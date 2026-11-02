@@ -11,6 +11,9 @@ assert(not src:find("NormalMinFlat",1,true),"legacy planner threshold NormalMinF
 assert(not src:find("DowngradeMinFlat",1,true),"legacy planner threshold DowngradeMinFlat must be removed")
 assert(not src:find("BigDowngradeMinFlat",1,true),"legacy planner threshold BigDowngradeMinFlat must be removed")
 assert(not src:find("UpgradeOverpayCapPct",1,true),"legacy planner upgrade cap duplicate must be removed")
+assert(not src:find("effectiveProfit",1,true),"legacy effectiveProfit alias must be removed")
+assert(not src:find("effectiveRequired",1,true),"legacy effectiveRequired alias must be removed")
+assert(not src:find("effectiveFloor",1,true),"legacy effectiveFloor terminology must be removed")
 
 assert(src:find("function M.run(scanner,marketProfile,marketLogic,marketPlanner)",1,true),"M.run dependency injection signature missing")
 assert(src:find("marketProfile.liveReady==true",1,true),"liveReady dependency gate missing")
