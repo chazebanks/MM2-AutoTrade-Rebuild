@@ -1590,3 +1590,29 @@ The transactional `TX ABORT -> RECOVERY VERIFIED` path is also now live-proven.
 No code patch is justified from this recording.
 
 Do not yet freeze the entire stack as final known-good until the remaining ownership and OUR-side duplicate-removal edge tests are covered, unless the user explicitly chooses to freeze it sooner.
+
+
+---
+
+# 30. MM2 request-window behavior correction
+
+Date: 2026-11-02
+
+User clarified an important native MM2 behavior:
+
+- While OUR outgoing trade request is actively pending/owned, another player cannot meaningfully overwrite that request by sending us a new incoming trade request.
+- The incoming-request window only becomes available after our outgoing request is canceled/resolved and MM2 returns to a state where incoming requests can be shown.
+
+Therefore the previously listed controlled test:
+"player B sends an incoming request while outgoing request to player A is actively owned/counting down"
+
+is not a valid MM2 live scenario and should be removed from the priority test list.
+
+This is a game-level UI/state restriction, not something Part 3 needs to defend against during an active outgoing request.
+
+Updated remaining priority edge tests:
+1. OUR SIDE duplicate eligible quantity x2 -> x1 removal verification while the visible slot remains.
+2. Rare physical Trade tap -> no pending UI -> later exact target trade-open, if naturally reproduced.
+3. Continue regression-first review of any future recordings for request/rotation, stale callbacks, trade-close recovery, planner/executor, and scanner contention.
+
+Do not add speculative code for an impossible incoming-overwrites-active-outgoing case.
