@@ -3019,3 +3019,95 @@ The previously reported Rare/Uncommon/non-target rebalance freeze appears fixed:
 The first trade's `THEIR 16` was initially easy to misread as 161; after full audit it is correct and the NO PLAN verdict is justified.
 
 Do not add another patch from this recording alone.
+
+
+---
+
+# 46. No-safe-plan immediate decline policy
+
+Date: 2026-11-02
+
+User-requested behavior:
+do not leave OUR high-value opening item (for example Chroma Watergun) sitting in a trade once the planner proves there is no safe trade combination.
+
+New rule:
+after THEIR OFFER is:
+1. non-empty,
+2. fully resolved,
+3. stable for the existing 0.65s stability gate,
+
+Part 4 runs the market planner.
+
+If the planner returns **zero safe 1-4 item plans**:
+- immediately decline the entire trade,
+- mark the trade closed/processed,
+- return to Part 3 rotation.
+
+Do NOT wait for THEIR OFFER to change anymore.
+
+Important preserved exceptions:
+- THEIR OFFER empty -> keep existing 15s empty-offer timeout.
+- THEIR OFFER unresolved -> HOLD safely and wait; do not decline based on unknown value.
+- THEIR OFFER still inside the 0.65s stability gate -> wait; do not prematurely decline while opponent is building the offer.
+- valid safe plan exists -> normal rebalancing/hold logic remains.
+- opponent Accept does not matter; FINAL ITEM-TRADE ACCEPT remains disabled.
+
+Decline failure handling:
+`declineTrade("no-safe-plan")` must actually close the trade.
+If decline fails/times out:
+- mark `sendfailed`,
+- stop the current Part 4 session,
+- do NOT pretend the trade closed,
+- do NOT resume competing Part 3 rotation against an open trade.
+
+Implementation:
+`pdiddler/pdiddler4_balancer_ROTATING_v2_4_2_NO_PLAN_DECLINE.lua`
+commit:
+`d124a56c9e28810cd7726aff88fc891d925f0683`
+
+Combined test stack:
+`pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_3_NO_PLAN_DECLINE.lua`
+
+Stack creation:
+`0dfb7e654fe17dec337e99ad81ff10433445a1c2`
+
+Final CI-tested head:
+`68a61e26cf47be8fe361e197c4eafafef30faa75`
+
+CI run:
+`41533980395`
+
+Result:
+SUCCESS
+
+Passed together:
+- official Luau compile,
+- 190/190 validated market profile,
+- market matrix 14/14,
+- deterministic ranking,
+- market planner fixtures,
+- bundle cache performance regression,
+- Rare/Uncommon plan-match regression,
+- Part 4 static guards,
+- no-plan immediate decline regression,
+- final Accept absence.
+
+Expected live behavior examples:
+- THEIR 16 vs OUR Chroma Watergun opening -> after stable/resolved planner returns no safe plan -> decline immediately.
+- THEIR Gemstone 13 -> no safe plan -> decline immediately.
+- THEIR Darkbringer 35 -> safe Plasmabeam 20 plan exists -> rebalance to 20 and keep trade open.
+- THEIR empty -> no immediate decline; keep 15s empty timer.
+- THEIR item unresolved -> HOLD rather than making a value decision.
+
+Loader:
+```lua
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/68a61e26cf47be8fe361e197c4eafafef30faa75/pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_3_NO_PLAN_DECLINE.lua",
+    true
+))()
+```
+
+Expected marker:
+`[PDIDDLER TEST] MARKET-AWARE v2.6.3 PERF + INELIGIBLE + NO-PLAN DECLINE ACTIVE`
+
+FINAL ITEM-TRADE ACCEPT remains disabled.
