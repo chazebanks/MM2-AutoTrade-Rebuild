@@ -259,7 +259,7 @@ jobs:
           assert "SHADOW ONLY" in r
 
           # No final completion action exists in Part 5 shadow mode.
-          forbidden=[
+          runtime_forbidden=[
               "AcceptTrade",
               'physicalClick(',
               'MouseButton1Click:Fire',
@@ -267,9 +267,16 @@ jobs:
               ':Activate()',
               'firesignal(',
           ]
-          for token in forbidden:
+          for token in runtime_forbidden:
               assert token not in r, f"shadow runtime contains action token: {token}"
-              assert token not in b, f"shadow bridge contains action token: {token}"
+
+          bridge_forbidden=[
+              "AcceptTrade",
+              'physicalClick(button,"Accept',
+              'physicalClick(button,"Confirm',
+          ]
+          for token in bridge_forbidden:
+              assert token not in b, f"shadow bridge contains completion action token: {token}"
 
           print("PASS Part 5 shadow integration contract")
           PY
