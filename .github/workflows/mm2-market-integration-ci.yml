@@ -29,6 +29,7 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler4_market_logic_v1_TEST.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_market_planner_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_MARKET_AWARE.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler_market_integration_ci_v1.luau >/dev/null
 
       - name: Run pure market integration tests
