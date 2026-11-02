@@ -940,3 +940,51 @@ At the end of this conversation:
 - Final trade Accept remains disabled.
 
 **Do not freeze Part 4 / v2.3 as final known-good unless the user explicitly says it is successful/final.**
+
+
+---
+
+# 22. Continuity / note-maintenance rule
+
+From this point forward, keep this file updated whenever the project materially changes.
+
+Update this handoff after:
+- a new script/build is created,
+- a bug is confirmed,
+- a bug is fixed,
+- a test passes or fails in a way that changes confidence,
+- a component is frozen as known-good,
+- the active loader/commit changes,
+- a requirement/rule changes,
+- a new unresolved risk or next test is identified.
+
+Each update should preserve:
+- exact file paths,
+- exact commit SHAs,
+- which behavior is confirmed vs assumed,
+- what must not be changed,
+- remaining tests,
+- the single next recommended step.
+
+Do not rely only on chat memory for project state.
+
+## Current continuation point
+
+The current active stack remains:
+
+`pdiddler/pdiddler_OUTGOING_OWNERSHIP_FIX_TEST_STACK_v2_3.lua`
+
+Commit:
+`0f8bb3536d3a073f3001e1759c07dca44fc5cbd1`
+
+Latest controlled recording was clean.
+
+Current next step is **testing**, not speculative patching.
+
+Priority remaining tests:
+1. incoming request while another outgoing request is actively owned,
+2. rapid THEIR OFFER changes during an in-progress rebalance,
+3. duplicate eligible quantity x2 -> x1,
+4. rare no-pending-UI -> later exact trade-open, if it naturally occurs.
+
+Do not change the request/rotation or transactional rebalance core unless one of these tests exposes a concrete failure.
