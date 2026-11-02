@@ -3784,3 +3784,36 @@ loadstring(game:HttpGet(
 ```
 
 Production v2.6.3 remains untouched.
+
+
+---
+
+# 52. Correction: duplicate lab v1 screenshot was manually contaminated
+
+Date: 2026-11-02
+
+User clarified that the Iceblaster visible in the screenshot was manually placed into YOUR OFFER.
+
+Therefore the prior interpretation in section 51 was too strong.
+
+What the screenshot actually proves:
+- lab v1 logged:
+  `[DUP LAB] FAIL | offer verify expected x1 | slot-missing`
+- an Iceblaster was visible in YOUR OFFER at screenshot time,
+- BUT that Iceblaster was manually added by the user.
+
+What it does NOT prove:
+- it does not prove the lab's `OfferItem:FireServer("481","Weapons")` succeeded,
+- it does not prove the lab's slot reader missed an automatically-added Iceblaster,
+- it does not prove duplicate removal succeeded or failed.
+
+Status:
+the v1 live test is INCONCLUSIVE due to manual intervention.
+
+The v2 lab remains useful because it requires YOUR OFFER to start empty and then verifies quantity progression after its own add operations, but the next test must be hands-off:
+- open the trade manually,
+- do NOT add/remove any offered item,
+- let the lab perform all Iceblaster mutations,
+- record the whole sequence and console.
+
+Production v2.6.3 remains untouched.
