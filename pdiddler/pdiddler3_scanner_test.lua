@@ -929,10 +929,10 @@ local function inventoryFromProfile(prof)
   local m=Meta["Weapons|"..tostring(id)]
   if qty>0 and m and tradable(m.data) and allowedPage(checkerPage(m)) then
    local e=checkerMarket(m)
-   if e and not isSunset(e.page,e.id,identityName(m)) then
-    out.items[#out.items+1]={id=m.id,cat="Weapons",name=identityName(m),qty=qty,value=e.v,type=m.type,page=e.page,checkerId=e.id}
-    out.total=out.total+e.v*qty
-   end
+   -- Eligibility is based on MM2 rarity, never on price lookup success.
+   -- An unpriced eligible item must remain visible and whitelisted.
+   out.items[#out.items+1]={id=m.id,cat="Weapons",name=identityName(m),qty=qty,value=e and e.v or nil,type=m.type,page=checkerPage(m),checkerId=e and e.id or "UNPRICED"}
+   if e then out.total=out.total+e.v*qty else out.unpriced=(out.unpriced or 0)+qty end
   end
  end
  table.sort(out.items,function(a,b) if a.value~=b.value then return a.value>b.value end return tostring(a.id)<tostring(b.id) end)
@@ -1034,7 +1034,7 @@ local function eligibleSummary(inv)
             "%s%s (%s)",
             tostring(it.name or it.id or "?"),
             qty > 1 and (" x" .. tostring(qty)) or "",
-            fmtValue(subtotal)
+            it.value and fmtValue(subtotal) or "UNPRICED"
         )
     end
 
@@ -1208,7 +1208,7 @@ local function applyPlayerResult(p, state, inv)
             string.format(
                 "Eligible: %d  |  Total value: %s\nItems: %s",
                 eligibleCopies(inv),
-                fmtValue(inv.total),
+                fmtValue(inv.total)..((inv.unpriced or 0)>0 and (" + "..inv.unpriced.." UNPRICED") or ""),
                 eligibleSummary(inv)
             ),
             order
