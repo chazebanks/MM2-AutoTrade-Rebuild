@@ -220,3 +220,60 @@ jobs:
       - name: Run Part 4.5 Discord trade report
         run: |
           /tmp/luau/luau pdiddler/tests/pdiddler4_5_trade_report_v1.luau
+
+
+      - name: Part 4.5 webhook runtime contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          bridge=Path("pdiddler/pdiddler4_balancer_ROTATING_v2_4_3_WEBHOOK_BRIDGE.lua")
+          runtime=Path("pdiddler/pdiddler4_5_discord_webhook_v1.lua")
+
+          assert bridge.exists(), "Part 4 webhook bridge missing"
+          assert runtime.exists(), "Discord webhook runtime missing"
+
+          b=bridge.read_text()
+          r=runtime.read_text()
+
+          # Bridge: preserve raw item ID and canonical checker ID separately.
+          assert "checkerId=first.checkerId" in b
+          assert "checkerId=item.checkerId" in b
+          assert "tradeAudit" in b
+          assert "lastCapture" in b
+          assert "preInventory" in b
+          assert "ourSig" in b and "theirSig" in b
+
+          # Completion must be positively proven by MM2's own completion event.
+          assert 'FindFirstChild("AcceptTrade")' in r
+          assert "OnClientEvent" in r
+          assert "completed==true" in r
+          assert "completed==false" in r
+          assert "trade-completed" in r
+
+          # Sender requirements.
+          assert "PDIDDLER_DISCORD_WEBHOOK" in r
+          assert "HttpService:JSONEncode" in r
+          assert '["Content-Type"]="application/json"' in r
+          assert "type(request)" in r
+          assert "type(http_request)" in r
+          assert "type(syn)==\"table\"" in r
+          assert "MaxAttempts=4" in r
+          assert "PDIDDLER_WEBHOOK_PENDING_COUNT" in r
+          assert "GenerateGUID" in r
+
+          # Post-trade inventory verification and exactly-once state.
+          assert "getOwnInventory" in r
+          assert "preInventory" in r
+          assert "fingerprint" in r
+          assert "processing" in r and "sent" in r and "failed" in r
+          assert "candidateKey" in r
+
+          # Never commit a real Discord secret and never perform final trade completion.
+          assert "discord.com/api/webhooks/" not in r
+          assert "discordapp.com/api/webhooks/" not in r
+          assert "AcceptTrade:FireServer" not in r
+          assert "FINAL ACCEPT" in r
+
+          print("PASS Part 4.5 webhook runtime contract")
+          PY
