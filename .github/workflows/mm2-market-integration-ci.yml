@@ -45,6 +45,7 @@ jobs:
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_ineligible_plan_match_v1.luau >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v2.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v3.lua >/dev/null
 
       - name: Run pure market integration tests
         run: |
