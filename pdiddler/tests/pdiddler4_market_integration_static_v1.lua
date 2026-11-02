@@ -12,11 +12,11 @@ assert(not src:find("DowngradeMinFlat",1,true),"legacy planner threshold Downgra
 assert(not src:find("BigDowngradeMinFlat",1,true),"legacy planner threshold BigDowngradeMinFlat must be removed")
 assert(not src:find("UpgradeOverpayCapPct",1,true),"legacy planner upgrade cap duplicate must be removed")
 
-assert(src:find("function M.run(scanner,marketProfile,marketLogic)",1,true),"M.run dependency injection signature missing")
+assert(src:find("function M.run(scanner,marketProfile,marketLogic,marketPlanner)",1,true),"M.run dependency injection signature missing")
 assert(src:find("marketProfile.liveReady==true",1,true),"liveReady dependency gate missing")
 assert(src:find("marketLogic.bundleAssessment",1,true),"bundleAssessment integration missing")
 assert(src:find("marketLogic.tradeDecision",1,true),"tradeDecision integration missing")
-assert(src:find("marketLogic.rankPlans",1,true),"rankPlans integration missing")
+assert(src:find("marketPlanner.buildPlans",1,true) or src:find("MARKET_PLANNER.buildPlans",1,true),"marketPlanner.buildPlans integration missing")\nassert(not src:find("local function buildPlans",1,true),"Part 4 must not contain a second planner copy")\nassert(not src:find("local function makeUnits",1,true),"Part 4 must not contain planner unit generation")
 
 assert(not src:find("AcceptTrade",1,true),"final Accept remote must not exist")
 assert(not src:find('physicalClick(button,"Accept',1,true),"physical final Accept must not exist")
