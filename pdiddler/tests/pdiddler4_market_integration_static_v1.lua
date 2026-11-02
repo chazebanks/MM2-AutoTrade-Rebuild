@@ -1,0 +1,30 @@
+local root=os.getenv and (os.getenv("MM2_INTEGRATION_ROOT")) or "."
+local path=root.."/pdiddler/pdiddler4_balancer_ROTATING_v2_4_MARKET_AWARE.lua"
+local f=io.open(path,"rb")
+assert(f,"market-aware Part 4 must exist")
+local src=f:read("*a"); f:close()
+
+assert(not src:find("MARKET_QUALITY",1,true),"legacy MARKET_QUALITY authority must be removed")
+assert(not src:find("exactQuality",1,true),"legacy exactQuality must be removed")
+assert(not src:find("qualityRatio",1,true),"legacy qualityRatio must be removed")
+
+assert(src:find("function M.run(scanner,marketProfile,marketLogic)",1,true),"M.run dependency injection signature missing")
+assert(src:find("marketProfile.liveReady==true",1,true),"liveReady dependency gate missing")
+assert(src:find("marketLogic.bundleAssessment",1,true),"bundleAssessment integration missing")
+assert(src:find("marketLogic.tradeDecision",1,true),"tradeDecision integration missing")
+assert(src:find("marketLogic.rankPlans",1,true),"rankPlans integration missing")
+
+assert(not src:find("AcceptTrade",1,true),"final Accept remote must not exist")
+assert(not src:find('physicalClick(button,"Accept',1,true),"physical final Accept must not exist")
+
+assert(src:find('local function txValidate',1,true),"txValidate missing")
+assert(src:find('local function clearOurOffer',1,true),"clearOurOffer missing")
+assert(src:find('local function applyPlan',1,true),"applyPlan missing")
+assert(src:find('EmptyTimeout=15.0',1,true),"15s empty timeout changed/missing")
+assert(src:find('ActiveOfferWindow=60.0',1,true),"60s offer window changed/missing")
+assert(src:find('ExtremeReplanRatio=2.0',1,true),"extreme ratio changed/missing")
+assert(src:find('ExtremeProfitFlat=50',1,true),"extreme flat changed/missing")
+assert(src:find('ExtremeProfitMultiple=2.5',1,true),"extreme multiple changed/missing")
+assert(src:find('ExtremeMinReplanStep=5',1,true),"extreme step changed/missing")
+
+print("PASS market Part 4 static integration contract")
