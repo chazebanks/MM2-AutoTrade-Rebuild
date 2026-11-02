@@ -37,6 +37,9 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_MARKET_AWARE.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_1_INELIGIBLE_FIX.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_2_NO_PLAN_DECLINE.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_5_trade_report_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_3_WEBHOOK_BRIDGE.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_5_discord_webhook_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_1_PERF.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_2_PERF_INELIGIBLE.lua >/dev/null
@@ -276,4 +279,32 @@ jobs:
           assert "FINAL ACCEPT" in r
 
           print("PASS Part 4.5 webhook runtime contract")
+          PY
+
+
+      - name: Part 4.5 webhook stack contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path("pdiddler/pdiddler_DISCORD_WEBHOOK_TEST_STACK_v1.lua")
+          assert p.exists(), "Discord webhook test stack missing"
+          src=p.read_text()
+
+          assert "PDIDDLER_DISCORD_WEBHOOK" in src
+          assert "webhook must be configured before this stack runs" in src
+          assert "pdiddler4_balancer_ROTATING_v2_4_3_WEBHOOK_BRIDGE.lua" in src
+          assert "pdiddler4_5_trade_report_v1.lua" in src
+          assert "pdiddler4_5_discord_webhook_v1.lua" in src
+          assert "DISCORD COMPLETION AUDIT ACTIVE" in src
+          assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in src
+          assert "AcceptTrade" not in src
+          assert "discord.com/api/webhooks/" not in src
+
+          p4=src.index("part4.run(")
+          wh=src.index("webhook.run(")
+          out=src.index("outgoing.run(")
+          assert p4 < wh < out, "webhook completion listener must arm before outgoing trade rotation"
+
+          print("PASS Part 4.5 webhook stack contract")
           PY
