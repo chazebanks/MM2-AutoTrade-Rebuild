@@ -29,6 +29,7 @@ local C = {
 
     -- Inventory remote pacing / live refresh.
     RemoteMinInterval = 0.18,
+    RemoteTimeout = 4.5,
     PeriodicRescanSeconds = 45,
     PeriodicRescanGap = 0.35,
 }
@@ -847,7 +848,9 @@ end
 
 local InventoryRemoteGate={
  busy=false,
+ inflight=false,
  lastCallAt=0,
+ timeoutCount=0,
 }
 
 local function targetInventory(p,force)
@@ -859,8 +862,6 @@ local function targetInventory(p,force)
   return nil
  end
 
- -- Serialize inventory reads so concurrent joins/retries/rescans cannot hammer
- -- MM2's inventory remote and manufacture false UNKNOWN/empty responses.
  while InventoryRemoteGate.busy do
   if not p.Parent then return nil end
   task.wait(0.03)
@@ -868,17 +869,50 @@ local function targetInventory(p,force)
 
  InventoryRemoteGate.busy=true
 
+ -- If an earlier timed-out InvokeServer is still alive, do not create another.
+ if InventoryRemoteGate.inflight then
+  InventoryRemoteGate.busy=false
+  return nil
+ end
+
  local elapsed=os.clock()-InventoryRemoteGate.lastCallAt
  if elapsed<C.RemoteMinInterval then
   task.wait(C.RemoteMinInterval-elapsed)
  end
 
- local ok,raw=pcall(function()
-  return rf:InvokeServer(p.Name)
+ local done=false
+ local ok=false
+ local raw=nil
+
+ InventoryRemoteGate.inflight=true
+
+ task.spawn(function()
+  ok,raw=pcall(function()
+   return rf:InvokeServer(p.Name)
+  end)
+  done=true
+  InventoryRemoteGate.inflight=false
  end)
+
+ local deadline=os.clock()+C.RemoteTimeout
+ while not done and os.clock()<deadline do
+  if not p.Parent then break end
+  task.wait(0.03)
+ end
 
  InventoryRemoteGate.lastCallAt=os.clock()
  InventoryRemoteGate.busy=false
+
+ if not done then
+  InventoryRemoteGate.timeoutCount += 1
+  warn(
+   "[PDIDDLER3] INVENTORY RPC TIMEOUT",
+   p.Name,
+   "count",
+   InventoryRemoteGate.timeoutCount
+  )
+  return nil
+ end
 
  if not ok or type(raw)~="table" then
   return nil
