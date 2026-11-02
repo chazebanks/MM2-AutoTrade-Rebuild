@@ -3658,3 +3658,77 @@ Status update:
 the previously unresolved single console warning from recording `ScreenRecording_11-02-2026 17-31-12_1.mp4` is now RESOLVED AS EXTERNAL / NON-PDIDDLER.
 
 Do not patch the trader for this warning.
+
+
+---
+
+# 50. Iceblaster OUR-side duplicate removal live lab
+
+Date: 2026-11-02
+
+Purpose:
+live-test the remaining executor edge:
+OUR stacked eligible duplicate quantity x3 -> x2 -> x1 while the same visible trade slot remains.
+
+User confirmed they own 3 copies of Iceblaster.
+
+Validated identity/value:
+- Iceblaster
+- page: godly
+- id: 481
+- MM2: 35
+- Supreme: 33
+- demand: 1
+- stability: Stable
+
+Standalone lab:
+`pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v1.lua`
+
+Creation commit:
+`3632fa5f8a2215ab300eb614140ca175d6fb26bf`
+
+CI-tested head:
+`a90b4e8ae6bf426c671166fac14857b966b1ae2c`
+
+CI run:
+`41540070997`
+
+Result:
+SUCCESS
+
+Lab behavior:
+1. Do NOT run main trader concurrently.
+2. Waits up to 45s for an already-open/manual trade.
+3. Requires YOUR OFFER empty.
+4. Fires verified `Trade.OfferItem` with Iceblaster id `481` three times.
+5. Verifies x1, then x2, then x3.
+6. Physically clicks the Iceblaster slot ActionButton once.
+7. Requires exact x3 -> x2.
+8. Physically clicks once more.
+9. Requires exact x2 -> x1.
+10. Does NOT attempt a third removal.
+11. Declines/closes trade for cleanup.
+12. FINAL ACCEPT is not implemented.
+
+Failure safety:
+- if x3 -> x2 does not occur exactly, lab stops and declines.
+- if x2 -> x1 does not occur exactly, lab stops and declines.
+- no further mutation after a failed transition.
+
+Loader:
+```lua
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/a90b4e8ae6bf426c671166fac14857b966b1ae2c/pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v1.lua",
+    true
+))()
+```
+
+Expected PASS logs:
+- `[DUP LAB] OFFER VERIFIED | Iceblaster x1`
+- `[DUP LAB] OFFER VERIFIED | Iceblaster x2`
+- `[DUP LAB] OFFER VERIFIED | Iceblaster x3`
+- `[DUP LAB] REMOVE VERIFIED | Iceblaster x3 -> x2 with one physical click`
+- `[DUP LAB] REMOVE VERIFIED | Iceblaster x2 -> x1 with one physical click`
+- `[DUP LAB] PASS | OUR duplicate removal x3 -> x2 -> x1 verified`
+
+Do not modify v2.6.3 production logic based on this lab unless live evidence fails.
