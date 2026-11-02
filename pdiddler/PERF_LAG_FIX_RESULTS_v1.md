@@ -155,3 +155,56 @@ Look specifically for:
 - any new console warning/error.
 
 If lag remains severe only when a new opponent offer becomes stable, the next suspect is the one-time planner DP calculation, not repeated bundle valuation. Do not stack another optimization until the recording confirms that pattern.
+
+
+## v2.6 live before-recording evidence
+
+Recording:
+`ScreenRecording_11-02-2026 16-20-03_1.mp4`
+
+Duration:
+~3m33s.
+
+This is the **before** recording for the original v2.6 stack, not v2.6.1 PERF.
+
+Observed functional behavior:
+- Tablet/startup path completed.
+- Scanner reached active state and produced whitelist/blacklist results.
+- P3 authoritative request ownership worked.
+- A request with no pending proof retained ownership and later ended as `UNCERTAIN TIMEOUT | NO RESEND THIS SERVER`.
+- A later request was pending-confirmed and canceled at the 15s no-response boundary.
+- Trade with `venossgaming99190` opened and Part 4 became active.
+- Rebalancer repeatedly reacted to opponent offer changes.
+- Multiple `TX ABORT ... opponent offer changed | modified true` events were followed by `RECOVERY VERIFIED ... our offer cleared`.
+- Fresh `REBALANCE VERIFIED` events followed recovery.
+- PROFITABLE HOLD appeared in NORMAL / UPGRADE / DOWNGRADE decisions.
+- 60s Case 3 boundary declined/rotated.
+- Part 3 continued into another trade later in the recording.
+- Final item-trade Accept was never executed.
+
+Developer Console:
+- 0 script errors visible.
+- 2 warnings visible; no evidence they originate from the v2.6 market script.
+- console shows the v2.6 active marker and final-Accept-disabled marker.
+
+Important console sequence visible around the first trade:
+- REBALANCE VERIFIED
+- TX ABORT on opponent offer mutation
+- RECOVERY VERIFIED
+- fresh REBALANCE VERIFIED
+- PROFITABLE HOLD
+- another TX ABORT / RECOVERY cycle
+- later NO PLAN / 60s rotation boundary
+
+Performance evidence:
+- user reported the run as severely laggy.
+- the recording's first active trade is the heaviest mutation/recovery sequence.
+- this does **not by itself prove** the market bundle assessment is the only source of lag.
+- however, it strongly exercises the already-confirmed redundant hot path:
+  `txValidate / remove verification / recovery -> evaluateSide -> bundleAssessment`.
+- therefore v2.6.1's transparent bundle cache is the correct first isolated performance experiment.
+
+Do not alter planner DP/polling/timers yet.
+
+Next comparison:
+run `pdiddler_MARKET_AWARE_TEST_STACK_v2_6_1_PERF.lua` and compare responsiveness during the same active-trade / repeated-offer-change conditions.
