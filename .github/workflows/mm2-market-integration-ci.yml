@@ -40,6 +40,7 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_1_PERF.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_2_PERF_INELIGIBLE.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_3_NO_PLAN_DECLINE.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_KNOWN_GOOD_MARKET_AWARE_v2_6_3.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler_market_integration_ci_v1.luau >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_market_bundle_cache_v1.luau >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_ineligible_plan_match_v1.luau >/dev/null
@@ -199,4 +200,17 @@ jobs:
           assert 'AcceptTrade' not in src
           assert 'FINAL ACCEPT DISABLED / NOT IMPLEMENTED' in src
           print("PASS duplicate live-lab v3 raw-owned-key regression")
+          PY
+
+
+      - name: Known-good v2.6.3 freeze guard
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          src=Path("pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_3_NO_PLAN_DECLINE.lua").read_text()
+          frozen=Path("pdiddler/pdiddler_KNOWN_GOOD_MARKET_AWARE_v2_6_3.lua").read_text()
+          assert frozen == src, "known-good v2.6.3 must remain byte-identical to tested stack"
+          assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in frozen
+          assert "AcceptTrade" not in frozen
+          print("PASS known-good v2.6.3 freeze guard")
           PY
