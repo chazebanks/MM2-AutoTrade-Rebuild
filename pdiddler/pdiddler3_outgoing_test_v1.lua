@@ -1,0 +1,1224 @@
+-- pdiddler Part 3 outgoing-request subtest v1
+-- Scope:
+--   * consumes successful scanner whitelist through ScannerAPI
+--   * physically taps target name -> Trade on tablet
+--   * verifies sender-side pending UI
+--   * waits 15 seconds
+--   * accepted -> pause at trade-open handoff
+--   * declined -> mark and continue
+--   * ignored -> cancel and continue
+--   * failed/left -> mark and continue
+--   * one outgoing request per player per execution session
+--
+-- SAFETY:
+--   * NEVER presses the final Accept button inside an active item trade
+--   * does not offer/rebalance/confirm items
+
+local M={}
+
+function M.run(scanner)
+    if type(scanner)~="table" then
+        error("[PDIDDLER P3 OUT] scanner API missing")
+    end
+
+    for _,name in ipairs({
+        "getWhitelist",
+        "getRecord",
+        "isWhitelisted",
+        "hasPendingWork",
+        "setStatus",
+        "setRequestState",
+    }) do
+        if type(scanner[name])~="function" then
+            error("[PDIDDLER P3 OUT] scanner API missing "..name)
+        end
+    end
+
+    local Players=game:GetService("Players")
+    local RS=game:GetService("ReplicatedStorage")
+    local VIM=game:GetService("VirtualInputManager")
+    local GuiService=game:GetService("GuiService")
+
+    local LP=Players.LocalPlayer
+    local PG=LP:FindFirstChildOfClass("PlayerGui") or LP:WaitForChild("PlayerGui")
+
+    local ENV=(getgenv and getgenv()) or _G
+    ENV.PDIDDLER_OUTGOING_SESSION=(tonumber(ENV.PDIDDLER_OUTGOING_SESSION) or 0)+1
+    local SESSION=ENV.PDIDDLER_OUTGOING_SESSION
+
+    local function alive()
+        return ENV.PDIDDLER_OUTGOING_SESSION==SESSION
+    end
+
+    local TradeFolder=RS:FindFirstChild("Trade")
+    local DeclineRequest=TradeFolder and TradeFolder:FindFirstChild("DeclineRequest")
+
+    local C={
+        ResponseTimeout=15,
+        SendAttempts=3,
+        PendingProofTimeout=2.75,
+        TradeOpenGrace=2.5,
+        JoinTradeGrace=15,
+    }
+
+    local S={
+        processed={},
+        active=nil,
+        paused=false,
+        sent=0,
+        ignored=0,
+        declined=0,
+        failed=0,
+        left=0,
+        accepted=0,
+        joinedAt={},
+        declineSignalAt=0,
+        declineSignalUid=nil,
+    }
+
+    for _,p in ipairs(Players:GetPlayers()) do
+        if p~=LP then
+            S.joinedAt[p.UserId]=0
+        end
+    end
+
+    Players.PlayerAdded:Connect(function(p)
+        if not alive() or p==LP then return end
+        S.joinedAt[p.UserId]=os.clock()
+    end)
+
+    Players.PlayerRemoving:Connect(function(p)
+        if not alive() then return end
+        S.joinedAt[p.UserId]=nil
+    end)
+
+    local function key(x)
+        return tostring(x or ""):lower():gsub("[^%w]","")
+    end
+
+    local function textOf(o)
+        if not o then return "" end
+
+        if o:IsA("TextLabel")
+            or o:IsA("TextButton")
+            or o:IsA("TextBox")
+        then
+            local ok,v=pcall(function() return tostring(o.Text or "") end)
+            if ok then return v end
+        end
+
+        return ""
+    end
+
+    local function visible(o)
+        if not o then return false end
+
+        local ok,result=pcall(function()
+            local c=o
+            while c do
+                if c:IsA("ScreenGui") and not c.Enabled then return false end
+                if c:IsA("GuiObject") and not c.Visible then return false end
+                c=c.Parent
+            end
+            return true
+        end)
+
+        return ok and result
+    end
+
+    local function clickableAncestor(o,limit)
+        local c=o
+
+        for _=1,(limit or 8) do
+            if not c then break end
+            if c:IsA("GuiButton") then return c end
+            c=c.Parent
+        end
+
+        return nil
+    end
+
+    local function correctedCenter(o)
+        local ok,pos,size=pcall(function()
+            return o.AbsolutePosition,o.AbsoluteSize
+        end)
+
+        if not ok or not pos or not size then
+            return nil,nil
+        end
+
+        local insetX,insetY=0,0
+
+        pcall(function()
+            local inset=GuiService:GetGuiInset()
+            insetX=inset.X
+            insetY=inset.Y
+        end)
+
+        return
+            pos.X+(size.X/2)+insetX,
+            pos.Y+(size.Y/2)+insetY
+    end
+
+    local function physicalTap(o,label)
+        if not alive() or not o or not visible(o) then
+            return false
+        end
+
+        local x,y=correctedCenter(o)
+        if not x then
+            return false
+        end
+
+        local ok=pcall(function()
+            VIM:SendMouseButtonEvent(x,y,0,true,game,0)
+            task.wait(0.07)
+            VIM:SendMouseButtonEvent(x,y,0,false,game,0)
+        end)
+
+        if ok then
+            print(
+                "[PDIDDLER P3 OUT] TAP",
+                tostring(label or o.Name),
+                math.floor(x),
+                math.floor(y)
+            )
+        end
+
+        return ok
+    end
+
+    local function leaderboardRoot()
+        local exact=PG:FindFirstChild("MainGUI")
+        exact=exact and exact:FindFirstChild("Game")
+        exact=exact and exact:FindFirstChild("Leaderboard")
+
+        if exact then return exact end
+
+        local ok,desc=pcall(function() return PG:GetDescendants() end)
+        if not ok then return nil end
+
+        for _,d in ipairs(desc) do
+            if (d:IsA("TextLabel") or d:IsA("TextButton"))
+                and visible(d)
+            then
+                local tx=textOf(d):upper()
+
+                if tx:find("TRADE REQUESTS",1,true)
+                    or tx:find("CLICK ON A PLAYER TO TRADE",1,true)
+                then
+                    local p=d
+
+                    for _=1,12 do
+                        if not p then break end
+
+                        if key(p.Name)=="leaderboard" then
+                            return p
+                        end
+
+                        p=p.Parent
+                    end
+                end
+            end
+        end
+
+        return nil
+    end
+
+    local function findPlayerLabel(plr)
+        if not plr
+            or plr==LP
+            or plr.UserId==LP.UserId
+        then
+            return nil,"self/missing target"
+        end
+
+        local root=leaderboardRoot()
+        if not root then
+            return nil,"MM2 Leaderboard root not found"
+        end
+
+        local container=root:FindFirstChild("Container")
+        local want=key(plr.Name)
+
+        if container then
+            for _,row in ipairs(container:GetChildren()) do
+                if key(row.Name)==want
+                    and key(row.Name)~=key(LP.Name)
+                then
+                    local label=
+                        row:FindFirstChild("PlayerLabel")
+                        or row:FindFirstChildWhichIsA("TextButton")
+                        or row:FindFirstChildWhichIsA("TextLabel")
+
+                    if label and visible(label) then
+                        return label,nil
+                    end
+                end
+            end
+        end
+
+        local display=key(plr.DisplayName)
+        local candidates={}
+
+        local ok,desc=pcall(function() return root:GetDescendants() end)
+        if not ok then
+            return nil,"cannot inspect MM2 Leaderboard"
+        end
+
+        for _,d in ipairs(desc) do
+            if (d:IsA("TextLabel") or d:IsA("TextButton"))
+                and visible(d)
+            then
+                local tx=key(textOf(d))
+                local parentName=d.Parent and key(d.Parent.Name) or ""
+
+                if parentName~=key(LP.Name) then
+                    local userMatch=
+                        want~=""
+                        and tx:find(want,1,true)
+
+                    local displayMatch=
+                        display~=""
+                        and #display>=4
+                        and display~=key(LP.Name)
+                        and display~=key(LP.DisplayName)
+                        and tx:find(display,1,true)
+
+                    if userMatch or displayMatch then
+                        local score=0
+
+                        if parentName==want then score=score+200 end
+                        if key(d.Name)=="playerlabel" then score=score+100 end
+                        if userMatch then score=score+40 end
+                        if tx==want then score=score+20 end
+
+                        candidates[#candidates+1]={
+                            node=d,
+                            score=score,
+                        }
+                    end
+                end
+            end
+        end
+
+        table.sort(candidates,function(a,b)
+            return a.score>b.score
+        end)
+
+        if candidates[1] then
+            return candidates[1].node,nil
+        end
+
+        return nil,"target PlayerLabel not found"
+    end
+
+    local function cardTextList(card)
+        local out={}
+        if not card then return out end
+
+        local ok,desc=pcall(function() return card:GetDescendants() end)
+        if not ok then return out end
+
+        for _,d in ipairs(desc) do
+            if (d:IsA("TextLabel") or d:IsA("TextButton"))
+                and visible(d)
+            then
+                local tx=textOf(d)
+                if tx~="" then out[#out+1]=tx end
+            end
+        end
+
+        return out
+    end
+
+    local function cardContainerForTradeButton(tradeButton)
+        local p=tradeButton
+
+        for _=1,10 do
+            if not p then break end
+
+            local hasProfile=false
+            local hasTrade=false
+
+            local ok,desc=pcall(function() return p:GetDescendants() end)
+            if ok then
+                for _,d in ipairs(desc) do
+                    if (d:IsA("TextLabel") or d:IsA("TextButton"))
+                        and visible(d)
+                    then
+                        local q=key(textOf(d))
+                        if q=="profile" then hasProfile=true end
+                        if q=="trade" then hasTrade=true end
+                    end
+                end
+            end
+
+            if hasProfile and hasTrade then
+                return p
+            end
+
+            p=p.Parent
+        end
+
+        return nil
+    end
+
+    local function cardMatchesPlayer(card,plr)
+        if not card or not plr then return false end
+
+        local user=key(plr.Name)
+        local display=key(plr.DisplayName)
+        local lpUser=key(LP.Name)
+        local lpDisplay=key(LP.DisplayName)
+
+        for _,tx in ipairs(cardTextList(card)) do
+            local q=key(tx)
+
+            if user~="" and q:find(user,1,true) then
+                return true
+            end
+
+            if display~=""
+                and #display>=4
+                and display~=lpUser
+                and display~=lpDisplay
+                and q:find(display,1,true)
+            then
+                return true
+            end
+        end
+
+        return false
+    end
+
+    local function findAnyOpenCard()
+        local ok,desc=pcall(function() return PG:GetDescendants() end)
+        if not ok then return nil,nil end
+
+        for _,d in ipairs(desc) do
+            if (d:IsA("TextLabel") or d:IsA("TextButton"))
+                and visible(d)
+                and key(textOf(d))=="trade"
+            then
+                local button=
+                    d:IsA("GuiButton")
+                    and d
+                    or clickableAncestor(d,6)
+
+                if button then
+                    local card=cardContainerForTradeButton(button)
+                    if card then return card,button end
+                end
+            end
+        end
+
+        return nil,nil
+    end
+
+    local function findCloseButton(card)
+        if not card then return nil end
+
+        local ok,desc=pcall(function() return card:GetDescendants() end)
+        if not ok then return nil end
+
+        for _,d in ipairs(desc) do
+            if (d:IsA("TextButton") or d:IsA("ImageButton"))
+                and visible(d)
+            then
+                local q=key(textOf(d).." "..tostring(d.Name or ""))
+
+                if q=="x"
+                    or q=="close"
+                    or q:find("close",1,true)
+                then
+                    return d
+                end
+            end
+        end
+
+        return nil
+    end
+
+    local function closeOpenCard()
+        for _=1,3 do
+            local card=findAnyOpenCard()
+
+            if not card then
+                return true
+            end
+
+            local close=findCloseButton(card)
+
+            if not close then
+                return false
+            end
+
+            if not physicalTap(close,"close stale card") then
+                return false
+            end
+
+            task.wait(0.25)
+
+            if not findAnyOpenCard() then
+                return true
+            end
+        end
+
+        return findAnyOpenCard()==nil
+    end
+
+    local function findOpenCardFor(plr)
+        local ok,desc=pcall(function() return PG:GetDescendants() end)
+        if not ok then return nil,nil,false end
+
+        for _,d in ipairs(desc) do
+            if (d:IsA("TextLabel") or d:IsA("TextButton"))
+                and visible(d)
+                and key(textOf(d))=="trade"
+            then
+                local button=
+                    d:IsA("GuiButton")
+                    and d
+                    or clickableAncestor(d,6)
+
+                if button then
+                    local card=cardContainerForTradeButton(button)
+
+                    if card then
+                        return card,button,cardMatchesPlayer(card,plr)
+                    end
+                end
+            end
+        end
+
+        return nil,nil,nil
+    end
+
+    local function openTargetCard(plr)
+        if not closeOpenCard() then
+            return false,"could not clear stale player card"
+        end
+
+        task.wait(0.20)
+
+        local label,why=findPlayerLabel(plr)
+        if not label then
+            return false,why
+        end
+
+        if not physicalTap(label,"player "..plr.Name) then
+            return false,"physical player-label click failed"
+        end
+
+        local deadline=os.clock()+3.0
+
+        while alive() and os.clock()<deadline do
+            local card,tradeButton,matched=findOpenCardFor(plr)
+
+            if card and matched==true then
+                return true,tradeButton
+            end
+
+            if card and matched==false then
+                local close=findCloseButton(card)
+                if close then physicalTap(close,"wrong-card close") end
+                return false,"player click opened wrong Profile/Trade card"
+            end
+
+            task.wait(0.08)
+        end
+
+        return false,"player click produced no Profile/Trade card"
+    end
+
+    local function roots()
+        local out={PG}
+
+        if gethui then
+            local ok,h=pcall(gethui)
+            if ok and h then out[#out+1]=h end
+        end
+
+        return out
+    end
+
+    local function findPendingCancel()
+        for _,root in ipairs(roots()) do
+            local ok,list=pcall(function() return root:GetDescendants() end)
+
+            if ok then
+                for _,marker in ipairs(list) do
+                    if visible(marker)
+                        and (marker:IsA("TextLabel")
+                            or marker:IsA("TextButton")
+                            or marker:IsA("TextBox"))
+                        and textOf(marker):upper():find(
+                            "TRADE REQUEST PENDING",
+                            1,
+                            true
+                        )
+                    then
+                        local p=marker
+
+                        for _=1,10 do
+                            if not p then break end
+
+                            local ok2,desc=pcall(function()
+                                return p:GetDescendants()
+                            end)
+
+                            if ok2 then
+                                for _,d in ipairs(desc) do
+                                    if d:IsA("GuiButton") and visible(d) then
+                                        local q=key(textOf(d).." "..tostring(d.Name or ""))
+
+                                        if q=="cancel"
+                                            or q:find("cancel",1,true)
+                                        then
+                                            return marker,d
+                                        end
+                                    end
+                                end
+                            end
+
+                            p=p.Parent
+                        end
+
+                        return marker,nil
+                    end
+                end
+            end
+        end
+
+        return nil,nil
+    end
+
+    local function pendingVisible()
+        return select(1,findPendingCancel())~=nil
+    end
+
+    local function tradeOpen()
+        for _,name in ipairs({"TradeGUI_Phone","TradeGUI"}) do
+            local g=PG:FindFirstChild(name)
+            local c=g and g:FindFirstChild("Container")
+            local t=c and c:FindFirstChild("Trade")
+
+            if t then
+                local enabled=true
+
+                if g:IsA("ScreenGui") then
+                    local ok,v=pcall(function() return g.Enabled end)
+                    if ok then enabled=v end
+                end
+
+                if enabled then
+                    return t
+                end
+            end
+        end
+
+        return nil
+    end
+
+    local function waitTradeOpen(target,seconds)
+        local deadline=os.clock()+(tonumber(seconds) or C.TradeOpenGrace)
+
+        while alive() and os.clock()<deadline do
+            if tradeOpen() then
+                return true
+            end
+
+            if not target
+                or not target.Parent
+                or Players:GetPlayerByUserId(target.UserId)~=target
+            then
+                return false
+            end
+
+            task.wait(0.08)
+        end
+
+        return tradeOpen()~=nil
+    end
+
+    local function cancelPending(reason)
+        local _,button=findPendingCancel()
+        local clicked=false
+        local remote=false
+
+        if button then
+            clicked=physicalTap(button,"Cancel pending request")
+        end
+
+        task.wait(0.15)
+
+        if pendingVisible()
+            and DeclineRequest
+            and DeclineRequest:IsA("RemoteEvent")
+        then
+            remote=pcall(function()
+                DeclineRequest:FireServer()
+            end)
+        end
+
+        local deadline=os.clock()+1.0
+
+        while alive()
+            and os.clock()<deadline
+            and pendingVisible()
+        do
+            local _,b=findPendingCancel()
+            if b then
+                physicalTap(b,"Cancel pending retry")
+            end
+            task.wait(0.10)
+        end
+
+        local cleared=not pendingVisible()
+
+        print(
+            "[PDIDDLER P3 OUT] CANCEL",
+            tostring(reason or ""),
+            "ui",clicked,
+            "remote",remote,
+            "cleared",cleared
+        )
+
+        return cleared
+    end
+
+    local function joinGraceRemaining(p)
+        if not p or p==LP then return math.huge end
+
+        local at=S.joinedAt[p.UserId]
+
+        if not at or at<=0 then
+            return 0
+        end
+
+        return math.max(
+            0,
+            C.JoinTradeGrace-(os.clock()-at)
+        )
+    end
+
+    local function nextTarget()
+        for _,p in ipairs(scanner.getWhitelist()) do
+            if p
+                and p.Parent==Players
+                and not S.processed[p.UserId]
+                and joinGraceRemaining(p)<=0
+            then
+                return p
+            end
+        end
+
+        return nil
+    end
+
+    local function soonestMaturing()
+        local best=nil
+        local bestRemain=math.huge
+
+        for _,p in ipairs(scanner.getWhitelist()) do
+            if p
+                and p.Parent==Players
+                and not S.processed[p.UserId]
+            then
+                local remain=joinGraceRemaining(p)
+
+                if remain>0 and remain<bestRemain then
+                    best=p
+                    bestRemain=remain
+                end
+            end
+        end
+
+        return best,bestRemain
+    end
+
+    local function markProcessed(p,result)
+        if not p then return end
+        S.processed[p.UserId]=tostring(result or "processed")
+    end
+
+    if DeclineRequest
+        and DeclineRequest:IsA("RemoteEvent")
+    then
+        DeclineRequest.OnClientEvent:Connect(function()
+            if not alive() then return end
+
+            local active=S.active
+
+            if not active then return end
+
+            S.declineSignalAt=os.clock()
+            S.declineSignalUid=active.UserId
+        end)
+    end
+
+    local function sendAndWatch(target)
+        if not alive() then return "stale-session" end
+
+        if not target
+            or target==LP
+            or target.UserId==LP.UserId
+        then
+            return "self-blocked"
+        end
+
+        if target.Parent~=Players then
+            return "left"
+        end
+
+        if not scanner.isWhitelisted(target.UserId) then
+            return "not-whitelisted"
+        end
+
+        S.active=target
+        S.declineSignalAt=0
+        S.declineSignalUid=nil
+
+        local delivered=false
+
+        for attempt=1,C.SendAttempts do
+            if not alive() then return "stale-session" end
+
+            if target.Parent~=Players
+                or Players:GetPlayerByUserId(target.UserId)~=target
+            then
+                S.left=S.left+1
+                scanner.setRequestState(
+                    target,
+                    "left",
+                    "Player left before outgoing request completed"
+                )
+                return "left"
+            end
+
+            if tradeOpen() then
+                S.accepted=S.accepted+1
+                scanner.setRequestState(
+                    target,
+                    "accepted",
+                    "Trade window already open | outgoing queue paused"
+                )
+                return "trade-open"
+            end
+
+            if pendingVisible() then
+                scanner.setRequestState(
+                    target,
+                    "sending",
+                    "Another pending request is visible | waiting"
+                )
+                return "blocked-by-pending"
+            end
+
+            scanner.setRequestState(
+                target,
+                "sending",
+                string.format(
+                    "Attempt %d/%d | physically tapping player name",
+                    attempt,
+                    C.SendAttempts
+                )
+            )
+
+            scanner.setStatus(
+                string.format(
+                    "P3 OUT — %s | opening player card %d/%d",
+                    target.Name,
+                    attempt,
+                    C.SendAttempts
+                )
+            )
+
+            local opened,tradeButtonOrWhy=openTargetCard(target)
+
+            if not opened then
+                warn(
+                    "[PDIDDLER P3 OUT] CARD OPEN FAILED",
+                    target.Name,
+                    tostring(tradeButtonOrWhy)
+                )
+
+                if attempt<C.SendAttempts then
+                    task.wait(0.8)
+                    continue
+                end
+
+                S.failed=S.failed+1
+                scanner.setRequestState(
+                    target,
+                    "sendfailed",
+                    "Could not physically open correct Profile/Trade card after 3 attempts"
+                )
+                return "failed"
+            end
+
+            local tradeButton=tradeButtonOrWhy
+
+            scanner.setRequestState(
+                target,
+                "sending",
+                "Correct player card verified | physically tapping Trade"
+            )
+
+            if not physicalTap(
+                tradeButton,
+                "Trade for "..target.Name
+            ) then
+                if attempt<C.SendAttempts then
+                    task.wait(0.8)
+                    continue
+                end
+
+                S.failed=S.failed+1
+                scanner.setRequestState(
+                    target,
+                    "sendfailed",
+                    "Trade button physical tap failed after 3 attempts"
+                )
+                return "failed"
+            end
+
+            S.sent=S.sent+1
+
+            local proofDeadline=os.clock()+C.PendingProofTimeout
+
+            while alive() and os.clock()<proofDeadline do
+                if target.Parent~=Players
+                    or Players:GetPlayerByUserId(target.UserId)~=target
+                then
+                    S.left=S.left+1
+                    scanner.setRequestState(
+                        target,
+                        "left",
+                        "Player left while verifying outgoing request"
+                    )
+                    return "left"
+                end
+
+                if tradeOpen() then
+                    S.accepted=S.accepted+1
+                    scanner.setRequestState(
+                        target,
+                        "accepted",
+                        "Request accepted immediately | trade window opened | queue paused"
+                    )
+                    return "trade-open"
+                end
+
+                if pendingVisible() then
+                    delivered=true
+                    break
+                end
+
+                task.wait(0.08)
+            end
+
+            if delivered then
+                break
+            end
+
+            warn(
+                "[PDIDDLER P3 OUT] PENDING NOT FOUND",
+                target.Name,
+                "attempt",
+                attempt
+            )
+
+            if attempt<C.SendAttempts then
+                task.wait(0.9)
+            end
+        end
+
+        if not delivered then
+            S.failed=S.failed+1
+            scanner.setRequestState(
+                target,
+                "sendfailed",
+                "Trade was tapped but sender-side pending request never appeared"
+            )
+            return "failed"
+        end
+
+        local started=os.clock()
+
+        scanner.setRequestState(
+            target,
+            "requesting",
+            "TRADE REQUEST PENDING confirmed | waiting 15.0s"
+        )
+
+        while alive() and os.clock()-started<C.ResponseTimeout do
+            if target.Parent~=Players
+                or Players:GetPlayerByUserId(target.UserId)~=target
+            then
+                S.left=S.left+1
+                scanner.setRequestState(
+                    target,
+                    "left",
+                    "Player left after confirmed outgoing request"
+                )
+                return "left"
+            end
+
+            if tradeOpen() then
+                S.accepted=S.accepted+1
+                scanner.setRequestState(
+                    target,
+                    "accepted",
+                    "Request accepted | trade window opened | PART 3 PAUSED"
+                )
+                return "trade-open"
+            end
+
+            if S.declineSignalUid==target.UserId
+                and S.declineSignalAt>0
+            then
+                scanner.setRequestState(
+                    target,
+                    "requesting",
+                    "Request response signal received | checking for trade window"
+                )
+
+                if waitTradeOpen(target,C.TradeOpenGrace) then
+                    S.accepted=S.accepted+1
+                    scanner.setRequestState(
+                        target,
+                        "accepted",
+                        "Request accepted | trade window opened | PART 3 PAUSED"
+                    )
+                    return "trade-open"
+                end
+
+                if not pendingVisible() then
+                    task.wait(0.30)
+
+                    if not tradeOpen() and not pendingVisible() then
+                        S.declined=S.declined+1
+                        scanner.setRequestState(
+                            target,
+                            "declined",
+                            "MM2 decline signal + pending closed + no trade window"
+                        )
+                        return "declined"
+                    end
+                end
+
+                S.declineSignalAt=0
+                S.declineSignalUid=nil
+            end
+
+            if not pendingVisible() then
+                scanner.setRequestState(
+                    target,
+                    "requesting",
+                    "Pending UI disappeared | verifying accept/decline before rotating"
+                )
+
+                if waitTradeOpen(target,C.TradeOpenGrace) then
+                    S.accepted=S.accepted+1
+                    scanner.setRequestState(
+                        target,
+                        "accepted",
+                        "Request accepted | trade window opened | PART 3 PAUSED"
+                    )
+                    return "trade-open"
+                end
+
+                task.wait(0.30)
+
+                if not tradeOpen() and not pendingVisible() then
+                    S.failed=S.failed+1
+                    scanner.setRequestState(
+                        target,
+                        "sendfailed",
+                        "Request channel closed without verifiable decline or trade-open"
+                    )
+                    return "failed"
+                end
+            end
+
+            local remaining=math.max(
+                0,
+                C.ResponseTimeout-(os.clock()-started)
+            )
+
+            scanner.setRequestState(
+                target,
+                "requesting",
+                string.format(
+                    "Pending confirmed | waiting for response | %.1fs",
+                    remaining
+                )
+            )
+
+            scanner.setStatus(
+                string.format(
+                    "P3 OUT — waiting on %s | %.1fs",
+                    target.Name,
+                    remaining
+                )
+            )
+
+            task.wait(0.12)
+        end
+
+        if not alive() then return "stale-session" end
+
+        S.ignored=S.ignored+1
+
+        scanner.setRequestState(
+            target,
+            "ignored",
+            "No response for 15s | cancelling confirmed pending request"
+        )
+
+        local cancelled=cancelPending(
+            "15s no response for "..target.Name
+        )
+
+        scanner.setRequestState(
+            target,
+            "ignored",
+            cancelled
+                and "Ignored 15s | pending request cancelled"
+                or "Ignored 15s | cancel attempted but pending UI may remain"
+        )
+
+        return "ignored"
+    end
+
+    task.spawn(function()
+        print(
+            "[PDIDDLER P3 OUT] START",
+            "session",
+            SESSION
+        )
+
+        task.wait(0.75)
+
+        local idleLogged=false
+
+        while alive() and not S.paused do
+            if tradeOpen() then
+                S.paused=true
+                scanner.setStatus(
+                    "P3 OUT — active trade detected | PAUSED for Part 4"
+                )
+                break
+            end
+
+            if pendingVisible() and not S.active then
+                scanner.setStatus(
+                    "P3 OUT — existing pending request visible | queue paused"
+                )
+                task.wait(0.25)
+                continue
+            end
+
+            local target=nextTarget()
+
+            if not target then
+                local maturing,remain=soonestMaturing()
+
+                if maturing then
+                    idleLogged=false
+
+                    scanner.setStatus(
+                        string.format(
+                            "P3 OUT — %s trade-ready in %.1fs",
+                            maturing.Name,
+                            remain
+                        )
+                    )
+
+                    task.wait(0.25)
+                    continue
+                end
+
+                if scanner.hasPendingWork() then
+                    idleLogged=false
+                    scanner.setStatus(
+                        "P3 OUT — waiting for scanner to resolve players"
+                    )
+                    task.wait(0.35)
+                    continue
+                end
+
+                if not idleLogged then
+                    print(
+                        "[PDIDDLER P3 OUT] QUEUE IDLE",
+                        "processed",
+                        tostring(#scanner.getWhitelist()),
+                        "sent",
+                        S.sent,
+                        "ignored",
+                        S.ignored,
+                        "declined",
+                        S.declined,
+                        "failed",
+                        S.failed
+                    )
+                    idleLogged=true
+                end
+
+                scanner.setStatus(
+                    "P3 OUT — no unprocessed whitelist targets | watching joins"
+                )
+
+                task.wait(0.35)
+                continue
+            end
+
+            idleLogged=false
+
+            local result=sendAndWatch(target)
+
+            if not alive() then break end
+
+            if result~="blocked-by-pending"
+                and result~="not-whitelisted"
+            then
+                markProcessed(target,result)
+            end
+
+            S.active=nil
+
+            if result=="trade-open" then
+                S.paused=true
+
+                scanner.setStatus(
+                    "P3 OUT — ACCEPTED request | trade window open | PART 3 PAUSED"
+                )
+
+                print(
+                    "[PDIDDLER P3 OUT] HANDOFF",
+                    target.Name,
+                    "| Part 4 not active yet",
+                    "| FINAL TRADE ACCEPT remains disabled"
+                )
+
+                break
+            end
+
+            task.wait(0.25)
+        end
+    end)
+
+    return {
+        session=SESSION,
+        state=S,
+        stop=function()
+            if ENV.PDIDDLER_OUTGOING_SESSION==SESSION then
+                ENV.PDIDDLER_OUTGOING_SESSION=SESSION+1
+            end
+        end,
+    }
+end
+
+return M
