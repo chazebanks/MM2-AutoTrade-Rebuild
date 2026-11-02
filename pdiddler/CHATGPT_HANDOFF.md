@@ -3732,3 +3732,55 @@ Expected PASS logs:
 - `[DUP LAB] PASS | OUR duplicate removal x3 -> x2 -> x1 verified`
 
 Do not modify v2.6.3 production logic based on this lab unless live evidence fails.
+
+
+---
+
+# 51. Duplicate live lab v1 false-negative and v2 fix
+
+Date: 2026-11-02
+
+User screenshot evidence:
+- lab v1 logged:
+  `[DUP LAB] FAIL | offer verify expected x1 | slot-missing`
+- but the trade UI visibly showed Iceblaster in YOUR OFFER.
+
+Conclusion:
+- OfferItem succeeded.
+- The failure was a lab slot-identification false-negative, not evidence that duplicate removal failed.
+- v1 unnecessarily required re-identifying the slot by exposed item id/name even though YOUR OFFER starts empty and the lab itself is the only code adding an item.
+
+Fix:
+new lab uses the stronger observable invariant:
+- YOUR OFFER must begin with 0 visible slots,
+- after each Iceblaster add there must be exactly 1 visible OUR slot,
+- quantity must progress x1 -> x2 -> x3,
+- then one physical click must produce x3 -> x2,
+- second physical click must produce x2 -> x1.
+
+The slot name/internal id are now diagnostic-only and are not required to locate the slot.
+
+New lab:
+`pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v2.lua`
+
+Implementation commit:
+`6bec28734feb7c3a410c8b6839489f7fcd39487d`
+
+CI-tested head:
+`25cf9e721239a7ce4f72d7786b2dc6d4cdc91c33`
+
+CI run:
+`41540778536`
+
+Result:
+SUCCESS
+
+v2 loader:
+```lua
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/25cf9e721239a7ce4f72d7786b2dc6d4cdc91c33/pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v2.lua",
+    true
+))()
+```
+
+Production v2.6.3 remains untouched.
