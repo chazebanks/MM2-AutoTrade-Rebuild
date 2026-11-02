@@ -299,3 +299,53 @@ jobs:
 
           print("PASS completed-trade webhook integration contract")
           PY
+
+
+      - name: Completed-trade webhook stack contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          stack=Path("pdiddler/pdiddler_WEBHOOK_TEST_STACK_v1.lua")
+          lab=Path("pdiddler/tests/pdiddler_webhook_connection_LIVE_LAB_v1.lua")
+          assert stack.exists(), "webhook test stack missing"
+          assert lab.exists(), "webhook connection lab missing"
+
+          src=stack.read_text()
+          test=lab.read_text()
+
+          for token in [
+              "pdiddler_trade_webhook_payload_v1.lua",
+              "pdiddler_trade_telemetry_v1.lua",
+              "pdiddler_trade_completion_logic_v1.lua",
+              "pdiddler_trade_webhook_sender_v1.lua",
+              "pdiddler4_balancer_ROTATING_v2_4_3_WEBHOOK_TELEMETRY.lua",
+              "pdiddler_trade_completion_logger_v1.lua",
+          ]:
+              assert token in src, f"stack missing {token}"
+
+          assert "PDIDDLER_DISCORD_WEBHOOK_URL" in src
+          assert "WEBHOOK LOGGER ACTIVE" in src
+          assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in src
+          assert "AcceptTrade" not in src
+          assert "discord.com/api/webhooks/" not in src
+          assert "discordapp.com/api/webhooks/" not in src
+
+          p4=src.index("part4.run(")
+          logger=src.index("completionLogger.run(")
+          outgoing=src.index("outgoing.run(scanner)")
+          assert p4 < logger < outgoing, (
+              "completion logger must arm after Part 4 and before outgoing rotation"
+          )
+
+          assert "PDIDDLER_DISCORD_WEBHOOK_URL" in test
+          assert "WEBHOOK CONNECTION TEST" in test
+          assert "sender.sendBlocking" in test
+          assert "AcceptTrade" not in test
+          assert "OfferItem" not in test
+          assert "DeclineTrade" not in test
+          assert "discord.com/api/webhooks/" not in test
+          assert "discordapp.com/api/webhooks/" not in test
+
+          print("PASS completed-trade webhook stack + connection-lab contract")
+          PY
