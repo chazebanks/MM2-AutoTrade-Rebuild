@@ -355,7 +355,7 @@ local function marketBundleAssessment(items,side)
     return res,nil
 end
 
-local function resolveEntrylocal function resolveEntry(entry,inv)
+local function resolveEntry(entry,inv)
     if not entry or not inv or type(inv.items)~="table" then
         return nil,"inventory-unavailable"
     end
@@ -513,7 +513,7 @@ local function evaluateSide(t,sideName,inv)
     return out
 end
 
-local function highestOwnlocal function highestOwn(inv)
+local function highestOwn(inv)
     if not inv or type(inv.items)~="table" then return nil end
 
     local best=nil
@@ -706,7 +706,7 @@ local function tradeDecision(ourEval,theirEval)
     return res
 end
 
-local function extremeOneSidedlocal function extremeOneSided(decision,ourEval,theirEval)
+local function extremeOneSided(decision,ourEval,theirEval)
     decision=type(decision)=="table" and decision or {}
 
     if decision.mode~="profit" then
@@ -1017,7 +1017,7 @@ local function buildPlans(inv,theirEval)
     return ranked
 end
 
-local function planMatcheslocal function planMatches(plan,live)
+local function planMatches(plan,live)
     if not plan or not live or #live.unresolved>0 then return false end
     if math.abs(live.rawTotal-plan.rawTotal)>0.001 then return false end
 
