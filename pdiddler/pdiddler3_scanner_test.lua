@@ -815,6 +815,7 @@ end
 
 local function checkerAlias(page,name,typ)
  local q,t=norm(name),norm(typ)
+ if page=="chroma" and (q=="chromadeathshard" or q=="deathshard") then return "13" end
  if page=="godly" and (q=="elderwoodrevolver" or q=="ewrevolver") then return "18" end
  if page=="ancient" and (q=="swirlyaxe" or q=="swirlaxe") then return "529" end
  if page=="godly" and (q=="wintersedge" or q=="winteredge") then return "50" end
