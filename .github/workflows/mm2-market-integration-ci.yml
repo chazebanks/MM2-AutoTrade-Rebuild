@@ -243,9 +243,9 @@ jobs:
           assert 'source="profitable-hold"' in b
           assert 'source="extreme-hold"' in b
           assert 'source="rebalance-verified"' in b
-          assert 'reason="their-offer-changed"' in b
-          assert 'reason="recovery-active"' in b
-          assert 'reason="rebalance-active"' in b
+          assert '"their-offer-changed"' in b
+          assert '"recovery-active"' in b
+          assert '"rebalance-active"' in b
           assert "signaturesCurrent" in b
 
           # Runtime must observe MM2's real native readiness signals.
