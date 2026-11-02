@@ -898,9 +898,165 @@ local function checkerResolve(name,opts)
  return nil,"unresolved"
 end
 
+local LiveValues={
+ ready=false,
+ attempted=false,
+ source="embedded-fallback",
+ count=0,
+ byPage={godly={},chroma={},ancient={}}
+}
+
+local function httpGetText(url)
+ local ok,res=pcall(function() return game:HttpGet(url) end)
+ if ok and type(res)=="string" and #res>100 then return res end
+
+ local reqFn=nil
+ if type(request)=="function" then reqFn=request
+ elseif type(http_request)=="function" then reqFn=http_request
+ elseif type(syn)=="table" and type(syn.request)=="function" then reqFn=syn.request end
+
+ if reqFn then
+  local ok2,res2=pcall(function()
+   return reqFn({Url=url,Method="GET"})
+  end)
+  if ok2 and type(res2)=="table" and type(res2.Body)=="string" and #res2.Body>100 then
+   return res2.Body
+  end
+ end
+end
+
+local function htmlPlain(html)
+ html=tostring(html or "")
+ html=html:gsub("<script.->.-</script>"," ")
+ html=html:gsub("<style.->.-</style>"," ")
+ html=html:gsub("<br%s*/?>","\n")
+ html=html:gsub("</p>","\n"):gsub("</div>","\n"):gsub("</td>","\n")
+ html=html:gsub("</tr>","\n"):gsub("</li>","\n")
+ html=html:gsub("<[^>]->"," ")
+ html=html:gsub("&nbsp;"," "):gsub("&#160;"," ")
+ html=html:gsub("&amp;","&"):gsub("&apos;","'"):gsub("&#39;","'")
+ html=html:gsub("&quot;",'"')
+ return html
+end
+
+local function cleanValueName(x)
+ x=tostring(x or "")
+ x=x:gsub("^%s*Image%s*[%|%-]?%s*","")
+ x=x:gsub("^%s+",""):gsub("%s+$",""):gsub("%s+"," ")
+ return x
+end
+
+local function ignoreValueLine(line)
+ local q=line:lower()
+ return line==""
+  or q=="home"
+  or q=="godly values"
+  or q=="ancient values"
+  or q=="all values below are based in seers."
+  or q=="seer"
+  or q=="chroma"
+  or q:match("^tier%s")
+  or q=="special tier"
+  or q:match("^demand:")
+  or q:match("^rarity:")
+  or q:match("^stability:")
+  or q:match("^status:")
+  or q:match("^origin:")
+  or q:match("^obtained:")
+  or q:match("^%(")
+  or q:find("privacy policy",1,true)
+  or q:find("t.o.s",1,true)
+end
+
+local function parseValuePage(html,basePage)
+ local plain=htmlPlain(html)
+ local page=basePage
+ local lastName=nil
+ local added=0
+
+ for raw in plain:gmatch("[^\r\n]+") do
+  local line=cleanValueName(raw)
+
+  if line=="CHROMA" then
+   page="chroma"
+   lastName=nil
+  elseif page=="chroma" and line:match("^TIER%s") then
+   page="godly"
+   lastName=nil
+  else
+   local num=line:match("^Value:%s*([%d,]+%.?%d*)")
+   if num and lastName and LiveValues.byPage[page] then
+    local v=tonumber((num:gsub(",","")))
+    if v then
+     LiveValues.byPage[page][norm(lastName)]=v
+     added += 1
+    end
+    lastName=nil
+   elseif not ignoreValueLine(line)
+    and not line:find(":",1,true)
+    and #line<=80
+   then
+    lastName=line
+   end
+  end
+ end
+
+ return added
+end
+
+local function buildLiveValues()
+ if LiveValues.ready then return true end
+ if LiveValues.attempted then return false end
+ LiveValues.attempted=true
+
+ local godlyHtml=httpGetText("https://www.mm2values.com/mobile.php?p=godly")
+ local ancientHtml=httpGetText("https://www.mm2values.com/mobile.php?p=ancient")
+
+ local n=0
+ if godlyHtml then n += parseValuePage(godlyHtml,"godly") end
+ if ancientHtml then n += parseValuePage(ancientHtml,"ancient") end
+
+ local godlyN,chromaN,ancientN=0,0,0
+ for _ in pairs(LiveValues.byPage.godly) do godlyN+=1 end
+ for _ in pairs(LiveValues.byPage.chroma) do chromaN+=1 end
+ for _ in pairs(LiveValues.byPage.ancient) do ancientN+=1 end
+
+ if godlyN>=60 and chromaN>=15 and ancientN>=10 then
+  LiveValues.ready=true
+  LiveValues.source="mm2values-live"
+  LiveValues.count=n
+  print("[PDIDDLER3] LIVE MM2VALUES READY","godly",godlyN,"chroma",chromaN,"ancient",ancientN)
+  return true
+ end
+
+ warn("[PDIDDLER3] LIVE MM2VALUES INCOMPLETE","godly",godlyN,"chroma",chromaN,"ancient",ancientN,"- embedded fallback active")
+ return false
+end
+
+local function liveValueKey(meta)
+ local q=norm(identityName(meta))
+ q=q:gsub("^vamps","vampires")
+ q=q:gsub("travellers","travelers")
+ return q
+end
+
+local function liveMarket(meta)
+ if not buildLiveValues() then return nil end
+ local page=checkerPage(meta)
+ if not allowedPage(page) then return nil end
+ local q=liveValueKey(meta)
+ local v=LiveValues.byPage[page] and LiveValues.byPage[page][q]
+ if not v then return nil end
+ return {v=v,id=q,page=page,img="LIVE:"..identityName(meta)}
+end
+
 local function checkerMarket(meta)
  local page=checkerPage(meta)
  if not allowedPage(page) then return nil end
+
+ local live=liveMarket(meta)
+ if live then return live,nil end
+
  local rec,why=checkerResolve(identityName(meta),{page=page,type=meta.type,id=meta.id,chroma=meta.chroma,meta=meta})
  if not rec then return nil,why end
  return {v=rec.v,id=rec.id,page=rec.page,img=rec.img},nil
@@ -928,12 +1084,13 @@ local function inventoryFromProfile(prof)
  local owned=prof.Weapons and prof.Weapons.Owned
  if type(owned)~="table" then return nil end
 
- local out={items={},total=0,rawOwned=0,unmapped=0,unpriced=0}
+ local out={items={},total=0,rawOwned=0,unmapped=0,unpriced=0,seen={}}
 
  for id,count in pairs(owned) do
   local qty=type(count)=="number" and math.max(0,math.floor(count)) or 1
   if qty>0 then
    out.rawOwned += qty
+   out.seen[#out.seen+1]=tostring(id).."x"..tostring(qty)
    local m=Meta["Weapons|"..tostring(id)]
 
    -- If the live MM2 catalog cannot identify an owned weapon ID, the scan is
@@ -955,6 +1112,9 @@ local function inventoryFromProfile(prof)
    end
   end
  end
+
+ table.sort(out.seen)
+ out.fingerprint=table.concat(out.seen,"|")
 
  table.sort(out.items,function(a,b)
   local av=tonumber(a.value) or -math.huge
@@ -1134,34 +1294,41 @@ local function scanOne(p, reason)
         and C.JoinScanRetryDelay
         or C.TargetScanRetryDelay
 
-    local inv
+    local lastZeroFingerprint=nil
+    local lastZeroInv=nil
 
     for attempt = 1, retries do
         if not p or not p.Parent then
             return "left", nil
         end
 
-        inv = targetInventory(p, attempt > 1)
+        local inv = targetInventory(p, attempt > 1)
 
         if inv then
-            -- A verified full inventory can be blacklisted only when every
-            -- owned weapon ID was understood by the live MM2 catalog.
             if (inv.unmapped or 0) > 0 then
-                return "unknown", inv
+                lastZeroFingerprint=nil
+                lastZeroInv=nil
+            elseif #inv.items > 0 then
+                return "whitelist", inv
+            else
+                local fp=tostring(inv.fingerprint or "")
+                if lastZeroFingerprint~=nil and fp==lastZeroFingerprint then
+                    return "blacklist", inv
+                end
+                lastZeroFingerprint=fp
+                lastZeroInv=inv
             end
-            return (#inv.items > 0) and "whitelist" or "blacklist", inv
         end
 
         if attempt < retries then
             guiSetStatus(
                 string.format(
-                    "%s inventory not ready — retry %d/%d",
+                    "%s inventory verification — retry %d/%d",
                     p.Name,
                     attempt,
                     retries
                 )
             )
-
             task.wait(retryDelay)
         end
     end
@@ -1170,7 +1337,7 @@ local function scanOne(p, reason)
         return "left", nil
     end
 
-    return "unknown", nil
+    return "unknown", lastZeroInv
 end
 
 local function removePlayerState(p)
