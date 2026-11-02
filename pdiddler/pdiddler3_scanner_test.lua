@@ -561,6 +561,21 @@ local function identityName(meta)
  return name
 end
 
+local function metaIdentity(meta)
+ if not meta then return "" end
+ local d=meta.data or {}
+ return table.concat({
+  tostring(meta.id or ""),
+  tostring(checkerPage and checkerPage(meta) or norm(meta.rarity) or ""),
+  norm(meta.type),
+  meta.chroma and "chroma" or "normal",
+  norm(d.Year or d.EventYear or ""),
+  norm(d.Event or d.Season or ""),
+  tostring(d.ItemID or ""),
+  assetKey(d.Image or d.Icon or d.Texture or "")
+ },"|")
+end
+
 local Checker={rows={},byId={},ready=false}
 Checker.raw=[==[
 ancient|1|250000000|NiksScythe.png
@@ -903,7 +918,8 @@ local LiveValues={
  attempted=false,
  source="embedded-fallback",
  count=0,
- byPage={godly={},chroma={},ancient={}}
+ byPage={godly={},chroma={},ancient={}},
+ collisions={godly={},chroma={},ancient={}}
 }
 
 local function httpGetText(url)
@@ -988,7 +1004,16 @@ local function parseValuePage(html,basePage)
    if num and lastName and LiveValues.byPage[page] then
     local v=tonumber((num:gsub(",","")))
     if v then
-     LiveValues.byPage[page][norm(lastName)]=v
+     local key=norm(lastName)
+     local bucket=LiveValues.byPage[page][key]
+     if not bucket then
+      bucket={}
+      LiveValues.byPage[page][key]=bucket
+     end
+     bucket[#bucket+1]={name=lastName,value=v}
+     if #bucket>1 then
+      LiveValues.collisions[page][key]=true
+     end
      added += 1
     end
     lastName=nil
@@ -1017,15 +1042,19 @@ local function buildLiveValues()
  if ancientHtml then n += parseValuePage(ancientHtml,"ancient") end
 
  local godlyN,chromaN,ancientN=0,0,0
- for _ in pairs(LiveValues.byPage.godly) do godlyN+=1 end
- for _ in pairs(LiveValues.byPage.chroma) do chromaN+=1 end
- for _ in pairs(LiveValues.byPage.ancient) do ancientN+=1 end
+ local collisions=0
+ for _,bucket in pairs(LiveValues.byPage.godly) do godlyN+=#bucket end
+ for _,bucket in pairs(LiveValues.byPage.chroma) do chromaN+=#bucket end
+ for _,bucket in pairs(LiveValues.byPage.ancient) do ancientN+=#bucket end
+ for _,pageMap in pairs(LiveValues.collisions) do
+  for _ in pairs(pageMap) do collisions+=1 end
+ end
 
  if godlyN>=60 and chromaN>=15 and ancientN>=10 then
   LiveValues.ready=true
   LiveValues.source="mm2values-live"
   LiveValues.count=n
-  print("[PDIDDLER3] LIVE MM2VALUES READY","godly",godlyN,"chroma",chromaN,"ancient",ancientN)
+  print("[PDIDDLER3] LIVE MM2VALUES READY","godly",godlyN,"chroma",chromaN,"ancient",ancientN,"nameCollisions",collisions)
   return true
  end
 
@@ -1041,28 +1070,110 @@ local function liveValueKey(meta)
 end
 
 local function liveMarket(meta)
- if not buildLiveValues() then return nil end
+ if not buildLiveValues() then return nil,"live-unavailable" end
  local page=checkerPage(meta)
- if not allowedPage(page) then return nil end
- local q=liveValueKey(meta)
- local v=LiveValues.byPage[page] and LiveValues.byPage[page][q]
- if not v then return nil end
- return {v=v,id=q,page=page,img="LIVE:"..identityName(meta)}
-end
+ if not allowedPage(page) then return nil,"tier-excluded" end
 
+ local q=liveValueKey(meta)
+ local bucket=LiveValues.byPage[page] and LiveValues.byPage[page][q]
+ if not bucket or #bucket==0 then
+  return nil,"live-name-miss"
+ end
+
+ if #bucket==1 then
+  local rec=bucket[1]
+  return {
+   v=rec.value,
+   id=q,
+   page=page,
+   img="LIVE:"..tostring(rec.name),
+   source="live-exact-name",
+   identity=metaIdentity(meta)
+  },nil
+ end
+
+ -- Duplicate normalized names must NEVER be resolved by load order.
+ -- If every duplicate has the same value, the numeric result is safe.
+ local first=tonumber(bucket[1].value)
+ local same=true
+ for i=2,#bucket do
+  if tonumber(bucket[i].value)~=first then
+   same=false
+   break
+  end
+ end
+
+ if same and first then
+  return {
+   v=first,
+   id=q,
+   page=page,
+   img="LIVE:DUPLICATE-SAME-VALUE:"..identityName(meta),
+   source="live-collision-same-value",
+   identity=metaIdentity(meta)
+  },nil
+ end
+
+ return nil,"live-name-collision"
+end
 local function checkerMarket(meta)
  local page=checkerPage(meta)
  if not allowedPage(page) then return nil end
 
- local live=liveMarket(meta)
+ local live,liveWhy=liveMarket(meta)
  if live then return live,nil end
 
- local rec,why=checkerResolve(identityName(meta),{page=page,type=meta.type,id=meta.id,chroma=meta.chroma,meta=meta})
- if not rec then return nil,why end
- return {v=rec.v,id=rec.id,page=rec.page,img=rec.img},nil
+ -- Embedded resolver uses the actual MM2 internal key + page + type + chroma,
+ -- and is therefore safer than choosing a duplicate live display name.
+ local rec,why=checkerResolve(identityName(meta),{
+  page=page,
+  type=meta.type,
+  id=meta.id,
+  chroma=meta.chroma,
+  meta=meta
+ })
+ if not rec then
+  return nil,(liveWhy or "live-miss").."/"..tostring(why or "embedded-miss")
+ end
+
+ return {
+  v=rec.v,
+  id=rec.id,
+  page=rec.page,
+  img=rec.img,
+  source="embedded-identity-fallback",
+  identity=metaIdentity(meta)
+ },nil
 end
 
 checkerBuild()
+
+local function auditEligibleIdentityCollisions()
+ local groups={}
+ for _,m in pairs(Meta) do
+  local page=checkerPage(m)
+  if allowedPage(page) then
+   local k=table.concat({page,norm(identityName(m))},"|")
+   groups[k]=groups[k] or {}
+   groups[k][#groups[k]+1]=m
+  end
+ end
+
+ local collisions=0
+ for k,list in pairs(groups) do
+  if #list>1 then
+   collisions+=1
+   local ids={}
+   for _,m in ipairs(list) do
+    ids[#ids+1]=metaIdentity(m)
+   end
+   warn("[PDIDDLER3] ELIGIBLE NAME COLLISION",k,"count",#list,table.concat(ids," || "))
+  end
+ end
+ print("[PDIDDLER3] ELIGIBLE IDENTITY AUDIT COMPLETE","collisions",collisions)
+end
+
+auditEligibleIdentityCollisions()
 
 local function ownProfile(forceRemote)
  local rem=RS:FindFirstChild("Remotes")
@@ -1102,7 +1213,11 @@ local function inventoryFromProfile(prof)
     out.items[#out.items+1]={
      id=m.id,cat="Weapons",name=identityName(m),qty=qty,
      value=e and e.v or nil,type=m.type,page=checkerPage(m),
-     checkerId=e and e.id or "UNPRICED"
+     checkerId=e and e.id or "UNPRICED",
+     identity=metaIdentity(m),
+     year=tostring((m.data or {}).Year or ""),
+     event=tostring((m.data or {}).Event or ""),
+     valueSource=e and e.source or "UNPRICED"
     }
     if e then
      out.total += e.v*qty
