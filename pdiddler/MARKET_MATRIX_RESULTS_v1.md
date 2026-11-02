@@ -130,3 +130,26 @@ This limitation does not affect the offline arithmetic evidence above, but it me
 Reached.
 
 Do not wire this module into live v2.5 yet. The next step is a separate Part 4 integration design/plan after target-runtime test evidence is accepted.
+
+
+## Target-runtime runner
+
+A read-only Delta runner is now committed:
+
+`pdiddler/tests/pdiddler_market_matrix_DELTA_RUNNER_v1.lua`
+
+Runner commit:
+`62c3c6f5fc0e5e9528e6fbbfd1cee754c44eec6d`
+
+It pins:
+- candidate profile commit `7ec3398582d565d423bdb00ac66d7ad6f26ad06e`
+- market logic commit `aca1dc23a1cbda074faf9c00b039fd212a0830b4`
+
+It performs:
+- 190/190 target-runtime profile load/audit,
+- all 14 decision cases,
+- deterministic ranking tests.
+
+It contains no trade/remotes/GUI/server-hop/final-Accept behavior.
+
+Status: **pending user Delta execution**.
