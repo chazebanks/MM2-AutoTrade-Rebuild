@@ -970,12 +970,12 @@ Do not rely only on chat memory for project state.
 
 ## Current continuation point
 
-The current active stack remains:
+The current active stack is:
 
-`pdiddler/pdiddler_OUTGOING_OWNERSHIP_FIX_TEST_STACK_v2_3.lua`
+`pdiddler/pdiddler_PROFIT_HOLD_TEST_STACK_v2_4.lua`
 
 Commit:
-`0f8bb3536d3a073f3001e1759c07dca44fc5cbd1`
+`4197968629960fd98068df9b4fac5f72cf903d50`
 
 Latest controlled recording was clean.
 
@@ -1065,3 +1065,97 @@ That remains the preferred duplicate/removal verifier test.
 
 Current recommendation remains:
 **Do not modify the core from this recording. Continue controlled testing.**
+
+
+---
+
+# 24. Profit-hold strategy change — v2.4
+
+Date: 2026-11-02
+
+Reason:
+During the 12:23 rapid-offer-change recording, THEIR OFFER increased from approximately 245 to 270 while OUR OFFER remained 230. The previous code happened to hold because +40 equaled its preferred downgrade-profit ceiling. Review showed the preferred maximum-profit normalization rule was strategically backwards for a profit-growth trader: if THEIR OFFER voluntarily increases and OUR existing offer is still safe/profitable, automatically increasing OUR OFFER gives away part of their overpay.
+
+Current public MM2Values data continues to expose value, demand, rarity and stability/status separately, reinforcing that raw equality is not the only trade criterion. Recent MM2 community discussion also describes the common growth loop as upgrade into desirable/liquid items, then downgrade for overpay.
+
+## Strategy decision
+
+Remove the preferred maximum-profit normalization trigger.
+
+New authoritative rule:
+- THEIR OFFER changes are always re-read/re-evaluated.
+- If OUR current offer remains valid under:
+  - minimum raw-profit requirement,
+  - effective/quality requirement,
+  - downgrade premium,
+  - big-downgrade premium,
+  - controlled quality-upgrade rules,
+  then KEEP OUR OFFER.
+- Do not voluntarily add value merely because THEIR OFFER increased.
+- Only run the combination planner when the current live offer is unsafe/underpaying or otherwise fails the trade-decision rules.
+
+This also reduces unnecessary planner work on iPad because the 1-4 item combination DP is skipped while a current profitable offer is already valid.
+
+## Removed obsolete logic
+
+Removed from Part 4:
+- preferredProfitCeiling()
+- NormalProfitBandExtraFlat/Pct
+- DowngradeProfitBandExtraFlat/Pct
+- BigDowngradeProfitBandExtraFlat/Pct
+- RebalanceMinValueStep
+- P4 NORMALIZE PROFIT path
+
+Retained unchanged:
+- Normal minimum: max(15, 3%)
+- Downgrade minimum: max(20, 6%)
+- Big downgrade minimum: max(30, 8%)
+- controlled quality-upgrade raw-loss cap: 3%
+- transactional executor/recovery
+- exact offer verification
+- accepted-empty immediate decline
+- 15s empty timeout
+- 60s Case 3 timer
+- final item-trade Accept disabled
+
+## New Part 4 file
+
+`pdiddler/pdiddler4_balancer_ROTATING_v2_2_PROFIT_HOLD.lua`
+
+Commit:
+`8d7d2a3ce1b543ef8cc6e7b65b4f5718fe36497c`
+
+## New current combined stack
+
+`pdiddler/pdiddler_PROFIT_HOLD_TEST_STACK_v2_4.lua`
+
+Commit:
+`4197968629960fd98068df9b4fac5f72cf903d50`
+
+Current loader:
+
+```lua
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/main/pdiddler/pdiddler_PROFIT_HOLD_TEST_STACK_v2_4.lua",
+    true
+))()
+```
+
+Pins:
+- Part 1 known-good unchanged
+- Part 2 known-good unchanged
+- scanner v6.8 critical pause unchanged
+- Part 3 v15 authoritative outgoing ownership unchanged
+- Part 4 v2.2 PROFIT HOLD
+
+## Next tests
+
+1. Confirm when THEIR OFFER increases but OUR current offer remains profitable, log/status shows PROFITABLE HOLD and OUR OFFER does not voluntarily increase.
+2. Confirm when THEIR OFFER decreases enough that OUR current offer becomes unsafe, the planner still rebalances downward immediately.
+3. Remaining prior tests:
+   - incoming B while outgoing A is owned,
+   - explicit mid-tx mutation with TX ABORT / RECOVERY VERIFIED console proof,
+   - OUR duplicate x2 -> x1 removal verification,
+   - rare no-pending -> late exact trade-open if naturally reproduced.
+
+Do not freeze v2.4 until live-tested.
