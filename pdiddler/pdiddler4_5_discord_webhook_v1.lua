@@ -370,10 +370,38 @@ function M.run(scanner,part4Controller,marketProfile,marketLogic,tradeReport)
         "| webhook configured",webhookUrl()~=nil
     )
 
+    local function testWebhook()
+        local payload={
+            username="MM2 AutoTrade Audit",
+            embeds={{
+                title="MM2 Webhook Connection Test",
+                description="Connection verified. This is a diagnostic only; no trade was completed.",
+                fields={{
+                    name="Status",
+                    value="Discord sender path is reachable from this executor session.",
+                    inline=false,
+                }},
+            }},
+        }
+
+        local ok,why=sendPayload(payload)
+
+        if ok then
+            S.lastStatus="test-sent:"..tostring(why)
+            print("[PDIDDLER WEBHOOK] TEST SENT",tostring(why))
+        else
+            S.lastStatus="test-failed:"..tostring(why)
+            warn("[PDIDDLER WEBHOOK] TEST FAILED",tostring(why))
+        end
+
+        return ok,why
+    end
+
     return {
         session=SESSION,
         state=S,
         candidateKey=candidateKey,
+        testWebhook=testWebhook,
         stop=function()
             if ENV.PDIDDLER_WEBHOOK_SESSION==SESSION then
                 ENV.PDIDDLER_WEBHOOK_SESSION=SESSION+1
