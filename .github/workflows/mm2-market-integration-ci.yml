@@ -221,3 +221,55 @@ jobs:
       - name: Run Part 5 shadow completion policy
         run: |
           /tmp/luau/luau pdiddler/tests/pdiddler5_completion_policy_v1.luau
+
+
+      - name: Part 5 shadow integration contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          bridge=Path("pdiddler/pdiddler4_balancer_ROTATING_v2_4_3_P5_SHADOW_BRIDGE.lua")
+          runtime=Path("pdiddler/pdiddler5_shadow_completion_v1.lua")
+
+          assert bridge.exists(), "Part 4 -> Part 5 shadow bridge missing"
+          assert runtime.exists(), "Part 5 shadow runtime missing"
+
+          b=bridge.read_text()
+          r=runtime.read_text()
+
+          # Bridge must preserve Part 4 as authority and expose read-only state.
+          assert "completion=" in b
+          assert "publishCompletion" in b
+          assert 'source="profitable-hold"' in b
+          assert 'source="extreme-hold"' in b
+          assert 'source="rebalance-verified"' in b
+          assert 'reason="their-offer-changed"' in b
+          assert 'reason="recovery-active"' in b
+          assert 'reason="rebalance-active"' in b
+          assert "signaturesCurrent" in b
+
+          # Runtime must observe MM2's real native readiness signals.
+          assert 'FindFirstChild("TheirOffer")' in r
+          assert 'FindFirstChild("Accepted")' in r
+          assert 'FindFirstChild("Actions")' in r
+          assert 'FindFirstChild("Cooldown")' in r
+          assert 'FindFirstChild("Confirm")' in r
+          assert 'FindFirstChild("ActionButton")' in r
+          assert "ready-first-click" in r
+          assert "SHADOW ONLY" in r
+
+          # No final completion action exists in Part 5 shadow mode.
+          forbidden=[
+              "AcceptTrade",
+              'physicalClick(',
+              'MouseButton1Click:Fire',
+              'SendMouseButtonEvent',
+              ':Activate()',
+              'firesignal(',
+          ]
+          for token in forbidden:
+              assert token not in r, f"shadow runtime contains action token: {token}"
+              assert token not in b, f"shadow bridge contains action token: {token}"
+
+          print("PASS Part 5 shadow integration contract")
+          PY
