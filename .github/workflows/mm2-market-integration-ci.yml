@@ -43,6 +43,7 @@ jobs:
           /tmp/luau/luau-compile pdiddler/tests/pdiddler_market_integration_ci_v1.luau >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_market_bundle_cache_v1.luau >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_ineligible_plan_match_v1.luau >/dev/null
+          /tmp/luau/luau-compile pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v1.lua >/dev/null
 
       - name: Run pure market integration tests
         run: |
@@ -143,4 +144,21 @@ jobs:
           assert "waiting for offer change" not in src[no_plan:finish], "no-plan branch must not hold indefinitely"
           assert "AcceptTrade" not in src
           print("PASS no-plan stable resolved trade declines immediately")
+          PY
+
+
+      - name: Duplicate live-lab contract guards
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          src=Path("pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v1.lua").read_text()
+          assert 'ICEBLASTER_ID="481"' in src
+          assert 'expected x3 -> x2 -> x1' in src
+          assert 'removeAndRequire(2)' in src
+          assert 'removeAndRequire(1)' in src
+          assert 'No third removal attempted.' in src
+          assert 'DeclineTrade' in src
+          assert 'AcceptTrade' not in src
+          assert 'FINAL ACCEPT DISABLED / NOT IMPLEMENTED' in src
+          print("PASS duplicate live-lab contract guards")
           PY
