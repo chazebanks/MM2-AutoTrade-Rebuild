@@ -41,6 +41,27 @@ local function loadModule(url,label)
     return result
 end
 
+local p1=loadModule(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4a646aa751571bace8eeb2b305ba16cebcad2f/pdiddler/pdiddler1_KNOWN_GOOD.lua",
+    "Part 1"
+)
+local ok1,res1=pcall(p1.run)
+if not ok1 then error("[PDIDDLER TEST] Part 1 run failed: "..tostring(res1)) end
+if res1~=true then warn("[PDIDDLER TEST] Part 1 blocked this server"); return false end
+
+local p2=loadModule(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/b097c1862db4cff7394d6a5e6764d34191df3283/pdiddler/pdiddler2_KNOWN_GOOD.lua",
+    "Part 2"
+)
+local ok2,res2=pcall(p2.run)
+if not ok2 then error("[PDIDDLER TEST] Part 2 run failed: "..tostring(res2)) end
+if res2~=true then warn("[PDIDDLER TEST] Part 2 failed"); return false end
+
+local scanner=loadModule(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/3c48b49c1e750d91bfbf088fbc737185bddf39be/pdiddler/pdiddler3_scanner_MODULE_v6_8_CRITICAL_PAUSE.lua",
+    "Scanner critical-phase pause build"
+)
+
 local INTEGRATION_COMMIT="7809aa8c8d210d8005c223eb9fd3a6b3ea716ba5"
 local BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..INTEGRATION_COMMIT.."/pdiddler/"
 
@@ -203,27 +224,6 @@ local okPreflight,preflightErr=pcall(preflight)
 if not okPreflight then
     error("[PDIDDLER TEST] MARKET PREFLIGHT FAILED: "..tostring(preflightErr))
 end
-
-local p1=loadModule(
-    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4a646aa751571bace8eeb2b305ba16cebcad2f/pdiddler/pdiddler1_KNOWN_GOOD.lua",
-    "Part 1"
-)
-local ok1,res1=pcall(p1.run)
-if not ok1 then error("[PDIDDLER TEST] Part 1 run failed: "..tostring(res1)) end
-if res1~=true then warn("[PDIDDLER TEST] Part 1 blocked this server"); return false end
-
-local p2=loadModule(
-    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/b097c1862db4cff7394d6a5e6764d34191df3283/pdiddler/pdiddler2_KNOWN_GOOD.lua",
-    "Part 2"
-)
-local ok2,res2=pcall(p2.run)
-if not ok2 then error("[PDIDDLER TEST] Part 2 run failed: "..tostring(res2)) end
-if res2~=true then warn("[PDIDDLER TEST] Part 2 failed"); return false end
-
-local scanner=loadModule(
-    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/3c48b49c1e750d91bfbf088fbc737185bddf39be/pdiddler/pdiddler3_scanner_MODULE_v6_8_CRITICAL_PAUSE.lua",
-    "Scanner critical-phase pause build"
-)
 
 local outgoing=loadModule(
     "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/9f0637b063c2f65cb1cf6fc1f6ce4ab08b5dda87/pdiddler/pdiddler3_outgoing_ROTATING_v15_UNCERTAIN_OWNER.lua",
