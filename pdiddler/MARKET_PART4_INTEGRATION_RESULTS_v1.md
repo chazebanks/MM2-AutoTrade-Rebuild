@@ -167,11 +167,11 @@ Workflow:
 Official Luau version:
 `0.745`
 
-Final tightened pre-documentation head:
-`0752ccc1da23b39e8e55e346297134146bacc227`
+Final code head before documentation:
+`bc2deeeffbd7d77bd933d2f11b2e0bea9c13de15`
 
 GitHub Actions run:
-`41525905272`
+`41526118216`
 
 Result:
 **SUCCESS**
@@ -184,6 +184,7 @@ Successful steps:
 - Static Part 4 regression guards
 
 Static guards verify:
+- P1/P2 execute before market preload/preflight,
 - dependency injection contract,
 - exact canonical identity markers,
 - timers and EXTREME thresholds,
