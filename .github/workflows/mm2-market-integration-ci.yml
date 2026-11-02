@@ -265,6 +265,8 @@ jobs:
           assert "MaxAttempts=4" in r
           assert "PDIDDLER_WEBHOOK_PENDING_COUNT" in r
           assert "GenerateGUID" in r
+          assert "testWebhook" in r
+          assert "MM2 Webhook Connection Test" in r
 
           # Post-trade inventory verification and exactly-once state.
           assert "getOwnInventory" in r
