@@ -48,6 +48,14 @@ jobs:
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v2.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v3.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_trade_webhook_payload_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_trade_telemetry_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_trade_completion_logic_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_trade_webhook_sender_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_3_WEBHOOK_TELEMETRY.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_trade_completion_logger_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_WEBHOOK_TEST_STACK_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/tests/pdiddler_webhook_connection_LIVE_LAB_v1.lua >/dev/null
 
       - name: Run pure market integration tests
         run: |
@@ -348,4 +356,38 @@ jobs:
           assert "discordapp.com/api/webhooks/" not in test
 
           print("PASS completed-trade webhook stack + connection-lab contract")
+          PY
+
+
+      - name: Webhook credential leak guard
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          files=[
+              Path("pdiddler/pdiddler_trade_webhook_payload_v1.lua"),
+              Path("pdiddler/pdiddler_trade_telemetry_v1.lua"),
+              Path("pdiddler/pdiddler_trade_completion_logic_v1.lua"),
+              Path("pdiddler/pdiddler_trade_webhook_sender_v1.lua"),
+              Path("pdiddler/pdiddler4_balancer_ROTATING_v2_4_3_WEBHOOK_TELEMETRY.lua"),
+              Path("pdiddler/pdiddler_trade_completion_logger_v1.lua"),
+              Path("pdiddler/pdiddler_WEBHOOK_TEST_STACK_v1.lua"),
+              Path("pdiddler/tests/pdiddler_webhook_connection_LIVE_LAB_v1.lua"),
+          ]
+
+          secret_pattern=re.compile(
+              r'https://(?:discord(?:app)?\.com)/api/webhooks/\d+/[A-Za-z0-9._-]+'
+          )
+
+          for p in files:
+              src=p.read_text()
+              assert not secret_pattern.search(src), f"webhook credential leaked in {p}"
+              if p.name not in {
+                  "pdiddler_trade_webhook_sender_v1.lua",
+              }:
+                  assert "discord.com/api/webhooks/" not in src, f"literal webhook URL prefix leaked in {p}"
+                  assert "discordapp.com/api/webhooks/" not in src, f"literal legacy webhook URL prefix leaked in {p}"
+
+          print("PASS webhook credential leak guard")
           PY
