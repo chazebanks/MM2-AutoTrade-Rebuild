@@ -2135,3 +2135,135 @@ Before creating v2.6, validate at least:
 Current conclusion:
 market-awareness can be added without touching the proven transactional executor.
 The next implementation step should be a complete, frozen market-profile snapshot plus offline decision-matrix validation, not an immediate live-script patch.
+
+
+---
+
+# 35. Complete 190-item market snapshot audit
+
+Date: 2026-11-02
+
+A complete audit-only market profile snapshot has now been created.
+
+File:
+`pdiddler/pdiddler_market_snapshot_2026-11-02_AUDIT_v2_COMPLETE.lua`
+
+Commit:
+`9bd3b528a681e8a2215aa84b61271fdd3e5d6acd`
+
+Important:
+- `liveReady=false`
+- not wired into v2.5,
+- does not alter scanner/planner/executor behavior,
+- intended only for offline audit and decision-matrix work.
+
+## Coverage
+
+Exact scanner-eligible population:
+- Ancient: 16 / 16
+- Chroma weapons: 46 / 46
+- Godly: 128 / 128
+- Total: 190 / 190
+
+Static coverage audit:
+- 190 scanner rows,
+- 190 snapshot rows,
+- 190 unique profile keys,
+- 0 missing,
+- 0 duplicate keys,
+- 0 extra keys,
+- 0 MM2Values-value mismatches versus the active v6.8 scanner.
+
+Key format:
+`page:id`
+
+This prevents accidental cross-page ID collisions.
+
+## Source timestamps
+
+MM2Values values:
+- active scanner snapshot: 2026-10-31 12:31:12 EST.
+
+Supreme:
+- current Ancient/Godly/Chroma pages report:
+  2026-11-02 12:34 PM.
+
+Supreme therefore changed after the earlier value-recheck work and is currently the fresher market snapshot.
+
+## Snapshot fields
+
+Each profiled item currently stores:
+- scanner page,
+- canonical scanner id,
+- canonical/profile name,
+- MM2Values value,
+- Supreme value or label,
+- Supreme demand,
+- Supreme stability/status,
+- calculated MM2Values/Supreme disagreement percentage,
+- verified/profiled flags.
+
+No market multiplier is applied yet.
+
+## Audit distribution
+
+Stability/status counts across the 190 eligible entries:
+- Stable: 174
+- Underpaid For: 5
+- Fluctuating: 8
+- Doing Well: 2
+- Overpaid For: 1 (Nik's Scythe)
+
+Demand distribution:
+- D1: 112
+- D2: 4
+- D3: 15
+- D4: 7
+- D5: 38
+- D6: 9
+- D7: 3
+- D8: 1
+- D11: 1
+
+## Source disagreement findings
+
+80 / 190 items differ by at least 5% between MM2Values and Supreme.
+46 / 190 differ by at least 10%.
+
+Important caveat:
+percentage disagreement alone is misleading at low values.
+Examples like 5 vs 7 produce a 40% difference while changing the trade by only 2 raw value.
+
+Therefore future disagreement-risk logic should consider BOTH:
+- percentage difference,
+- absolute value difference / material effect on the trade.
+
+Material examples with at least 25 absolute value and >=5% disagreement include:
+- Chroma Mortal: MM2 1800 vs Supreme 1600
+- Chroma Immortal: MM2 1800 vs Supreme 1600
+- Chroma Embersickle: MM2 1100 vs Supreme 1300
+- Chroma Sands: MM2 1325 vs Supreme 1225
+- Chroma Beachy: MM2 1275 vs Supreme 1175
+- Emberscythe: MM2 300 vs Supreme 375
+- Emberbow: MM2 325 vs Supreme 375
+
+These are stronger candidates for explicit uncertainty handling than tiny low-tier disagreements.
+
+## Current next step
+
+Run the offline decision matrix using this complete snapshot before any new Part 4 build.
+
+Required cases remain:
+1. same raw value, different liquidity/demand,
+2. <=3% raw-loss upgrade into clearly stronger inventory,
+3. profitable downgrade into weak/underpaid pieces,
+4. material Supreme/MM2Values disagreement,
+5. falling/new-event item,
+6. moderate opponent overpay,
+7. extreme opponent overpay,
+8. THEIR OFFER decrease after profitable hold,
+9. missing metadata fallback behavior,
+10. mixed good/bad bundle,
+11. equal-raw candidate plans with different exit quality.
+
+Do not wire this snapshot into live trading until those decisions are explicitly validated.
