@@ -1616,3 +1616,136 @@ Updated remaining priority edge tests:
 3. Continue regression-first review of any future recordings for request/rotation, stale callbacks, trade-close recovery, planner/executor, and scanner contention.
 
 Do not add speculative code for an impossible incoming-overwrites-active-outgoing case.
+
+
+---
+
+# 31. Wide trading-profit research pass
+
+Date: 2026-11-02
+
+Before any further trading-logic changes, a broad research pass was completed across:
+- Supreme Values current use guide / godly list / changelog,
+- MM2Values.com,
+- MM2 Trade Hub current trade feed, demand guides, weekly market reports and item activity,
+- Neblio's 2026 trading guide,
+- Reddit MM2 trading discussions from 2024-2026,
+- recent YouTube MM2 trading-guide content and older demand/overpay guides,
+- Traderie/current community trade-list context where available.
+
+No code was changed from this research alone.
+
+## Core strategy conclusions
+
+1. Raw value is only the starting point.
+   Demand, stability, rarity, current trading range, list disagreement, and actual trade activity materially affect whether an item is good inventory.
+
+2. The strongest repeated profit loop remains:
+   upgrade -> acquire a desirable/liquid item -> downgrade for overpay -> repeat.
+
+3. A small paper loss can be strategically correct when consolidating low-demand pieces into a materially more liquid item.
+   Conversely, a raw-value win can be strategically bad if it leaves us holding hard-to-move, falling, or over-supplied items.
+
+4. "Value" and "exit quality" must be separated.
+   A trade should be evaluated not only on what we gain immediately, but on how easily the received inventory can be moved again.
+
+5. Demand should influence both:
+   - how much we are willing to pay to upgrade into an item,
+   - how much premium we require when downgrading out of an item.
+
+6. Stability/status must affect risk:
+   - Rising / Overpaid For / Doing Well / Improving are generally desirable acquisition states.
+   - Stable is neutral.
+   - Fluctuating requires extra caution and current verification.
+   - Underpaid For / Decreasing / Unsafe should not be treated as equal to stable inventory merely because the base number is high.
+
+7. Current market activity is a useful liquidity signal beyond static demand scores.
+   "Asked for" vs "Offered" counts and typical solo asking premiums can reveal whether holders have bargaining power.
+
+8. Do not average conflicting value lists.
+   Compare both sides consistently on MM2Values and Supreme. If the trade verdict changes materially between lists, treat it as uncertain/risky and require a larger safety margin.
+
+9. New-event items are especially dangerous during initial hype.
+   The Halloween 2026 Ember items collapsed rapidly after supply entered the game:
+   - Emberbow fell from 1,700/1,900 territory to ~325,
+   - Emberscythe fell from ~1,900 to ~300,
+   - related chromas also fell sharply.
+   This is a strong live example that fresh event scarcity should not be treated as durable value.
+
+10. Current 2026 examples of liquid/desired trade material include items with strong ask activity such as:
+   - Harvester,
+   - Icepiercer,
+   - Snowcannon,
+   - Bat,
+   - Candy,
+   while some recently released/falling items show much more supply than demand.
+
+11. The current planner should eventually distinguish:
+   - RAW PROFIT,
+   - LIQUIDITY/EXIT QUALITY,
+   - STABILITY RISK,
+   - UPGRADE QUALITY,
+   - DOWNGRADE PREMIUM,
+   rather than compressing everything into one number.
+
+12. For low-tier items, demand differences are often weak enough that raw value matters more.
+   For mid/high-tier items, demand/stability/marketability matter much more and can justify small controlled deviations from base-value equality.
+
+13. Negotiation/offer logic from experienced-trader guides consistently favors:
+   - begin with the lowest reasonable offer,
+   - preserve room to move,
+   - do not voluntarily give away opponent overpay,
+   - when upgrading, pay only the minimum necessary premium,
+   - when downgrading a desirable item, seek stronger overpay.
+
+14. More items is not automatically better.
+   A downgrade into many low-demand pieces can be worse than receiving fewer liquid pieces.
+   "Inventory growth" should mean more usable trade material, not merely a larger item count.
+
+15. Sets can carry extra practical demand because some traders specifically seek complete sets, but set desirability is market-dependent and should not be hard-coded without current evidence.
+
+16. Server hopping / broad exposure remains an important practical profit driver.
+   Community advice repeatedly notes that better trades often come from seeing more traders rather than forcing a marginal deal with the current partner.
+
+## Current market observations relevant to future planner changes
+
+- Harvester:
+  high trade volume; often asked for more than offered; strong practical liquidity despite only moderate static demand.
+- Icepiercer:
+  asked for substantially more often than offered; holder has meaningful bargaining power.
+- Snowcannon:
+  stable, healthy demand, strong ask activity, relatively easy to move.
+- Bat:
+  relatively strong ask activity compared with supply, often listed with a premium.
+- Heart Wand:
+  balanced offer/ask activity and stable market behavior.
+- Emberbow / Emberscythe:
+  recently crashed, marked Underpaid For, and show buyer-favorable market conditions.
+  Their listed value should not be treated as equally safe inventory to a stable/liquid item at the same number.
+- Raygun / Alienbeam:
+  current stable/high-demand examples with recent positive movement.
+- Darkshot / Darksword:
+  high headline value but currently Underpaid For; do not treat them as equivalent-quality inventory to stable items at the same base value.
+
+## Implication for the script
+
+Do NOT immediately patch the planner from this research alone.
+
+Before code changes:
+1. inspect the exact current Part 4 planner,
+2. identify what market-quality data is already available in the canonical value system,
+3. decide which signals can be sourced reliably at runtime without introducing brittle web dependencies,
+4. preserve deterministic behavior on iPad/Delta,
+5. avoid making a second independent value system,
+6. prefer a small, explicit market-quality layer over a large opaque scoring formula,
+7. keep all final-Accept protection unchanged.
+
+Likely future direction:
+- keep canonical MM2 numeric value as the hard safety floor,
+- add a bounded quality/liquidity modifier for comparing otherwise-safe plans,
+- apply stronger penalties to falling/underpaid/fluctuating inventory,
+- reward stable/high-demand/high-liquidity inventory,
+- require more overpay when accepting a downgrade into weaker exit-quality items,
+- allow small controlled raw loss only when the received side is materially better quality/liquidity.
+
+This research changes strategy confidence, but does not itself authorize a code patch.
