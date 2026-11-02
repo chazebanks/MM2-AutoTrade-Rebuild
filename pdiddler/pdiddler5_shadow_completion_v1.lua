@@ -185,7 +185,7 @@ function M.run(part4Controller,policy)
                 ready and "1" or "0",
                 tostring(reason),
                 tostring(targetName or ""),
-                tostring(type(feed)=="table" and feed.seq or ""),
+                tostring(type(feed)=="table" and feed.source or ""),
             },":")
 
             if key~=lastKey then
