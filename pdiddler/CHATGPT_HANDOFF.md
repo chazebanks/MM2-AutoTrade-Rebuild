@@ -3111,3 +3111,252 @@ Expected marker:
 `[PDIDDLER TEST] MARKET-AWARE v2.6.3 PERF + INELIGIBLE + NO-PLAN DECLINE ACTIVE`
 
 FINAL ITEM-TRADE ACCEPT remains disabled.
+
+
+---
+
+# 47. Full-system audit of 17-09-21 recording
+
+Date: 2026-11-02
+
+Recording:
+`ScreenRecording_11-02-2026 17-09-21_1.mp4`
+
+Duration:
+~4m13s.
+
+Review scope:
+full-system audit covering startup, scanner, join/leave churn, request ownership, request rotation, trade handoff, accepted-empty handling, no-plan immediate decline, values, market/planner math, rebalancing, transaction safety, Case 3 timer, lag/responsiveness, duplicate actions, and final-Accept safety.
+
+Build-identification caveat:
+the recording does not visibly show the v2.6.3 startup marker or Developer Console, so the exact loader commit cannot be proven from pixels alone. Observed no-plan behavior matches the v2.6.3 policy.
+
+## Startup / scanner
+
+- Loading Character -> device selection -> lobby/scanner completed.
+- Scanner reached LIVE state.
+- Initial whitelist/blacklist classification populated correctly.
+- live join/leave churn updated counts without leaving stale visible target state.
+- examples:
+  - gamerboyi left and was removed from live scanner.
+  - venossgaming90190 later joined; scanner performed inventory stability verification before P3 takeover.
+- scanner/P3 ownership handoff is visible:
+  - scanner verifies new player,
+  - P3 waits for scanner,
+  - trade-ready delay,
+  - outgoing request begins.
+
+No startup regression found.
+
+## Request ownership / rotation
+
+Observed:
+- callie2013: physical Trade tap with pending proof uncertain; target remained owned/locked and later became unavailable without an immediate duplicate resend.
+- ParkersBunnyHmhp: pending-confirmed request progressed to timeout/cancel rather than competing requests.
+- multiple later outgoing targets were attempted sequentially.
+- no visible simultaneous outgoing requests.
+- no visible duplicate resend to an already processed target during the same session.
+- after trade closure/decline, P3 resumes rotation.
+
+No ownership regression confirmed.
+
+## Accepted-empty rule
+
+Trade with Nelly / wthecky_nelly6:
+- OUR opening Chroma Watergun appears.
+- THEIR OFFER remains empty.
+- native MM2 Accept becomes active and opponent accepts with zero items.
+- trade closes immediately.
+- scanner row records:
+  `P4 — THEY ACCEPTED WITH ZERO ITEMS | declining immediately`.
+
+This rule still works.
+
+## No-safe-plan immediate decline — VERIFIED
+
+Trade with `mashell6750`:
+- OUR opening: Chroma Watergun = 2350.
+- THEIR OFFER: Shark.
+- validated snapshot:
+  - Shark MM2 = 20
+  - Supreme = 20
+  - Stable, D1.
+- no positive-value OUR eligible item can preserve the normal +15 floor against a 20-value opponent offer unless OUR <=5; no safe 1-4 plan is available from the current inventory.
+
+Visible sequence:
+- approximately 110.0s:
+  `P4 BALANCER — THEIR OFFER changed | waiting 0.65s for stability`
+  with Watergun vs Shark visible.
+- approximately 110.5s:
+  trade window is already closed and P3 reports trade closed / returning to next eligible.
+- by ~111s:
+  next target rotation begins.
+
+Therefore:
+- the new no-plan rule does NOT wait for the 60s Case 3 window,
+- Chroma Watergun no longer sits in a proven dead trade,
+- decline/closure returns control to P3 promptly.
+
+This is the first live recording proof of the new v2.6.3 behavior.
+
+## Long dynamic trade — venossgaming90190
+
+Partner was scanned/verified before request:
+- scanner shows inventory verification stable progression,
+- P3 waits for scanner,
+- then trade-ready countdown,
+- request pending-confirmed,
+- trade opens.
+
+The opponent repeatedly changes THEIR OFFER. Part 4 responds without resetting the authoritative Case 3 window.
+
+Validated values used in visible states:
+- Iceblaster = 35
+- Green Luger = 25
+- Immortal = 140
+- Chroma Laser = 40
+- Chroma Swirly Gun = 35
+- Ornament = 60
+- Jinglegun = 15
+- Laser = 23
+- Mortal = 140
+- Boneblade = 8
+- Plasmabeam = 20
+
+Observed value states reconcile:
+
+1. THEIR Iceblaster x3 = 105.
+   OUR opening Chroma Watergun is unsafe but a safe plan exists, so Part 4 rebalances rather than declining.
+
+2. OUR Chroma Laser 40 + Ornament 60 + Mortal 140 = 240.
+   THEIR Iceblaster x3 105 + Green Luger 25 + Immortal 140 = 270.
+   Profit = +30.
+   GUI status reports safe DOWNGRADE/profit with target raw/protected profit 30.
+
+3. OUR Mortal 140 + Plasmabeam 20 = 160.
+   THEIR Iceblaster 35 + Immortal 140 = 175.
+   Profit = +15 when that opponent state is stable.
+
+4. OUR Chroma Laser 40 + Chroma Swirly Gun 35 + Ornament 60 + Jinglegun 15 = 150.
+   THEIR Green Luger 25 + Immortal 140 + Iceblaster x3 105 = 270.
+   Profit = +120.
+   Ratio is below the 2x extreme trigger at this exact 150/270 state, so a normal safe hold/replan path is valid.
+
+5. OUR Chroma Laser 40 + Chroma Swirly Gun 35 + Jinglegun 15 + Laser 23 = 113.
+   THEIR Green Luger 25 + Iceblaster x3 105 = 130.
+   Profit = +17.
+   Equal 4-vs-4 eligible-copy state is NORMAL; +17 clears the +15 floor.
+
+6. THEIR later returns to Green Luger 25 + Iceblaster x3 105 + Immortal 140 = 270.
+   Part 4 begins moving OUR offer upward again toward a safe target.
+
+7. OUR Chroma Laser 40 + Jinglegun 15 + Laser 23 + Mortal 140 = 218.
+   THEIR 270 state gives +52.
+
+8. THEIR changes to Iceblaster x3 105 + Immortal 140 = 245.
+   OUR 218 gives +27.
+
+9. OUR Chroma Laser 40 + Jinglegun 15 + Mortal 140 = 195.
+   THEIR Iceblaster x2 70 + Immortal 140 = 210.
+   Profit = +15.
+   GUI status reports safe NORMAL/profit target +15.
+
+10. OUR Plasmabeam 20.
+    THEIR Iceblaster 35.
+    Profit = +15.
+    GUI status reports safe NORMAL/profit target +15.
+
+11. THEIR then becomes Iceblaster x2 70 + Green Luger 25 = 95 while OUR remains 20.
+    This is a highly one-sided +75 state and ratio 4.75x, so the extreme logic has reason to move OUR upward if a safe higher plan exists.
+
+12. Near the end, OUR is again a larger multi-item pack while THEIR becomes Iceblaster x2 + Green Luger + Immortal = 235, preserving a safe positive margin.
+
+No visible arithmetic error or identity collision found in these states.
+
+## Transaction / stale-state behavior
+
+The opponent changes items frequently while Part 4 is applying/removing items.
+
+Visible evidence:
+- status repeatedly returns to
+  `THEIR OFFER changed | waiting 0.65s for stability`
+  rather than blindly completing a stale plan.
+- temporary partial OUR offers appear during mutation/recovery/replan, but are subsequently replaced by a new safe plan.
+- no final Accept occurs during any transient state.
+- no visible duplicate item-fire spam or permanent partial offer lock was observed.
+
+This clip does not expose Developer Console, so individual `TX ABORT` / `RECOVERY VERIFIED` log lines cannot be confirmed from console text in this recording alone. UI behavior is consistent with those guards functioning.
+
+## Case 3 timer
+
+The venoss trade's Case 3 window does not reset despite many opponent changes.
+
+Visible approximate countdown:
+- ~204s recording: 40s remaining
+- ~208s: 35s
+- ~236s: 8s
+- ~240s: 3s
+- trade closes around ~244s and P3 returns to scanner/rotation.
+
+Therefore:
+- opponent additions/removals do not restart the 60s window,
+- rebalancing continues inside the authoritative window,
+- boundary rotation still occurs.
+
+## Lag / responsiveness
+
+Compared with the earlier severe v2.6 baseline:
+- no obvious multi-second frozen rebalancer state is visible.
+- Shark no-plan trade closes promptly after stability.
+- dynamic venoss offer changes repeatedly trigger new stable/rebalance cycles.
+- value-plan changes are generally visible within the expected stability/application intervals.
+
+This supports the bundle-cache performance fix.
+
+However:
+- screen recording alone cannot provide a reliable device FPS metric.
+- Developer Console was not shown, so hidden runtime warnings/errors are unverified.
+
+## Rare/Uncommon/non-target handling
+
+This recording does not provide as clean a deliberate Elite-style non-target injection test as the prior 16-45 recording. The previous recording remains the direct live proof for the ineligible plan-match fix.
+
+No regression is visible here.
+
+## Final Accept / safety
+
+- final item-trade Accept never executes.
+- accepted-empty is declined.
+- unsafe no-plan trade is declined.
+- safe plans rebalance/hold.
+- transient states during opponent mutation are not final-Accepted.
+
+FINAL ITEM-TRADE ACCEPT remains disabled.
+
+## Unverified / still open edge cases
+
+Do not infer passes for:
+- duplicate eligible quantity x2 -> x1 while one UI slot remains,
+- player leaving during an active trade,
+- death/respawn during trade,
+- PlayerGui/trade GUI recreation,
+- decline remote/UI fallback failure in a real no-plan trade,
+- rare no-pending physical tap -> later exact-target trade,
+- hidden console warnings/errors in this particular recording.
+
+## Conclusion
+
+No new confirmed defect found in this recording.
+
+Strong live evidence now exists for:
+- immediate no-safe-plan decline,
+- accepted-empty decline,
+- scanner/P3 handoff,
+- request rotation,
+- market/value arithmetic,
+- repeated dynamic rebalancing,
+- non-resetting Case 3 timer,
+- performance improvement over the original laggy v2.6 run,
+- final Accept lock.
+
+Do not add another patch based on this recording alone.
