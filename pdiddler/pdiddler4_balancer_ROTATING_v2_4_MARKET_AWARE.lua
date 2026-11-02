@@ -40,17 +40,6 @@ local C={
     ApplyVerifyTimeout=2.5,
     LoopDelay=0.12,
 
-    NormalMinFlat=15,
-    NormalMinPct=0.03,
-
-    DowngradeMinFlat=20,
-    DowngradeMinPct=0.06,
-
-    BigDowngradeMinFlat=30,
-    BigDowngradeMinPct=0.08,
-
-    UpgradeOverpayCapPct=0.03,
-
     -- Profit-focused strategy:
     -- keep moderate overpay, but do not sit on an implausibly tiny OUR OFFER
     -- after THEIR OFFER grows dramatically. Extreme normalization requires
