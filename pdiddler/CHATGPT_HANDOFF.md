@@ -2470,6 +2470,7 @@ New Part 4:
 - canonical page:id used in live/plan counts, ambiguity checks, duplicate-slot verification, and signatures.
 
 Preserved:
+- P1 -> P2 -> scanner execute before market preload/preflight,
 - opening highest eligible item,
 - accepted-empty immediate decline,
 - 15s empty timeout,
@@ -2486,7 +2487,7 @@ Preserved:
 CI:
 - workflow `.github/workflows/mm2-market-integration-ci.yml`
 - official Luau 0.745,
-- run `41525905272` on head `0752ccc1da23b39e8e55e346297134146bacc227`,
+- run `41526118216` on head `bc2deeeffbd7d77bd933d2f11b2e0bea9c13de15`,
 - compile PASS,
 - pure integration tests PASS,
 - static regression guards PASS.
