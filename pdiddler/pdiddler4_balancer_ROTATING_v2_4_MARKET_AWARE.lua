@@ -655,10 +655,7 @@ local function tradeDecision(ourEval,theirEval)
             reason="market-assessment-unavailable",
             rawProfit=theirRaw-ourRaw,
             protectedProfit=0,
-            effectiveProfit=0,
             requiredProfit=math.huge,
-            rawRequired=math.huge,
-            effectiveRequired=math.huge,
             qualityGain=0,
         }
     end
@@ -677,20 +674,10 @@ local function tradeDecision(ourEval,theirEval)
             reason="market-decision-failed",
             rawProfit=theirRaw-ourRaw,
             protectedProfit=0,
-            effectiveProfit=0,
             requiredProfit=math.huge,
-            rawRequired=math.huge,
-            effectiveRequired=math.huge,
             qualityGain=0,
         }
     end
-
-    -- Compatibility aliases are kept only for the existing EXTREME GUARD
-    -- and unchanged executor-facing log sites. They now mean protected value,
-    -- not the retired multiplier-based "effective" system.
-    res.effectiveProfit=tonumber(res.protectedProfit) or 0
-    res.rawRequired=tonumber(res.requiredProfit) or math.huge
-    res.effectiveRequired=tonumber(res.requiredProfit) or math.huge
 
     return res
 end
@@ -702,16 +689,15 @@ local function extremeOneSided(decision,ourEval,theirEval)
         return false,{
             ratio=0,
             rawFloor=math.huge,
-            effectiveFloor=math.huge,
+            protectedFloor=math.huge,
         }
     end
 
     local ourRaw=math.max(0,tonumber(ourEval and ourEval.rawTotal) or 0)
     local theirRaw=math.max(0,tonumber(theirEval and theirEval.rawTotal) or 0)
     local rawProfit=tonumber(decision.rawProfit) or (theirRaw-ourRaw)
-    local effectiveProfit=tonumber(decision.effectiveProfit) or 0
-    local rawRequired=math.max(0,tonumber(decision.rawRequired) or 0)
-    local effectiveRequired=math.max(0,tonumber(decision.effectiveRequired) or 0)
+    local protectedProfit=tonumber(decision.protectedProfit) or 0
+    local required=math.max(0,tonumber(decision.requiredProfit) or 0)
 
     local ratio
     if ourRaw<=0 then
@@ -722,23 +708,23 @@ local function extremeOneSided(decision,ourEval,theirEval)
 
     local rawFloor=math.max(
         C.ExtremeProfitFlat,
-        rawRequired*C.ExtremeProfitMultiple
+        required*C.ExtremeProfitMultiple
     )
 
-    local effectiveFloor=math.max(
+    local protectedFloor=math.max(
         C.ExtremeProfitFlat,
-        effectiveRequired*C.ExtremeProfitMultiple
+        required*C.ExtremeProfitMultiple
     )
 
     local extreme=
         ratio>=C.ExtremeReplanRatio
         and rawProfit>=rawFloor-0.0001
-        and effectiveProfit>=effectiveFloor-0.0001
+        and protectedProfit>=protectedFloor-0.0001
 
     return extreme,{
         ratio=ratio,
         rawFloor=rawFloor,
-        effectiveFloor=effectiveFloor,
+        protectedFloor=protectedFloor,
     }
 end
 
@@ -1754,7 +1740,7 @@ local function runTrade(scanner,session,sessionAlive)
                         fmt(ourEval.rawTotal),
                         fmt(theirEval.rawTotal),
                         fmt(currentDecision.rawProfit),
-                        fmt(currentDecision.effectiveProfit)
+                        fmt(currentDecision.protectedProfit)
                     )
                 )
 
@@ -1764,7 +1750,7 @@ local function runTrade(scanner,session,sessionAlive)
                     "kind",currentDecision.kind,
                     "mode",currentDecision.mode,
                     "rawProfit",currentDecision.rawProfit,
-                    "effectiveProfit",currentDecision.effectiveProfit,
+                    "protectedProfit",currentDecision.protectedProfit,
                     "qualityGain",currentDecision.qualityGain,
                     "| ACCEPT DISABLED"
                 )
@@ -1837,7 +1823,7 @@ local function runTrade(scanner,session,sessionAlive)
                 "rawProfit",currentDecision.rawProfit,
                 "ratio",tonumber(extremeInfo and extremeInfo.ratio) or 0,
                 "rawFloor",tonumber(extremeInfo and extremeInfo.rawFloor) or 0,
-                "effectiveFloor",tonumber(extremeInfo and extremeInfo.effectiveFloor) or 0,
+                "protectedFloor",tonumber(extremeInfo and extremeInfo.protectedFloor) or 0,
                 "newOur",plan.rawTotal,
                 "targetProfit",plan.rawProfit,
                 "| ACCEPT DISABLED"
@@ -1885,7 +1871,7 @@ local function runTrade(scanner,session,sessionAlive)
                 fmt(ourEval.rawTotal),
                 fmt(plan.rawTotal),
                 fmt(plan.rawProfit),
-                fmt(plan.effectiveProfit)
+                fmt(plan.protectedProfit)
             )
         )
 
@@ -2009,7 +1995,7 @@ local function runTrade(scanner,session,sessionAlive)
                     fmt(ourFinal.rawTotal),
                     fmt(theirFinal.rawTotal),
                     fmt(finalDecision.rawProfit),
-                    fmt(finalDecision.effectiveProfit)
+                    fmt(finalDecision.protectedProfit)
                 )
             )
 
@@ -2020,7 +2006,7 @@ local function runTrade(scanner,session,sessionAlive)
                 "kind",finalDecision.kind,
                 "mode",finalDecision.mode,
                 "rawProfit",finalDecision.rawProfit,
-                "effectiveProfit",finalDecision.effectiveProfit,
+                "protectedProfit",finalDecision.protectedProfit,
                 "| ACCEPT DISABLED"
             )
         else
