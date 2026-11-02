@@ -2427,3 +2427,91 @@ This closes the target-runtime verification requirement for the offline market m
 
 Next step:
 create a separate v2.6 Part 4 integration design/plan against the exact current v2.5 planner extension points while preserving request ownership, TX abort/recovery, timers, EXTREME GUARD, scanner scheduling, and FINAL ACCEPT disabled.
+
+
+---
+
+# 40. v2.6 market-aware Part 4 pre-live gate
+
+Date: 2026-11-02
+
+Branch:
+`feature/mm2-market-aware-part4-v2_6`
+
+Evidence:
+`pdiddler/MARKET_PART4_INTEGRATION_RESULTS_v1.md`
+
+New components:
+- `pdiddler/pdiddler_market_profile_2026-11-02_v1_VALIDATED.lua`
+- `pdiddler/pdiddler4_market_planner_v1.lua`
+- `pdiddler/pdiddler4_balancer_ROTATING_v2_4_MARKET_AWARE.lua`
+- `pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua`
+
+Immutable v2.6 live-test stack commit:
+`a4e74021f6eae13cb312fb12a61337d3f4f38074`
+
+The stack pins its market integration modules to:
+`7809aa8c8d210d8005c223eb9fd3a6b3ea716ba5`
+
+Architecture:
+`scanner -> exact page:id profile -> pure market engine -> standalone planner -> existing transaction executor/verifier`
+
+Validated profile:
+- 190/190 exact rows versus the tested candidate,
+- 0 decision-row changes,
+- liveReady=true.
+
+New Part 4:
+- requires injected marketProfile, marketLogic, marketPlanner,
+- old MARKET_QUALITY/exactQuality/multiplier system removed,
+- duplicate old planner thresholds removed,
+- local duplicate planner removed,
+- protected terminology replaces effective terminology,
+- canonical page:id used in live/plan counts, ambiguity checks, duplicate-slot verification, and signatures.
+
+Preserved:
+- opening highest eligible item,
+- accepted-empty immediate decline,
+- 15s empty timeout,
+- 60s Case 3 timer,
+- txValidate,
+- offer mutation verification,
+- bounded remove retry,
+- clear/recovery/protected hold,
+- request ownership / scanner pause,
+- EXTREME semantics (2.0x / 50 / 2.5x / >=5 step),
+- Part 3 rotation,
+- FINAL ACCEPT disabled.
+
+CI:
+- workflow `.github/workflows/mm2-market-integration-ci.yml`
+- official Luau 0.745,
+- run `41525905272` on head `0752ccc1da23b39e8e55e346297134146bacc227`,
+- compile PASS,
+- pure integration tests PASS,
+- static regression guards PASS.
+
+Important integration hardening:
+bare item-id offer identity was changed to canonical `page:id` because the market snapshot/scanner pages can contain colliding IDs. This prevents cross-page identity aliasing.
+
+Current status:
+**PRE-LIVE GATE PASSED. NOT FROZEN KNOWN-GOOD YET.**
+
+Next required action:
+run the immutable v2.6 stack on the user's iPad + Delta and send a recording. Review the recording for failures/regressions as aggressively as successes.
+
+Loader:
+```lua
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/a4e74021f6eae13cb312fb12a61337d3f4f38074/pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua",
+    true
+))()
+```
+
+Expected early success marker:
+`[PDIDDLER TEST] MARKET PREFLIGHT PASS | profile 190/190 | planner fixtures PASS`
+
+Expected active marker:
+`[PDIDDLER TEST] MARKET-AWARE v2.6 ACTIVE`
+
+FINAL ITEM-TRADE ACCEPT remains disabled.
