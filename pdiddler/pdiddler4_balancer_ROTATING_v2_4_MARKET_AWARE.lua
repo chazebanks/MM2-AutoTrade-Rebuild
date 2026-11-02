@@ -395,6 +395,7 @@ local function resolveEntry(entry,inv)
     for i=2,#hits do
         local x=hits[i]
         if norm(x.id)~=norm(first.id)
+            or tostring(x.page or "")~=tostring(first.page or "")
             or tonumber(x.value)~=tonumber(first.value)
         then
             return nil,"ambiguous"
@@ -449,7 +450,8 @@ local function evaluateSide(t,sideName,inv)
             end
 
             local id=tostring(item.id or fullShownName(entry))
-            out.counts[id]=(out.counts[id] or 0)+qty
+            local countKey=tostring(item.page or "")..":"..id
+            out.counts[countKey]=(out.counts[countKey] or 0)+qty
 
             out.resolved[#out.resolved+1]={
                 id=id,
@@ -487,6 +489,7 @@ local function evaluateSide(t,sideName,inv)
     local sig={}
     for _,r in ipairs(out.resolved) do
         sig[#sig+1]=table.concat({
+            tostring(r.page or ""),
             tostring(r.id),
             tostring(r.qty),
             tostring(r.rawValue),
@@ -732,7 +735,8 @@ end
 local function planCounts(plan)
     local counts={}
     for _,p in ipairs(plan.picks or {}) do
-        counts[tostring(p.id)]=(counts[tostring(p.id)] or 0)
+        local key=tostring(p.page or "")..":"..tostring(p.id or "")
+        counts[key]=(counts[key] or 0)
             +(tonumber(p.qty) or 1)
     end
     return counts
@@ -1078,7 +1082,8 @@ local function applyPlan(scanner,target,ownInv,plan,tx,sessionAlive)
             if ours.slots>=4 then
                 -- A duplicate may stack into an existing slot, so only block
                 -- when this item does not already exist in our live offer.
-                local alreadyThere=(ours.counts[tostring(p.id)] or 0)>0
+                local offerKey=tostring(p.page or "")..":"..tostring(p.id or "")
+                local alreadyThere=(ours.counts[offerKey] or 0)>0
                 if not alreadyThere then
                     return false,"slot-limit",modified
                 end
