@@ -150,3 +150,64 @@ end)
 
 assert(pass==14,"expected 14 cases, got "..tostring(pass))
 print("PASS matrix 14/14")
+
+
+local function plan(id,mode,rawTotal,rawProfit,exitScore,disputed,unprofiled,pickCount)
+  local picks={}
+  for i=1,(pickCount or 1) do picks[i]={page="godly",id=id..":"..i} end
+  return {
+    id=id,mode=mode,rawTotal=rawTotal,rawProfit=rawProfit,
+    protectedProfit=rawProfit,givenExitScore=exitScore,
+    disputedCopies=disputed or 0,unprofiledCopies=unprofiled or 0,picks=picks,
+  }
+end
+local theirRankBundle={rawTotal=300}
+
+local ranked=M.rankPlans({
+  plan("quality","quality-upgrade",300,-2,-4,0,0,1),
+  plan("profit","profit",280,20,0,0,0,1),
+},theirRankBundle)
+eq(ranked[1].id,"profit","profit ranks above quality-upgrade")
+
+ranked=M.rankPlans({
+  plan("lowOffer","profit",260,40,-5,0,0,1),
+  plan("highOffer","profit",280,20,3,0,0,1),
+},theirRankBundle)
+eq(ranked[1].id,"highOffer","outside similarity window higher safe our raw first")
+
+ranked=M.rankPlans({
+  plan("strongGiven","profit",280,20,3,0,0,1),
+  plan("weakGiven","profit",276,24,-3,0,0,1),
+},theirRankBundle)
+eq(ranked[1].id,"weakGiven","inside window give lower exit-quality inventory first")
+
+ranked=M.rankPlans({
+  plan("disputed","profit",280,20,0,1,0,1),
+  plan("clean","profit",280,20,0,0,0,1),
+},theirRankBundle)
+eq(ranked[1].id,"clean","fewer disputed copies wins tie")
+
+ranked=M.rankPlans({
+  plan("unprofiled","profit",280,20,0,0,1,1),
+  plan("profiled","profit",280,20,0,0,0,1),
+},theirRankBundle)
+eq(ranked[1].id,"profiled","fewer unprofiled copies wins tie")
+
+ranked=M.rankPlans({
+  plan("zeta","profit",280,20,0,0,0,4),
+  plan("alpha","profit",280,20,0,0,0,1),
+},theirRankBundle)
+eq(ranked[1].id,"alpha","quantity alone does not improve rank; canonical tie-break wins")
+
+local first=M.rankPlans({
+  plan("beta","profit",280,20,0,0,0,2),
+  plan("alpha","profit",280,20,0,0,0,2),
+},theirRankBundle)
+local second=M.rankPlans({
+  plan("beta","profit",280,20,0,0,0,2),
+  plan("alpha","profit",280,20,0,0,0,2),
+},theirRankBundle)
+eq(first[1].id,second[1].id,"ranking deterministic across repeated runs")
+eq(first[1].id,"alpha","canonical ids final tie-break")
+
+print("PASS ranking tests")
