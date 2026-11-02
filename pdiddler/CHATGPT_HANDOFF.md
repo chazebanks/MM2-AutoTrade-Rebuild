@@ -1159,3 +1159,95 @@ Pins:
    - rare no-pending -> late exact trade-open if naturally reproduced.
 
 Do not freeze v2.4 until live-tested.
+
+
+---
+
+# 25. 2026-11-02 13:16 v2.4 PROFIT-HOLD live test — PASSED
+
+Recording reviewed:
+`ScreenRecording_11-02-2026 13-16-52_1.mp4`
+
+Build under test:
+`pdiddler/pdiddler_PROFIT_HOLD_TEST_STACK_v2_4.lua`
+
+Commit:
+`4197968629960fd98068df9b4fac5f72cf903d50`
+
+Part 4:
+`pdiddler/pdiddler4_balancer_ROTATING_v2_2_PROFIT_HOLD.lua`
+
+Commit:
+`8d7d2a3ce1b543ef8cc6e7b65b4f5718fe36497c`
+
+## Main result
+
+The new profit-hold strategy was live-proven.
+
+In the long venoss trade:
+- outgoing ownership/pending/trade-open resolved normally,
+- Part 4 opened with its normal highest-item behavior,
+- initial safe rebalance verified,
+- then THEIR OFFER changed repeatedly,
+- Part 4 repeatedly re-read/evaluated the new offer,
+- OUR existing offer was kept whenever it remained safe/profitable,
+- no preferred-profit normalization gave value back to the other player.
+
+Console repeatedly showed:
+
+`[PDIDDLER P4] PROFITABLE HOLD ... | THEIR EXTRA VALUE RETAINED | ACCEPT DISABLED`
+
+Observed profitable-hold raw-profit examples included approximately:
+- +52
+- +87
+- +122
+- +262
+- +97
+- +167
+- +27
+
+The hold classification also changed appropriately as THEIR copy count/composition changed:
+- DOWNGRADE
+- BIG DOWNGRADE
+- NORMAL
+
+This proves the new rule is not simply ignoring THEIR OFFER changes; it is re-evaluating them and intentionally holding OUR offer when the current trade still passes safety/profit rules.
+
+## Underpay/no-plan behavior
+
+An earlier trade in the same recording showed the opposite safety condition:
+- OUR opening offer remained much larger than THEIR offered value,
+- Part 4 logged `P4 NO PLAN`,
+- no unsafe replacement/final Accept occurred.
+
+This is evidence that removing the preferred maximum-profit ceiling did not remove minimum-profit/no-plan protection.
+
+## Performance / state-machine observations
+
+- scanner refreshes did not run through active Part 4 trade work,
+- scanner refresh resumed after trade close,
+- Part 3 resumed normally after trade close,
+- no duplicate resend was observed,
+- final item-trade Accept remained disabled,
+- no script-originating functional error was identified.
+
+Roblox produced unrelated asset/sound load warnings/errors in the developer console; these were not from the pdiddler state machine and did not affect the tested flow.
+
+## Still not fully live-proven
+
+The reverse rebalancing case is still desirable:
+- start from a safe/profitable OUR OFFER,
+- then have THEIR OFFER drop far enough that OUR current offer no longer passes minimum-profit/quality safety,
+- expected: Part 4 must stop PROFITABLE HOLD and run the planner/rebalance downward immediately.
+
+Other remaining controlled tests:
+1. incoming B while outgoing A is actively owned,
+2. explicit mid-transaction mutation with console proof of `TX ABORT` / `RECOVERY VERIFIED`,
+3. OUR duplicate stack x2 -> x1 exact remove verification,
+4. rare no-pending UI -> later exact target trade-open if naturally reproduced.
+
+## Confidence update
+
+v2.4 PROFIT-HOLD behavior is now **live-tested and passed** for the intended “THEIR OFFER adds extra value” case.
+
+Do not yet freeze the entire v2.4 stack as final known-good; remaining edge-path tests above are still outstanding.
