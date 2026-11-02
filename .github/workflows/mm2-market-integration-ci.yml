@@ -130,13 +130,15 @@ jobs:
           unresolved=src.index("if #theirEval.unresolved>0 then")
           stable=src.index("os.clock()-stableSince<C.OfferStability")
           no_plan=src.index("if #plans==0 then")
-          decline=src.index('declineTrade("no-safe-plan")', no_plan)
+          decline=src.index('local declined,declineWhy=declineTrade("no-safe-plan")', no_plan)
+          decline_fail=src.index('return "no-safe-plan-decline-failed"', no_plan)
           finish=src.index('return finishTradeClosed("no-safe-plan-declined")', no_plan)
 
           assert stable < no_plan, "no-plan decline must occur only after stability gate"
           assert unresolved < no_plan, "unresolved THEIR OFFER must remain a hold before no-plan decline"
           assert decline > no_plan, "no-plan branch must decline the trade"
-          assert finish > decline, "no-plan decline must terminate the current Part 4 session"
+          assert decline_fail > decline, "failed decline must not pretend the trade closed or resume rotation"
+          assert finish > decline_fail, "successful no-plan decline must terminate the current Part 4 session"
           assert "waiting for offer change" not in src[no_plan:finish], "no-plan branch must not hold indefinitely"
           assert "AcceptTrade" not in src
           print("PASS no-plan stable resolved trade declines immediately")
