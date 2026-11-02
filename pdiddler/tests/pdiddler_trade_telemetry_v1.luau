@@ -10,8 +10,8 @@ local profiles={
         mm2Value=35,supremeValue=33,demand=1,stability="Stable",
         profiled=true,verified=true,
     },
-    ["ancient:VampireAxe"]={
-        page="ancient",id="VampireAxe",name="Vampire's Axe",
+    ["ancient:vamp-checker"]={
+        page="ancient",id="vamp-checker",name="Vampire's Axe",
         mm2Value=1375,supremeValue=1425,demand=6,stability="Stable",
         profiled=true,verified=true,
     },
@@ -27,7 +27,7 @@ local ourEval={
     slots=1,rawTotal=70,protectedTotal=70,signature="our-sig",
     unresolved={},
     resolved={{
-        id="481",page="godly",name="Iceblaster",
+        id="Iceblaster",checkerId="481",page="godly",name="Iceblaster",
         rawValue=35,qty=2,rawSubtotal=70,ineligible=false,
     }},
 }
@@ -37,7 +37,7 @@ local theirEval={
     unresolved={},
     resolved={
         {
-            id="VampireAxe",page="ancient",name="Vampire's Axe",
+            id="VampireAxe",checkerId="vamp-checker",page="ancient",name="Vampire's Axe",
             rawValue=1375,qty=1,rawSubtotal=1375,ineligible=false,
         },
         {
@@ -80,6 +80,8 @@ assert(snap.kind=="NORMAL" and snap.mode=="profit")
 
 assert(#snap.gave==1)
 assert(snap.gave[1].name=="Iceblaster")
+assert(snap.gave[1].id=="Iceblaster")
+assert(snap.gave[1].checkerId=="481")
 assert(snap.gave[1].qty==2)
 assert(snap.gave[1].mm2Value==35)
 assert(snap.gave[1].supremeValue==33)
@@ -90,6 +92,8 @@ assert(snap.gave[1].confidence==true)
 
 assert(#snap.received==2)
 assert(snap.received[1].name=="Vampire's Axe")
+assert(snap.received[1].id=="VampireAxe")
+assert(snap.received[1].checkerId=="vamp-checker")
 assert(snap.received[1].demand==6)
 assert(snap.received[1].liquidity==1)
 
