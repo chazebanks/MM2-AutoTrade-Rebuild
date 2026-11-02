@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/mm2-market-aware-part4-v2_6
+      - fix/mm2-v2_6-lag
   workflow_dispatch:
 
 permissions:
@@ -31,11 +32,16 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_MARKET_AWARE.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler_market_integration_ci_v1.luau >/dev/null
+          /tmp/luau/luau-compile pdiddler/tests/pdiddler4_market_bundle_cache_v1.luau >/dev/null
 
       - name: Run pure market integration tests
         run: |
           /tmp/luau/luau pdiddler/tests/pdiddler_market_integration_ci_v1.luau
 
+
+      - name: Run market cache performance regression
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler4_market_bundle_cache_v1.luau
 
       - name: Static Part 4 regression guards
         run: |
