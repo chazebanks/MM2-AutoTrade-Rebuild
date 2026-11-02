@@ -2628,3 +2628,44 @@ compare user's current v2.6 recording against v2.6.1 PERF.
 If severe lag remains specifically when a NEW opponent offer becomes stable, investigate the one-time planner DP next. Do NOT stack planner changes until that pattern is evidenced.
 
 FINAL ITEM-TRADE ACCEPT remains disabled.
+
+
+---
+
+# 42. v2.6 live recording reviewed before PERF comparison
+
+Date: 2026-11-02
+
+Recording:
+`ScreenRecording_11-02-2026 16-20-03_1.mp4`
+
+This recording is the laggy **v2.6 baseline**.
+
+Functional pass evidence:
+- startup / scanner active,
+- request ownership and 15s request rotation,
+- no-resend uncertain timeout behavior,
+- active Part 4 trade,
+- TX ABORT on opponent mutations,
+- RECOVERY VERIFIED after modified transactions,
+- fresh REBALANCE VERIFIED,
+- profitable holds,
+- 60s Case 3 rotation,
+- later trade activity continues,
+- final Accept remains disabled,
+- no v2.6 script error visible in Developer Console.
+
+Performance evidence:
+the heaviest visible lag period overlaps the most mutation/recovery-heavy trade. That path repeatedly invokes `evaluateSide` from fast transaction verification loops, which previously recomputed frozen market bundle assessments.
+
+This supports the isolated v2.6.1 PERF experiment but does not yet prove the cache removes all lag.
+
+Do not change Part 4 polling or planner DP until the v2.6.1 comparison recording is reviewed.
+
+Current PERF loader remains:
+```lua
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/b1ef79d8f9ce815a56cfd0b58f1c4a11a33c4088/pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_1_PERF.lua",
+    true
+))()
+```
