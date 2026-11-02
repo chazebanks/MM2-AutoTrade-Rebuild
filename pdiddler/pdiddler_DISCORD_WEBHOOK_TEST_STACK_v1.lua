@@ -113,7 +113,7 @@ local marketPlanner=loadModule(
     NO_PLAN_BASE.."pdiddler4_market_planner_v1_1.lua",
     "Market-aware planner v1.1 ineligible-safe verifier"
 )
-local WEBHOOK_COMMIT="25a9cdb8060fbc8f02018c6cf2c96308eea0c41c"
+local WEBHOOK_COMMIT="cf8356264ebc883a40e265449a77ffd623c1434c"
 local WEBHOOK_BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..WEBHOOK_COMMIT.."/pdiddler/"
 
 local part4=loadModule(
