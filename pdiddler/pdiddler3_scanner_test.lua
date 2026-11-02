@@ -986,7 +986,13 @@ local function targetInventory(p,force)
   if ok then prof=unwrapProfile(raw) end
   if not prof then State.targetReader=nil; State.targetMode=nil; State.targetReaderCheckedAt=0 end
  end
- return prof and inventoryFromProfile(prof) or nil
+ if not prof then return nil end
+ local inv=inventoryFromProfile(prof)
+ if inv and #inv.items==0 then
+  warn("[PDIDDLER3] UNVERIFIED EMPTY:",p.Name,"- refusing false blacklist")
+  return nil
+ end
+ return inv
 end
 
 
