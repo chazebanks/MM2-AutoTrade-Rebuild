@@ -3360,3 +3360,275 @@ Strong live evidence now exists for:
 - final Accept lock.
 
 Do not add another patch based on this recording alone.
+
+
+---
+
+# 48. Full-system audit of 17-31-12 recording
+
+Date: 2026-11-02
+
+Recording:
+`ScreenRecording_11-02-2026 17-31-12_1.mp4`
+
+Duration:
+~2m09s.
+
+Exact build identification:
+Developer Console visibly confirms:
+`[PDIDDLER TEST] MARKET-AWARE v2.6.3 PERF + INELIGIBLE + NO-PLAN DECLINE ACTIVE`
+
+Therefore this recording is positively identified as the v2.6.3 test stack rather than inferred from behavior.
+
+## Startup / scanner
+
+- Tablet startup succeeds.
+- scanner loads validated value snapshot:
+  `VALUE SNAPSHOT READY 190 rows`.
+- initial server scan completes with:
+  - whitelist 4
+  - blacklist 5
+  - unknown 0.
+- P4 arms successfully.
+- market preflight passes.
+- P3 starts normally.
+- no startup regression found.
+
+## Request ownership / rotation
+
+Console shows sequential request handling:
+- 2_PRETTYNOBII: attempted first.
+- Spotty6726:
+  - physical Trade tap succeeded,
+  - pending confirmed,
+  - canceled at 15s no-response boundary,
+  - UI cleared.
+- unicorn97285:
+  - physical Trade tap succeeded,
+  - pending confirmed,
+  - canceled at 15s no-response boundary,
+  - UI cleared.
+- venossgaming90190:
+  - physical Trade tap succeeded,
+  - pending confirmed,
+  - trade opened,
+  - handoff to Part 4.
+
+No duplicate outgoing send or concurrent outgoing target is visible.
+
+The rare no-pending -> later exact-target trade edge is NOT exercised here because venoss had `pendingConfirmed=true`.
+
+## Partner inventory / scanner consistency
+
+Scanner reports:
+- venossgaming90190:
+  - eligible copies = 3
+  - eligible total value = 1445.
+
+Trade later visibly shows all three eligible copies:
+- Vampire's Axe = 1375
+- Darkbringer x2 = 35 x2 = 70
+- total = 1445.
+
+This is strong scanner -> trade-window identity/value consistency.
+
+## Trade opening
+
+Part 4 opening:
+- Chroma Watergun = 2350.
+- opening verified.
+- Case 3 starts when THEIR OFFER becomes non-empty.
+- FINAL ACCEPT disabled.
+
+## Dynamic trade / value audit
+
+Validated values involved:
+- Vampire's Axe = 1375
+- Darkbringer = 35
+- Chroma Laser = 40
+- Ornament = 60
+- Immortal = 140
+- Mortal = 140
+- Jinglegun = 15
+- Plasmabeam = 20.
+
+Observed sequence reconciles with console:
+
+1. THEIR Vampire's Axe 1375.
+   OUR four-item pack:
+   - Chroma Laser 40
+   - Ornament 60
+   - Immortal 140
+   - Mortal 140
+   = 380.
+   Profit = 1375 - 380 = +995.
+   Console:
+   `REBALANCE VERIFIED ... kind UPGRADE ... rawProfit 995 protectedProfit 995`.
+
+2. THEIR becomes:
+   - Vampire's Axe 1375
+   - Darkbringer x2 = 70
+   = 1445.
+   OUR remains 380.
+   Profit = +1065.
+   Ratio = 1445/380 = 3.8026315789.
+   Console reports the same ratio/profit and `EXTREME HOLD`.
+   No higher safe plan was available from the actual current own-inventory planner state.
+
+3. THEIR later becomes Darkbringer x2 only:
+   - 35 x2 = 70.
+   Part 4 moves OUR to:
+   - Chroma Laser 40
+   - Jinglegun 15
+   = 55.
+   Profit = +15.
+   Console:
+   `REBALANCE VERIFIED ... NORMAL ... rawProfit 15 protectedProfit 15`.
+
+4. THEIR duplicate quantity changes from Darkbringer x2 -> x1:
+   - 70 -> 35.
+   Part 4 moves OUR to Plasmabeam 20.
+   Profit = +15.
+   Console:
+   `REBALANCE VERIFIED ... NORMAL ... rawProfit 15 protectedProfit 15`.
+
+5. THEIR later returns to the full 1445 state while OUR is 20:
+   raw profit = 1425,
+   ratio = 72.25x.
+   Console:
+   `EXTREME REPLAN ... ours 20 theirs 1445 rawProfit 1425 ratio 72.25 ... newOur 380 targetProfit 1065`.
+   Part 4 then verifies the four-item 380 plan.
+
+No arithmetic or item-identity error found in this trade.
+
+## Duplicate-quantity evidence
+
+New live evidence:
+THEIR Darkbringer quantity visibly changes:
+`x2 -> x1`
+
+The script correctly:
+- detects the offer mutation,
+- changes THEIR raw value from 70 -> 35,
+- invalidates the prior 55-vs-70 plan,
+- replans to Plasmabeam 20 vs 35,
+- preserves +15.
+
+This validates opponent-side duplicate quantity parsing and signature change behavior.
+
+Still NOT validated:
+OUR own eligible duplicate x2 -> x1 removal while the same visible UI slot remains.
+That remains the specific executor edge test we still need.
+
+## Transaction / stale-state behavior
+
+Repeated opponent changes do not produce visible stale final states.
+
+Observed:
+- multiple verified replans,
+- no duplicate offer spam,
+- no final Accept during transient offer states,
+- extreme replan only after current opponent state warrants it.
+
+No TX ABORT line is required in this particular sequence because some changes occurred between completed transactions rather than mid-mutation. Do not infer a new TX ABORT pass from this clip alone.
+
+## Partner-left recovery — LIVE PASS
+
+At ~17:32:34:
+`[MM2 Scanner T4.3] PLAYER LEFT venossgaming90190 | removed from live state`
+
+Immediately followed by:
+- `[PDIDDLER P4] TRADE RESULT trade-closed`
+- `[PDIDDLER P3 OUT] RESUME | trade closed | continuing queue`
+
+Then scanner/queue activity continues.
+
+This is live evidence that:
+- partner leaving during active trade closes the current trade session,
+- scanner removes stale player state,
+- Part 4 exits,
+- Part 3 resumes,
+- no stale trade visibly controls the next state.
+
+This previously-open recovery edge can now be considered passed for this observed path.
+
+## Performance / lag
+
+No severe multi-second rebalancer freeze is visible.
+
+Dynamic opponent changes:
+- 1375 -> 1445 -> 70 -> 35 -> 1445
+are followed by timely replans.
+
+This continues to support the v2.6.1 bundle-cache performance fix.
+
+Developer Console visible memory usage during the captured console interval is approximately:
+- 1426 MB
+- 1470 MB
+- 1480 MB
+- 1489 MB
+- 1492 MB
+- 1488 MB
+- 1484 MB.
+
+This short interval does not show a monotonic runaway memory increase. It is not a long-duration memory-leak test.
+
+## Console audit
+
+Developer Console visibly shows:
+- Error count: 0
+- Warning count: 1
+
+No script error is present in the visible log.
+
+The single warning's actual text/source is not surfaced clearly in the captured/scroll-visible console range, so it must remain:
+**UNRESOLVED WARNING SOURCE**.
+
+Do not attribute it to our script or to MM2 without direct evidence.
+
+For the next console audit, click/filter the Warning tab once so the actual warning can be identified.
+
+## No-plan / accepted-empty / Rare-Uncommon coverage in THIS recording
+
+Not exercised in this particular clip:
+- no-safe-plan immediate decline,
+- accepted-empty immediate decline,
+- deliberate Rare/Uncommon injection.
+
+Those have separate live evidence from the previous recordings and are not regressed visibly here, but this clip is not new proof for them.
+
+## Final Accept
+
+Developer Console startup marker confirms:
+`FINAL ITEM-TRADE ACCEPT IS DISABLED`.
+
+No final Accept occurs during the active trade.
+
+## Remaining open edge cases after this recording
+
+Still not live-proven:
+1. OUR eligible duplicate quantity x2 -> x1 while same slot remains.
+2. death/respawn during active trade.
+3. PlayerGui/trade GUI recreation during active trade.
+4. decline remote/UI fallback failure in real conditions.
+5. rare physical Trade tap with no pending proof -> later exact-target trade.
+6. long-duration memory stability.
+7. source of the one visible Developer Console warning.
+
+## Conclusion
+
+No new confirmed code defect found.
+
+New passes gained from this recording:
+- exact v2.6.3 build confirmed,
+- 0 Developer Console errors,
+- request 15s cancel/rotation,
+- scanner -> trade inventory consistency,
+- THEIR duplicate x2 -> x1 value/signature handling,
+- dynamic market/planner arithmetic,
+- extreme replan,
+- partner-left active-trade recovery,
+- performance remains improved,
+- final Accept lock.
+
+Do not add another patch based on this recording alone.
