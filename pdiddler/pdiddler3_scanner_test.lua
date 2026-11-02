@@ -555,6 +555,10 @@ end
 local LiveValues={
  ready=false,
  attempted=false,
+ lastAttemptAt=0,
+ lastLoadedAt=0,
+ RetrySeconds=30,
+ RefreshSeconds=600,
  source="unavailable",
  count=0,
  byPage={godly={},chroma={},ancient={}},
@@ -668,10 +672,29 @@ local function parseValuePage(html,basePage)
  return added
 end
 
+local function resetLiveValueMaps()
+ LiveValues.byPage={godly={},chroma={},ancient={}}
+ LiveValues.collisions={godly={},chroma={},ancient={}}
+ LiveValues.count=0
+end
+
 local function buildLiveValues()
- if LiveValues.ready then return true end
- if LiveValues.attempted then return false end
+ local now=os.clock()
+
+ if LiveValues.ready and (now-LiveValues.lastLoadedAt)<LiveValues.RefreshSeconds then
+  return true
+ end
+
+ if LiveValues.attempted
+  and not LiveValues.ready
+  and (now-LiveValues.lastAttemptAt)<LiveValues.RetrySeconds
+ then
+  return false
+ end
+
  LiveValues.attempted=true
+ LiveValues.lastAttemptAt=now
+ resetLiveValueMaps()
 
  local godlyHtml=httpGetText("https://www.mm2values.com/mobile.php?p=godly")
  local ancientHtml=httpGetText("https://www.mm2values.com/mobile.php?p=ancient")
@@ -698,12 +721,15 @@ local function buildLiveValues()
 
  if godlyN>=60 and chromaN>=15 and ancientN>=10 and sentinels then
   LiveValues.ready=true
+  LiveValues.lastLoadedAt=now
   LiveValues.source="mm2values-live"
   LiveValues.count=n
   print("[PDIDDLER3] LIVE MM2VALUES READY","godly",godlyN,"chroma",chromaN,"ancient",ancientN,"nameCollisions",collisions)
   return true
  end
 
+ LiveValues.ready=false
+ LiveValues.source="unavailable"
  warn("[PDIDDLER3] LIVE MM2VALUES INCOMPLETE","godly",godlyN,"chroma",chromaN,"ancient",ancientN,"- prices disabled rather than guessing")
  return false
 end
@@ -988,8 +1014,8 @@ local function scanOne(p, reason)
         and C.JoinScanRetryDelay
         or C.TargetScanRetryDelay
 
-    local lastZeroFingerprint=nil
-    local lastZeroInv=nil
+    local lastFingerprint=nil
+    local lastInv=nil
 
     for attempt = 1, retries do
         if not p or not p.Parent then
@@ -998,26 +1024,33 @@ local function scanOne(p, reason)
 
         local inv = targetInventory(p, attempt > 1)
 
-        if inv then
-            if (inv.unmapped or 0) > 0 or (inv.badQty or 0) > 0 then
-                lastZeroFingerprint=nil
-                lastZeroInv=nil
-            elseif #inv.items > 0 then
-                return "whitelist", inv
-            else
-                local fp=tostring(inv.fingerprint or "")
-                if lastZeroFingerprint~=nil and fp==lastZeroFingerprint then
-                    return "blacklist", inv
+        if inv
+            and (inv.unmapped or 0)==0
+            and (inv.badQty or 0)==0
+        then
+            local fp=tostring(inv.fingerprint or "")
+
+            if lastFingerprint~=nil and fp==lastFingerprint then
+                -- Classification happens only after TWO identical,
+                -- complete snapshots of this exact target.
+                if #inv.items>0 then
+                    return "whitelist", inv
                 end
-                lastZeroFingerprint=fp
-                lastZeroInv=inv
+                return "blacklist", inv
             end
+
+            lastFingerprint=fp
+            lastInv=inv
+        else
+            -- Any incomplete/unreadable response breaks stability proof.
+            lastFingerprint=nil
+            lastInv=inv
         end
 
         if attempt < retries then
             guiSetStatus(
                 string.format(
-                    "%s inventory verification — retry %d/%d",
+                    "%s inventory verification — stable read %d/%d",
                     p.Name,
                     attempt,
                     retries
@@ -1031,7 +1064,7 @@ local function scanOne(p, reason)
         return "left", nil
     end
 
-    return "unknown", lastZeroInv
+    return "unknown", lastInv
 end
 
 local function removePlayerState(p)
