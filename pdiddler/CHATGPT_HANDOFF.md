@@ -1251,3 +1251,81 @@ Other remaining controlled tests:
 v2.4 PROFIT-HOLD behavior is now **live-tested and passed** for the intended “THEIR OFFER adds extra value” case.
 
 Do not yet freeze the entire v2.4 stack as final known-good; remaining edge-path tests above are still outstanding.
+
+
+---
+
+# 26. Correction to 13:16 v2.4 interpretation — EXTREME PROFIT-HOLD BUG CONFIRMED
+
+This section supersedes the earlier conclusion in section 25 that the v2.4 profit-hold behavior fully passed.
+
+After re-reviewing the later Venoss trade frame-by-frame, a real strategy regression was confirmed.
+
+## Exact sequence
+
+Embedded scanner values:
+- Boneblade = 8
+- Green Luger = 25
+- Iceblaster = 35
+
+Observed:
+1. OUR opening item was initially Chroma Watergun.
+2. Venoss offered Green Luger (25).
+3. Planner correctly replaced the opening item with Boneblade (8):
+   - THEIR 25 - OUR 8 = +17
+   - valid normal-profit trade.
+4. Venoss then kept increasing THEIR eligible offer while OUR OFFER remained Boneblade (8).
+
+Examples:
+- Green Luger 25 + Iceblaster 35 = 60 -> OUR 8 -> +52
+- Green Luger 25 + Iceblaster x2 70 = 95 -> OUR 8 -> +87
+- Green Luger 25 + Iceblaster x3 105 = 130 -> OUR 8 -> +122
+
+Console profits such as +52, +87, +122, +167, +262 align with this behavior.
+
+A green-label Sunset was also visible in some frames but is outside the current Godly/Ancient/Chroma eligible pool, so it was not the cause of the hold.
+
+## Root cause
+
+v2.4 removed the preferred-profit normalization path entirely and changed the logic to:
+
+- if OUR current offer is still technically safe/profitable,
+- immediately PROFITABLE HOLD,
+- skip alternate-plan search.
+
+That is too broad.
+
+It correctly preserves moderate overpay, but it also preserves absurd one-sided trades such as THEIR 130 vs OUR 8.
+
+The script DID detect THEIR OFFER changes. The bug is the strategy decision after detection.
+
+## Correct direction
+
+Do NOT simply restore the old preferred-profit ceiling unchanged, because that would again give back moderate overpay such as OUR 230 vs THEIR 270 (+40).
+
+Instead introduce an **extreme-overpay / participation guard**:
+
+- moderate extra value from THEIR side -> keep OUR offer,
+- extreme ratio / implausibly tiny OUR side -> run planner again,
+- planner should move OUR side upward to the highest safe plan while still preserving required profit/downgrade premium,
+- minimum-profit, demand/quality, transaction recovery, and final-Accept lock remain unchanged.
+
+Preferred implementation direction:
+- use a relative ratio / extreme-one-sided threshold rather than the old small fixed profit ceiling,
+- e.g. detect when OUR raw offer is only a small fraction of THEIR eligible raw offer,
+- then re-run the safe-plan search.
+
+Do not choose the exact threshold without reviewing the current planner and testing representative cases.
+
+## Status correction
+
+v2.4 is **NOT ready to freeze**.
+
+The new profit-hold rule passed moderate-overpay intent but failed the extreme-overpay case.
+
+Next coding task, once authorized:
+replace unconditional profitable hold with:
+1. safe/profitable check,
+2. extreme-one-sided check,
+3. HOLD if moderate,
+4. REPLAN upward if extreme.
