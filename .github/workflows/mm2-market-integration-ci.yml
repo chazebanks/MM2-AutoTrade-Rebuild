@@ -90,6 +90,10 @@ jobs:
 
           stack=Path("pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua").read_text()
           assert "7809aa8c8d210d8005c223eb9fd3a6b3ea716ba5" in stack
+          p1_run=stack.index("local ok1,res1=pcall(p1.run)")
+          p2_run=stack.index("local ok2,res2=pcall(p2.run)")
+          market_load=stack.index("local marketProfile=loadModule")
+          assert p1_run < market_load and p2_run < market_load, "P1/P2 must run before market preload/preflight"
           assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in stack
           assert "AcceptTrade" not in stack
           print("PASS static Part 4 + stack regression guards")
