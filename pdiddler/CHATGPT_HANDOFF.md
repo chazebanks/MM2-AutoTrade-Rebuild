@@ -2448,7 +2448,7 @@ New components:
 - `pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua`
 
 Immutable v2.6 live-test stack commit:
-`a4e74021f6eae13cb312fb12a61337d3f4f38074`
+`bc2deeeffbd7d77bd933d2f11b2e0bea9c13de15`
 
 The stack pins its market integration modules to:
 `7809aa8c8d210d8005c223eb9fd3a6b3ea716ba5`
@@ -2503,10 +2503,18 @@ run the immutable v2.6 stack on the user's iPad + Delta and send a recording. Re
 Loader:
 ```lua
 loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/a4e74021f6eae13cb312fb12a61337d3f4f38074/pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua",
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/bc2deeeffbd7d77bd933d2f11b2e0bea9c13de15/pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua",
     true
 ))()
 ```
+
+Startup-order correction:
+- P1 runs first,
+- P2 runs second,
+- scanner loads,
+- only then do market modules/preflight run,
+- Part 4/outgoing arm afterward.
+This preserves the known-good v2.5 startup order. Corrected stack commit `bc2deeeffbd7d77bd933d2f11b2e0bea9c13de15` passed CI run `41526118216`.
 
 Expected early success marker:
 `[PDIDDLER TEST] MARKET PREFLIGHT PASS | profile 190/190 | planner fixtures PASS`
