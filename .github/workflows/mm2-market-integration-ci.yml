@@ -30,10 +30,13 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler_market_profile_2026-11-02_v1_VALIDATED.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_market_logic_v1_TEST.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_market_planner_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_market_planner_v1_1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_market_bundle_cache_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_MARKET_AWARE.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_1_INELIGIBLE_FIX.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_1_PERF.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_2_PERF_INELIGIBLE.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler_market_integration_ci_v1.luau >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_market_bundle_cache_v1.luau >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_ineligible_plan_match_v1.luau >/dev/null
