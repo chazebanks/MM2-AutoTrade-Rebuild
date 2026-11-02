@@ -260,6 +260,9 @@ jobs:
           assert 'FindFirstChild("ActionButton")' in r
           assert "ready-first-click" in r
           assert "SHADOW ONLY" in r
+          assert 'tostring(type(feed)=="table" and feed.seq or "")' not in r, (
+              "Part 5 transition key must not include heartbeat seq or it will log-spam"
+          )
 
           # No final completion action exists in Part 5 shadow mode.
           runtime_forbidden=[
