@@ -514,7 +514,10 @@ local function indexItems(src)
   end
  end
 end
-indexItems(Sync.Weapons or Sync.Item)
+indexItems(Sync.Weapons)
+if Sync.Item~=Sync.Weapons then
+ indexItems(Sync.Item)
+end
 
 local function identityName(meta)
  if not meta then return "" end
@@ -745,6 +748,13 @@ end
 
 local function allowedPage(page) return page=="ancient" or page=="godly" or page=="chroma" end
 
+local function qualifyingMeta(meta)
+ if not meta then return false end
+ if not allowedPage(checkerPage(meta)) then return false end
+ local t=norm(meta.type)
+ return t=="knife" or t=="gun"
+end
+
 local function checkerBuild()
  if Checker.ready then return true end
  local count=0
@@ -842,13 +852,15 @@ local function checkerResolve(name,opts)
   end
  end
  local pages={}
- if pageHint~="" then pages[#pages+1]=pageHint end
- for _,p in ipairs({"ancient","chroma","godly"}) do
-  local seen=false; for _,x in ipairs(pages) do if x==p then seen=true break end end
-  if not seen and ((chroma and p=="chroma") or (not chroma and p~="chroma")) then pages[#pages+1]=p end
+ if pageHint~="" then
+  pages[1]=pageHint
+ else
+  return nil,"missing-tier"
  end
  local best,bestScore,tied,tiedSame=nil,-100000,false,true
- local itemYear=iid:match("(20%d%d)")
+ local md=meta and meta.data or {}
+ local itemYear=tostring(md.Year or md.EventYear or ""):match("(20%d%d)")
+ if not itemYear then itemYear=iid:match("(20%d%d)") end
  for _,page in ipairs(pages) do
   local n0,n1,n2=checkerCanon(shown,page,typ,0),checkerCanon(shown,page,typ,1),checkerCanon(shown,page,typ,2)
   local mn=meta and identityName(meta) or ""
@@ -870,9 +882,9 @@ local function checkerResolve(name,opts)
    elseif score==bestScore and best and rec.id~=best.id then tied=true; if math.abs((rec.v or 0)-(best.v or 0))>.000001 then tiedSame=false end end
   end
  end
- if best and bestScore>=200 and (not tied or tiedSame) then
+ if best and bestScore>=200 and not tied then
   checkerCache[ck]=best
-  return best,tied and "value-equivalent" or ("match:"..bestScore)
+  return best,"match:"..bestScore
  end
  if tied then return nil,"ambiguous" end
  return nil,"unresolved"
@@ -883,7 +895,7 @@ local function checkerMarket(meta)
  if not allowedPage(page) then return nil end
  local rec,why=checkerResolve(identityName(meta),{page=page,type=meta.type,id=meta.id,chroma=meta.chroma,meta=meta})
  if not rec then return nil,why end
- return {v=rec.v,id=rec.id,page=rec.page,img=rec.img,source="verified-snapshot-2026-10-31"},nil
+ return {v=rec.v,id=rec.id,page=rec.page,img=rec.img,source="verified-snapshot-2026-11-01"},nil
 end
 
 checkerBuild()
@@ -921,7 +933,7 @@ local function auditValueCoverage()
  local unresolved={}
 
  for _,m in pairs(Meta) do
-  if allowedPage(checkerPage(m)) then
+  if qualifyingMeta(m) then
    total+=1
    local rec,why=checkerMarket(m)
    if rec and tonumber(rec.v) then
@@ -951,7 +963,9 @@ local function auditValueCoverage()
   "unresolved",#unresolved
  )
 
- for _,x in ipairs(unresolved) do
+ local show=math.min(#unresolved,12)
+ for i=1,show do
+  local x=unresolved[i]
   warn(
    "[PDIDDLER3] UNPRICED CATALOG ITEM",
    x.page,
@@ -961,6 +975,9 @@ local function auditValueCoverage()
    x.why,
    x.identity
   )
+ end
+ if #unresolved>show then
+  warn("[PDIDDLER3] UNPRICED CATALOG ITEMS OMITTED",#unresolved-show)
  end
 end
 
@@ -1014,7 +1031,7 @@ local function inventoryFromProfile(prof)
    else
     local page=checkerPage(meta)
 
-    if allowedPage(page) then
+    if qualifyingMeta(meta) then
      local market,why=checkerMarket(meta)
 
      out.items[#out.items+1]={
@@ -1091,7 +1108,7 @@ local InventoryRemoteGate={
  timeoutCount=0,
 }
 
-local function targetInventory(p,force)
+local function targetInventory(p)
  if not p or p==LP or not p.Parent then return nil end
 
  local rf=getFullInventoryRemote()
@@ -1287,6 +1304,7 @@ local function scanOne(p, reason)
         or C.TargetScanRetryDelay
 
     local lastFingerprint=nil
+    local stableCount=0
     local lastInv=nil
 
     for attempt = 1, retries do
@@ -1294,7 +1312,7 @@ local function scanOne(p, reason)
             return "left", nil
         end
 
-        local inv = targetInventory(p, attempt > 1)
+        local inv = targetInventory(p)
 
         if inv
             and (inv.unmapped or 0)==0
@@ -1303,29 +1321,38 @@ local function scanOne(p, reason)
             local fp=tostring(inv.fingerprint or "")
 
             if lastFingerprint~=nil and fp==lastFingerprint then
-                -- Classification happens only after TWO identical,
-                -- complete snapshots of this exact target.
+                stableCount+=1
+            else
+                lastFingerprint=fp
+                stableCount=1
+            end
+
+            lastInv=inv
+
+            -- A completely empty Weapons.Owned response is more likely to be
+            -- a loading/transient profile. Require an extra confirming read.
+            local requiredStable=(tonumber(inv.rawOwned) or 0)==0 and 3 or 2
+
+            if stableCount>=requiredStable then
                 if #inv.items>0 then
                     return "whitelist", inv
                 end
                 return "blacklist", inv
             end
-
-            lastFingerprint=fp
-            lastInv=inv
         else
-            -- Any incomplete/unreadable response breaks stability proof.
+            -- An unreadable/incomplete response breaks the stability proof.
             lastFingerprint=nil
+            stableCount=0
             lastInv=inv
         end
 
         if attempt < retries then
             guiSetStatus(
                 string.format(
-                    "%s inventory verification — stable read %d/%d",
+                    "%s inventory verification — stable %d/%d",
                     p.Name,
-                    attempt,
-                    retries
+                    stableCount,
+                    ((lastInv and (tonumber(lastInv.rawOwned) or 0)==0) and 3 or 2)
                 )
             )
             task.wait(retryDelay)
