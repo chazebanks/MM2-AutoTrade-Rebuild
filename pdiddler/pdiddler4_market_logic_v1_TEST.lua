@@ -253,4 +253,76 @@ function M.tradeDecision(ourBundle,theirBundle)
   return decision
 end
 
+local function canonicalPickKey(plan)
+  local keys={}
+  if type(plan)~="table" or type(plan.picks)~="table" then return "" end
+  for _,pick in ipairs(plan.picks) do
+    if type(pick)=="table" then
+      keys[#keys+1]=tostring(pick.page or "")..":"..tostring(pick.id or "")
+    else
+      keys[#keys+1]=tostring(pick)
+    end
+  end
+  table.sort(keys)
+  return table.concat(keys,"|")
+end
+
+function M.rankPlans(plans,theirBundle)
+  local out={}
+  if type(plans)=="table" then
+    for _,plan in ipairs(plans) do
+      if type(plan)=="table" and plan.mode~="reject" and plan.ok~=false then
+        out[#out+1]=plan
+      end
+    end
+  end
+  local theirRaw=tonumber(type(theirBundle)=="table" and theirBundle.rawTotal) or 0
+  local window=math.min(25,math.max(5,theirRaw*0.02))
+  local minProfit=nil
+  for _,plan in ipairs(out) do
+    if plan.mode=="profit" then
+      local rp=tonumber(plan.rawProfit) or -math.huge
+      if minProfit==nil or rp<minProfit then minProfit=rp end
+    end
+  end
+  local function modeRank(plan)
+    if plan.mode=="profit" then return 0 end
+    if plan.mode=="quality-upgrade" then return 1 end
+    return 2
+  end
+  local function profitBand(plan)
+    if plan.mode~="profit" or minProfit==nil then return 0 end
+    local diff=(tonumber(plan.rawProfit) or math.huge)-minProfit
+    if diff<=0 then return 0 end
+    return math.floor(math.max(0,diff-1e-9)/window)
+  end
+  table.sort(out,function(a,b)
+    local am,bm=modeRank(a),modeRank(b)
+    if am~=bm then return am<bm end
+
+    if am==0 then
+      local ab,bb=profitBand(a),profitBand(b)
+      if ab~=bb then return ab<bb end
+      local ae,be=tonumber(a.givenExitScore) or 0,tonumber(b.givenExitScore) or 0
+      if ae~=be then return ae<be end
+      local ar,br=tonumber(a.rawTotal) or 0,tonumber(b.rawTotal) or 0
+      if ar~=br then return ar>br end
+    elseif am==1 then
+      local ap,bp=tonumber(a.rawProfit) or -math.huge,tonumber(b.rawProfit) or -math.huge
+      if ap~=bp then return ap>bp end
+      local ae,be=tonumber(a.givenExitScore) or 0,tonumber(b.givenExitScore) or 0
+      if ae~=be then return ae<be end
+    end
+
+    local ad,bd=tonumber(a.disputedCopies) or 0,tonumber(b.disputedCopies) or 0
+    if ad~=bd then return ad<bd end
+    local au,bu=tonumber(a.unprofiledCopies) or 0,tonumber(b.unprofiledCopies) or 0
+    if au~=bu then return au<bu end
+    local ak,bk=canonicalPickKey(a),canonicalPickKey(b)
+    if ak~=bk then return ak<bk end
+    return tostring(a.id or "")<tostring(b.id or "")
+  end)
+  return out
+end
+
 return M
