@@ -3926,3 +3926,151 @@ Expected new early log:
 
 Production v2.6.3 remains untouched.
 FINAL ITEM-TRADE ACCEPT remains disabled.
+
+
+---
+
+# 54. Duplicate x3 -> x2 -> x1 live PASS + v2.6.3 freeze
+
+Date: 2026-11-02
+
+Recording:
+`ScreenRecording_11-02-2026 18-00-35_1.mp4`
+
+Duration:
+~1m44s.
+
+This recording contains **two successful v3 duplicate-removal lab runs**.
+
+## v3 raw key resolution
+
+Console confirms:
+`[DUP LAB] OWNED KEY RESOLVED | checker=481 | raw=Iceblaster | inventory qty=3`
+
+This validates the key distinction discovered in the prior failed labs:
+- checker/market identity: `481`
+- actual MM2 `Weapons.Owned` / `OfferItem` key: `Iceblaster`
+
+The v3 lab therefore used the same raw-owned-key layer production Part 4 uses.
+
+## First successful run
+
+Visible/console sequence:
+- Iceblaster x1 verified
+- Iceblaster x2 verified
+- Iceblaster x3 verified
+- one physical slot ActionButton click:
+  x3 -> x2
+- exact x2 verified
+- second physical slot ActionButton click:
+  x2 -> x1
+- exact x1 verified
+- no third removal attempted
+- trade cleanup closed=true.
+
+Console:
+`[DUP LAB] PASS v3 | OUR duplicate removal x3 -> x2 -> x1 verified`
+
+The trade UI visibly shows the stacked quantity during this sequence (for example x2 is clearly visible).
+
+## Second successful run
+
+Later in the same recording the user reruns v3 after the game returns through another startup/device-selection state.
+
+Console again confirms:
+- raw key resolved to `Iceblaster`
+- inventory qty=3
+- x1 verified
+- x2 verified
+- x3 verified
+- x3 -> x2 with one physical click
+- x2 -> x1 with one physical click
+- PASS v3
+- no third removal
+- cleanup closed=true.
+
+The second run shows:
+**Developer Console Errors = 0**.
+
+Therefore this is repeatable live evidence, not a one-off.
+
+## First-run red error audit
+
+During the first run, before the lab mutation sequence, Developer Console shows:
+`ReplicatedStorage.Modules.TradeModule:42: attempt to index nil with 'GetChildren'`
+
+Stack visibly points to:
+- MM2's `ReplicatedStorage.Modules.TradeModule`, line 42
+- MM2 PlayerGui/Inventory/Leaderboard script, around line 199.
+
+This error occurs during/manual trade-opening UI activity before the duplicate lab begins its verified x1/x2/x3 sequence.
+
+It is not emitted from pdiddler or the duplicate lab.
+The lab subsequently completes successfully despite it, and the second full lab run passes with 0 errors.
+
+Treat this as the already-known MM2 trade/leaderboard UI transient, not a production trader regression.
+
+## External warning
+
+The known warning also appears:
+`Workspace.Lobby.Elite.Screen.Surface.Frame.Frame:WaitForChild("Buy")`
+
+Already classified as external MM2 Elite-screen code.
+
+## Duplicate edge status
+
+The previously open executor edge:
+**OUR eligible duplicate quantity x2 -> x1 while the same visible trade slot remains**
+
+is now **LIVE VERIFIED**.
+
+Stronger evidence exists:
+**x3 -> x2 -> x1** with one physical click per decrement, repeated twice.
+
+No production patch is required.
+
+## v2.6.3 freeze
+
+Because the remaining duplicate-removal executor edge is now live-proven and prior recordings already verified:
+- startup/scanner,
+- request ownership/rotation,
+- accepted-empty decline,
+- no-safe-plan immediate decline,
+- Rare/Uncommon non-target handling,
+- market/value math,
+- dynamic rebalancing,
+- TX abort/recovery behavior,
+- non-resetting 60s Case 3 timer,
+- partner-left recovery,
+- lag/cache improvement,
+- final Accept lock,
+
+v2.6.3 is now frozen as a known-good baseline.
+
+Frozen artifact:
+`pdiddler/pdiddler_KNOWN_GOOD_MARKET_AWARE_v2_6_3.lua`
+
+Freeze commit:
+`9d66b5e69afa867c3b97589138290caeb664b350`
+
+The frozen file is an exact byte-for-byte copy of:
+`pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_3_NO_PLAN_DECLINE.lua`
+
+CI freeze guard commit:
+`b2d4a34d83b4eeb78c96322a85caa235173d42b6`
+
+CI run:
+`41542834394`
+
+Result:
+SUCCESS
+
+Freeze guard verifies:
+- frozen file compiles,
+- frozen file is byte-identical to tested v2.6.3 stack,
+- all existing market/cache/ineligible/no-plan/duplicate-lab regressions remain green,
+- FINAL ITEM-TRADE ACCEPT remains disabled,
+- `AcceptTrade` remains absent.
+
+Do not modify the frozen v2.6.3 artifact.
+All future behavior changes must use a new version/file.
