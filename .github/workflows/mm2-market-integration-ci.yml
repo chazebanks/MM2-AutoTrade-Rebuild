@@ -7,6 +7,7 @@ on:
       - fix/mm2-v2_6-lag
       - fix/mm2-v2_6-ineligible-rebalance
       - fix/mm2-v2_6-no-plan-decline
+      - feature/mm2-discord-trade-webhook
   workflow_dispatch:
 
 permissions:
@@ -214,3 +215,8 @@ jobs:
           assert "AcceptTrade" not in frozen
           print("PASS known-good v2.6.3 freeze guard")
           PY
+
+
+      - name: Run Part 4.5 Discord trade report
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler4_5_trade_report_v1.luau
