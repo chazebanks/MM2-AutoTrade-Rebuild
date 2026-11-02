@@ -396,3 +396,33 @@ jobs:
       - name: Run raw/checker market identity regression
         run: |
           /tmp/luau/luau pdiddler/tests/pdiddler4_market_identity_raw_checker_v1.luau
+
+
+      - name: Part 4 market identity bridge contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path("pdiddler/pdiddler4_balancer_ROTATING_v2_4_4_MARKET_IDENTITY_WEBHOOK.lua")
+          assert p.exists(), "Part 4 market-identity webhook build missing"
+          src=p.read_text()
+
+          assert "checkerId=first.checkerId" in src
+          assert "checkerId=item.checkerId" in src
+          assert 'id=tostring(item.checkerId or item.id or "")' in src, (
+              "live market bundle must use checker id"
+          )
+
+          raw_id=src.index('local id=tostring(item.id or fullShownName(entry))')
+          count_key=src.index('local countKey=tostring(item.page or "")..":"..id',raw_id)
+          assert raw_id < count_key, "live counts must remain raw-id keyed"
+
+          assert 'offer:FireServer(p.id,"Weapons")' in src, (
+              "executor must still send raw planner id"
+          )
+          assert "AcceptTrade" not in src
+          assert 'physicalClick(button,"Accept' not in src
+          assert 'physicalClick(button,"Confirm' not in src
+
+          print("PASS Part 4 market identity bridge contract")
+          PY
