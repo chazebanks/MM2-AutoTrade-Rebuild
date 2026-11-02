@@ -2760,3 +2760,80 @@ Conclusion:
 - value/decision correctness in this recording is strong; the main regression remains performance/lag.
 
 FINAL ACCEPT remained disabled.
+
+
+---
+
+# 44. Rare/Uncommon rebalance freeze root cause + fix
+
+Date: 2026-11-02
+
+User-reported symptom:
+when a Rare/Uncommon/non-target-tier item is manually added to an active trade, Part 4 can appear to freeze rebalancing.
+
+Root cause:
+- `resolveEntry` correctly marks complete-scan non-target items as:
+  - `page="ineligible"`
+  - `value=0`
+  - `ineligible=true`
+- `evaluateSide` still stores those items in `live.counts` using keys like `ineligible:<id>`.
+- planner picks contain only eligible Ancient/Godly/Chroma items.
+- old `planMatches` compared the entire `live.counts` table against eligible-only plan counts.
+- therefore any extra `ineligible:<id>` entry made a correct eligible plan fail verification forever.
+
+Important:
+- ineligible items were already correctly excluded from raw/market value.
+- they remain in the offer signature so adding/removing one still counts as an offer mutation for TX/stale-state safety.
+- only plan-count verification should ignore them.
+
+TDD:
+- RED test:
+  `pdiddler/tests/pdiddler4_ineligible_plan_match_v1.luau`
+- RED CI run:
+  `41530585193`
+- GREEN planner verifier:
+  `pdiddler/pdiddler4_market_planner_v1_1.lua`
+  commit `daa3a5bd85c632981d147257a3ef4a8544b309b0`
+- Part 4 wiring:
+  `pdiddler/pdiddler4_balancer_ROTATING_v2_4_1_INELIGIBLE_FIX.lua`
+  commit `2fe6ff426368d5f3cc9aef153db791dcaa47f0a9`
+
+New combined stack:
+`pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_2_PERF_INELIGIBLE.lua`
+
+Final CI-tested head:
+`b1d32597b0a319f0b1b30b0a9242af2325ee093f`
+
+CI run:
+`41530913685`
+
+Result:
+SUCCESS
+
+Verified:
+- 14/14 market matrix,
+- planner fixtures,
+- 190/190 market profile,
+- v2.6.1 market bundle cache regression,
+- Rare/Uncommon plan-match regression,
+- Part 4 compile,
+- v2.6.2 stack compile,
+- 15s/60s timers retained,
+- final Accept absent.
+
+New verifier behavior:
+- extra `ineligible:*` counts are ignored for plan matching,
+- missing planned eligible item still fails,
+- extra eligible Godly/Ancient/Chroma still fails,
+- unresolved item still fails,
+- raw-total mismatch still fails.
+
+Loader:
+```lua
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/b1d32597b0a319f0b1b30b0a9242af2325ee093f/pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_2_PERF_INELIGIBLE.lua",
+    true
+))()
+```
+
+FINAL ITEM-TRADE ACCEPT remains disabled.
