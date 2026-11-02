@@ -2524,3 +2524,107 @@ Expected active marker:
 `[PDIDDLER TEST] MARKET-AWARE v2.6 ACTIVE`
 
 FINAL ITEM-TRADE ACCEPT remains disabled.
+
+
+---
+
+# 41. v2.6.1 performance fix for severe live lag
+
+Date: 2026-11-02
+
+Branch:
+`fix/mm2-v2_6-lag`
+
+User report:
+v2.6 caused severe runtime lag during the live iPad + Delta test.
+
+Root-cause investigation:
+- initial suspicion: market-aware planner recomputed continuously,
+- disproved: `lastTheirSig` / `stableSince` / `lastBalancedSig` already suppress planner reruns on an unchanged settled offer,
+- confirmed redundant hot path: every `evaluateSide` rebuilt `marketLogic.bundleAssessment`, including main 0.12s polling and faster transaction/remove verification loops,
+- those repeated bundle calculations redo frozen profile lookup + market item assessment even when the canonical offer is unchanged.
+
+Fix:
+- new pure bounded cache:
+  `pdiddler/pdiddler4_market_bundle_cache_v1.lua`
+- implementation commit:
+  `03dd37b0f3d49700a38c55d7f7d15e83de077911`
+- caches by OUR/THEIR side + canonical page/id/value/qty bundle,
+- item order normalized,
+- max 64 entries,
+- changed bundle recomputes,
+- alternate profile lookup bypasses the cache.
+
+Important architecture decision:
+**Part 4 was NOT modified for this lag fix.**
+
+The perf stack wraps the validated market logic:
+`marketBundleCache.wrap(marketProfile, marketLogicBase, 64)`
+
+Everything else continues to use the exact v2.6 integration:
+- profile,
+- planner,
+- Part 4 commit `7809aa8c8d210d8005c223eb9fd3a6b3ea716ba5`,
+- request ownership,
+- scanner scheduling,
+- TX ABORT/recovery,
+- 15s/60s timers,
+- EXTREME GUARD,
+- final Accept lock.
+
+TDD:
+- RED test existed before production module and failed on missing cache module,
+- cache regression is now GREEN,
+- same bundle/new poll computes once,
+- reordered same items hits cache,
+- OUR/THEIR remain separate,
+- changed signature computes fresh.
+
+New test stack:
+`pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_1_PERF.lua`
+
+Stack creation:
+`92eddb1d15699510e7e6f86a9414f6d28a4d3da8`
+
+CI-tested head:
+`b1ef79d8f9ce815a56cfd0b58f1c4a11a33c4088`
+
+CI run:
+`41528139709`
+
+Result:
+**SUCCESS**
+
+Passed:
+- official Luau 0.745 compile,
+- v2.6 market matrix 14/14,
+- ranking,
+- planner fixtures,
+- 190/190 profile promotion,
+- market cache regression,
+- v2.6/v2.6.1 static guards,
+- final Accept absence.
+
+Evidence:
+`pdiddler/PERF_LAG_FIX_RESULTS_v1.md`
+
+Loader:
+```lua
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/b1ef79d8f9ce815a56cfd0b58f1c4a11a33c4088/pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_1_PERF.lua",
+    true
+))()
+```
+
+Expected marker:
+`[PDIDDLER TEST] MARKET-AWARE v2.6.1 PERF ACTIVE`
+
+Also:
+`[PDIDDLER TEST] repeated market bundle valuation cache active | max=64`
+
+Current test instruction:
+compare user's current v2.6 recording against v2.6.1 PERF.
+
+If severe lag remains specifically when a NEW opponent offer becomes stable, investigate the one-time planner DP next. Do NOT stack planner changes until that pattern is evidenced.
+
+FINAL ITEM-TRADE ACCEPT remains disabled.
