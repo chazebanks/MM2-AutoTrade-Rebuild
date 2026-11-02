@@ -1,0 +1,36 @@
+name: MM2 Market Integration CI
+
+on:
+  push:
+    branches:
+      - feature/mm2-market-aware-part4-v2_6
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  luau:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install official Luau 0.745
+        run: |
+          curl -L --fail --retry 3             -o /tmp/luau.zip             https://github.com/luau-lang/luau/releases/download/0.745/luau-ubuntu.zip
+          echo "186e5ddaa2b048ebc7390c11ed1b00c04e7d3beaffed429250329e3575d2ece2  /tmp/luau.zip" | sha256sum -c -
+          mkdir -p /tmp/luau
+          unzip -q /tmp/luau.zip -d /tmp/luau
+          chmod +x /tmp/luau/*
+
+      - name: Compile market integration modules
+        run: |
+          /tmp/luau/luau-compile pdiddler/pdiddler_market_profile_2026-11-02_v1_VALIDATED.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_market_logic_v1_TEST.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_market_planner_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_MARKET_AWARE.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/tests/pdiddler_market_integration_ci_v1.luau >/dev/null
+
+      - name: Run pure market integration tests
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler_market_integration_ci_v1.luau
