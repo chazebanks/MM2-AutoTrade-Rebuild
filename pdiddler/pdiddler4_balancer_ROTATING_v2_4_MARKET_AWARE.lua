@@ -431,7 +431,6 @@ local function evaluateSide(t,sideName,inv)
         eligibleCopies=0,
         resolved={},
         unresolved={},
-        rejected={},
         counts={},
         market=nil,
         marketError=nil,
@@ -1846,22 +1845,6 @@ local function runTrade(scanner,session,sessionAlive)
                     "P4 BALANCER — unresolved THEIR OFFER (%d slot%s) | waiting for offer change | no Accept",
                     #theirEval.unresolved,
                     #theirEval.unresolved==1 and "" or "s"
-                )
-            )
-
-            task.wait(C.LoopDelay)
-            continue
-        end
-
-        if #theirEval.rejected>0 then
-            lastBalancedSig=theirEval.signature
-
-            scanner.setRequestState(
-                target,
-                "sending",
-                string.format(
-                    "P4 RISK HOLD — rejected-risk item detected | %.0fs test window remaining | will not Accept",
-                    offerRemain
                 )
             )
 
