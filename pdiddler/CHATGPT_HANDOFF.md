@@ -972,10 +972,10 @@ Do not rely only on chat memory for project state.
 
 The current active stack is:
 
-`pdiddler/pdiddler_PROFIT_HOLD_TEST_STACK_v2_4.lua`
+`pdiddler/pdiddler_EXTREME_GUARD_TEST_STACK_v2_5.lua`
 
 Commit:
-`4197968629960fd98068df9b4fac5f72cf903d50`
+`2a5d116786e9651df59e150e7958822ee9696e21`
 
 Latest controlled recording was clean.
 
@@ -1329,3 +1329,103 @@ replace unconditional profitable hold with:
 2. extreme-one-sided check,
 3. HOLD if moderate,
 4. REPLAN upward if extreme.
+
+
+---
+
+# 27. v2.5 EXTREME GUARD fix for Boneblade-stuck regression
+
+Date: 2026-11-02
+
+This fixes the regression confirmed in section 26 where OUR OFFER could remain Boneblade = 8 while THEIR OFFER grew from 25 to 60/95/130+.
+
+## Root cause
+
+v2.4 treated any technically profitable current offer as a permanent PROFITABLE HOLD and skipped alternate-plan search.
+
+That correctly preserved moderate overpay, but it also let absurdly one-sided trades persist.
+
+## New rule
+
+Moderate overpay still holds.
+
+A technically profitable trade becomes an **EXTREME REPLAN** candidate only when BOTH are true:
+
+1. THEIR raw value is at least 2.0x OUR raw value.
+2. Raw and effective profit are each at least:
+   `max(50, requiredProfit * 2.5)`
+
+Constants:
+- `ExtremeReplanRatio = 2.0`
+- `ExtremeProfitFlat = 50`
+- `ExtremeProfitMultiple = 2.5`
+- `ExtremeMinReplanStep = 5`
+
+If extreme:
+- run the existing safe 1-4 item planner,
+- only move OUR side upward if the new plan adds at least 5 raw value and reduces the excessive profit gap by at least 5,
+- still require all normal safety / downgrade / quality rules,
+- if no higher safe plan exists, keep the current safe offer and log `EXTREME HOLD`.
+
+## Representative cases
+
+Expected:
+- THEIR 25 vs OUR 8 = +17 -> HOLD
+- THEIR 270 vs OUR 230 = +40 -> HOLD
+- THEIR 60 vs OUR 8 = +52 -> EXTREME REPLAN
+- THEIR 95 vs OUR 8 = +87 -> EXTREME REPLAN
+- THEIR 130 vs OUR 8 = +122 -> EXTREME REPLAN
+
+This avoids restoring the old small preferred-profit ceiling.
+
+## New Part 4 file
+
+`pdiddler/pdiddler4_balancer_ROTATING_v2_3_EXTREME_GUARD.lua`
+
+Commit:
+`41372d75f053cb125c12847188966a10d51d1f10`
+
+## New current test stack
+
+`pdiddler/pdiddler_EXTREME_GUARD_TEST_STACK_v2_5.lua`
+
+Commit:
+`2a5d116786e9651df59e150e7958822ee9696e21`
+
+Loader:
+
+```lua
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/main/pdiddler/pdiddler_EXTREME_GUARD_TEST_STACK_v2_5.lua",
+    true
+))()
+```
+
+## Regression audit
+
+Confirmed unchanged in Part 4:
+- normal minimum: max(15, 3%)
+- downgrade minimum: max(20, 6%)
+- big downgrade minimum: max(30, 8%)
+- controlled quality-upgrade cap: 3%
+- 15s empty timeout
+- 60s Case 3 window
+- transaction abort / protected recovery
+- accepted-empty immediate decline
+- no `AcceptTrade`
+- no `AcceptRequest`
+- final item-trade Accept disabled.
+
+## Next live test
+
+Highest priority:
+reproduce the Boneblade sequence.
+
+Expected progression:
+- Green Luger 25 vs Boneblade 8 -> HOLD
+- add Iceblaster so THEIR total becomes 60 -> EXTREME REPLAN
+- OUR side should visibly increase to the highest safe planner result instead of remaining Boneblade 8.
+
+Also verify that a moderate case such as OUR 230 vs THEIR 270 stays held.
+
+Do not freeze v2.5 until this exact behavior is confirmed live.
