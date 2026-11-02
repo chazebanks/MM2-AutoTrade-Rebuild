@@ -1473,3 +1473,120 @@ Do not patch until the root cause is identified, but do not dismiss anomalous be
 
 The 13:16 v2.4 recording is the example motivating this rule:
 the intended PROFITABLE HOLD behavior appeared to pass, but a deeper review showed OUR OFFER could remain Boneblade 8 while THEIR OFFER grew to 60/95/130+, exposing the extreme-profit-hold regression.
+
+
+---
+
+# 29. 2026-11-02 13:48 v2.5 EXTREME GUARD live test — PASSED
+
+Recording reviewed:
+`ScreenRecording_11-02-2026 13-48-51_1(1).mp4`
+
+Build under test:
+`pdiddler/pdiddler_EXTREME_GUARD_TEST_STACK_v2_5.lua`
+
+Commit:
+`2a5d116786e9651df59e150e7958822ee9696e21`
+
+Part 4:
+`pdiddler/pdiddler4_balancer_ROTATING_v2_3_EXTREME_GUARD.lua`
+
+Commit:
+`41372d75f053cb125c12847188966a10d51d1f10`
+
+## Main result — EXTREME GUARD passed
+
+The exact v2.5 strategy change was live-proven.
+
+Console evidence during the Venoss trade included:
+
+- `EXTREME REPLAN ... ours 20 theirs 105 rawProfit 85 ratio 5.25 ... newOur 90 targetProfit 15`
+  -> followed by `REBALANCE VERIFIED ... kind NORMAL ... rawProfit 15`.
+
+- `EXTREME REPLAN ... ours 90 theirs 270 rawProfit 180 ratio 3 ... newOur 250 targetProfit 20`
+  -> followed by `REBALANCE VERIFIED ... kind DOWNGRADE ... rawProfit 20`.
+
+- Later extreme cases also triggered replanning, including approximately:
+  - ours 120 vs theirs 245 -> newOur 230
+  - ours 113 vs theirs 245 -> newOur 230
+
+This proves OUR OFFER no longer stays stuck at an implausibly tiny item when THEIR OFFER grows far beyond it.
+
+Moderate overpay was still retained:
+- `PROFITABLE HOLD` appeared at approximately +52 and +62 raw profit when the extreme ratio/threshold combination was not met.
+- Therefore v2.5 preserves the intended distinction:
+  - moderate extra value -> HOLD,
+  - extreme one-sided trade -> REPLAN upward.
+
+## Transaction abort / recovery path — now live-proven
+
+This recording also provided the previously missing explicit transactional evidence.
+
+Observed console sequences included:
+- `TX ABORT ... opponent offer changed | modified true`
+- `RECOVERY VERIFIED ... our offer cleared`
+- fresh `REBALANCE VERIFIED` afterward.
+
+This happened multiple times during rapid Venoss offer changes.
+
+Therefore the stale-transaction protection is now live-proven for:
+1. detecting opponent mutation during an active transaction,
+2. aborting the stale transaction,
+3. clearing OUR partially modified offer,
+4. verifying recovery,
+5. replanning from the new opponent state.
+
+No stuck partial plan, uncontrolled double-remove loop, or stale plan continuation was observed.
+
+## Reverse/downward replanning evidence
+
+The recording also showed THEIR OFFER dropping/changing enough to invalidate the currently planned state.
+
+Part 4 stopped holding the prior plan and produced fresh verified rebalances, including NORMAL / UPGRADE / DOWNGRADE classifications as the opponent composition changed.
+
+This gives strong live evidence that v2.5 is not only adding value upward on extreme overpay; it also re-evaluates and reduces/rebuilds OUR OFFER when THEIR OFFER moves the other direction.
+
+## 60-second Case 3 boundary
+
+The Venoss trade reached the authoritative 60-second Case 3 boundary.
+
+Console showed:
+- `DECLINE 60s Case 3 rotation boundary`
+- `TRADE RESULT offer-window-timeout-declined`
+- Part 3 resumed the queue afterward.
+
+The timer did not visibly restart because of intermediate offer changes.
+
+## Other regression checks
+
+Confirmed:
+- scanner critical-phase pause remained intact during active Part 4 work,
+- Part 3 resumed after trade close,
+- subsequent players were processed,
+- no duplicate resend regression was observed,
+- final item-trade Accept remained disabled,
+- accepted UI state was never automatically pressed,
+- no pdiddler-originating runtime error was visible.
+
+Developer Console showed 0 errors from the tested script. A separate MM2/game warning about an Infinite Yield / missing `Buy` child was visible and is not part of the pdiddler state machine.
+
+## Remaining unproven / priority tests
+
+Still not fully live-proven:
+1. incoming player B while outgoing player A is actively owned/counting down,
+2. OUR SIDE duplicate stack exact removal x2 -> x1 while the visible slot remains,
+3. rare physical Trade tap -> no pending UI -> later exact target trade-open with no prior pending confirmation.
+
+The previous rapid-opponent-quantity test already covered THEIR-side quantity changes; the remaining duplicate test is specifically OUR-side removal verification.
+
+## Confidence update
+
+v2.5 EXTREME GUARD is now live-tested and passed for its primary regression:
+- moderate profitable overpay is retained,
+- extreme one-sided profitable states trigger a safe upward replan.
+
+The transactional `TX ABORT -> RECOVERY VERIFIED` path is also now live-proven.
+
+No code patch is justified from this recording.
+
+Do not yet freeze the entire stack as final known-good until the remaining ownership and OUR-side duplicate-removal edge tests are covered, unless the user explicitly chooses to freeze it sooner.
