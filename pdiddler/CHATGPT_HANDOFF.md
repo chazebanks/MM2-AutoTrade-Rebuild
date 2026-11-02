@@ -3632,3 +3632,29 @@ New passes gained from this recording:
 - final Accept lock.
 
 Do not add another patch based on this recording alone.
+
+
+---
+
+# 49. Developer Console warning source resolved
+
+Date: 2026-11-02
+
+User provided screenshot from the 17-31-12 recording showing the single warning.
+
+Visible warning:
+`Infinite yield possible on 'Workspace.Lobby.Elite.Screen.Surface.Frame.Frame:WaitForChild("Buy")'`
+
+Visible stack:
+- `Script 'Workspace.Lobby.Elite.Screen.Surface.Frame.Frame.Script', Line 1`
+
+Conclusion:
+- warning originates from an MM2 Workspace/Lobby Elite screen script,
+- it is not emitted by the pdiddler scanner/outgoing/Part4/market modules,
+- it is a Roblox `WaitForChild("Buy")` infinite-yield warning because the expected `Buy` child was not found within Roblox's warning interval,
+- Developer Console still shows 0 Errors.
+
+Status update:
+the previously unresolved single console warning from recording `ScreenRecording_11-02-2026 17-31-12_1.mp4` is now RESOLVED AS EXTERNAL / NON-PDIDDLER.
+
+Do not patch the trader for this warning.
