@@ -544,6 +544,7 @@ local function metaIdentity(meta)
  },"|")
 end
 
+local VALUE_SNAPSHOT_UPDATED="2026-10-31 12:31:12 EST"
 local Checker={rows={},byId={},ready=false}
 Checker.raw=[==[
 ancient|1|250000000|NiksScythe.png
@@ -771,7 +772,7 @@ local function checkerBuild()
   end
  end
  Checker.ready=count>0
- log("VALUE SNAPSHOT READY",count,"rows (loaded once)")
+ log("VALUE SNAPSHOT READY",count,"rows | source update",VALUE_SNAPSHOT_UPDATED)
  return Checker.ready
 end
 
@@ -904,8 +905,8 @@ local function auditEligibleIdentityCollisions()
  local groups={}
  for _,m in pairs(Meta) do
   local page=checkerPage(m)
-  if allowedPage(page) then
-   local k=table.concat({page,norm(identityName(m))},"|")
+  if qualifyingMeta(m) then
+   local k=table.concat({page,norm(identityName(m)),norm(m.type)},"|")
    groups[k]=groups[k] or {}
    groups[k][#groups[k]+1]=m
   end
