@@ -42,7 +42,7 @@ Combined test stack:
 `pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua`
 
 Immutable stack commit:
-`a4e74021f6eae13cb312fb12a61337d3f4f38074`
+`bc2deeeffbd7d77bd933d2f11b2e0bea9c13de15`
 
 The stack internally pins the integrated market modules to:
 `7809aa8c8d210d8005c223eb9fd3a6b3ea716ba5`
@@ -96,7 +96,7 @@ It:
 - prefers giving away weaker exit-quality inventory inside the similarity band,
 - preserves deterministic canonical tie-breaking.
 
-Preflight fixtures in the combined stack run before Parts 1-4 arm:
+Startup order is deliberately preserved as P1 bot check -> P2 Tablet/startup -> scanner load -> market modules/preflight -> Part 4/outgoing. Preflight fixtures run before Part 4/outgoing arm:
 - profile coverage 190/190,
 - OUR Emberscythe protected at 375,
 - moderate 230 -> 270 keeps the 230 offer (+40),
@@ -221,3 +221,32 @@ The recording must be reviewed for:
 - any console error or warning attributable to pdiddler.
 
 Do not freeze v2.6 as known-good before that recording review.
+
+
+## Startup-order regression fix
+
+The first v2.6 stack draft ran market-module/preflight work before the frozen P1/P2 startup sequence.
+
+That ordering was rejected because it could:
+- perform extra HTTP/module work before the bot avoider,
+- delay or interfere with the known-good Tablet/startup selector,
+- change the startup timing that v2.5 had already proven.
+
+Corrected immutable stack:
+`bc2deeeffbd7d77bd933d2f11b2e0bea9c13de15`
+
+Corrected order:
+1. Part 1 known-good bot avoider,
+2. Part 2 known-good Tablet/startup selector,
+3. scanner v6.8 load,
+4. validated market modules + preflight,
+5. Part 4 market-aware arm,
+6. outgoing v15 arm.
+
+CI run `41526118216` on the corrected stack commit completed successfully:
+- official Luau 0.745 install: PASS,
+- compile integration modules + combined stack: PASS,
+- pure integration tests: PASS,
+- static Part 4 regression guards: PASS.
+
+Use only the corrected stack for the iPad live test.
