@@ -1,0 +1,157 @@
+# MM2 v2.6.1 Lag Fix Results
+
+Date: 2026-11-02
+Branch: `fix/mm2-v2_6-lag`
+
+## Status
+
+**PERFORMANCE FIX PRE-LIVE GATE PASSED.**
+
+This build exists specifically to reduce the severe runtime lag reported while testing v2.6. It does not freeze or replace v2.6 as known-good yet.
+
+FINAL ITEM-TRADE ACCEPT remains disabled.
+
+## Root-cause investigation
+
+The first hypothesis was that the new market-aware planner was continuously recomputing.
+
+That was not true.
+
+Part 4 already suppresses repeated planning for an unchanged opponent offer through:
+- `lastTheirSig`
+- `stableSince`
+- `lastBalancedSig`
+
+So the planner is not rerun every 0.12s once an unchanged offer is settled.
+
+The confirmed repeated work was lower in the pipeline:
+
+`evaluateSide -> marketBundleAssessment -> marketLogic.bundleAssessment -> profile lookup + itemAssessment`
+
+`evaluateSide` is called repeatedly from:
+- the main active-trade polling loop,
+- `txValidate`,
+- remove/mutation verification,
+- recovery checks,
+- apply-plan verification.
+
+Some of those verification loops poll at 0.05-0.08s. They only need raw totals, signatures, slot counts, and identity, but v2.6 still recalculated the same market bundle for the same unchanged offer each time.
+
+That repeated Supreme/MM2/demand/stability work was redundant because the market profile is frozen during the session and the same canonical bundle produces the same assessment.
+
+## Fix
+
+New pure module:
+`pdiddler/pdiddler4_market_bundle_cache_v1.lua`
+
+Cache behavior:
+- bounded to 64 entries,
+- canonical key includes side + page + id + raw value + quantity,
+- bundle item order is normalized before keying,
+- OUR and THEIR assessments are cached separately,
+- same bundle in a new poll reuses the previous immutable market assessment,
+- changed bundle computes a fresh result,
+- alternate profile input bypasses the cache and preserves original behavior.
+
+Production integration is deliberately outside Part 4:
+- the validated market logic is loaded unchanged,
+- the cache wraps only `bundleAssessment`,
+- all other market API functions are forwarded unchanged through `__index`,
+- Part 4 itself is the exact v2.6 integration build.
+
+This means no changes were made to:
+- Part 4 polling interval,
+- scanner scheduling,
+- request ownership,
+- transaction generation,
+- offer signatures,
+- remove verification,
+- TX ABORT,
+- recovery,
+- 15s empty timer,
+- 60s Case 3 timer,
+- EXTREME GUARD,
+- planner rules/ranking,
+- final Accept lock.
+
+## TDD evidence
+
+RED:
+- test commit `2d18be091a00e5c8b7f7e8b65a86df4b902792e0`
+- CI failed because `pdiddler4_market_bundle_cache_v1` did not exist.
+
+GREEN:
+- cache implementation commit `03dd37b0f3d49700a38c55d7f7d15e83de077911`
+- identical bundle computed once,
+- same signature/new eval object reused,
+- reversed item order reused,
+- OUR/THEIR remained separate,
+- changed signature computed fresh.
+
+## New test stack
+
+File:
+`pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_1_PERF.lua`
+
+Stack creation commit:
+`92eddb1d15699510e7e6f86a9414f6d28a4d3da8`
+
+Final CI-tested head:
+`b1ef79d8f9ce815a56cfd0b58f1c4a11a33c4088`
+
+It retains:
+- P1 -> P2 -> scanner startup order,
+- v2.6 market profile,
+- v2.6 market logic,
+- v2.6 market planner,
+- exact v2.6 Part 4 commit `7809aa8c8d210d8005c223eb9fd3a6b3ea716ba5`,
+- outgoing v15,
+- FINAL ACCEPT disabled.
+
+Only new runtime component:
+`marketBundleCache.wrap(marketProfile, marketLogicBase, 64)`
+
+## Official Luau CI
+
+Workflow run:
+`41528139709`
+
+Head:
+`b1ef79d8f9ce815a56cfd0b58f1c4a11a33c4088`
+
+Result:
+**SUCCESS**
+
+Passed:
+- official Luau 0.745 install,
+- compile market profile,
+- compile market logic,
+- compile market planner,
+- compile cache module,
+- compile Part 4,
+- compile v2.6 stack,
+- compile v2.6.1 PERF stack,
+- 14/14 market matrix,
+- ranking tests,
+- planner integration fixtures,
+- 190/190 profile promotion,
+- cache performance regression,
+- Part 4 static regression guards,
+- v2.6/v2.6.1 stack guards.
+
+## Live comparison required
+
+Compare the user's current v2.6 recording against v2.6.1 PERF.
+
+Look specifically for:
+- frame-rate/input responsiveness,
+- freezes when THEIR OFFER is unchanged,
+- freezes during remove/rebalance verification,
+- lag when THEIR OFFER changes,
+- planner/rebalance behavior unchanged,
+- request ownership unchanged,
+- scanner behavior unchanged,
+- 15s/60s timing unchanged,
+- any new console warning/error.
+
+If lag remains severe only when a new opponent offer becomes stable, the next suspect is the one-time planner DP calculation, not repeated bundle valuation. Do not stack another optimization until the recording confirms that pattern.
