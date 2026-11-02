@@ -2267,3 +2267,49 @@ Required cases remain:
 11. equal-raw candidate plans with different exit quality.
 
 Do not wire this snapshot into live trading until those decisions are explicitly validated.
+
+
+---
+
+# 36. v2.6 market-aware planner design approved approach / pending design approval
+
+Date: 2026-11-02
+
+The user selected Approach C: Hybrid Market-Aware Planner.
+
+Design document:
+`docs/superpowers/specs/2026-11-02-mm2-market-aware-planner-design.md`
+
+Design commit:
+`f0d83656c05cc66a1b550544c7554e5041fbc0d9`
+
+No live code changed.
+
+The design preserves:
+- Parts 1-3,
+- scanner canonical identity/MM2Values baseline,
+- Part 4 transaction executor,
+- TX ABORT/recovery,
+- 15s/60s timers,
+- moderate profitable hold,
+- EXTREME GUARD,
+- FINAL ACCEPT disabled.
+
+The design defines a 14-case offline decision matrix covering:
+- same raw/different quality,
+- controlled <=3% quality upgrade,
+- weak downgrade,
+- material list disagreement,
+- unstable event inventory,
+- moderate overpay,
+- extreme overpay,
+- opponent decrease after hold,
+- missing metadata,
+- mixed bundles,
+- equal-raw candidate ranking,
+- low-tier high-percentage/tiny-absolute disagreement,
+- high-value absolute disagreement,
+- unknown/ambiguous market identity.
+
+Next required step after explicit design approval:
+use the Superpowers writing-plans workflow, then implement the offline matrix/tests before any live planner integration.
