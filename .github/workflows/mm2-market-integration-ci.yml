@@ -6,6 +6,7 @@ on:
       - feature/mm2-market-aware-part4-v2_6
       - fix/mm2-v2_6-lag
       - fix/mm2-v2_6-ineligible-rebalance
+      - fix/mm2-v2_6-no-plan-decline
   workflow_dispatch:
 
 permissions:
@@ -34,6 +35,7 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler4_market_bundle_cache_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_MARKET_AWARE.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_1_INELIGIBLE_FIX.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_2_NO_PLAN_DECLINE.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_1_PERF.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_2_PERF_INELIGIBLE.lua >/dev/null
@@ -114,4 +116,28 @@ jobs:
           assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in stack
           assert "AcceptTrade" not in stack
           print("PASS static Part 4 + stack regression guards")
+          PY
+
+
+      - name: No-plan decline behavior regression
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("pdiddler/pdiddler4_balancer_ROTATING_v2_4_2_NO_PLAN_DECLINE.lua")
+          assert p.exists(), "new no-plan-decline Part 4 build missing"
+          src=p.read_text()
+
+          unresolved=src.index("if #theirEval.unresolved>0 then")
+          stable=src.index("os.clock()-stableSince<C.OfferStability")
+          no_plan=src.index("if #plans==0 then")
+          decline=src.index('declineTrade("no-safe-plan")', no_plan)
+          finish=src.index('return finishTradeClosed("no-safe-plan-declined")', no_plan)
+
+          assert stable < no_plan, "no-plan decline must occur only after stability gate"
+          assert unresolved < no_plan, "unresolved THEIR OFFER must remain a hold before no-plan decline"
+          assert decline > no_plan, "no-plan branch must decline the trade"
+          assert finish > decline, "no-plan decline must terminate the current Part 4 session"
+          assert "waiting for offer change" not in src[no_plan:finish], "no-plan branch must not hold indefinitely"
+          assert "AcceptTrade" not in src
+          print("PASS no-plan stable resolved trade declines immediately")
           PY
