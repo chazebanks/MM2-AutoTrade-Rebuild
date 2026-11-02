@@ -156,4 +156,101 @@ function M.bundleAssessment(items,side,profileLookup)
   return out
 end
 
+local function max2(a,b) if a>b then return a else return b end end
+
+function M.requiredProfit(ourBundle,theirBundle)
+  ourBundle=type(ourBundle)=="table" and ourBundle or {}
+  theirBundle=type(theirBundle)=="table" and theirBundle or {}
+  local ourCopies=tonumber(ourBundle.eligibleCopies) or 0
+  local theirCopies=tonumber(theirBundle.eligibleCopies) or 0
+  local ourProtected=tonumber(ourBundle.protectedTotal) or 0
+  local kind
+  local flat,pct
+  if ourCopies==1 and theirCopies>=3 then
+    kind="BIG DOWNGRADE"; flat=30; pct=0.08
+  elseif theirCopies>ourCopies then
+    kind="DOWNGRADE"; flat=20; pct=0.06
+  elseif ourCopies>theirCopies then
+    kind="UPGRADE"; flat=15; pct=0.03
+  else
+    kind="NORMAL"; flat=15; pct=0.03
+  end
+  local baseRequired=max2(flat,ourProtected*pct)
+  local marketPremium=0
+  local theirRisk=tonumber(theirBundle.riskPoints) or 0
+  local ourExit=tonumber(ourBundle.exitScore) or 0
+  local theirExit=tonumber(theirBundle.exitScore) or 0
+  local receivingMoreOrWeaker=(kind=="DOWNGRADE" or kind=="BIG DOWNGRADE" or theirExit<ourExit)
+  if receivingMoreOrWeaker and theirRisk>0 and ourProtected>0 then
+    local premiumPct=math.min(0.10,theirRisk*0.02)
+    marketPremium=premiumPct*ourProtected
+  end
+  return baseRequired+marketPremium,kind,baseRequired,marketPremium
+end
+
+function M.tradeDecision(ourBundle,theirBundle)
+  ourBundle=type(ourBundle)=="table" and ourBundle or {}
+  theirBundle=type(theirBundle)=="table" and theirBundle or {}
+  local ourRaw=tonumber(ourBundle.rawTotal) or 0
+  local theirRaw=tonumber(theirBundle.rawTotal) or 0
+  local ourProtected=tonumber(ourBundle.protectedTotal) or 0
+  local theirProtected=tonumber(theirBundle.protectedTotal) or 0
+  local rawProfit=theirRaw-ourRaw
+  local protectedProfit=theirProtected-ourProtected
+  local required,kind,baseRequired,marketPremium=M.requiredProfit(ourBundle,theirBundle)
+  local qualityGain=(tonumber(theirBundle.exitScore) or 0)-(tonumber(ourBundle.exitScore) or 0)
+  local ratio=(ourRaw>0) and (theirRaw/ourRaw) or math.huge
+  local decision={
+    ok=false,kind=kind,mode="reject",rawProfit=rawProfit,protectedProfit=protectedProfit,
+    requiredProfit=required,baseRequired=baseRequired,marketPremium=marketPremium,
+    qualityGain=qualityGain,ratio=ratio,ourRaw=ourRaw,theirRaw=theirRaw,
+    reason="raw-underpay",
+  }
+
+  if rawProfit>=required and protectedProfit>=required then
+    decision.ok=true
+    decision.mode="profit"
+    decision.reason="profit"
+    return decision
+  end
+
+  local ourCopies=tonumber(ourBundle.eligibleCopies) or 0
+  local theirCopies=tonumber(theirBundle.eligibleCopies) or 0
+  if kind=="UPGRADE" and ourCopies>theirCopies and theirCopies>0 then
+    if ourBundle.confidence~=true or theirBundle.confidence~=true then
+      decision.reason="upgrade-confidence"
+      return decision
+    end
+    if (tonumber(ourBundle.disputedCopies) or 0)>0 or (tonumber(theirBundle.disputedCopies) or 0)>0 then
+      decision.reason="upgrade-disagreement"
+      return decision
+    end
+    if qualityGain<2 then
+      decision.reason="upgrade-quality-insufficient"
+      return decision
+    end
+    local rawCap=ourRaw*0.03
+    local protectedCap=ourProtected*0.03
+    if rawProfit < -rawCap then
+      decision.reason="upgrade-raw-loss"
+      return decision
+    end
+    if protectedProfit < -protectedCap then
+      decision.reason="upgrade-protected-loss"
+      return decision
+    end
+    decision.ok=true
+    decision.mode="quality-upgrade"
+    decision.reason="quality-upgrade"
+    return decision
+  end
+
+  if rawProfit>=required and protectedProfit<required then
+    decision.reason="protected-underpay"
+  elseif marketPremium>0 and rawProfit>=baseRequired and rawProfit<required then
+    decision.reason="weak-downgrade-premium"
+  end
+  return decision
+end
+
 return M
