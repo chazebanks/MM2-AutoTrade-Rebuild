@@ -234,3 +234,68 @@ jobs:
       - name: Run Discord webhook sender transport contract
         run: |
           /tmp/luau/luau pdiddler/tests/pdiddler_trade_webhook_sender_v1.luau
+
+
+      - name: Completed-trade webhook integration contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          bridge=Path("pdiddler/pdiddler4_balancer_ROTATING_v2_4_3_WEBHOOK_TELEMETRY.lua")
+          logger=Path("pdiddler/pdiddler_trade_completion_logger_v1.lua")
+
+          assert bridge.exists(), "Part 4 webhook telemetry bridge missing"
+          assert logger.exists(), "completed-trade logger missing"
+
+          b=bridge.read_text()
+          l=logger.read_text()
+
+          # Part 4 remains trade authority; telemetry is read-only.
+          assert "webhookCandidate" in b
+          assert "publishWebhookCandidate" in b
+          assert "clearWebhookCandidate" in b
+          assert "tradeTelemetry.build" in b
+          assert '"profitable-hold"' in b
+          assert '"extreme-hold"' in b
+          assert '"rebalance-verified"' in b
+          for token in [
+              '"their-offer-changed"',
+              '"their-offer-empty"',
+              '"their-offer-unresolved"',
+              '"our-offer-unresolved"',
+              '"recovery-active"',
+              '"rebalance-active"',
+              '"no-safe-plan"',
+              '"trade-closed"',
+          ]:
+              assert token in b, f"bridge missing invalidation: {token}"
+
+          assert "AcceptTrade" not in b
+          assert 'physicalClick(button,"Accept' not in b
+          assert 'physicalClick(button,"Confirm' not in b
+
+          # Completion is server-confirmed first, inventory-delta verified second.
+          assert 'FindFirstChild("AcceptTrade")' in l
+          assert "OnClientEvent" in l
+          assert "complete==true" in l
+          assert 'FindFirstChild("DeclineTrade")' in l
+          assert "GetProfileData" in l
+          assert "Weapons" in l and "Owned" in l
+          assert "expectedDelta" in l
+          assert "deltaMatches" in l
+          assert "inventory-verified-fallback" in l
+          assert "logged" in l
+          assert "webhookCandidate" in l
+
+          # URL/credential must remain external to GitHub source.
+          assert "PDIDDLER_DISCORD_WEBHOOK_URL" in l
+          assert "discord.com/api/webhooks/" not in l
+          assert "discordapp.com/api/webhooks/" not in l
+
+          # Logger observes completion but never performs final trade acceptance.
+          assert ":FireServer(" not in l
+          assert "SendMouseButtonEvent" not in l
+          assert "firesignal" not in l
+
+          print("PASS completed-trade webhook integration contract")
+          PY
