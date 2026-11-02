@@ -2313,3 +2313,40 @@ The design defines a 14-case offline decision matrix covering:
 
 Next required step after explicit design approval:
 use the Superpowers writing-plans workflow, then implement the offline matrix/tests before any live planner integration.
+
+
+---
+
+# 37. Offline market decision matrix implementation plan
+
+Date: 2026-11-02
+
+User approved the v2.6 Hybrid Market-Aware Planner design.
+
+Implementation plan:
+`docs/superpowers/plans/2026-11-02-mm2-market-decision-matrix-plan.md`
+
+Plan commit:
+`e37b4a13e099c1884e6023fd2567eead09f7e624`
+
+Scope is intentionally limited to offline market logic and deterministic tests.
+
+Pinned candidate rules include:
+- material list disagreement only when absolute difference >=25 AND percentage difference >=5%,
+- OUR disputed items protect high; THEIR disputed items credit low,
+- demand/status scoring,
+- downgrade risk premium capped at +10% of OUR protected value,
+- quality-upgrade exception remains <=3% raw loss,
+- no positive quality credit from missing/incomplete metadata,
+- deterministic plan ranking,
+- no live Part 4 integration in this plan.
+
+Planned new files:
+- `pdiddler/pdiddler_market_profile_2026-11-02_v1_CANDIDATE.lua`
+- `pdiddler/pdiddler4_market_logic_v1_TEST.lua`
+- `pdiddler/tests/pdiddler_market_profile_audit_v1.lua`
+- `pdiddler/tests/pdiddler4_market_logic_matrix_v1.lua`
+- `pdiddler/MARKET_MATRIX_RESULTS_v1.md`
+
+Explicit stop condition:
+after offline matrix verification, stop. Do not wire the model into v2.5 until a separate integration plan is approved.
