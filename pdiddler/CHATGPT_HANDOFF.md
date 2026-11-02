@@ -2389,3 +2389,12 @@ the committed stack has not yet been executed inside Delta/Roblox from pinned ra
 
 **LIVE PART 4 INTEGRATION HAS NOT STARTED.**
 Do not wire this into v2.5 until target-runtime test evidence is accepted and a separate integration design/plan is approved.
+
+
+Target-runtime matrix runner added:
+- `pdiddler/tests/pdiddler_market_matrix_DELTA_RUNNER_v1.lua`
+- commit `62c3c6f5fc0e5e9528e6fbbfd1cee754c44eec6d`
+- pins candidate profile `7ec3398582d565d423bdb00ac66d7ad6f26ad06e`
+- pins market logic `aca1dc23a1cbda074faf9c00b039fd212a0830b4`
+- read-only: no trade/remotes/GUI/server-hop/final-Accept behavior
+- pending user Delta execution before any Part 4 integration.
