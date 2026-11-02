@@ -31,7 +31,6 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_MARKET_AWARE.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler_market_integration_ci_v1.luau >/dev/null
-          /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua >/dev/null
 
       - name: Run pure market integration tests
         run: |
@@ -52,6 +51,8 @@ jobs:
               'local countKey=tostring(item.page or "")..":"..id',
               'local key=tostring(p.page or "")..":"..tostring(p.id or "")',
               'tostring(r.page or "")',
+              'tostring(x.page or "")~=tostring(first.page or "")',
+              'local offerKey=tostring(p.page or "")..":"..tostring(p.id or "")',
               "EmptyTimeout=15.0",
               "ActiveOfferWindow=60.0",
               "RecoveryMaxAttemptsPerOffer=2",
@@ -77,6 +78,8 @@ jobs:
               "effectiveFloor",
               "local function buildPlans",
               "local function makeUnits",
+              "local function marketProfileRecord",
+              "local function marketItemAssessment",
               "AcceptTrade",
               'physicalClick(button,"Accept',
           ]
