@@ -391,3 +391,8 @@ jobs:
 
           print("PASS webhook credential leak guard")
           PY
+
+
+      - name: Run raw/checker market identity regression
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler4_market_identity_raw_checker_v1.luau
