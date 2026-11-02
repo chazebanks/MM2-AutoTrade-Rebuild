@@ -153,3 +153,31 @@ It performs:
 It contains no trade/remotes/GUI/server-hop/final-Accept behavior.
 
 Status: **pending user Delta execution**.
+
+
+## Delta target-runtime recording
+
+Evidence:
+`ScreenRecording_11-02-2026 15-43-30_1.mp4`
+
+Observed in Delta / Roblox on iPad:
+- `PASS target profile audit 190/190`
+- `PASS case 1` through `PASS case 14`
+- `PASS matrix 14/14`
+- `PASS ranking tests`
+- developer console showed 0 script errors from the market runner.
+
+An unrelated MM2 game-script warning was visible:
+`Infinite yield possible on 'Workspace.Lobby.Elite.Screen.Surface.Frame.Frame:WaitForChild("Buy")'`
+with stack pointing to:
+`Workspace.Lobby.Elite.Screen.Surface.Frame.Frame.Script, Line 1`.
+
+This warning is outside the market runner and did not affect the test results.
+
+Target-runtime gate status: **PASS**.
+
+The offline market model is now validated in both:
+1. standalone Lua runtime, and
+2. the actual Delta/Roblox target environment.
+
+LIVE PART 4 INTEGRATION HAS STILL NOT STARTED.
