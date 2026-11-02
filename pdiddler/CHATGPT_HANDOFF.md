@@ -2350,3 +2350,42 @@ Planned new files:
 
 Explicit stop condition:
 after offline matrix verification, stop. Do not wire the model into v2.5 until a separate integration plan is approved.
+
+
+---
+
+# 38. Offline market matrix implementation results
+
+Date: 2026-11-02
+Branch: `feature/mm2-market-matrix-v1`
+
+Results:
+`pdiddler/MARKET_MATRIX_RESULTS_v1.md`
+
+Key implementation files:
+- `pdiddler/pdiddler_market_profile_2026-11-02_v1_CANDIDATE.lua`
+- `pdiddler/pdiddler4_market_logic_v1_TEST.lua`
+- `pdiddler/tests/pdiddler_market_profile_audit_v1.lua`
+- `pdiddler/tests/pdiddler4_market_logic_evaluator_v1.lua`
+- `pdiddler/tests/pdiddler4_market_logic_matrix_v1.lua`
+
+Verified offline:
+- candidate source audit: 190/190 canonical rows, 0 duplicates, 0 missing/extra, 0 MM2 baseline mismatches,
+- evaluator tests PASS,
+- decision matrix 14/14 PASS,
+- deterministic ranking tests PASS,
+- forbidden trade/UI/network/final-Accept scan PASS.
+
+Independent Firecrawl recheck matched the critical Supreme/MM2Values fields used in the disagreement tests.
+
+Important TDD ruling:
+the controlled <=3% quality-upgrade exception requires both raw and protected loss to stay within 3%, with material disagreement forbidden. A literal protectedProfit>=0 requirement made the approved small-loss upgrade impossible whenever the lists agree.
+
+Important ranking ruling:
+profit similarity uses deterministic anchored bands rather than pairwise comparisons to prevent non-transitive sort results.
+
+Remaining limitation:
+the committed stack has not yet been executed inside Delta/Roblox from pinned raw GitHub URLs.
+
+**LIVE PART 4 INTEGRATION HAS NOT STARTED.**
+Do not wire this into v2.5 until target-runtime test evidence is accepted and a separate integration design/plan is approved.
