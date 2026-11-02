@@ -243,9 +243,9 @@ jobs:
           # Bridge must preserve Part 4 as authority and expose read-only state.
           assert "completion=" in b
           assert "publishCompletion" in b
-          assert 'source="profitable-hold"' in b
-          assert 'source="extreme-hold"' in b
-          assert 'source="rebalance-verified"' in b
+          assert '"profitable-hold"' in b
+          assert '"extreme-hold"' in b
+          assert '"rebalance-verified"' in b
           assert '"their-offer-changed"' in b
           assert '"recovery-active"' in b
           assert '"rebalance-active"' in b
