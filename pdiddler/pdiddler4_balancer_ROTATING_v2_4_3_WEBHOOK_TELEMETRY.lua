@@ -365,6 +365,7 @@ local function resolveEntry(entry,inv)
 
     return {
         id=first.id,
+        checkerId=first.checkerId,
         name=first.name,
         value=tonumber(first.value) or 0,
         page=first.page,
@@ -416,6 +417,7 @@ local function evaluateSide(t,sideName,inv)
 
             out.resolved[#out.resolved+1]={
                 id=id,
+                checkerId=item.checkerId,
                 page=item.page,
                 name=item.name,
                 rawValue=tonumber(item.value) or 0,
