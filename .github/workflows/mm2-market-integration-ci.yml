@@ -181,3 +181,21 @@ jobs:
           assert 'FINAL ACCEPT DISABLED / NOT IMPLEMENTED' in src
           print("PASS duplicate live-lab v2 contract guards")
           PY
+
+
+      - name: Duplicate live-lab v3 raw-owned-key regression
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v3.lua")
+          assert p.exists(), "duplicate live lab v3 missing"
+          src=p.read_text()
+          assert 'GetProfileData' in src, "v3 must read own Weapons.Owned"
+          assert 'Database' in src and 'Sync' in src, "v3 must resolve the owned key through MM2 Sync metadata"
+          assert 'resolveOwnedIceblasterKey' in src
+          assert 'offer:FireServer(ownedIceblasterKey,"Weapons")' in src
+          assert 'offer:FireServer(ICEBLASTER_CHECKER_ID,"Weapons")' not in src
+          assert 'AcceptTrade' not in src
+          assert 'FINAL ACCEPT DISABLED / NOT IMPLEMENTED' in src
+          print("PASS duplicate live-lab v3 raw-owned-key regression")
+          PY
