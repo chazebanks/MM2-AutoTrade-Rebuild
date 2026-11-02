@@ -68,3 +68,45 @@ assert(source5=="computed","changed canonical signature must compute fresh marke
 assert(calls==3,"changed offer should cause exactly one new market computation")
 
 print("PASS market bundle cache avoids repeated valuation work")
+
+
+-- Production integration contract: wrapper preserves the market-logic API
+-- while caching bundleAssessment transparently.
+local wrapCalls=0
+local realLikeLogic={
+    bundleAssessment=function(items,side,profileLookup)
+        wrapCalls+=1
+        local raw=0
+        for _,it in ipairs(items) do
+            raw+=(tonumber(it.value) or 0)*(tonumber(it.qty) or 1)
+        end
+        return {rawTotal=raw,protectedTotal=raw,eligibleCopies=#items,confidence=true}
+    end,
+    itemAssessment=function() return {protectedUnitValue=1} end,
+    tradeDecision=function() return {ok=true} end,
+    rankPlans=function(plans) return plans end,
+}
+
+local wrapped=Cache.wrap(profile,realLikeLogic,8)
+assert(type(wrapped.itemAssessment)=="function","wrapper must preserve itemAssessment")
+assert(type(wrapped.tradeDecision)=="function","wrapper must preserve tradeDecision")
+assert(type(wrapped.rankPlans)=="function","wrapper must preserve rankPlans")
+
+local items={
+    {page="godly",id="a",name="A",value=10,qty=1},
+    {page="ancient",id="b",name="B",value=20,qty=1},
+}
+local w1=wrapped.bundleAssessment(items,"ours",profile)
+local w2=wrapped.bundleAssessment(items,"ours",profile)
+assert(wrapCalls==1,"wrapped bundleAssessment must compute identical bundle once")
+assert(w1==w2,"wrapped cache hit must reuse the immutable bundle result")
+
+local reversed={items[2],items[1]}
+local w3=wrapped.bundleAssessment(reversed,"ours",profile)
+assert(wrapCalls==1,"bundle cache key must be order-independent")
+assert(w3==w1,"order-independent bundle must reuse the cached result")
+
+wrapped.bundleAssessment(items,"theirs",profile)
+assert(wrapCalls==2,"OUR/THEIR protected semantics must remain separate in wrapper")
+
+print("PASS market logic wrapper caches repeated bundleAssessment")
