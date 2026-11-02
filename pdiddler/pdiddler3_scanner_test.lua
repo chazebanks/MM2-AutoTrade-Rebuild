@@ -33,12 +33,6 @@ local C = {
     PeriodicRescanGap = 0.35,
 }
 
-local State = {
-    targetReader = nil,
-    targetMode = nil,
-    targetReaderCheckedAt = 0,
-}
-
 local function log(...)
     print("[MM2 Scanner T4]", ...)
 end
@@ -494,19 +488,8 @@ local function req(mod)
 end
 
 local DB=RS:FindFirstChild("Database")
-local Mods=RS:FindFirstChild("Modules")
 local Sync=req(DB and DB:FindFirstChild("Sync")) or {}
-local ProfileData=req(Mods and Mods:FindFirstChild("ProfileData")) or {}
 local Meta={}
-local NameCandidates={}
-local AssetCandidates={}
-
-local function candidateAdd(map,q,m)
- if not q or q=="" or not m then return end
- map[q]=map[q] or {}
- for _,x in ipairs(map[q]) do if x==m then return end end
- map[q][#map[q]+1]=m
-end
 
 local function assetKey(x)
  local raw=tostring(x or "")
@@ -514,54 +497,29 @@ local function assetKey(x)
  return raw:match("(%d%d%d%d%d+)") or norm(raw)
 end
 
-local function indexCatalogAssets(d,m)
- for k,v in pairs(d or {}) do
-  local nk=norm(k)
-  if (type(v)=="string" or type(v)=="number")
-   and (nk:find("image",1,true) or nk:find("icon",1,true) or nk:find("texture",1,true) or nk:find("thumbnail",1,true))
-  then
-   local a=assetKey(v)
-   if a~="" then candidateAdd(AssetCandidates,a,m) end
-  end
- end
-end
-
-local function addNameMeta(q,m) candidateAdd(NameCandidates,q,m) end
-
 local function indexItems(src)
  if type(src)~="table" then return end
  for id,d in pairs(src) do
   if type(d)=="table" then
-   local m={id=tostring(id),cat="Weapons",data=d,name=d.ItemName or d.Name or tostring(id),chroma=d.Chroma==true,type=d.ItemType or "",rarity=d.Rarity or ""}
-   Meta["Weapons|"..tostring(id)]=m
-   indexCatalogAssets(d,m)
-   local display=m.chroma and (m.name:lower():match("^chroma%s") and m.name or ("Chroma "..m.name)) or m.name
-   addNameMeta(norm(display),m)
+   Meta["Weapons|"..tostring(id)]={
+    id=tostring(id),
+    cat="Weapons",
+    data=d,
+    name=d.ItemName or d.Name or tostring(id),
+    chroma=d.Chroma==true,
+    type=d.ItemType or "",
+    rarity=d.Rarity or ""
+   }
   end
  end
 end
 indexItems(Sync.Weapons or Sync.Item)
 
-local function tradable(d)
- return type(d)=="table" and d.Tradable~=false and d.CanTrade~=false and d.Untradable~=true and d.NonTradable~=true and d.Locked~=true
-end
-
-local VariantPrefixes={{"gold","Gold"},{"silver","Silver"},{"bronze","Bronze"},{"blue","Blue"},{"red","Red"},{"purple","Purple"},{"green","Green"},{"yellow","Yellow"},{"orange","Orange"},{"pink","Pink"}}
 local function identityName(meta)
  if not meta then return "" end
  local name=tostring(meta.name or meta.id or "")
- local d=meta.data or {}
- if meta.chroma then return name:lower():match("^chroma%s") and name or ("Chroma "..name) end
- local nameq=norm(name)
- if norm(meta.rarity)=="unique" then
-  for _,field in ipairs({"Variant","VariantName","Color","Colour","LeaderboardColor","LeaderboardColour","Edition","Version"}) do
-   local rq=norm(d[field])
-   if rq~="" then
-    for _,pair in ipairs(VariantPrefixes) do
-     if (rq==pair[1] or rq:find(pair[1],1,true)) and not nameq:find(pair[1],1,true) then return pair[2].." "..name end
-    end
-   end
-  end
+ if meta.chroma then
+  return name:lower():match("^chroma%s") and name or ("Chroma "..name)
  end
  return name
 end
@@ -843,84 +801,6 @@ local function auditEligibleIdentityCollisions()
 end
 
 auditEligibleIdentityCollisions()
-
-local function ownProfile(forceRemote)
- local rem=RS:FindFirstChild("Remotes")
- local inv=rem and rem:FindFirstChild("Inventory")
- local rf=inv and inv:FindFirstChild("GetProfileData")
- if forceRemote and rf and rf:IsA("RemoteFunction") then
-  local ok,x=pcall(function() return rf:InvokeServer() end)
-  if ok and type(x)=="table" then return x end
- end
- if type(ProfileData)=="table" and ProfileData.Weapons then return ProfileData end
- if rf and rf:IsA("RemoteFunction") then
-  local ok,x=pcall(function() return rf:InvokeServer() end)
-  if ok and type(x)=="table" then return x end
- end
-end
-
-local function inventoryFromProfile(prof)
- if type(prof)~="table" then return nil end
- local owned=prof.Weapons and prof.Weapons.Owned
- if type(owned)~="table" then return nil end
-
- local out={items={},total=0,rawOwned=0,unmapped=0,unpriced=0,badQty=0,seen={}}
-
- for id,count in pairs(owned) do
-  local qty=nil
-  if type(count)=="number" then
-   if count>=0 and count==math.floor(count) then qty=count end
-  elseif type(count)=="string" then
-   local n=tonumber(count)
-   if n and n>=0 and n==math.floor(n) then qty=n end
-  end
-
-  if qty==nil then
-   out.badQty += 1
-   out.seen[#out.seen+1]=tostring(id).."x?"
-  elseif qty>0 then
-   out.rawOwned += qty
-   out.seen[#out.seen+1]=tostring(id).."x"..tostring(qty)
-   local m=Meta["Weapons|"..tostring(id)]
-
-   -- If the live MM2 catalog cannot identify an owned weapon ID, the scan is
-   -- incomplete. Never turn an incomplete scan into a blacklist.
-   if not m then
-    out.unmapped += qty
-   elseif allowedPage(checkerPage(m)) then
-    local e=checkerMarket(m)
-    out.items[#out.items+1]={
-     id=m.id,cat="Weapons",name=identityName(m),qty=qty,
-     value=e and e.v or nil,type=m.type,page=checkerPage(m),
-     checkerId=e and e.id or "UNPRICED",
-     identity=metaIdentity(m),
-     year=tostring((m.data or {}).Year or ""),
-     event=tostring((m.data or {}).Event or ""),
-     valueSource=e and e.source or "UNPRICED"
-    }
-    if e then
-     out.total += e.v*qty
-    else
-     out.unpriced += qty
-    end
-   end
-  end
- end
-
- table.sort(out.seen)
- out.fingerprint=table.concat(out.seen,"|")
-
- table.sort(out.items,function(a,b)
-  local av=tonumber(a.value) or -math.huge
-  local bv=tonumber(b.value) or -math.huge
-  if av~=bv then return av>bv end
-  return tostring(a.id)<tostring(b.id)
- end)
-
- return out
-end
-
-local function scanOwn() return inventoryFromProfile(ownProfile(true) or ownProfile(false)) end
 
 local function unwrapProfile(x,depth)
  depth=depth or 0
