@@ -2669,3 +2669,94 @@ loadstring(game:HttpGet(
     true
 ))()
 ```
+
+
+---
+
+# 43. v2.6 recording trade/value audit
+
+Date: 2026-11-02
+
+Recording:
+`ScreenRecording_11-02-2026 16-20-03_1.mp4`
+
+Validated snapshot used:
+`pdiddler/pdiddler_market_profile_2026-11-02_v1_VALIDATED.lua`
+
+The visible trade states reconcile with the current MM2Values raw values and the console's reported profits.
+
+Key first-trade states vs `venossgaming99190`:
+
+1. Plasmabeam 20 vs Iceblaster 35
+- OUR 20
+- THEIR 35
+- raw profit +15
+- matches REBALANCE VERIFIED +15.
+
+2. Chroma Laser 40 + Jinglegun 15 = 55
+vs Iceblaster x2 = 70
+- raw profit +15
+- matches the normal +15 rebalance behavior.
+
+3. Same OUR 55
+vs Immortal 140 + Iceblaster 35 = 175
+- raw profit +120
+- ratio = 175/55 = 3.1818x
+- exactly matches console EXTREME REPLAN: ours 55, theirs 175, rawProfit 120, ratio 3.1818x.
+- a safe 160 target exists from Mortal 140 + Plasmabeam 20, leaving +15.
+
+4. Chroma Laser 40 + Jinglegun 15 + Mortal 140 = 195
+vs Immortal 140 + Iceblaster x2 70 = 210
+- raw profit +15.
+
+5. Chroma Laser 40 + Jinglegun 15 + Laser 23 + Mortal 140 = 218
+vs Iceblaster x3 105 + Green Luger 25 + Immortal 140 = 270
+- visible green-rarity Sunset is excluded as ineligible/non-target tier.
+- raw profit +52
+- exactly matches console PROFITABLE HOLD, DOWNGRADE, rawProfit 52.
+
+6. Chroma Laser 40 + Chroma Swirly Gun 35 + Ornament 60 + Jinglegun 15 = 150
+vs Green Luger 25 + Immortal 140 = 165
+- green-rarity Sunset excluded.
+- raw profit +15
+- OUR 4 eligible copies vs THEIR 2 eligible copies => UPGRADE
+- matches console REBALANCE VERIFIED UPGRADE +15.
+
+7. Same OUR 150
+vs Green Luger 25 + Immortal 140 + Iceblaster x3 105 = 270
+- raw profit +120
+- THEIR 5 eligible copies vs OUR 4 => DOWNGRADE
+- matches console PROFITABLE HOLD DOWNGRADE +120.
+
+Other transient visible states also arithmetically fit the snapshot (for example Chroma Swirly Gun 35 + Boneblade 8 + Mortal 140 = 183).
+
+Second trade vs `misterioustheif123`:
+
+Initial:
+- OUR Chroma Watergun = 2350
+- THEIR side empty
+- script waits; does not accept.
+
+After Raygun appears:
+- THEIR Raygun = 1825
+- initial Chroma Watergun would be a raw -525 overpay by us and must not be kept.
+
+Rebalanced OUR:
+- Vampire's Axe 1375
+- Chroma Laser 40
+- Ornament 60
+- Mortal 140
+- OUR total = 1615
+- THEIR Raygun = 1825
+- raw profit = +210
+
+The MM2/Supreme differences on Vampire's Axe (1375/1425) and Raygun (1825/1875) do not cross the configured >=5% material-disagreement threshold, so protected totals remain the MM2 baseline in this case. Protected profit is therefore also +210.
+
+Conclusion:
+- no visible value arithmetic error found,
+- no visible item-identity collision found,
+- canonical page:id handling correctly avoids treating the green-rarity Sunset as the Godly/Chroma Sunset,
+- planner correctly moves away from a losing Chroma Watergun-for-Raygun opening and finds a +210 four-item upgrade,
+- value/decision correctness in this recording is strong; the main regression remains performance/lag.
+
+FINAL ACCEPT remained disabled.
