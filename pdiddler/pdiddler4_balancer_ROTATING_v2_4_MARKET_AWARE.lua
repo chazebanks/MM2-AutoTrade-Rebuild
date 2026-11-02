@@ -284,45 +284,6 @@ local function theirAcceptedShown(t)
     return AcceptedFallback.value,AcceptedFallback.via
 end
 
-local function marketProfileRecord(item)
-    if not item
-        or not MARKET_PROFILE
-        or type(MARKET_PROFILE.get)~="function"
-    then
-        return nil
-    end
-
-    local ok,res=pcall(
-        MARKET_PROFILE.get,
-        tostring(item.page or ""),
-        tostring(item.id or "")
-    )
-
-    if ok then return res end
-    return nil
-end
-
-local function marketItemAssessment(item,side)
-    if not MARKET_LOGIC
-        or type(MARKET_LOGIC.itemAssessment)~="function"
-    then
-        return nil,"market-logic-unavailable"
-    end
-
-    local ok,res=pcall(
-        MARKET_LOGIC.itemAssessment,
-        item,
-        side,
-        marketProfileRecord(item)
-    )
-
-    if not ok or type(res)~="table" then
-        return nil,"market-item-assessment-failed"
-    end
-
-    return res,nil
-end
-
 local function marketBundleAssessment(items,side)
     if not MARKET_LOGIC
         or type(MARKET_LOGIC.bundleAssessment)~="function"
