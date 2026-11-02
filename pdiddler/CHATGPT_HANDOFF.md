@@ -2398,3 +2398,32 @@ Target-runtime matrix runner added:
 - pins market logic `aca1dc23a1cbda074faf9c00b039fd212a0830b4`
 - read-only: no trade/remotes/GUI/server-hop/final-Accept behavior
 - pending user Delta execution before any Part 4 integration.
+
+
+---
+
+# 39. Delta target-runtime matrix gate PASSED
+
+Date: 2026-11-02
+
+Recording evidence:
+`ScreenRecording_11-02-2026 15-43-30_1.mp4`
+
+Verified on the user's actual iPad + Delta + Roblox environment:
+- target profile audit 190/190 PASS,
+- Cases 1-14 PASS,
+- matrix 14/14 PASS,
+- deterministic ranking tests PASS,
+- no runner-specific console errors observed.
+
+Visible warning:
+`Infinite yield possible on Workspace.Lobby.Elite.Screen.Surface.Frame.Frame:WaitForChild("Buy")`
+
+Stack identifies MM2's own Workspace script, not the market matrix runner. Treat as unrelated unless future evidence shows interaction.
+
+This closes the target-runtime verification requirement for the offline market model.
+
+**LIVE PART 4 INTEGRATION HAS NOT STARTED.**
+
+Next step:
+create a separate v2.6 Part 4 integration design/plan against the exact current v2.5 planner extension points while preserving request ownership, TX abort/recovery, timers, EXTREME GUARD, scanner scheduling, and FINAL ACCEPT disabled.
