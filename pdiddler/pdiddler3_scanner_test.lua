@@ -564,9 +564,10 @@ end
 local function metaIdentity(meta)
  if not meta then return "" end
  local d=meta.data or {}
+ local page=meta.chroma and "chroma" or norm(meta.rarity)
  return table.concat({
   tostring(meta.id or ""),
-  tostring(checkerPage and checkerPage(meta) or norm(meta.rarity) or ""),
+  tostring(page or ""),
   norm(meta.type),
   meta.chroma and "chroma" or "normal",
   norm(d.Year or d.EventYear or ""),
