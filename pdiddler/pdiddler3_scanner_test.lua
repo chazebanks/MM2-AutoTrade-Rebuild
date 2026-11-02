@@ -679,6 +679,24 @@ local function resetLiveValueMaps()
  LiveValues.count=0
 end
 
+local function resetLiveValueMaps()
+ LiveValues.byPage={godly={},chroma={},ancient={}}
+ LiveValues.collisions={godly={},chroma={},ancient={}}
+ LiveValues.count=0
+end
+
+local function fetchValuePage(primaryUrl,fallbackUrl)
+ local html=httpGetText(primaryUrl)
+ if html and #html>500 then return html,"main" end
+
+ if fallbackUrl then
+  local fallback=httpGetText(fallbackUrl)
+  if fallback and #fallback>500 then return fallback,"mobile" end
+ end
+
+ return nil,"none"
+end
+
 local function buildLiveValues()
  local now=os.clock()
 
@@ -697,11 +715,24 @@ local function buildLiveValues()
  LiveValues.lastAttemptAt=now
  resetLiveValueMaps()
 
- local godlyHtml=httpGetText("https://www.mm2values.com/mobile.php?p=godly")
- local ancientHtml=httpGetText("https://www.mm2values.com/mobile.php?p=ancient")
+ -- Use the full MM2Values lists first. The old mobile pages omit newer/event
+ -- Godlies (Sweet, Treat, Heart Wand, Mortal/Immortal, etc.).
+ local godlyHtml,godlySource=fetchValuePage(
+  "https://www.mm2values.com/index.php?p=godly",
+  "https://www.mm2values.com/mobile.php?p=godly"
+ )
+ local chromaHtml,chromaSource=fetchValuePage(
+  "https://www.mm2values.com/index.php?p=chroma",
+  nil
+ )
+ local ancientHtml,ancientSource=fetchValuePage(
+  "https://www.mm2values.com/index.php?p=ancient",
+  "https://www.mm2values.com/mobile.php?p=ancient"
+ )
 
  local n=0
  if godlyHtml then n += parseValuePage(godlyHtml,"godly") end
+ if chromaHtml then n += parseValuePage(chromaHtml,"chroma") end
  if ancientHtml then n += parseValuePage(ancientHtml,"ancient") end
 
  local godlyN,chromaN,ancientN=0,0,0
@@ -713,25 +744,52 @@ local function buildLiveValues()
   for _ in pairs(pageMap) do collisions+=1 end
  end
 
+ -- Coverage sentinels intentionally include newer/event items that the mobile
+ -- page used to miss. If these are absent, pricing is considered incomplete.
  local sentinels =
   LiveValues.byPage.godly[norm("Elderwood Revolver")]
   and LiveValues.byPage.godly[norm("Death Shard")]
+  and LiveValues.byPage.godly[norm("Sweet")]
+  and LiveValues.byPage.godly[norm("Treat")]
+  and LiveValues.byPage.godly[norm("Heart Wand")]
+  and LiveValues.byPage.godly[norm("Immortal")]
   and LiveValues.byPage.chroma[norm("Chroma DeathShard")]
   and LiveValues.byPage.ancient[norm("Gingerscope")]
-  and LiveValues.byPage.ancient[norm("Icebreaker")]
+  and LiveValues.byPage.ancient[norm("Harvester")]
 
- if godlyN>=60 and chromaN>=15 and ancientN>=10 and sentinels then
+ if godlyN>=80 and chromaN>=20 and ancientN>=10 and sentinels then
   LiveValues.ready=true
   LiveValues.lastLoadedAt=now
-  LiveValues.source="mm2values-live"
+  LiveValues.source="mm2values-full"
   LiveValues.count=n
-  print("[PDIDDLER3] LIVE MM2VALUES READY","godly",godlyN,"chroma",chromaN,"ancient",ancientN,"nameCollisions",collisions)
+
+  print(
+   "[PDIDDLER3] LIVE MM2VALUES READY",
+   "godly",godlyN,
+   "chroma",chromaN,
+   "ancient",ancientN,
+   "collisions",collisions,
+   "sources",godlySource,chromaSource,ancientSource
+  )
+
   return true
  end
 
  LiveValues.ready=false
  LiveValues.source="unavailable"
- warn("[PDIDDLER3] LIVE MM2VALUES INCOMPLETE","godly",godlyN,"chroma",chromaN,"ancient",ancientN,"- prices disabled rather than guessing")
+
+ warn(
+  "[PDIDDLER3] LIVE MM2VALUES INCOMPLETE",
+  "godly",godlyN,
+  "chroma",chromaN,
+  "ancient",ancientN,
+  "sweet",LiveValues.byPage.godly[norm("Sweet")]~=nil,
+  "treat",LiveValues.byPage.godly[norm("Treat")]~=nil,
+  "heartwand",LiveValues.byPage.godly[norm("Heart Wand")]~=nil,
+  "immortal",LiveValues.byPage.godly[norm("Immortal")]~=nil,
+  "- prices disabled rather than guessed"
+ )
+
  return false
 end
 
