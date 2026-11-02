@@ -37,6 +37,9 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_MARKET_AWARE.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_1_INELIGIBLE_FIX.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_2_NO_PLAN_DECLINE.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_3_P5_SHADOW_BRIDGE.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler5_completion_policy_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler5_shadow_completion_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_1_PERF.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_2_PERF_INELIGIBLE.lua >/dev/null
@@ -279,4 +282,32 @@ jobs:
               assert token not in b, f"shadow bridge contains completion action token: {token}"
 
           print("PASS Part 5 shadow integration contract")
+          PY
+
+
+      - name: Part 5 shadow live-stack contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path("pdiddler/pdiddler_PART5_SHADOW_TEST_STACK_v1.lua")
+          assert p.exists(), "Part 5 shadow test stack missing"
+          src=p.read_text()
+
+          assert "pdiddler_KNOWN_GOOD_MARKET_AWARE_v2_6_3.lua" not in src, (
+              "Part 5 stack must compose modules explicitly; do not execute a second nested full stack"
+          )
+          assert "pdiddler4_balancer_ROTATING_v2_4_3_P5_SHADOW_BRIDGE.lua" in src
+          assert "pdiddler5_completion_policy_v1.lua" in src
+          assert "pdiddler5_shadow_completion_v1.lua" in src
+          assert "PART 5 SHADOW ACTIVE" in src
+          assert "SHADOW ONLY" in src
+          assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in src
+          assert "AcceptTrade" not in src
+
+          p4_run=src.index("part4.run(")
+          p5_run=src.index("part5.run(")
+          assert p4_run < p5_run, "Part 4 must arm before Part 5 observer"
+
+          print("PASS Part 5 shadow live-stack contract")
           PY
