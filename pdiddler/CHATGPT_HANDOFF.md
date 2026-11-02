@@ -3817,3 +3817,112 @@ The v2 lab remains useful because it requires YOUR OFFER to start empty and then
 - record the whole sequence and console.
 
 Production v2.6.3 remains untouched.
+
+
+---
+
+# 53. Clean v2 duplicate-lab recording + raw-owned-key diagnosis
+
+Date: 2026-11-02
+
+Recording:
+`ScreenRecording_11-02-2026 17-53-58_1.mp4`
+
+Duration:
+~1m03s.
+
+This was a clean hands-off duplicate-lab attempt:
+- trade was opened manually,
+- YOUR OFFER began empty,
+- user did not manually add/remove Iceblaster during the lab sequence,
+- THEIR OFFER changed independently,
+- lab v2 was responsible for all intended OUR-side mutations.
+
+## Observed v2 failure
+
+Developer Console shows:
+- `[DUP LAB] START v2 | Iceblaster id 481 | expected x3 -> x2 -> x1`
+- `[DUP LAB] FINAL ACCEPT DISABLED / NOT IMPLEMENTED`
+- `[DUP LAB] Open a normal trade manually; lab waits up to 45s.`
+- `[DUP LAB] FAIL | offer verify expected x1 | visible-slots=0`
+- `[DUP LAB] CLEANUP | closed=true | closed`
+
+Visible UI agrees:
+- YOUR OFFER stays empty,
+- lab never reaches x1,
+- therefore x3 -> x2 -> x1 removal is still NOT tested.
+
+## Console audit
+
+- Developer Console Errors: 0.
+- Warning 1 is the known external MM2 warning:
+  `Workspace.Lobby.Elite.Screen.Surface.Frame.Frame:WaitForChild("Buy")`
+- Warning 2 is the lab's own intentional `warn("[DUP LAB] FAIL ...")`.
+- no pdiddler production error appears.
+
+## Root-cause diagnosis
+
+The lab incorrectly used market/checker ID `481` as the argument to:
+`Trade.OfferItem:FireServer(...,"Weapons")`.
+
+Production scanner architecture keeps two different identifiers:
+- `item.id` = raw key from `GetProfileData().Weapons.Owned`,
+- `item.checkerId` = canonical MM2Values/checker identity such as Iceblaster `481`.
+
+Verified scanner code:
+`inventoryFromProfile` iterates:
+`for rawId,count in pairs(owned)`
+and stores:
+`id=tostring(rawId)`
+while separately storing:
+`checkerId=market.id`.
+
+Part 4 then sends the production `item.id` / planner pick id to `OfferItem`, not the checkerId.
+
+Therefore v2 used the wrong identifier layer for the remote.
+This explains why:
+- FireServer itself did not throw,
+- no OUR slot appeared,
+- verification correctly saw `visible-slots=0`.
+
+## v3 fix
+
+New lab:
+`pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v3.lua`
+
+v3 first:
+1. calls the already-verified own inventory source `Remotes.Inventory.GetProfileData`,
+2. unwraps `Weapons.Owned`,
+3. loads `ReplicatedStorage.Database.Sync`,
+4. matches the owned raw key whose Sync metadata name is exactly non-Chroma Iceblaster,
+5. requires inventory quantity >=3,
+6. logs the resolved raw key,
+7. sends that raw owned key to `OfferItem`,
+8. then performs the same x1 -> x2 -> x3 -> x2 -> x1 observable verification.
+
+TDD:
+- RED workflow commit:
+  `c9ffcbc533ceda09d38ea490d184c3b00b5ca85e`
+- RED run:
+  `41541578799`
+- implementation:
+  `b4fe7f9c30b9273bbac81cb1ac7fc09123bd9d74`
+- CI compile wiring / tested head:
+  `4257e48117ea10ada3bec7abb2aa577c5bb7df8f`
+- final CI run:
+  `41541687322`
+- result: SUCCESS.
+
+v3 loader:
+```lua
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/4257e48117ea10ada3bec7abb2aa577c5bb7df8f/pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v3.lua",
+    true
+))()
+```
+
+Expected new early log:
+`[DUP LAB] OWNED KEY RESOLVED | checker=481 | raw=<actual owned key> | inventory qty=3`
+
+Production v2.6.3 remains untouched.
+FINAL ITEM-TRADE ACCEPT remains disabled.
