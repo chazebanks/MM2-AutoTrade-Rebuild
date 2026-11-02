@@ -40,6 +40,7 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_3_P5_SHADOW_BRIDGE.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler5_completion_policy_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler5_shadow_completion_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_PART5_SHADOW_TEST_STACK_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_1_PERF.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MARKET_AWARE_TEST_STACK_v2_6_2_PERF_INELIGIBLE.lua >/dev/null
@@ -303,6 +304,9 @@ jobs:
           assert "pdiddler4_balancer_ROTATING_v2_4_3_P5_SHADOW_BRIDGE.lua" in src
           assert "pdiddler5_completion_policy_v1.lua" in src
           assert "pdiddler5_shadow_completion_v1.lua" in src
+          assert '82bfbe29792bb5dc8d5d98071468f838dce9653f' in src, (
+              "Part 5 stack must pin the CI-tested deduped shadow observer commit"
+          )
           assert "PART 5 SHADOW ACTIVE" in src
           assert "SHADOW ONLY" in src
           assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in src
