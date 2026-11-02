@@ -106,7 +106,7 @@ local marketPlanner=loadModule(
     NO_PLAN_BASE.."pdiddler4_market_planner_v1_1.lua",
     "Market-aware planner v1.1 ineligible-safe verifier"
 )
-local P5_COMMIT="e809a174c200d83038ecc2200d426260752b0a3a"
+local P5_COMMIT="82bfbe29792bb5dc8d5d98071468f838dce9653f"
 local P5_BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..P5_COMMIT.."/pdiddler/"
 
 local part4=loadModule(
