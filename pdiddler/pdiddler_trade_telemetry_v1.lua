@@ -25,6 +25,7 @@ local function enrichResolved(resolved,side,profile,marketLogic)
         local item={
             page=tostring(row.page or ""),
             id=tostring(row.id or ""),
+            checkerId=tostring(row.checkerId or ""),
             name=tostring(row.name or row.id or "Unknown item"),
             qty=qty,
             mm2Value=raw,
@@ -37,7 +38,11 @@ local function enrichResolved(resolved,side,profile,marketLogic)
             item.page=item.page~="" and item.page or "ineligible"
             item.protectedTotal=item.rawTotal
         else
-            local p=getProfile(profile,item.page,item.id)
+            local marketId=
+                item.checkerId~=""
+                and item.checkerId
+                or item.id
+            local p=getProfile(profile,item.page,marketId)
             local assessment=nil
 
             if type(marketLogic)=="table"
@@ -47,7 +52,7 @@ local function enrichResolved(resolved,side,profile,marketLogic)
                     marketLogic.itemAssessment,
                     {
                         page=item.page,
-                        id=item.id,
+                        id=marketId,
                         name=item.name,
                         value=raw,
                         qty=qty,
