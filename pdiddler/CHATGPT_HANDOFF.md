@@ -4074,3 +4074,229 @@ Freeze guard verifies:
 
 Do not modify the frozen v2.6.3 artifact.
 All future behavior changes must use a new version/file.
+
+
+---
+
+# 55. Part 5 shadow completion verifier v1
+
+Date: 2026-11-02
+
+Status:
+Parts 1-4 remain frozen/known-good. Part 5 begins as a **SHADOW-ONLY completion verifier**.
+
+Part 5 does NOT Accept or Confirm a trade.
+It answers only:
+**Would the first native MM2 Accept click be permitted right now?**
+
+## Architecture
+
+`Part 4 verified trade state -> Part 5 pure policy -> MM2 native UI observer -> READY-FIRST-CLICK / BLOCKED`
+
+Part 4 remains the sole authority for:
+- identity/value resolution,
+- market assessment,
+- planner choice,
+- rebalance execution,
+- transaction/recovery state,
+- safe/unsafe decision.
+
+Part 5 does not independently guess values or rebuild trade plans.
+
+## Part 4 read-only bridge
+
+New file:
+`pdiddler/pdiddler4_balancer_ROTATING_v2_4_3_P5_SHADOW_BRIDGE.lua`
+
+Initial bridge commit:
+`39d1ae8d07915031a06f8b335ef0d45e6486d589`
+
+Based on known-good:
+`pdiddler4_balancer_ROTATING_v2_4_2_NO_PLAN_DECLINE.lua`
+
+The bridge publishes read-only completion snapshots.
+
+Verified sources:
+- `profitable-hold`
+- `extreme-hold`
+- `rebalance-verified`
+
+It invalidates readiness on:
+- trade start/end,
+- THEIR OFFER empty,
+- THEIR OFFER changed,
+- OUR/THEIR unresolved,
+- recovery active,
+- rebalance active,
+- no safe plan,
+- unsafe decision,
+- stale session.
+
+A heartbeat verifies that OUR/THEIR signatures still exactly match the previously verified safe state.
+
+## Pure Part 5 policy
+
+File:
+`pdiddler/pdiddler5_completion_policy_v1.lua`
+
+Commit:
+`62fa6408be0dc6e250fe2d52a54c13a12e006ea2`
+
+TDD:
+- RED test first:
+  `pdiddler/tests/pdiddler5_completion_policy_v1.luau`
+- test commit:
+  `fdbe517f1274de4bfb6fc6215c7c3bec27c4f5bc`
+- RED run:
+  `41546210284`
+- GREEN run after implementation:
+  `41546324770`
+
+The policy requires ALL of:
+- trade open,
+- current Part 4 session,
+- correct partner,
+- Part 4 verified safe state,
+- OUR OFFER non-empty,
+- THEIR OFFER non-empty,
+- OUR OFFER fully resolved,
+- THEIR OFFER fully resolved,
+- recovery idle,
+- transaction idle,
+- offer stable,
+- market decision safe,
+- signatures still current,
+- opponent accepted,
+- MM2 native cooldown ready,
+- native Accept ActionButton visible.
+
+It blocks if:
+- Confirm is already visible,
+- local player is already in Accepted state.
+
+Only full pass returns:
+`true, "ready-first-click"`
+
+## Native MM2 readiness evidence
+
+Latest available public decompile is MM2 v1456.
+Recent live recordings show server version v1460, but no v1460 decompile was available in that source.
+
+v1456 TradeModule confirms:
+- every offer update resets native Accept state,
+- non-empty offer starts a 6-second cooldown,
+- `Actions.Accept.Cooldown.Visible` is true during cooldown,
+- cooldown becomes hidden when ready,
+- first native Accept click shows Confirm,
+- Confirm click after >=0.4s is the completion action,
+- opponent acceptance is reflected by `TheirOffer.Accepted.Visible`,
+- local acceptance is reflected by `YourOffer.Accepted.Visible`.
+
+Because Part 5 v1 is shadow-only, any v1460 UI-layout change fails closed as BLOCKED rather than performing an unsafe action.
+
+## Part 5 native observer
+
+File:
+`pdiddler/pdiddler5_shadow_completion_v1.lua`
+
+Initial runtime commit:
+`e809a174c200d83038ecc2200d426260752b0a3a`
+
+Heartbeat-log dedupe fix:
+`82bfbe29792bb5dc8d5d98071468f838dce9653f`
+
+Reads only:
+- active TradeGUI/TradeGUI_Phone,
+- TheirOffer.Username,
+- TheirOffer.Accepted,
+- YourOffer.Accepted,
+- Actions.Accept.Cooldown,
+- Actions.Accept.Confirm,
+- Actions.Accept.ActionButton.
+
+It contains no:
+- `AcceptTrade`,
+- physical Accept/Confirm click,
+- VirtualInput completion action,
+- `firesignal`,
+- `:Activate()`.
+
+Feed freshness:
+Part 4 completion snapshot must be <=0.75 seconds old.
+
+Logs only meaningful transitions; heartbeat sequence is deliberately excluded from the transition key to prevent console spam.
+
+Expected logs:
+- `[PDIDDLER P5 SHADOW] BLOCKED | reason ...`
+- `[PDIDDLER P5 SHADOW] READY-FIRST-CLICK ... | SHADOW ONLY | NO CLICK`
+
+## Full Part 5 shadow stack
+
+File:
+`pdiddler/pdiddler_PART5_SHADOW_TEST_STACK_v1.lua`
+
+Stack creation:
+`b6ec74cbde977729220a941afa9c794c8aaac424`
+
+Final stack pin update:
+`ca5deae7e18118e4630f11beb4b2100500ae26e3`
+
+Part 5 module pin used by stack:
+`82bfbe29792bb5dc8d5d98071468f838dce9653f`
+
+Final CI workflow head:
+`35a36a56510512045e982a44a15e54c6032fb2db`
+
+CI run:
+`41547208874`
+
+Result:
+**SUCCESS**
+
+Passed together:
+- official Luau compile,
+- complete Part 5 shadow stack compile,
+- 14/14 market matrix,
+- validated 190/190 market profile,
+- planner fixtures/ranking,
+- market bundle performance cache,
+- Rare/Uncommon plan verification,
+- no-safe-plan immediate decline,
+- duplicate live-lab guards,
+- frozen v2.6.3 byte-identical guard,
+- Part 5 pure completion policy,
+- Part 5 shadow integration contract,
+- Part 5 full live-stack contract,
+- heartbeat log-spam regression,
+- no final Accept behavior.
+
+## Loader for live shadow testing
+
+```lua
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/35a36a56510512045e982a44a15e54c6032fb2db/pdiddler/pdiddler_PART5_SHADOW_TEST_STACK_v1.lua",
+    true
+))()
+```
+
+Expected startup marker:
+`[PDIDDLER TEST] PART 5 SHADOW ACTIVE | SHADOW ONLY | NO CLICK`
+
+## Live test target
+
+Record normal trading.
+
+Best evidence:
+1. safe profitable trade is established by Part 4,
+2. before opponent accepts, Part 5 remains BLOCKED,
+3. opponent presses Accept,
+4. if MM2 native cooldown is still visible, Part 5 remains BLOCKED,
+5. when cooldown is hidden and the exact Part 4 verified signatures remain current:
+   Part 5 should report `READY-FIRST-CLICK`,
+6. **nothing should actually be clicked or accepted**.
+
+Also deliberately change THEIR OFFER after a READY-capable state.
+Part 5 must immediately return to BLOCKED because Part 4 invalidates the old signatures.
+
+FINAL ITEM-TRADE ACCEPT remains disabled.
+Do not enable real completion until shadow behavior is live-validated.
