@@ -921,21 +921,44 @@ end
 
 local function inventoryFromProfile(prof)
  if type(prof)~="table" then return nil end
- local out={items={},total=0}
  local owned=prof.Weapons and prof.Weapons.Owned
- if type(owned)~="table" then return out end
+ if type(owned)~="table" then return nil end
+
+ local out={items={},total=0,rawOwned=0,unmapped=0,unpriced=0}
+
  for id,count in pairs(owned) do
   local qty=type(count)=="number" and math.max(0,math.floor(count)) or 1
-  local m=Meta["Weapons|"..tostring(id)]
-  if qty>0 and m and tradable(m.data) and allowedPage(checkerPage(m)) then
-   local e=checkerMarket(m)
-   -- Eligibility is based on MM2 rarity, never on price lookup success.
-   -- An unpriced eligible item must remain visible and whitelisted.
-   out.items[#out.items+1]={id=m.id,cat="Weapons",name=identityName(m),qty=qty,value=e and e.v or nil,type=m.type,page=checkerPage(m),checkerId=e and e.id or "UNPRICED"}
-   if e then out.total=out.total+e.v*qty else out.unpriced=(out.unpriced or 0)+qty end
+  if qty>0 then
+   out.rawOwned += qty
+   local m=Meta["Weapons|"..tostring(id)]
+
+   -- If the live MM2 catalog cannot identify an owned weapon ID, the scan is
+   -- incomplete. Never turn an incomplete scan into a blacklist.
+   if not m then
+    out.unmapped += qty
+   elseif tradable(m.data) and allowedPage(checkerPage(m)) then
+    local e=checkerMarket(m)
+    out.items[#out.items+1]={
+     id=m.id,cat="Weapons",name=identityName(m),qty=qty,
+     value=e and e.v or nil,type=m.type,page=checkerPage(m),
+     checkerId=e and e.id or "UNPRICED"
+    }
+    if e then
+     out.total += e.v*qty
+    else
+     out.unpriced += qty
+    end
+   end
   end
  end
- table.sort(out.items,function(a,b) if a.value~=b.value then return a.value>b.value end return tostring(a.id)<tostring(b.id) end)
+
+ table.sort(out.items,function(a,b)
+  local av=tonumber(a.value) or -math.huge
+  local bv=tonumber(b.value) or -math.huge
+  if av~=bv then return av>bv end
+  return tostring(a.id)<tostring(b.id)
+ end)
+
  return out
 end
 
@@ -950,51 +973,42 @@ local function unwrapProfile(x,depth)
  end
 end
 
-local function callReader(r,p,mode)
- if mode==1 then return r:InvokeServer(p) end
- if mode==2 then return r:InvokeServer(p.UserId) end
- return r:InvokeServer(p.Name)
-end
-
-local function findTargetReader(p,force)
- if State.targetReader then return State.targetReader,State.targetMode end
- if not force and State.targetReaderCheckedAt>0 and os.clock()-State.targetReaderCheckedAt<5 then return nil end
- State.targetReaderCheckedAt=os.clock()
- local wanted={getfullinventory=true,getplayerinventory=true,getplayerprofile=true,viewinventory=true,viewprofile=true,getinventory=true}
- local candidates={}
- for _,r in ipairs(RS:GetDescendants()) do
-  if r:IsA("RemoteFunction") and wanted[r.Name:lower()] then candidates[#candidates+1]=r end
- end
- table.sort(candidates,function(a,b)
-  local an=a.Name:lower()=="getfullinventory" and 0 or 1
-  local bn=b.Name:lower()=="getfullinventory" and 0 or 1
-  return an<bn
- end)
- for _,r in ipairs(candidates) do
-  for mode=1,3 do
-   local ok,raw=pcall(function() return callReader(r,p,mode) end)
-   local prof=ok and unwrapProfile(raw)
-   if prof then State.targetReader,State.targetMode=r,mode; log("target reader",r:GetFullName(),"mode",mode); return r,mode,prof end
-  end
- end
+local function getFullInventoryRemote()
+ local remotes=RS:FindFirstChild("Remotes")
+ local extras=remotes and remotes:FindFirstChild("Extras")
+ local rf=extras and extras:FindFirstChild("GetFullInventory")
+ if rf and rf:IsA("RemoteFunction") then return rf end
+ return nil
 end
 
 local function targetInventory(p,force)
- local r,mode,prof=findTargetReader(p,force)
- if not prof and r then
-  local ok,raw=pcall(function() return callReader(r,p,mode) end)
-  if ok then prof=unwrapProfile(raw) end
-  if not prof then State.targetReader=nil; State.targetMode=nil; State.targetReaderCheckedAt=0 end
- end
- if not prof then return nil end
- local inv=inventoryFromProfile(prof)
- if inv and #inv.items==0 then
-  warn("[PDIDDLER3] UNVERIFIED EMPTY:",p.Name,"- refusing false blacklist")
+ if not p or p==LP or not p.Parent then return nil end
+
+ -- Match MM2's own ViewProfileModule exactly:
+ -- Remotes.Extras.GetFullInventory:InvokeServer(usernameString)
+ local rf=getFullInventoryRemote()
+ if not rf then
+  warn("[PDIDDLER3] GetFullInventory remote missing")
   return nil
  end
- return inv
-end
 
+ local ok,raw=pcall(function()
+  return rf:InvokeServer(p.Name)
+ end)
+ if not ok or type(raw)~="table" then
+  return nil
+ end
+
+ local prof=unwrapProfile(raw)
+ if not prof
+  or type(prof.Weapons)~="table"
+  or type(prof.Weapons.Owned)~="table"
+ then
+  return nil
+ end
+
+ return inventoryFromProfile(prof)
+end
 
 
 -- ============================================================================
@@ -1126,6 +1140,11 @@ local function scanOne(p, reason)
         inv = targetInventory(p, attempt > 1)
 
         if inv then
+            -- A verified full inventory can be blacklisted only when every
+            -- owned weapon ID was understood by the live MM2 catalog.
+            if (inv.unmapped or 0) > 0 then
+                return "unknown", inv
+            end
             return (#inv.items > 0) and "whitelist" or "blacklist", inv
         end
 
@@ -1248,7 +1267,9 @@ local function applyPlayerResult(p, state, inv)
         guiSetPlayer(
             p,
             "unknown",
-            "Inventory not ready yet — automatic retry active",
+            (inv and (inv.unmapped or 0) > 0)
+                and ("Inventory incomplete — "..tostring(inv.unmapped).." unmapped weapon copies; retrying")
+                or "Inventory not ready yet — automatic retry active",
             order
         )
 
