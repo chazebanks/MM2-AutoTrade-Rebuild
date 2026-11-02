@@ -229,3 +229,8 @@ jobs:
       - name: Run raw-key completion verification contract
         run: |
           /tmp/luau/luau pdiddler/tests/pdiddler_trade_completion_logic_v1.luau
+
+
+      - name: Run Discord webhook sender transport contract
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler_trade_webhook_sender_v1.luau
