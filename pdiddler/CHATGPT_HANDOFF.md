@@ -2837,3 +2837,185 @@ loadstring(game:HttpGet(
 ```
 
 FINAL ITEM-TRADE ACCEPT remains disabled.
+
+
+---
+
+# 45. Full-system audit of 16-45 recording
+
+Date: 2026-11-02
+
+Recording:
+`ScreenRecording_11-02-2026 16-45-00_1.mp4`
+
+Duration:
+~1m33s.
+
+Review policy:
+this recording was audited across startup/scanner/request rotation/trade identity/value resolution/market math/planner decisions/ineligible handling/rebalance timing/stale-state safety/timers/final-Accept behavior/performance. Do not reduce future recording reviews to one symptom.
+
+Important build-identification note:
+the recording does not visibly show the v2.6.2 stack marker, so exact loader identity is not directly proven from the pixels. However, the observed Elite/non-eligible behavior matches the v2.6.2 ineligible verification fix.
+
+## Startup / scanner / rotation
+
+- live scanner active and populated.
+- Whitelist / processed / declined states visibly update.
+- incoming request from `capos baby @imsobunnyhah` was declined while the outgoing rotation was active, consistent with incoming-secondary/busy behavior.
+- outgoing rotation progressed:
+  1. GamerGirl_Flamee
+  2. Jacesuperstar48
+  3. Piano1234180
+- no duplicate resend to a processed player was visible.
+- trade partner names matched the active trade windows.
+
+## Trade 1 — GamerGirl_Flamee
+
+Opening:
+- OUR Chroma Watergun = 2350.
+- scanner row for partner shows eligible total = 16:
+  - Heat = 12
+  - Cookieblade = 4.
+- extra visible items Embergun / Predator are not part of the eligible Ancient/Godly/Chroma snapshot and therefore correctly contribute 0.
+
+Critical correction:
+the on-screen status reads `THEIR 16 |`, not 161. The separator can visually resemble a final digit 1.
+
+Decision:
+- OUR 2350 / THEIR 16.
+- no safe 1-4 item plan.
+- this is correct because minimum normal profit is +15; with THEIR eligible value 16, OUR safe value would need to be <=1.
+- Plasmabeam 20 would still be a -4 raw loss and is not safe.
+
+Opponent later presses Accept with a non-empty underpay.
+- script does not final-Accept.
+- current policy only instant-declines accepted-empty; non-empty unsafe accepted trades remain held/rotated by normal window behavior.
+- trade closes/cancels and Part 3 resumes.
+
+No value/planner error found in this trade.
+
+## Trade 2 — Jacesuperstar48
+
+Opening:
+- OUR Chroma Watergun = 2350.
+- THEIR side initially empty.
+
+Darkbringer added:
+- Darkbringer MM2 value = 35.
+- planner replaces OUR opening with Plasmabeam = 20.
+- raw profit = +15.
+- protected profit = +15.
+- status visibly reports:
+  `P4 REBALANCED — NORMAL/profit | RAW OUR 20 THEIR 35 PROFIT 15 | PROTECTED PROFIT 15`.
+
+Elite/non-target item then added:
+- native Accept cooldown resets because the offer changed.
+- Part 4 status changes to:
+  `THEIR OFFER changed | waiting 0.65s for stability`.
+- after stability, status returns to:
+  `P4 PROFITABLE HOLD — NORMAL/profit | RAW OUR 20 THEIR 35 PROFIT 15 | PROTECTED PROFIT 15`.
+- OUR Plasmabeam remains 20 because Elite contributes zero eligible value and no new rebalance is required.
+
+This is the key Rare/Uncommon/non-target regression result:
+- the script did NOT freeze after Elite was added.
+- the eligible plan remained valid.
+- non-target item changed the signature/stability gate.
+- it did not change raw/protected valuation.
+- it did not invalidate eligible plan verification.
+
+Case 3 timer:
+- approximately 59s remaining at ~44s recording time.
+- approximately 51s remaining at ~52s recording time after Elite was added.
+- therefore the non-target offer mutation did NOT reset the authoritative 60s Case 3 timer.
+
+Trade later closes and rotation resumes.
+
+## Trade 3 — Piano1234180
+
+Opening:
+- OUR Chroma Watergun = 2350.
+- THEIR Gemstone = 13.
+
+Market values:
+- Chroma Watergun MM2 2350 / Supreme 2300.
+  - absolute diff 50 but only ~2.13%; below configured 5% material threshold.
+  - protected value remains MM2 baseline 2350.
+- Gemstone MM2 13 / Supreme 15.
+  - absolute diff 2; non-material.
+  - protected value remains 13.
+
+Decision:
+- no safe plan.
+- correct: THEIR 13 cannot support the +15 minimum profit with any positive-value OUR eligible item.
+- opponent later presses Accept.
+- script does not final-Accept and remains safe.
+
+Recording ends before this trade reaches the 60s boundary, so this clip does NOT independently verify the Case 3 timeout for trade 3.
+
+## Values / identity
+
+Relevant validated values observed:
+- Chroma Watergun 2350
+- Heat 12
+- Cookieblade 4
+- Darkbringer 35
+- Plasmabeam 20
+- Gemstone 13
+
+Observed decisions reconcile with these values.
+
+Non-target visible items are excluded from eligible totals as intended.
+
+No same-name identity collision was observed.
+
+## Rebalance / transaction behavior
+
+- Darkbringer offer -> Plasmabeam rebalance happens promptly after the configured ~0.65s stability gate.
+- Elite addition -> stability wait -> same profitable plan held.
+- no visible partial-offer corruption.
+- no duplicate offer spam visible.
+- no stale plan visibly applied after opponent mutation.
+- no unnecessary rebalance when the eligible value did not change.
+
+## Timers / Accept behavior
+
+- Case 3 timer did not reset after Elite/non-target item mutation.
+- native MM2 Accept cooldown did reset after the visible offer mutation, which is expected MM2 behavior.
+- FINAL ITEM-TRADE ACCEPT remained disabled even when opponents pressed Accept.
+
+## Performance
+
+Compared with the earlier laggy v2.6 baseline:
+- no obvious multi-second rebalancer stall is visible.
+- Darkbringer change -> safe Plasmabeam plan occurs in roughly the configured stability + application interval.
+- Elite change -> profitable hold resumes shortly after stability.
+- static periods in the recording correspond to unchanged trade states and are not evidence by themselves of a script freeze.
+
+The recording does not show Developer Console, so runtime warnings/errors cannot be ruled out from this clip alone.
+
+## Untested in this clip
+
+Do not infer passes for:
+- duplicate eligible quantity x2 -> x1 while one visible slot remains,
+- player leave during active trade,
+- death/respawn,
+- PlayerGui recreation,
+- trade GUI reload,
+- 60s timeout on the third trade,
+- server hop recovery,
+- natural no-pending -> later exact-target trade ownership edge.
+
+## Conclusion
+
+No new code defect was confirmed by this recording.
+
+The previously reported Rare/Uncommon/non-target rebalance freeze appears fixed:
+- non-target item is zero-valued,
+- signature still changes,
+- timer does not reset,
+- valid eligible plan remains verified,
+- rebalancer returns to PROFITABLE HOLD.
+
+The first trade's `THEIR 16` was initially easy to misread as 161; after full audit it is correct and the NO PLAN verdict is justified.
+
+Do not add another patch from this recording alone.
