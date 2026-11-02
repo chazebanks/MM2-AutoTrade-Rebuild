@@ -44,6 +44,7 @@ jobs:
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_market_bundle_cache_v1.luau >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_ineligible_plan_match_v1.luau >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v2.lua >/dev/null
 
       - name: Run pure market integration tests
         run: |
@@ -161,4 +162,22 @@ jobs:
           assert 'AcceptTrade' not in src
           assert 'FINAL ACCEPT DISABLED / NOT IMPLEMENTED' in src
           print("PASS duplicate live-lab contract guards")
+          PY
+
+
+      - name: Duplicate live-lab v2 contract guards
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          src=Path("pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v2.lua").read_text()
+          assert 'ICEBLASTER_ID="481"' in src
+          assert 'local function visibleOurSlots' in src
+          assert 'local function soleOurSlot' in src
+          assert 'findIceblasterSlot' not in src
+          assert 'SLOT DIAGNOSTIC' in src
+          assert 'removeAndRequire(2)' in src
+          assert 'removeAndRequire(1)' in src
+          assert 'AcceptTrade' not in src
+          assert 'FINAL ACCEPT DISABLED / NOT IMPLEMENTED' in src
+          print("PASS duplicate live-lab v2 contract guards")
           PY
