@@ -526,7 +526,7 @@ local function addNameMeta(q,m) candidateAdd(NameCandidates,q,m) end
 local function indexItems(src)
  if type(src)~="table" then return end
  for id,d in pairs(src) do
-  if type(d)=="table" and (d.ItemType=="Knife" or d.ItemType=="Gun") then
+  if type(d)=="table" then
    local m={id=tostring(id),cat="Weapons",data=d,name=d.ItemName or d.Name or tostring(id),chroma=d.Chroma==true,type=d.ItemType or "",rarity=d.Rarity or ""}
    Meta["Weapons|"..tostring(id)]=m
    indexCatalogAssets(d,m)
@@ -815,6 +815,9 @@ end
 
 local function checkerAlias(page,name,typ)
  local q,t=norm(name),norm(typ)
+ if page=="godly" and (q=="elderwoodrevolver" or q=="ewrevolver") then return "18" end
+ if page=="ancient" and (q=="swirlyaxe" or q=="swirlaxe") then return "529" end
+ if page=="godly" and (q=="wintersedge" or q=="winteredge") then return "50" end
  if page=="godly" and q=="sunrise" and (t=="" or t=="gun") then return "901" end
  if page=="godly" and q=="sunset" and (t=="" or t=="knife") then return "902" end
  if page=="chroma" and (q=="chromasunrise" or q=="sunrise") and (t=="" or t=="gun") then return "899" end
@@ -1273,7 +1276,7 @@ local function applyPlayerResult(p, state, inv)
             order
         )
 
-        warn(
+        print(
             "[MM2 Scanner T4.3] TEMP UNKNOWN",
             p.Name,
             "| scheduling background retry"
@@ -1300,7 +1303,7 @@ scheduleUnknownRetry = function(p)
         guiSetPlayer(
             p,
             "unknown",
-            "Inventory stayed unreadable after extended retries",
+            "Inventory could not be fully verified after extended retries",
             getOrder(p)
         )
 
