@@ -1864,3 +1864,97 @@ Before any implementation:
 - preserve server rotation as a core profit strategy when no good counterparty exists.
 
 No patch authorized yet.
+
+
+---
+
+# 33. Current value recheck
+
+Date: 2026-11-02
+
+A fresh public-value recheck was completed before any further planner changes.
+
+## MM2Values authoritative project source
+
+MM2Values currently reports:
+`VALUES UPDATED: 10/31/2026 12:31:12pm EST`
+
+The active scanner:
+`pdiddler/pdiddler3_scanner_MODULE_v6_8_CRITICAL_PAUSE.lua`
+
+contains:
+`VALUE_SNAPSHOT_UPDATED="2026-10-31 12:31:12 EST"`
+
+and its embedded canonical values match the latest MM2Values publication for the checked high-tier/trade-eligible rows.
+
+Verified examples:
+- Gingerscope 15,250
+- Travelers Axe 7,700
+- Celestial 1,950
+- Vampires Axe 1,375
+- Emberbow 325
+- Emberscythe 300
+- Harvester 250
+- Icepiercer 165
+- Icebreaker 70
+- Batwing 45
+- Chroma Alienbeam 23,000
+- Chroma Raygun 12,500
+- Chroma Emberscythe 10,000
+- Chroma Sunset gun/internal duplicate 8,250
+- Chroma Snowcannon 7,650
+- Chroma Sunset knife 5,500
+- Chroma Blizzard 5,500
+- Chroma Emberbow 4,450
+- Chroma Snowstorm 4,250
+- Chroma Heart Wand 3,400
+- Chroma Snow Dagger 2,400
+- Chroma Watergun 2,350
+- Chroma Icecream 1,875
+- Chroma Treat 1,800
+- Chroma Sweet 1,750
+- Chroma Sands 1,325
+- Chroma Beachy 1,275
+- Chroma Embersickle 1,100
+- Alienbeam 1,850
+- Raygun 1,825
+- Darkshot 1,550
+- Darksword 1,525
+- Sunrise 775
+- Snowcannon 680
+- Bauble 675
+- Sunset 650
+- Heart Wand 350
+- Immortal 140
+- Mortal 140
+- Bat 120
+- Candy 90
+- Embersickle 80
+- Heartblade 65
+- Ornament 60
+- Green Luger 25
+
+Conclusion:
+The active v6.8 scanner value snapshot is not stale relative to MM2Values' latest published update. No value-table patch is justified at this time.
+
+## Supreme Values cross-check
+
+Supreme currently disagrees on several important items, including:
+- Gingerscope 15,750 vs MM2Values 15,250
+- Travelers Axe 7,500 vs 7,700
+- Vampires Axe 1,425 vs 1,375
+- Emberbow 375 vs 325
+- Emberscythe 375 vs 300
+- Harvester 250 vs 250
+- Icepiercer 160 vs 165
+- Chroma Watergun 2,300 vs 2,350
+- Alienbeam 1,900 vs 1,850
+- Raygun 1,875 vs 1,825
+- Darkshot 1,500 vs 1,550
+- Darksword 1,475 vs 1,525
+
+Project rule remains:
+MM2Values is the canonical numeric source for trade math.
+Supreme/current market data may inform quality/liquidity/risk, but must not silently overwrite canonical MM2Values numbers.
+
+No code changed from this recheck.
