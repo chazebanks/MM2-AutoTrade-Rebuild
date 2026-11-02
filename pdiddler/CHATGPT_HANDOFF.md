@@ -1958,3 +1958,180 @@ MM2Values is the canonical numeric source for trade math.
 Supreme/current market data may inform quality/liquidity/risk, but must not silently overwrite canonical MM2Values numbers.
 
 No code changed from this recheck.
+
+
+---
+
+# 34. v2.5 planner audit before market-aware redesign
+
+Date: 2026-11-02
+
+Exact source audited:
+`pdiddler/pdiddler4_balancer_ROTATING_v2_3_EXTREME_GUARD.lua`
+
+No code changed during this audit.
+
+## Existing planner architecture
+
+The current Part 4 already has a small market-quality layer:
+
+- `exactQuality(it)`
+- `evaluateSide(...)`
+- `qualityRatio(...)`
+- `tradeDecision(...)`
+- `buildPlans(...)`
+
+Current quality modifiers:
+- Overpaid For: +5%
+- Doing Well: +3%
+- Stable: 0%
+- Fluctuating: -2%
+- Underpaid For: -8%
+
+Only a small explicit item set is profiled.
+All other eligible items currently default to:
+`{mult=1, tag="Stable", verified=true}`
+
+That default is now considered too optimistic for the proposed market-aware planner.
+
+## What already works and should be preserved
+
+1. Canonical scanner identity/value resolution.
+2. MM2Values numeric values from the scanner.
+3. Exact offer identity/quantity evaluation.
+4. Raw-value minimum profit floors.
+5. Controlled <=3% quality-upgrade exception.
+6. 1-4 item planner.
+7. Planner preference for highest safe raw offer rather than cheapest exploitable offer.
+8. Moderate profitable hold.
+9. v2.5 EXTREME GUARD.
+10. Transaction generation/signature checks.
+11. TX ABORT / recovery / protected hold.
+12. Exact remove/apply verification.
+13. 15s empty and 60s Case 3 timers.
+14. Final Accept disabled.
+
+The executor/verifier/recovery path should not be redesigned for market-awareness.
+
+## Exact places market-aware work belongs
+
+Primary planner changes should be isolated to:
+- market profile lookup replacing/expanding `exactQuality`,
+- side evaluation metadata inside `evaluateSide`,
+- safety/quality decision inputs in `tradeDecision` / `requiredProfit`,
+- plan candidate ranking in `buildPlans`,
+- EXTREME GUARD may consume the new conservative decision totals but its behavioral rule should remain unchanged.
+
+## Current strengths confirmed by offline cases
+
+- A real quality upgrade can already pass with a small raw loss:
+  example: OUR 100 effective 100 -> THEIR 98 effective 102.9, 2 copies -> 1 copy, passes as quality-upgrade.
+- Known Underpaid-For inventory already receives some protection:
+  OUR stable 100 -> THEIR 130 raw spread across 3 underpaid pieces at 0.92 effective multiplier fails because effective profit is only 19.6 while 30 is required.
+- Moderate overpay remains valid:
+  OUR 230 -> THEIR 270 remains a profitable hold candidate.
+- Extreme one-sided profit remains detected:
+  OUR 20 -> THEIR 105 passes base profit and is eligible for EXTREME REPLAN.
+
+## Main gaps found
+
+### A. Missing market metadata is incorrectly treated as verified Stable
+
+Example:
+OUR stable 100 -> THEIR 130 across 3 unprofiled items currently passes a BIG DOWNGRADE at +30 because unprofiled items default to Stable.
+
+The same trade with known Underpaid-For metadata fails.
+
+This means missing information can currently be treated as safer than known negative information.
+
+Future rule:
+unprofiled != Stable.
+Use neutral numeric behavior for raw safety, but mark quality metadata unverified and never grant positive quality-upgrade credit from missing metadata.
+
+### B. No Supreme/MM2Values disagreement model
+
+Current Part 4 receives only scanner MM2Values numeric value plus the small stability multiplier table.
+
+It cannot distinguish:
+- Supreme higher than MM2Values,
+- Supreme lower than MM2Values,
+- major source disagreement.
+
+Future profile should retain both numbers rather than average them.
+
+### C. Downgrade premium is mostly copy-count based
+
+`requiredProfit` currently classifies:
+- NORMAL,
+- DOWNGRADE,
+- BIG DOWNGRADE
+
+based primarily on our/their eligible copy counts.
+
+Weak received inventory affects effective profit through multipliers, but there is no explicit additional downgrade premium based on exit-quality weakness, volatility, or source disagreement.
+
+Future design should allow weaker received inventory to increase the required premium.
+
+### D. Quality table coverage is sparse
+
+The current table was intentionally partial.
+Most eligible items are not explicitly characterized by demand, liquidity, trend, or list disagreement.
+
+### E. Current "effective value" compresses too much into one multiplier
+
+Research now supports keeping separate concepts:
+- canonical/MM2Values value,
+- Supreme market value,
+- demand/liquidity,
+- stability/status,
+- source disagreement/confidence.
+
+These should not all be hidden inside one opaque multiplier.
+
+## Proposed market-profile shape
+
+Part 4 can remain separate from the scanner and key profiles by the scanner's canonical item ID/name.
+
+Candidate fields:
+- supremeValue
+- demand
+- status
+- liquidity
+- sourceUpdated
+- profiled
+- disagreementPct
+- trend/risk class
+
+Scanner `item.value` remains canonical MM2Values and canonical identity stays untouched.
+
+## Conservative cross-source safety direction
+
+Do not average MM2Values and Supreme.
+
+For trade safety, candidate future logic:
+- OUR item: protect against giving away too much by considering the higher supported valuation.
+- THEIR item: protect against over-crediting what we receive by considering the lower supported valuation.
+- Missing Supreme data falls back to MM2Values but carries lower market-confidence, not a fake Stable classification.
+
+Supreme can be used as the primary market reference/ranking context while MM2Values remains the canonical scanner number and safety cross-check.
+
+Exact thresholds must be tested before implementation.
+
+## Required pre-build test matrix
+
+Before creating v2.6, validate at least:
+1. same raw value, different liquidity,
+2. <=3% raw-loss upgrade into clearly stronger inventory,
+3. profitable downgrade into weak/underpaid pieces,
+4. large Supreme/MM2Values disagreement,
+5. falling/new-event item,
+6. moderate opponent overpay,
+7. extreme opponent overpay,
+8. THEIR OFFER decrease after profitable hold,
+9. missing market metadata,
+10. mixed good/bad bundle,
+11. multiple equal-raw plan candidates with different exit quality.
+
+Current conclusion:
+market-awareness can be added without touching the proven transactional executor.
+The next implementation step should be a complete, frozen market-profile snapshot plus offline decision-matrix validation, not an immediate live-script patch.
