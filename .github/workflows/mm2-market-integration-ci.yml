@@ -7,6 +7,7 @@ on:
       - fix/mm2-v2_6-lag
       - fix/mm2-v2_6-ineligible-rebalance
       - fix/mm2-v2_6-no-plan-decline
+      - feature/mm2-part5-shadow
   workflow_dispatch:
 
 permissions:
@@ -47,6 +48,7 @@ jobs:
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v2.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler4_duplicate_remove_LIVE_LAB_v3.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/tests/pdiddler5_completion_policy_v1.luau >/dev/null
 
       - name: Run pure market integration tests
         run: |
@@ -214,3 +216,8 @@ jobs:
           assert "AcceptTrade" not in frozen
           print("PASS known-good v2.6.3 freeze guard")
           PY
+
+
+      - name: Run Part 5 shadow completion policy
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler5_completion_policy_v1.luau
