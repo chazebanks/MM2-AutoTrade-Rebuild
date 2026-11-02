@@ -27,6 +27,8 @@ assert(src:find('tostring(r.page or "")',1,true),"transaction signature must inc
 assert(src:find('tostring(x.page or "")~=tostring(first.page or "")',1,true),"resolver ambiguity check must include page")
 assert(not src:find("local function buildPlans",1,true),"Part 4 must not contain a second planner copy")
 assert(not src:find("local function makeUnits",1,true),"Part 4 must not contain planner unit generation")
+assert(not src:find("local function marketProfileRecord",1,true),"dead marketProfileRecord helper must be removed")
+assert(not src:find("local function marketItemAssessment",1,true),"dead marketItemAssessment helper must be removed")
 
 assert(not src:find("AcceptTrade",1,true),"final Accept remote must not exist")
 assert(not src:find('physicalClick(button,"Accept',1,true),"physical final Accept must not exist")
