@@ -220,3 +220,12 @@ jobs:
       - name: Run completed-trade webhook payload contract
         run: |
           /tmp/luau/luau pdiddler/tests/pdiddler_trade_webhook_payload_v1.luau
+
+
+      - name: Run completed-trade telemetry snapshot contract
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler_trade_telemetry_v1.luau
+
+      - name: Run raw-key completion verification contract
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler_trade_completion_logic_v1.luau
