@@ -1749,3 +1749,118 @@ Likely future direction:
 - allow small controlled raw loss only when the received side is materially better quality/liquidity.
 
 This research changes strategy confidence, but does not itself authorize a code patch.
+
+
+---
+
+# 32. Expanded Reddit / YouTube trading research
+
+Date: 2026-11-02
+
+A second wide research pass was completed across additional Reddit threads and YouTube trading/challenge content.
+
+No code changed from this research alone.
+
+## Additional conclusions
+
+1. The largest practical bottleneck is not arithmetic; it is finding counterparties.
+   Multiple current Reddit threads describe MM2 trading as patience-heavy:
+   - repeated server hopping,
+   - checking many inventories,
+   - waiting for someone whose goals line up with yours.
+   The script should therefore prefer declining mediocre/no-plan situations and moving on rather than forcing a marginal trade.
+
+2. Mid-tier inventory is a known friction zone.
+   Community reports commonly describe fast early gains from low tiers, then slower progress once players reach roughly 30-40+ value because counterparties are more value-aware.
+   This supports having different strategy behavior by inventory tier rather than one universal profit rule.
+
+3. Low-tier acceptance is partly aesthetic / quantity-driven.
+   Several traders report that attractive-looking items, stacks, and multiple small adds can be easier to move than mathematically equivalent unattractive pieces.
+   This is evidence for a bounded "marketability" concept, but aesthetics should not be hard-coded without reliable data.
+
+4. "Never settle for less" has an important exception:
+   if an owned item is actively dropping, a small loss to escape it can be strategically correct.
+   Likewise, a small loss to upgrade into a much more liquid item can be recoverable later.
+
+5. Community advice repeatedly converges on:
+   - slight overpay to acquire a strong/liquid upgrade,
+   - then seek overpay when downgrading that strong item,
+   - keep part of the spread/profit,
+   - repeat.
+
+6. Creator / montage bias is real.
+   Many YouTube MM2 trading videos are explicitly framed as:
+   - "only wins",
+   - "insane overpays",
+   - "huge profit",
+   - common-to-godly / godly-to-harvester challenges.
+   These are useful for seeing possible trade structures, but are not reliable estimates of normal acceptance rates or average achievable profit.
+   The script should not tune thresholds to spectacular montage trades.
+
+7. Famous-creator / launch-day trades can be especially misleading.
+   Current Reddit discussion around newly released Beachy items notes massive first-hours overpays collapsing within a day.
+   Therefore:
+   - early event hype must be treated as unstable,
+   - YouTube clips recorded near launch are not durable market evidence.
+
+8. Current community examples reinforce "exit value":
+   - items that are technically wins can still be called bad because they are hard to trade,
+   - traders sometimes deliberately accept a slight underpay to exit a hard-to-move item,
+   - "flippable" inventory is repeatedly valued above static arithmetic.
+
+9. Value trajectory risk matters.
+   Community traders describe:
+   - buying underpaid items cheaply and flipping if they stabilize,
+   - avoiding items that have sat in "Doing Well" for several updates if they appear near a peak,
+   - preferring stable staples when they do not want directional risk.
+   This supports treating trend/status as risk, not as guaranteed future value.
+
+10. List values are not enough to estimate acceptance.
+    A trade can be mathematically fair and still repeatedly fail because:
+    - the desired item has higher demand,
+    - the offered pieces are hard to move,
+    - the counterparty prefers one large item or multiple small items,
+    - current market sentiment differs from the list.
+
+11. The planner should eventually distinguish between:
+    - theoretical W,
+    - executable W,
+    - strategic W.
+    A theoretical W is positive raw value.
+    An executable W uses items people actually accept.
+    A strategic W leaves inventory easier to trade again.
+
+12. Community "server hopping" advice directly supports the existing rotation architecture.
+    If no safe plan exists, skipping that partner and seeing more players can have higher expected profit than relaxing safety rules.
+
+13. Some community methods rely on exploiting players who do not know values.
+    This should NOT become an automated targeting rule.
+    The bot should evaluate the offer itself, not profile or deliberately seek inexperienced players.
+
+14. More research also strengthens the rule that low-demand pieces should require a larger downgrade premium.
+    If we exchange one liquid item for several weak pieces, raw +15/+20 may not adequately compensate for the future trading friction.
+
+## YouTube-specific lessons
+
+Useful categories observed:
+- Common-to-Godly challenges:
+  demonstrate many sequential small upgrades and the importance of repeated exposure.
+- Godly-to-Harvester / Common-to-Gingerscope style challenges:
+  show that long growth paths are usually chains of flips, not one giant trade.
+- "What do people offer for X" videos:
+  useful as historical examples of willingness-to-pay, but only when time-aligned with the current market.
+- Trading montages:
+  useful for trade structure ideas, but strongly selected toward wins and should not be used to set expected-profit thresholds.
+
+## Strategy refinement candidate
+
+Before any implementation:
+- keep raw-value rules as hard safety constraints,
+- classify received inventory by exit quality,
+- require more profit when downgrading into weaker / harder-to-move pieces,
+- allow tiny controlled losses for clearly stronger/liquid upgrades,
+- add stronger caution for falling, underpaid, new-release, and highly fluctuating items,
+- do not use YouTube montage outcomes as baseline expected returns,
+- preserve server rotation as a core profit strategy when no good counterparty exists.
+
+No patch authorized yet.
