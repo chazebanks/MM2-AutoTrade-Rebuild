@@ -988,3 +988,80 @@ Priority remaining tests:
 4. rare no-pending-UI -> later exact trade-open, if it naturally occurs.
 
 Do not change the request/rotation or transactional rebalance core unless one of these tests exposes a concrete failure.
+
+
+---
+
+# 23. 2026-11-02 12:23 controlled rapid-offer-change test
+
+Recording reviewed:
+`ScreenRecording_11-02-2026 12-23-35_1.mp4`
+
+Current build under test remained:
+`pdiddler/pdiddler_OUTGOING_OWNERSHIP_FIX_TEST_STACK_v2_3.lua`
+commit:
+`0f8bb3536d3a073f3001e1759c07dca44fc5cbd1`
+
+## What was confirmed
+
+- Normal outgoing ownership path worked:
+  - target `venossgaming90190`
+  - pending UI was visibly confirmed around 25-26s
+  - exact trade opened around 27s
+  - therefore this was NOT the rare no-pending -> late-trade-open case.
+
+- Rapid THEIR OFFER changes were exercised heavily during the active trade.
+
+Observed opponent-side sequence included:
+- repeated composition changes,
+- repeated quantity changes on the same visible duplicate slot,
+- notably `x3 -> x2 -> x3` style quantity changes while the slot remained present,
+- adding/removing other eligible items such as Immortal / Green Luger.
+
+Observed OUR OFFER behavior:
+- old offer was cleared/rebuilt repeatedly as THEIR OFFER changed,
+- no stale old plan visibly continued through the opponent changes,
+- no stuck partial offer was visible,
+- no repeated uncontrolled remove loop was visible,
+- no final Accept was pressed.
+
+This gives strong live evidence that:
+- THEIR OFFER signature/generation reacts to quantity changes, not just visible slot count,
+- rapid stable offer changes trigger replanning correctly,
+- the executor can clear/rebuild repeatedly without visibly corrupting state.
+
+Important limitation:
+- the recording did not include console output proving an explicit `TX ABORT` or `RECOVERY VERIFIED` during a change that landed exactly mid-transaction.
+- therefore the dedicated stale-transaction abort/recovery path is still not considered fully live-proven.
+- this is still a successful rapid-replan stress test.
+
+## Duplicate quantity test status
+
+Partially covered:
+- opponent-side duplicate quantity changes were observed on the same slot (`x3 -> x2 -> x3`).
+- the script visibly reacted/replanned.
+
+Still NOT fully covered:
+- OUR SIDE exact remove verification where our own duplicate stack changes `x2 -> x1` while slot count remains unchanged.
+
+That remains the preferred duplicate/removal verifier test.
+
+## Other behavior
+
+- Opponent accepted with a nonempty offer around the later portion of the trade.
+- Script correctly did NOT treat nonempty accepted state as accepted-empty.
+- MM2 Accept cooldown reset naturally after offer changes; no workaround was attempted.
+- trade closed before the 60s Case 3 deadline and Part 3 recovered/continued.
+- no duplicate resend to venoss was visible after closure.
+- scanner performance pause remained intact during the active trade.
+- no new bug was identified that justifies a code patch.
+
+## Remaining priority tests after this recording
+
+1. Incoming request from player B while an outgoing request to player A is actively owned/counting down.
+2. Explicit mid-transaction opponent mutation that produces console evidence of `TX ABORT` and, if OUR side was partially modified, `RECOVERY VERIFIED`.
+3. OUR SIDE duplicate stack removal `x2 -> x1` to live-test exact mutation verification.
+4. Rare physical Trade tap -> no pending UI -> later exact target trade-open, if naturally reproduced.
+
+Current recommendation remains:
+**Do not modify the core from this recording. Continue controlled testing.**
