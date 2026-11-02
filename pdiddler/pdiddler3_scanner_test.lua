@@ -829,6 +829,107 @@ end
 
 auditEligibleIdentityCollisions()
 
+local function inventoryFromProfile(prof)
+ if type(prof)~="table" then return nil end
+
+ local weapons=prof.Weapons
+ local owned=type(weapons)=="table" and weapons.Owned
+ if type(owned)~="table" then return nil end
+
+ local out={
+  items={},
+  total=0,
+  rawOwned=0,
+  unmapped=0,
+  unpriced=0,
+  badQty=0,
+  seen={}
+ }
+
+ for rawId,count in pairs(owned) do
+  local id=tostring(rawId)
+  local qty=nil
+
+  if type(count)=="number" then
+   if count>=0 and count==math.floor(count) then
+    qty=count
+   end
+  elseif type(count)=="string" then
+   local n=tonumber(count)
+   if n and n>=0 and n==math.floor(n) then
+    qty=n
+   end
+  end
+
+  if qty==nil then
+   out.badQty+=1
+   out.seen[#out.seen+1]=id.."x?"
+  elseif qty>0 then
+   out.rawOwned+=qty
+   out.seen[#out.seen+1]=id.."x"..tostring(qty)
+
+   local meta=Meta["Weapons|"..id]
+
+   if not meta then
+    -- We cannot safely classify the complete inventory if MM2 itself has an
+    -- owned weapon key that our live Sync catalog did not expose.
+    out.unmapped+=qty
+   else
+    local page=checkerPage(meta)
+
+    if allowedPage(page) then
+     local market,why=checkerMarket(meta)
+
+     out.items[#out.items+1]={
+      id=id,
+      cat="Weapons",
+      name=identityName(meta),
+      qty=qty,
+      value=market and market.v or nil,
+      type=tostring(meta.type or ""),
+      page=page,
+      checkerId=market and market.id or "UNPRICED",
+      identity=metaIdentity(meta),
+      year=tostring((meta.data or {}).Year or ""),
+      event=tostring((meta.data or {}).Event or ""),
+      valueSource=market and market.source or tostring(why or "UNPRICED")
+     }
+
+     if market and tonumber(market.v) then
+      out.total+=tonumber(market.v)*qty
+     else
+      out.unpriced+=qty
+     end
+    end
+   end
+  end
+ end
+
+ table.sort(out.seen)
+ out.fingerprint=table.concat(out.seen,"|")
+
+ table.sort(out.items,function(a,b)
+  local av=tonumber(a.value)
+  local bv=tonumber(b.value)
+
+  if av~=nil and bv~=nil and av~=bv then
+   return av>bv
+  elseif av~=nil and bv==nil then
+   return true
+  elseif av==nil and bv~=nil then
+   return false
+  end
+
+  if tostring(a.page)~=tostring(b.page) then
+   return tostring(a.page)<tostring(b.page)
+  end
+
+  return tostring(a.id)<tostring(b.id)
+ end)
+
+ return out
+end
+
 local function unwrapProfile(x,depth)
  depth=depth or 0
  if type(x)~="table" or depth>4 then return nil end
