@@ -752,8 +752,38 @@ local function allowedPage(page) return page=="ancient" or page=="godly" or page
 local function qualifyingMeta(meta)
  if not meta then return false end
  if not allowedPage(checkerPage(meta)) then return false end
+
  local t=norm(meta.type)
- return t=="knife" or t=="gun"
+ if t~="knife" and t~="gun" then return false end
+
+ local d=meta.data or {}
+
+ -- Evolution stages are catalog/progression entries, not normal tradable
+ -- weapons. Examples: Reaver_Ancient, IceHammer_Ancient,
+ -- Gingerscythe_Ancient, Synthwave_Ancient.
+ if d.EvoBaseID~=nil or d.EvoIndex~=nil then
+  return false
+ end
+
+ -- MM2 contains placeholder/test Godly entries named "???" such as
+ -- Emptybringer. They must never create a whitelist target.
+ if norm(meta.name)==""
+  or tostring(meta.name)=="???"
+ then
+  return false
+ end
+
+ -- Honor explicit non-trade metadata when MM2 supplies it. Missing flags are
+ -- not treated as non-tradable, so ordinary catalog items remain eligible.
+ if d.Tradable==false
+  or d.CanTrade==false
+  or d.Untradable==true
+  or d.NonTradable==true
+ then
+  return false
+ end
+
+ return true
 end
 
 local function checkerBuild()
@@ -804,6 +834,27 @@ local function checkerCanon(x,page,itemType,level)
  return q
 end
 
+local CheckerInternalKey={
+ godly={
+  BattleAxe="57",
+  Bioblade="444",
+  Chill="24",
+  Handsaw="25",
+  Phantom2022="620",
+  Rainbow_K="714",
+ },
+ chroma={
+  CandleflameChroma="525",
+ },
+ ancient={}
+}
+
+local function checkerInternalAlias(page,meta)
+ if not meta then return nil end
+ local bucket=CheckerInternalKey[page]
+ return bucket and bucket[tostring(meta.id)] or nil
+end
+
 local function checkerAlias(page,name,typ)
  local q,t=norm(name),norm(typ)
  if page=="chroma" and (q=="chromadeathshard" or q=="deathshard") then return "13" end
@@ -846,10 +897,21 @@ local function checkerResolve(name,opts)
  local ck=table.concat({norm(shown),pageHint,norm(typ),norm(iid),chroma and "1" or "0"},"|")
  if checkerCache[ck] then return checkerCache[ck],"cache" end
  if pageHint~="" then
+  local internalId=checkerInternalAlias(pageHint,meta)
+  local internalRec=internalId
+   and Checker.byId[pageHint]
+   and Checker.byId[pageHint][internalId]
+
+  if internalRec then
+   checkerCache[ck]=internalRec
+   return internalRec,"internal-key"
+  end
+
   local aid=checkerAlias(pageHint,shown,typ)
   local rec=aid and Checker.byId[pageHint] and Checker.byId[pageHint][aid]
   if rec then
-   checkerCache[ck]=rec; return rec,"alias"
+   checkerCache[ck]=rec
+   return rec,"alias"
   end
  end
  local pages={}
@@ -928,6 +990,36 @@ end
 
 auditEligibleIdentityCollisions()
 
+local function auditCatalogExclusions()
+ local rarityWeapons=0
+ local tradeEligible=0
+ local excluded=0
+
+ for _,m in pairs(Meta) do
+  local page=checkerPage(m)
+  local t=norm(m.type)
+
+  if allowedPage(page) and (t=="knife" or t=="gun") then
+   rarityWeapons+=1
+
+   if qualifyingMeta(m) then
+    tradeEligible+=1
+   else
+    excluded+=1
+   end
+  end
+ end
+
+ print(
+  "[PDIDDLER3] CATALOG FILTER",
+  "rarityWeapons",rarityWeapons,
+  "tradeEligible",tradeEligible,
+  "excludedNonTrade",excluded
+ )
+end
+
+auditCatalogExclusions()
+
 local function auditValueCoverage()
  local total=0
  local resolved=0
@@ -958,7 +1050,7 @@ local function auditValueCoverage()
  end)
 
  print(
-  "[PDIDDLER3] VALUE COVERAGE",
+  "[PDIDDLER3] TRADE VALUE COVERAGE",
   "resolved",resolved,
   "total",total,
   "unresolved",#unresolved
