@@ -1429,3 +1429,47 @@ Expected progression:
 Also verify that a moderate case such as OUR 230 vs THEIR 270 stays held.
 
 Do not freeze v2.5 until this exact behavior is confirmed live.
+
+
+---
+
+# 28. Recording-review rule — regressions first, not success-only
+
+Date: 2026-11-02
+
+From this point forward, every MM2 test recording must be reviewed as a **regression/error hunt**, not merely as confirmation that expected behavior occurred.
+
+For every video:
+1. Confirm the intended test behavior.
+2. Independently scan the entire recording for unrelated regressions.
+3. Compare against the last known-good behavior/build.
+4. Inspect moments where:
+   - OUR OFFER does not change when THEIR OFFER changes,
+   - THEIR OFFER changes but planner state appears stale,
+   - values/quantities/classification do not match visible items,
+   - pending/request ownership appears inconsistent,
+   - trade partner/session changes,
+   - scanner refreshes during critical phases,
+   - duplicate send/decline/rebalance/remove actions occur,
+   - timers reset unexpectedly or fail to reset,
+   - old callbacks act on a new trade/session,
+   - UI disappears/reappears and state does not recover,
+   - a transaction partially modifies OUR OFFER,
+   - a plan remains technically profitable but strategically wrong,
+   - an error/warning appears in console even if the visible flow continues.
+
+Do not treat a passing target scenario as proof that the whole build passed.
+
+For each recording, explicitly separate:
+- confirmed successes,
+- confirmed bugs/regressions,
+- suspicious behavior requiring more evidence,
+- untested paths.
+
+If a suspicious behavior is visible, trace the full pipeline:
+visible UI -> parsed identity/quantity -> value resolution -> trade classification -> planner decision -> executor mutation -> verification -> recovery.
+
+Do not patch until the root cause is identified, but do not dismiss anomalous behavior merely because the main test passed.
+
+The 13:16 v2.4 recording is the example motivating this rule:
+the intended PROFITABLE HOLD behavior appeared to pass, but a deeper review showed OUR OFFER could remain Boneblade 8 while THEIR OFFER grew to 60/95/130+, exposing the extreme-profit-hold regression.
