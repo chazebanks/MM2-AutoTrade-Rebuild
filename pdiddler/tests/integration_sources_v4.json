@@ -1,0 +1,65 @@
+[
+  {
+    "key": "profile",
+    "path": "pdiddler/pdiddler_supreme_snapshot_2026_11_03.lua",
+    "ref": "c37c6db25a01f3c12cac98e46a1a9aedab64f675",
+    "blob": "2455b372f80d0bd3efb1bc55ae799af30a8bd421",
+    "local_path": "pdiddler/pdiddler_supreme_snapshot_2026_11_03.lua"
+  },
+  {
+    "key": "strict",
+    "path": "pdiddler/pdiddler4_supreme_policy_v1.lua",
+    "ref": "c37c6db25a01f3c12cac98e46a1a9aedab64f675",
+    "blob": "d4294d3ef6f23539b6326f9f0ae5b6d053966ebe",
+    "local_path": "pdiddler/pdiddler4_supreme_policy_v1.lua"
+  },
+  {
+    "key": "p2",
+    "path": "pdiddler/pdiddler2_KNOWN_GOOD.lua",
+    "ref": "b097c1862db4cff7394d6a5e6764d34191df3283",
+    "blob": "463915e34d509b55b1a17634ec74396e7d82b76c",
+    "local_path": "pdiddler/pdiddler2_KNOWN_GOOD.lua"
+  },
+  {
+    "key": "gate",
+    "path": "pdiddler/pdiddler1_fast_gate_TEST_v5.lua",
+    "ref": "c3da9263b52bc7294c432531b71024b8051d2701",
+    "blob": "c2fc6dc4aa2a2b10789337b0815cf20b04662fdc",
+    "local_path": "pdiddler/pdiddler1_fast_gate_TEST_v5.lua"
+  },
+  {
+    "key": "scanner",
+    "path": "pdiddler/pdiddler3_scanner_MODULE_v6_8_CRITICAL_PAUSE.lua",
+    "ref": "3c48b49c1e750d91bfbf088fbc737185bddf39be",
+    "blob": "f1d4b5393846289fee766f06591dc1d5d5eda890",
+    "local_path": "pdiddler/pdiddler3_scanner_MODULE_v6_8_CRITICAL_PAUSE.lua"
+  },
+  {
+    "key": "p4",
+    "path": "pdiddler/pdiddler4_balancer_SUPREME_v1_TEST.lua",
+    "ref": "c37c6db25a01f3c12cac98e46a1a9aedab64f675",
+    "blob": "5300aed2d9a20a5cd0eb0751982523d9e8cfeb8f",
+    "local_path": "pdiddler/pdiddler4_balancer_SUPREME_v1_TEST.lua"
+  },
+  {
+    "key": "outgoing",
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v16_EXACT_IDENTITY.lua",
+    "ref": "c37c6db25a01f3c12cac98e46a1a9aedab64f675",
+    "blob": "b652dbd8f90aeec30af6a0d4fef6c190fea35b4f",
+    "local_path": "pdiddler/pdiddler3_outgoing_ROTATING_v16_EXACT_IDENTITY.lua"
+  },
+  {
+    "key": "policy",
+    "path": "pdiddler/pdiddler5_server_hopper_policy_v1.lua",
+    "ref": "3be1c15f435389ff518cf3a4594b34efc08e84de",
+    "blob": "fbd4643340e0f415c51538194a151340d556b7c9",
+    "local_path": "pdiddler/tests/fixtures/p5_policy_v1.lua"
+  },
+  {
+    "key": "transport",
+    "path": "pdiddler/pdiddler5_server_hopper_v2.lua",
+    "ref": "a20e96fff663e42e50bf668d5be5c7b148a70b9e",
+    "blob": "13d663c12431610edc036f709e998e9a0b2ad27d",
+    "local_path": "pdiddler/pdiddler5_server_hopper_v2.lua"
+  }
+]
