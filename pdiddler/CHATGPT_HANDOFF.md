@@ -4567,3 +4567,118 @@ Expected live sequence:
    - webhook contains both sides, market metadata, gain, and post-trade tracked inventory total.
 
 Do not call manual Accept detection or the live completed-trade webhook path proven until this controlled recording is reviewed.
+
+
+---
+
+# 54. 2026-11-02 manual Accept + projected gain + webhook live test
+
+Evidence:
+- Screen recording: `ScreenRecording_11-02-2026 19-22-11_1.mp4`
+- Discord screenshot: completed-trade embed for `venossgaming90190`
+
+Test build:
+`pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v1.lua`
+
+Branch:
+`feature/mm2-manual-accept-gain-test`
+
+## Confirmed live-success path
+
+Observed final safe trade:
+- OUR OFFER: PlasmaBeam x1
+- OUR raw tracked value: 20
+- THEIR OFFER: Darkbringer x1
+- THEIR raw tracked value: 35
+- projected/raw gain: +15
+
+Recording evidence:
+- gain display showed `Projected Gain: +15 | You: 20` before manual Accept,
+- native local accept state became visible (`YOU HAVE ACCEPTED.`),
+- console logged:
+  `[PDIDDLER MANUAL TEST] LOCAL ACCEPT DETECTED | projected gain +15 | NO AUTOMATED ACCEPT/CONFIRM ACTION`
+- trade then closed normally,
+- console logged:
+  `[PDIDDLER MANUAL TEST] TRADE CLOSED AFTER LOCAL ACCEPT | completion authority remains webhook completion logger`
+- Part 4 returned `trade-closed`,
+- webhook logger logged exactly one:
+  `[PDIDDLER WEBHOOK] SENT venossgaming90190 | raw gain 15 | protected gain 15 | source server-complete`
+
+Discord received exactly one completed-trade embed showing:
+- We traded: PlasmaBeam x1 — MM2 20 | Supreme 18 | Demand 1/10 | Liquidity -2.00 | Stable
+- They traded: Darkbringer x1 — MM2 35 | Supreme 33 | Demand 1/10 | Liquidity -2.00 | Stable
+- Trade value: We 20 / Them 35
+- Protected: We 20 / Them 35
+- Gain: Raw +15 / Protected +15
+- Completion: server-complete
+
+Therefore live-proven:
+- manual Accept detection,
+- no automated final Accept/Confirm action,
+- server-complete completion proof,
+- exactly-one webhook send for this completed trade,
+- raw/checker market metadata output for these items,
+- +15 gain computation.
+
+## Defect 1 — projected-gain banner clips right side
+
+Observed banner:
+`Projected Gain: +15 | You: 20`
+
+Expected source text also contains:
+`Them: 35`
+
+Current observer GUI:
+- width = 330 px,
+- height = 38 px,
+- TextWrapped = true.
+
+On iPad trade UI, right side is clipped/wrapped out of the visible single-line area.
+`MANUAL ACCEPTED` is likewise not visibly shown even though console detection works.
+
+Required fix:
+- make banner width/height responsive or compact text,
+- ensure `Them` and manual-accepted status remain visible on iPad,
+- do not alter Part 4 logic.
+
+## Defect 2 — webhook does NOT yet satisfy original post-trade inventory requirement
+
+Live Discord embed currently ends at:
+`Completion: server-complete`
+
+It does NOT visibly include:
+- post-trade Tracked Inventory Total,
+- Trade ID.
+
+Code audit confirms:
+- `pdiddler_trade_webhook_payload_v1.lua` only builds fields:
+  - We traded
+  - They traded
+  - Trade value
+  - Gain
+- `pdiddler_trade_completion_logger_v1.lua` immediately queues the server-complete snapshot and does not currently perform a stabilized post-trade tracked-inventory valuation before send.
+
+This contradicts the earlier intended Part 4.5 design that said the webhook would include post-trade tracked inventory value with stabilization.
+
+Required fix before calling Part 4.5 complete:
+1. after verified completion, poll own inventory until stable,
+2. resolve only canonical tracked market items (Godly/Ancient/Chroma),
+3. compute Tracked Inventory Total through the same canonical scanner/value path,
+4. include verification/fallback status,
+5. include Trade ID in the embed,
+6. preserve duplicate-send suppression and server-complete primary proof,
+7. do not delay/duplicate trading state recovery,
+8. keep webhook transport isolated and bounded.
+
+## Status
+
+Manual Accept + real completion + exactly-one webhook:
+**LIVE PASS**
+
+Projected gain banner presentation:
+**FUNCTIONAL BUT UI CLIPPING BUG**
+
+Original full Part 4.5 reporting contract:
+**NOT COMPLETE YET** because post-trade Tracked Inventory Total and visible Trade ID are missing.
+
+Do not advance to automated Part 5 Accept until these Part 4.5 reporting defects are fixed and re-tested.
