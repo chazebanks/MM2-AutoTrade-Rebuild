@@ -6523,3 +6523,108 @@ Do NOT call the Part 1 false-negative fixed until a new masked live run using P1
 - no excessive false bot rejections appear.
 
 If P1 v2 still misses a manually confirmed bot lobby, use the v2 readiness logs + recording evidence before adding any behavior or level-based heuristic.
+
+
+---
+
+# 73. P1 v2 still missed manual Botted lobby -> v3 persistent diversified fix
+
+Recording:
+`ScreenRecording_11-03-2026 01-15-59_1.mp4`
+
+Date: 2026-11-03
+
+## Confirmed regression
+
+The user sent chat message `Botted` in a Part 1 v2 APPROVED lobby at approximately 293s into the recording.
+
+Before the message:
+- observation GUI showed `PART 1: APPROVED`,
+- current server 11/12,
+- the lobby contained mixed/simple avatars rather than a pure clone farm.
+
+After the message, the user spectated and opened the Roblox People panel to show the server population and behavior.
+
+Visible population pattern:
+- repeated/simple avatar pairs were present,
+- usernames/display identities were diversified,
+- some accounts shared the `SoulV_` username family while using unrelated display names,
+- other accounts used generated-looking mixed alphanumeric names,
+- spectating showed abnormal/stuck/geometry-adjacent behavior.
+
+This proves P1 v2 readiness alone did NOT fix the missed diversified-farm pattern.
+
+## Actual decision flaw
+
+Existing Part 1 already has a medium rule named:
+`possible diversified farm`
+
+Thresholds:
+- total >= 8,
+- >=70% avatar descriptions loaded,
+- >=70% simple avatars,
+- >=60% usernames with >=1 generated trait,
+- >=30% usernames with >=2 generated traits.
+
+That rule adds only **45 points**.
+
+Global automatic bot threshold is **60**.
+
+Old control flow:
+- first scan below 60 -> APPROVE immediately,
+- only >=60 bot scans receive the second confirmation scan.
+
+Therefore a stable diversified bot farm can repeatedly satisfy the 45-point medium rule and still be approved.
+
+## v3 fix
+
+New detector:
+`pdiddler/pdiddler1_BOT_DETECTOR_v3_PERSISTENT_DIVERSIFIED.lua`
+
+Preserves all v2 readiness behavior.
+
+New decision behavior:
+1. clean below-threshold report -> approve normally,
+2. threshold bot -> confirm exactly as before,
+3. `possibleDiversified=true` -> now also requires confirmation,
+4. if the second scan still has `possibleDiversified=true`, reject with:
+   `persistent-diversified`,
+5. if the second scan clears the medium pattern, approve.
+
+This does NOT lower the global 60 threshold.
+It does NOT add movement guessing.
+It does NOT add an unverified level/leaderstats dependency.
+It does NOT change Part 5.
+
+## TDD evidence
+
+RED test:
+`pdiddler/tests/pdiddler1_bot_detector_v3_persistent_diversified.luau`
+
+RED run:
+`41590139530`
+- failed only because v3 module was absent,
+- earlier P1/P5 observation tests passed before the failure.
+
+v3 implementation:
+commit `7071ef9dfe789d4588985edebc1bc5d780a06862`
+
+CI compile commit:
+`abcca99c38a9fe94148eec1242e044751e9156dc`
+
+GREEN run:
+`41590234993`, job `125765048991`
+- Part 1 v2 readiness contract: PASS
+- Part 1 v3 persistent diversified regression: PASS 7/7
+- Part 5 policy/transport and observation policy/observer/GUI checks: PASS
+- branch still ends at the previously intentional observation-lab-v2 missing-file RED gate; do not confuse that known gate with the v3 regression result.
+
+## Live gate
+
+Use the same masked P1+P5 observation test with P1 v3 swapped in.
+
+Do NOT move on to Part 3 until a new live run shows either:
+- v3 automatically rejects the diversified pattern that v2 missed, or
+- another manual `Botted` false negative gives a new distinct pattern to diagnose.
+
+Keep P1 v1 and P1 v2 unchanged as historical baselines.
