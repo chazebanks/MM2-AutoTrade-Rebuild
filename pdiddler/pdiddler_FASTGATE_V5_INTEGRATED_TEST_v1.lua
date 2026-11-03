@@ -149,9 +149,10 @@ local function runIdleLoop(scanner,outgoing,part4,hopper)
         local safe,reason=safety(scanner,outgoing,part4)
         local n=available(scanner,outgoing)
         if currentRoster~=lastRoster then
-            -- A new player may be tradable. Wait for scanner resolution.
+            -- Roster changes alone are not proof of a new tradable player.
+            -- The scanner will classify the newcomer. Only an actual
+            -- unprocessed whitelisted trader resets the countdown.
             lastRoster=currentRoster
-            since=nil
         end
         if safe and n==0 then
             since=since or os.clock()
@@ -195,9 +196,15 @@ local function runIdleLoop(scanner,outgoing,part4,hopper)
                 since=nil
             end
         else
-            -- Preserve 45s countdown only with a resolved empty queue.
-            -- Pending inventory work can reveal a new eligible player.
-            since=nil
+            if reason=="scanner-pending" and n==0 then
+                -- Pause hop eligibility during scanning, preserving the
+                -- established exhaustion start. Final verification still
+                -- requires a fully settled scanner.
+            else
+                -- Actual tradable player, busy request/trade, unknown UI,
+                -- or invalid scanner state cancels the exhaustion window.
+                since=nil
+            end
         end
         task.wait(.5)
     end
