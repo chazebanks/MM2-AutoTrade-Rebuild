@@ -233,7 +233,7 @@ function P.negotiate(state,signature,total,plans,now,accepted)
     -- One trade-generation owns one negotiation. A change invalidates old waits.
     if state.signature~=signature then
         state.signature=signature; state.total=total; state.since=now
-        state.steps=0; state.finalSince=nil
+        state.steps=0; state.finalSince=nil; state.wasAccepted=false
     elseif state.total~=total then
         -- Our actual offer has changed: never reuse a prior final countdown.
         state.total=total; state.since=now; state.finalSince=nil
@@ -241,8 +241,12 @@ function P.negotiate(state,signature,total,plans,now,accepted)
     if accepted then
         -- No voluntary mutation/decline while the other side is accepted.
         -- Restart the observation interval if that state clears.
-        state.since=now; state.finalSince=nil
+        state.since=now; state.finalSince=nil; state.wasAccepted=true
         return "hold"
+    end
+    if state.wasAccepted then
+        -- The first observed unaccepted state begins a new full wait.
+        state.wasAccepted=false; state.since=now; state.finalSince=nil
     end
     if state.finalSince then
         if now-state.finalSince>=5 then return "decline" end
