@@ -786,6 +786,11 @@ jobs:
         run: |
           python pdiddler/tests/pdiddler1_bot_detector_v2_readiness_contract.py
 
+
+      - name: Run Part 1 v3 persistent diversified regression
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler1_bot_detector_v3_persistent_diversified.luau
+
       - name: Run P1 P5 observation lab v2 contract
         run: |
           python pdiddler/tests/pdiddler_p1_p5_observation_lab_v2_contract.py
