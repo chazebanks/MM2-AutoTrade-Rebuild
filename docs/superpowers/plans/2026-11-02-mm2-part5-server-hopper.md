@@ -86,7 +86,102 @@ Commit message: `feat: add Part 5 hopper policy`.
 
 ---
 
-### Task 2: Canonical final-rescan scanner interface
+### Task 2: Standalone Part 1 + Part 5 transport lab
+
+**Files:**
+- Create: `pdiddler/pdiddler5_server_hopper_v1.lua`
+- Create: `pdiddler/tests/pdiddler5_server_hopper_contract_v1.py`
+- Create: `pdiddler/tests/pdiddler_P1_P5_SERVER_HOP_LIVE_LAB_v1.lua`
+- Modify: `.github/workflows/mm2-market-integration-ci.yml`
+
+**Interfaces:**
+- Consumes: Part 5 policy module from Task 1.
+- Produces: `M.bootstrap(policy) -> hopperController`.
+- `hopperController:handleBotRejected(reason) -> boolean` starts immediate re-hop mode.
+- `hopperController:hopNow(reason) -> boolean` invokes the same production server-discovery/teleport transport path without claiming Part 3 exhaustion.
+- `hopperController:stop()` invalidates the current Part 5 session.
+- Teleport setting key: `"PDIDDLER_P5_STATE_V1"`.
+- ENV owners: `PDIDDLER_PART5_SESSION`, `PDIDDLER_HOPPING_SESSION`.
+- Server list: `https://games.roblox.com/v1/games/<PlaceId>/servers/Public?sortOrder=Desc&excludeFullGames=true&limit=100[&cursor=...]`.
+- Maximum pages per refresh: policy `MaxPagesPerRefresh == 5`.
+- No-candidate refresh: policy `RefreshSeconds == 5`.
+- No-evidence fallback after a protected teleport call: 12 seconds if still in the source JobId and no success/failure evidence arrived.
+
+- [ ] **Step 1: Write failing Part 5 runtime/static contract**
+
+Assert persistence, candidate exclusion, public-server parsing/pagination, 11/12→10/12 ranking consumption, serialized teleport attempts, `OnTeleport`, `TeleportInitFailed`, specific-instance teleport, no queue-on-teleport, no trade remotes, no `task.delay`.
+
+- [ ] **Step 2: Verify RED**
+
+Expected: FAIL because runtime does not exist.
+
+- [ ] **Step 3: Implement transport-only Part 5 runtime**
+
+Implement:
+- restore/persist visited state,
+- fetch/filter candidate pages,
+- serialized candidate attempts,
+- immediate/late failure recovery,
+- bot-reject re-hop entry,
+- `hopNow(reason)` for the lab and later production controller.
+
+Do **not** add scanner/outgoing dependencies yet.
+
+- [ ] **Step 4: Create P1+P5 live lab**
+
+Lab sequence:
+1. load Part 5 policy/runtime,
+2. bootstrap Part 5,
+3. run known-good Part 1,
+4. if bot -> `handleBotRejected("part1-bot-rejected")`,
+5. if approved -> print LAB marker and wait exactly 45 seconds,
+6. call `hopNow("p1-p5-lab-45s")`.
+
+The 45-second LAB timer is explicitly test-only and does not claim the server is trade-exhausted.
+
+- [ ] **Step 5: Compile + run contract tests**
+
+Expected: PASS.
+
+- [ ] **Step 6: Commit**
+
+Commit message: `feat: add standalone Part 1 + Part 5 hopper lab`.
+
+---
+
+### Task 3: Live-prove standalone hopper before production integration
+
+**Files:**
+- No production integration changes.
+- Modify handoff only after recording evidence.
+
+- [ ] **Step 1: Run the P1+P5 lab through Delta Auto Execute**
+
+Validate at least:
+- approved server waits 45s then searches,
+- chooses 11/12 when available,
+- uses 10/12 when no valid 11/12 is available,
+- failed/full candidate advances to another candidate,
+- visited/current JobId is not selected,
+- no target -> 5s refresh,
+- bot server after teleport -> Part 1 rejects -> immediate re-hop,
+- successful arrival auto-executes the lab again.
+
+- [ ] **Step 2: Analyze full recording for races/errors**
+
+Do not mark Part 5 transport live-proven from logs alone if the actual teleport/relaunch sequence is not visible.
+
+- [ ] **Step 3: Only after live proof, freeze the transport core**
+
+Record exact commit as known-good transport baseline.
+
+- [ ] **Step 4: If the standalone lab fails, fix only transport/lifecycle behavior**
+
+Do not touch scanner/outgoing/trading code.
+
+---
+
+### Task 4: Canonical final-rescan scanner interface
 
 **Files:**
 - Create from v6.9: `pdiddler/pdiddler3_scanner_MODULE_v6_10_HOP_FINAL_SCAN.lua`
@@ -94,47 +189,21 @@ Commit message: `feat: add Part 5 hopper policy`.
 - Modify: `.github/workflows/mm2-market-integration-ci.yml`
 
 **Interfaces:**
-- Existing scanner APIs remain byte-for-behavior compatible.
+- Existing scanner APIs remain behavior-compatible.
 - Produces: `ScannerAPI.finalRescanAll() -> result`.
 - `result` fields: `ok:boolean`, `reason:string|nil`, `generation:number`, `tracked:number`, `whitelist:number`, `blacklist:number`, `unknown:number`.
 - Internal `Live.membershipGeneration:number` increments on non-local `PlayerAdded` and `PlayerRemoving`.
-- `finalRescanAll()` must reuse `scanPlayerLive` / `scanOne`; it must not add a second inventory parser.
+- `finalRescanAll()` reuses `scanPlayerLive` / `scanOne`; no second parser.
 
-- [ ] **Step 1: Write failing scanner contract test**
-
-Assert:
-- v6.10 exists,
-- `finalRescanAll` exists,
-- it calls the canonical `scanPlayerLive` path,
-- membership generation is incremented by both join and leave handlers,
-- stable completion requires unchanged generation and no `Live.scanning` / unknown pending work,
-- the file contains no duplicate `Weapons.Owned` parser/classifier implementation added for Part 5,
-- all v6.9 claim-pause tokens remain present.
-
-- [ ] **Step 2: Run contract test to verify RED**
-
-Expected: FAIL because v6.10 does not exist.
-
-- [ ] **Step 3: Implement scanner v6.10**
-
-Copy v6.9, preserve existing behavior, add only:
-- membership generation tracking,
-- `finalRescanAll()`,
-- bounded internal stable-pass attempts (3 passes); if membership keeps changing, return `ok=false, reason="membership-changing"` rather than claiming clear.
-
-The caller may retry later; scanner must never manufacture a clear result from unstable membership.
-
-- [ ] **Step 4: Compile v6.10 and run old claim + new scanner contracts**
-
-Expected: PASS, including existing post-trade claim integration guards.
-
-- [ ] **Step 5: Commit**
-
-Commit message: `feat: add canonical final server rescan`.
+- [ ] **Step 1: Write failing scanner contract**
+- [ ] **Step 2: Verify RED**
+- [ ] **Step 3: Implement scanner v6.10 with bounded stable passes**
+- [ ] **Step 4: Compile and run old claim + new scanner contracts**
+- [ ] **Step 5: Commit** `feat: add canonical final server rescan`
 
 ---
 
-### Task 3: Part 3 hop-status and pre-hop hold integration
+### Task 5: Part 3 hop-status and pre-hop hold integration
 
 **Files:**
 - Create from v16: `pdiddler/pdiddler3_outgoing_ROTATING_v17_HOP_STATUS.lua`
@@ -142,168 +211,54 @@ Commit message: `feat: add canonical final server rescan`.
 - Modify: `.github/workflows/mm2-market-integration-ci.yml`
 
 **Interfaces:**
-- Returned outgoing controller adds `getHopSnapshot() -> snapshot`.
-- `snapshot` fields: `session:number`, `hasUnprocessed:boolean`, `hasDeferred:boolean`, `activeRequest:boolean`, `tradePaused:boolean`, `uncertain:boolean`, `queueExhausted:boolean`.
-- Outgoing reads `ENV.PDIDDLER_HOP_PRECHECK_BUSY_SESSION` before choosing a new target and yields while it is owned by current Part 5.
-- Part 5 owns the flag; outgoing never clears another subsystem's ownership.
+- Adds `getHopSnapshot()` with unprocessed/deferred/active/paused/uncertain/exhausted state.
+- Reads `PDIDDLER_HOP_PRECHECK_BUSY_SESSION` before selecting a new target.
 
 - [ ] **Step 1: Write failing outgoing contract**
-
-Assert:
-- v17 exists,
-- `getHopSnapshot` derives `hasUnprocessed` using existing `nextTarget()`,
-- derives deferred work using existing `soonestMaturing()`,
-- active/paused/uncertain state comes from existing `S`,
-- pre-hop hold check occurs before `nextTarget()` in the main queue loop,
-- claim pause remains before normal trade-close resume,
-- existing unproven-request bounded retry tokens remain,
-- no Accept/Confirm automation is added.
-
 - [ ] **Step 2: Verify RED**
-
-Expected: FAIL because v17 does not exist.
-
 - [ ] **Step 3: Implement minimal v17 extension**
-
-Do not alter request timing, physical click behavior, processed semantics, claim pause, or uncertain-send recovery.
-
-- [ ] **Step 4: Compile and run outgoing old/new regressions**
-
-Expected: existing Part 3 regression + new Part 5 status contract PASS.
-
-- [ ] **Step 5: Commit**
-
-Commit message: `feat: expose safe Part 3 hop status`.
+- [ ] **Step 4: Compile and run old/new Part 3 regressions**
+- [ ] **Step 5: Commit** `feat: expose safe Part 3 hop status`
 
 ---
 
-### Task 4: Part 5 runtime hopper
+### Task 6: Production exhaustion controller on the live-proven transport
 
 **Files:**
-- Create: `pdiddler/pdiddler5_server_hopper_v1.lua`
-- Create: `pdiddler/tests/pdiddler5_server_hopper_contract_v1.py`
-- Modify: `.github/workflows/mm2-market-integration-ci.yml`
+- Extend only the new Part 5 module version after standalone transport is frozen, or create `pdiddler5_server_hopper_v2_EXHAUSTION.lua`.
+- Create: `pdiddler/tests/pdiddler5_exhaustion_integration_contract_v1.py`.
 
 **Interfaces:**
-- Consumes: Part 5 policy module.
-- Produces: `M.bootstrap(policy) -> hopperController`.
-- `hopperController:handleBotRejected(reason) -> boolean` starts immediate re-hop mode without scanner/outgoing.
-- `hopperController:attach(scanner, outgoingController) -> boolean` arms the normal exhaustion controller exactly once.
-- `hopperController:stop()` invalidates the current Part 5 session.
-- Teleport setting key: `"PDIDDLER_P5_STATE_V1"`.
-- ENV owners: `PDIDDLER_PART5_SESSION`, `PDIDDLER_HOP_PRECHECK_BUSY_SESSION`, `PDIDDLER_HOPPING_SESSION`.
-- Server list: `https://games.roblox.com/v1/games/<PlaceId>/servers/Public?sortOrder=Desc&excludeFullGames=true&limit=100[&cursor=...]`.
-- Maximum pages per refresh: policy `MaxPagesPerRefresh == 5`.
-- No-candidate refresh: policy `RefreshSeconds == 5`.
-- No-evidence fallback after a protected teleport call: **12 seconds**, only when no `OnTeleport` state and no `TeleportInitFailed` arrived and `game.JobId` is still the source server.
+- Consumes scanner v6.10 + outgoing v17.
+- Adds `attach(scanner,outgoingController)`.
+- Uses policy 45-second timer and mandatory final scan.
+- Uses the already live-proven `hopNow()` transport path for actual hopping.
 
-- [ ] **Step 1: Write failing runtime/static contract**
-
-Assert:
-- runtime exists and requires injected policy,
-- uses `GetTeleportSetting` / `SetTeleportSetting`,
-- current JobId is persisted before normal hopping,
-- candidate JobId is persisted as attempted before teleport call,
-- uses `game:HttpGet` + `HttpService:JSONDecode`,
-- parses `data` and `nextPageCursor`,
-- URL-encodes cursor,
-- uses specific-instance client teleport path `TeleportToPlaceInstance(game.PlaceId, jobId, LP)`,
-- listens to both `LP.OnTeleport` and `TeleportService.TeleportInitFailed`,
-- handles `Enum.TeleportState.Failed`,
-- never launches two attempt workers for one Part 5 session,
-- no `queue_on_teleport`, `syn.queue_on_teleport`, or executor file persistence,
-- no `task.delay`,
-- no trade remotes / final Accept logic.
-
-- [ ] **Step 2: Verify RED**
-
-Expected: FAIL because runtime does not exist.
-
-- [ ] **Step 3: Implement bootstrap/persistence/server discovery**
-
-Restore plain-value teleport state defensively. Reject malformed persisted entries instead of trusting them. Add current/attempted JobIds before selection/attempt.
-
-Fetch up to five public-server pages per refresh. On HTTP/JSON failure, keep the current server and return to the 5-second discovery cadence.
-
-- [ ] **Step 4: Implement serialized teleport attempt state**
-
-One current candidate at a time:
-- protected call,
-- observe `OnTeleport`,
-- observe `TeleportInitFailed`,
-- explicit failure -> next candidate,
-- no event after 12s while still in source JobId -> fail candidate,
-- Started/WaitingForServer/InProgress -> never issue a competing target unless an explicit failure later returns control.
-
-- [ ] **Step 5: Implement normal exhaustion controller**
-
-Poll the outgoing snapshot and scanner pending state without console spam.
-At policy `"final-scan"`:
-1. claim pre-hop hold,
-2. re-check critical conditions,
-3. call `scanner.finalRescanAll()`,
-4. re-read outgoing snapshot,
-5. if a tradable/unprocessed target exists, release hold and reset,
-6. if scanner remains unstable/pending, retain safe hold and retry verification,
-7. if clear, transition to HOPPING.
-
-- [ ] **Step 6: Run compile + contract tests**
-
-Expected: PASS.
-
-- [ ] **Step 7: Commit**
-
-Commit message: `feat: add Part 5 server hopper runtime`.
+- [ ] **Step 1: RED integration contract**
+- [ ] **Step 2: Implement exhaustion/final-scan controller only**
+- [ ] **Step 3: Verify no transport behavior changed**
+- [ ] **Step 4: Commit** `feat: add Part 5 production exhaustion controller`
 
 ---
 
-### Task 5: Integrate early bot-rehop bootstrap and normal Part 5 into v8 stack
+### Task 7: Integrate Part 5 into full v8 stack only after standalone proof
 
 **Files:**
 - Create from v7: `pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v8_SERVER_HOP.lua`
 - Create: `pdiddler/tests/pdiddler5_stack_integration_contract_v1.py`
-- Modify: `.github/workflows/mm2-market-integration-ci.yml`
 
-**Interfaces:**
-- Stack loads Part 5 policy/runtime before running Part 1.
-- Stack calls `local hopper=part5.bootstrap(hopperPolicy)` before Part 1.
-- If Part 1 rejects the lobby: call `hopper:handleBotRejected("part1-bot-rejected")` and stop loading Parts 2–4.
-- Approved lobby continues v7 setup with scanner v6.10 and outgoing v17.
-- After `outgoing.run(scanner)` returns its controller, call `hopper:attach(scanner,outgoingController)`.
-- Part 4/claim/logger/manual observer arm order remains unchanged relative to outgoing.
-
-- [ ] **Step 1: Write failing v8 integration contract**
-
-Assert:
-- bootstrap occurs before Part 1 run,
-- bot rejection routes to Part 5 rather than plain `return false`,
-- Part 2 still runs only after Part 1 approval,
-- scanner v6.10 and outgoing v17 are used,
-- Part 4 -> claimer -> completion logger -> manual observer -> outgoing ordering is preserved,
-- hopper attach occurs only after outgoing controller exists,
-- final Accept remains disabled,
-- webhook secret remains runtime-only,
-- no queue-on-teleport fallback is present.
-
-- [ ] **Step 2: Verify RED**
-
-Expected: FAIL because v8 stack does not exist.
-
-- [ ] **Step 3: Implement v8 wiring only**
-
-Do not alter market, planner, webhook, Part 4, claim, or manual observer logic.
-
-- [ ] **Step 4: Compile v8 + run all existing and Part 5 regressions**
-
-Expected: PASS.
-
-- [ ] **Step 5: Commit**
-
-Commit message: `feat: wire Part 5 server hopping into v8 stack`.
+- [ ] **Step 1: RED v8 integration contract**
+- [ ] **Step 2: Wire early Part 5 bootstrap before Part 1**
+- [ ] **Step 3: Preserve Part 4 -> claimer -> logger -> manual observer -> outgoing order**
+- [ ] **Step 4: Attach production exhaustion controller after outgoing exists**
+- [ ] **Step 5: Compile + run all regressions**
+- [ ] **Step 6: Commit** `feat: wire live-proven Part 5 into v8 stack`
 
 ---
 
-### Task 6: Full branch verification, handoff, and live-test launcher
+### Task 8: Full branch verification and integrated live validation
+
+
 
 **Files:**
 - Modify: `pdiddler/CHATGPT_HANDOFF.md`
