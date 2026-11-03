@@ -12,6 +12,7 @@ on:
       - feature/mm2-outgoing-unproven-tdd
       - feature/mm2-adaptive-acceptance-v1
       - fix/mm2-adaptive-plan-cache-lag
+      - feature/mm2-post-trade-auto-claim
   workflow_dispatch:
 
 permissions:
@@ -731,3 +732,12 @@ jobs:
 
           print("PASS adaptive v6 plan-cache stack wiring")
           PY
+
+
+      - name: Run post-trade claim policy tests
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler_post_trade_claim_policy_v1.luau
+
+      - name: Run post-trade auto-claim integration contract
+        run: |
+          python pdiddler/tests/pdiddler_post_trade_claim_contract_v1.py
