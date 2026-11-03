@@ -4808,3 +4808,128 @@ Must verify:
 8. Parts 1-4 behavior remains unchanged.
 
 Do not advance to automated Part 5 Accept until this v2 live test is reviewed.
+
+
+---
+
+# 56. 2026-11-02 v2 live recording — mid-negotiation no-plan decline regression
+
+Evidence:
+`ScreenRecording_11-02-2026 19-43-55_1.mp4`
+
+Build:
+`pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v2.lua`
+
+## Main regression — script closes active negotiation
+
+This was NOT a random MM2/map-load close.
+
+Exact live sequence with `venossgaming90190`:
+- 19:44:57 Part 4 opens with Chroma Watergun 2350.
+- 19:44:59 Case 3 60s active-offer window starts.
+- 19:45:00 Part 4 rebalances to a safe plan, rawProfit +20.
+- 19:45:03 profitable hold reaches rawProfit +40.
+- Visible state later:
+  - OUR: Jinglegun = 15
+  - THEIR: Darkbringer 35 + Plasmabeam 20 = 55
+  - gain banner correctly shows `GAIN +40 | OUR 15 | THEIR 55`.
+- At ~77.0s in the recording, opponent removes Darkbringer.
+- THEIR OFFER becomes only Plasmabeam = 20.
+- Gain banner immediately invalidates to `GAIN ... | OUR ? | THEIR ?`, which is correct stale-candidate protection.
+- Part 4 uses the existing 0.65s offer-stability gate.
+- At 19:45:13 console logs:
+  `[PDIDDLER P4] NO PLAN DECLINE venossgaming90190 ours 15 theirs 20 planner no-safe-plan | declining trade | ACCEPT DISABLED`
+- Then:
+  `[PDIDDLER P4] DECLINE no-safe-plan`
+  `[PDIDDLER P4] TRADE RESULT no-safe-plan-declined`
+- Part 3 resumes immediately.
+
+Conclusion:
+The script itself closed the active trade because +5 did not meet the safe profit floor and no safe 1-4 item plan existed. The visible `LOADING MAP...` transition happened at the same time but is not the root cause.
+
+## Same behavior happened earlier in the same recording
+
+With `Dance_4life1989`:
+- Part 4 opened Chroma Watergun 2350.
+- Opponent had a low-value offer around 10.
+- Part 4 immediately reached `NO PLAN DECLINE` and closed the trade.
+
+This proves the behavior is systemic, not a one-off venoss timing event.
+
+## Diagnosis
+
+Current rule:
+stable + resolved + non-empty THEIR OFFER + zero safe plans => immediate decline.
+
+Current stability delay:
+`OfferStability=0.65`
+
+0.65 seconds is enough for technical UI stabilization but too short to infer that a human has finished editing an offer.
+
+This causes a race with normal negotiation:
+- opponent removes one item while changing bundle,
+- offer is technically stable for ~0.65s,
+- temporary bundle has no safe plan,
+- script declines before opponent can add/replace the next item.
+
+## Recommended correction
+
+Separate **UI stability** from **negotiation finality**.
+
+Keep:
+- 0.65s technical stability for parsing/value/rebalance safety,
+- accepted-empty immediate decline,
+- unresolved HOLD,
+- 15s truly-empty behavior,
+- 60s active-offer outer window,
+- no overpay / safe-plan rules.
+
+Change only no-safe-plan behavior:
+- when a resolved non-empty offer has no safe plan, enter `NO_PLAN_NEGOTIATION_HOLD` instead of immediate decline,
+- hold for ~5 seconds while exact THEIR signature remains unchanged,
+- reset the hold timer on every THEIR OFFER change,
+- if a safe plan appears, continue normal planning immediately,
+- if the same no-plan offer remains unchanged for the full grace period, decline,
+- session/partner/trade close still aborts immediately,
+- stale callbacks must not decline a newer offer.
+
+This preserves the no-plan safety rule while preventing mid-edit bundle changes from closing the trade.
+
+## Other observations from recording
+
+### Gain banner v2
+PASS for normal stable state:
+`GAIN +40 | OUR 15 | THEIR 55`
+is fully visible with no right-side clipping.
+
+PASS stale protection:
+when Darkbringer was removed, banner returned to unknown rather than displaying the stale +40.
+
+MANUAL ACCEPTED state:
+not exercised in this recording because the trade was declined before manual completion.
+
+### Part 4.5 inventory-after / Trade ID webhook v2
+Not live-tested in this recording because no trade completed.
+
+### Earlier closures
+- Dance close: expected current no-plan policy, but demonstrates the same negotiation-finality design issue.
+- Destiny close: `accepted-empty-declined`; this matches the explicit accepted-empty safety rule and should remain unchanged.
+
+### Console warnings/errors
+A Roblox/game-side warning appears:
+`Infinite yield possible on Workspace.Lobby...WaitForChild("Buy")`
+and later an asset/sound load approval error.
+No evidence in this recording ties those messages to the pdiddler modules; they appear game-side and should not drive a trader patch.
+
+## Status
+
+Gain banner clipping fix:
+**LIVE PASS for normal state**
+
+No-plan immediate decline:
+**LIVE REGRESSION / ROOT CAUSE CONFIRMED**
+
+Part 4.5 inventory-after + Trade ID:
+**STILL NEEDS A COMPLETED v2 LIVE TRADE**
+
+Do not change accepted-empty behavior while fixing this regression.
