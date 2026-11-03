@@ -65,6 +65,8 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler_trade_completion_logger_v2_INVENTORY.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_manual_accept_gain_observer_v2_IPAD.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v2.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_5_NO_PLAN_GRACE.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v3.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler_trade_webhook_payload_v2_INVENTORY.luau >/dev/null
 
       - name: Run pure market integration tests
@@ -543,4 +545,62 @@ jobs:
           assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in stack
 
           print("PASS post-trade inventory audit + iPad banner guards")
+          PY
+
+
+      - name: No-plan negotiation grace regression guards
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          src=Path("pdiddler/pdiddler4_balancer_ROTATING_v2_4_5_NO_PLAN_GRACE.lua").read_text()
+          stack=Path("pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v3.lua").read_text()
+
+          required=[
+              "NoPlanNegotiationGrace=5.0",
+              "local noPlanSig=nil",
+              "local noPlanSince=nil",
+              "local function clearNoPlanHold()",
+              "NO PLAN HOLD START",
+              "P4 NO PLAN HOLD",
+              'if held<C.NoPlanNegotiationGrace then',
+              'finalTheir.signature~=noPlanSig',
+              'declineTrade("no-safe-plan-after-grace")',
+              'return finishTradeClosed("no-safe-plan-declined-after-grace")',
+          ]
+          for token in required:
+              assert token in src, f"missing no-plan grace token: {token}"
+
+          # Their-offer mutation must invalidate any timer before the new
+          # signature is accepted as authoritative.
+          change=src.index("if theirEval.signature~=lastTheirSig then")
+          clear=src.index("clearNoPlanHold()",change)
+          assign=src.index("lastTheirSig=theirEval.signature",change)
+          assert change < clear < assign, "offer change must clear no-plan hold before adopting new signature"
+
+          # Accepted-empty remains the earlier, immediate safety path.
+          empty=src.index("if theirEval.slots==0 then")
+          accepted=src.index("if accepted then",empty)
+          accepted_decline=src.index('declineTrade("accepted empty via "',accepted)
+          no_plan=src.index("if #plans==0 then")
+          assert empty < accepted < accepted_decline < no_plan
+          assert "accepted-empty-declined" in src[accepted:no_plan]
+
+          # No-plan must hold before decline rather than immediately close.
+          hold=src.index("NO PLAN HOLD START",no_plan)
+          wait=src.index("held<C.NoPlanNegotiationGrace",no_plan)
+          final_sig=src.index("finalTheir.signature~=noPlanSig",no_plan)
+          decline=src.index('declineTrade("no-safe-plan-after-grace")',no_plan)
+          assert no_plan < hold < wait < final_sig < decline
+          assert "declining immediately" not in src[no_plan:decline]
+
+          # Keep final automation disabled.
+          assert "FINAL ACCEPT DISABLED" in src
+          assert "AcceptTrade" not in src
+
+          assert "pdiddler4_balancer_ROTATING_v2_4_5_NO_PLAN_GRACE.lua" in stack
+          assert "NO_PLAN_GRACE_COMMIT" in stack
+          assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in stack
+
+          print("PASS no-plan negotiation grace regression guards")
           PY
