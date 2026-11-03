@@ -49,6 +49,39 @@ end)
 test("pending request blocks bot rejection",function()
     local f=F.new({gateState="BOT_PATTERN_FOR_REVIEW"}); f.nodes.SendingRequest.Visible=true; f:run(path); f:advance(60); eq(f:count("hop"),0)
 end)
+test("desktop tablet request layout permits corroborated bot hop",function()
+    local f=F.new({gateState="BOT_PATTERN_FOR_REVIEW"}); f:desktopUi(); f:run(path); f:advance(25)
+    eq(f:count("hop"),1); eq(f:count("scanner"),0)
+end)
+test("desktop tablet request layout supports exhaustion",function()
+    local f=F.new(); f:desktopUi(); f:run(path); f:advance(60); eq(f:count("hop"),1)
+end)
+for _,direction in ipairs({"sending","receiving"}) do
+    test("desktop tablet "..direction.." request blocks bot hop",function()
+        local f=F.new({gateState="BOT_PATTERN_FOR_REVIEW"}); local _,sending,receiving=f:desktopUi()
+        if direction=="sending" then sending.Visible=true else receiving.Visible=true end
+        f:run(path); f:advance(30); eq(f:count("hop"),0)
+    end)
+end
+test("hidden phone layout cannot mask active desktop request",function()
+    local f=F.new({gateState="BOT_PATTERN_FOR_REVIEW"})
+    f.pg.children.MainGUI.children.Lobby.Visible=false
+    local _,sending=f:desktopUi(true); sending.Visible=true
+    f:run(path); f:advance(30); eq(f:count("hop"),0)
+end)
+test("request frame moved under another GUI root is structurally located",function()
+    local f=F.new({gateState="BOT_PATTERN_FOR_REVIEW"})
+    local main=f.pg.children.MainGUI; f.pg.children.MainGUI=nil
+    main.Name="TabletUI"; f.pg.children.TabletUI=main
+    f:run(path); f:advance(25); eq(f:count("hop"),1)
+end)
+test("missing all request frames stays blocked with a precise diagnostic",function()
+    local f=F.new({gateState="BOT_PATTERN_FOR_REVIEW"})
+    local board=f.pg.children.MainGUI.children.Lobby.children.Leaderboard
+    board.children.Container.children.OverlayMenu.children.TradeRequest=nil
+    f:run(path); f:advance(30); eq(f:count("hop"),0)
+    assert(f.controller.error:find("request",1,true))
+end)
 test("missing/recreated request UI blocks then recovers",function()
     local f=run(nil,20); f.lp.children.PlayerGui=nil; f:advance(80); eq(f:count("hop"),0)
     f.lp.children.PlayerGui=f.pg; f:advance(85); eq(f:count("hop"),1)

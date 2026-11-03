@@ -132,6 +132,42 @@ local function visible(node)
     end
     return true
 end
+local function requestFrames(pg)
+    local frames,seen={},{}
+    local function add(frame)
+        if frame and frame:IsA("GuiObject") and not seen[frame] then
+            seen[frame]=true; frames[#frames+1]=frame
+        end
+    end
+    local main=pg:FindFirstChild("MainGUI")
+    -- Trading_Phone.lua binds Lobby/.../OverlayMenu/TradeRequest;
+    -- Trading.lua binds Game/.../Container/TradeRequest (tablet/desktop).
+    for _,scope in ipairs({"Lobby","Game"}) do
+        local root=main and main:FindFirstChild(scope)
+        local board=root and root:FindFirstChild("Leaderboard")
+        local container=board and board:FindFirstChild("Container")
+        local overlay=container and container:FindFirstChild("OverlayMenu")
+        add(container and container:FindFirstChild("TradeRequest"))
+        add(overlay and overlay:FindFirstChild("TradeRequest"))
+    end
+    if #frames==0 then
+        -- Layout fallback only. Locate the request widget by its exact structure,
+        -- never infer idle from its absence or from arbitrary Accept buttons.
+        local ok,nodes=pcall(function() return pg:GetDescendants() end)
+        if not ok then return nil,"request-ui-inspection-failed" end
+        if #nodes>8192 then return nil,"request-ui-inspection-limit" end
+        for _,node in ipairs(nodes) do
+            if node.Name=="TradeRequest" then add(node) end
+        end
+    end
+    return frames
+end
+local function requestPath(frame,pg)
+    local parts={}
+    local node=frame
+    while node and node~=pg do table.insert(parts,1,node.Name); node=node.Parent end
+    return table.concat(parts,".")
+end
 -- Always reacquire PlayerGui and request nodes: respawns must not reuse stale refs.
 local function uiSafety()
     local pg=LP and LP:FindFirstChildOfClass("PlayerGui")
@@ -143,16 +179,28 @@ local function uiSafety()
         local t=c and c:FindFirstChild("Trade")
         if t and visible(t) then return false,"active-trade-ui" end
     end
-    local main=pg:FindFirstChild("MainGUI")
-    local lobby=main and main:FindFirstChild("Lobby")
-    local board=lobby and lobby:FindFirstChild("Leaderboard")
-    local container=board and board:FindFirstChild("Container")
-    local overlay=container and container:FindFirstChild("OverlayMenu")
-    local req=overlay and overlay:FindFirstChild("TradeRequest")
-    local sending=req and req:FindFirstChild("SendingRequest")
-    local receiving=req and req:FindFirstChild("ReceivingRequest")
-    if not sending or not receiving then return false,"request-ui-loading" end
-    if visible(sending) or visible(receiving) then return false,"pending-request-ui" end
+    local frames,inspectionError=requestFrames(pg)
+    if not frames then return false,inspectionError end
+    local paths={}
+    local complete=false
+    local blocked=nil
+    for _,req in ipairs(frames) do
+        local path=requestPath(req,pg)
+        paths[#paths+1]=path
+        local sending=req:FindFirstChild("SendingRequest")
+        local receiving=req:FindFirstChild("ReceivingRequest")
+        if sending and receiving and sending:IsA("GuiObject") and receiving:IsA("GuiObject") then
+            complete=true
+            if visible(sending) or visible(receiving) then blocked="pending-request-ui:"..path end
+        elseif visible(req) then blocked="request-ui-incomplete:"..path end
+    end
+    local found=#paths>0 and table.concat(paths,";") or "none (checked Lobby/Game and structural fallback)"
+    if I.requestUiPath~=found then
+        I.requestUiPath=found
+        print("[PDIDDLER V3] REQUEST_UI | "..found)
+    end
+    if blocked then return false,blocked end
+    if not complete then return false,"request-ui-loading:"..found end
     return true,"idle"
 end
 local seenEligible={}
@@ -314,13 +362,15 @@ local function boot()
     if strong then
         -- Missing/loading UI remains conservative, but is rechecked dynamically.
         local untilUI=os.clock()+15
+        local heldReason
         repeat
             local safe,why=uiSafety()
             if safe then requestHop(true); return end
+            heldReason=why
             phase("BOT_HOLD",why)
             task.wait(.25)
         until not live() or os.clock()>=untilUI
-        error("corroborated bot held: active or unavailable UI",0)
+        error("corroborated bot held:"..tostring(heldReason),0)
     end
     workerGui=LP:FindFirstChildOfClass("PlayerGui")
     assert(workerGui,"PlayerGui unavailable before scanner startup")

@@ -37,6 +37,13 @@ function F.new(options)
         function n:FindFirstChild(k) return self.children[k] end
         function n:FindFirstChildOfClass(c) for _,v in pairs(self.children) do if v:IsA(c) then return v end end end
         function n:WaitForChild(k) return self:FindFirstChild(k) end
+        function n:GetDescendants()
+            local out={}
+            local function walk(root)
+                for _,child in pairs(root.children) do out[#out+1]=child; walk(child) end
+            end
+            walk(self); return out
+        end
         if parent then parent.children[name]=n end
         self.nodes[name]=n
         return n
@@ -67,6 +74,17 @@ function F.new(options)
         self.pg=pg
     end
     f:ui()
+    function f:desktopUi(keepPhone)
+        local main=self.pg.children.MainGUI
+        local desktop=self:node("Game","Frame",main)
+        local board=self:node("Leaderboard","Frame",desktop)
+        local container=self:node("Container","Frame",board)
+        local req=self:node("TradeRequest","Frame",container)
+        local sending=self:node("SendingRequest","Frame",req,{Visible=false})
+        local receiving=self:node("ReceivingRequest","Frame",req,{Visible=false})
+        if not keepPhone then main.children.Lobby=nil end
+        return req,sending,receiving
+    end
     f.records={}; f.white={}; f.pending=false
     f.scanner={getWhitelist=function() return f.white end,
         getRecord=function(uid) return f.records[tonumber(uid)] end,

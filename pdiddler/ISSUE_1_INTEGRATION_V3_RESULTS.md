@@ -1,16 +1,53 @@
 # Issue #1 — isolated integration V3
 
-The reported failure was **staying in a bot server**, not a reported console
-exception. No recording or detector result for that run was supplied. The
-following is a reproduced integration failure that explains that behavior when
-V5 produces a corroborated bot verdict; it is not proof of the verdict produced
-in the user's particular run. The detector's false-negative rate remains unknown.
+The reported failure was **staying in a bot server**, not initially a reported
+console exception. The later console screenshot confirms a successful detector
+verdict followed by a V3 request-UI hold; see the live follow-up below. The
+detector's false-negative rate remains unknown.
+
+## Live follow-up: supplied console screenshot
+
+The screenshot shows:
+
+- 14:25:55: V3 starts its ten-second gate.
+- 14:26:05: V5 publishes `BOT_PATTERN_FOR_REVIEW`, two positive appearance scans,
+  score 175, 11 players, 10.0 seconds elapsed.
+- 14:26:06: V3 reports `BOT_HOLD | request-ui-loading`.
+- 14:26:21: its 15-second UI wait ends with an error, before any hop request.
+
+This establishes the failed boundary: **bot detection succeeded; V3's request
+frame resolver did not establish idle UI**. It does not show the actual Instance
+hierarchy, so the screenshot alone cannot identify which node was absent.
+
+The initial V3 fix retained a phone-only layout assumption. MM2's two client
+scripts demonstrate two different bindings at immutable external revision
+`0552a0f3502217a1cf89df66be9bd0f153e47fa4`:
+
+- [Trading.lua](https://github.com/tlredz/decompiledGames/blob/0552a0f3502217a1cf89df66be9bd0f153e47fa4/murder-mystery-2/v1456/Trading.lua):
+  `MainGUI.Game.Leaderboard.Container.TradeRequest` (desktop/tablet).
+- [Trading_Phone.lua](https://github.com/tlredz/decompiledGames/blob/0552a0f3502217a1cf89df66be9bd0f153e47fa4/murder-mystery-2/v1456/Trading_Phone.lua):
+  `MainGUI.Lobby.Leaderboard.Container.OverlayMenu.TradeRequest` (phone).
+
+V3 now checks both layouts and all request frames it finds. An inactive phone
+frame cannot mask an active desktop request. If exact paths fail, a bounded
+PlayerGui fallback locates `TradeRequest` by its actual sending/receiving child
+structure. Absence, unreadable inspection, or visible incomplete frames still
+block hopping. A deduplicated `REQUEST_UI` line names the resolved path(s), and
+the final error preserves the specific hold reason. No request-UI safety bypass,
+remote invocation, or change to the detector/trading modules was added.
+
+Seven additional regression cases cover desktop bot/exhaustion hops, both
+pending directions, competing layouts, moved GUI roots, and genuinely missing
+request widgets. Before the fix, the new tests reproduced the desktop false hold
+and showed that an idle phone layout could mask an active desktop request.
+Independent review of this follow-up found no concrete defects. The revised
+loader still requires a fresh Delta test; actual paths are now logged for it.
 
 ## Reproduced cause
 
 V1 `pendingUiVisible()` looks under
 `MainGUI.Lobby.Leaderboard.OverlayMenu.TradeRequest` (lines 93–100).
-The documented tablet hierarchy and the working outgoing module instead use
+The documented phone hierarchy and the working outgoing module instead use
 `MainGUI.Lobby.Leaderboard.Container.OverlayMenu.TradeRequest`.
 
 With that real hierarchy, V1 cannot find the request frame and returns `true`
@@ -79,7 +116,7 @@ branch without fetching the separate P5 branch.
 - `pdiddler_FASTGATE_V5_INTEGRATED_TEST_v3.lua`: one bootstrap/monitor.
 - `pdiddler5_server_hopper_v2.lua`: one bounded transport owner.
 - `tests/integration_fixture.lua`: deterministic scheduler and external boundaries.
-- `tests/integration_v3_test.lua`: 37 bootstrap/monitor regression cases.
+- `tests/integration_v3_test.lua`: 44 bootstrap/monitor regression cases.
 - `tests/hopper_v2_test.lua`: 14 actual transport/policy regression cases.
 - `tests/fixtures/p5_policy_v1.lua`: unchanged original policy test dependency.
 - `tests/integration_sources_v3.json`: immutable dependency integrity manifest.
@@ -94,7 +131,7 @@ From the repository root:
 python3 pdiddler/tests/run_integration_tests.py
 ```
 
-Result: **37 integration + 14 transport tests passed**, seven dependency pins
+Result: **44 integration + 14 transport tests passed**, seven dependency pins
 and blob hashes matched, and all new Lua files passed syntax checks. Tests run
 under texlua (Lua 5.3); Lua 5.3/5.4 plus luac also work. New runtime code uses
 Lua/Luau-compatible syntax. Tests replace Roblox/executor boundaries; they do not

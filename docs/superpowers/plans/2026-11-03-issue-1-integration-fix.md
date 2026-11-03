@@ -31,3 +31,9 @@ teleport Started without completion/failure. Include regression tests for each.
 Execution: continue inline under the user's investigate/fix/verify/PR instruction.
 The GitHub connection supplies source and publication because local proxy fails.
 No merge, production loader replacement, or existing-module edits.
+
+Live follow-up: console screenshot confirms a strong bot verdict followed by
+request-ui-loading. Source-backed desktop/tablet and phone layouts differ.
+Extend only the V3 resolver to inspect both and report discovered request paths;
+add failing regressions before the change, preserve unknown-UI/request blocking,
+rerun the full suite and independent review, then update the existing draft PR.
