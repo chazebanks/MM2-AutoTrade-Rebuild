@@ -4682,3 +4682,129 @@ Original full Part 4.5 reporting contract:
 **NOT COMPLETE YET** because post-trade Tracked Inventory Total and visible Trade ID are missing.
 
 Do not advance to automated Part 5 Accept until these Part 4.5 reporting defects are fixed and re-tested.
+
+
+---
+
+# 55. 2026-11-02 Part 4.5 v2 inventory-audited webhook + iPad gain banner
+
+Branch:
+`feature/mm2-manual-accept-gain-test`
+
+This revision fixes the two defects found in the first live manual-Accept webhook recording without modifying frozen Parts 1-4 behavior.
+
+## Fix A — post-trade tracked inventory total + visible Trade ID
+
+New logger:
+`pdiddler/pdiddler_trade_completion_logger_v2_INVENTORY.lua`
+
+Creation commit:
+`50c9da1c4174dce296a590993dad28ba3701baa3`
+
+Behavior:
+- completion proof is still claimed immediately so duplicate completion evidence cannot start a second webhook path,
+- server-complete remains the primary completion proof,
+- inventory-delta fallback remains supported,
+- after completion, the logger calls the canonical scanner API:
+  `scanner.getOwnInventory()`,
+- no second value resolver/database is introduced,
+- it waits briefly for MM2 replication,
+- it requires two matching post-trade inventory fingerprints,
+- when pre-trade raw counts are available it also requires the expected trade delta before labeling the total verified,
+- verified status:
+  `verified-stable-delta-verified` or `verified-stable-server-complete`,
+- if replication never stabilizes but a canonical read is available, it reports the latest canonical total as unverified rather than falsely claiming verification,
+- if no canonical read succeeds, inventory total is reported unavailable,
+- final automated Accept/Confirm remains absent.
+
+New payload:
+`pdiddler/pdiddler_trade_webhook_payload_v2_INVENTORY.lua`
+
+Final payload fix commit:
+`d49b7ee1c768141f35234a1545b563a76545834d`
+
+New Discord fields:
+- `Tracked inventory after`
+- verification status
+- `Trade ID`
+
+The inventory number remains a **Tracked Inventory Total** from the existing canonical scanner/value coverage, not a claim that every Common/Rare/Uncommon has a market value.
+
+## Fix B — projected gain banner clipping
+
+New observer:
+`pdiddler/pdiddler_manual_accept_gain_observer_v2_IPAD.lua`
+
+Commit:
+`d802519ce4a4013a977f1c651597cd50332ed441`
+
+Banner text is now compact:
+`GAIN +15 | OUR 20 | THEIR 35`
+
+When local manual Accept is visible:
+`GAIN +15 | OUR 20 | THEIR 35`
+`MANUAL ACCEPTED`
+
+Layout:
+- width follows the native trade width, clamped 360-540 px,
+- normal height 34 px,
+- accepted height 50 px,
+- keeps read-only local Accept detection,
+- no Accept/Confirm click/remote capability.
+
+## Runnable v2 stack
+
+File:
+`pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v2.lua`
+
+Commit:
+`fd054973dd87dbc866f280df406a3ade1ce7478f`
+
+The stack pins the replacement modules through:
+`d802519ce4a4013a977f1c651597cd50332ed441`
+
+and passes the authoritative scanner API into completion logger v2.
+
+Automated final Accept remains disabled.
+
+## Tests
+
+New pure payload regression:
+`pdiddler/tests/pdiddler_trade_webhook_payload_v2_INVENTORY.luau`
+
+Commit:
+`404b5575a95ff971c17fd39948427dbb5f2513e7`
+
+CI workflow update:
+`b8a9221d05bfcf6907356275d4a0e04fc6165c07`
+
+CI run:
+`41554364961`
+
+Result:
+**SUCCESS**
+
+Passed:
+- official Luau compile for all new modules + v2 stack,
+- all prior Parts 1-4/market/webhook regressions,
+- raw/checker identity regression,
+- v2 payload assertions for Tracked Inventory After + Trade ID,
+- static proof logger v2 has no Accept/Confirm/trade mutation path,
+- static proof gain observer v2 has no Accept/trade mutation path,
+- iPad compact-banner contract.
+
+## Next live test
+
+Run v2 stack and complete one controlled safe trade manually.
+
+Must verify:
+1. banner visibly shows GAIN / OUR / THEIR with no clipping,
+2. after manual Accept it visibly shows MANUAL ACCEPTED,
+3. exactly one Discord completion webhook,
+4. webhook shows Tracked inventory after,
+5. webhook shows Trade ID,
+6. inventory status is preferably `verified-stable-delta-verified`,
+7. if status is unverified/unavailable, inspect replication timing before changing logic,
+8. Parts 1-4 behavior remains unchanged.
+
+Do not advance to automated Part 5 Accept until this v2 live test is reviewed.
