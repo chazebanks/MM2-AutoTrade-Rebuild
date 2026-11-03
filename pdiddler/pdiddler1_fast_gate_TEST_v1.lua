@@ -92,6 +92,13 @@ local function setup()
     gui.Parent=pg
 end
 pcall(setup)
+-- Independent watchdog also covers slow or hung HttpGet and module setup.
+task.spawn(function()
+    while current() and os.clock()-started<BUDGET do task.wait(.1) end
+    if current() then
+        finish("PROCEED_UNVERIFIED","10-second watchdog expired; no rejection")
+    end
+end)
 task.spawn(function()
     local loaded,lib=pcall(function()
         return loadstring(game:HttpGet(
