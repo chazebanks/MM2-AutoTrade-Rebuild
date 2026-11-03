@@ -36,6 +36,7 @@ function M.assess(observation,context)
     if context.scannerPending==true or context.hopping==true then return "HOLD","system-busy" end
     if context.observerCurrent~=true then return "HOLD","stale-observer" end
     if observation.complete~=true then return "HOLD","observation-incomplete" end
+    if observation.stable~=true then return "HOLD","population-churn" end
     if not integer(observation.total) or not integer(observation.moving)
         or not integer(observation.confirmed) or not integer(observation.partial)
         or not integer(observation.unknown) then return "HOLD","invalid-counts" end
@@ -85,6 +86,7 @@ function M.assess(observation,context)
         or reviewed/n<M.MinReviewedPopulationRatio then
         return "ALLOW","no-strong-combined-pattern"
     end
+    if observation.groupPattern~=true then return "HOLD","observer-policy-mismatch" end
     return "REVIEW","combined-farm-pattern-not-proof"
 end
 return M
