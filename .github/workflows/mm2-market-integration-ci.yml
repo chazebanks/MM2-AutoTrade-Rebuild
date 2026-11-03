@@ -67,6 +67,8 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v2.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_5_NO_PLAN_GRACE.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v3.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler3_outgoing_ROTATING_v16_BOUNDED_UNPROVEN_RETRY.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v4.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler_trade_webhook_payload_v2_INVENTORY.luau >/dev/null
 
       - name: Run pure market integration tests
@@ -603,4 +605,55 @@ jobs:
           assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in stack
 
           print("PASS no-plan negotiation grace regression guards")
+          PY
+
+
+      - name: Bounded unproven outgoing recovery regression guards
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          src=Path("pdiddler/pdiddler3_outgoing_ROTATING_v16_BOUNDED_UNPROVEN_RETRY.lua").read_text()
+          stack=Path("pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v4.lua").read_text()
+
+          required=[
+              "UnavailableRetryDelay=15",
+              "MaxUnavailableChecks=2",
+              "UNCERTAIN DEFER",
+              "deferred-unproven",
+              "UNCERTAIN FINAL",
+              "NO FURTHER RESEND THIS SERVER",
+              "S.unavailableUntil[target.UserId]=os.clock()+C.UnavailableRetryDelay",
+              "S.unavailableCount[target.UserId]=count",
+          ]
+          for token in required:
+              assert token in src, f"missing bounded retry token: {token}"
+
+          # First fully unproven timeout must defer instead of processing.
+          timeout=src.index("local count=(tonumber(S.unavailableCount[target.UserId]) or 0)+1")
+          defer=src.index('return finish("deferred-unproven")',timeout)
+          final=src.index('return finish("uncertain-timeout-final")',timeout)
+          assert timeout < defer < final
+
+          # Queue must explicitly keep deferred-unproven out of processed set.
+          assert 'and result~="deferred-unproven"' in src
+
+          # Late pending adoption remains available during cooldown.
+          assert "LATE PENDING ADOPT" in src
+          assert "recentAge<=C.LatePendingAdoptWindow" in src
+
+          # Proven pending is still owned, not retried.
+          pending=src.index("PENDING CONFIRMED")
+          assert pending < timeout
+
+          # No new trade Accept/Confirm automation.
+          assert "FINAL TRADE ACCEPT remains disabled" in src
+          assert 'physicalTap(button,"Accept' not in src
+          assert 'physicalTap(button,"Confirm' not in src
+
+          assert "pdiddler3_outgoing_ROTATING_v16_BOUNDED_UNPROVEN_RETRY.lua" in stack
+          assert "OUTGOING_RECOVERY_COMMIT" in stack
+          assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in stack
+
+          print("PASS bounded unproven outgoing recovery guards")
           PY
