@@ -11,16 +11,16 @@ This follow-up is a **real, isolated source change** from user-tested PR #5. It 
 Disable earlier pdiddler auto-execute entries. Start **one** V6 loader per new JobId:
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/BRANCH_COMMIT_SHA/pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v6_FINAL_WAIT.lua",true))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/1b7f34dd769db9bbe51dcb8943117831f32ce899/pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v6_FINAL_WAIT.lua",true))()
 ```
 
-Use the **exact reviewed immutable GitHub commit SHA** from this draft PR; do not load `main` or a moving branch. The loader itself pins its strict v3 policy to commit `6008fd02345dad87d789a48f4868e6f65dbce7cc`, retains the other dependencies, and blocks a loaded V5/V4 owner. A stale Supreme snapshot refuses fresh trading; do not bypass it.
+Use the **exact reviewed immutable GitHub commit SHA** from this draft PR; do not load `main` or a moving branch. The loader itself pins its strict v3 policy to commit `8b337089e753c6295e116bd426a263e6c33eec9f`, retains the other dependencies, and blocks a loaded V5/V4 owner. A stale Supreme snapshot refuses fresh trading; do not bypass it.
 
 ### Evidence probe: observational, no trader actions
 The probe can be run in the same fresh session as V6 because it does not own or mutate the trade:
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/BRANCH_COMMIT_SHA/pdiddler/pdiddler_native_trade_probe_v1.lua",true))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/1b7f34dd769db9bbe51dcb8943117831f32ce899/pdiddler/pdiddler_native_trade_probe_v1.lua",true))()
 ```
 
 The probe watches the **visible** `PlayerGui.TradeGUI[_Phone].Container.Trade` instance, exact offer visibility/quantity and Accepted indicators, candidate touch controls (via `GuiButton.Activated`), and the observed `ReplicatedStorage.Trade.AcceptTrade/DeclineTrade.OnClientEvent` arguments. It logs **types/booleans only** for remote messages; it never dumps private profile data, messages or credentials. Roblox documents `GuiButton.Activated` as touch-compatible. A remote event with only a boolean **does not contain a transaction ID**.
