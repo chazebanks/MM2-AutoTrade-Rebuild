@@ -5289,3 +5289,53 @@ Not exercised:
 - fully-unproven outgoing tap recovery path.
 
 No new code change was justified by this recording alone.
+
+
+---
+
+# 62. Adaptive opener + acceptance-aware trading design
+
+Date: 2026-11-02
+
+User selected:
+**Approach C — adaptive opener + acceptance-aware safe-plan ranking + bounded sweetening**
+
+Design branch:
+`feature/mm2-acceptance-aware-planner-design`
+
+Design document:
+`docs/superpowers/specs/2026-11-02-mm2-adaptive-acceptance-aware-trading-design.md`
+
+Design commit:
+`f4322fd3bbb6bc7ad5950b80d60ddcce55551e96`
+
+Key research/code finding:
+- current Part 4 always opens with the single highest-value eligible own item,
+- current market ranker, within similar safe profit bands, prefers lower `givenExitScore`,
+- this protects our better-demand inventory but can make the counterparty receive the less liquid/less desirable bundle,
+- this is strategically misaligned with improving human acceptance rate.
+
+Chosen redesign:
+1. 2.5s initial observation window.
+2. If THEIR OFFER appears first, skip our opener and respond to their revealed intent.
+3. If they do not offer, choose a realistic market-aware opener using partner four-slot affordability + existing demand/stability/exit metadata.
+4. If no realistic opener exists, remain empty rather than forcing an absurd high-value opener.
+5. Existing safety planner remains authoritative.
+6. Acceptance-aware ranking only orders already-safe plans.
+7. Remove the bias that prefers dumping our lowest-exit-score items.
+8. Use counterparty quality delta + upgrade/downgrade shape + bundle simplicity to rank safe plans.
+9. Bounded sweetening uses the existing profit-band width:
+   `min(25, max(5, theirRaw * 0.02))`.
+10. Proposed default: start one safe profit band above the floor when possible, sweeten after 5s, sweeten a second/final time after another 5s, never below safety floor.
+11. Any THEIR OFFER change resets opener/sweetening generation.
+12. Manual Accepted state freezes voluntary offer mutation.
+13. Final automated Accept remains disabled during testing.
+
+Required before live integration:
+- pure offline strategy matrix,
+- CI/regression coverage,
+- new versioned modules only,
+- no edits to frozen known-good artifacts.
+
+Status:
+**DESIGN WRITTEN — AWAITING USER APPROVAL BEFORE IMPLEMENTATION PLAN**
