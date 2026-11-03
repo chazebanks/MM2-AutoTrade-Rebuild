@@ -388,8 +388,13 @@ pcall(gui)
 task.spawn(function()
     local nextView=0
     local pendingInitial=true
+    local deadline=os.clock()+300
     while live() do
         local now=os.clock()
+        if now>=deadline then
+            markInconclusive("overall 300-second deadline reached")
+            break
+        end
         local ids=playerIds()
         if pendingInitial then
             -- First snapshot only after the player set stops changing briefly.
@@ -423,11 +428,12 @@ task.spawn(function()
                 if not live() or before~=signature(membershipBaseline) then
                     markChange()
                 else
-                    pcall(report,true)
+                    local reportOk,reportErr=pcall(report,true)
                     local after=signature(playerIds())
-                    if changeSerial~=serial or after~=before then
-                        E.PDIDDLER_P1_EVIDENCE_V1=nil
-                        warn("[P1 V4.3] FINAL INVALIDATED | membership changed during report")
+                    if not reportOk then
+                        markInconclusive("final report failed: "..tostring(reportErr))
+                    elseif changeSerial~=serial or after~=before then
+                        markInconclusive("membership changed during final report")
                     else
                         print("[P1 V4.3] COMPLETE | restarts="..attempts)
                     end
