@@ -6700,3 +6700,27 @@ v4 should focus on:
 - reason-coded diagnostics for every reject/manual false negative.
 
 Do not call P1 fixed yet.
+
+
+---
+
+# 75. Full conversation checkpoint saved
+
+Durable checkpoint:
+`pdiddler/CONVERSATION_CHECKPOINT_2026-11-03.md`
+
+Checkpoint commit:
+`8d9cf1e75a614d67b12c6477a2055c1f3b16ab5a`
+
+This checkpoint consolidates the current conversation state, including:
+- Parts 1–5 status,
+- hopper live proof,
+- masked P1+P5 proof,
+- P1 v1/v2/v3 false-negative history,
+- bot-pattern findings from the reviewed videos,
+- external MM2 bot research implications,
+- current v4 detector direction,
+- the agreed bot-only evidence phase followed by real-server false-positive validation,
+- explicit no-regression rules.
+
+On a new chat, read this checkpoint plus the handoff before making changes.
