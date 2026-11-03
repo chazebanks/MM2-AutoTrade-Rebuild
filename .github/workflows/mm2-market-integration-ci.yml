@@ -61,6 +61,11 @@ jobs:
           /tmp/luau/luau-compile pdiddler/tests/pdiddler_webhook_connection_LIVE_LAB_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_manual_accept_gain_observer_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_trade_webhook_payload_v2_INVENTORY.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_trade_completion_logger_v2_INVENTORY.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_manual_accept_gain_observer_v2_IPAD.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v2.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/tests/pdiddler_trade_webhook_payload_v2_INVENTORY.luau >/dev/null
 
       - name: Run pure market integration tests
         run: |
@@ -481,4 +486,61 @@ jobs:
           if missing:
               raise SystemExit("test stack missing required markers: "+repr(missing))
           print("manual Accept/gain observer static guard PASS")
+          PY
+
+
+      - name: Run webhook inventory payload v2 contract
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler_trade_webhook_payload_v2_INVENTORY.luau
+
+      - name: Post-trade inventory audit and iPad gain banner guards
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          logger=Path("pdiddler/pdiddler_trade_completion_logger_v2_INVENTORY.lua").read_text()
+          payload=Path("pdiddler/pdiddler_trade_webhook_payload_v2_INVENTORY.lua").read_text()
+          observer=Path("pdiddler/pdiddler_manual_accept_gain_observer_v2_IPAD.lua").read_text()
+          stack=Path("pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v2.lua").read_text()
+
+          for token in [
+              "scanner.getOwnInventory",
+              "countsFromParsedInventory",
+              "deltaMatches",
+              "stableCount>=2",
+              "trackedInventoryTotal",
+              "trackedInventoryVerification",
+              "completion-verified-inventory-pending",
+          ]:
+              assert token in logger, f"logger missing {token}"
+
+          for forbidden in [
+              ":FireServer(",
+              "SendMouseButtonEvent",
+              "firesignal",
+              'physicalClick(button,"Accept',
+              'physicalClick(button,"Confirm',
+          ]:
+              assert forbidden not in logger, f"logger mutation token present: {forbidden}"
+
+          for token in [
+              'name="Tracked inventory after"',
+              'name="Trade ID"',
+              "trackedInventoryVerification",
+          ]:
+              assert token in payload, f"payload missing {token}"
+
+          assert "GAIN %s%s | OUR %s | THEIR %s" in observer
+          assert "MANUAL ACCEPTED" in observer
+          assert "math.clamp(size.X,360,540)" in observer
+          assert "AcceptTrade" not in observer
+          assert "FireServer(" not in observer
+
+          assert "pdiddler_trade_webhook_payload_v2_INVENTORY.lua" in stack
+          assert "pdiddler_trade_completion_logger_v2_INVENTORY.lua" in stack
+          assert "pdiddler_manual_accept_gain_observer_v2_IPAD.lua" in stack
+          assert "completionLogic,\n        scanner" in stack
+          assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in stack
+
+          print("PASS post-trade inventory audit + iPad banner guards")
           PY
