@@ -215,10 +215,20 @@ task.spawn(function()
         return
     end
     integration.hopper=hopper
+    log("STARTUP / TABLET SELECTION")
+    local p2,why=pull("pdiddler2_KNOWN_GOOD.lua",
+        "b097c1862db4cff7394d6a5e6764d34191df3283","P2")
+    if not p2 or type(p2.run)~="function" then fail(why or "P2 unavailable") return end
+    local success2,ready=pcall(p2.run)
+    if not success2 or ready~=true then fail("P2 tablet selection failed") return end
+    -- Start the bot gate only after the character can enter the lobby.
     log("BOT SCREENING (10s)")
     -- Use exactly the already-tested v5 gate. It publishes one result;
     -- do not run the frozen Part1 gate again.
     local startedGate=os.clock()
+    -- Clear any result from earlier standalone testing in this client.
+    ENV.PDIDDLER_FAST_GATE_RESULT=nil
+    local previousGeneration=tonumber(ENV.PDIDDLER_FAST_GATE_GEN) or 0
     local gate,gateErr=pull("pdiddler1_fast_gate_TEST_v5.lua",BRANCH,"Fast Gate v5")
     -- The v5 file runs asynchronously and returns nil by design.
     if gateErr and not gate then
@@ -232,6 +242,8 @@ task.spawn(function()
         local result=ENV.PDIDDLER_FAST_GATE_RESULT
         if type(result)=="table" and result.evidenceVersion==5
             and result.jobId==game.JobId and result.automaticHopAllowed==false
+            and tonumber(result.generation)==(tonumber(ENV.PDIDDLER_FAST_GATE_GEN) or -1)
+            and tonumber(result.generation)>previousGeneration
             and tonumber(result.elapsed) and result.elapsed>=0
             and tonumber(result.elapsed)<=12 then
             finalGate=result
@@ -266,11 +278,6 @@ task.spawn(function()
     -- For all uncertain/animation-only findings, go to trading.
     -- Do not treat uncertainty as evidence of a safe server.
     log("STARTING KNOWN-GOOD TRADING MODULES")
-    local p2,why=pull("pdiddler2_KNOWN_GOOD.lua",
-        "b097c1862db4cff7394d6a5e6764d34191df3283","P2")
-    if not p2 or type(p2.run)~="function" then fail(why or "P2 unavailable") return end
-    local success2,ready=pcall(p2.run)
-    if not success2 or ready~=true then fail("P2 tablet selection failed") return end
     local scanner,sErr=pull("pdiddler3_scanner_MODULE_v6_8_CRITICAL_PAUSE.lua",
         "3c48b49c1e750d91bfbf088fbc737185bddf39be","P3 scanner")
     if not scanner then fail(sErr or "scanner missing") return end
