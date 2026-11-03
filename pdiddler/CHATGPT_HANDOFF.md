@@ -5598,3 +5598,145 @@ Record and verify:
 12. Fully-unproven Part 3 outgoing retry remains an older live-unproven edge.
 
 Final automated Accept remains disabled.
+
+
+---
+
+# 65. v6 adaptive performance fix — cache full planner per THEIR generation
+
+Date: 2026-11-02
+
+User report:
+- lag/choppiness returned after adaptive acceptance v5.
+
+Branch:
+`fix/mm2-adaptive-plan-cache-lag`
+
+## Root-cause investigation
+
+The prior severe-v2.6 lag fix is still present in v5:
+- scanner critical-phase pause remains,
+- exact GUI paths remain,
+- Part 4 loop remains 0.12s,
+- direct Accepted-node lookup remains,
+- bounded market bundle cache remains.
+
+Therefore this is NOT a regression of the old repeated `bundleAssessment` hot path.
+
+New v5-specific cost:
+1. planner v1.3 intentionally retains up to two DP variants per raw/protected state,
+2. Part 4 v2.5 reran the full planner when sweeten step changed,
+3. more importantly, during the 5s no-plan grace, `lastBalancedSig` is intentionally not finalized because the countdown must continue, so the old code could call `marketPlans(ownInv,theirEval)` again on successive ~0.12s loops.
+
+That means one unchanged no-safe-plan THEIR offer could trigger roughly dozens of expensive dual-variant planner builds during the 5-second grace.
+
+This is the new regression point.
+
+## Fix
+
+New Part 4:
+`pdiddler/pdiddler4_balancer_ROTATING_v2_5_1_ADAPTIVE_PLAN_CACHE.lua`
+
+Implementation commit:
+`5b4a45fca2f6024bdf645b4ca68b09c0129406f0`
+
+Design:
+- cache raw safe-plan generation by:
+  - exact `theirEval.signature`,
+  - exact `offerGeneration`.
+- full planner runs once on cache miss,
+- cached safe plans are reused during:
+  - normal same-signature polling,
+  - 5s no-plan negotiation grace,
+  - ~5s sweeten step,
+  - ~10s final sweeten step.
+- sweetening still calls acceptance-policy ranking each stage; it does NOT rebuild the DP.
+- cache clears immediately on:
+  - THEIR offer going empty,
+  - THEIR exact signature changing / new generation.
+- planner infrastructure failure is not made authoritative/cached.
+
+Behavior NOT changed:
+- adaptive 2.5s opener,
+- appeal A/B/C/D logic,
+- Underpaid handling,
+- dual-variant planner math,
+- +profit safety logic,
+- 5s/10s bounded sweetening,
+- 5s no-plan grace,
+- 15s empty timeout,
+- 60s active window,
+- TX/recovery,
+- scanner pause,
+- webhook/completion,
+- manual Accept,
+- final automated Accept remains disabled.
+
+## TDD
+
+RED regression:
+`pdiddler/tests/pdiddler4_adaptive_plan_cache_perf_v1.py`
+
+RED CI:
+`41567541106`
+
+Expected failure:
+- new cached Part 4 artifact absent.
+
+GREEN after implementation:
+`41567613183`
+
+The performance guard verifies:
+- only one direct `marketPlans(ownInv,theirEval)` call site exists,
+- it lives inside the generation-cache helper,
+- sweetening re-ranks cached plans,
+- no-plan countdown does not invoke plan generation,
+- cache invalidates on empty/signature changes,
+- old timing/safety invariants remain,
+- no automated Accept / Confirm / stale `task.delay`.
+
+## Runnable v6 stack
+
+File:
+`pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v6_ADAPTIVE_PERF.lua`
+
+Stack commit:
+`3cb616956b94119ff6be0174676c26839c8c6622`
+
+Part 4 performance pin:
+`5b4a45fca2f6024bdf645b4ca68b09c0129406f0`
+
+Adaptive logic/planner/policy remain pinned to:
+`78fa90b21c63bc8bed412076cf5f01c33b48d70f`
+
+Final compile + full regression CI:
+`41567777695` — SUCCESS.
+
+Passed together:
+- official Luau 0.745 compile,
+- all legacy market/cache/webhook/Part 3 regressions,
+- adaptive acceptance policy matrix,
+- adaptive Part 4 contract,
+- bounded dual-variant planner regression,
+- v5 wiring guard,
+- plan-cache lag regression,
+- v6 exact stack wiring guard.
+
+## Live validation
+
+Next recording should compare v6 against the laggy v5 behavior.
+
+Watch specifically:
+- when THEIR offer first becomes stable,
+- during a 5s no-plan hold,
+- at sweeten ~5s,
+- at sweeten ~10s,
+- during repeated THEIR offer edits/rebalances.
+
+Expected:
+- one visible `[PDIDDLER P4] PLAN CACHE MISS ...` per exact THEIR offer generation,
+- no repeated cache-miss spam while THEIR offer is unchanged,
+- no severe choppiness during 5s no-plan countdown,
+- no extra hitch caused solely by the 5s/10s sweeten transition.
+
+If a noticeable hitch remains ONLY on the first cache miss for each NEW stable THEIR offer, the next target is the one-time dual-variant planner DP itself. Do not change that planner until the v6 recording proves this remaining pattern.
