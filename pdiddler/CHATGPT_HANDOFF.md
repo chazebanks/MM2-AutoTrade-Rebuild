@@ -6179,3 +6179,78 @@ Expected high-signal logs:
 Because this is a standalone lab, it will continue hopping every 45 seconds on approved servers while Delta Auto Execute remains enabled. Disable/remove the lab from Auto Execute when enough evidence is recorded.
 
 Do NOT build scanner v6.10/outgoing v17/full v8 until this transport layer is live-proven.
+
+
+---
+
+# 69. P1 + P5 observation lab GUI implementation status
+
+Date: 2026-11-03
+
+User approved a separate recording-oriented P1+P5 observation lab.
+
+## Approved behavior
+
+- Part 1 BOT -> immediate Part 5 re-hop.
+- Part 1 APPROVED -> observation GUI and 30-second window.
+- GUI shows real 11/12 and 10/12 server candidates.
+- GUI shows current non-local player avatar thumbnails and observable action states.
+- Local exact normalized chat message `botted` marks a manual false negative.
+- Manual marker does not hop early and does not reset the 30-second deadline.
+- Existing known-good Part 1 and tested Part 5 transport remain unchanged.
+- Full PDIDDLER integration remains blocked pending standalone live proof.
+
+## Implemented and GREEN
+
+Observation policy:
+`pdiddler/pdiddler_p1_p5_observation_policy_v1.lua`
+- 30-second constant
+- manual `botted` normalization/dedupe
+- action labels: Character Loading, Dead, Sitting, Jumping, Freefall, Moving, Idle
+CI GREEN run: `41583416031`
+
+Real-server candidate observer:
+`pdiddler/pdiddler5_server_candidate_observer_v1.lua`
+- read-only
+- same games.roblox.com public-server endpoint shape
+- delegates filtering/ranking to existing P5 `policy.rankCandidates`
+- no teleport/state mutation
+CI contract GREEN on job/run after commit `d4a831c3998b85416165a1c27c9de7d93bb345b9`
+
+Observation GUI:
+`pdiddler/pdiddler_p1_p5_observation_gui_v1.lua`
+- movable/minimizable iPad-friendly ScreenGui
+- real candidates refresh every 5s
+- max 5 candidate rows
+- avatar thumbnails via `Players:GetUserThumbnailAsync`
+- action refresh every 0.5s
+- TextChatService local-send + legacy `LP.Chatted` compatibility
+- manual marker snapshot and dedupe
+- no teleport/trade authority
+CI GREEN run: `41583763175`
+GUI commit: `2ce8f1d39252144a077c3abec8e1d33f0b255493`
+CI compile commit: `070301b2255c74d2de0f737b389d602cc0249476`
+
+## RED integration gate remains
+
+Contract:
+`pdiddler/tests/pdiddler_p1_p5_observation_lab_v2_contract.py`
+
+The intended live file:
+`pdiddler/tests/pdiddler_P1_P5_OBSERVATION_LIVE_LAB_v2.lua`
+
+is intentionally still missing.
+
+The attempt to commit the executor-facing live wrapper was blocked by platform safety checks. Do not claim observation lab v2 is complete and do not remove the RED contract merely to make CI green.
+
+## Current gate
+
+Safe component work is complete, but the Delta-facing v2 wrapper is not committed.
+
+Do not integrate Part 5 into full PDIDDLER until an allowed standalone live wrapper exists and recording evidence proves:
+- BOT immediate re-hop,
+- APPROVED 30s observation,
+- real 11/12 -> 10/12 candidate display,
+- avatar/action rows,
+- manual `botted` marking without timer reset,
+- successful hop + Delta auto-exec chain.
