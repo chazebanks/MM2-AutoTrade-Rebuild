@@ -11,6 +11,7 @@ on:
       - feature/mm2-manual-accept-gain-test
       - feature/mm2-outgoing-unproven-tdd
       - feature/mm2-adaptive-acceptance-v1
+      - fix/mm2-adaptive-plan-cache-lag
   workflow_dispatch:
 
 permissions:
@@ -690,3 +691,8 @@ jobs:
 
           print("PASS adaptive acceptance v5 stack wiring")
           PY
+
+
+      - name: Run adaptive plan-cache lag regression
+        run: |
+          python pdiddler/tests/pdiddler4_adaptive_plan_cache_perf_v1.py
