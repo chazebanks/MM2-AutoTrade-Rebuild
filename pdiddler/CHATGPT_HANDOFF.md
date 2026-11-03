@@ -6628,3 +6628,75 @@ Do NOT move on to Part 3 until a new live run shows either:
 - another manual `Botted` false negative gives a new distinct pattern to diagnose.
 
 Keep P1 v1 and P1 v2 unchanged as historical baselines.
+
+
+---
+
+# 74. Cross-video MM2 bot study + P1 v3 false negative
+
+New research document:
+`docs/research/mm2-bot-pattern-study-2026-11-03.md`
+
+Commit:
+`559ff4406c620ed8744e83aad67a24fb6b17ecb6`
+
+Latest positive sample:
+`ScreenRecording_11-03-2026 01-42-17_1.mp4`
+
+The user manually typed `Botted` in a lobby that **Part 1 v3 APPROVED**.
+
+Exact v3 console evidence:
+- score 0
+- players 11
+- avatars loaded 11
+- largest cluster 2
+- trait>=1 9/11
+- trait>=2 0/11
+- repeated avatar members 4
+- result APPROVED
+- flagged avatar pair accounts were ~2158–2168 days old
+
+Visible MM2 leaderboard:
+all 11 non-local accounts were exactly level 100.
+
+Therefore:
+- v3 readiness is not the issue,
+- v3 persistent-diversified rule is not enough,
+- trait2 dependence is a major blind spot,
+- old account age cannot clear suspicion,
+- cosmetic diversification defeats clone-first rules,
+- exact level-100 pile-up is a strong missing GROUP feature,
+- lobby `Idle` snapshots are insufficient.
+
+Cross-video positive samples now show:
+1. random/generated names + simple randomized outfits + near-unanimous level 100 + multiple accounts in void,
+2. username-family farms (e.g. `SoulV_3nom...`) hidden behind unrelated display names + geometry/under-map behavior,
+3. weak-name diversified farm with 9/11 one-trait names, 0/11 two-trait names, old accounts, all level 100.
+
+External 2026 MM2 research corroborates:
+- randomized free-item outfits,
+- newer Robux-dressed bots,
+- shorter human-looking names,
+- max/high levels,
+- teleport-to-coin,
+- glide/tween farming,
+- float/noclip,
+- underground/void teleport,
+- reset/return lobby when bag full,
+- kill/fling/shoot role automation,
+- server hop/rejoin.
+
+Do NOT continue patching individual static thresholds.
+
+Recommended next Part 1 architecture:
+`STATIC_SCAN -> STRONG_REJECT/CLEAN_APPROVE/BORDERLINE_CONFIRM -> BEHAVIOR_PROBE -> BOT/APPROVE`
+
+v4 should focus on:
+- group weak-name distribution across Username + DisplayName,
+- verified exact-level-100 group ratio,
+- avatar simplicity + repeated subgroup evidence,
+- old account age neutral,
+- bounded round movement telemetry for borderline lobbies,
+- reason-coded diagnostics for every reject/manual false negative.
+
+Do not call P1 fixed yet.
