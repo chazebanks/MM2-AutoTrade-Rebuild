@@ -1853,4 +1853,3 @@ function M.run(scanner,marketProfile,marketLogic,marketPlanner,tradeTelemetry)
 end
 
 return M
-
