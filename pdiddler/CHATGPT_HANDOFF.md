@@ -5184,3 +5184,108 @@ If a trade opens normally:
 - Part 4/Part 4.5 behavior remains as previously live-proven.
 
 Automated final Accept remains disabled.
+
+
+---
+
+# 61. 2026-11-02 v4 TDD live recording
+
+Evidence:
+`ScreenRecording_11-02-2026 20-26-44_1.mp4`
+
+Build:
+`pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v4_TDD.lua`
+
+## What this recording actually exercised
+
+This run did **not** reproduce the fully-unproven outgoing tap bug.
+
+Every visible outgoing request in the recording either:
+- reached confirmed pending UI, or
+- opened the exact target trade window.
+
+Examples:
+- CrispyBaconTM: physical Trade tap -> trade window opened.
+- kxlvlzs: pending confirmed -> exact target trade window opened.
+- THElexif3r: pending confirmed -> exact target trade window opened.
+- venossgaming90190: pending confirmed -> exact target trade window opened.
+
+Therefore:
+- the new `UNCERTAIN DEFER -> cooldown -> one retry -> UNCERTAIN FINAL` path is still **not live-proven**,
+- this recording does confirm that the TDD change did not break the normal proven-request path.
+
+## First trade: CrispyBaconTM
+
+Part 4 behavior:
+- opened with Chroma Watergun,
+- opponent added Chroma Shark + Chroma Slasher,
+- planner held/rebalanced normally,
+- final visible candidate became:
+  - OUR 91
+  - THEIR 106
+  - GAIN +15
+- user manually accepted,
+- trade later closed/cancelled and Part 3 resumed.
+
+No completed-trade webhook for this attempt was visibly reviewed in the recording, so do not classify it as a confirmed completed trade from video evidence alone.
+
+## kxlvlzs / THElexif3r
+
+Both exact target trade windows opened.
+Both showed empty opponent offers initially.
+Both later closed and Part 3 continued to the next processed target.
+
+This is evidence that:
+- request ownership handoff to Part 4 remained functional,
+- queue rotation continued after trade close/cancel.
+
+## venossgaming90190 completed trade
+
+Final visible trade:
+OUR:
+- Chroma Swirly Gun x1
+- Candleflame x1
+- Darkbringer x2
+Raw total = 140
+
+THEIR:
+- Mortal x1
+- Immortal x1
+- Chroma Laser x1
+- Ornament x1
+Raw total = 380
+
+Gain banner:
+`GAIN +240 | OUR 140 | THEIR 380`
+
+Opponent Accept was visible first.
+User then manually confirmed Accept.
+Observer displayed:
+`MANUAL ACCEPTED`
+
+Trade completed during the active round/map state.
+
+Discord webhook shown in recording:
+- We: 140
+- Them: 380
+- Raw gain: +240
+- Protected gain: +240
+- Tracked inventory after: 4301
+- Status: `verified-stable-delta-verified`
+- Trade ID: `p4w:2:398706566:88627`
+- Completion: `server-complete`
+
+## Secondary observations
+
+PASS from video:
+- gain banner remained readable,
+- map/round transition did not close the active venoss trade,
+- offer changes caused candidate invalidation/re-evaluation rather than stale gain use,
+- Part 3 resumed after non-completed trade closes,
+- completed-trade webhook contained inventory total + Trade ID.
+
+Not exercised:
+- 5-second unchanged no-plan expiry,
+- fully-unproven outgoing tap recovery path.
+
+No new code change was justified by this recording alone.
