@@ -772,3 +772,8 @@ jobs:
       - name: Run Part 5 candidate observer contract
         run: |
           python pdiddler/tests/pdiddler5_candidate_observer_contract_v1.py
+
+
+      - name: Run P1 P5 observation GUI contract
+        run: |
+          python pdiddler/tests/pdiddler_p1_p5_observation_gui_contract_v1.py
