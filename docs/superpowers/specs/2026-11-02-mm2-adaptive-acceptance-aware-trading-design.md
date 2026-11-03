@@ -591,3 +591,67 @@ Research used:
 One retrieved transcript was high quality and strategy-rich; several other videos had sparse or unusable transcripts.
 
 Therefore these findings are treated as supporting behavioral evidence, not a complete census of the MM2 TikTok trading community.
+
+
+## 12. Broader 2026 market validation and additional constraints
+
+A broader research pass was completed after the TikTok validation, using:
+- Supreme Values' current use guide and current value/status pages,
+- current 2026 Reddit MM2 trading discussions,
+- current MM2 trading glossary/guide material,
+- recent trade-up/downgrade examples.
+
+### Confirmed market behavior
+
+1. **Fair by raw value is not necessarily fair by market quality.**
+   Current trading guidance explicitly distinguishes value from demand/stability and recognizes "fair by value, bad by demand" as a real outcome.
+
+2. **Upgrade and downgrade are asymmetric.**
+   Upgrading into a stronger single item commonly costs a modest premium.
+   Downgrading a stronger item into several smaller items can justify compensation, but the required premium depends on the quality/liquidity of the smaller items.
+
+3. **Small overpays are normal for genuinely high-demand inventory.**
+   A rigid "never overpay" rule is inferior to bounded quality-upgrade logic when the received item is materially healthier and the loss is capped.
+
+4. **Selectivity is a trading skill.**
+   Current traders repeatedly describe server hopping / waiting for better inventories instead of forcing a trade with every available player.
+
+5. **Underpaid/dropping inventory can be rejected even when the numbers look close.**
+   Recent examples show traders refusing nearly-equal-value bundles because the offered pieces are dropping or undesirable.
+
+### Additional design constraint — skip unattractive opportunities
+
+The planner is not required to produce an offer merely because one safe plan exists.
+
+If every safe plan is appeal tier D and none provides a credible counterparty benefit:
+- do not mutate OUR OFFER simply to force activity,
+- hold for THEIR next change within the existing negotiation window,
+- if no better plan appears, use the existing bounded no-plan / outer-window exit behavior.
+
+This is a deliberate move from "always transact when mathematically possible" to "only present a trade we would reasonably expect a market participant to consider."
+
+### Additional design constraint — upgrade premium must be bounded and quality-backed
+
+The existing quality-upgrade exception remains the only path that permits a small raw/protected loss.
+
+It must require:
+- materially better exit quality,
+- complete/confident market metadata,
+- no material disagreement,
+- current existing capped loss percentages.
+
+No general acceptance score may authorize a loss.
+
+### Set-value risk discovered
+
+Supreme Values tracks matched sets separately and set market behavior can differ from simple component sums.
+
+The current canonical profile is item-based and does not contain a verified set-membership / set-premium model.
+
+For this implementation:
+- do not invent set premiums,
+- do not hard-code guessed set bonuses,
+- record this as an explicit limitation,
+- future set-aware protection should use a verified canonical set table before the planner is allowed to preserve/break/complete sets strategically.
+
+This prevents a new acceptance feature from silently introducing unverified set economics.
