@@ -4074,3 +4074,364 @@ Freeze guard verifies:
 
 Do not modify the frozen v2.6.3 artifact.
 All future behavior changes must use a new version/file.
+
+
+---
+
+# 56. Pre-Part-5 completed-trade Discord webhook + market identity correction
+
+Date: 2026-11-02
+
+User requirement before beginning Part 5:
+Every **verified completed trade** must send a Discord webhook showing:
+- what WE traded,
+- value / demand / liquidity of what we traded,
+- what THEY traded,
+- value / demand / liquidity of what they traded,
+- how much value we gained.
+
+FINAL ITEM-TRADE ACCEPT remains disabled.
+
+## Architecture
+
+`Part 4 verified trade state -> immutable telemetry snapshot -> completion verifier -> payload formatter -> isolated Discord sender`
+
+Trading and webhook responsibilities are separated:
+- Part 4 remains the trade/value/planner/executor authority.
+- Webhook telemetry is read-only.
+- Completion logger observes completion only.
+- Discord/network failures cannot rebalance, decline, offer, rotate, or otherwise block trading.
+
+## Payload
+
+File:
+`pdiddler/pdiddler_trade_webhook_payload_v1.lua`
+
+Implementation:
+`6ad6dce9739b2b587ca0d8ab872b953c92451504`
+
+Each eligible item reports:
+- MM2 value,
+- Supreme value/label,
+- Demand /10,
+- Liquidity,
+- Stability.
+
+Liquidity is NOT a new guessed metric.
+It is the project market model's existing `exitScore`:
+`demandScore + stabilityScore - material-disagreement penalty`.
+
+Ineligible filler remains visible in the webhook but reports:
+- MM2 0,
+- Supreme N/A,
+- Demand N/A,
+- Liquidity N/A,
+- Stability N/A.
+
+Trade totals report:
+- OUR raw value,
+- THEIR raw value,
+- OUR/THEIR protected values,
+- raw gain,
+- protected gain.
+
+## Completion proof
+
+Pure logic:
+`pdiddler/pdiddler_trade_completion_logic_v1.lua`
+commit:
+`7e085f01418b61ff1edf2479210bd5c835789dc3`
+
+Primary completion proof:
+MM2 `AcceptTrade.OnClientEvent` with `complete == true`.
+
+Fallback:
+- trade closes,
+- an authoritative pre-trade own `Weapons.Owned` snapshot exists,
+- post-close `Weapons.Owned` exactly matches the expected raw-ID inventory delta.
+
+The fallback uses raw MM2 owned keys, not display names, so duplicate names and Chroma/non-Chroma variants cannot false-match.
+
+If any traded item lacks an authoritative raw ID, or the expected net delta is zero/ambiguous, fallback refuses to verify.
+
+## Passive completion logger
+
+File:
+`pdiddler/pdiddler_trade_completion_logger_v1.lua`
+
+Commit:
+`66b818e1d5142de0e0c1dd63585dcda62363123e`
+
+Properties:
+- passive only,
+- no `:FireServer(...)`,
+- no VirtualInput trade action,
+- no `firesignal`,
+- listens to completion/decline events,
+- reads own `GetProfileData().Weapons.Owned` only for fallback verification,
+- uses session + arm serials so stale async inventory reads cannot attach to newer trades,
+- deduplicates completion/posting,
+- bounded retry batches for transient webhook delivery failures.
+
+## Discord transport
+
+File:
+`pdiddler/pdiddler_trade_webhook_sender_v1.lua`
+
+Commit:
+`5b7e410eed52a08a990a7cffd74e7d2ad10f4a58`
+
+Transport order retained from prior working build:
+- `request`
+- `http_request`
+- `syn.request`
+- `http.request`
+
+Behavior:
+- official Discord webhook validation,
+- POST JSON + `wait=true`,
+- any HTTP 2xx accepted,
+- executor `Success=true` accepted when no status exists,
+- non-429 permanent 4xx stops immediately,
+- 429 parses Discord `retry_after`,
+- bounded retries.
+
+Webhook URL is NEVER committed.
+Runtime reads only:
+`ENV.PDIDDLER_DISCORD_WEBHOOK_URL`
+
+## Raw-ID vs checker-ID bug discovered during webhook audit
+
+The scanner already carries two authoritative identities:
+- `id` = raw MM2 `Weapons.Owned` / executor key, e.g. `Iceblaster`
+- `checkerId` = canonical MM2Values/profile ID, e.g. `481`
+
+The 190-item market profile is keyed by:
+`page:checkerId`.
+
+Audit discovered the prior frozen live Part 4/planner were feeding raw `id` into market-profile lookup.
+
+Consequences:
+- raw MM2 value arithmetic could still look correct,
+- but live Supreme disagreement protection,
+- demand/stability risk,
+- liquidity/exitScore,
+- confidence,
+- quality-upgrade logic
+could silently fall back to unprofiled/default behavior.
+
+This was NOT patched into the frozen v2.6.3 artifact.
+A new corrected version was created.
+
+## Planner v1.2 market identity correction
+
+File:
+`pdiddler/pdiddler4_market_planner_v1_2_MARKET_IDENTITY.lua`
+
+Commit:
+`a9b79f2b4b5936162aa814e7d524ab7bf46db80b`
+
+Rules:
+- market/profile lookup uses `checkerId`,
+- itemAssessment uses checker identity,
+- planner units/picks preserve raw `id`,
+- picks also carry `checkerId`,
+- executor still receives raw `p.id`,
+- plan verification/counts stay raw-ID keyed.
+
+Regression:
+`pdiddler/tests/pdiddler4_market_identity_raw_checker_v1.luau`
+
+Tests include:
+- raw `Iceblaster` + checker `481`
+  -> raw executor pick remains `Iceblaster`,
+  -> checker remains `481`,
+  -> demand/stability profile resolves,
+  -> exitScore = -2,
+  -> unprofiledCopies = 0.
+- raw `Emberscythe` + checker `1027`
+  -> raw = 300,
+  -> OUR protected = 375,
+  -> disputed copy recognized,
+  -> profile confidence retained.
+
+## Part 4 v2.4.4 market identity + webhook bridge
+
+File:
+`pdiddler/pdiddler4_balancer_ROTATING_v2_4_4_MARKET_IDENTITY_WEBHOOK.lua`
+
+Commit:
+`30589f1bc60fc239c503ee6e7d8f5ace80b61287`
+
+Live bundle market assessment now uses:
+`checkerId`.
+
+Operational identity remains raw for:
+- signatures,
+- counts,
+- duplicate handling,
+- removals,
+- planner picks,
+- `OfferItem(p.id,"Weapons")`.
+
+Webhook candidate is published only from verified safe states:
+- profitable hold,
+- extreme hold,
+- rebalance verified.
+
+Candidate is invalidated on:
+- trade start/close,
+- partner left,
+- OUR unresolved,
+- THEIR empty,
+- THEIR changed,
+- THEIR unresolved,
+- recovery,
+- rebalance,
+- no safe plan,
+- unsafe decision,
+- stale session.
+
+Candidate timestamps refresh only while exact OUR/THEIR signatures remain current.
+
+## Telemetry identity
+
+File:
+`pdiddler/pdiddler_trade_telemetry_v1.lua`
+
+Final identity fix:
+`d855254f81bdda5296d96cbe9ac31b71c7b4e94c`
+
+Telemetry preserves both:
+- raw `id` for completion proof,
+- `checkerId` for market metadata.
+
+## Runnable pre-Part-5 webhook stack
+
+File:
+`pdiddler/pdiddler_WEBHOOK_TEST_STACK_v1.lua`
+
+Corrected stack update:
+`a6f746e313120df1012cb9c470f9631f58b6350c`
+
+Stack module pin:
+`30589f1bc60fc239c503ee6e7d8f5ace80b61287`
+
+Loads:
+- frozen P1,
+- frozen P2,
+- scanner v6.8 critical pause,
+- validated 190-item profile,
+- market logic + bounded cache,
+- planner v1.2 market identity,
+- Part 4 v2.4.4 market identity + webhook telemetry,
+- completed-trade payload,
+- completion logic,
+- Discord sender,
+- completion logger,
+- outgoing v15.
+
+Logger arms AFTER Part 4 and BEFORE outgoing rotation so no accepted trade can finish before the completion observer exists.
+
+Startup preflight explicitly checks:
+raw `Iceblaster` + checker `481`
+and requires profile/exit metadata to resolve correctly.
+
+## Connection lab
+
+File:
+`pdiddler/tests/pdiddler_webhook_connection_LIVE_LAB_v1.lua`
+
+Commit:
+`4eacd12767970874bb2c37368fafdebc0695a770`
+
+Purpose:
+safe one-shot Discord transport test only.
+
+It:
+- reads local `PDIDDLER_DISCORD_WEBHOOK_URL`,
+- sends `🧪 MM2 WEBHOOK CONNECTION TEST`,
+- performs NO trade action,
+- has no AcceptTrade,
+- no OfferItem,
+- no DeclineTrade.
+
+## Final CI evidence
+
+Final workflow head:
+`65f8ac209dbf86d23e4ac2b74c5adaf787c27330`
+
+CI run:
+`41549717431`
+
+Result:
+**SUCCESS**
+
+All passed together:
+- official Luau 0.745 compilation,
+- original market integration suite,
+- market cache regression,
+- Rare/Uncommon plan verification,
+- no-plan decline,
+- duplicate lab v1/v2/v3 guards,
+- frozen v2.6.3 byte-identical guard,
+- webhook payload,
+- webhook telemetry,
+- raw-key completion logic,
+- Discord sender transport,
+- webhook integration contract,
+- webhook full-stack contract,
+- webhook credential leak guard,
+- raw/checker market identity regression,
+- Part 4 market identity bridge contract.
+
+The frozen v2.6.3 artifact remains unchanged.
+
+## Live test sequence
+
+### 1. Connection test first
+
+Set the URL only in the local executor environment, then run:
+
+```lua
+getgenv().PDIDDLER_DISCORD_WEBHOOK_URL = "<YOUR_DISCORD_WEBHOOK_URL>"
+
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/65f8ac209dbf86d23e4ac2b74c5adaf787c27330/pdiddler/tests/pdiddler_webhook_connection_LIVE_LAB_v1.lua",
+    true
+))()
+```
+
+Expected:
+`[PDIDDLER WEBHOOK LAB] PASS | Discord webhook accepted test`
+
+and Discord receives:
+`🧪 MM2 WEBHOOK CONNECTION TEST`
+
+### 2. Full webhook trader stack
+
+```lua
+getgenv().PDIDDLER_DISCORD_WEBHOOK_URL = "<YOUR_DISCORD_WEBHOOK_URL>"
+
+loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/65f8ac209dbf86d23e4ac2b74c5adaf787c27330/pdiddler/pdiddler_WEBHOOK_TEST_STACK_v1.lua",
+    true
+))()
+```
+
+Expected startup:
+- `[PDIDDLER TEST] WEBHOOK LOGGER ACTIVE | verified completed trades only`
+- `[PDIDDLER TEST] webhook URL config PRESENT`
+- `[PDIDDLER WEBHOOK] ARMED | completion observer active | URL kept external`
+- `[PDIDDLER TEST] FINAL ITEM-TRADE ACCEPT IS DISABLED`
+
+Because final automated Accept remains disabled, an actual completed-trade webhook still requires a real trade completion (for example a controlled manually completed safe trade) before completion logging can be live-proven.
+
+Do not enable automated final Accept merely to test the webhook.
+
+## Status
+
+Webhook system is CI-tested and structurally ready.
+Discord transport still needs the connection lab live test.
+Actual completed-trade payload still needs one live completed trade before it can be called live-validated.
+Part 5 remains paused until this pre-Part-5 webhook stage is accepted.
