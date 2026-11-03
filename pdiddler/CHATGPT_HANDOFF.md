@@ -5086,3 +5086,49 @@ Recommended next engineering step:
 - distinguish physical tap from server/pending proof,
 - avoid permanently consuming an eligible target solely from an unproven tap unless there is stronger evidence that a request was created,
 - preserve duplicate-send safety while adding a bounded recovery path for truly unproven sends.
+
+
+---
+
+# 60. 2026-11-02 bounded unproven outgoing recovery v4
+
+Evidence source:
+`ScreenRecording_11-02-2026 20-08-29_1.mp4`
+
+Problem:
+- Part 3 could physically tap Trade,
+- observe no pending/trade/decline proof for 15s,
+- then permanently consume that target for the server.
+
+New Part 3:
+`pdiddler/pdiddler3_outgoing_ROTATING_v16_BOUNDED_UNPROVEN_RETRY.lua`
+Commit:
+`5b5bf1c7400c43125c7ea5e4576ea6b6e58a0a5d`
+
+Behavior:
+- proven pending/trade/decline ownership remains authoritative and is not resent,
+- completely unproven first tap waits the full 15s response window,
+- then enters a 15s cooldown,
+- recent tap ownership is preserved so a late pending UI can still be adopted,
+- after cooldown, one retry is allowed only if no pending/trade evidence appeared,
+- second fully unproven timeout becomes final for that target in the server,
+- no infinite retries and no immediate duplicate taps.
+
+New stack:
+`pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v4.lua`
+Commit:
+`411ac0ecf0d818d711c5c09a4a33922fd83ac34e`
+
+CI:
+`41558853472` — SUCCESS
+Validation commit:
+`70bc3869798b57198f752f56927e98338c5a3857`
+
+Next live recording:
+- if first Trade tap is unproven, expect `UNCERTAIN DEFER`,
+- target must not be processed immediately,
+- wait 15s cooldown,
+- either late pending is adopted or exactly one retry occurs,
+- if second tap is also fully unproven, expect `UNCERTAIN FINAL`,
+- if trade opens, Part 4 should take ownership normally,
+- no automated final Accept.
