@@ -778,3 +778,8 @@ jobs:
       - name: Run P1 P5 observation GUI contract
         run: |
           python pdiddler/tests/pdiddler_p1_p5_observation_gui_contract_v1.py
+
+
+      - name: Run P1 P5 observation lab v2 contract
+        run: |
+          python pdiddler/tests/pdiddler_p1_p5_observation_lab_v2_contract.py
