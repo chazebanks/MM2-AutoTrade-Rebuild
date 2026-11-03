@@ -9,6 +9,7 @@ on:
       - fix/mm2-v2_6-no-plan-decline
       - feature/mm2-completed-trade-webhook
       - feature/mm2-manual-accept-gain-test
+      - feature/mm2-outgoing-unproven-tdd
   workflow_dispatch:
 
 permissions:
@@ -604,3 +605,8 @@ jobs:
 
           print("PASS no-plan negotiation grace regression guards")
           PY
+
+
+      - name: Run unproven outgoing recovery regression
+        run: |
+          python pdiddler/tests/pdiddler3_unproven_outgoing_recovery_regression.py
