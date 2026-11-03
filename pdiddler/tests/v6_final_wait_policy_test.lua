@@ -5,7 +5,7 @@ local passed=0
 local function test(name,fn)
     local ok,err=pcall(fn)
     if not ok then error("FAIL "..name.." | "..tostring(err),0) end
-    passed+=1
+    passed=passed+1
     print("PASS "..name)
 end
 local function eq(a,b) assert(a==b,tostring(a).." != "..tostring(b)) end
