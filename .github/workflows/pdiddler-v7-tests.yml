@@ -1,0 +1,61 @@
+name: Pdiddler V7 delayed sweeten regression
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/**'
+      - '.github/workflows/pdiddler-v7-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  safety-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Install Lua and official pinned Luau compiler
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4 unzip
+          curl --fail --location --retry 2 --max-time 60 -o /tmp/luau.zip https://github.com/luau-lang/luau/releases/download/0.745/luau-ubuntu.zip
+          echo '186e5ddaa2b048ebc7390c11ed1b00c04e7d3beaffed429250329e3575d2ece2  /tmp/luau.zip' | sha256sum --check
+          unzip -q /tmp/luau.zip -d /tmp/pdiddler-luau
+          chmod +x /tmp/pdiddler-luau/luau /tmp/pdiddler-luau/luau-compile
+      - name: Run both V6 and V7 negotiation regressions
+        run: |
+          lua5.4 pdiddler/tests/v6_final_wait_policy_test.lua
+          lua5.4 pdiddler/tests/v7_delayed_sweeten_policy_test.lua
+      - name: Verify pinned V7 policy and unchanged baseline
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          v6=Path("pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v7_DELAYED_SWEETEN.lua").read_text()
+          path="pdiddler/pdiddler4_supreme_policy_v4_DELAYED_SWEETEN.lua"
+          commit="09aaac09c9b531286dbd78fd52a41290f096e4e8"
+          assert 'strict={"pdiddler4_supreme_policy_v4_DELAYED_SWEETEN.lua","'+commit+'"}' in v6
+          assert '"PDIDDLER_INTEGRATION_V5_ADAPTIVE"' in v6
+          assert '"PDIDDLER_INTEGRATION_V6_FINAL_WAIT"' in v6
+          pinned=subprocess.check_output(["git","show",commit+":"+path])
+          assert pinned==Path(path).read_bytes(), "Pinned V3 policy differs from published source"
+          probe=Path("pdiddler/pdiddler_native_trade_probe_v1.lua").read_text()
+          for forbidden in [":FireServer(",":HttpPost(",":Teleport(", "VirtualInputManager", "firesignal("]:
+              assert forbidden not in probe, "Read-only probe contains mutation: "+forbidden
+          print("PASS fixed policy SHA, old V5 lock, and probe side-effect audit")
+          PY
+      - name: Compile runtime files with official Luau
+        run: |
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_supreme_policy_v4_DELAYED_SWEETEN.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v7_DELAYED_SWEETEN.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_native_trade_probe_v1.lua >/dev/null
+      - name: Run original PR5 and PR3 regression suites
+        env:
+          LUAU_BIN: /tmp/pdiddler-luau/luau
+          LUAU_COMPILE: /tmp/pdiddler-luau/luau-compile
+        run: |
+          python3 pdiddler/tests/run_integration_tests.py
+          python3 pdiddler/tests/run_trading_tests.py
+          python3 -m unittest discover -s pdiddler/tests -p test_refresh_supreme_snapshot.py
+          python3 pdiddler/tests/run_issue4_tests.py
