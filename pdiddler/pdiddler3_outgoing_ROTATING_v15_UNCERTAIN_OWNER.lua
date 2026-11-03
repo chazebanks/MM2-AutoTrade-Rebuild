@@ -61,7 +61,7 @@ function M.run(scanner)
         TradeOpenGrace=2.5,
         JoinTradeGrace=15,
         UnavailableRetryDelay=15,
-        MaxUnavailableChecks=3,
+        MaxUnavailableChecks=2,
         LatePendingAdoptWindow=60,
         TradePartnerResolveGrace=2.5,
     }
@@ -1881,25 +1881,61 @@ function M.run(scanner)
             return finish("ignored")
         end
 
-        -- The physical Trade tap itself is authoritative enough to prevent a
-        -- duplicate send. No local pending UI does NOT prove the server request
-        -- failed (MM2 TradeModule can error after the server call).
+        -- A physical tap proves only that our input happened. It does not prove
+        -- MM2 created a request. Preserve ownership for the full response
+        -- window first; only a completely unproven tap gets one bounded retry.
         S.uncertainTimeouts+=1
+
+        local count=(tonumber(S.unavailableCount[target.UserId]) or 0)+1
+        S.unavailableCount[target.UserId]=count
+
+        if count<C.MaxUnavailableChecks then
+            S.unavailableUntil[target.UserId]=os.clock()+C.UnavailableRetryDelay
+
+            scanner.setRequestState(
+                target,
+                "unavailable",
+                string.format(
+                    "UNPROVEN SEND %d/%d — no pending/trade/decline proof for 15s | retry in %.0fs",
+                    count,
+                    C.MaxUnavailableChecks,
+                    C.UnavailableRetryDelay
+                )
+            )
+
+            print(
+                "[PDIDDLER P3 OUT] UNCERTAIN DEFER",
+                target.Name,
+                "serial",tostring(serial),
+                "check",count.."/"..C.MaxUnavailableChecks,
+                "retryIn",C.UnavailableRetryDelay,
+                "| no resend before cooldown"
+            )
+
+            -- Keep recentTradeTap intact so late pending replication can be
+            -- adopted during the cooldown instead of triggering another tap.
+            return finish("deferred-unproven")
+        end
 
         scanner.setRequestState(
             target,
             "unavailable",
-            "Trade tapped but no local pending/trade/decline proof for 15s | protected from resend this server"
+            string.format(
+                "UNPROVEN SEND %d/%d — still no pending/trade/decline proof | no further resend this server",
+                count,
+                C.MaxUnavailableChecks
+            )
         )
 
         print(
-            "[PDIDDLER P3 OUT] UNCERTAIN TIMEOUT",
+            "[PDIDDLER P3 OUT] UNCERTAIN FINAL",
             target.Name,
             "serial",tostring(serial),
-            "| NO RESEND THIS SERVER"
+            "check",count.."/"..C.MaxUnavailableChecks,
+            "| NO FURTHER RESEND THIS SERVER"
         )
 
-        return finish("uncertain-timeout")
+        return finish("uncertain-timeout-final")
     end
 
     local function sendAndWatch(target)
@@ -2413,6 +2449,7 @@ function M.run(scanner)
                 and result~="interrupted-by-incoming"
                 and result~="not-whitelisted"
                 and result~="preexisting-trade-open"
+                and result~="deferred-unproven"
             then
                 markProcessed(target,result)
             end
