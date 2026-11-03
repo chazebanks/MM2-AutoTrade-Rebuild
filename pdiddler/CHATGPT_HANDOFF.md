@@ -5740,3 +5740,190 @@ Expected:
 - no extra hitch caused solely by the 5s/10s sweeten transition.
 
 If a noticeable hitch remains ONLY on the first cache miss for each NEW stable THEIR offer, the next target is the one-time dual-variant planner DP itself. Do not change that planner until the v6 recording proves this remaining pattern.
+
+
+---
+
+# 66. v7 post-trade received-item auto-claim
+
+Date: 2026-11-02
+
+Evidence recordings:
+- `ScreenRecording_11-02-2026 21-45-48_1.mp4` (~352.4s)
+- `ScreenRecording_11-02-2026 21-52-13_1.mp4` (~31.5s)
+
+## Video findings
+
+### v6 performance / adaptive strategy
+
+The long recording confirms v6 loaded:
+- `[PDIDDLER TEST] PLAN CACHE PERF ACTIVE | one full planner build per exact THEIR generation`
+
+Observed venoss trade:
+- adaptive opener skipped because THEIR OFFER appeared first,
+- cache misses aligned to new offer generations rather than repeated unchanged polling,
+- initial safe profit around +25,
+- bounded sweeten step 1 moved to +22,
+- bounded sweeten step 2 moved to +17,
+- protected profit matched raw profit on those verified stages,
+- manual local Accept detected at projected +17,
+- trade completed,
+- no automated final Accept/Confirm.
+
+Transaction safety also live-fired:
+- opponent changed offer during a mutation,
+- `TX ABORT`,
+- `RECOVERY VERIFIED`,
+- fresh plan generated for the new generation.
+
+No severe multi-second rebalancer freeze was visible in the reviewed recording.
+Developer Console memory sampled around ~1464–1506 MB and did not visibly show a monotonic runaway during the captured interval.
+
+Visible console errors/warnings not attributed to PDIDDLER:
+- Roblox/MM2 sound asset not approved for requester,
+- Infinite yield possible in `Workspace.Lobby.Elite.Screen.Surface.Frame.Frame:WaitForChild("Buy")` from the game's own script.
+
+No PDIDDLER runtime exception was visible.
+
+### Part 3 bounded uncertain-send path
+
+Live console evidence includes:
+- `UNCERTAIN DEFER ... check 1/2 ... retryIn 15`
+- `UNCERTAIN FINAL ... check 2/2 ... NO FURTHER RESEND THIS SERVER`
+
+This provides live evidence that the bounded unproven-send recovery path is active.
+
+### Confirmed post-trade claim interference bug
+
+Long recording:
+- at about 240s, MM2 visibly shows `Darkbringer — Claim (2/3)`,
+- at the same post-completion period, console shows Part 3 had already resumed and physically tapped a new player (`DearlyKira`) for a trade.
+
+Therefore trade rotation can resume while received-item claim UI is still blocking normal interaction.
+
+Short recording gives the exact sequential reward behavior:
+- `Boneblade — Claim (1/4)`
+- `Jinglegun — Claim (2/4)`
+- `Chroma Laser — Claim (3/4)`
+- final fourth claim follows before the popup clears.
+
+Claim count is dynamic; implementation must not hard-code 3 or 4.
+
+## v7 architecture
+
+Branch:
+`feature/mm2-post-trade-auto-claim`
+
+New pure policy:
+`pdiddler/pdiddler_post_trade_claim_policy_v1.lua`
+
+Policy behavior:
+- accepts only strict `Claim (n/total)` text,
+- validates indices,
+- one initial tap,
+- no tap spam before retry delay,
+- max 3 attempts for a stuck step,
+- next claim index resets retry budget,
+- temporary disappearance does not immediately end sequence,
+- sequence completes after claim UI remains absent for a small settle period,
+- failed physical tap does not consume a retry.
+
+TDD:
+- initial RED policy run: `41569993258`
+- caught exact retry-boundary precision issue,
+- second RED: `41570154270`
+- fixed both floating boundary comparisons,
+- final policy test GREEN in `41570459098`.
+
+New runtime:
+`pdiddler/pdiddler_post_trade_claim_v1.lua`
+
+Runtime behavior:
+- listens read-only to authoritative `AcceptTrade.OnClientEvent complete == true`,
+- immediately sets `PDIDDLER_POST_TRADE_CLAIM_BUSY_SESSION`,
+- claims scanner status owner `CLAIM`,
+- looks only for visible text matching `Claim (n/total)`,
+- physically taps using VirtualInputManager,
+- bounded appearance timeout 4s,
+- bounded overall timeout 12s,
+- releases queue on complete/no-popup/timeout to avoid permanent deadlock,
+- never fires AcceptTrade/DeclineTrade/OfferItem,
+- no `firesignal`,
+- no `:Activate()`,
+- no detached `task.delay`.
+
+New scanner:
+`pdiddler/pdiddler3_scanner_MODULE_v6_9_CLAIM_PAUSE.lua`
+
+Change:
+- background inventory work treats post-trade claim busy as critical activity and pauses.
+
+New outgoing:
+`pdiddler/pdiddler3_outgoing_ROTATING_v16_CLAIM_PAUSE.lua`
+
+Change:
+- claim-busy guard runs BEFORE normal `S.paused` trade-close resume,
+- logs `POST-TRADE CLAIM PAUSE`,
+- does not select/click a new target while claims are active,
+- logs `POST-TRADE CLAIM RELEASE` before normal queue continuation.
+
+New stack:
+`pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v7_AUTO_CLAIM.lua`
+
+Stack commit:
+`fb268275e259205d7c529ab528c63e8fd09b4930`
+
+Claim module pin:
+`a3e5160b232226b5f105a8630eb2048c8d26a7aa`
+
+Part 4 performance pin remains:
+`5b4a45fca2f6024bdf645b4ca68b09c0129406f0`
+
+Arm order:
+1. Part 4
+2. post-trade claim observer
+3. completion/webhook logger
+4. manual gain observer
+5. outgoing rotation
+
+This ensures the claim completion listener is already armed before another outgoing action can race after a completed trade.
+
+## Verification
+
+Final compile + full regression CI:
+`41570459098` — SUCCESS.
+
+Passed:
+- official Luau compilation for all v7/new claim artifacts,
+- all legacy market/cache/webhook/Part 3 regressions,
+- adaptive acceptance policy,
+- adaptive Part 4 contract,
+- dual-variant planner,
+- v6 plan-cache lag regression,
+- 13/13 post-trade claim policy tests,
+- post-trade auto-claim integration contract.
+
+Final static safety scan of all five new/changed v7 runtime files:
+- no `AcceptTrade:FireServer`,
+- no `DeclineTrade:FireServer`,
+- no `OfferItem:FireServer` added by claim subsystem,
+- no `firesignal`,
+- no `:Activate()`,
+- no embedded Discord webhook credential,
+- no `task.delay`.
+
+## Live validation still required
+
+Run v7 and complete one trade receiving 2–4 items.
+
+Expected sequence:
+- `[PDIDDLER CLAIM] AUTO CLAIM START`
+- `[PDIDDLER P3 OUT] POST-TRADE CLAIM PAUSE`
+- one `AUTO CLAIM TAP n/total` per received item, with bounded retries only if a tap does not advance,
+- after last popup disappears: `AUTO CLAIM COMPLETE`,
+- then `POST-TRADE CLAIM RELEASE`,
+- only then Part 3 resumes and sends the next outgoing request.
+
+Webhook/inventory verification should continue independently.
+
+Final automated trade Accept remains disabled.
