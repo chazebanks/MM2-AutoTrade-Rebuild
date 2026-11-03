@@ -34,7 +34,7 @@ assert "task.delay(" not in src, "sweetening/opener must not use detached stale 
 # Opener must observe THEM before selecting/mutating an opener.
 observe=src.index("ADAPTIVE OPENER OBSERVE")
 skip=src.index("ADAPTIVE OPENER SKIP")
-select=src.index("acceptancePolicy.selectOpener")
+select=src.index("ACCEPTANCE_POLICY.selectOpener")
 fire=src.index('offer:FireServer(opener.id,"Weapons")')
 assert observe < select < fire
 assert skip < fire
@@ -48,7 +48,7 @@ assert accepted_empty < no_plan
 # Sweetening must be signature/generation bound and reset on THEIR mutation.
 sig_change=src.index("if theirEval.signature~=lastTheirSig then")
 sweet_reset=src.index("sweetenSince=os.clock()",sig_change)
-rank=src.index("acceptancePolicy.rankSafePlans")
+rank=src.index("ACCEPTANCE_POLICY.rankSafePlans")
 assert sig_change < sweet_reset < rank
 assert "sweetenGeneration=offerGeneration" in src
 assert "sweetenGeneration~=offerGeneration" in src
