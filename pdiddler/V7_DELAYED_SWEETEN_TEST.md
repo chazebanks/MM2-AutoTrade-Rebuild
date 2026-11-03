@@ -7,7 +7,7 @@ The November 3 Delta recording showed a roughly **six-second native Accept count
 - Observe 2.5 seconds at trade start; retain adaptive reachable opener.
 - Wait **9 seconds** from the most recently verified offer/planning generation before the first optional sweeten. This is ~3 seconds beyond the countdown seen in the recording. The timing is approximate: **button-ready has not yet been proven as a machine-readable UI signal**.
 - Wait a fresh **9 seconds after each verified sweetening mutation**, not nine seconds from the original opener. The second sweeten is the maximum.
-- After no further safe candidate or the two-step cap, allow a separate **5-second final decision window**.
+- After the second sweeten, wait a fresh **9 seconds** for the newly restarted Accept cooldown, then allow a separate **5-second final decision window**. If no better safe plan exists earlier, the same 9-second initial wait is followed by the final 5 seconds.
 - On partner offer/signature change or unexpected own-offer total change, invalidate stale timers. While either side Accepted, freeze voluntary mutations; on clearing Accepted, start a fresh wait.
 - Preserve **strict +15 Supreme, absolute 60-second first-nonempty window**, 12-second empty, accepted-empty immediate decline, 4-copy guard and old regression tests.
 - **Final auto-Accept and completion/Discord integration remain OFF.** Use a supervised low-value test. Never merge automatically.
