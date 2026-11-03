@@ -242,8 +242,9 @@ task.spawn(function()
         local result=ENV.PDIDDLER_FAST_GATE_RESULT
         if type(result)=="table" and result.evidenceVersion==5
             and result.jobId==game.JobId and result.automaticHopAllowed==false
-            and tonumber(result.generation)==(tonumber(ENV.PDIDDLER_FAST_GATE_GEN) or -1)
-            and tonumber(result.generation)>previousGeneration
+            -- V5's result does not contain a generation field, so require
+            -- a newly started gate generation and a result slot cleared before launch.
+            and (tonumber(ENV.PDIDDLER_FAST_GATE_GEN) or 0)>previousGeneration
             and tonumber(result.elapsed) and result.elapsed>=0
             and tonumber(result.elapsed)<=12 then
             finalGate=result
