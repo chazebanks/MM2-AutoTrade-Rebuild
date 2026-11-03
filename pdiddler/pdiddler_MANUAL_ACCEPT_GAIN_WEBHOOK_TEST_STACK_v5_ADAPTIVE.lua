@@ -92,7 +92,7 @@ local scanner=loadModule(
 local INTEGRATION_COMMIT="7809aa8c8d210d8005c223eb9fd3a6b3ea716ba5"
 local BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..INTEGRATION_COMMIT.."/pdiddler/"
 
-local ADAPTIVE_COMMIT="86da44856e392cb6415cf6f4ecdf962b27098ed9"
+local ADAPTIVE_COMMIT="78fa90b21c63bc8bed412076cf5f01c33b48d70f"
 local ADAPTIVE_BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..ADAPTIVE_COMMIT.."/pdiddler/"
 
 local marketProfile=loadModule(
