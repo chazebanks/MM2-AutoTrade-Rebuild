@@ -256,9 +256,10 @@ function P.negotiate(state,signature,total,plans,now,accepted)
         return "final-wait"
     end
     if state.steps>=2 then
-        -- Two sweetens exhausted: one final full 5-second offer window.
-        state.finalSince=state.since or now
-        if now-state.finalSince>=P.finalWaitSeconds then return "decline" end
+        -- The last sweeten resets MM2's cooldown too. Do not start a final
+        -- decline clock until this verified offer has had its full 9s window.
+        if now-(state.since or now)<P.sweetenWaitSeconds then return "wait" end
+        state.finalSince=now
         return "final-wait"
     end
     if now-(state.since or now)<P.sweetenWaitSeconds then return "wait" end
