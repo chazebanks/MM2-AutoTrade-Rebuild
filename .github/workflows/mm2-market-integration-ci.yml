@@ -10,6 +10,7 @@ on:
       - feature/mm2-completed-trade-webhook
       - feature/mm2-manual-accept-gain-test
       - feature/mm2-outgoing-unproven-tdd
+      - feature/mm2-adaptive-acceptance-v1
   workflow_dispatch:
 
 permissions:
@@ -624,3 +625,8 @@ jobs:
           assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in stack
           print("PASS TDD v4 stack wiring")
           PY
+
+
+      - name: Run adaptive acceptance policy matrix
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler4_acceptance_policy_v1.luau
