@@ -6424,3 +6424,102 @@ Proven together:
 The remaining 10/12 and no-candidate branches are edge cases already covered by policy/contract tests but were not naturally triggered in this recording.
 
 Do not modify the proven standalone test while moving toward production integration. Freeze this behavior as the live-proven P1+P5 baseline.
+
+
+---
+
+# 72. Confirmed P1 false-negative analysis + readiness v2
+
+Recording evidence:
+`ScreenRecording_11-03-2026 00-49-20_1.mp4`
+
+The user manually marked one Part 1 APPROVED lobby as `botted` and deliberately inspected the server before the scheduled hop.
+
+## What the recording showed
+
+Visible lobby evidence:
+- generated-looking/mixed usernames rather than obvious clone names,
+- mostly simple/free-looking but diversified avatars,
+- leaderboard showed 10 of 11 visible other players at level 100 and one at 73,
+- spectating showed abnormal lobby behavior including players idle/stuck against geometry, overlapping/stacking, and one appearing in the void/out-of-bounds,
+- user opened the Roblox People panel to show the avatar mix directly.
+
+This is a diversified bot-farm pattern, not a simple identical-avatar clone farm.
+
+## Important static-name finding
+
+Using the existing Part 1 `generatedTraits()` logic on the visible usernames from the recording, the observed set is approximately:
+- trait1: 11/11 (100%)
+- trait2: 3/11 (~27%)
+
+That means the current name logic already sees a strong weak-name signal, but some stronger rules depend on enough avatar descriptions being loaded.
+
+## Root-cause bug found in Part 1 v1
+
+Part 1 v1:
+1. waits 6 seconds,
+2. scans once,
+3. if `first.bot == false`, immediately APPROVES.
+
+It does not require avatar-data readiness before approval.
+
+Several strong diversified rules require:
+`loaded >= math.floor(total * 0.80)`
+
+For 11 players, `floor(8.8) == 8`, which is only ~73% loaded, not true 80%.
+
+So a lobby can be approved while avatar descriptions are still incomplete, before the simple-avatar + generated-name rules have enough data to fire.
+
+## Conservative v2 fix
+
+Known-good v1 remains untouched.
+
+New file:
+`pdiddler/pdiddler1_BOT_DETECTOR_v2_READINESS.lua`
+
+Changes only:
+- `BotAvatarReadyRatio = 0.80`
+- `BotAvatarReadyRetries = 4`
+- `BotAvatarReadyRetryDelay = 0.75`
+- uses `math.ceil(total * 0.80)`, so 11 players requires 9 loaded avatar descriptions,
+- before a non-bot first scan can approve, incomplete avatar data triggers bounded retries,
+- logs each readiness retry,
+- after bounded retries, proceeds with available signals rather than hanging forever.
+
+Not added yet:
+- no movement classifier,
+- no level-100 rule,
+- no invented leaderstats/remote path,
+- no threshold lowering,
+- no new behavior score.
+
+Reason: root-cause-first. Test the readiness fix before stacking new heuristics.
+
+## TDD evidence
+
+RED contract:
+`pdiddler/tests/pdiddler1_bot_detector_v2_readiness_contract.py`
+
+RED run:
+`41588241844` (Part 1 v2 readiness contract failed because v2 file was absent).
+
+v2 implementation commit:
+`f4da596e8f3543d2a831fcc0d94f5c719d43d9b6`
+
+compile/CI commit:
+`dcfd0a950f01fab1e1c91542c4a440f70b58b20d`
+
+GREEN evidence:
+run `41588347324`, job `125758984355`
+- Part 1 v2 avatar-readiness contract: PASS
+- all earlier Part 5 / observation policy / candidate observer / GUI checks before the known RED lab-v2 gate: PASS
+
+## Gate before moving on
+
+Do NOT call the Part 1 false-negative fixed until a new masked live run using P1 v2 proves:
+- normal lobbies still approve,
+- bot lobbies still reject,
+- the diversified/manual-botted pattern is caught automatically when encountered,
+- no excessive false bot rejections appear.
+
+If P1 v2 still misses a manually confirmed bot lobby, use the v2 readiness logs + recording evidence before adding any behavior or level-based heuristic.
