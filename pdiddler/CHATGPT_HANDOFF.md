@@ -4435,3 +4435,135 @@ Webhook system is CI-tested and structurally ready.
 Discord transport still needs the connection lab live test.
 Actual completed-trade payload still needs one live completed trade before it can be called live-validated.
 Part 5 remains paused until this pre-Part-5 webhook stage is accepted.
+
+
+---
+
+# 53. Manual Accept + projected gain + completed-trade webhook live test build
+
+Date: 2026-11-02
+
+Branch:
+`feature/mm2-manual-accept-gain-test`
+
+Purpose:
+- live-test a real manually completed safe trade,
+- keep automated final Accept/Confirm disabled,
+- detect when the user manually presses native Accept,
+- display current verified raw projected gain during the trade,
+- let the existing completed-trade logger alone decide whether completion is real,
+- send exactly one Discord webhook only after verified completion.
+
+## New observer
+
+File:
+`pdiddler/pdiddler_manual_accept_gain_observer_v1.lua`
+
+Commit:
+`fc52a18ce363bc5e2bf11faea2a3609d56520fb6`
+
+Behavior:
+- read-only,
+- watches `TradeGUI(_Phone).Container.Trade.YourOffer.Accepted`,
+- logs LOCAL ACCEPT DETECTED on false -> true,
+- logs LOCAL ACCEPT CLEARED on true -> false while the trade remains open,
+- never clicks Accept,
+- never clicks Confirm,
+- never fires/invokes trade remotes,
+- never offers/removes/declines,
+- shows:
+  `Projected Gain: +N | You: OUR_RAW | Them: THEIR_RAW`
+  from the current verified Part 4 webhook candidate,
+- if Part 4 has not published a current verified candidate, display is calculating/unknown rather than guessing.
+
+Completion authority remains:
+`pdiddler_trade_completion_logger_v1.lua`
+
+Primary completion proof remains:
+`AcceptTrade.OnClientEvent complete == true`
+
+Fallback remains:
+trade close + exact raw `Weapons.Owned` delta verification.
+
+## New runnable stack
+
+File:
+`pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v1.lua`
+
+Commit:
+`9de4ee019195dc951ef064d5be1db8ec25ac8c89`
+
+Base:
+`feature/mm2-completed-trade-webhook`
+
+Important:
+- frozen Parts 1-4 artifacts remain untouched,
+- final automated item-trade Accept remains disabled,
+- observer arms after Part 4 + completion logger and before outgoing rotation,
+- supports both runtime variable names:
+  - `PDIDDLER_DISCORD_WEBHOOK_URL` (canonical),
+  - `PDIDDLER_DISCORD_WEBHOOK` (compatibility alias copied to canonical at runtime),
+- webhook secret is not committed.
+
+## Loader-order regression found and fixed in this test stack
+
+The prior webhook test stack referenced `WEBHOOK_BASE` before declaring it.
+
+This test stack corrects declaration order:
+1. `WEBHOOK_COMMIT`
+2. `WEBHOOK_BASE`
+3. market planner/module loads that consume `WEBHOOK_BASE`
+
+The older stack artifact was not modified.
+
+## CI
+
+Workflow branch support + compile/static guard commit:
+`d659ab00ba97a67285c854653f5b10e7ce9a73a5`
+
+CI run:
+`41551776604`
+
+Result:
+**SUCCESS**
+
+Passed together:
+- official Luau 0.745 compilation,
+- all prior market integration regressions,
+- cache regression,
+- ineligible-plan regression,
+- duplicate-removal guards,
+- frozen v2.6.3 byte-identical guard,
+- webhook payload,
+- telemetry,
+- raw-key completion verification,
+- Discord sender transport,
+- webhook integration contract,
+- webhook stack contract,
+- credential leak guard,
+- raw/checker market identity regression,
+- Part 4 market identity bridge,
+- new manual Accept/gain observer compile,
+- new manual Accept/gain stack compile,
+- new static proof that the observer has no trade mutation / automated Accept capability.
+
+## Live test still required
+
+This build is structurally/CI validated but still needs a controlled live trade.
+
+Expected live sequence:
+1. stack opens/rotates normally,
+2. Part 4 reaches a verified safe state,
+3. projected gain display shows current raw values,
+4. user manually presses Accept,
+5. console prints `LOCAL ACCEPT DETECTED`,
+6. script itself performs no final Accept/Confirm action,
+7. if the opponent changes the offer and MM2 clears local acceptance:
+   - console prints `LOCAL ACCEPT CLEARED`,
+   - no completion webhook is sent,
+8. if the trade actually completes:
+   - completion logger verifies completion,
+   - exactly one Discord completed-trade webhook is sent,
+   - webhook contains both sides, market metadata, gain, and post-trade tracked inventory total.
+
+Do not call manual Accept detection or the live completed-trade webhook path proven until this controlled recording is reviewed.
