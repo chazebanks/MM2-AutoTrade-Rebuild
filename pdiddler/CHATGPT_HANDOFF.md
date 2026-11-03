@@ -5339,3 +5339,54 @@ Required before live integration:
 
 Status:
 **DESIGN WRITTEN — AWAITING USER APPROVAL BEFORE IMPLEMENTATION PLAN**
+
+
+---
+
+# 63. TikTok validation of adaptive acceptance-aware design
+
+Date: 2026-11-02
+
+Research source:
+- current TikTok-indexed MM2 trading posts,
+- TikTok-capable transcript provider for selected posts.
+
+Strongest usable transcript:
+- creator: `@villianhello`
+- TikTok post id: `7589012728535125270`
+- topic: MM2 trading tips / Supreme Values.
+
+Usable findings from transcript:
+- use Supreme-style value/status data rather than raw number alone,
+- check Stable / Doing Well / Underpaid For,
+- Underpaid For items commonly receive underpays and are undesirable holds,
+- build value in **small steps at a time**,
+- explicit `LF` (Looking For) intent is a chance to gain extra value,
+- players often ask for adds even when a trade is already fair/over,
+- current-event items can drop quickly and require caution.
+
+Additional current TikTok trade-up/challenge evidence:
+- inventory progression is commonly framed as repeated incremental upgrades/fair trades toward a target,
+- several posts emphasize desirable/in-demand items and staged progress rather than one giant profit trade.
+
+Research limitation:
+- direct TikTok page scraping is blocked,
+- dedicated TikTok caption index returned no results for the first exact searches,
+- selected transcript provider worked, but several videos had sparse/unusable transcripts.
+Therefore TikTok evidence supports the strategy direction but is not treated as exhaustive.
+
+Design changes committed:
+`24fca598a2c9e847c94da24065b182a332be34fb`
+
+Design document:
+`docs/superpowers/specs/2026-11-02-mm2-adaptive-acceptance-aware-trading-design.md`
+
+Added constraints:
+1. revealed intent outranks generic opener assumptions,
+2. small-step progression is the default profit posture,
+3. items WE RECEIVE with `Underpaid For` cannot receive positive appeal credit and should require extra compensation / lower rank,
+4. do not guess current-event status until canonical metadata exists,
+5. sweetening remains bounded to two safe steps and never chases repeated add requests below the floor.
+
+Status:
+**DESIGN VALIDATED/ADJUSTED WITH TIKTOK EVIDENCE — STILL DESIGN ONLY, NO LIVE CODE CHANGED**
