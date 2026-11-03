@@ -13,6 +13,7 @@ on:
       - feature/mm2-adaptive-acceptance-v1
       - fix/mm2-adaptive-plan-cache-lag
       - feature/mm2-post-trade-auto-claim
+      - feature/mm2-server-hopper-design
   workflow_dispatch:
 
 permissions:
@@ -746,3 +747,8 @@ jobs:
       - name: Run post-trade auto-claim integration contract
         run: |
           python pdiddler/tests/pdiddler_post_trade_claim_contract_v1.py
+
+
+      - name: Run Part 5 server hopper policy tests
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler5_server_hopper_policy_v1.luau
