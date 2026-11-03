@@ -8,6 +8,7 @@ on:
       - fix/mm2-v2_6-ineligible-rebalance
       - fix/mm2-v2_6-no-plan-decline
       - feature/mm2-completed-trade-webhook
+      - feature/mm2-manual-accept-gain-test
   workflow_dispatch:
 
 permissions:
@@ -58,6 +59,8 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler_trade_completion_logger_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_WEBHOOK_TEST_STACK_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler_webhook_connection_LIVE_LAB_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_manual_accept_gain_observer_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v1.lua >/dev/null
 
       - name: Run pure market integration tests
         run: |
@@ -435,4 +438,47 @@ jobs:
           assert 'physicalClick(button,"Confirm' not in src
 
           print("PASS Part 4 market identity bridge contract")
+          PY
+
+
+      - name: Static manual Accept/gain observer guard
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          obs=Path("pdiddler/pdiddler_manual_accept_gain_observer_v1.lua").read_text()
+          stack=Path("pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v1.lua").read_text()
+          required_obs=[
+            'YourOffer',
+            'Accepted',
+            'Projected Gain:',
+            'LOCAL ACCEPT DETECTED',
+            'NO AUTOMATED ACCEPT/CONFIRM ACTION',
+            'part4Controller.state.webhookCandidate',
+          ]
+          forbidden_obs=[
+            'FireServer(',
+            'InvokeServer(',
+            'VirtualInputManager',
+            'firesignal',
+            'getconnections',
+            'AcceptTrade',
+            'OfferItem',
+            'DeclineTrade',
+          ]
+          missing=[x for x in required_obs if x not in obs]
+          bad=[x for x in forbidden_obs if x in obs]
+          if missing:
+              raise SystemExit("manual observer missing required markers: "+repr(missing))
+          if bad:
+              raise SystemExit("manual observer contains forbidden mutation markers: "+repr(bad))
+          required_stack=[
+            'manualGainObserver.run(p4Controller)',
+            'completionLogger.run(',
+            'FINAL ITEM-TRADE ACCEPT IS DISABLED',
+            'PDIDDLER_DISCORD_WEBHOOK_URL',
+          ]
+          missing=[x for x in required_stack if x not in stack]
+          if missing:
+              raise SystemExit("test stack missing required markers: "+repr(missing))
+          print("manual Accept/gain observer static guard PASS")
           PY
