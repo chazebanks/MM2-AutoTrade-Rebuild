@@ -5390,3 +5390,211 @@ Added constraints:
 
 Status:
 **DESIGN VALIDATED/ADJUSTED WITH TIKTOK EVIDENCE — STILL DESIGN ONLY, NO LIVE CODE CHANGED**
+
+
+---
+
+# 64. Adaptive acceptance v1 implementation — offline complete, live validation next
+
+Date: 2026-11-02
+
+Implementation branch:
+`feature/mm2-adaptive-acceptance-v1`
+
+Spec:
+`docs/superpowers/specs/2026-11-02-mm2-adaptive-acceptance-aware-trading-design.md`
+
+Plan:
+`docs/superpowers/plans/2026-11-02-mm2-adaptive-acceptance-v1.md`
+
+Final review:
+`docs/superpowers/reviews/2026-11-02-mm2-adaptive-acceptance-v1-review.md`
+
+## Research-backed strategy change
+
+The trader no longer treats "mathematically safe + positive value" as sufficient reason to force an offer.
+
+Research across current Supreme-style guidance, Reddit MM2 trading discussions, trading guides, and TikTok content supported:
+- demand/stability matter separately from raw value,
+- fair-by-value can still be bad by demand,
+- upgrades commonly cost a modest premium,
+- downgrades can justify compensation depending on the smaller items' quality,
+- experienced traders are selective and server-hop rather than force every inventory,
+- incremental/small-step inventory growth is normal,
+- explicit/revealed intent is more useful than a blind first offer.
+
+## New pure market logic
+
+File:
+`pdiddler/pdiddler4_market_logic_v2_ACCEPTANCE.lua`
+
+Adds explicit health metadata without changing v1 safety thresholds:
+- underpaid copies/value/share,
+- fluctuating copies/value/share,
+- demand/stability metadata per assessment.
+
+## New acceptance policy
+
+File:
+`pdiddler/pdiddler4_acceptance_policy_v1.lua`
+
+Behavior:
+- 2.5s opener observation,
+- realistic opener based on partner top-4 eligible capacity,
+- no opener if no plausible candidate,
+- raw/checker identity handled correctly,
+- A/B/C/D counterparty appeal tiers,
+- receive-side Underpaid exposure cannot earn positive quality credit,
+- safe-plan profit bands use `min(25,max(5,theirRaw*0.02))`,
+- stage 0 keeps a modest reserve when available,
+- ~5s sweeten one band toward floor,
+- ~10s final sweeten to floor,
+- maximum two sweetens,
+- never legalizes an unsafe trade.
+
+Raw/checker opener regression:
+- RED run `41565010480`,
+- fix `78fa90b21c63bc8bed412076cf5f01c33b48d70f`,
+- GREEN run `41565080100`.
+
+## New bounded dual-variant planner
+
+File:
+`pdiddler/pdiddler4_market_planner_v1_3_ACCEPTANCE.lua`
+
+Critical architecture point:
+- old planner dedupe kept only the lower-exit bundle at identical raw/protected totals,
+- simply reversing that would break existing quality-upgrade behavior,
+- v1.3 keeps at most TWO variants per raw/protected state:
+  1. low-exit safety extreme,
+  2. high-exit / low-risk acceptance extreme.
+
+This keeps state growth bounded while allowing acceptance policy to see both.
+
+Planner regression:
+`pdiddler/tests/pdiddler4_acceptance_planner_v1.luau`
+
+## New Part 4
+
+File:
+`pdiddler/pdiddler4_balancer_ROTATING_v2_5_ADAPTIVE_ACCEPTANCE.lua`
+
+Changes from v2.4.5:
+- highest-value-first opener removed,
+- observe THEIR side for 2.5s first,
+- any visible non-empty THEIR OFFER suppresses our opener,
+- re-read THEIR side immediately before opener mutation,
+- market-aware opener if they stay empty,
+- safe plans reranked by acceptance policy,
+- same THEIR signature can replan at sweeten step 1 and 2,
+- THEIR signature change resets sweetener generation,
+- appeal-tier-D safe plans HOLD instead of forcing an ugly offer,
+- manual local Accepted freezes voluntary opener/rebalance/sweetening,
+- original TX validation/recovery retained,
+- accepted-empty immediate decline retained,
+- 15s empty timeout retained,
+- 60s active window retained,
+- 5s no-plan negotiation grace retained,
+- final automated Accept still disabled.
+
+## Runnable v5 test stack
+
+File:
+`pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v5_ADAPTIVE.lua`
+
+Exact stack commit:
+`595c0be7bd9af38981e1e689d34ce342557d6713`
+
+Adaptive modules pinned by that stack to:
+`78fa90b21c63bc8bed412076cf5f01c33b48d70f`
+
+Retained known-good pieces:
+- Part 1,
+- Part 2,
+- scanner critical-pause build,
+- Part 3 TDD bounded-unproven-send recovery,
+- market bundle cache,
+- manual Accept/gain observer v2,
+- completion logger v2,
+- webhook payload v2,
+- webhook completion verification.
+
+Webhook credential remains runtime-only and is not in GitHub.
+
+## TDD / CI history
+
+Acceptance policy:
+- RED: `41563593152`
+- GREEN after pure policy: `41563725593`
+
+Adaptive Part 4:
+- RED contract: `41563914804`
+- contract corrected for module-state naming, then GREEN.
+
+Planner retention:
+- RED on dual-variant requirement: `41564347562`
+- GREEN after v1.3 planner: `41564431813`
+
+v5 stack:
+- RED wiring guard: `41564526886`
+- GREEN stack: `41564671627`
+
+Explicit Luau compilation for every new module:
+- GREEN: `41564816352`
+
+Raw/checker opener identity:
+- RED: `41565010480`
+- GREEN: `41565080100`
+
+Final pin-guard workflow placement mistake:
+- `41565167805` failed because the NEW v5 pin assertion was accidentally inserted into the old webhook-v1 CI contract.
+- No trading runtime code was involved.
+- workflow fix commit: `50f89bb46f76f94b840cbc434df888aa2eea5b7b`.
+
+Clean final code gate:
+- `41565278318` — SUCCESS.
+- official Luau 0.745 compile SUCCESS,
+- all legacy regressions SUCCESS,
+- acceptance policy SUCCESS,
+- adaptive Part 4 contract SUCCESS,
+- dual-variant planner SUCCESS,
+- v5 stack wiring/pin SUCCESS.
+
+## Final static safety review
+
+All five new runtime files scanned:
+- no `AcceptTrade`,
+- no physical final Accept/Confirm,
+- no `firesignal`,
+- no detached `task.delay` negotiation callbacks,
+- no embedded Discord webhook credential.
+
+Known-good artifacts were not edited.
+
+## Explicit limitations / rulings
+
+- A visible non-empty THEIR OFFER suppresses opener even if not fully resolved. This is conservative and prevents racing their action.
+- Safety recovery remains allowed before manual-Accept hold if a transaction is already uncertain; recovery is safety-authoritative, not voluntary sweetening.
+- Set premiums are NOT guessed because no canonical set model exists.
+- Current-event penalties are NOT guessed because no canonical event-age field exists.
+- Low-demand but otherwise valid opener behavior remains relative/market-ranked and requires live acceptance evidence before adding a hard minimum-demand cutoff.
+
+## Live validation required next
+
+This version is **offline/CI complete but not production-complete**.
+
+Record and verify:
+1. THEY offer within 2.5s -> no opener.
+2. THEY stay empty -> realistic opener selected; unreachable highest item not used.
+3. Raw/checker opener path live (Iceblaster is a useful identity test if available).
+4. No realistic opener -> OUR side stays empty safely.
+5. Two safe plans -> healthier counterparty-facing plan selected.
+6. Unchanged THEIR offer -> sweeten near 5s and near 10s only.
+7. THEIR offer changes mid-sweeten -> old generation invalidated.
+8. Appeal tier D -> HOLD rather than forced ugly offer.
+9. Manual Accepted -> no voluntary mutation.
+10. Completed trade -> exactly one webhook, inventory-after, verification, Trade ID.
+11. Unchanged no-safe-plan >5s -> existing grace decline still correct.
+12. Fully-unproven Part 3 outgoing retry remains an older live-unproven edge.
+
+Final automated Accept remains disabled.
