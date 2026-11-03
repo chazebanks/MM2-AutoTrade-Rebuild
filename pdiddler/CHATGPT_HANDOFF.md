@@ -6254,3 +6254,77 @@ Do not integrate Part 5 into full PDIDDLER until an allowed standalone live wrap
 - avatar/action rows,
 - manual `botted` marking without timer reset,
 - successful hop + Delta auto-exec chain.
+
+
+---
+
+# 70. Hopper-only live recording audit
+
+Recording:
+`ScreenRecording_11-03-2026 00-34-11_1.mp4`
+
+Date: 2026-11-03
+
+Scope: standalone Part 5 hopper-only test. No Part 1, scanner, trading, or observation GUI.
+
+## Live-proven behavior
+
+1. **30-second wait works**
+   - First run logged START at approximately 00:33:57.
+   - Countdown reached 5 at ~00:34:22, then 4/3/2/1/0 at one-second intervals.
+   - `COUNTDOWN COMPLETE | STARTING HOPPER` at ~00:34:27.
+   - This confirms the apparent compressed countdown in early frames was only console history; the live timer itself lasted the intended ~30 seconds.
+
+2. **11/12 discovery + selection works**
+   - First hop:
+     `[PDIDDLER P5] SERVERS | 11/12=384 | 10/12=0 | visited=1`
+     followed by
+     `HOP ATTEMPT | 11/12 | ...`
+   - Third observed hop:
+     `SERVERS | 11/12=233 | 10/12=0 | visited=7`
+     followed by another 11/12 attempt.
+
+3. **Visited state persists across teleport chain**
+   - First normal attempt showed `visited=1`.
+   - Second hop cycle showed `visited=3`.
+   - Third hop cycle showed `visited=7`.
+   - This proves the teleport-setting state survived between servers and includes attempted/full candidates, not only successful current servers.
+
+4. **GameFull recovery works**
+   - Second hop cycle produced a real Roblox teleport failure:
+     `Teleport failed because Requested experience is full (GameFull)`.
+   - Runtime logged:
+     `[PDIDDLER P5] HOP FAILED | ... | init-failed:...GameFull... | trying next`
+   - It immediately issued another:
+     `HOP ATTEMPT | 11/12 | ...`
+   - The next candidate eventually teleported successfully.
+
+5. **Server race is expected**
+   - Some target candidates were 11/12 when selected but the landed lobby displayed 12/12.
+   - This is expected population race behavior: the script is selecting an 11/12 candidate, then that server can fill during the teleport/join window.
+
+6. **No same-server rejoin was observed**
+   - Current JobIds shown after each successful hop were different.
+   - Combined with visited count growth, no observed evidence of a visited/current JobId being intentionally reselected.
+
+## Still NOT proven
+
+1. **Delta Auto Execute relaunch**
+   - Recording shows Delta being opened/pasted/executed again after teleports.
+   - Therefore the hopper transport is proven, but automatic relaunch without manual interaction is NOT proven by this recording.
+
+2. **10/12 fallback**
+   - Every discovery shown had many 11/12 candidates and `10/12=0`.
+   - The code policy is statically tested, but live fallback to 10/12 was not exercised.
+
+3. **No-candidate 5-second refresh**
+   - Not exercised because hundreds of eligible 11/12 servers were available.
+
+4. **Part 1 bot-reject immediate re-hop**
+   - Not part of this hopper-only recording.
+
+## Current verdict
+
+**Part 5 transport core: LIVE-PROVEN for normal 11/12 hopping, persisted visited state, and real GameFull failure recovery.**
+
+Do not yet label the full Part 5 lifecycle live-proven because Delta Auto Execute relaunch, live 10/12 fallback, no-candidate refresh, and Part 1 bot-reject routing remain separately unproven.
