@@ -68,6 +68,7 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v2.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_5_NO_PLAN_GRACE.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v3.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v4_TDD.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler_trade_webhook_payload_v2_INVENTORY.luau >/dev/null
 
       - name: Run pure market integration tests
@@ -610,3 +611,16 @@ jobs:
       - name: Run unproven outgoing recovery regression
         run: |
           python pdiddler/tests/pdiddler3_unproven_outgoing_recovery_regression.py
+
+
+      - name: TDD v4 stack wiring guard
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          stack=Path("pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v4_TDD.lua").read_text()
+          assert 'OUTGOING_RECOVERY_COMMIT="cf847b6f7f555d2159a259f4f53d12fafc75373f"' in stack
+          assert "pdiddler3_outgoing_ROTATING_v15_UNCERTAIN_OWNER.lua" in stack
+          assert "one retry" in stack
+          assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in stack
+          print("PASS TDD v4 stack wiring")
+          PY
