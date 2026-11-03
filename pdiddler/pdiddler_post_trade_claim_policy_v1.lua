@@ -78,7 +78,7 @@ function M.observe(state,text,now)
         end
 
         local elapsed=state.lastTapAt and (now-state.lastTapAt) or math.huge
-        if elapsed>=M.RetryDelay then
+        if elapsed+1e-9>=M.RetryDelay then
             return "tap",{
                 current=current,
                 total=total,
