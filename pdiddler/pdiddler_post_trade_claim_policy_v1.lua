@@ -59,7 +59,7 @@ function M.observe(state,text,now)
 
         if state.attempts>=M.MaxAttemptsPerStep then
             local elapsed=state.lastTapAt and (now-state.lastTapAt) or math.huge
-            if elapsed>=M.RetryDelay then
+            if elapsed+1e-9>=M.RetryDelay then
                 return "stuck",{
                     current=current,
                     total=total,
