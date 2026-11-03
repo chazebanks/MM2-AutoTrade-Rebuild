@@ -457,3 +457,40 @@ Part 5 does not:
 ## Approval gate
 
 No production code should be written until this design is approved.
+
+
+## Standalone validation gate before full PDIDDLER integration
+
+Part 5 must **not** be wired into the full PDIDDLER stack immediately.
+
+The first live artifact is a dedicated **Part 1 + Part 5 server-hopper lab**. Its purpose is to validate the transport/lifecycle layer independently from trading.
+
+The standalone lab validates:
+- Part 1 remains the bot-lobby authority.
+- Approved lobby -> Part 5 test exhaustion countdown -> server discovery.
+- 11/12 preferred over 10/12.
+- 10/12 used when no valid 11/12 exists.
+- 9/12 and lower never intentionally selected.
+- current JobId excluded.
+- attempted/visited JobIds persist across the teleport chain.
+- failed/full candidate moves to a different candidate.
+- no preferred candidate -> 5-second refresh.
+- Part 1 bot rejection after arrival -> immediate Part 5 re-hop.
+- Delta Auto Execute relaunches the lab after successful teleport.
+- no duplicate hopper loops/teleports.
+
+The standalone lab does **not** claim to validate true Part 3 exhaustion, tradable-player resets, or the mandatory final canonical inventory scan. Those require scanner/outgoing integration and happen only after the transport layer is live-proven.
+
+### Standalone lab exhaustion source
+
+Because Part 3 is intentionally absent, the lab uses a clearly test-only exhaustion driver:
+- after Part 1 approves the current server, start a 45-second LAB countdown,
+- no inventory/tradeability claim is made,
+- at the deadline, invoke the same Part 5 server-selection/teleport transport path that production will use.
+
+This keeps production hopper transport identical while avoiding a fake/duplicate inventory scanner in the lab.
+
+Proposed lab file:
+`pdiddler/tests/pdiddler_P1_P5_SERVER_HOP_LIVE_LAB_v1.lua`
+
+Only after the P1+P5 lab is live-proven should scanner v6.10, outgoing v17, and the integrated v8 stack be built/wired for production exhaustion behavior.
