@@ -2,10 +2,12 @@
 
 Saved November 3, 2026. Documentation only; no script changes or merge.
 
-Start with [the research synthesis](MM2_TRADING_RESEARCH_2026-11-03.md).
+Start with [the finished recommendations](FINAL_RECOMMENDATIONS.md), then
+[the detailed research synthesis](MM2_TRADING_RESEARCH_2026-11-03.md).
 
 ## Research
 
+- [Finished recommendations and explicit limits](FINAL_RECOMMENDATIONS.md)
 - [Cross-source findings and proposed experiments](MM2_TRADING_RESEARCH_2026-11-03.md)
 - [YouTube transcript-based notes](youtube.md)
 - [TikTok evidence and retrieval limits](tiktok.md)
