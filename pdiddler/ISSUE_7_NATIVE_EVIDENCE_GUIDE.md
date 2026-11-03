@@ -54,6 +54,20 @@ getgenv().PDIDDLER_NATIVE_EVIDENCE_V1.stop()
 7. **Negative controls**: manual decline, partner leaves, UI closes without completion, offer mutation after manual Accepted, late event, respawn/PlayerGui recreation. No closed GUI or bare boolean may be counted as a completed trade.
 8. **One controller and hopping**: no P5 hop during any request, active trade, confirmation uncertainty or inventory read.
 
+## Previously live-tested Discord delivery — do not rebuild from zero
+
+The earlier **Part 4.5 manual-Accept + completed-trade webhook** was live-tested on November 2, 2026. In that session, a manual-accepted trade gave **PlasmaBeam (20)** and received **Darkbringer (35)**, for a reported **+15**; the server completion was observed and **exactly one Discord webhook arrived**. Its message included the traded items and market metadata. This is **positive evidence for the older Discord HTTP transport, payload formatting, and completion notification path**. Earlier versions also showed Discord posts after completed trades.
+
+Reuse and compare these existing repository artifacts before creating a new sender:
+- `feature/mm2-manual-accept-gain-test/pdiddler/pdiddler_trade_webhook_sender_v1.lua` — working transport adapter; runtime webhook URL, HTTP result and retry logic
+- `feature/mm2-manual-accept-gain-test/pdiddler/pdiddler_trade_completion_logger_v2_INVENTORY.lua` — older server-complete + inventory-delta observer
+- `feature/mm2-manual-accept-gain-test/pdiddler/pdiddler_trade_completion_logic_v1.lua` — raw inventory delta comparison
+- `feature/mm2-manual-accept-gain-test/pdiddler/pdiddler_trade_webhook_payload_v2_INVENTORY.lua` — report construction
+- `feature/mm2-manual-accept-gain-test/pdiddler/pdiddler_manual_accept_gain_observer_v2_IPAD.lua` — read-only local Accepted signal
+- `feature/mm2-manual-accept-gain-test/pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v2.lua` — assembled earlier test
+
+**Precise unverified scope:** this success does not prove PR #5/V6's *new* trade-session correlation, stable post-trade **whole-inventory** totals, or exactly-once webhook delivery across process restarts and lost acknowledgements. The older logger used a recent-snapshot correlation window and may deliver before the inventory total is fully verified; do not copy that assumption uncritically. The V6 adapter is still absent, but **do not claim Discord delivery itself was never tested or that the sender needs to be invented**. New evidence collection should target only the missing native final-accept sequence and robust cross-session completion association.
+
 ## Evidence required before enabling automatic completion
 - The *actual* UI control identities, initial Accept/final Confirm state sequence, native cooldown and cancellation behavior (not guessed names).
 - A stable trade token: JobId, exact UserId, PlayerGui and trade-root generation, both exact offer signatures, verified price profile version and active acceptance state.
