@@ -151,7 +151,7 @@ function M.build(snapshot,source)
         },
         {
             name="Trade ID",
-            value=tradeId~="" and ("\`"..compact(tradeId,220).."\`") or "Unavailable",
+            value=tradeId~="" and ("`"..compact(tradeId,220).."`") or "Unavailable",
             inline=false,
         },
     }
