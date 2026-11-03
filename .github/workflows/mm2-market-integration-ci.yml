@@ -53,6 +53,8 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler_trade_completion_logic_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_trade_webhook_sender_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_3_WEBHOOK_TELEMETRY.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_market_planner_v1_2_MARKET_IDENTITY.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_4_MARKET_IDENTITY_WEBHOOK.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_trade_completion_logger_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_WEBHOOK_TEST_STACK_v1.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler_webhook_connection_LIVE_LAB_v1.lua >/dev/null
@@ -249,7 +251,7 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          bridge=Path("pdiddler/pdiddler4_balancer_ROTATING_v2_4_3_WEBHOOK_TELEMETRY.lua")
+          bridge=Path("pdiddler/pdiddler4_balancer_ROTATING_v2_4_4_MARKET_IDENTITY_WEBHOOK.lua")
           logger=Path("pdiddler/pdiddler_trade_completion_logger_v1.lua")
 
           assert bridge.exists(), "Part 4 webhook telemetry bridge missing"
@@ -327,11 +329,17 @@ jobs:
               "pdiddler_trade_telemetry_v1.lua",
               "pdiddler_trade_completion_logic_v1.lua",
               "pdiddler_trade_webhook_sender_v1.lua",
-              "pdiddler4_balancer_ROTATING_v2_4_3_WEBHOOK_TELEMETRY.lua",
+              "pdiddler4_market_planner_v1_2_MARKET_IDENTITY.lua",
+              "pdiddler4_balancer_ROTATING_v2_4_4_MARKET_IDENTITY_WEBHOOK.lua",
               "pdiddler_trade_completion_logger_v1.lua",
           ]:
               assert token in src, f"stack missing {token}"
 
+          assert "30589f1bc60fc239c503ee6e7d8f5ace80b61287" in src, (
+              "webhook stack must pin corrected market-identity module commit"
+          )
+          assert "pdiddler4_market_planner_v1_2_MARKET_IDENTITY.lua" in src
+          assert "pdiddler4_balancer_ROTATING_v2_4_4_MARKET_IDENTITY_WEBHOOK.lua" in src
           assert "PDIDDLER_DISCORD_WEBHOOK_URL" in src
           assert "WEBHOOK LOGGER ACTIVE" in src
           assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in src
@@ -371,6 +379,8 @@ jobs:
               Path("pdiddler/pdiddler_trade_completion_logic_v1.lua"),
               Path("pdiddler/pdiddler_trade_webhook_sender_v1.lua"),
               Path("pdiddler/pdiddler4_balancer_ROTATING_v2_4_3_WEBHOOK_TELEMETRY.lua"),
+              Path("pdiddler/pdiddler4_market_planner_v1_2_MARKET_IDENTITY.lua"),
+              Path("pdiddler/pdiddler4_balancer_ROTATING_v2_4_4_MARKET_IDENTITY_WEBHOOK.lua"),
               Path("pdiddler/pdiddler_trade_completion_logger_v1.lua"),
               Path("pdiddler/pdiddler_WEBHOOK_TEST_STACK_v1.lua"),
               Path("pdiddler/tests/pdiddler_webhook_connection_LIVE_LAB_v1.lua"),
