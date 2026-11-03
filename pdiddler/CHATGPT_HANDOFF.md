@@ -5043,3 +5043,46 @@ Also complete one safe trade manually if possible to finish live validation of:
 - exactly-one completed-trade webhook.
 
 Do not advance to automated Part 5 Accept until this v3 recording is reviewed.
+
+
+---
+
+# 59. 2026-11-02 v3 follow-up recording — Part 3 outgoing proof failure
+
+Evidence:
+`ScreenRecording_11-02-2026 20-08-29_1.mp4`
+
+This recording did NOT exercise Part 4 no-plan grace. No item trade window opened.
+
+Observed Part 3 sequence:
+- outgoing physical Trade tap was attempted for multiple whitelisted targets,
+- sender-side pending UI was never proven,
+- no active trade window was observed,
+- no verifiable decline state was observed,
+- each target remained under uncertain ownership for the full 15-second response window,
+- then Part 3 marked the target UNAVAILABLE / protected from resend this server,
+- after multiple targets followed the same path, Part 3 reached no unprocessed whitelist targets.
+
+Visible examples:
+- jackybacky101010: `Trade tapped but no local pending/trade/decline proof for 15s | protected from resend this server`
+- Muffin: same failure classification.
+
+Important comparison:
+- Part 3 outgoing module is unchanged between the previous successful v3 trade and this recording.
+- The only new v3 change was Part 4 no-plan grace, so this is not evidence that the Part 4 patch caused the outgoing failure.
+
+Risk identified in current Part 3 v15:
+- after a physical Trade tap, no local pending/trade/decline proof for 15s is treated as authoritative enough to protect the target from resend for the rest of the server session.
+- This avoids duplicate sends when local pending UI is late/missing, but it can also consume a target when the tap never became a real server-side request.
+
+The recording occurs across a map-loading / active-round transition. This timing correlates with the failures, but the recording alone does not prove whether:
+1. MM2 refused/ignored the request in that game state, or
+2. the request existed but the local pending detector failed to observe it.
+
+Do not change Part 4 because of this recording.
+
+Recommended next engineering step:
+- add observation/diagnostic evidence around outgoing send proof rather than blindly resending,
+- distinguish physical tap from server/pending proof,
+- avoid permanently consuming an eligible target solely from an unproven tap unless there is stronger evidence that a request was created,
+- preserve duplicate-send safety while adding a bounded recovery path for truly unproven sends.
