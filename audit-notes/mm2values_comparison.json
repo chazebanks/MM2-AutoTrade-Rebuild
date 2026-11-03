@@ -1,0 +1,1558 @@
+{
+  "embedded_count": 190,
+  "published_count": 190,
+  "matches": 166,
+  "mismatches": [
+    {
+      "page": "ancient",
+      "id": "771",
+      "name": "Gingerscope",
+      "value": 15750.0,
+      "image": "Gingerscope.png",
+      "embedded": 15250.0,
+      "difference": 500.0
+    },
+    {
+      "page": "ancient",
+      "id": "743",
+      "name": "Travelers Axe",
+      "value": 7350.0,
+      "image": "TravellersAxe.png",
+      "embedded": 7700.0,
+      "difference": -350.0
+    },
+    {
+      "page": "ancient",
+      "id": "829",
+      "name": "Vampires Axe",
+      "value": 1425.0,
+      "image": "vampsaxe.png",
+      "embedded": 1375.0,
+      "difference": 50.0
+    },
+    {
+      "page": "ancient",
+      "id": "1026",
+      "name": "Emberbow",
+      "value": 350.0,
+      "image": "Emberbow.png",
+      "embedded": 325.0,
+      "difference": 25.0
+    },
+    {
+      "page": "ancient",
+      "id": "1027",
+      "name": "Emberscythe",
+      "value": 350.0,
+      "image": "Emberscythe.png",
+      "embedded": 300.0,
+      "difference": 50.0
+    },
+    {
+      "page": "godly",
+      "id": "926",
+      "name": "Alienbeam",
+      "value": 1900.0,
+      "image": "Alienbeam.png",
+      "embedded": 1850.0,
+      "difference": 50.0
+    },
+    {
+      "page": "godly",
+      "id": "925",
+      "name": "Raygun",
+      "value": 1875.0,
+      "image": "Raygun.png",
+      "embedded": 1825.0,
+      "difference": 50.0
+    },
+    {
+      "page": "godly",
+      "id": "741",
+      "name": "Darkshot",
+      "value": 1500.0,
+      "image": "Darkshot.png",
+      "embedded": 1550.0,
+      "difference": -50.0
+    },
+    {
+      "page": "godly",
+      "id": "742",
+      "name": "Darksword",
+      "value": 1475.0,
+      "image": "Darksword.png",
+      "embedded": 1525.0,
+      "difference": -50.0
+    },
+    {
+      "page": "godly",
+      "id": "833",
+      "name": "Soul",
+      "value": 615.0,
+      "image": "soul.png",
+      "embedded": 625.0,
+      "difference": -10.0
+    },
+    {
+      "page": "godly",
+      "id": "832",
+      "name": "Spirit",
+      "value": 605.0,
+      "image": "spirit.png",
+      "embedded": 615.0,
+      "difference": -10.0
+    },
+    {
+      "page": "godly",
+      "id": "924",
+      "name": "Xenoshot",
+      "value": 425.0,
+      "image": "Xenoshot.png",
+      "embedded": 440.0,
+      "difference": -15.0
+    },
+    {
+      "page": "godly",
+      "id": "923",
+      "name": "Xenoknife",
+      "value": 420.0,
+      "image": "Xenoknife.png",
+      "embedded": 435.0,
+      "difference": -15.0
+    },
+    {
+      "page": "godly",
+      "id": "811",
+      "name": "WaterGun",
+      "value": 140.0,
+      "image": "WaterGun.png",
+      "embedded": 150.0,
+      "difference": -10.0
+    },
+    {
+      "page": "godly",
+      "id": "1005",
+      "name": "Icecream",
+      "value": 140.0,
+      "image": "Icecream_knife.png",
+      "embedded": 155.0,
+      "difference": -15.0
+    },
+    {
+      "page": "godly",
+      "id": "1028",
+      "name": "Embersickle",
+      "value": 100.0,
+      "image": "Embersickle.png",
+      "embedded": 80.0,
+      "difference": 20.0
+    },
+    {
+      "page": "godly",
+      "id": "1003",
+      "name": "Beachy",
+      "value": 75.0,
+      "image": "BeachyGodly2026.png",
+      "embedded": 80.0,
+      "difference": -5.0
+    },
+    {
+      "page": "godly",
+      "id": "1004",
+      "name": "Sands",
+      "value": 75.0,
+      "image": "SandsGodly2026.png",
+      "embedded": 80.0,
+      "difference": -5.0
+    },
+    {
+      "page": "chroma",
+      "id": "960",
+      "name": "Chroma Snow Dagger",
+      "value": 2350.0,
+      "image": "Chroma_Snow_Dagger.png",
+      "embedded": 2400.0,
+      "difference": -50.0
+    },
+    {
+      "page": "chroma",
+      "id": "810",
+      "name": "Chroma WaterGun",
+      "value": 2300.0,
+      "image": "Chroma_Watergun.png",
+      "embedded": 2350.0,
+      "difference": -50.0
+    },
+    {
+      "page": "chroma",
+      "id": "1006",
+      "name": "Chroma Icecream",
+      "value": 1850.0,
+      "image": "C_Icecream.png",
+      "embedded": 1875.0,
+      "difference": -25.0
+    },
+    {
+      "page": "chroma",
+      "id": "1029",
+      "name": "Chroma Embersickle",
+      "value": 1250.0,
+      "image": "Chroma_Embersickle.png",
+      "embedded": 1100.0,
+      "difference": 150.0
+    },
+    {
+      "page": "chroma",
+      "id": "1007",
+      "name": "Chroma Sands",
+      "value": 1225.0,
+      "image": "CSands.png",
+      "embedded": 1325.0,
+      "difference": -100.0
+    },
+    {
+      "page": "chroma",
+      "id": "1008",
+      "name": "Chroma Beachy",
+      "value": 1175.0,
+      "image": "CBeachy.png",
+      "embedded": 1275.0,
+      "difference": -100.0
+    }
+  ],
+  "missing": [],
+  "extra": [],
+  "image_differences": [],
+  "rows": [
+    {
+      "page": "ancient",
+      "id": "1",
+      "name": "Niks Scythe",
+      "value": 250000000.0,
+      "image": "NiksScythe.png"
+    },
+    {
+      "page": "ancient",
+      "id": "771",
+      "name": "Gingerscope",
+      "value": 15750.0,
+      "image": "Gingerscope.png"
+    },
+    {
+      "page": "ancient",
+      "id": "743",
+      "name": "Travelers Axe",
+      "value": 7350.0,
+      "image": "TravellersAxe.png"
+    },
+    {
+      "page": "ancient",
+      "id": "860",
+      "name": "Celestial",
+      "value": 1950.0,
+      "image": "Celestial.png"
+    },
+    {
+      "page": "ancient",
+      "id": "829",
+      "name": "Vampires Axe",
+      "value": 1425.0,
+      "image": "vampsaxe.png"
+    },
+    {
+      "page": "ancient",
+      "id": "1026",
+      "name": "Emberbow",
+      "value": 350.0,
+      "image": "Emberbow.png"
+    },
+    {
+      "page": "ancient",
+      "id": "1027",
+      "name": "Emberscythe",
+      "value": 350.0,
+      "image": "Emberscythe.png"
+    },
+    {
+      "page": "ancient",
+      "id": "526",
+      "name": "Harvester",
+      "value": 250.0,
+      "image": "harvester.png"
+    },
+    {
+      "page": "ancient",
+      "id": "661",
+      "name": "Icepiercer",
+      "value": 165.0,
+      "image": "Icepiercer.png"
+    },
+    {
+      "page": "ancient",
+      "id": "480",
+      "name": "Icebreaker",
+      "value": 70.0,
+      "image": "Icebreaker.png"
+    },
+    {
+      "page": "ancient",
+      "id": "3",
+      "name": "Batwing",
+      "value": 45.0,
+      "image": "BatwingUpdated.png"
+    },
+    {
+      "page": "ancient",
+      "id": "2",
+      "name": "Elderwood Scythe",
+      "value": 40.0,
+      "image": "ewscythe.png"
+    },
+    {
+      "page": "ancient",
+      "id": "529",
+      "name": "SwirlyAxe",
+      "value": 40.0,
+      "image": "SwirlAxe.png"
+    },
+    {
+      "page": "ancient",
+      "id": "471",
+      "name": "Hallowscythe",
+      "value": 32.0,
+      "image": "HallowscytheUp.png"
+    },
+    {
+      "page": "ancient",
+      "id": "404",
+      "name": "Log Chopper",
+      "value": 20.0,
+      "image": "LogchopperUp.png"
+    },
+    {
+      "page": "ancient",
+      "id": "4",
+      "name": "Ice Wing",
+      "value": 15.0,
+      "image": "IcewingknifeUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "740",
+      "name": "Travelers Gun",
+      "value": 5150.0,
+      "image": "TravGun.png"
+    },
+    {
+      "page": "godly",
+      "id": "770",
+      "name": "Evergun",
+      "value": 3425.0,
+      "image": "Evergun.png"
+    },
+    {
+      "page": "godly",
+      "id": "769",
+      "name": "Evergreen",
+      "value": 2700.0,
+      "image": "Evergreen.png"
+    },
+    {
+      "page": "godly",
+      "id": "856",
+      "name": "Constellation",
+      "value": 2475.0,
+      "image": "2024Constellation.png"
+    },
+    {
+      "page": "godly",
+      "id": "926",
+      "name": "Alienbeam",
+      "value": 1900.0,
+      "image": "Alienbeam.png"
+    },
+    {
+      "page": "godly",
+      "id": "830",
+      "name": "Vampires Gun",
+      "value": 1875.0,
+      "image": "vampsgun.png"
+    },
+    {
+      "page": "godly",
+      "id": "925",
+      "name": "Raygun",
+      "value": 1875.0,
+      "image": "Raygun.png"
+    },
+    {
+      "page": "godly",
+      "id": "762",
+      "name": "Turkey",
+      "value": 1850.0,
+      "image": "Turkey.png"
+    },
+    {
+      "page": "godly",
+      "id": "741",
+      "name": "Darkshot",
+      "value": 1500.0,
+      "image": "Darkshot.png"
+    },
+    {
+      "page": "godly",
+      "id": "742",
+      "name": "Darksword",
+      "value": 1475.0,
+      "image": "Darksword.png"
+    },
+    {
+      "page": "godly",
+      "id": "696",
+      "name": "Blossom",
+      "value": 1160.0,
+      "image": "BlossomGun.png"
+    },
+    {
+      "page": "godly",
+      "id": "697",
+      "name": "Sakura",
+      "value": 1150.0,
+      "image": "Sakura.png"
+    },
+    {
+      "page": "godly",
+      "id": "901",
+      "name": "Sunrise",
+      "value": 775.0,
+      "image": "SunsetGun.png"
+    },
+    {
+      "page": "godly",
+      "id": "961",
+      "name": "Snowcannon",
+      "value": 680.0,
+      "image": "Snowcannon.png"
+    },
+    {
+      "page": "godly",
+      "id": "854",
+      "name": "Bauble",
+      "value": 675.0,
+      "image": "Bauble.png"
+    },
+    {
+      "page": "godly",
+      "id": "902",
+      "name": "Sunset",
+      "value": 650.0,
+      "image": "SunsetKnife.png"
+    },
+    {
+      "page": "godly",
+      "id": "833",
+      "name": "Soul",
+      "value": 615.0,
+      "image": "soul.png"
+    },
+    {
+      "page": "godly",
+      "id": "832",
+      "name": "Spirit",
+      "value": 605.0,
+      "image": "spirit.png"
+    },
+    {
+      "page": "godly",
+      "id": "924",
+      "name": "Xenoshot",
+      "value": 425.0,
+      "image": "Xenoshot.png"
+    },
+    {
+      "page": "godly",
+      "id": "923",
+      "name": "Xenoknife",
+      "value": 420.0,
+      "image": "Xenoknife.png"
+    },
+    {
+      "page": "godly",
+      "id": "715",
+      "name": "Rainbow Gun",
+      "value": 410.0,
+      "image": "rainbowgun.png"
+    },
+    {
+      "page": "godly",
+      "id": "891",
+      "name": "Flora",
+      "value": 405.0,
+      "image": "Flora_Gun.png"
+    },
+    {
+      "page": "godly",
+      "id": "714",
+      "name": "Rainbow",
+      "value": 400.0,
+      "image": "Rainbowblade.png"
+    },
+    {
+      "page": "godly",
+      "id": "890",
+      "name": "Bloom",
+      "value": 395.0,
+      "image": "Bloom_Knife.png"
+    },
+    {
+      "page": "godly",
+      "id": "989",
+      "name": "Heart Wand",
+      "value": 350.0,
+      "image": "Heartwand.png"
+    },
+    {
+      "page": "godly",
+      "id": "955",
+      "name": "Blizzard",
+      "value": 250.0,
+      "image": "Blizzard.png"
+    },
+    {
+      "page": "godly",
+      "id": "956",
+      "name": "Snowstorm",
+      "value": 250.0,
+      "image": "Snowstorm.png"
+    },
+    {
+      "page": "godly",
+      "id": "728",
+      "name": "Ocean",
+      "value": 240.0,
+      "image": "Ocean_gun.png"
+    },
+    {
+      "page": "godly",
+      "id": "795",
+      "name": "Flowerwood Gun",
+      "value": 235.0,
+      "image": "Flowerwood_Gun.png"
+    },
+    {
+      "page": "godly",
+      "id": "727",
+      "name": "Waves",
+      "value": 235.0,
+      "image": "Waves_knife.png"
+    },
+    {
+      "page": "godly",
+      "id": "794",
+      "name": "Flowerwood Knife",
+      "value": 230.0,
+      "image": "Flowerwood_Knife.png"
+    },
+    {
+      "page": "godly",
+      "id": "959",
+      "name": "Snow Dagger",
+      "value": 170.0,
+      "image": "Snow_Dagger.png"
+    },
+    {
+      "page": "godly",
+      "id": "988",
+      "name": "Treat",
+      "value": 155.0,
+      "image": "Treat.png"
+    },
+    {
+      "page": "godly",
+      "id": "987",
+      "name": "Sweet",
+      "value": 150.0,
+      "image": "Sweet.png"
+    },
+    {
+      "page": "godly",
+      "id": "1031",
+      "name": "Mortal",
+      "value": 140.0,
+      "image": "Mortal.png"
+    },
+    {
+      "page": "godly",
+      "id": "1032",
+      "name": "Immortal",
+      "value": 140.0,
+      "image": "Immortal.png"
+    },
+    {
+      "page": "godly",
+      "id": "811",
+      "name": "WaterGun",
+      "value": 140.0,
+      "image": "WaterGun.png"
+    },
+    {
+      "page": "godly",
+      "id": "859",
+      "name": "Borealis",
+      "value": 140.0,
+      "image": "2024Borealis.png"
+    },
+    {
+      "page": "godly",
+      "id": "1005",
+      "name": "Icecream",
+      "value": 140.0,
+      "image": "Icecream_knife.png"
+    },
+    {
+      "page": "godly",
+      "id": "858",
+      "name": "Australis",
+      "value": 135.0,
+      "image": "2024Australis.png"
+    },
+    {
+      "page": "godly",
+      "id": "618",
+      "name": "Bat",
+      "value": 120.0,
+      "image": "Bat_Zombie.png"
+    },
+    {
+      "page": "godly",
+      "id": "1028",
+      "name": "Embersickle",
+      "value": 100.0,
+      "image": "Embersickle.png"
+    },
+    {
+      "page": "godly",
+      "id": "23",
+      "name": "Candy",
+      "value": 90.0,
+      "image": "Updated_Candy.png"
+    },
+    {
+      "page": "godly",
+      "id": "813",
+      "name": "Pearlshine",
+      "value": 80.0,
+      "image": "Pearlsh.png"
+    },
+    {
+      "page": "godly",
+      "id": "812",
+      "name": "Pearl",
+      "value": 75.0,
+      "image": "Pearl.png"
+    },
+    {
+      "page": "godly",
+      "id": "1003",
+      "name": "Beachy",
+      "value": 75.0,
+      "image": "BeachyGodly2026.png"
+    },
+    {
+      "page": "godly",
+      "id": "1004",
+      "name": "Sands",
+      "value": 75.0,
+      "image": "SandsGodly2026.png"
+    },
+    {
+      "page": "godly",
+      "id": "512",
+      "name": "Heartblade",
+      "value": 65.0,
+      "image": "HeartBladeUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "984",
+      "name": "Ornament",
+      "value": 60.0,
+      "image": "ornagodly.png"
+    },
+    {
+      "page": "godly",
+      "id": "20",
+      "name": "Red Luger",
+      "value": 38.0,
+      "image": "Red_Luger.png"
+    },
+    {
+      "page": "godly",
+      "id": "620",
+      "name": "Phantom",
+      "value": 37.0,
+      "image": "Phantom_Shop.png"
+    },
+    {
+      "page": "godly",
+      "id": "621",
+      "name": "Spectre",
+      "value": 37.0,
+      "image": "Spectre.png"
+    },
+    {
+      "page": "godly",
+      "id": "524",
+      "name": "Candleflame",
+      "value": 35.0,
+      "image": "candleflame.png"
+    },
+    {
+      "page": "godly",
+      "id": "18",
+      "name": "Elderwood Revolver",
+      "value": 35.0,
+      "image": "ewrev.png"
+    },
+    {
+      "page": "godly",
+      "id": "448",
+      "name": "Darkbringer",
+      "value": 35.0,
+      "image": "DarkbringerUpdated.png"
+    },
+    {
+      "page": "godly",
+      "id": "481",
+      "name": "Iceblaster",
+      "value": 35.0,
+      "image": "IceblasterUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "22",
+      "name": "Sugar",
+      "value": 33.0,
+      "image": "Sugar_v2.png"
+    },
+    {
+      "page": "godly",
+      "id": "617",
+      "name": "Makeshift",
+      "value": 33.0,
+      "image": "Makeshift.png"
+    },
+    {
+      "page": "godly",
+      "id": "445",
+      "name": "Lightbringer",
+      "value": 33.0,
+      "image": "LightbringerUpdated.png"
+    },
+    {
+      "page": "godly",
+      "id": "619",
+      "name": "Elderwood Blade",
+      "value": 32.0,
+      "image": "ElderwoodBlade.png"
+    },
+    {
+      "page": "godly",
+      "id": "21",
+      "name": "Green Luger",
+      "value": 25.0,
+      "image": "Green_Luger.png"
+    },
+    {
+      "page": "godly",
+      "id": "30",
+      "name": "Amerilaser",
+      "value": 23.0,
+      "image": "AmeriUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "46",
+      "name": "Laser",
+      "value": 23.0,
+      "image": "LaserUpdated.png"
+    },
+    {
+      "page": "godly",
+      "id": "472",
+      "name": "Hallowgun",
+      "value": 22.0,
+      "image": "hallowgunup.png"
+    },
+    {
+      "page": "godly",
+      "id": "532",
+      "name": "Icebeam",
+      "value": 20.0,
+      "image": "IceBeamUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "48",
+      "name": "Shark",
+      "value": 20.0,
+      "image": "SharkUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "572",
+      "name": "Plasmabeam",
+      "value": 20.0,
+      "image": "Plasmabeam.png"
+    },
+    {
+      "page": "godly",
+      "id": "63",
+      "name": "Night Blade",
+      "value": 20.0,
+      "image": "NightBladeUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "528",
+      "name": "Swirlygun",
+      "value": 18.0,
+      "image": "SwirlGunUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "531",
+      "name": "Iceflake",
+      "value": 18.0,
+      "image": "IceFlakeUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "32",
+      "name": "Battle Axe II",
+      "value": 18.0,
+      "image": "BattleAxe2UP.png"
+    },
+    {
+      "page": "godly",
+      "id": "34",
+      "name": "Pixel",
+      "value": 18.0,
+      "image": "PixelUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "36",
+      "name": "Ginger Luger",
+      "value": 18.0,
+      "image": "Ginger_LugerUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "31",
+      "name": "Old Glory",
+      "value": 17.0,
+      "image": "OldGloryUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "35",
+      "name": "Blaster",
+      "value": 17.0,
+      "image": "BlasterUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "39",
+      "name": "Luger",
+      "value": 17.0,
+      "image": "LugerUpdated.png"
+    },
+    {
+      "page": "godly",
+      "id": "573",
+      "name": "Plasmablade",
+      "value": 17.0,
+      "image": "Plasmablade.png"
+    },
+    {
+      "page": "godly",
+      "id": "37",
+      "name": "Virtual",
+      "value": 15.0,
+      "image": "VirtualUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "43",
+      "name": "Slasher",
+      "value": 15.0,
+      "image": "SlasherUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "405",
+      "name": "Minty",
+      "value": 15.0,
+      "image": "MintyUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "408",
+      "name": "Luger Cane",
+      "value": 15.0,
+      "image": "LugerCaneUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "473",
+      "name": "Vampires Edge",
+      "value": 15.0,
+      "image": "VampiresedgeUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "482",
+      "name": "Jinglegun",
+      "value": 15.0,
+      "image": "JinglegunUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "660",
+      "name": "Cookiecane",
+      "value": 14.0,
+      "image": "Cookiecane.png"
+    },
+    {
+      "page": "godly",
+      "id": "662",
+      "name": "Gingermint",
+      "value": 14.0,
+      "image": "Gingermint.png"
+    },
+    {
+      "page": "godly",
+      "id": "522",
+      "name": "Nebula",
+      "value": 13.0,
+      "image": "NebulaUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "530",
+      "name": "Swirlyblade",
+      "value": 13.0,
+      "image": "SwirlyBladeUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "49",
+      "name": "Death Shard",
+      "value": 13.0,
+      "image": "DeathshardUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "57",
+      "name": "BattleAxe",
+      "value": 13.0,
+      "image": "Battleaxe1UP.png"
+    },
+    {
+      "page": "godly",
+      "id": "60",
+      "name": "Gingerblade",
+      "value": 13.0,
+      "image": "GingerbladeUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "379",
+      "name": "Eternal Cane",
+      "value": 13.0,
+      "image": "eternalcane.png"
+    },
+    {
+      "page": "godly",
+      "id": "440",
+      "name": "Gemstone",
+      "value": 13.0,
+      "image": "GemstoneUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "24",
+      "name": "Chill",
+      "value": 12.0,
+      "image": "ChillUpdated4.png"
+    },
+    {
+      "page": "godly",
+      "id": "28",
+      "name": "Clockwork",
+      "value": 12.0,
+      "image": "ClockworkUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "33",
+      "name": "Spider",
+      "value": 12.0,
+      "image": "SpiderUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "40",
+      "name": "Heat",
+      "value": 12.0,
+      "image": "HeatUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "42",
+      "name": "Tides",
+      "value": 12.0,
+      "image": "TidesUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "47",
+      "name": "Fang",
+      "value": 12.0,
+      "image": "FangUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "26",
+      "name": "Eternal",
+      "value": 10.0,
+      "image": "EternalUpdated.png"
+    },
+    {
+      "page": "godly",
+      "id": "41",
+      "name": "Xmas",
+      "value": 10.0,
+      "image": "XmasUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "58",
+      "name": "Frostsaber",
+      "value": 10.0,
+      "image": "FrostsaberUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "441",
+      "name": "Eternal III",
+      "value": 10.0,
+      "image": "eternal3.png"
+    },
+    {
+      "page": "godly",
+      "id": "444",
+      "name": "Bioblade",
+      "value": 10.0,
+      "image": "Mm2bioblade.png"
+    },
+    {
+      "page": "godly",
+      "id": "467",
+      "name": "Eternal IV",
+      "value": 10.0,
+      "image": "Eternal4UP.png"
+    },
+    {
+      "page": "godly",
+      "id": "25",
+      "name": "Handsaw",
+      "value": 9.0,
+      "image": "Handsaw_Png.png"
+    },
+    {
+      "page": "godly",
+      "id": "29",
+      "name": "Hallows Edge",
+      "value": 9.0,
+      "image": "HallowEdgeUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "59",
+      "name": "Ice Shard",
+      "value": 9.0,
+      "image": "IceShardUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "19",
+      "name": "Eternal II",
+      "value": 8.0,
+      "image": "Eternal_2UP.png"
+    },
+    {
+      "page": "godly",
+      "id": "27",
+      "name": "Boneblade",
+      "value": 8.0,
+      "image": "BonebladeUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "44",
+      "name": "Pumpking",
+      "value": 8.0,
+      "image": "PumpkingUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "45",
+      "name": "Saw",
+      "value": 8.0,
+      "image": "SawUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "62",
+      "name": "Ghost Blade",
+      "value": 8.0,
+      "image": "ghostblade.png"
+    },
+    {
+      "page": "godly",
+      "id": "38",
+      "name": "Flames",
+      "value": 7.0,
+      "image": "FlamesUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "50",
+      "name": "Winters Edge",
+      "value": 7.0,
+      "image": "WinterEdgeUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "51",
+      "name": "Ice Dragon",
+      "value": 7.0,
+      "image": "IceDragonUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "64",
+      "name": "Hallows Blade",
+      "value": 7.0,
+      "image": "HallowsbladeUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "407",
+      "name": "Frostbite",
+      "value": 7.0,
+      "image": "FrostbiteUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "521",
+      "name": "Eggblade",
+      "value": 5.0,
+      "image": "EggbladeUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "61",
+      "name": "Snowflake",
+      "value": 5.0,
+      "image": "SnowflakeUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "468",
+      "name": "Prismatic",
+      "value": 5.0,
+      "image": "PrismaticUp.png"
+    },
+    {
+      "page": "godly",
+      "id": "479",
+      "name": "Peppermint",
+      "value": 4.0,
+      "image": "peppermint.png"
+    },
+    {
+      "page": "godly",
+      "id": "483",
+      "name": "Cookieblade",
+      "value": 4.0,
+      "image": "CookiebladeUP.png"
+    },
+    {
+      "page": "godly",
+      "id": "52",
+      "name": "Red Seer",
+      "value": 3.0,
+      "image": "redseer.png"
+    },
+    {
+      "page": "godly",
+      "id": "53",
+      "name": "Blue Seer",
+      "value": 3.0,
+      "image": "blueseer.png"
+    },
+    {
+      "page": "godly",
+      "id": "54",
+      "name": "Purple Seer",
+      "value": 3.0,
+      "image": "purpleseer.png"
+    },
+    {
+      "page": "godly",
+      "id": "889",
+      "name": "Seer",
+      "value": 3.0,
+      "image": "Seer.png"
+    },
+    {
+      "page": "godly",
+      "id": "55",
+      "name": "Orange Seer",
+      "value": 2.0,
+      "image": "orangeseer.png"
+    },
+    {
+      "page": "godly",
+      "id": "56",
+      "name": "Yellow Seer",
+      "value": 2.0,
+      "image": "yellowseer.png"
+    },
+    {
+      "page": "chroma",
+      "id": "739",
+      "name": "Chroma Travelers Gun",
+      "value": 140000.0,
+      "image": "ChromaTravGun.png"
+    },
+    {
+      "page": "chroma",
+      "id": "772",
+      "name": "Chroma Evergun",
+      "value": 47000.0,
+      "image": "Chroma_Evergun.png"
+    },
+    {
+      "page": "chroma",
+      "id": "773",
+      "name": "Chroma Evergreen",
+      "value": 33000.0,
+      "image": "Chroma_Evergreen.png"
+    },
+    {
+      "page": "chroma",
+      "id": "855",
+      "name": "Chroma Bauble",
+      "value": 29000.0,
+      "image": "CBauble.png"
+    },
+    {
+      "page": "chroma",
+      "id": "857",
+      "name": "Chroma Constellation",
+      "value": 26000.0,
+      "image": "ChromaConstellation.png"
+    },
+    {
+      "page": "chroma",
+      "id": "831",
+      "name": "Chroma Vampires Gun",
+      "value": 25000.0,
+      "image": "chromavampsgun.png"
+    },
+    {
+      "page": "chroma",
+      "id": "927",
+      "name": "Chroma Alienbeam",
+      "value": 23000.0,
+      "image": "ChromaAlienbeam.png"
+    },
+    {
+      "page": "chroma",
+      "id": "928",
+      "name": "Chroma Raygun",
+      "value": 12500.0,
+      "image": "ChromaRaygun.png"
+    },
+    {
+      "page": "chroma",
+      "id": "1036",
+      "name": "Chroma Emberscythe",
+      "value": 10000.0,
+      "image": "Chroma_Emberscythe.png"
+    },
+    {
+      "page": "chroma",
+      "id": "899",
+      "name": "Chroma Sunrise",
+      "value": 8250.0,
+      "image": "ChromaSunsetGun.png"
+    },
+    {
+      "page": "chroma",
+      "id": "962",
+      "name": "Chroma Snowcannon",
+      "value": 7650.0,
+      "image": "Chroma_Snowcannon.png"
+    },
+    {
+      "page": "chroma",
+      "id": "900",
+      "name": "Chroma Sunset",
+      "value": 5500.0,
+      "image": "ChromaSunsetKnife.png"
+    },
+    {
+      "page": "chroma",
+      "id": "957",
+      "name": "Chroma Blizzard",
+      "value": 5500.0,
+      "image": "ChromaBlizzard.png"
+    },
+    {
+      "page": "chroma",
+      "id": "1030",
+      "name": "Chroma Emberbow",
+      "value": 4450.0,
+      "image": "Chroma_Emberbow.png"
+    },
+    {
+      "page": "chroma",
+      "id": "958",
+      "name": "Chroma Snowstorm",
+      "value": 4250.0,
+      "image": "Chroma_Snowstorm.png"
+    },
+    {
+      "page": "chroma",
+      "id": "990",
+      "name": "Chroma Heart Wand",
+      "value": 3400.0,
+      "image": "CHeartwand.png"
+    },
+    {
+      "page": "chroma",
+      "id": "960",
+      "name": "Chroma Snow Dagger",
+      "value": 2350.0,
+      "image": "Chroma_Snow_Dagger.png"
+    },
+    {
+      "page": "chroma",
+      "id": "810",
+      "name": "Chroma WaterGun",
+      "value": 2300.0,
+      "image": "Chroma_Watergun.png"
+    },
+    {
+      "page": "chroma",
+      "id": "1006",
+      "name": "Chroma Icecream",
+      "value": 1850.0,
+      "image": "C_Icecream.png"
+    },
+    {
+      "page": "chroma",
+      "id": "1033",
+      "name": "Chroma Mortal",
+      "value": 1800.0,
+      "image": "coming.png"
+    },
+    {
+      "page": "chroma",
+      "id": "1034",
+      "name": "Chroma Immortal",
+      "value": 1800.0,
+      "image": "coming.png"
+    },
+    {
+      "page": "chroma",
+      "id": "985",
+      "name": "Chroma Ornament",
+      "value": 1800.0,
+      "image": "Chroma_Ornament.png"
+    },
+    {
+      "page": "chroma",
+      "id": "992",
+      "name": "Chroma Treat",
+      "value": 1800.0,
+      "image": "Ctreat.png"
+    },
+    {
+      "page": "chroma",
+      "id": "991",
+      "name": "Chroma Sweet",
+      "value": 1750.0,
+      "image": "Csweet.png"
+    },
+    {
+      "page": "chroma",
+      "id": "1029",
+      "name": "Chroma Embersickle",
+      "value": 1250.0,
+      "image": "Chroma_Embersickle.png"
+    },
+    {
+      "page": "chroma",
+      "id": "1007",
+      "name": "Chroma Sands",
+      "value": 1225.0,
+      "image": "CSands.png"
+    },
+    {
+      "page": "chroma",
+      "id": "1008",
+      "name": "Chroma Beachy",
+      "value": 1175.0,
+      "image": "CBeachy.png"
+    },
+    {
+      "page": "chroma",
+      "id": "447",
+      "name": "Chroma Darkbringer",
+      "value": 60.0,
+      "image": "Chroma_Darkbringer.png"
+    },
+    {
+      "page": "chroma",
+      "id": "446",
+      "name": "Chroma Lightbringer",
+      "value": 55.0,
+      "image": "Chroma_Lightbringer.png"
+    },
+    {
+      "page": "chroma",
+      "id": "6",
+      "name": "Chroma Luger",
+      "value": 48.0,
+      "image": "chromaluger.png"
+    },
+    {
+      "page": "chroma",
+      "id": "8",
+      "name": "Chroma Laser",
+      "value": 40.0,
+      "image": "chromalaser.png"
+    },
+    {
+      "page": "chroma",
+      "id": "525",
+      "name": "Chroma Candleflame",
+      "value": 40.0,
+      "image": "chromacandle.png"
+    },
+    {
+      "page": "chroma",
+      "id": "13",
+      "name": "Chroma DeathShard",
+      "value": 35.0,
+      "image": "chromads.png"
+    },
+    {
+      "page": "chroma",
+      "id": "527",
+      "name": "Chroma Swirlygun",
+      "value": 35.0,
+      "image": "chromaswirlygun.png"
+    },
+    {
+      "page": "chroma",
+      "id": "616",
+      "name": "Chroma Elderwood Blade",
+      "value": 35.0,
+      "image": "ChromaElderwoodBlade.png"
+    },
+    {
+      "page": "chroma",
+      "id": "7",
+      "name": "Chroma Shark",
+      "value": 33.0,
+      "image": "chromashark.png"
+    },
+    {
+      "page": "chroma",
+      "id": "9",
+      "name": "Chroma Slasher",
+      "value": 33.0,
+      "image": "chromaslasher.png"
+    },
+    {
+      "page": "chroma",
+      "id": "10",
+      "name": "Chroma Fang",
+      "value": 33.0,
+      "image": "chromafang.png"
+    },
+    {
+      "page": "chroma",
+      "id": "439",
+      "name": "Chroma Gemstone",
+      "value": 33.0,
+      "image": "chromagem.png"
+    },
+    {
+      "page": "chroma",
+      "id": "11",
+      "name": "Chroma Heat",
+      "value": 30.0,
+      "image": "chromaheat.png"
+    },
+    {
+      "page": "chroma",
+      "id": "659",
+      "name": "Chroma Cookiecane",
+      "value": 30.0,
+      "image": "ChromaCookiecane.png"
+    },
+    {
+      "page": "chroma",
+      "id": "14",
+      "name": "Chroma Tides",
+      "value": 25.0,
+      "image": "chromatides.png"
+    },
+    {
+      "page": "chroma",
+      "id": "15",
+      "name": "Chroma Seer",
+      "value": 25.0,
+      "image": "chromaseer.png"
+    },
+    {
+      "page": "chroma",
+      "id": "17",
+      "name": "Chroma Gingerblade",
+      "value": 25.0,
+      "image": "Chroma_Gingerblade.png"
+    },
+    {
+      "page": "chroma",
+      "id": "12",
+      "name": "Chroma Saw",
+      "value": 22.0,
+      "image": "chromasaw.png"
+    },
+    {
+      "page": "chroma",
+      "id": "16",
+      "name": "Chroma Boneblade",
+      "value": 20.0,
+      "image": "Chroma_Boneblade.png"
+    }
+  ]
+}

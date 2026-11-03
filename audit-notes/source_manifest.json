@@ -1,0 +1,44 @@
+{
+  "observed_utc": "2026-11-03 19:36:47 UTC",
+  "embedded_source_update": "2026-10-31 12:31:12 EST",
+  "retrieved_mm2values_publication": "11/03/2026 02:09:46pm EST",
+  "scope": "all190 currently pinned MM2Values weapon rows; not new Supreme-authority implementation",
+  "sources": [
+    {
+      "category": "ancient",
+      "url": "https://mm2values.com/?p=ancient",
+      "status": 200,
+      "scrape_id": "01a1a2e7-450c-7032-a122-82fbd343bc14"
+    },
+    {
+      "category": "godly",
+      "url": "https://mm2values.com/?p=godly",
+      "status": 200,
+      "scrape_id": "01a1a2e7-44ca-75a3-b55d-573acd4fe547"
+    },
+    {
+      "category": "chroma",
+      "url": "https://mm2values.com/?p=chroma",
+      "status": 200,
+      "scrape_id": "01a1a2e7-44b0-772b-bb3e-06a15529a339"
+    },
+    {
+      "category": "home",
+      "url": "https://mm2values.com/",
+      "status": 200,
+      "scrape_id": "01a1a2e7-c2c6-7266-83ef-ff6d8313911c"
+    },
+    {
+      "category": "supremeAncient",
+      "url": "https://supremevaluelist.com/mm2/ancients.html",
+      "status": 200,
+      "scrape_id": "01a1a2e8-19e0-74bd-9a0b-65b5d9c999c6"
+    },
+    {
+      "category": "guide",
+      "url": "https://mm2values.com/?p=tradeguide",
+      "status": 200,
+      "scrape_id": "01a1a2e8-b1b0-709a-8594-be02f170b22a"
+    }
+  ]
+}

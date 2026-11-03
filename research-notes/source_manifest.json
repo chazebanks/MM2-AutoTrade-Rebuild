@@ -1,0 +1,224 @@
+{
+  "research_date": "2026-11-03",
+  "cutoff": "2026-11-03",
+  "scope": "MM2 strategy evidence for Pdiddler; proposals only",
+  "primary_sources": [
+    {
+      "key": "supreme-use",
+      "url": "https://supremevalues.com/use",
+      "title": "Use - Supreme Values",
+      "status": 200,
+      "retrieved_date": "2026-11-03",
+      "scrape_id": "01a1a2f7-da93-7099-ba0b-c8b118fee01a"
+    },
+    {
+      "key": "supreme-trading",
+      "url": "https://supremevalues.com/mm2/trading",
+      "title": "MM2 Trading Servers - Supreme Values",
+      "status": 200,
+      "retrieved_date": "2026-11-03",
+      "scrape_id": "01a1a2f7-d9c0-779c-a5b9-93ab93fbe4b1"
+    },
+    {
+      "key": "mm2-guide",
+      "url": "https://mm2values.com/?p=tradeguide",
+      "title": "MM2Values.com",
+      "status": 200,
+      "retrieved_date": "2026-11-03",
+      "scrape_id": "01a1a2f7-d9a2-750e-acea-7830e2b886f9"
+    },
+    {
+      "key": "supreme-godlies",
+      "url": "https://supremevalues.com/mm2/godlies",
+      "title": "MM2 Godly Values - Supreme Values",
+      "status": 200,
+      "retrieved_date": "2026-11-03",
+      "scrape_id": "01a1a2f8-8f6a-7497-a847-ab11ae85de4c"
+    },
+    {
+      "key": "supreme-ancients",
+      "url": "https://supremevalues.com/mm2/ancients",
+      "title": "MM2 Ancient Values - Supreme Values",
+      "status": 200,
+      "retrieved_date": "2026-11-03",
+      "scrape_id": "01a1a2f8-8f3e-768b-82f2-c80d6ef4adf5"
+    },
+    {
+      "key": "hub-home",
+      "url": "https://mm2tradehub.com/",
+      "title": "MM2 Values (November 2026) & Trade Checker | MM2 Trade Hub",
+      "status": 200,
+      "retrieved_date": "2026-11-03",
+      "scrape_id": "01a1a2f8-9091-761a-812b-d93320978adb"
+    },
+    {
+      "key": "hub-demand",
+      "url": "https://mm2tradehub.com/guides/mm2-demand-explained",
+      "title": "MM2 Demand Explained: What the Number Means and Which Items Actually Sell",
+      "status": 200,
+      "retrieved_date": "2026-11-03",
+      "scrape_id": "01a1a2f9-8eb6-766b-85fb-d4651fc60c57"
+    },
+    {
+      "key": "hub-harvester",
+      "url": "https://mm2tradehub.com/values/harvester",
+      "title": "Harvester MM2 Value 250 & Supreme Value 250 (November 2026)",
+      "status": 200,
+      "retrieved_date": "2026-11-03",
+      "scrape_id": "01a1a2f9-8cf1-7064-bedb-e9cc244501cd"
+    },
+    {
+      "key": "hub-embersickle",
+      "url": "https://mm2tradehub.com/values/embersickle",
+      "title": "Embersickle MM2 Value 80 & Supreme Value 90 (November 2026)",
+      "status": 200,
+      "retrieved_date": "2026-11-03",
+      "scrape_id": "01a1a2f9-8dc5-74fe-b3c2-8d43e0c5c417"
+    },
+    {
+      "key": "hub-market",
+      "url": "https://mm2tradehub.com/market",
+      "title": "MM2 Market Report: Weekly Value Changes, Most Traded and Most Overpaid Items",
+      "status": 200,
+      "retrieved_date": "2026-11-03",
+      "scrape_id": "01a1a2f9-8e27-731b-ba51-8cabac814278"
+    },
+    {
+      "key": "hub-editorial",
+      "url": "https://mm2tradehub.com/editorial-policy",
+      "title": "Editorial Policy: How MM2 Trade Hub Sources, Writes and Corrects",
+      "status": 200,
+      "retrieved_date": "2026-11-03",
+      "scrape_id": "01a1a2fa-0ed2-7306-b53d-9d3df8aeaeec"
+    },
+    {
+      "key": "hub-how-trade",
+      "url": "https://mm2tradehub.com/guides/how-to-trade-in-mm2",
+      "title": "How to Trade in MM2: A Beginner's Guide to Your First Trades",
+      "status": 200,
+      "retrieved_date": "2026-11-03",
+      "scrape_id": "01a1a2fa-12e2-714d-8e67-5380a6f015cf"
+    }
+  ],
+  "youtube": [
+    {
+      "title": "How I Went From 0 to 10,000 Value in MM2 (10 Pro Trading Tips)",
+      "url": "https://www.youtube.com/watch?v=CQQ589ACJvQ",
+      "reported_upload_date": "2026-06-01",
+      "retrieved_format": "description and transcript text",
+      "timed_english_captions_retrieved": true,
+      "manual_video_or_frame_verification": false
+    },
+    {
+      "title": "Common To Godly MM2 Trading Challenge",
+      "url": "https://www.youtube.com/watch?v=K07Mg8sm-ng",
+      "reported_upload_date": "2026-10-02",
+      "retrieved_format": "description and transcript text",
+      "timed_english_captions_retrieved": true,
+      "manual_video_or_frame_verification": false
+    },
+    {
+      "title": "HOW TO BECOME A BETTER TRADER IN MURDER MYSTERY 2 [TIPS AND TRICKS] (Roblox Murder Mystery Guide)",
+      "url": "https://www.youtube.com/watch?v=wEPZkxIo2rk",
+      "reported_upload_date": "2024-04-01",
+      "retrieved_format": "description and transcript text",
+      "timed_english_captions_retrieved": false,
+      "manual_video_or_frame_verification": false
+    },
+    {
+      "title": "HOW TO MAKE PROFIT ON MURDER MYSTERY 2! (Trading)",
+      "url": "https://www.youtube.com/watch?v=4Zkn-9-fj9s",
+      "reported_upload_date": "2017-01-24",
+      "retrieved_format": "description and transcript text",
+      "timed_english_captions_retrieved": false,
+      "manual_video_or_frame_verification": false
+    },
+    {
+      "title": "The ONLY Trading Guide You'll Need For MM2  \u2502 Part 1",
+      "url": "https://www.youtube.com/watch?v=8BjBWt8M6TE",
+      "reported_upload_date": "2026-07-29",
+      "retrieved_format": "description and transcript text",
+      "timed_english_captions_retrieved": true,
+      "manual_video_or_frame_verification": false
+    },
+    {
+      "title": "How To Get Your First Godly In MM2! (Easy)",
+      "url": "https://www.youtube.com/watch?v=mRZxbl0TWGI",
+      "reported_upload_date": "2024-12-13",
+      "retrieved_format": "description and transcript text",
+      "timed_english_captions_retrieved": true,
+      "manual_video_or_frame_verification": false
+    },
+    {
+      "title": "How To Trade In MM2 2026 (Beginner's Guide) | MM2 Trading Guide",
+      "url": "https://www.youtube.com/watch?v=nbvaa_Erjww",
+      "reported_upload_date": "2026-05-01",
+      "retrieved_format": "description and transcript text",
+      "timed_english_captions_retrieved": true,
+      "manual_video_or_frame_verification": false
+    },
+    {
+      "title": "HOW TO GET *RICH* IN MURDER MYSTERY 2 (FAST)",
+      "url": "https://www.youtube.com/watch?v=kJ1X08FKdQg",
+      "reported_upload_date": "2024-01-06",
+      "retrieved_format": "description and transcript text",
+      "timed_english_captions_retrieved": true,
+      "manual_video_or_frame_verification": false
+    },
+    {
+      "title": "How To ACTUALLY Become Rich In MM2! (ALL METHODS!)",
+      "url": "https://www.youtube.com/watch?v=bR97OXGJADI",
+      "reported_upload_date": "2025-01-06",
+      "retrieved_format": "description and transcript text",
+      "timed_english_captions_retrieved": false,
+      "manual_video_or_frame_verification": false
+    }
+  ],
+  "tiktok": [
+    {
+      "url": "https://www.tiktok.com/@nitronuke/video/7694799049664384286",
+      "reported_date": "2026-10-09",
+      "format": "indexed caption, machine transcript and OCR; not video verification",
+      "use": "gift/selection-bias example"
+    },
+    {
+      "url": "https://www.tiktok.com/@shark.boi41/video/7693302069762985230",
+      "reported_date": "2026-10-05",
+      "format": "indexed caption and machine transcript",
+      "use": "explicit gifting context"
+    },
+    {
+      "url": "https://www.tiktok.com/@.brawnilla/video/7671665676464983316",
+      "reported_date": "2026-08-08",
+      "format": "indexed caption and Portuguese machine transcript",
+      "use": "individual collecting preference, not universal knife advantage"
+    }
+  ],
+  "reddit": {
+    "format": "search-index excerpts only",
+    "publication_dates_verified": false,
+    "full_threads_read": false,
+    "access_limit": "Firecrawl unsupported; normal public page/JSON/RSS 403; no fitting provider found",
+    "urls": [
+      "https://www.reddit.com/r/MurderMystery2/comments/1jksgfd/how_much_would_u_overpay_by_if_people_had/",
+      "https://www.reddit.com/r/MurderMystery2/comments/1m0bu7i/was_this_a_good_downgrade_for_icep/",
+      "https://www.reddit.com/r/MurderMystery2/comments/1kr0e2t/good_downgrade_for_rainbow_knife/",
+      "https://www.reddit.com/r/MurderMystery2/comments/1clcaln/should_i_do_this_trade_supreme_values/",
+      "https://www.reddit.com/r/MurderMystery2/comments/1fgjik5/w_or_l/",
+      "https://www.reddit.com/r/MurderMystery2/comments/1ia7q10/how_come_guns_in_sets_are_usually_worth_more_than/",
+      "https://www.reddit.com/r/MurderMystery2/comments/vl0hyo/i_kind_of_want_to_get_more_into_trading_but_i/",
+      "https://www.reddit.com/r/MurderMystery2Trades/comments/1d3zxjv/trading_these_from_my_inv/",
+      "https://www.reddit.com/r/MurderMystery2/comments/1wlsjld/tips_on_trading_and_growing_inv/",
+      "https://www.reddit.com/r/MurderMystery2/comments/46zxsv/types_of_scams_and_how_to_avoid_them/",
+      "https://www.reddit.com/r/MurderMystery2/comments/1vx4sks/be_careful_with_this_scam/",
+      "https://www.reddit.com/r/MurderMystery2/comments/1vzr0gg/beware_of_this_scam_sorry_for_quality/"
+    ]
+  },
+  "tiktok_access": {
+    "direct_scrape": "unsupported-site403",
+    "focused_trading_guide_lookups": "empty, including Villianhello; not evidence that posts are deleted",
+    "indexed_search": "partial corpus; two uncertain pagination outcomes not retried",
+    "primary_format": "provider text fields, not manual viewing",
+    "discovery_excerpts": "low-confidence; generated summaries not creator testimony"
+  }
+}

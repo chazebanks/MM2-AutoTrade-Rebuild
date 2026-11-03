@@ -1,0 +1,34 @@
+/tmp/p4_audit_cases.lua
+ACTUAL partner when another player display-name equals username:	WrongUser
+ACTUAL partner when punctuation-normalized username collides:	Actual_User
+ACTUAL missing profile becomes:	Stable	true
+ACTUAL unknown-profile received item grants quality upgrade:	true	quality-upgrade	-2	0.08
+ACTUAL contradictory explicit id resolved by display name:	bad-id	resolved
+ACTUAL qty  -> 1
+ACTUAL qty x2 -> 2
+ACTUAL qty x1,000 -> 1
+ACTUAL qty x0 -> 1
+ACTUAL qty nonsense -> 1
+STRATEGY	8	25	true	profit	false	table: 0x559e011a89f0
+STRATEGY	230	270	true	profit	false	table: 0x559e011a8d70
+STRATEGY	8	60	true	profit	true	table: 0x559e011a90f0
+STRATEGY	8	95	true	profit	true	table: 0x559e011a9440
+STRATEGY	8	130	true	profit	true	table: 0x559e011a9790
+STALE VALUES CASE: give Chroma Embersickle, receive Chroma Beachy:	profit	1100.0	175.0	current profit=-75 (1175-1250)
+STALE VALUES CASE: give Emberscythe, receive Icepiercer+Icecream:	profit	300.0	20.0	current profit=-45 ((165+140)-350)
+
+/tmp/p4_open_audit.lua
+true	inventory RPC pending
+ACTUAL opening mutation fired id=OurHighItem after sessionAlive=false and live partner=(OtherUser)
+true	AUDIT_STOP_AFTER_OPENING
+ACTUAL opening remote calls after stopped/replaced trade:	1
+
+/tmp/outgoing_layout_audit.lua
+keepHiddenPhone=false mode=incoming activeLeaderboard=true targetLabel=true incoming=true pending=false
+keepHiddenPhone=true mode=incoming activeLeaderboard=false targetLabel=false incoming=false pending=false
+keepHiddenPhone=false mode=pending activeLeaderboard=true targetLabel=true incoming=false pending=true
+keepHiddenPhone=true mode=pending activeLeaderboard=false targetLabel=false incoming=false pending=false
+PASS: actual outgoing helper extraction reproduces hidden phone masking active desktop
+
+/tmp/outgoing_card_identity_audit.lua
+Target Alice / visible card Alice123 matched:	true
