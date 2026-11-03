@@ -6036,3 +6036,146 @@ No code change is justified by this recording.
 
 Minor diagnostic note:
 the runtime's cumulative `S.taps` counter would make later-cycle `AUTO CLAIM COMPLETE | taps ...` totals cumulative rather than per-cycle. This did not affect behavior in the first live cycle and is not changed without evidence that it causes diagnostic confusion.
+
+
+---
+
+# 68. Part 5 standalone P1 + P5 server-hopper lab
+
+Date: 2026-11-02
+
+User explicitly required Part 5 to be tested separately with Part 1 before any full PDIDDLER integration.
+
+## Rollout decision
+
+Do NOT wire Part 5 into scanner/outgoing/full PDIDDLER yet.
+
+First live-test only:
+- Part 1 known-good bot detector
+- Part 5 hopper policy
+- Part 5 transport runtime
+
+No Part 3, Part 4, webhook, claim, or trade logic is loaded by the lab.
+
+## Approved behavior
+
+Production target remains:
+- true exhaustion countdown 45s,
+- only confirmed tradable join resets,
+- ineligible join does not reset,
+- unresolved scan blocks commit,
+- mandatory final canonical server scan,
+- 11/12 preferred, then 10/12 only,
+- never intentionally 9/12 or lower,
+- no preferred candidates => refresh every 5s,
+- current/visited/attempted JobIds excluded,
+- failed/full server => different candidate,
+- Part 1 bot rejection => immediate re-hop,
+- Delta Auto Execute is authoritative script relaunch.
+
+## Pure policy
+
+File:
+`pdiddler/pdiddler5_server_hopper_policy_v1.lua`
+
+TDD RED:
+GitHub Actions run `41580323334`
+failed exactly because the policy module was missing.
+
+GREEN:
+GitHub Actions run `41580582163`
+passed all old tests plus Part 5 policy 10/10.
+
+Policy:
+- ExhaustionSeconds=45
+- RefreshSeconds=5
+- MaxPagesPerRefresh=5
+- stepExhaustion
+- rankCandidates
+- strict 11 before 10
+- excludes lower/full/wrong-max/current/visited/duplicate candidates.
+
+## Transport runtime
+
+File:
+`pdiddler/pdiddler5_server_hopper_v1.lua`
+transport commit:
+`fa288984552e95fc13be01ec9c9b58bf7c9fb914`
+
+Responsibilities:
+- Get/SetTeleportSetting persistence under `PDIDDLER_P5_STATE_V1`
+- JSON string persistence of visited JobIds
+- public server discovery through games.roblox.com
+- cursor pagination with HttpService:UrlEncode
+- policy-ranked 11/12 then 10/12 candidates
+- mark candidate visited + persist before teleport call
+- TeleportToPlaceInstance client path
+- LP.OnTeleport observation
+- TeleportInitFailed late-failure observation
+- no-evidence 12s fallback only if Roblox emitted no progress/failure evidence
+- once Started/WaitingForServer/InProgress is observed, do not launch a competing teleport
+- duplicate same-server bootstrap reuses existing controller
+- no queue_on_teleport
+- no executor-file persistence
+- no trade remotes / final Accept code.
+
+## Standalone lab
+
+File:
+`pdiddler/tests/pdiddler_P1_P5_SERVER_HOP_LIVE_LAB_v1.lua`
+
+Lab commit:
+`0be16bc0da4265f11055468f2130ade27ba00d9a`
+
+Final compile/contract branch commit:
+`bf8da6108b52c1fa17b283873c0bc0db0912e9a0`
+
+Lab behavior:
+1. load Part 5 policy/runtime
+2. bootstrap Part 5
+3. run Part 1 known-good
+4. bot => immediate `handleBotRejected("part1-bot-rejected")`
+5. approved => test-only 45s countdown
+6. `hopNow("p1-p5-lab-45s")`
+7. after teleport Delta Auto Execute re-runs same lab.
+
+The 45s lab countdown is deliberately NOT a claim of actual trade exhaustion because Part 3 is absent.
+
+## Verification
+
+Standalone contract RED:
+run `41580698749`
+failed exactly with:
+`AssertionError: Part 5 runtime missing`
+
+Final CI:
+run `41580864767`
+job `125735120556`
+SUCCESS.
+
+Fresh final evidence:
+- official Luau compile succeeded for new policy/runtime/lab,
+- Part 5 policy 10/10,
+- standalone P1+P5 contract PASS,
+- all prior market/cache/webhook/Part3/adaptive/claim regressions PASS.
+
+## Current gate
+
+**STOP HERE until live recording.**
+
+User should put the standalone lab loader in Delta Auto Execute, execute it, and record multiple hops.
+
+Expected high-signal logs:
+- `[PDIDDLER LAB] P1 + P5 SERVER HOP LIVE LAB`
+- Part 1 approved OR bot rejected
+- approved: `LAB COUNTDOWN | 45 seconds`
+- `[PDIDDLER P5] SERVERS | 11/12=N | 10/12=N | visited=N`
+- `[PDIDDLER P5] HOP ATTEMPT | 11/12 ...` preferred
+- fallback `10/12` if no 11/12 candidate
+- failure/full => `HOP FAILED ... trying next`
+- no candidates => `NO TARGET SERVERS | refresh in 5s`
+- bot arrival => Part 1 rejects and P5 immediately re-hops.
+
+Because this is a standalone lab, it will continue hopping every 45 seconds on approved servers while Delta Auto Execute remains enabled. Disable/remove the lab from Auto Execute when enough evidence is recorded.
+
+Do NOT build scanner v6.10/outgoing v17/full v8 until this transport layer is live-proven.
