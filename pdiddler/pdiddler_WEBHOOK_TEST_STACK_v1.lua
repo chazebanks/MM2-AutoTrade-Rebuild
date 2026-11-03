@@ -104,10 +104,10 @@ local NO_PLAN_COMMIT="d124a56c9e28810cd7726aff88fc891d925f0683"
 local NO_PLAN_BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..NO_PLAN_COMMIT.."/pdiddler/"
 
 local marketPlanner=loadModule(
-    NO_PLAN_BASE.."pdiddler4_market_planner_v1_1.lua",
-    "Market-aware planner v1.1 ineligible-safe verifier"
+    WEBHOOK_BASE.."pdiddler4_market_planner_v1_2_MARKET_IDENTITY.lua",
+    "Market-aware planner v1.2 raw/checker identity"
 )
-local WEBHOOK_COMMIT="66b818e1d5142de0e0c1dd63585dcda62363123e"
+local WEBHOOK_COMMIT="30589f1bc60fc239c503ee6e7d8f5ace80b61287"
 local WEBHOOK_BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..WEBHOOK_COMMIT.."/pdiddler/"
 
 local tradeTelemetry=loadModule(
@@ -127,8 +127,8 @@ local webhookSender=loadModule(
     "Discord webhook sender"
 )
 local part4=loadModule(
-    WEBHOOK_BASE.."pdiddler4_balancer_ROTATING_v2_4_3_WEBHOOK_TELEMETRY.lua",
-    "Part 4 known-good behavior + webhook telemetry bridge"
+    WEBHOOK_BASE.."pdiddler4_balancer_ROTATING_v2_4_4_MARKET_IDENTITY_WEBHOOK.lua",
+    "Part 4 market identity + webhook telemetry bridge"
 )
 local completionLogger=loadModule(
     WEBHOOK_BASE.."pdiddler_trade_completion_logger_v1.lua",
@@ -282,6 +282,30 @@ local function preflight()
     end
     assert(seen[300] and seen[375],
         "300 raw / 300 vs 375 protected planner states were collapsed")
+
+    -- Raw/checker identity: market metadata must use checkerId while
+    -- executor picks retain the raw Weapons.Owned key.
+    plans,why=marketPlanner.buildPlans(
+        {items={{
+            id="Iceblaster",
+            checkerId="481",
+            page="godly",
+            name="Iceblaster",
+            value=35,
+            qty=1,
+        }}},
+        theirBundle({item("godly","23",90,1,"Candy")}),
+        marketProfile,
+        marketLogic
+    )
+    assert(type(plans)=="table" and plans[1],
+        "raw/checker identity preflight failed: "..tostring(why))
+    assert(plans[1].picks[1].id=="Iceblaster"
+        and plans[1].picks[1].checkerId=="481",
+        "planner did not preserve raw/checker identity split")
+    assert(plans[1].unprofiledCopies==0
+        and plans[1].givenExitScore==-2,
+        "Iceblaster market metadata was not resolved through checker id")
 
     -- Rare/Uncommon regression: extra non-eligible zero-value items must not
     -- prevent verification of the eligible plan.
