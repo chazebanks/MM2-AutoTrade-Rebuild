@@ -70,6 +70,11 @@ jobs:
           /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_4_5_NO_PLAN_GRACE.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v3.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v4_TDD.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_market_logic_v2_ACCEPTANCE.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_acceptance_policy_v1.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_market_planner_v1_3_ACCEPTANCE.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler4_balancer_ROTATING_v2_5_ADAPTIVE_ACCEPTANCE.lua >/dev/null
+          /tmp/luau/luau-compile pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v5_ADAPTIVE.lua >/dev/null
           /tmp/luau/luau-compile pdiddler/tests/pdiddler_trade_webhook_payload_v2_INVENTORY.luau >/dev/null
 
       - name: Run pure market integration tests
