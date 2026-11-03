@@ -27,7 +27,7 @@ test("first offer leaves approximately 3s beyond observed 6s cooldown",function(
     assert(improved.rawTotal>70 and improved.rawProfit>=15)
     eq(s.steps,1)
 end)
-test("each verified local sweeten requires a NEW 9s window",function()
+test("each sweeten has 9s cooldown buffer BEFORE final 5s window",function()
     local s={}
     local plans={plan(65,100),plan(70,100),plan(75,100),plan(80,100)}
     P.negotiate(s,"offer",65,plans,0,false)
@@ -39,9 +39,11 @@ test("each verified local sweeten requires a NEW 9s window",function()
     eq(action2,"improve")
     assert(second.rawTotal>first.rawTotal and second.rawProfit>=15)
     eq(s.steps,2)
-    eq(P.negotiate(s,"offer",second.rawTotal,plans,18.2,false),"final-wait")
-    eq(P.negotiate(s,"offer",second.rawTotal,plans,23.19,false),"final-wait")
-    eq(P.negotiate(s,"offer",second.rawTotal,plans,23.2,false),"decline")
+    eq(P.negotiate(s,"offer",second.rawTotal,plans,18.2,false),"wait")
+    eq(P.negotiate(s,"offer",second.rawTotal,plans,27.19,false),"wait")
+    eq(P.negotiate(s,"offer",second.rawTotal,plans,27.2,false),"final-wait")
+    eq(P.negotiate(s,"offer",second.rawTotal,plans,32.19,false),"final-wait")
+    eq(P.negotiate(s,"offer",second.rawTotal,plans,32.2,false),"decline")
 end)
 test("no feasible sweeten: 9s initial window plus full 5s final",function()
     local s={}
