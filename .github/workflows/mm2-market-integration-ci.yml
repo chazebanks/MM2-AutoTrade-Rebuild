@@ -640,3 +640,47 @@ jobs:
       - name: Run acceptance planner dual-variant regression
         run: |
           /tmp/luau/luau pdiddler/tests/pdiddler4_acceptance_planner_v1.luau
+
+
+      - name: Adaptive acceptance v5 stack wiring guard
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v5_ADAPTIVE.lua")
+          assert p.exists(), "adaptive v5 stack missing"
+          src=p.read_text()
+          required=[
+              "pdiddler4_market_logic_v2_ACCEPTANCE.lua",
+              "pdiddler4_market_planner_v1_3_ACCEPTANCE.lua",
+              "pdiddler4_acceptance_policy_v1.lua",
+              "pdiddler4_balancer_ROTATING_v2_5_ADAPTIVE_ACCEPTANCE.lua",
+              "pdiddler_manual_accept_gain_observer_v2_IPAD.lua",
+              "pdiddler_trade_completion_logger_v2_INVENTORY.lua",
+              "pdiddler_trade_webhook_payload_v2_INVENTORY.lua",
+              "pdiddler3_outgoing_ROTATING_v15_UNCERTAIN_OWNER.lua",
+              "acceptancePolicy",
+              "FINAL ITEM-TRADE ACCEPT IS DISABLED",
+          ]
+          for token in required:
+              assert token in src, f"v5 stack missing {token}"
+
+          p4=src.index("part4.run(")
+          logger=src.index("completionLogger.run(")
+          outgoing=src.index("outgoing.run(scanner)")
+          assert p4 < logger < outgoing, "logger must arm after P4 and before outgoing rotation"
+
+          assert "PDIDDLER_DISCORD_WEBHOOK_URL" in src
+          assert "discord.com/api/webhooks/" not in src
+          assert "discordapp.com/api/webhooks/" not in src
+          assert "AcceptTrade" not in src
+          assert 'physicalClick(button,"Accept' not in src
+          assert 'physicalClick(button,"Confirm' not in src
+
+          # New preflight must prove both equal-state variants survive and
+          # acceptance policy chooses the stronger counterparty bundle.
+          assert "seenWeak" in src and "seenStrong" in src
+          assert "acceptancePolicy.rankSafePlans" in src
+          assert "strong equal-state variant" in src
+
+          print("PASS adaptive acceptance v5 stack wiring")
+          PY
