@@ -4933,3 +4933,113 @@ Part 4.5 inventory-after + Trade ID:
 **STILL NEEDS A COMPLETED v2 LIVE TRADE**
 
 Do not change accepted-empty behavior while fixing this regression.
+
+
+---
+
+# 57. 2026-11-02 no-plan negotiation grace v3
+
+Root-cause source:
+`ScreenRecording_11-02-2026 19-43-55_1.mp4`
+
+The prior Part 4 closed active negotiations because technically stable but temporary human offer states were treated as final after only 0.65s.
+
+## Part 4 v2.4.5
+
+File:
+`pdiddler/pdiddler4_balancer_ROTATING_v2_4_5_NO_PLAN_GRACE.lua`
+
+Commit:
+`837bf387e5cc75469b1e43a5e74be02c19a5f742`
+
+Change is intentionally narrow:
+- `OfferStability=0.65` is retained for technical UI parsing/stability.
+- Added `NoPlanNegotiationGrace=5.0`.
+- A resolved non-empty THEIR OFFER with zero safe plans no longer declines immediately.
+- It enters a signature-bound no-plan hold.
+- The hold timer is bound to the exact THEIR OFFER signature.
+- Every THEIR OFFER signature change clears the old no-plan hold before the new signature is adopted.
+- A safe plan immediately clears any prior no-plan hold and resumes normal planning.
+- After 5 seconds, Part 4 re-reads THEIR OFFER immediately before decline.
+- If the final signature differs from the held signature, the decline is cancelled and planning restarts.
+- Only an unchanged bad offer for the full grace period can decline.
+- No task.delay callback is used, so stale delayed callbacks cannot decline a newer offer.
+
+New console behavior:
+`[PDIDDLER P4] NO PLAN HOLD START ... | grace 5`
+
+During hold:
+`P4 NO PLAN HOLD — ... waiting Ns for THEIR OFFER change`
+
+Only after unchanged grace:
+`[PDIDDLER P4] NO PLAN DECLINE ... | unchanged for 5.xx s`
+
+Preserved unchanged:
+- accepted-empty immediate decline,
+- 15s initial empty-offer handling,
+- 60s active-offer outer boundary,
+- unresolved HOLD,
+- transaction abort/recovery,
+- moderate profitable hold,
+- EXTREME GUARD,
+- market identity/checkerId handling,
+- webhook candidate invalidation,
+- final automated Accept disabled.
+
+## Runnable v3 stack
+
+File:
+`pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v3.lua`
+
+Commit:
+`aa48df2c05215e3a8154c3a1ad2872ff91a796ac`
+
+It retains:
+- Part 4.5 inventory-audited webhook v2,
+- Tracked Inventory After,
+- visible Trade ID,
+- compact iPad gain banner,
+- manual Accept observer,
+- no automated Accept/Confirm.
+
+## CI
+
+Workflow validation commit:
+`fe7a44aee5e122e1e5651de298cf42b78047b56c`
+
+CI run:
+`41556421767`
+
+Result:
+**SUCCESS**
+
+The new regression guard verifies ordering:
+1. THEIR OFFER change,
+2. clear old no-plan hold,
+3. adopt new signature,
+4. 5-second unchanged hold,
+5. final signature re-read,
+6. decline only if still identical.
+
+It also verifies accepted-empty remains an earlier immediate safety path.
+
+## Next live test
+
+Reproduce the previously failing negotiation pattern:
+- THEIR offer starts profitable, e.g. multiple items,
+- they remove one item so the temporary bundle becomes no-plan,
+- within <5s they add/replace another item.
+
+Expected:
+- trade stays open,
+- console shows NO PLAN HOLD instead of immediate decline,
+- offer change resets the hold,
+- planner resumes on the new bundle.
+
+Also complete one safe trade manually if possible to finish live validation of:
+- MANUAL ACCEPTED banner,
+- Tracked Inventory After,
+- Trade ID,
+- exactly-one completed-trade webhook.
+
+Do not advance to automated Part 5 Accept until this v3 recording is reviewed.
