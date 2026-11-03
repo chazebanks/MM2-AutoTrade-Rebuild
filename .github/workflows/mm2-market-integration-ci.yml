@@ -753,3 +753,8 @@ jobs:
       - name: Run Part 5 server hopper policy tests
         run: |
           /tmp/luau/luau pdiddler/tests/pdiddler5_server_hopper_policy_v1.luau
+
+
+      - name: Run standalone Part 1 + Part 5 hopper contract
+        run: |
+          python pdiddler/tests/pdiddler5_server_hopper_contract_v1.py
