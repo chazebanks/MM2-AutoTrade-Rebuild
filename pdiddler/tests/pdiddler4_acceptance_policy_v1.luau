@@ -39,6 +39,7 @@ local profiles={
     ["godly:fluct90"]=prof(90,90,5,"Fluctuating"),
     ["godly:disputed100"]=prof(100,150,8,"Doing Well"),
     ["godly:low30"]=prof(30,30,3,"Stable"),
+    ["godly:481"]=prof(35,35,8,"Doing Well"),
 }
 local profile={liveReady=true}
 function profile.get(page,id)
@@ -74,6 +75,22 @@ case("opener skips unreachable highest and selects attractive reachable",functio
     ok(picked,"expected reachable opener")
     eq(picked.id,"strong100","must not use unreachable highest or weak opener")
     eq(meta.partnerTop4Raw,260,"partner top4")
+end)
+
+case("opener resolves checkerId while preserving raw owned key",function()
+    local own={items={{
+        page="godly",
+        id="Iceblaster",
+        checkerId="481",
+        name="Iceblaster",
+        value=35,
+        qty=1,
+    }}}
+    local picked,meta=policy.selectOpener(own,partner,profile,logic)
+    ok(picked,"checker-backed raw item should be eligible opener")
+    eq(picked.id,"Iceblaster","executor-facing raw owned key must be preserved")
+    eq(picked.checkerId,"481","market identity must remain checker-backed")
+    eq(meta.reason,"selected","checker-backed opener selected")
 end)
 
 case("opener returns nil when nothing is realistically reachable",function()
@@ -215,5 +232,5 @@ case("ranking is deterministic",function()
     eq(a[1].id,"alpha","canonical tie break")
 end)
 
-assert(pass==14,"expected 14 cases, got "..tostring(pass))
-print("PASS adaptive acceptance policy 14/14")
+assert(pass==15,"expected 15 cases, got "..tostring(pass))
+print("PASS adaptive acceptance policy 15/15")
