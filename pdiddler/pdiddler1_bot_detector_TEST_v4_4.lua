@@ -39,8 +39,14 @@ E.PDIDDLER_BOT_OBSERVER_STOP=stop
 local function pct(a,b)a,b) if b==0 then return "n/a" end return string.format("%.0f%%",100*a/b) end
 local function stat(p)
     local s=stats[p.UserId]
+    -- A new Player instance must never inherit observations from a prior
+    -- connection, even when the UserId is the same.
+    if s and s.playerRef~=p then
+        stats[p.UserId]=nil
+        s=nil
+    end
     if not s then
-        s={id=p.UserId,name=p.Name,character=nil,prev=nil,when=nil,valid=0,missing=0,dead=0,
+        s={id=p.UserId,name=p.Name,playerRef=p,character=nil,prev=nil,when=nil,valid=0,missing=0,dead=0,
             eval=0,noTrack=0,withTrack=0,still=0,small=0,jumps=0,jumpTimes={},
             staticFacing=0,wallNearby=0,readFail=0,animMissing=0,tracks={},
             halves={{m=0,n=0},{m=0,n=0}},firstSeen=os.clock(),active=true}
@@ -362,11 +368,12 @@ task.spawn(function()
     local nextRender=0
     while live() and os.clock()-started<T do
         local now=os.clock()
-        if #appearanceScans==0 and now-started>=20 then
+        if #appearanceScans==0 and now-started>=20 and now-started<=30 then
             local ok,snapshot=pcall(appearanceScan)
             if ok then appearanceScans[1]=snapshot end
         end
-        if #appearanceScans==1 and now-started>=70 then
+        if #appearanceScans==1 and now-started>=70
+            and now-appearanceScans[1].at>=30 then
             local ok,snapshot=pcall(appearanceScan)
             if ok then appearanceScans[2]=snapshot end
         end
