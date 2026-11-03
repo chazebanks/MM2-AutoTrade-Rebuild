@@ -290,7 +290,7 @@ local function report(final)
             and signature(b.ids or {})==signature(lastIds)
         -- Even a strong diagnostic pattern is advisory. No hopping here.
         E.PDIDDLER_P1_EVIDENCE_V1={
-            jobId=game.JobId, complete=true, observedAt=os.clock(),
+            jobId=game.JobId, session=G, complete=true, observedAt=os.clock(),
             total=total,moving=movable,confirmed=confirmed,
             partial=partial,unknown=unknown,
             initialIds=membershipBaseline,appearance={
