@@ -635,3 +635,8 @@ jobs:
       - name: Run adaptive Part 4 contract
         run: |
           python pdiddler/tests/pdiddler4_adaptive_part4_contract_v1.py
+
+
+      - name: Run acceptance planner dual-variant regression
+        run: |
+          /tmp/luau/luau pdiddler/tests/pdiddler4_acceptance_planner_v1.luau
