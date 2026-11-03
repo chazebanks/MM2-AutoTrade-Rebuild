@@ -32,7 +32,7 @@ jobs:
           import subprocess
           v6=Path("pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v6_FINAL_WAIT.lua").read_text()
           path="pdiddler/pdiddler4_supreme_policy_v3_FINAL_WAIT.lua"
-          commit="6008fd02345dad87d789a48f4868e6f65dbce7cc"
+          commit="8b337089e753c6295e116bd426a263e6c33eec9f"
           assert 'strict={"pdiddler4_supreme_policy_v3_FINAL_WAIT.lua","'+commit+'"}' in v6
           assert '"PDIDDLER_INTEGRATION_V5_ADAPTIVE"' in v6
           pinned=subprocess.check_output(["git","show",commit+":"+path])
