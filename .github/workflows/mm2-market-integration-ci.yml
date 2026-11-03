@@ -766,3 +766,8 @@ jobs:
       - name: Run P1 P5 observation policy tests
         run: |
           /tmp/luau/luau pdiddler/tests/pdiddler_p1_p5_observation_policy_v1.luau
+
+
+      - name: Run Part 5 candidate observer contract
+        run: |
+          python pdiddler/tests/pdiddler5_candidate_observer_contract_v1.py
