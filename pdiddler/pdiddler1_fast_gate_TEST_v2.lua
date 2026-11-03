@@ -837,43 +837,44 @@ task.spawn(function()
         if elapsed>=5.5 and not second then
             second=startScan()
         end
-        if second and second.done and not second.handled then
+        -- Both scans can complete early, but animation windows must still
+        -- receive meaningful time before any final group classification.
+        if elapsed>=8.5 and second and second.done and not second.handled then
             second.handled=true
-            if second.ok and type(second.value)=="table" and second.roster==ids then
-                scans+=1
-                local a=first and first.value
-                local b=second.value
-                if first and first.ok and a and first.roster==ids then
-                    local total=tonumber(b.total) or 0
-                    local loaded=tonumber(b.loaded) or 0
-                    local score=tonumber(b.score) or 0
-                    local strong,observed=animationSummary()
-                    local detail={players=total,loaded=loaded,score=score,
-                        strong=strong,observed=observed,scans=scans}
-                    local adequate=total>=8 and loaded>=math.ceil(total*.80)
-                    -- Two independent paths: repeated strong appearance
-                    -- or unusually widespread missing tracks with supporting
-                    -- appearance evidence. Short animation signals are provisional.
-                    local appearanceStrong=adequate and a.bot==true and b.bot==true
-                    local animationStrong=adequate and strong>=6 and observed>=6
-                        and strong/observed>=.75 and strong/total>=.55
-                    local appearanceSupport=(tonumber(a.score) or 0)>=25
-                        or (tonumber(b.score) or 0)>=25
-                        or (tonumber(b.simple1Ratio) or 0)>=.70
-                        and (tonumber(b.trait1Ratio) or 0)>=.70
-                    if appearanceStrong or (animationStrong and appearanceSupport) then
-                        completed("BOT_PATTERN_FOR_REVIEW",
-                            appearanceStrong and "two strong appearance scans" or
-                            "short animation cluster with appearance support",detail)
-                        return
-                    end
-                    -- No early approval before both scan windows have been seen.
-                    if not animationStrong and not appearanceStrong then
-                        completed("PROCEED_UNVERIFIED",
-                            "no confirmed farm pattern in short observation",detail)
-                        return
-                    end
+            if second.ok and type(second.value)=="table" and second.roster==ids
+                and first and first.done and first.ok and type(first.value)=="table"
+                and first.roster==ids then
+                local firstResult,secondResult=first.value,second.value
+                scans=2
+                local total=tonumber(secondResult.total) or 0
+                local loaded=tonumber(secondResult.loaded) or 0
+                local score=tonumber(secondResult.score) or 0
+                local strong,observed=animationSummary()
+                local detail={players=total,loaded=loaded,score=score,
+                    strong=strong,observed=observed,scans=scans}
+                local adequate=total>=8 and loaded>=math.ceil(total*.80)
+                    and firstResult.total==total
+                    and firstResult.loaded>=math.ceil(total*.80)
+                local appearanceStrong=adequate
+                    and firstResult.bot==true and secondResult.bot==true
+                local animationStrong=adequate and strong>=6 and observed>=6
+                    and strong/observed>=.75 and strong/total>=.55
+                local appearanceSupport=(tonumber(firstResult.score) or 0)>=25
+                    or (tonumber(secondResult.score) or 0)>=25
+                    or ((tonumber(secondResult.simple1Ratio) or 0)>=.70
+                        and (tonumber(secondResult.trait1Ratio) or 0)>=.70)
+                if appearanceStrong or (animationStrong and appearanceSupport) then
+                    completed("BOT_PATTERN_FOR_REVIEW",
+                        appearanceStrong and "two strong appearance scans" or
+                        "short animation cluster with appearance support",detail)
+                elseif animationStrong then
+                    completed("ANIMATION_CLUSTER_FOR_REVIEW",
+                        "short animation-only group signal; requires further validation",detail)
+                else
+                    completed("PROCEED_UNVERIFIED",
+                        "no corroborated farm pattern within short sample",detail)
                 end
+                return
             end
         end
         if elapsed>=9.5 and current() then
