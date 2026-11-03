@@ -5086,3 +5086,101 @@ Recommended next engineering step:
 - distinguish physical tap from server/pending proof,
 - avoid permanently consuming an eligible target solely from an unproven tap unless there is stronger evidence that a request was created,
 - preserve duplicate-send safety while adding a bounded recovery path for truly unproven sends.
+
+
+---
+
+# 60. TDD rebuild of unproven outgoing recovery
+
+Date: 2026-11-02
+
+Branch:
+`feature/mm2-outgoing-unproven-tdd`
+
+Evidence source:
+`ScreenRecording_11-02-2026 20-08-29_1.mp4`
+
+Root cause:
+- Part 3 treated a successful physical Trade-button tap as authoritative enough to permanently consume the target even when no pending UI, exact trade-open, or decline proof ever appeared.
+- A physical input proves only that the client attempted the click; it does not prove MM2 created the request.
+- This caused eligible targets to be exhausted after one completely unproven 15-second send window.
+
+## Superpowers workflow used
+
+Systematic debugging:
+- reproduced from recording,
+- confirmed Part 4 was never reached,
+- compared current v15 against the older unavailable-retry pattern,
+- isolated the failure to the final fully-unproven timeout path.
+
+TDD:
+1. Added regression:
+   `pdiddler/tests/pdiddler3_unproven_outgoing_recovery_regression.py`
+2. RED CI:
+   `41559428021` — FAILURE exactly at the new regression.
+3. Minimal fix commit:
+   `cf847b6f7f555d2159a259f4f53d12fafc75373f`
+4. GREEN CI:
+   `41559496908` — SUCCESS.
+
+## Fixed Part 3 behavior
+
+Patched on the isolated TDD branch:
+`pdiddler/pdiddler3_outgoing_ROTATING_v15_UNCERTAIN_OWNER.lua`
+
+Only a completely unproven tap gets recovery:
+- wait original full 15s response window,
+- if no pending/trade/decline evidence: `UNCERTAIN DEFER`,
+- apply 15s cooldown,
+- preserve recent tap record so late pending can still be adopted,
+- allow exactly one retry,
+- if second full window is also completely unproven: `UNCERTAIN FINAL`,
+- then no further resend to that target in the server.
+
+Proven evidence remains authoritative:
+- pending confirmed,
+- exact target trade-open,
+- verified decline,
+- late pending adoption.
+
+Those paths do not enter the bounded retry.
+
+## Runnable stack
+
+`pdiddler/pdiddler_MANUAL_ACCEPT_GAIN_WEBHOOK_TEST_STACK_v4_TDD.lua`
+
+Stack commit:
+`be0c8e2fc49ccc8ecc08c3d96b3ab9bb389d5a31`
+
+Final verification commit:
+`fffc1944ed57cd020696f93506484e7b9ce78989`
+
+Fresh full CI:
+`41559568217` — SUCCESS
+
+CI passed:
+- official Luau compilation,
+- all existing market/Part 4/webhook regressions,
+- no-plan grace regression,
+- new unproven outgoing recovery regression,
+- v4 stack wiring guard.
+
+## Next live recording
+
+Run v4 TDD stack.
+
+If first Trade tap is fully unproven:
+- expect `UNCERTAIN DEFER`,
+- target remains unprocessed,
+- 15s cooldown follows,
+- late pending may be adopted without a resend,
+- otherwise exactly one second attempt is allowed.
+
+If second attempt is also fully unproven:
+- expect `UNCERTAIN FINAL`,
+- no third resend.
+
+If a trade opens normally:
+- Part 4/Part 4.5 behavior remains as previously live-proven.
+
+Automated final Accept remains disabled.
