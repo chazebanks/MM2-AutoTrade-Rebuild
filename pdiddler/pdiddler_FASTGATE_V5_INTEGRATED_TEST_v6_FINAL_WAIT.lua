@@ -84,7 +84,7 @@ end
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local PINS={
     profile={"pdiddler_supreme_snapshot_2026_11_03_ISSUE4.lua","7ecd5b44b30f513a16061f0cb92476cb8cd2e6fa"},
-    strict={"pdiddler4_supreme_policy_v3_FINAL_WAIT.lua","6008fd02345dad87d789a48f4868e6f65dbce7cc"},
+    strict={"pdiddler4_supreme_policy_v3_FINAL_WAIT.lua","8b337089e753c6295e116bd426a263e6c33eec9f"},
     p2={"pdiddler2_KNOWN_GOOD.lua","b097c1862db4cff7394d6a5e6764d34191df3283"},
     gate={"pdiddler1_fast_gate_TEST_v5.lua","c3da9263b52bc7294c432531b71024b8051d2701"},
     scanner={"pdiddler3_scanner_MODULE_v6_8_CRITICAL_PAUSE.lua","3c48b49c1e750d91bfbf088fbc737185bddf39be"},
