@@ -6328,3 +6328,99 @@ Scope: standalone Part 5 hopper-only test. No Part 1, scanner, trading, or obser
 **Part 5 transport core: LIVE-PROVEN for normal 11/12 hopping, persisted visited state, and real GameFull failure recovery.**
 
 Do not yet label the full Part 5 lifecycle live-proven because Delta Auto Execute relaunch, live 10/12 fallback, no-candidate refresh, and Part 1 bot-reject routing remain separately unproven.
+
+
+---
+
+# 71. Masked P1 + P5 live recording audit
+
+Recording:
+`ScreenRecording_11-03-2026 00-49-20_1.mp4`
+
+Date: 2026-11-03
+
+Scope: masked standalone Part 1 + Part 5 observation test using Delta Auto Execute.
+
+## LIVE-PROVEN
+
+1. **Delta Auto Execute relaunch works across teleports**
+   - After successful hops, the test restarted itself without the user reopening Delta and manually executing again.
+   - Repeated cycles show loading -> device picker -> lobby -> observation GUI automatically.
+   - This closes the main gap left by the previous hopper-only recording.
+
+2. **Part 1 APPROVED path works**
+   - Approved lobbies show `PART 1: APPROVED`.
+   - GUI displays the current server and real candidate servers.
+   - Approved lobbies hold for the intended ~30-second observation window before the normal Part 5 hop.
+
+3. **Real server candidate display works**
+   - GUI repeatedly showed hundreds of live `11/12` candidates and `10/12=0` during this recording.
+   - Candidate rows displayed real Job IDs and occupancy.
+   - No 9/12-or-lower candidate was displayed as a valid target.
+
+4. **Avatar + action display works**
+   - Current-server player rows loaded avatar headshots.
+   - Observable actions changed among `Idle`, `Moving`, `Freefall`, and `Character Loading` as appropriate.
+   - Player joins/leaves did not visibly break the panel.
+
+5. **Manual `botted` false-negative path works**
+   - In an APPROVED lobby, the user sent chat message `Botted`.
+   - Case-insensitive normalization worked.
+   - GUI changed to:
+     `PART 1: APPROVED | MANUALLY CONFIRMED BOTTED`
+   - GUI showed:
+     `Snapshot captured at 17.7s remaining`
+   - Remaining hop timer continued from ~18 seconds; it did NOT reset to 30 seconds.
+   - It did NOT hop immediately.
+   - Player avatar/action evidence remained visible for the rest of the observation period.
+   - The server then hopped normally at the scheduled deadline.
+
+6. **Part 1 BOT path works**
+   - A later lobby was automatically classified as BOT.
+   - GUI displayed:
+     `PART 1: BOT DETECTED — REHOPPING`
+     and
+     `HOP IN: IMMEDIATE`
+   - The client transitioned into a new teleport/loading sequence within roughly 1-2 seconds instead of waiting 30 seconds.
+
+7. **BOT-path teleport failure recovery works**
+   - A later BOT-detected lobby attempted an immediate re-hop and Roblox displayed:
+     `Teleport Failed | Server is full ... (Error Code: 772)`
+   - The test did not remain stuck on that failure.
+   - Part 5 continued into another teleport/loading sequence and reached another lobby.
+   - This live-proves immediate BOT re-hop plus GameFull recovery in the combined test.
+
+8. **Repeated automatic loop works**
+   - Multiple APPROVED -> 30s -> hop cycles occurred.
+   - BOT -> immediate re-hop cycles occurred.
+   - The GUI/test relaunched automatically after teleport.
+   - No duplicate stacked GUI/controller behavior was visibly observed.
+
+## Still not live-proven
+
+1. **10/12 fallback**
+   - Visible discovery rows in this recording consistently had many 11/12 candidates and `10/12=0`.
+   - 10/12 fallback remains statically tested but not exercised live.
+
+2. **No-candidate 5-second refresh**
+   - Not exercised because valid 11/12 candidates were continuously available.
+
+## Current verdict
+
+**Standalone masked Part 1 + Part 5 test: LIVE-PROVEN for the main production behaviors.**
+
+Proven together:
+- automatic Delta relaunch,
+- Part 1 approved path,
+- 30-second observation window,
+- real server display,
+- avatar/action rows,
+- manual `botted` marking without timer reset or early hop,
+- Part 1 automatic BOT detection,
+- immediate BOT re-hop,
+- GameFull recovery,
+- repeated multi-hop operation.
+
+The remaining 10/12 and no-candidate branches are edge cases already covered by policy/contract tests but were not naturally triggered in this recording.
+
+Do not modify the proven standalone test while moving toward production integration. Freeze this behavior as the live-proven P1+P5 baseline.
