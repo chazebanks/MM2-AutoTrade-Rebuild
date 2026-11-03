@@ -358,7 +358,7 @@ jobs:
           )
           assert "pdiddler4_market_planner_v1_2_MARKET_IDENTITY.lua" in src
           assert "pdiddler4_balancer_ROTATING_v2_4_4_MARKET_IDENTITY_WEBHOOK.lua" in src
-          assert 'ADAPTIVE_COMMIT="78fa90b21c63bc8bed412076cf5f01c33b48d70f"' in src, "v5 must pin verified adaptive identity fix"\n          assert "PDIDDLER_DISCORD_WEBHOOK_URL" in src
+          assert "PDIDDLER_DISCORD_WEBHOOK_URL" in src
           assert "WEBHOOK LOGGER ACTIVE" in src
           assert "FINAL ITEM-TRADE ACCEPT IS DISABLED" in src
           assert "AcceptTrade" not in src
@@ -674,6 +674,7 @@ jobs:
           outgoing=src.index("outgoing.run(scanner)")
           assert p4 < logger < outgoing, "logger must arm after P4 and before outgoing rotation"
 
+          assert 'ADAPTIVE_COMMIT="78fa90b21c63bc8bed412076cf5f01c33b48d70f"' in src, "v5 must pin verified adaptive identity fix"
           assert "PDIDDLER_DISCORD_WEBHOOK_URL" in src
           assert "discord.com/api/webhooks/" not in src
           assert "discordapp.com/api/webhooks/" not in src
