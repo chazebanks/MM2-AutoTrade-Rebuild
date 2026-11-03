@@ -498,3 +498,96 @@ Expected new work:
 - handoff update.
 
 Parts 1-3 remain unchanged unless testing proves a separate regression.
+
+
+## 11. TikTok validation and resulting design adjustments
+
+Additional research was performed against current TikTok-indexed MM2 trading content and TikTok transcripts.
+
+### Evidence that supports the existing design
+
+A current MM2 trading-tips TikTok explicitly recommends:
+- using Supreme-style market status, not raw value alone,
+- checking whether an item is Stable / Doing Well / Underpaid For,
+- building value in **small steps** rather than trying to force one huge win,
+- taking advantage of explicit `LF` (Looking For) intent because a player seeking a specific item may pay extra,
+- being cautious around current-event items because values can drop quickly,
+- expecting players to ask for adds even when a trade is already fair or slightly over.
+
+A separate current trade-up challenge shows inventory progression being measured as incremental progress from one fair trade to the next rather than requiring every trade to be a huge win.
+
+These observations reinforce:
+- adaptive opener,
+- counterparty-appeal ranking,
+- bounded sweetening,
+- modest initial profit reserve rather than maximum-profit opening,
+- demand/stability-aware decisions.
+
+### Design adjustment A — revealed intent outranks generic appeal
+
+When the other player provides direct in-trade evidence of intent, use that evidence before generic opener assumptions.
+
+Current implementation scope:
+- THEIR first offered items are considered direct revealed intent.
+- If THEY offer first during the observation window, skip our opener and build around that actual offer.
+
+Future optional scope:
+- explicit public `LF <item>` chat signals could be treated as intent, but no chat-reading subsystem is added by this design.
+
+Do not infer preferences that are not actually observed.
+
+### Design adjustment B — small-step progression is the default profit posture
+
+Do not optimize the first safe plan for maximum raw profit.
+
+Among safe plans:
+- prefer the strongest counterparty appeal inside a reasonable safe profit band,
+- retain only a modest reserve above the floor initially,
+- use bounded sweetening to move toward the floor if necessary.
+
+This directly matches the "small steps at a time" pattern found in current TikTok trading advice.
+
+### Design adjustment C — stronger receive-side Underpaid For penalty
+
+Current market logic already adds risk points for `Underpaid For` items, but TikTok evidence suggests these items are commonly expected to receive underpays and can be difficult inventory to move.
+
+New rule for the acceptance-aware strategy matrix:
+- an item WE RECEIVE with `Underpaid For` status cannot contribute positive appeal/quality credit,
+- receiving such an item must increase required compensation or lose ranking priority,
+- a raw-value overpay made mostly of `Underpaid For` inventory must not outrank a smaller but healthier bundle solely because its sticker value is larger.
+
+This remains a ranking/risk rule, not a silent value rewrite.
+
+### Design adjustment D — current-event risk requires verified metadata
+
+TikTok advice strongly warns against current-event items because their values can move rapidly.
+
+However, the current canonical profile does not yet guarantee a verified `currentEvent`/age field for every item.
+
+Therefore:
+- do NOT guess event status from names,
+- do NOT hard-code a current-event blacklist without canonical metadata,
+- rely on existing stability/disagreement/risk fields for the first implementation,
+- event-age risk can be added later only if the canonical profile gains a verified origin/event field.
+
+### Design adjustment E — bounded sweetening is confirmed, not endless adding
+
+TikTok advice also notes that MM2 players often ask for adds even when a trade is already fair.
+
+Therefore:
+- the script may sweeten only through its precomputed safe bands,
+- maximum sweetening steps remain 2,
+- it must never chase repeated "add" behavior below the safety floor,
+- once the floor is reached, hold or walk away according to existing timing/state rules.
+
+### TikTok research limitations
+
+TikTok itself blocks normal page scraping in this environment.
+
+Research used:
+- TikTok-indexed web search results,
+- a TikTok-capable transcript provider for specific videos.
+
+One retrieved transcript was high quality and strategy-rich; several other videos had sparse or unusable transcripts.
+
+Therefore these findings are treated as supporting behavioral evidence, not a complete census of the MM2 TikTok trading community.
