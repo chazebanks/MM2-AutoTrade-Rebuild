@@ -1,0 +1,38 @@
+name: Issue 4 adaptive verification
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/**'
+      - '.github/workflows/pdiddler-issue4-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install Lua and pinned official Luau
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4 unzip
+          curl --fail --location --retry 2 --max-time 60 -o /tmp/luau.zip https://github.com/luau-lang/luau/releases/download/0.745/luau-ubuntu.zip
+          echo '186e5ddaa2b048ebc7390c11ed1b00c04e7d3beaffed429250329e3575d2ece2  /tmp/luau.zip' | sha256sum --check
+          unzip -q /tmp/luau.zip -d /tmp/pdiddler-luau
+          chmod +x /tmp/pdiddler-luau/luau /tmp/pdiddler-luau/luau-compile
+      - name: Verify unchanged dependencies and original regressions
+        run: python3 pdiddler/tests/run_integration_tests.py
+      - name: Verify new trading build and complete Luau runtime
+        env:
+          LUAU_BIN: /tmp/pdiddler-luau/luau
+          LUAU_COMPILE: /tmp/pdiddler-luau/luau-compile
+        run: python3 pdiddler/tests/run_trading_tests.py
+      - name: Verify source parser and snapshot expiry
+        run: python3 -m unittest discover -s pdiddler/tests -p test_refresh_supreme_snapshot.py
+      - name: Verify Issue 4 adaptive behavior and source integrity
+        env:
+          LUAU_BIN: /tmp/pdiddler-luau/luau
+          LUAU_COMPILE: /tmp/pdiddler-luau/luau-compile
+        run: python3 pdiddler/tests/run_issue4_tests.py
