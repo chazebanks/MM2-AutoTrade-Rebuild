@@ -92,8 +92,16 @@ function M.selectOpener(ownInv,partnerInv,profile,marketLogic)
     for _,item in ipairs(inventoryItems(ownInv)) do
         local raw=num(item and item.value) or 0
         if raw>0 and qtyOf(item)>0 then
-            local record=profileGet(profile,item.page,item.id)
-            local ok,a=pcall(marketLogic.itemAssessment,item,"ours",record)
+            local marketId=
+                tostring(item.checkerId or "")~=""
+                and tostring(item.checkerId)
+                or tostring(item.id or "")
+            local record=profileGet(profile,item.page,marketId)
+            local marketInput={}
+            for k,v in pairs(item) do marketInput[k]=v end
+            marketInput.id=marketId
+            marketInput.checkerId=marketId
+            local ok,a=pcall(marketLogic.itemAssessment,marketInput,"ours",record)
             if ok and type(a)=="table" then
                 meta.considered+=1
                 local protected=num(a.protectedUnitValue) or raw
