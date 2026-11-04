@@ -7,6 +7,9 @@ assert(s.isFresh(s.observedAtEpoch) and s.isFresh(s.expiresAtEpoch-1))
 assert(not s.isFresh(s.expiresAtEpoch) and not s.isFresh(s.expiresAtEpoch+1))
 local c=s.coverage();assert(c.total==190 and c.finite==189 and c.unpriced==1)
 assert(s.version~=old.version and s.observedAtEpoch>old.expiresAtEpoch)
+local asOf={}
+for k,v in pairs(s) do asOf[k]=v end
+asOf.isFresh=function() return s.isFresh(s.observedAtEpoch) end -- historical test time, never the runtime profile
 local changed=0;local seen={}
 for key,row in pairs(s.profiles) do
  local prior=old.profiles[key];assert(prior and prior.name==row.name and prior.page==row.page and prior.id==row.id)
@@ -14,7 +17,7 @@ for key,row in pairs(s.profiles) do
  if prior.supremeValue~=row.supremeValue then changed=changed+1 end
  if row.supremeValue then
   local item={page=row.page,checkerId=row.id,id='raw-'..key,name=row.name,qty=1,cat='Weapons',type='Knife',value=999999}
-  local inv,why=P.reprice({items={item}},s);assert(not why and #inv.items==1 and inv.items[1].value==row.supremeValue)
+  local inv,why=P.reprice({items={item}},asOf);assert(not why and #inv.items==1 and inv.items[1].value==row.supremeValue)
  end
 end
 assert(changed==22)
