@@ -1,0 +1,1302 @@
+[
+  {
+    "path": ".github/workflows/pdiddler-issue4-tests.yml",
+    "blob": "039e7e5bc3daa6ef48dd797e479ee7e1a4f55c18"
+  },
+  {
+    "path": ".github/workflows/pdiddler-supreme-tests.yml",
+    "blob": "65e4e0221e78deeca7543966e23a26f2a87ba8de"
+  },
+  {
+    "path": ".github/workflows/pdiddler-v10-selection-tests.yml",
+    "blob": "4aac80630dca1857a7625b6a315a4e5207bb3a2e"
+  },
+  {
+    "path": ".github/workflows/pdiddler-v10-teleport-autoexec.yml",
+    "blob": "97ec875cb9057d0abc35ca4f46fee5ef0a802d16"
+  },
+  {
+    "path": ".github/workflows/pdiddler-v11-verified-readiness.yml",
+    "blob": "abce8c8b07e23c4bd36cd40c5ffccd0d24807301"
+  },
+  {
+    "path": ".github/workflows/pdiddler-v12-researched-strategy.yml",
+    "blob": "dfb6f7d53b27e641901b0ce8849c305c98347308"
+  },
+  {
+    "path": ".github/workflows/pdiddler-v14-verified-workflow.yml",
+    "blob": "a3ab2e8a19567057f423e0b63c21b83f348150e2"
+  },
+  {
+    "path": ".github/workflows/pdiddler-v15-opponent-negotiation.yml",
+    "blob": "e1961d8abcbcb761ed996d44b16ca17814d6dc80"
+  },
+  {
+    "path": ".github/workflows/pdiddler-v6-tests.yml",
+    "blob": "d5e538c49eb8309cafe7e78f63af16d88e8eff14"
+  },
+  {
+    "path": ".github/workflows/pdiddler-v7-tests.yml",
+    "blob": "3940b32b02a72b73912c1bc7b2b8715477446e23"
+  },
+  {
+    "path": ".github/workflows/pdiddler-v8-tests.yml",
+    "blob": "257f6fbda63327eb53069b24ff095efdd780a534"
+  },
+  {
+    "path": ".github/workflows/pdiddler-v9-early-counter-tests.yml",
+    "blob": "e976f9b9b3a98aa03f1aadc57684d71b8045136f"
+  },
+  {
+    "path": ".github/workflows/refresh-values.yml",
+    "blob": "6a0945fefe1ad65986ef19bb5393a45fbdb3f3da"
+  },
+  {
+    "path": ".github/workflows/supreme-20261104-refresh.yml",
+    "blob": "8b85a4f4368218a74f69b9adf366d6898675ee67"
+  },
+  {
+    "path": "README.md",
+    "blob": "127fe177f3e13dc6b38a540fa9ed41729379225c"
+  },
+  {
+    "path": "docs/ISSUE_4_IMPLEMENTATION.md",
+    "blob": "7a266361359e18ed1ed14b9740e1fc8a26a21471"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-11-02-mm2-market-decision-matrix-plan.md",
+    "blob": "d2210672ad95774a41f5d45bd05fb8143aab7cd9"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-11-03-issue-1-integration-fix.md",
+    "blob": "af2ea2e3326ecb113adecc226e81fd409e00b26b"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-11-03-trading-improvements.md",
+    "blob": "956010d04e954de21c81919bba64fb8662ecf774"
+  },
+  {
+    "path": "docs/superpowers/plans/2026-11-04-v12-researched-strategy.md",
+    "blob": "88c5f33dd867d1fd41184e68a955d6e0a92f11eb"
+  },
+  {
+    "path": "docs/superpowers/specs/2026-11-02-mm2-market-aware-planner-design.md",
+    "blob": "8e90614b2ad561043d3272d89570d507652f923a"
+  },
+  {
+    "path": "docs/superpowers/specs/2026-11-04-v12-researched-strategy.md",
+    "blob": "8653b0c4e78a9f7b767b57a0e4847f3793ebe166"
+  },
+  {
+    "path": "pdiddler/CHATGPT_HANDOFF.md",
+    "blob": "e93497a157711a7fa1ec6e63d9d1b00f2355d52e"
+  },
+  {
+    "path": "pdiddler/CURRENT_PRICE_REFRESH_2026_11_04.md",
+    "blob": "310cc89440bb0cf59a8d0a6f77bb4357f8cb26eb"
+  },
+  {
+    "path": "pdiddler/FAST_GATE_V5_PART5_INTEGRATION_CHECKPOINT.md",
+    "blob": "3408ae3a5efe4085fd7a4d1c42eebcf09372c77f"
+  },
+  {
+    "path": "pdiddler/ISSUE19_VERIFICATION.md",
+    "blob": "370d962e565b3395ae27a026446f5ca137623054"
+  },
+  {
+    "path": "pdiddler/ISSUE_1_INTEGRATION_V3_RESULTS.md",
+    "blob": "5e7d7a9f7b87d0aba13aa1c2e61e43d869308578"
+  },
+  {
+    "path": "pdiddler/ISSUE_4_DELTA_TEST.md",
+    "blob": "c0828405f719572cdeba1a217b70b8eadeec6475"
+  },
+  {
+    "path": "pdiddler/ISSUE_7_NATIVE_EVIDENCE_GUIDE.md",
+    "blob": "5299d898a50c3596ecdc2e52fd820f462117f866"
+  },
+  {
+    "path": "pdiddler/P1_V4_2_SAFETY_CHECKPOINT.md",
+    "blob": "a533b782f229753b4174847ab34a8c62d9a03dae"
+  },
+  {
+    "path": "pdiddler/P1_V4_4_COHORT_CHECKPOINT.md",
+    "blob": "27027d6ab34f75c81646d21168a242fc0bf12536"
+  },
+  {
+    "path": "pdiddler/PDIDDLER_V11_IPAD_TEST_GUIDE.md",
+    "blob": "48021a715b93046506677b2a3d8dab1a6eb0db5d"
+  },
+  {
+    "path": "pdiddler/PDIDDLER_V12_IPAD_TEST_GUIDE.md",
+    "blob": "41e5fe29ba1c2ef7bd8da81bdfe1bee7e8937f6c"
+  },
+  {
+    "path": "pdiddler/PDIDDLER_V14_IPAD_TEST_GUIDE.md",
+    "blob": "ef3bb9d994ef803eccfe222ce886f4e2cecf53f0"
+  },
+  {
+    "path": "pdiddler/PDIDDLER_V15_CODEX_REVIEW.md",
+    "blob": "6d2c2a03c0af3816db6eab4c92adcea062117c1f"
+  },
+  {
+    "path": "pdiddler/README.md",
+    "blob": "d21ffc22dfc92d037ce859e12675c75e520b7d63"
+  },
+  {
+    "path": "pdiddler/SUPREME_TEST_BUILD.md",
+    "blob": "3a7d2c23eaedcfb72f4190a7fe5994c70962047d"
+  },
+  {
+    "path": "pdiddler/V7_DELAYED_SWEETEN_TEST.md",
+    "blob": "8a6e04369a16dd1c8c434f47ebe64e8554c3c99c"
+  },
+  {
+    "path": "pdiddler/V9_EARLY_COUNTER_TEST_GUIDE.md",
+    "blob": "296d039decc398f88b5844686178c488860acd01"
+  },
+  {
+    "path": "pdiddler/audit-notes/CURRENT_PRICE_REFRESH_RESULTS.txt",
+    "blob": "f7fc9c3324a910245d1b5d178917fbaadf741a0e"
+  },
+  {
+    "path": "pdiddler/audit-notes/ISSUE19_PIN_CHECKS.json",
+    "blob": "92f72e502db0a2c5baf5c78e57f91434e017dffe"
+  },
+  {
+    "path": "pdiddler/audit-notes/ISSUE19_TEST_RESULTS.txt",
+    "blob": "d211368d1a9d1b735344275ad532e44f74c2a796"
+  },
+  {
+    "path": "pdiddler/audit-notes/ISSUE4_TEST_RESULTS.txt",
+    "blob": "fd395a115cbd231db367ad7d099bffdd5b514d52"
+  },
+  {
+    "path": "pdiddler/audit-notes/SUPREME_IMPROVEMENTS_2026-11-03.md",
+    "blob": "3754b799ccc37c67c72485a5ebffd3baaf5d3aeb"
+  },
+  {
+    "path": "pdiddler/audit-notes/V11_REMOTE_PIN_CHECKS.json",
+    "blob": "f091b5e85cfb194bc4eb65a02b1b98419f59993f"
+  },
+  {
+    "path": "pdiddler/audit-notes/V11_TEST_RESULTS.txt",
+    "blob": "1835ccdade80f59982b71f7c9b0f220ea8e47ec8"
+  },
+  {
+    "path": "pdiddler/audit-notes/V12_REMOTE_PIN_CHECKS.json",
+    "blob": "68826f9bdfcbe1ebc530b00ddfb24b9b5ed0cdfb"
+  },
+  {
+    "path": "pdiddler/audit-notes/V12_TEST_RESULTS.txt",
+    "blob": "1f152ca8263555f93d0fe790259b4ea5e9fcf7d2"
+  },
+  {
+    "path": "pdiddler/audit-notes/V13_READINESS_ROOT_CAUSE.md",
+    "blob": "8f49cd97edc7ae1bc7fad956d6a8d41373880ecf"
+  },
+  {
+    "path": "pdiddler/audit-notes/V14_IMPLEMENTATION_LEDGER.md",
+    "blob": "b82467fe8a0ab91c5877e8b74ddbecc3dc550c78"
+  },
+  {
+    "path": "pdiddler/audit-notes/V14_REMOTE_PIN_CHECKS.json",
+    "blob": "1bb970dd1f9b33eb68f5d10484c7b6cee9969f1e"
+  },
+  {
+    "path": "pdiddler/audit-notes/V14_REVIEW_AND_RELEASE.md",
+    "blob": "eeaacd6655fd2a0cc51461ce0e72a83e72cd2bdf"
+  },
+  {
+    "path": "pdiddler/audit-notes/V14_TEST_RESULTS.txt",
+    "blob": "7d1fa2524e170e550f7d6b20198625939bcd1117"
+  },
+  {
+    "path": "pdiddler/core/health.lua",
+    "blob": "ecb99dd5c78ee87b787195f8a96a0fc463770db4"
+  },
+  {
+    "path": "pdiddler/loader.lua",
+    "blob": "41496abe80099a10986159d003c3957f638848a3"
+  },
+  {
+    "path": "pdiddler/pdiddler1.lua",
+    "blob": "193d0319d54a3309fda338bdd054eb2f94b9190b"
+  },
+  {
+    "path": "pdiddler/pdiddler1_KNOWN_GOOD.lua",
+    "blob": "193d0319d54a3309fda338bdd054eb2f94b9190b"
+  },
+  {
+    "path": "pdiddler/pdiddler1_bot_detector_TEST_v1.lua",
+    "blob": "ca5ff3bd5ffbaed47259e043e7a5e2d7a6e0c516"
+  },
+  {
+    "path": "pdiddler/pdiddler1_bot_detector_TEST_v2.lua",
+    "blob": "dd18a91bfc3631ec70705697eee3d7856a41aaec"
+  },
+  {
+    "path": "pdiddler/pdiddler1_bot_detector_TEST_v3.lua",
+    "blob": "1cb58e120d8fafe87642adee8383e855cd0e8aed"
+  },
+  {
+    "path": "pdiddler/pdiddler1_bot_detector_TEST_v4.lua",
+    "blob": "926d5bd3245048ab73da9e30b907ffac2d827094"
+  },
+  {
+    "path": "pdiddler/pdiddler1_bot_detector_TEST_v4_1.lua",
+    "blob": "53746433f22304458749d177a208515cd79e9b07"
+  },
+  {
+    "path": "pdiddler/pdiddler1_bot_detector_TEST_v4_2.lua",
+    "blob": "170594c4e1f9fd7d9482e29564b47542896f543c"
+  },
+  {
+    "path": "pdiddler/pdiddler1_bot_detector_TEST_v4_3.lua",
+    "blob": "d151b7d500e6f7e513f1277f04b71756d8e9cff4"
+  },
+  {
+    "path": "pdiddler/pdiddler1_bot_detector_TEST_v4_4.lua",
+    "blob": "66e7c833c3df51cc77fdf92bb3f2def494eee896"
+  },
+  {
+    "path": "pdiddler/pdiddler1_fast_gate_TEST_v1.lua",
+    "blob": "683557d7b10f01d78ddfb84a561ec25370d20d0e"
+  },
+  {
+    "path": "pdiddler/pdiddler1_fast_gate_TEST_v2.lua",
+    "blob": "e58cc26525183b624f3e35d9354962d041f7bf56"
+  },
+  {
+    "path": "pdiddler/pdiddler1_fast_gate_TEST_v3.lua",
+    "blob": "24c810d4f8b0dc4d463fe22458642a84c015e585"
+  },
+  {
+    "path": "pdiddler/pdiddler1_fast_gate_TEST_v4.lua",
+    "blob": "92bfd533ddd1403215381af46830c1968eebf235"
+  },
+  {
+    "path": "pdiddler/pdiddler1_fast_gate_TEST_v5.lua",
+    "blob": "c2fc6dc4aa2a2b10789337b0815cf20b04662fdc"
+  },
+  {
+    "path": "pdiddler/pdiddler1_fast_gate_TEST_v6_VALID_EVIDENCE.lua",
+    "blob": "9b9681bcab82bc6654ad0174aa448c3c6e00bcc5"
+  },
+  {
+    "path": "pdiddler/pdiddler1_fast_scoring_from_known_good_v1.lua",
+    "blob": "81b85183719ecdef039bd00020593ee0020c7319"
+  },
+  {
+    "path": "pdiddler/pdiddler1_p5_handoff_adapter_v1.lua",
+    "blob": "2e4cd87acca7a2aedfbdb91bb329c086db943272"
+  },
+  {
+    "path": "pdiddler/pdiddler1_p5_handoff_policy_TEST.lua",
+    "blob": "a0aacabe3855ef54ba13f6097a6492175f48a12f"
+  },
+  {
+    "path": "pdiddler/pdiddler1_p5_handoff_policy_v1.lua",
+    "blob": "f2f7879b2174833aa79fa36f7d7aa26d0e52bef6"
+  },
+  {
+    "path": "pdiddler/pdiddler2.lua",
+    "blob": "463915e34d509b55b1a17634ec74396e7d82b76c"
+  },
+  {
+    "path": "pdiddler/pdiddler2_KNOWN_GOOD.lua",
+    "blob": "463915e34d509b55b1a17634ec74396e7d82b76c"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_KNOWN_GOOD_v5.lua",
+    "blob": "d29dd8d44833b153e160c4364dd04ad354666f67"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_PART4_BRIDGE_v5.lua",
+    "blob": "a13596ecae607c323b1fc93f34072b3e959c3f84"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v10_LATE_PENDING.lua",
+    "blob": "18a7cda703fa5111c078182d14fac95e508bc2dc"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v11_PENDING_OWNER.lua",
+    "blob": "73c714d7766be55802cc397e346afbe8a9dc9ad9"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v12_EXACT_UI_PERF.lua",
+    "blob": "0fe1e79bc2b8826c0fac31e6bf8e51f12acc5442"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v13_UNCERTAIN_OWNER.lua",
+    "blob": "28b062dd51b469e28968dd54e4d467202788719b"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v14_UNCERTAIN_OWNER.lua",
+    "blob": "bdd193bb86877658d602fb37f181af5353f78321"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v15_UNCERTAIN_OWNER.lua",
+    "blob": "df1d9615bd17e584d4bd825c1d90a9bf03f9ef07"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v16_EXACT_IDENTITY.lua",
+    "blob": "b652dbd8f90aeec30af6a0d4fef6c190fea35b4f"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v17_TRANSACTION_LEASE.lua",
+    "blob": "7d709c2623657d25aac24f2f0c41516f93e48019"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v6.lua",
+    "blob": "ec5821815e7e789628c78f159129d3eeb8e5d593"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v7.lua",
+    "blob": "80fe18676d99d49f974438b653fb47fca33f60a4"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v8_PERF.lua",
+    "blob": "fe843c9f6253c224de190e9070347d5890bdc3d1"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v9_LATE_PENDING.lua",
+    "blob": "16802f6b1e0b9b2226a30181494c9ef868e93c3d"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_TEST_STACK_v1.lua",
+    "blob": "1463d1fe60e7b73a1a99f2eed3ac4fbc1db0605f"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_TEST_STACK_v2.lua",
+    "blob": "3b3889154ef80d74e08ba12fbea1fdb396c8a9b4"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_TEST_STACK_v3_PURPLE.lua",
+    "blob": "2ad5cd592aca7adfc352d527ef3523d368db73a7"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_TEST_STACK_v4_PURPLE.lua",
+    "blob": "db286b6f409a8b96ccd072e0dc999a384265d779"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_TEST_STACK_v5_PURPLE.lua",
+    "blob": "a869cfa59cd310b506d7e1ce0437d57a0a0ac15d"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_test_v1.lua",
+    "blob": "55c25d9cc11c841a4b6b75061a4cc991072bb38d"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_test_v2.lua",
+    "blob": "71ce1d67a0e4f274aa8d1b185c70e39437564401"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_test_v3.lua",
+    "blob": "1aa7752f979b5135781392ff70c47ed3b7440e89"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_test_v4.lua",
+    "blob": "0bbd5064d9b4dec9320e78111a4bf96a58f885d8"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_test_v4_1.lua",
+    "blob": "ed154f0cbb295e1f0812981930759c7bd01e7799"
+  },
+  {
+    "path": "pdiddler/pdiddler3_outgoing_test_v5.lua",
+    "blob": "d29dd8d44833b153e160c4364dd04ad354666f67"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_KNOWN_GOOD_v5.lua",
+    "blob": "e05b3e2e98df9964e084a6b33d5872838cc6fa55"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_KNOWN_GOOD_v6.lua",
+    "blob": "56c6e4f7fad40fec63bb9e1334221893bdf53f00"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_MODULE_KNOWN_GOOD_v6_3_PURPLE.lua",
+    "blob": "38c4e5eb717a2b60c8e6d7dfd96775fa0b4a258c"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_MODULE_v6.lua",
+    "blob": "65137e7e6966784cdb3c6bb3f6cd5adf885a68ba"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_MODULE_v6_1.lua",
+    "blob": "d795f9c786f97d2de7c1d29651566b4a11f5acaa"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_MODULE_v6_2_PURPLE.lua",
+    "blob": "23bb183693ac9dad19223595bc9fa023c50e26e2"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_MODULE_v6_3_PURPLE.lua",
+    "blob": "38c4e5eb717a2b60c8e6d7dfd96775fa0b4a258c"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_MODULE_v6_4_PART4_BRIDGE.lua",
+    "blob": "4f7582b0f3f5d9e3b28ecde30a4fbe82ddb0f53c"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_MODULE_v6_5_PART4_STATUS_BRIDGE.lua",
+    "blob": "f7190538cbc882e23b22f723f3af0b6140a98bcd"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_MODULE_v6_6_PERF.lua",
+    "blob": "d3d3e2d5476b970ec17f4577d8d30d4407a4de64"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_MODULE_v6_7_CRITICAL_PAUSE.lua",
+    "blob": "7fed3622a777eefd836c68a513f58077d7673ea8"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_MODULE_v6_8_CRITICAL_PAUSE.lua",
+    "blob": "f1d4b5393846289fee766f06591dc1d5d5eda890"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_PART4_BRIDGE_v6_4.lua",
+    "blob": "084dfb37a75bee6905ff26840ea9dbcb7ec5aa74"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_test.lua",
+    "blob": "56c6e4f7fad40fec63bb9e1334221893bdf53f00"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_test_v2.lua",
+    "blob": "aef3b9898786b038f7850ccdd1743bcf32c0f17a"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_test_v3.lua",
+    "blob": "4ad4f20d7938aadb12d8703f64bcf8d64330ce12"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_test_v4.lua",
+    "blob": "095239cca73156db01c858b22c3b23524743513f"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_test_v5.lua",
+    "blob": "e05b3e2e98df9964e084a6b33d5872838cc6fa55"
+  },
+  {
+    "path": "pdiddler/pdiddler3_scanner_test_v6.lua",
+    "blob": "56c6e4f7fad40fec63bb9e1334221893bdf53f00"
+  },
+  {
+    "path": "pdiddler/pdiddler4_ROTATION_TEST_STACK_v1_3.lua",
+    "blob": "cad2e9d0814d694f39df59700ce4b55d39b05ce5"
+  },
+  {
+    "path": "pdiddler/pdiddler4_TRANSACTION_FIX_TEST_STACK_v1_9.lua",
+    "blob": "8f316503ba320dd3f8ada45e706c56040ac05dc3"
+  },
+  {
+    "path": "pdiddler/pdiddler4_VIDEO_FIX_TEST_STACK_v1_6.lua",
+    "blob": "1ef7be068b145b87a5c9481ab9165ee42195fd67"
+  },
+  {
+    "path": "pdiddler/pdiddler4_accept_ui_gate_v1.lua",
+    "blob": "f931faaaef5cd806db36872561641b6b080cfe0a"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_ROTATING_v1_2.lua",
+    "blob": "bdfe0a199c21393ab0064ff361fb214522e0ef6e"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_ROTATING_v1_3.lua",
+    "blob": "e98edbe6eaa9e7e16ea2b6999cd2daa43d1b748d"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_ROTATING_v1_4.lua",
+    "blob": "593cd47d42a1180a7d46679bb50a22c3681e67ac"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_ROTATING_v1_5.lua",
+    "blob": "f41362e5132c13659137979c97cc09dff3408ef1"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_ROTATING_v1_6.lua",
+    "blob": "ff0ecd0d2f1324e2c6311836be2fc192aa6ea12b"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_ROTATING_v1_7.lua",
+    "blob": "0636c04711b8db1e982bba5414176bf869088c76"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_ROTATING_v1_8.lua",
+    "blob": "9a1a722e1c5d6d1c70ca48c7a647ad33bb6c76c7"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_ROTATING_v1_9.lua",
+    "blob": "1c078bd47832a23effed02f2fed2ca4d4b49f574"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_ROTATING_v2_0_PERF.lua",
+    "blob": "e15ea44d0e690f611d88fc5cdd4c4beb0843c7f1"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_ROTATING_v2_1_CLOSE_FIX.lua",
+    "blob": "c843c3a5ba45b600c3e635183bb510e50f1ce310"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_ROTATING_v2_2_PROFIT_HOLD.lua",
+    "blob": "9d90dad6facbbeb012d64fbb2dbe3ed591cb8dcd"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_ROTATING_v2_3_EXTREME_GUARD.lua",
+    "blob": "041496d2fbda726acbd97165d5c3d260a8e3246b"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_SUPREME_v1_TEST.lua",
+    "blob": "5300aed2d9a20a5cd0eb0751982523d9e8cfeb8f"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_SUPREME_v2_ADAPTIVE.lua",
+    "blob": "008ea105a1fb48afb0d8ad5a35c0806aba09db9f"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_SUPREME_v3_VISIBLE_ACCEPT.lua",
+    "blob": "a409b0905f94e5d4cd1325ae79b958ed34bf2bbc"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_SUPREME_v4_EARLY_COUNTER.lua",
+    "blob": "2e7a5ac2285d2e2443fb0dbe4427d0c39bd3057e"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_SUPREME_v5_BOUNDED_SELECTION.lua",
+    "blob": "12639dec92ee7a3b728264ef7507a1cebf675526"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_SUPREME_v6_VERIFIED_STEPS.lua",
+    "blob": "844593bcb64a24dee350573075ee49158b965d7d"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_SUPREME_v7_PORTFOLIO_LEDGER.lua",
+    "blob": "2c54876bc29e9f42d59c5abc85c7c0219ff24ede"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_SUPREME_v8_TRANSACTION_OWNER.lua",
+    "blob": "bdaafcd419e6d6b768399c35b5146a5538bab198"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_SUPREME_v9_OPPONENT_ADDED.lua",
+    "blob": "20d0545e69fe0405f197132da091d8e5201dd6ee"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_TEST_STACK_v1_1.lua",
+    "blob": "a31227dc7c8bfb0650754168a6bad9a71f129005"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_test_v1.lua",
+    "blob": "d63e94d2114744b8c51a7d31951825cddce9b9eb"
+  },
+  {
+    "path": "pdiddler/pdiddler4_balancer_test_v1_1.lua",
+    "blob": "91a3eaf4915b4051f7b4836f7b6d80a04f4e3736"
+  },
+  {
+    "path": "pdiddler/pdiddler4_controller_v1.lua",
+    "blob": "2034510da0985e26a0e73ff0b19e038e2c1f00ee"
+  },
+  {
+    "path": "pdiddler/pdiddler4_controller_v1_1.lua",
+    "blob": "bc1b47b07e5e23cad10e400315aaba8282083fb6"
+  },
+  {
+    "path": "pdiddler/pdiddler4_controller_v1_2.lua",
+    "blob": "0f540a7e36e39d1e83b89211c1787a27a4edc5fc"
+  },
+  {
+    "path": "pdiddler/pdiddler4_controller_v1_3.lua",
+    "blob": "e27fab1dc76d0455243d4825f6e9dce1967f57fb"
+  },
+  {
+    "path": "pdiddler/pdiddler4_early_counter_policy_v1.lua",
+    "blob": "d9ad774287f98f55d93c263456645244d283c3e8"
+  },
+  {
+    "path": "pdiddler/pdiddler4_early_counter_policy_v2_BOUNDED_VALUE.lua",
+    "blob": "d5c9f7d2a2cf68172b9d36676a49aca4231a439d"
+  },
+  {
+    "path": "pdiddler/pdiddler4_early_counter_policy_v3_TRADE_BUDGET.lua",
+    "blob": "e786f5aba54693b88d01f9bcf3ce8c366ae0979b"
+  },
+  {
+    "path": "pdiddler/pdiddler4_early_counter_policy_v4_MEASURED_APPEAL.lua",
+    "blob": "ee1e8bf27eb248fecd9cba8c72fd0bdeaf0b6b4e"
+  },
+  {
+    "path": "pdiddler/pdiddler4_early_counter_policy_v5_OPPONENT_ADDED.lua",
+    "blob": "1be4581cbcc9ef78349561cca918fe145df2aa74"
+  },
+  {
+    "path": "pdiddler/pdiddler4_market_v1.lua",
+    "blob": "c71eebbc889e1eb64f61c760f5f1061ab3679200"
+  },
+  {
+    "path": "pdiddler/pdiddler4_planner_v1.lua",
+    "blob": "6bd6d01155d996725ad592d2ccbd53577e982704"
+  },
+  {
+    "path": "pdiddler/pdiddler4_supreme_policy_v1.lua",
+    "blob": "d4294d3ef6f23539b6326f9f0ae5b6d053966ebe"
+  },
+  {
+    "path": "pdiddler/pdiddler4_supreme_policy_v2_ADAPTIVE.lua",
+    "blob": "80acfd673bd6d9eaabd3c5425625e48fe7466f85"
+  },
+  {
+    "path": "pdiddler/pdiddler4_supreme_policy_v3_FINAL_WAIT.lua",
+    "blob": "167434f14ca5a386d7bc7a484aa72c511cab4c47"
+  },
+  {
+    "path": "pdiddler/pdiddler4_supreme_policy_v4_DELAYED_SWEETEN.lua",
+    "blob": "7d87ffac10bf456d058f7bdc0a81c020e08a8fb8"
+  },
+  {
+    "path": "pdiddler/pdiddler4_supreme_policy_v5_NATIVE_READY.lua",
+    "blob": "b41e0c005c07178f915e615bd0e2bcd7f25944ec"
+  },
+  {
+    "path": "pdiddler/pdiddler4_supreme_policy_v6_BOUNDED_CONCESSION.lua",
+    "blob": "067b07cbab096d5ce3edf927e9e8b9d4a2f982ca"
+  },
+  {
+    "path": "pdiddler/pdiddler4_supreme_policy_v7_VERIFIED_STEPS.lua",
+    "blob": "e9a59eff4b61387c2268842c001233af5623f82e"
+  },
+  {
+    "path": "pdiddler/pdiddler4_supreme_policy_v8_PORTFOLIO_LEDGER.lua",
+    "blob": "0a60a6761721ce4fc1c14b91ee996e7fc4c1b19a"
+  },
+  {
+    "path": "pdiddler/pdiddler4_supreme_policy_v9_CONSISTENT_QUOTES.lua",
+    "blob": "4aac33d5ac32cba3c83562e53644099f377ac2e2"
+  },
+  {
+    "path": "pdiddler/pdiddler4_tradeio_v1.lua",
+    "blob": "0c12285438ee66166aa89086c891f697a33338fc"
+  },
+  {
+    "path": "pdiddler/pdiddler5_server_hopper_v2.lua",
+    "blob": "13d663c12431610edc036f709e998e9a0b2ad27d"
+  },
+  {
+    "path": "pdiddler/pdiddler_EXTREME_GUARD_TEST_STACK_v2_5.lua",
+    "blob": "1128ec1430339b040d62eba7a9d4e93d1e5ddd14"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v1.lua",
+    "blob": "e11a19d738f3180d89075da4b53b7408d64fb29f"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v10_BOUNDED_SELECTION.lua",
+    "blob": "7086b738f7a24cb354b2bb30b542cad8e34f3791"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v2.lua",
+    "blob": "2d7062bd9ce40ad4b7fa9296ad2e7874879dc37f"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v3.lua",
+    "blob": "79e80edee4f1dbdd8eb38405e2fd1611214cfddd"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v4_SUPREME.lua",
+    "blob": "9d523058d00876ba3012f85ec77bde0c4eb128bf"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v5_ADAPTIVE.lua",
+    "blob": "d5639e9525984fedee5cc9d6ecc4e82387040545"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v6_FINAL_WAIT.lua",
+    "blob": "cfa28c4c584563598cccda0d4d78d24d32a53928"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v7_DELAYED_SWEETEN.lua",
+    "blob": "d3aecff3c3c4a68279b6f9e307f5fd657d238574"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v8_VISIBLE_ACCEPT.lua",
+    "blob": "ac07d3ea7fd97c016941347e7c1fd3c5fd0f5ff9"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v9_EARLY_COUNTER.lua",
+    "blob": "7848e2ce2a8aea1a59e4aa6c2afd1b7c4b2fd4aa"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v11_VERIFIED_READINESS.lua",
+    "blob": "a331b1d9564540472fd7d0e17ae0aca83d573982"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v12_PORTFOLIO_LEDGER.lua",
+    "blob": "cf0a01f4ae291ff80fb0c4a1b9aa49345a179ef5"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v13_VISIBLE_READINESS.lua",
+    "blob": "8c99472de42556402410de2c0c6af6bb2f91677d"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v14_VERIFIED_WORKFLOW.lua",
+    "blob": "9f2b8d22224078c605d6cf2bcb3039b9b0706d1a"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v15_1_CURRENT_PRICES.lua",
+    "blob": "94814402679c622736442ba63412bd0ac7ed423c"
+  },
+  {
+    "path": "pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v15_OPPONENT_ADDED.lua",
+    "blob": "b5c75c6a6ccb51871992703d3dd50b981c51e849"
+  },
+  {
+    "path": "pdiddler/pdiddler_KNOWN_GOOD_PARTS_1_2_3.lua",
+    "blob": "88de4b0a4195bb49d3cd7724c4ff05ca40a54891"
+  },
+  {
+    "path": "pdiddler/pdiddler_OUTGOING_OWNERSHIP_FIX_TEST_STACK_v2_3.lua",
+    "blob": "f70c6fc986a72abf451642abf457732efc4ca9dd"
+  },
+  {
+    "path": "pdiddler/pdiddler_PART4_BALANCER_TEST_v1.lua",
+    "blob": "588f43f47b71337eae2400f5b1e2908091f742f7"
+  },
+  {
+    "path": "pdiddler/pdiddler_PENDING_CLOSE_FIX_TEST_STACK_v2_1.lua",
+    "blob": "f19b83ba23c0b8aba284b3ca5e90fbab21ed5d5c"
+  },
+  {
+    "path": "pdiddler/pdiddler_PERFORMANCE_FIX_TEST_STACK_v2_0.lua",
+    "blob": "213f6ebbfeb418c646010f890e36f6da0bec43de"
+  },
+  {
+    "path": "pdiddler/pdiddler_PERFORMANCE_SCANNER_FIX_TEST_STACK_v2_2.lua",
+    "blob": "973bc6dd4cfb661db2dea968446ebf65e41ddabf"
+  },
+  {
+    "path": "pdiddler/pdiddler_PROFIT_HOLD_TEST_STACK_v2_4.lua",
+    "blob": "d09e0804a987c45046b9d2c93208f73399492edc"
+  },
+  {
+    "path": "pdiddler/pdiddler_V10_TELEPORT_AUTOBOOT_v1.lua",
+    "blob": "9f065eed88b29eeadc81c4ce6ed4015f519db62a"
+  },
+  {
+    "path": "pdiddler/pdiddler_V11_TELEPORT_AUTOBOOT_v1.lua",
+    "blob": "a1573a6977f333578d76f4e81a162f3cf0992c68"
+  },
+  {
+    "path": "pdiddler/pdiddler_V12_TELEPORT_AUTOBOOT_v1.lua",
+    "blob": "be6dd97e8fd04fb0c4aac9548472c5e29c30f332"
+  },
+  {
+    "path": "pdiddler/pdiddler_V13_TELEPORT_AUTOBOOT_v1.lua",
+    "blob": "8dcf6219fb9e4caa4e34642aad2a6e4de560623b"
+  },
+  {
+    "path": "pdiddler/pdiddler_V14_TELEPORT_AUTOBOOT_v1.lua",
+    "blob": "ee4fea6148d6d28b35969173409b035dd14d9be3"
+  },
+  {
+    "path": "pdiddler/pdiddler_V15_1_TELEPORT_AUTOBOOT_v1.lua",
+    "blob": "596fb4491445a8af79e7dc28764ada6dec1848be"
+  },
+  {
+    "path": "pdiddler/pdiddler_V15_TELEPORT_AUTOBOOT_v1.lua",
+    "blob": "38862759249882ddcc28cbfd5d432a0d5df908f8"
+  },
+  {
+    "path": "pdiddler/pdiddler_discord_transport_v1.lua",
+    "blob": "9f532ad6ba1324dc123e54ad95cc6dab7195e811"
+  },
+  {
+    "path": "pdiddler/pdiddler_market_snapshot_2026-11-02_AUDIT_v1.lua",
+    "blob": "38ec0619f5225e844f71afa4ea4f5c23a6be79b2"
+  },
+  {
+    "path": "pdiddler/pdiddler_market_snapshot_2026-11-02_AUDIT_v2_COMPLETE.lua",
+    "blob": "bf60a74d329744273cc08728a27b48e2bb04ed50"
+  },
+  {
+    "path": "pdiddler/pdiddler_native_trade_probe_v1.lua",
+    "blob": "0d8b5a6ad58ff1c9132f3cba2ad5c13bd5975090"
+  },
+  {
+    "path": "pdiddler/pdiddler_native_trade_probe_v2.lua",
+    "blob": "bd3edb457f48c92717c20dfcfe1bccb402e2bca2"
+  },
+  {
+    "path": "pdiddler/pdiddler_readiness_v1.lua",
+    "blob": "d6ac68e92f19a20b6de29ba1097ab0f254e8d54a"
+  },
+  {
+    "path": "pdiddler/pdiddler_readiness_v2_VISIBLE_SCAN.lua",
+    "blob": "409b6e4fdf85447859da0180bfc3e807520cdb09"
+  },
+  {
+    "path": "pdiddler/pdiddler_runtime_journal_v1.lua",
+    "blob": "f437031d3d406217f63d6793cfd0512aff78a51a"
+  },
+  {
+    "path": "pdiddler/pdiddler_success_stack_1_2_3scanner.lua",
+    "blob": "0d93fbd1c30979f347026a9fc90270412a3f5ae1"
+  },
+  {
+    "path": "pdiddler/pdiddler_success_stack_1_2_3scanner_v2.lua",
+    "blob": "351ad1a349a988ff189f608684a52ee9892d5207"
+  },
+  {
+    "path": "pdiddler/pdiddler_success_stack_1_2_3scanner_v3.lua",
+    "blob": "e078d448198e4c8060858fc2aafd373f75a14e52"
+  },
+  {
+    "path": "pdiddler/pdiddler_supreme_snapshot_2026_11_03.lua",
+    "blob": "2455b372f80d0bd3efb1bc55ae799af30a8bd421"
+  },
+  {
+    "path": "pdiddler/pdiddler_supreme_snapshot_2026_11_03_ISSUE4.lua",
+    "blob": "9b6bbb43245e4ee1d95f627657cbe8d4d8723206"
+  },
+  {
+    "path": "pdiddler/pdiddler_trade_lifecycle_v1.lua",
+    "blob": "c0d20f34e5abb73336f61f06b0f1ff38b801f3b9"
+  },
+  {
+    "path": "pdiddler/pdiddler_trade_verification_v1.lua",
+    "blob": "aecaaeb6cc9d7917beafff0550b7213e150651a0"
+  },
+  {
+    "path": "pdiddler/pdiddler_trade_verification_v2.lua",
+    "blob": "bd3cfd32663371a7bfd20800cbb1e99472038772"
+  },
+  {
+    "path": "pdiddler/pdiddler_webhook_outbox_v2.lua",
+    "blob": "e2abfc8021f2e8811b65bb64bfc720cc8c6d57fd"
+  },
+  {
+    "path": "pdiddler/pdiddler_webhook_outbox_v3.lua",
+    "blob": "8182e84e6d64476b007a68d7b9c984bf54a9ac5a"
+  },
+  {
+    "path": "pdiddler/refresh_supreme_snapshot.py",
+    "blob": "01a6c9159828e02c32cf46cac30facc7ab73d673"
+  },
+  {
+    "path": "pdiddler/research-notes/v11/BOT_DETECTION_CHECKPOINT.md",
+    "blob": "10afbe97606abe2bc61cb58f2b7487ef393ef2b2"
+  },
+  {
+    "path": "pdiddler/research-notes/v11/LOADING_CHECKPOINT.md",
+    "blob": "2b2139e9f44b4cd24c88f38250e28913710ebcc6"
+  },
+  {
+    "path": "pdiddler/research-notes/v11/TRADING_CHECKPOINT.md",
+    "blob": "8fa61813d9b5c99cfecc423a1da5352bcab95668"
+  },
+  {
+    "path": "pdiddler/snapshots/pdiddler_supreme_snapshot_2026_11_04.lua",
+    "blob": "3e085101e257e615cf56561f0181bd5182d1bd68"
+  },
+  {
+    "path": "pdiddler/snapshots/supreme_changes_2026_11_04.json",
+    "blob": "12f8fa8501f0ba996a1cb98f59b999c313e263f1"
+  },
+  {
+    "path": "pdiddler/snapshots/supreme_retrieval_2026_11_04.json",
+    "blob": "1c75a347929a75a00134d6916576ababf6ec1992"
+  },
+  {
+    "path": "pdiddler/snapshots/supreme_snapshot_2026_11_04.json",
+    "blob": "955e3fb7cd25999fc4f0aad4a77378b9a7bb9ba3"
+  },
+  {
+    "path": "pdiddler/snapshots/supreme_unmapped_2026_11_04.json",
+    "blob": "601993b5e7ef41410dc70960867581d6d7429098"
+  },
+  {
+    "path": "pdiddler/supreme_snapshot_2026_11_03.json",
+    "blob": "37d47906253aeb0721b1a604988a3a1ea5dd465c"
+  },
+  {
+    "path": "pdiddler/supreme_snapshot_2026_11_03_ISSUE4.json",
+    "blob": "644feaca15052c82c68864dae2d0e6dee97ac7c8"
+  },
+  {
+    "path": "pdiddler/test_runner.lua",
+    "blob": "b6bbe45607fdc6a2142d967c12a014e46e9570c1"
+  },
+  {
+    "path": "pdiddler/tests/check_issue19_baseline.py",
+    "blob": "abdbe8f2273317ed007cf5857f49e57f4626b13d"
+  },
+  {
+    "path": "pdiddler/tests/check_price_refresh_scope.py",
+    "blob": "e3d057f8c4e398f42de750b9aaa316fe4ed02d52"
+  },
+  {
+    "path": "pdiddler/tests/current_price_bootstrap_test.lua",
+    "blob": "0c3b2dce24f5d525fdf39ae952511fd02627168d"
+  },
+  {
+    "path": "pdiddler/tests/current_price_integration_test.lua",
+    "blob": "3ae833d0721108d956379c16748aa19ad7e39b72"
+  },
+  {
+    "path": "pdiddler/tests/current_snapshot_test.lua",
+    "blob": "2e48bb9ae6b50ce1a0799990fa9eed5eb9cfb8b3"
+  },
+  {
+    "path": "pdiddler/tests/fast_gate_runtime_fixture.lua",
+    "blob": "90f47c6349ebfe60f9c11a713f6a0f24110f417d"
+  },
+  {
+    "path": "pdiddler/tests/fixtures/p5_policy_v1.lua",
+    "blob": "fbd4643340e0f415c51538194a151340d556b7c9"
+  },
+  {
+    "path": "pdiddler/tests/hopper_v2_test.lua",
+    "blob": "91ae0a6470607fc768af9a5e842d1b9b5deca99c"
+  },
+  {
+    "path": "pdiddler/tests/integration_fixture.lua",
+    "blob": "d2b560c71429b6248ad695b834b057aa8e855696"
+  },
+  {
+    "path": "pdiddler/tests/integration_sources_v11.json",
+    "blob": "73b81735fbf8b33f14ce89410bbb50e6c7fac458"
+  },
+  {
+    "path": "pdiddler/tests/integration_sources_v12.json",
+    "blob": "09bbd959a53bb28a90f805e52edd4b608b98f221"
+  },
+  {
+    "path": "pdiddler/tests/integration_sources_v13.json",
+    "blob": "1996b6d62b09341b4410033b27e9ee4196dbca24"
+  },
+  {
+    "path": "pdiddler/tests/integration_sources_v14.json",
+    "blob": "d7b82ffe96e0bda2ea98b01a788fcb793f11aa44"
+  },
+  {
+    "path": "pdiddler/tests/integration_sources_v3.json",
+    "blob": "0fb0da05a4eef5c272e0407d4b7b9e4d6852f74a"
+  },
+  {
+    "path": "pdiddler/tests/integration_sources_v4.json",
+    "blob": "7d973d4fe2c212faa1144b27b2613bc9ba394cba"
+  },
+  {
+    "path": "pdiddler/tests/integration_sources_v5.json",
+    "blob": "800eda7422e232103509348acc266077217262b6"
+  },
+  {
+    "path": "pdiddler/tests/integration_v3_test.lua",
+    "blob": "eb0f0385da50b8b5c267e0dead3b521c516a7051"
+  },
+  {
+    "path": "pdiddler/tests/integration_v4_test.lua",
+    "blob": "0e7d074bff73ed8519800662c54aa8aab9602c7e"
+  },
+  {
+    "path": "pdiddler/tests/integration_v5_test.lua",
+    "blob": "7f3f386856052d293e0a8788fa54d00c0203fa92"
+  },
+  {
+    "path": "pdiddler/tests/issue19_bootstrap_test.lua",
+    "blob": "bc61de9298ff9b346c2d1e994bdc44483130cb9f"
+  },
+  {
+    "path": "pdiddler/tests/issue19_integration_test.lua",
+    "blob": "068deb7e49483591aa130990cba334193b6f25bc"
+  },
+  {
+    "path": "pdiddler/tests/issue19_runtime_test.lua",
+    "blob": "b1cfcd09febe02270133f967f745b13b7c3ddd1b"
+  },
+  {
+    "path": "pdiddler/tests/issue19_v14_baseline.json",
+    "blob": "0d2d6fe65158427ed3064335231ef49f7a0510a0"
+  },
+  {
+    "path": "pdiddler/tests/issue4_baseline_sources.json",
+    "blob": "fbe4ff41a77e093eb4810928d9bea8311fa03e9d"
+  },
+  {
+    "path": "pdiddler/tests/issue4_lifecycle_test.lua",
+    "blob": "6cdf7e8b3f2142d42b97d2f09206f4a697b8ec59"
+  },
+  {
+    "path": "pdiddler/tests/issue4_policy_test.lua",
+    "blob": "8f71a280573a6fa1825e6e340f740d6e9e2b5aad"
+  },
+  {
+    "path": "pdiddler/tests/issue4_runtime_test.lua",
+    "blob": "660f952aabbcf20b78b0e13ec0176df13c293419"
+  },
+  {
+    "path": "pdiddler/tests/outgoing_v16_test.lua",
+    "blob": "e2a04d0b209ae6e450232a5996e34c0cdfd7d258"
+  },
+  {
+    "path": "pdiddler/tests/part4_runtime_test.lua",
+    "blob": "5ddc7274cc680c1cce38c65b44915960becab34e"
+  },
+  {
+    "path": "pdiddler/tests/part4_supreme_guard_test.lua",
+    "blob": "a42878c27f9146bf16c18fb016f32f6b7f68f740"
+  },
+  {
+    "path": "pdiddler/tests/run_integration_tests.py",
+    "blob": "9a45ada38d2bee57d8f5bce324cc8ff6e4f8ae31"
+  },
+  {
+    "path": "pdiddler/tests/run_issue19_runtime.py",
+    "blob": "2f0a9b93af114f80b02e3437461e4c34cd4e6933"
+  },
+  {
+    "path": "pdiddler/tests/run_issue4_tests.py",
+    "blob": "a2aea08a096fd1244b178edba0717c45b0eb77a1"
+  },
+  {
+    "path": "pdiddler/tests/run_trading_tests.py",
+    "blob": "f87f0331d6fbfed4eb7e154db588f61778ecd413"
+  },
+  {
+    "path": "pdiddler/tests/run_v10_bounded_runtime.py",
+    "blob": "2ac182f1e192e4fe36d167b75ba179c422539a62"
+  },
+  {
+    "path": "pdiddler/tests/run_v11_checks.py",
+    "blob": "46690c340967a7d830a2149af8fb9fc1de8b28c7"
+  },
+  {
+    "path": "pdiddler/tests/run_v11_fast_gate.py",
+    "blob": "97ff56567f9b7321f981f1a719d66e82d15a161b"
+  },
+  {
+    "path": "pdiddler/tests/run_v11_trading_runtime.py",
+    "blob": "85212ee9e6e0496436cf12f62b4d7a55fd5b28d1"
+  },
+  {
+    "path": "pdiddler/tests/run_v12_checks.py",
+    "blob": "891de82796ef51843b95aa2d28bf3113a41738b1"
+  },
+  {
+    "path": "pdiddler/tests/run_v12_trading_runtime.py",
+    "blob": "17bb7f716068d7675cb89537b8e0bd64c307fd3b"
+  },
+  {
+    "path": "pdiddler/tests/run_v14_checks.py",
+    "blob": "d23a3b1c38fe20f26572b4d59477daf4ef512311"
+  },
+  {
+    "path": "pdiddler/tests/run_v14_delivery.py",
+    "blob": "547b473d22b5387a0a53eafe897af729216aadbb"
+  },
+  {
+    "path": "pdiddler/tests/run_v14_trading_runtime.py",
+    "blob": "3f77fdc949e2e4761fc29d27de8d8525098d6316"
+  },
+  {
+    "path": "pdiddler/tests/run_v9_early_counter_runtime.py",
+    "blob": "e2983f43995768d6cfa509c1364be79419c877c5"
+  },
+  {
+    "path": "pdiddler/tests/supreme_policy_test.lua",
+    "blob": "cfceb34f156d2aed5c1901518f0a3b6b7d4f127e"
+  },
+  {
+    "path": "pdiddler/tests/test_refresh_supreme_snapshot.py",
+    "blob": "1b1eb4057d6556a9072e6052c8eae087c3426986"
+  },
+  {
+    "path": "pdiddler/tests/v10_recording_offer_selection_test.lua",
+    "blob": "68328e221077176e232c8cae87f91041a8776a92"
+  },
+  {
+    "path": "pdiddler/tests/v10_teleport_autoexec_test.lua",
+    "blob": "139fca3c032f23b1f0963bdede7db17a6ad6d013"
+  },
+  {
+    "path": "pdiddler/tests/v11_baseline_sources.json",
+    "blob": "bb0677772eb5df8fa8b6113fd8101b82b57a638d"
+  },
+  {
+    "path": "pdiddler/tests/v11_fast_gate_runtime_test.lua",
+    "blob": "2e95470fa3721defb065feaa26e8ed44017e4070"
+  },
+  {
+    "path": "pdiddler/tests/v11_integration_test.lua",
+    "blob": "5a3e905e8290c192bb89460f6892a4e86c227b1a"
+  },
+  {
+    "path": "pdiddler/tests/v11_readiness_test.lua",
+    "blob": "c199048acf07d25c375f769562b76b53b4ab4b6e"
+  },
+  {
+    "path": "pdiddler/tests/v11_teleport_autoexec_test.lua",
+    "blob": "0b9bcf2827bfb42b12edbe6eb7055ba54d5cb007"
+  },
+  {
+    "path": "pdiddler/tests/v11_trading_runtime_test.lua",
+    "blob": "a634cbb5687f89c2b72514cf29316c66bc2a96b7"
+  },
+  {
+    "path": "pdiddler/tests/v11_verified_negotiation_test.lua",
+    "blob": "b2bd392a772abc1c139a0b276c9e0e3ad876992e"
+  },
+  {
+    "path": "pdiddler/tests/v12_baseline_sources.json",
+    "blob": "aac453c159e19b87a043554dfe38e9757c945e5f"
+  },
+  {
+    "path": "pdiddler/tests/v12_integration_test.lua",
+    "blob": "f66754af36f45f797b72cae3050711592a6cc75e"
+  },
+  {
+    "path": "pdiddler/tests/v12_portfolio_ledger_policy_test.lua",
+    "blob": "4232dc54b2e853a1b0bcc5960b0a8cb4de027d60"
+  },
+  {
+    "path": "pdiddler/tests/v12_teleport_autoexec_test.lua",
+    "blob": "82eac321fd5f2dd16726adf6d89800924076cc7e"
+  },
+  {
+    "path": "pdiddler/tests/v12_trading_runtime_test.lua",
+    "blob": "7a9dbcc76e85f8d2f6a137cdeddac416c8dced8b"
+  },
+  {
+    "path": "pdiddler/tests/v13_baseline_sources.json",
+    "blob": "864e8b1b1f9b23622c447f8ffdf9f3c811486ce4"
+  },
+  {
+    "path": "pdiddler/tests/v13_integration_test.lua",
+    "blob": "095e72e676e19cc9cb885405d7caf084a20128b7"
+  },
+  {
+    "path": "pdiddler/tests/v13_readiness_fixture.lua",
+    "blob": "4f84f05cc88a89908c38e98eaeb7254adf302210"
+  },
+  {
+    "path": "pdiddler/tests/v13_readiness_test.lua",
+    "blob": "4a058a7e50c6cf9b2e92ac2683aaf84bdc856aa5"
+  },
+  {
+    "path": "pdiddler/tests/v13_teleport_autoexec_test.lua",
+    "blob": "19d7494aa93677c7960239573c81a005db23cb1d"
+  },
+  {
+    "path": "pdiddler/tests/v14_delivery_test.lua",
+    "blob": "1a65daff3fe1d9b47d0897fb17c79f216351857e"
+  },
+  {
+    "path": "pdiddler/tests/v14_early_test.lua",
+    "blob": "5c82775da5532f4892292c11e83824d71ed51f51"
+  },
+  {
+    "path": "pdiddler/tests/v14_integration_test.lua",
+    "blob": "7b95a84c982c2874d2928d3f195f964d606a33aa"
+  },
+  {
+    "path": "pdiddler/tests/v14_lifecycle_test.lua",
+    "blob": "e0c1fd837ff7a9822cb66b9f16a007cf3e7b4559"
+  },
+  {
+    "path": "pdiddler/tests/v14_outgoing_test.lua",
+    "blob": "3ec7f6243256808c1dceee6b0fe1ea56c019a091"
+  },
+  {
+    "path": "pdiddler/tests/v14_portfolio_oracle_test.lua",
+    "blob": "98560c73bfd2edf4dd93cea1149511bd8a78a3da"
+  },
+  {
+    "path": "pdiddler/tests/v14_probe_fixture.lua",
+    "blob": "939c2a7fce729266f469823482902f468f1ffdb2"
+  },
+  {
+    "path": "pdiddler/tests/v14_probe_runtime.py",
+    "blob": "a4ff497fc477e71d54ded2650385a11109695d40"
+  },
+  {
+    "path": "pdiddler/tests/v14_probe_test.lua",
+    "blob": "f98e74d3578d97ddc2b135b085a77007d7baf6e9"
+  },
+  {
+    "path": "pdiddler/tests/v14_retry_clock_test.lua",
+    "blob": "0d1f342dca6f9ac804ea7a3816d5ae144b29dbd3"
+  },
+  {
+    "path": "pdiddler/tests/v14_strategy_test.lua",
+    "blob": "1a71f83fa0bb428cb655ae1756848b92dcaaee41"
+  },
+  {
+    "path": "pdiddler/tests/v14_teleport_autoexec_test.lua",
+    "blob": "cb2d8d1a89a505dbadc4e674ca9ae86982407c5d"
+  },
+  {
+    "path": "pdiddler/tests/v14_trading_runtime_test.lua",
+    "blob": "ed73519b08cb841f602a0cd481602a63f2b403cb"
+  },
+  {
+    "path": "pdiddler/tests/v14_transaction_test.lua",
+    "blob": "6930b263d03d9145a9f299ac56fae54810934ca8"
+  },
+  {
+    "path": "pdiddler/tests/v15_opponent_addition_test.lua",
+    "blob": "60494662a72df1c26e705b795d02716c71ac028e"
+  },
+  {
+    "path": "pdiddler/tests/v15_source_guard.py",
+    "blob": "9141e5355343f387c7fb3c02cd5b31dc56e062a1"
+  },
+  {
+    "path": "pdiddler/tests/v6_final_wait_policy_test.lua",
+    "blob": "8eac1a388ba9bd5bf62b443a1e04e66d6e52dee5"
+  },
+  {
+    "path": "pdiddler/tests/v7_delayed_sweeten_policy_test.lua",
+    "blob": "f29c0d2b952a8b0d3cb271a8078deda47048ed40"
+  },
+  {
+    "path": "pdiddler/tests/v8_visible_accept_gate_test.lua",
+    "blob": "05a0beb0e8837f8c874c79ef653b1332c5b9c348"
+  },
+  {
+    "path": "pdiddler/tests/v9_early_counter_policy_test.lua",
+    "blob": "616869da01a73398603ff6cab71d7cf9558ec114"
+  },
+  {
+    "path": "pdiddler/tests/v9_early_counter_runtime_test.lua",
+    "blob": "25de2af850a2851061d1cd38c7d44cfb502cbcd3"
+  },
+  {
+    "path": "research-notes/deep-search/COMMUNITY_EVIDENCE.md",
+    "blob": "1d87438c93d9db55d98dc894d88894696a10fb71"
+  },
+  {
+    "path": "research-notes/deep-search/CONCLUSION_AND_IMPLEMENTATION.md",
+    "blob": "9cda8a7376729ce4ef5d096312fd54df1088af1a"
+  },
+  {
+    "path": "research-notes/deep-search/PUBLIC_PLATFORM_INVESTIGATION.json",
+    "blob": "4bfd0edb321da91b268f0bacc3638856cba30b6a"
+  },
+  {
+    "path": "research-notes/deep-search/TIKTOK_INDEX_OBSERVATIONS.json",
+    "blob": "5c488c0c08c7f95c998f2e3f07f46b345a4d8e80"
+  },
+  {
+    "path": "research-notes/deep-search/VIDEO_TIKTOK_EVIDENCE.md",
+    "blob": "11d76ef6ac4110196bf66f18b8c710409f3230fb"
+  },
+  {
+    "path": "scripts/update_values.py",
+    "blob": "8610d23bdbc74189fe795c4417faad54d821680a"
+  },
+  {
+    "path": "values/mm2values.lua",
+    "blob": "c83666b9c0b56624cd9ff5b1eb8a681f71d6697c"
+  }
+]
