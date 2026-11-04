@@ -1,0 +1,297 @@
+[
+  {
+    "page": "ancient",
+    "id": "771",
+    "name": "Gingerscope",
+    "changes": {
+      "supremeValue": {
+        "old": 15750,
+        "new": 16000
+      },
+      "demand": {
+        "old": 6,
+        "new": 5
+      }
+    }
+  },
+  {
+    "page": "ancient",
+    "id": "743",
+    "name": "Traveler's Axe",
+    "changes": {
+      "supremeValue": {
+        "old": 7500,
+        "new": 7300
+      }
+    }
+  },
+  {
+    "page": "ancient",
+    "id": "829",
+    "name": "Vampire's Axe",
+    "changes": {
+      "demand": {
+        "old": 6,
+        "new": 5
+      }
+    }
+  },
+  {
+    "page": "ancient",
+    "id": "1026",
+    "name": "Emberbow",
+    "changes": {
+      "supremeValue": {
+        "old": 375,
+        "new": 400
+      }
+    }
+  },
+  {
+    "page": "ancient",
+    "id": "1027",
+    "name": "Emberscythe",
+    "changes": {
+      "supremeValue": {
+        "old": 375,
+        "new": 400
+      }
+    }
+  },
+  {
+    "page": "chroma",
+    "id": "927",
+    "name": "Chroma Alienbeam",
+    "changes": {
+      "supremeValue": {
+        "old": 23500,
+        "new": 23000
+      }
+    }
+  },
+  {
+    "page": "chroma",
+    "id": "1036",
+    "name": "Chroma Emberscythe",
+    "changes": {
+      "supremeValue": {
+        "old": 10000,
+        "new": 11000
+      }
+    }
+  },
+  {
+    "page": "chroma",
+    "id": "1030",
+    "name": "Chroma Emberbow",
+    "changes": {
+      "supremeValue": {
+        "old": 4500,
+        "new": 5000
+      }
+    }
+  },
+  {
+    "page": "chroma",
+    "id": "1007",
+    "name": "Chroma Sands",
+    "changes": {
+      "supremeValue": {
+        "old": 1225,
+        "new": 1200
+      },
+      "stability": {
+        "old": "Stable",
+        "new": "Underpaid For"
+      }
+    }
+  },
+  {
+    "page": "chroma",
+    "id": "1008",
+    "name": "Chroma Beachy",
+    "changes": {
+      "supremeValue": {
+        "old": 1175,
+        "new": 1150
+      },
+      "stability": {
+        "old": "Stable",
+        "new": "Underpaid For"
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "926",
+    "name": "Alienbeam",
+    "changes": {
+      "demand": {
+        "old": 6,
+        "new": 5
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "925",
+    "name": "Raygun",
+    "changes": {
+      "demand": {
+        "old": 6,
+        "new": 5
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "741",
+    "name": "Darkshot",
+    "changes": {
+      "supremeValue": {
+        "old": 1500,
+        "new": 1475
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "742",
+    "name": "Darksword",
+    "changes": {
+      "supremeValue": {
+        "old": 1475,
+        "new": 1450
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "833",
+    "name": "Soul",
+    "changes": {
+      "supremeValue": {
+        "old": 605,
+        "new": 595
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "832",
+    "name": "Spirit",
+    "changes": {
+      "supremeValue": {
+        "old": 595,
+        "new": 585
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "924",
+    "name": "Xenoshot",
+    "changes": {
+      "supremeValue": {
+        "old": 420,
+        "new": 410
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "923",
+    "name": "Xenoknife",
+    "changes": {
+      "supremeValue": {
+        "old": 420,
+        "new": 410
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "1005",
+    "name": "Icecream",
+    "changes": {
+      "supremeValue": {
+        "old": 145,
+        "new": 140
+      },
+      "demand": {
+        "old": 3,
+        "new": 2
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "811",
+    "name": "Watergun",
+    "changes": {
+      "supremeValue": {
+        "old": 145,
+        "new": 140
+      },
+      "demand": {
+        "old": 3,
+        "new": 2
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "1031",
+    "name": "Mortal",
+    "changes": {
+      "supremeValue": {
+        "old": 140,
+        "new": 135
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "1032",
+    "name": "Immortal",
+    "changes": {
+      "supremeValue": {
+        "old": 140,
+        "new": 135
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "859",
+    "name": "Borealis",
+    "changes": {
+      "supremeValue": {
+        "old": 140,
+        "new": 135
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "858",
+    "name": "Australis",
+    "changes": {
+      "supremeValue": {
+        "old": 135,
+        "new": 130
+      }
+    }
+  },
+  {
+    "page": "godly",
+    "id": "1028",
+    "name": "Embersickle",
+    "changes": {
+      "supremeValue": {
+        "old": 90,
+        "new": 95
+      }
+    }
+  }
+]

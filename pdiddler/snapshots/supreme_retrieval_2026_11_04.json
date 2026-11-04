@@ -1,0 +1,26 @@
+{
+  "retrieval": "Firecrawl live fetch maxAge=0; public structured facts only",
+  "observationWindowStartUTC": "2026-11-04T21:55:32Z",
+  "timestampRationale": "Conservatively use the known pre-retrieval UTC clock bound, not later copy/generation time.",
+  "sourcePublicationUTC": "2026-11-04T17:27:12Z",
+  "captures": [
+    {
+      "slug": "ancients",
+      "url": "https://supremevalues.com/mm2/ancients",
+      "status": 200,
+      "scrapeId": "01a1a891-b26c-713c-98d7-d3dc07034d41"
+    },
+    {
+      "slug": "chromas",
+      "url": "https://supremevalues.com/mm2/chromas",
+      "status": 200,
+      "scrapeId": "01a1a891-b2ef-745e-b2d1-30663db4c940"
+    },
+    {
+      "slug": "godlies",
+      "url": "https://supremevalues.com/mm2/godlies",
+      "status": 200,
+      "scrapeId": "01a1a891-b261-75dc-86bf-73fd6369462d"
+    }
+  ]
+}
