@@ -65,11 +65,13 @@ test("the 5 percent branch scales for expensive trades",function()
     local action,plan=decide({},"B",1000,500,1050,{510})
     assert(action=="counter" and plan.rawTotal==510)
 end)
-test("unknown accepted state freezes all changes",function()
-    local a=decide({},"A",200,100,250,{110},{localAccepted=nil})
-    assert(a=="counter") -- explicit false is required; check actual unknown below
-    local b=decide({},"B",200,100,250,{110},{localAccepted=true})
-    assert(b=="hold")
+test("unknown or accepted local state freezes all changes",function()
+    local plans={candidate(110,250)}
+    local unknown=P.choose({},"A",offer(100),theirs(250),plans,
+        {anchorTotal=200,earlyRemaining=40,accepted=false,localAccepted=nil})
+    assert(unknown=="hold")
+    local accepted=decide({},"B",200,100,250,{110},{localAccepted=true})
+    assert(accepted=="hold")
 end)
 test("missing verified anchor fails closed",function()
     local a,_,meta=decide({},"A",nil,100,250,{110})
