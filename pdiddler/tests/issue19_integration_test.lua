@@ -19,7 +19,7 @@ end
 test(]=]
 local start=assert(source:find(point,1,true));source=source:sub(1,start-1)..setup..source:sub(start+#point)
 source=source..[[
-for _,key in ipairs({'PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS','PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER','PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS'}) do
+for _,key in ipairs({'PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS','PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER','PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS','PDIDDLER_INTEGRATION_V14_VERIFIED_WORKFLOW'}) do
  test('legacy integration '..key..' prevents a competing V13 owner',function()
   local f=fixture();local old={jobId='job',running=true};f.env[key]=old
   assert(f:run(path)==old);f:advance(25);assert(f:count('p2')==0 and f:count('outgoing')==0)
