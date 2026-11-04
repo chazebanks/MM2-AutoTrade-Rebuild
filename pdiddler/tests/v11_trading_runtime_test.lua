@@ -54,4 +54,15 @@ test("Accepted immediately after physical verification uses the verified signatu
  f:start();f:advance(1);f:setTheir({f.partnerInv.items[1]});f:advance(7)
  eq(f:total(),85);eq(f.declines,0);eq(f.accepts,0)
 end)
+test("loading readiness lost during inventory yield fences opening action",function()
+ local f=fixture();local ready=true;f.scanner.isAutomationReady=function() return ready end
+ f.ownDelay=1;f.onInventory=function() ready=false end
+ f:start();f:advance(5);eq(f.offers,0);eq(f.accepts,0)
+end)
+test("initial readiness loss closes safely instead of stranding visible ownership",function()
+ local f=fixture();local ready=true;f.scanner.isAutomationReady=function() return ready end
+ f.ownDelay=1;f.onInventory=function() ready=false end
+ f:start();f:advance(2);ready=true;f:advance(75)
+ eq(f.offers,0);eq(f.declines,1);eq(f.controller.state.active,false)
+end)
 print("TOTAL "..n.." V11 trading runtime tests")

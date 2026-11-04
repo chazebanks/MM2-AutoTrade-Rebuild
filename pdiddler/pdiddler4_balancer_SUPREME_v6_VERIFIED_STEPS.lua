@@ -5,7 +5,7 @@
 --   * accepted-empty => decline immediately
 --   * empty/no-action => decline after 12 seconds, including after removal
 --   * non-empty => stabilize, value, and rebalance our side
---   * strict +15 Supreme floor; five-second bounded negotiation
+--   * strict +15 Supreme floor; native-ready bounded negotiation
 --   * FINAL TRADE ACCEPT IS ABSOLUTELY DISABLED
 --
 -- Market decisions use one immutable dated Supreme profile and strict pure policy.
@@ -28,6 +28,7 @@ local MARKET_LOGIC=nil
 local MARKET_PLANNER=nil
 local ACCEPT_READY_GATE=nil -- read-only native UI readiness
 local EARLY_COUNTER_POLICY=nil -- pure early market-aware policy; no Roblox actions
+local AUTOMATION_READY=nil -- optional read-only readiness shared by the integration
 local BOUND=nil -- exactly one verified root/partner/session owns all mutations
 
 local C={
@@ -437,6 +438,10 @@ local function actionContext(requirePrices)
     local bound=BOUND
     if not bound or bound.invalid or not bound.alive() then return false,"stale-session" end
     if requirePrices~=false and (not MARKET_PROFILE or not MARKET_PROFILE.isFresh()) then return false,"supreme-profile-stale" end
+    if requirePrices~=false and AUTOMATION_READY then
+        local ok,ready=pcall(AUTOMATION_READY)
+        if not ok or ready~=true then return false,"automation-not-ready" end
+    end
     if requirePrices~=false and bound.deadline and os.clock()>=bound.deadline then return false,"overall-timeout" end
     local t=tradeRoot()
     if not t then return false,"trade-closed" end
@@ -1060,6 +1065,18 @@ local function runTrade(scanner,session,sessionAlive,tradeTelemetry,publishWebho
         return "supreme-snapshot-expired:"..tostring(why)
     end
 
+    local function finishInitialContextFailure(why)
+        if why=="supreme-profile-stale" then return finishExpired() end
+        if why=="automation-not-ready" then
+            invalidateWebhook(why)
+            local declined=declineTrade("loading readiness lost before initial offer")
+            if declined then return finishTradeClosed("readiness-lost-declined") end
+            holdOutcome("readiness lost; bound initial trade could not be safely closed")
+            return "readiness-unconfirmed"
+        end
+        return why
+    end
+
     local rec=scanner.getRecord(target.UserId)
     if not rec or rec.state~="whitelist" or not rec.inv then
         p4Status(
@@ -1109,10 +1126,7 @@ local function runTrade(scanner,session,sessionAlive,tradeTelemetry,publishWebho
     if timing.started then BOUND.deadline=timing.started+C.ActiveOfferWindow end
     local ownInv,ownWhy=scanner.getOwnInventory()
     local contextOK,contextWhy,current=actionContext()
-    if not contextOK then
-        if contextWhy=="supreme-profile-stale" then return finishExpired() end
-        return contextWhy
-    end
+    if not contextOK then return finishInitialContextFailure(contextWhy) end
     if readSide(current,"YourOffer").slots~=0 then return "our-offer-changed-during-inventory" end
     if not ownInv then
         p4Status(
@@ -1168,10 +1182,7 @@ local function runTrade(scanner,session,sessionAlive,tradeTelemetry,publishWebho
         if opener then
             scanner.setRequestState(target,"accepted","P4 OPENING — reachable "..tostring(opener.name).." | MANUAL ACCEPT")
             local valid,contextWhy,current=actionContext()
-            if not valid then
-                if contextWhy=="supreme-profile-stale" then return finishExpired() end
-                return contextWhy
-            end
+            if not valid then return finishInitialContextFailure(contextWhy) end
             -- No yield between this final read and OfferItem. A changed side
             -- skips the speculative opener and enters the normal planner.
             if readSide(current,"TheirOffer").slots==0 and readSide(current,"YourOffer").slots==0
@@ -1842,6 +1853,7 @@ function M.run(scanner,marketProfile,marketLogic,marketPlanner,tradeTelemetry,ac
         return prior
     end
     assert(ENV.PDIDDLER_PART4_SESSION==nil,"Part 4 already initialized; rejoin before switching builds")
+    AUTOMATION_READY=scanner.isAutomationReady
     MARKET_PROFILE=marketProfile
     MARKET_LOGIC=marketLogic
     MARKET_PLANNER=marketPlanner

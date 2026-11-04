@@ -29,6 +29,23 @@ local function roster()
     table.sort(ids)
     return table.concat(ids,",")
 end
+local function identities()
+    local out={}
+    for _,p in ipairs(Players:GetPlayers()) do
+        if p~=LP then out[p.UserId]={player=p,char=p.Character} end
+    end
+    return out
+end
+local function identitiesCurrent(entry)
+    if entry.roster~=roster() then return false end
+    for _,p in ipairs(Players:GetPlayers()) do
+        if p~=LP then
+            local old=entry.identities[p.UserId]
+            if not old or old.player~=p or old.char~=p.Character then return false end
+        end
+    end
+    return true
+end
 local function status(message)
     if label then label.Text=message end
 end
@@ -761,7 +778,7 @@ local function overview()
         if p~=LP then
             total+=1
             local s=rows[p.UserId]
-            if s and s.player==p then
+            if s and s.player==p and s.char==p.Character then
                 stationary+=s.still teleports+=s.teleports bad+=s.bad
                 if s.moving>=4 then
                     eligible+=1
@@ -791,7 +808,7 @@ local function finish(state,reason)
     local score=0
     local count=0
     for _,v in ipairs(appearance) do
-        if v.valid then count+=1 score=math.max(score,v.score or 0) end
+        if v.valid and identitiesCurrent(v) then count+=1 score=math.max(score,v.score or 0) end
     end
     E.PDIDDLER_FAST_GATE_RESULT={
         state=state,reason=reason,elapsed=elapsed,
@@ -816,7 +833,7 @@ end
 -- Appearance scans happen independently; a hung description fetch must not
 -- delay sampling or exceed the hard 10-second deadline.
 local function launchAppearance()
-    local entry={valid=false,done=false,roster=roster(),at=os.clock()}
+    local entry={valid=false,done=false,roster=roster(),identities=identities(),at=os.clock()}
     appearance[#appearance+1]=entry
     task.spawn(function()
         local ok,result=pcall(function()
@@ -824,7 +841,7 @@ local function launchAppearance()
         end)
         if not live() then return end
         entry.done=true
-        if ok and type(result)=="table" and roster()==entry.roster then
+        if ok and type(result)=="table" and identitiesCurrent(entry) then
             entry.valid=true
             entry.score=result.score or 0
             entry.bot=result.bot==true
@@ -840,7 +857,7 @@ task.spawn(function()
     local m=overview()
     local a,b=appearance[1],appearance[2]
     local corroborated=a and b and a.valid and b.valid
-        and a.roster==b.roster and b.roster==roster() and a.bot and b.bot
+        and a.roster==b.roster and identitiesCurrent(a) and identitiesCurrent(b) and a.bot and b.bot
         and a.loaded>=math.ceil(a.total*.8)
         and b.loaded>=math.ceil(b.total*.8)
     -- Partial players have adequate total movement, but most movement
@@ -858,7 +875,7 @@ task.spawn(function()
     -- Preserve the distinction between TWO COMPLETED appearance scans and
     -- POSITIVE avatar/account corroboration. A score of zero is not support.
     local twoValidScans=a and b and a.valid and b.valid
-        and a.roster==b.roster and b.roster==roster()
+        and a.roster==b.roster and identitiesCurrent(a) and identitiesCurrent(b)
         and a.total==m.total and b.total==m.total
         and a.loaded>=math.ceil(m.total*.8)
         and b.loaded>=math.ceil(m.total*.8)

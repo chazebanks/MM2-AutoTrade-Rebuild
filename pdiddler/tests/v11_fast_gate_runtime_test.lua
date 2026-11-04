@@ -36,4 +36,9 @@ test("movement in two windows is not missing-animation evidence in two windows",
   still=0,teleports=0,bad=0,moving=7,absence=6,present=1,early=6,late=1,earlyAbsent=6,lateAbsent=0} end
  local m=f.readOverview();assert(m.absent==0 and m.oneWindow==4 and m.tracked==4)
 end)
+test("respawned characters invalidate positive scans without changing the roster",function()
+ local f=gateFixture():start();f:advance(7);local nextChars=gateFixture({diverse=true})
+ for i,p in ipairs(f.players) do p.Character=nextChars.players[i].Character end
+ f:advance(10.1);assert(f:result().state~="BOT_PATTERN_FOR_REVIEW","pre-respawn appearances reused")
+end)
 print("TOTAL "..count.." actual fast-gate runtime tests")
