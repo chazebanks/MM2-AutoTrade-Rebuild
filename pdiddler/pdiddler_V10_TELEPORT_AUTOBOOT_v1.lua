@@ -40,9 +40,11 @@ ENV[KEY]=state
 local bootUrl=ENV[URL_KEY]
 local prefix=ROOT
 local suffix="/pdiddler/"..BOOT_NAME
+local bootstrapSha=type(bootUrl)=="string"
+    and bootUrl:sub(#prefix+1,#bootUrl-#suffix) or ""
 if type(bootUrl)~="string" or bootUrl:sub(1,#prefix)~=prefix
     or bootUrl:sub(-#suffix)~=suffix
-    or #bootUrl < #prefix+#suffix+40 then
+    or #bootstrapSha~=40 or not bootstrapSha:match("^[0-9a-f]+$") then
     state.started=false
     warn("[PDIDDLER V10 AUTO] Missing immutable bootstrap URL; re-run full entry snippet")
     return state
@@ -59,8 +61,10 @@ if type(queuer)=="function" then
     -- as the initial entry, and each new execution queues the next hop.
     local quoted=string.format("%q",bootUrl)
     local reentry='local e=(getgenv and getgenv()) or _G; e.'..URL_KEY..
-        '='..quoted..'; local code=game:HttpGet('..quoted..
-        ',true); local fn=assert(loadstring(code)); fn()'
+        '='..quoted..'; local deadline=os.clock()+30; '..
+        'while not game:IsLoaded() and os.clock()<deadline do task.wait(0.25) end; '..
+        'if game:IsLoaded() then local code=game:HttpGet('..quoted..
+        ',true); local fn=assert(loadstring(code)); fn() end'
     local ok,result,why=pcall(queuer,reentry)
     if ok and result~=false then
         state.queueStatus="queued"
@@ -88,8 +92,9 @@ local ok,err=pcall(function()
 end)
 if not ok then
     state.loaderStatus="failed"
-    state.started=false
-    warn("[PDIDDLER V10 AUTO] V10 loader failed:",tostring(err))
+    -- Keep the JobId claim even if launch fails; a same-job retry could
+    -- otherwise stack another queued copy before the next teleport.
+    warn("[PDIDDLER V10 AUTO] V10 loader failed; rejoin to retry:",tostring(err))
 else
     state.loaderStatus="launched"
 end
