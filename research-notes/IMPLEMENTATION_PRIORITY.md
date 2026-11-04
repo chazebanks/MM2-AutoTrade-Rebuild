@@ -1,5 +1,7 @@
 # Recommended improvements and gates
 
+**Current baseline update:** [November 4 PR14 review](CURRENT_TRADER_STRATEGY_REVIEW_2026-11-04.md) supersedes this document's old execution assumptions for new work. Verified-step ownership and the native-ready nine-second late wait are already in PR14. Use the new review's ranked remaining changes and experiment protocol; do not repeat completed fixes or restore the earlier five-second model. Original dated data and historical comparisons below are retained.
+
 Research only. Issue #4 checkpoint `4b5c6d9095d21643349cee32d43719e515e294d1`
 is preserved. No recommendation here replaces tested code or authorizes an
 automatic acceptance, reporting or merge action.

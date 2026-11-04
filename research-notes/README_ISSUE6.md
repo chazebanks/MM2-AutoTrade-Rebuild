@@ -1,5 +1,7 @@
 # Issue 6 research pack
 
+**Current-strategy follow-up, November 4:** [PR14 strategy review](CURRENT_TRADER_STRATEGY_REVIEW_2026-11-04.md), [six reproducible experiments](CURRENT_STRATEGY_EXPERIMENTS_2026-11-04.json), [comparison protocol](STRATEGY_EXPERIMENT_PROTOCOL_2026-11-04.md) and [new-source/access ledger](STRATEGY_SOURCE_UPDATE_2026-11-04.md). This follow-up uses the actual V11 implementation; the original market tables remain dated November 3. It proposes improvements without changing runtime.
+
 Documentation/data only; preserved engineering checkpoint:
 `4b5c6d9095d21643349cee32d43719e515e294d1` (draft PR #5).
 

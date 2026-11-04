@@ -93,3 +93,7 @@ No full third-party page bodies or complete transcripts are mirrored. Supreme's 
 ## Completion standard
 
 **Independently verified completed trades obtained:0.** A qualifying future record needs exact counterparties/items/quantities/variants, native final completion and matching inventory delta, dated source values and no unexplained gift/edit. Listings, one Accepted indicator, creator narration, global platform counters and methodology claims do not meet that standard. No acceptance probability or realized-liquidity dataset is fabricated.
+
+## Current-strategy follow-up
+
+[November 4 source update](STRATEGY_SOURCE_UPDATE_2026-11-04.md) records focused new retrieval, reused creator/TikTok/Reddit evidence, exact current-code experiments and their limitations. The original ledger above retains its November 3 cutoff. No new completed-settlement dataset or live-price refresh is claimed.

@@ -1,5 +1,7 @@
 # MM2 market and sustained-inventory-growth research
 
+**Current baseline update:** [November 4 PR14 review](CURRENT_TRADER_STRATEGY_REVIEW_2026-11-04.md) supersedes this document's old execution assumptions for new work. Verified-step ownership and the native-ready nine-second late wait are already in PR14. Use the new review's ranked remaining changes and experiment protocol; do not repeat completed fixes or restore the earlier five-second model. Original dated data and historical comparisons below are retained.
+
 Research cutoff: **November 3, 2026**. This is a documentation-only follow-up to
 [Issue #6](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/issues/6).
 The complete Issue #4 checkpoint is preserved at

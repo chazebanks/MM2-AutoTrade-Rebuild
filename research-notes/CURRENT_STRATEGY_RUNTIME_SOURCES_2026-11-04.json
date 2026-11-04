@@ -1,0 +1,18 @@
+{
+  "runtime_commit": "b92348125372026393c3815ecabbc8f3be1df32b",
+  "method": "Offline pure-policy reproduction at original profile observation time; synthetic raw IDs/native type; no native actions",
+  "sources": [
+    {
+      "path": "pdiddler/pdiddler4_supreme_policy_v7_VERIFIED_STEPS.lua",
+      "blob": "e9a59eff4b61387c2268842c001233af5623f82e"
+    },
+    {
+      "path": "pdiddler/pdiddler4_early_counter_policy_v2_BOUNDED_VALUE.lua",
+      "blob": "d5c9f7d2a2cf68172b9d36676a49aca4231a439d"
+    },
+    {
+      "path": "pdiddler/pdiddler_supreme_snapshot_2026_11_03_ISSUE4.lua",
+      "blob": "9b6bbb43245e4ee1d95f627657cbe8d4d8723206"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+
+QUOTE GAP: own Icecream145 + Green Luger23; receive Flowerwood235	23.0	Green Luger x1	initial-market-quote	no-meaningful-capped-plan
+Remove only Green Luger23:	145.0	Icecream x1	initial-fallback-smallest-safe
+
+EQUAL-ECONOMICS EDITS: receive101, demand1, Stable every time; start give7
+1	Boneblade x1 + Jinglegun x1 + Plasmabeam x1	give	38.0	profit	63.0	per-generation budget	31.6
+2	Jinglegun x1 + Plasmabeam x1 + Green Luger x1	give	54.0	profit	47.0	per-generation budget	19.2
+3	Ornament x1	give	65.0	profit	36.0	per-generation budget	12.8
+Total concession from unchanged101 economics:	58	(not one 40-cap trade allowance)
+
+PUBLISHED-RANGE SCENARIO: Beachy75 -> Embersickle90	true	15.0	received risk	1.0
+Research Nov3 published lower85 makes scenario gain10. This is not an executable bid.
+Icepiercer160/D3 -> 3 Ornament195/D1:	true	35.0	-2.0
+If original inventory also has Chroma Darkbringer65/D1, >=D3 held value changes160 ->0.
+
+EQUAL-STATS DP PRUNING: Darkbringer33 + Iceblaster33 x3 -> receive Ornament65	1	Darkbringer x1
+Post-inventory HHI selected / give one Iceblaster instead:	0.52149018441404	0.35953301606187
+Both give33, D1, Stable, 1 copy and yield+32; alternate is absent from candidate list.
+
+ABSOLUTE FLOOR: Orange Seer2 -> Boneblade7 +5	0	safe plans under mandated+15
+
+SYNTHETIC RISK METRIC: same give100/profit100/demand3	90%-unstable	selected before 10%-unstable two-copy candidate
+
+All six deterministic strategy experiments passed. No acceptance probabilities or completed returns are assumed.
