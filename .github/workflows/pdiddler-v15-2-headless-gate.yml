@@ -1,0 +1,46 @@
+name: Pdiddler V15.2 headless bot gate
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/**'
+      - '.github/workflows/pdiddler-v15-2-headless-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  headless-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install fixed Lua and Luau tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4 unzip
+          curl --fail --location --retry 2 --max-time 60 -o /tmp/luau.zip https://github.com/luau-lang/luau/releases/download/0.745/luau-ubuntu.zip
+          echo '186e5ddaa2b048ebc7390c11ed1b00c04e7d3beaffed429250329e3575d2ece2  /tmp/luau.zip' | sha256sum --check
+          unzip -q /tmp/luau.zip -d /tmp/pdiddler-luau
+          chmod +x /tmp/pdiddler-luau/luau /tmp/pdiddler-luau/luau-compile
+      - name: Prove exact GUI-only change to classifier
+        run: python3 pdiddler/tests/check_v15_2_headless_scope.py
+      - name: Luau compile new gate, loader and bootstrap
+        run: |
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler1_fast_gate_v7_HEADLESS.lua > /dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_INTEGRATED_v15_2_HEADLESS_GATE.lua > /dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_V15_2_TELEPORT_AUTOBOOT_v1.lua > /dev/null
+      - name: Preserve verified negotiation and current market profile
+        env:
+          LUAU_BIN: /tmp/pdiddler-luau/luau
+          LUAU_COMPILE: /tmp/pdiddler-luau/luau-compile
+        run: |
+          python3 pdiddler/tests/run_issue19_runtime.py
+          lua5.4 pdiddler/tests/current_snapshot_test.lua
+          lua5.4 pdiddler/tests/current_price_integration_test.lua
+          lua5.4 pdiddler/tests/current_price_bootstrap_test.lua
+      - name: Preserve full V14 regression suite
+        env:
+          LUAU_BIN: /tmp/pdiddler-luau/luau
+          LUAU_COMPILE: /tmp/pdiddler-luau/luau-compile
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 pdiddler/tests/run_v14_checks.py
