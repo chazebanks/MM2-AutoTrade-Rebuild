@@ -24,9 +24,13 @@ local function decide(state,signature,anchor,our,their,values,opts)
     local plans={}
     for _,v in ipairs(values or {}) do plans[#plans+1]=candidate(v,their) end
     opts=opts or {}
+    -- Lua's `a and false or b` yields b, not false; preserve explicit
+    -- native unaccepted state rather than accidentally coercing it to nil.
+    local localAccepted=opts.localAccepted
+    if localAccepted==nil then localAccepted=false end
     return P.choose(state,signature,offer(our),theirs(their),plans,{
         anchorTotal=anchor,earlyRemaining=opts.allowance or 40,
-        accepted=opts.accepted or false,localAccepted=opts.localAccepted==nil and false or opts.localAccepted})
+        accepted=opts.accepted or false,localAccepted=localAccepted})
 end
 test("no concession on unchanged opponent offer",function()
     local action,_,meta=decide({},"A",200,100,200,{102,105})
