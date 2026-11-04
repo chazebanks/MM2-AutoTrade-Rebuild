@@ -1,5 +1,5 @@
 -- PDIDDLER V15_2 TELEPORT AUTO-REENTRY v1
--- Transport-only wrapper. V15_2 pricing/trading/bot checks/hopping are untouched.
+-- Transport-only wrapper. Same V15.1 prices, negotiation, bot scoring and hopping; gate panel removed.
 -- Reads one immutable bootstrap URL passed by the initial short entry snippet.
 -- Requeues that SAME immutable URL for each subsequent teleport when the
 -- current executor exposes an actual queue-on-teleport API.
@@ -10,7 +10,7 @@ local ENV=(getgenv and getgenv()) or _G
 local KEY="PDIDDLER_V15_2_TELEPORT_AUTOBOOT_v1"
 local URL_KEY="PDIDDLER_V15_2_AUTOBOOT_URL"
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
-local V15_2_SHA="d624793fdc1c2bac638283b65bdec78091b05474"
+local V15_2_SHA="612d18cd5351ac2e75989b57bb47351d8072948f"
 local V15_2_BASE=ROOT..V15_2_SHA.."/pdiddler/"
 local BOOT_NAME="pdiddler_V15_2_TELEPORT_AUTOBOOT_v1.lua"
 
@@ -106,7 +106,7 @@ local function runPinned(filename)
 end
 local ok,err=pcall(function()
     runPinned("pdiddler_native_trade_probe_v2.lua")
-    runPinned("pdiddler_FASTGATE_V6_INTEGRATED_TEST_v15_2_GUI_STATUS.lua")
+    runPinned("pdiddler_INTEGRATED_v15_2_HEADLESS_GATE.lua")
 end)
 if not ok then
     state.loaderStatus="failed"

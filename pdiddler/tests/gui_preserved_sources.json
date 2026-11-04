@@ -28,6 +28,10 @@
     "blob": "a3ab2e8a19567057f423e0b63c21b83f348150e2"
   },
   {
+    "path": ".github/workflows/pdiddler-v15-2-headless-gate.yml",
+    "blob": "104e3eeab012ac3f40d5923cba507423a7b2633e"
+  },
+  {
     "path": ".github/workflows/pdiddler-v15-opponent-negotiation.yml",
     "blob": "e1961d8abcbcb761ed996d44b16ca17814d6dc80"
   },
@@ -282,6 +286,10 @@
   {
     "path": "pdiddler/pdiddler1_fast_gate_TEST_v6_VALID_EVIDENCE.lua",
     "blob": "9b9681bcab82bc6654ad0174aa448c3c6e00bcc5"
+  },
+  {
+    "path": "pdiddler/pdiddler1_fast_gate_v7_HEADLESS.lua",
+    "blob": "b213fbc30a65d98b370861e5b457e83e8274590f"
   },
   {
     "path": "pdiddler/pdiddler1_fast_scoring_from_known_good_v1.lua",
@@ -752,6 +760,10 @@
     "blob": "b5c75c6a6ccb51871992703d3dd50b981c51e849"
   },
   {
+    "path": "pdiddler/pdiddler_INTEGRATED_v15_2_HEADLESS_GATE.lua",
+    "blob": "eac2a34f3474bdc7a663f6e9d07f25e0145cb0b9"
+  },
+  {
     "path": "pdiddler/pdiddler_KNOWN_GOOD_PARTS_1_2_3.lua",
     "blob": "88de4b0a4195bb49d3cd7724c4ff05ca40a54891"
   },
@@ -802,6 +814,10 @@
   {
     "path": "pdiddler/pdiddler_V15_1_TELEPORT_AUTOBOOT_v1.lua",
     "blob": "596fb4491445a8af79e7dc28764ada6dec1848be"
+  },
+  {
+    "path": "pdiddler/pdiddler_V15_2_TELEPORT_AUTOBOOT_v1.lua",
+    "blob": "4d905c52440e83da732968b64d26888470ad861f"
   },
   {
     "path": "pdiddler/pdiddler_V15_TELEPORT_AUTOBOOT_v1.lua",
@@ -934,6 +950,10 @@
   {
     "path": "pdiddler/tests/check_price_refresh_scope.py",
     "blob": "e3d057f8c4e398f42de750b9aaa316fe4ed02d52"
+  },
+  {
+    "path": "pdiddler/tests/check_v15_2_headless_scope.py",
+    "blob": "a910cdd82acf51e01e2eae73b995285413521f45"
   },
   {
     "path": "pdiddler/tests/current_price_bootstrap_test.lua",

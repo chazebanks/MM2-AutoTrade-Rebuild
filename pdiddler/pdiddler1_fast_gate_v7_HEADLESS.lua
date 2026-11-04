@@ -1,4 +1,4 @@
--- PDIDDLER P1 FAST GATE V7 HEADLESS | V6 evidence and timing unchanged
+-- PDIDDLER P1 FAST GATE V7 HEADLESS | SAME measurement-focused 10-second gate, no overlay
 -- Existing thresholds/scoring retained; incomplete/stale evidence is rejected.
 -- Does not execute trade actions, change servers, or allow Part 5 to hop.
 local Players=game:GetService("Players")
@@ -45,6 +45,9 @@ local function identitiesCurrent(entry)
     end
     return true
 end
+-- Headless: preserve status telemetry in the developer console and shared state.
+-- Do not create or mutate GUI. Keep generation and lifecycle ownership intact.
+local function status(_message) end
 local function stop()
     alive=false
 end
@@ -790,6 +793,7 @@ local function finish(state,reason)
         .."cluster=%d/%d | appearance=%d score=%d | ticks=%d\nNO HOP / NO TRADE",
         state,reason,elapsed,m.total,m.eligible,m.absent,m.oneWindow,
         m.tracked,m.suspicious,m.eligible,count,score,samples)
+    status(summary)
     print("[P1 FAST V5] "..summary:gsub("\n"," | "))
     for i=1,math.min(12,#m.details) do
         print("[P1 FAST V5] "..m.details[i])

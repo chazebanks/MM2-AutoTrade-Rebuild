@@ -67,5 +67,5 @@ jobs:
           python3 pdiddler/tests/run_headless_gate.py
           lua5.4 pdiddler/tests/gui_integration_test.lua
           lua5.4 pdiddler/tests/gui_bootstrap_test.lua
-          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v15_2_GUI_STATUS.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v15_3_GUI_STATUS.lua >/dev/null
           /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_V15_2_TELEPORT_AUTOBOOT_v1.lua >/dev/null

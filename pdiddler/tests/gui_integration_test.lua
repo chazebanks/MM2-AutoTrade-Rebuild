@@ -1,7 +1,7 @@
 -- Reuse the complete successor loader contract; inject Instance boundaries only.
 local file=assert(io.open('pdiddler/tests/current_price_integration_test.lua'))
 local wrapper=file:read('*a');file:close()
-wrapper=wrapper:gsub('v15_1_CURRENT_PRICES','v15_2_GUI_STATUS'):gsub('V15_1_CURRENT_PRICES','V15_2_GUI_STATUS')
+wrapper=wrapper:gsub('v15_1_CURRENT_PRICES','v15_3_GUI_STATUS'):gsub('V15_1_CURRENT_PRICES','V15_3_GUI_STATUS')
 local before="assert(load(source,'v13-loader-contract','t',_G))()"
 local extra=[==[
 source=source:gsub('pdiddler1_fast_gate_TEST_v6_VALID_EVIDENCE.lua','pdiddler1_fast_gate_v7_HEADLESS.lua')
@@ -73,6 +73,10 @@ test('ordinary monitor updates do not overwrite scanner or P4 status',function()
 end)
 test('predecessor V15.1 owner prevents competing GUI or scanner initialization',function()
  local f=fixture();local old={jobId='job',running=true};f.env.PDIDDLER_INTEGRATION_V15_1_CURRENT_PRICES=old
+ assert(f:run(path)==old);f:advance(20);assert(#f.guiCreated==0 and f:count('p2')==0)
+end)
+test('V15.2 headless integration prevents competing startup GUI',function()
+ local f=fixture();local old={jobId='job',running=true};f.env.PDIDDLER_INTEGRATION_V15_2_HEADLESS_GATE=old
  assert(f:run(path)==old);f:advance(20);assert(#f.guiCreated==0 and f:count('p2')==0)
 end)
 print('PASS startup GUI regression cases')

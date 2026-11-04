@@ -1,25 +1,25 @@
--- V15 supervised workflow. Opponent-net-addition-only negotiation; V14 transaction and reporting adapters preserved.
+-- V15.2 headless gate: V15.1 verified prices and V15 negotiation preserved; only Part 1 overlay removed.
 -- Native automatic acceptance and completion/webhook reporting remain disabled.
 -- One bootstrap/monitor; only P5 transports. Final trade acceptance stays disabled.
 local E=(getgenv and getgenv()) or _G
-local KEY="PDIDDLER_INTEGRATION_V15_2_GUI_STATUS"
+local KEY="PDIDDLER_INTEGRATION_V15_3_GUI_STATUS"
 local JOB=game.JobId
 local prior=E[KEY]
 if type(prior)=="table" and prior.jobId==JOB and (prior.running or prior.dirty) then
-    warn("[PDIDDLER V15_2_GUI_STATUS] HOLD | existing owner or partial initialization; rejoin if stopped")
+    warn("[PDIDDLER V15_3_GUI_STATUS] HOLD | existing owner or partial initialization; rejoin if stopped")
     return prior
 end
 -- Never steal sessions from an older stack or an independent outgoing owner.
-for _,key in ipairs({"PDIDDLER_INTEGRATION_V1","PDIDDLER_INTEGRATION_V2","PDIDDLER_INTEGRATION_V3","PDIDDLER_INTEGRATION_V4_SUPREME","PDIDDLER_INTEGRATION_V5_ADAPTIVE","PDIDDLER_INTEGRATION_V6_FINAL_WAIT","PDIDDLER_INTEGRATION_V7_DELAYED_SWEETEN","PDIDDLER_INTEGRATION_V8_VISIBLE_ACCEPT","PDIDDLER_INTEGRATION_V9_EARLY_COUNTER","PDIDDLER_INTEGRATION_V10_BOUNDED_SELECTION","PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS","PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER","PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS","PDIDDLER_INTEGRATION_V14_VERIFIED_WORKFLOW","PDIDDLER_INTEGRATION_V15_OPPONENT_ADDED","PDIDDLER_INTEGRATION_V15_1_CURRENT_PRICES"}) do
+for _,key in ipairs({"PDIDDLER_INTEGRATION_V1","PDIDDLER_INTEGRATION_V2","PDIDDLER_INTEGRATION_V3","PDIDDLER_INTEGRATION_V4_SUPREME","PDIDDLER_INTEGRATION_V5_ADAPTIVE","PDIDDLER_INTEGRATION_V6_FINAL_WAIT","PDIDDLER_INTEGRATION_V7_DELAYED_SWEETEN","PDIDDLER_INTEGRATION_V8_VISIBLE_ACCEPT","PDIDDLER_INTEGRATION_V9_EARLY_COUNTER","PDIDDLER_INTEGRATION_V10_BOUNDED_SELECTION","PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS","PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER","PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS","PDIDDLER_INTEGRATION_V14_VERIFIED_WORKFLOW","PDIDDLER_INTEGRATION_V15_OPPONENT_ADDED","PDIDDLER_INTEGRATION_V15_1_CURRENT_PRICES","PDIDDLER_INTEGRATION_V15_2_HEADLESS_GATE"}) do
     local old=E[key]
     if type(old)=="table" and old.jobId==JOB then
-        warn("[PDIDDLER V15_2_GUI_STATUS] HOLD | legacy integration present; rejoin first")
+        warn("[PDIDDLER V15_3_GUI_STATUS] HOLD | legacy integration present; rejoin first")
         return old
     end
 end
 if E.PDIDDLER_OUTGOING_SESSION~=nil or E.PDIDDLER_PART4_SESSION~=nil
     or E.PDIDDLER_HOPPING_SESSION~=nil or E.PDIDDLER_PART5_CONTROLLER~=nil then
-    warn("[PDIDDLER V15_2_GUI_STATUS] HOLD | subsystem already initialized; rejoin first")
+    warn("[PDIDDLER V15_3_GUI_STATUS] HOLD | subsystem already initialized; rejoin first")
     return
 end
 local I={capabilities={autoAccept=false,completion=false,discord=false,stackedSlots=false},blockers={autoAccept="native final control/cooldown sequence unproved",completion="native boolean event lacks transaction identity; full raw inventory reconciliation unproved",discord="verified completion and persistent outbox adapter unavailable",stackedSlots="native slot/quantity behavior unproved"},running=true,dirty=false,jobId=JOB,stage="BOOT",reason="starting",lastDecision="PROCEED_UNVERIFIED"}
@@ -52,7 +52,7 @@ local function createStartupGui()
     local ok=pcall(function()
         local pg=assert(LP:FindFirstChildOfClass("PlayerGui"),"PlayerGui unavailable")
         startupGui=Instance.new("ScreenGui")
-        startupGui.Name="PdiddlerStartupStatusV15_2"
+        startupGui.Name="PdiddlerStartupStatusV15_3"
         startupGui.ResetOnSpawn=false
         startupGui.Enabled=true
         startupGui.DisplayOrder=5
@@ -74,7 +74,7 @@ local function createStartupGui()
         title.TextSize=15
         title.TextColor3=Color3.fromRGB(235,214,255)
         title.TextXAlignment=Enum.TextXAlignment.Left
-        title.Text="PDIDDLER | V15.2"
+        title.Text="PDIDDLER | V15.3"
         title.Active=false
         title.Parent=panel
         startupStatus=Instance.new("TextLabel")
@@ -95,14 +95,14 @@ local function createStartupGui()
     end)
     if not ok then
         destroyStartupGui()
-        warn("[PDIDDLER V15.2] Startup display unavailable; console status remains active")
+        warn("[PDIDDLER V15.3] Startup display unavailable; console status remains active")
     end
 end
 local function phase(stage,reason)
     if I.stage~=stage or I.reason~=reason then
         I.stage=stage; I.reason=reason
         display(stage,reason)
-        print("[PDIDDLER V15_2_GUI_STATUS] "..stage.." | "..tostring(reason))
+        print("[PDIDDLER V15_3_GUI_STATUS] "..stage.." | "..tostring(reason))
     end
 end
 local function cancel(co)
@@ -158,7 +158,7 @@ local PINS={
     profile={"snapshots/pdiddler_supreme_snapshot_2026_11_04.lua","11537dfd47f8df72aec7aeba9ecaffdfc5c879d4"},
     strict={"pdiddler4_supreme_policy_v9_CONSISTENT_QUOTES.lua","b23138cc769a632b8791fe1d50776faf1c7ac1dd"},
     p2={"pdiddler2_KNOWN_GOOD.lua","b097c1862db4cff7394d6a5e6764d34191df3283"},
-    gate={"pdiddler1_fast_gate_v7_HEADLESS.lua","64b7f6de7dfd8737554de797ceb8b6a0199a393f"},
+    gate={"pdiddler1_fast_gate_v7_HEADLESS.lua","1bcc13d857489376ee57eae42ee34de33323bbeb"},
     scanner={"pdiddler3_scanner_MODULE_v6_8_CRITICAL_PAUSE.lua","3c48b49c1e750d91bfbf088fbc737185bddf39be"},
     p4={"pdiddler4_balancer_SUPREME_v9_OPPONENT_ADDED.lua","54c9ff4b999f67b2a257be10747c32916051bdd4"},
     early={"pdiddler4_early_counter_policy_v5_OPPONENT_ADDED.lua","c6b135289f86d87664d59e2559cc95c9f67dae66"},
@@ -291,7 +291,7 @@ local function uiSafety()
     local found=#paths>0 and table.concat(paths,";") or "none (checked Lobby/Game and structural fallback)"
     if I.requestUiPath~=found then
         I.requestUiPath=found
-        print("[PDIDDLER V15_2_GUI_STATUS] REQUEST_UI | "..found)
+        print("[PDIDDLER V15_3_GUI_STATUS] REQUEST_UI | "..found)
     end
     if blocked then return false,blocked end
     if not complete then return false,"request-ui-loading:"..found end
@@ -586,7 +586,7 @@ local function boot()
     local outgoing=api(module("outgoing",5,false),"outgoing",{"run"})
     I.part4=api(bounded("P4 run",5,function() return p4.run(I.scanner,I.profile,I.strict,I.strict,{build=function() return nil end,holdOutcome=holdOutcome,lifecycle=I.lifecycle},I.acceptGate,I.earlyPolicy) end),"P4 controller",{"stop"})
     I.outgoing=api(bounded("outgoing run",5,function() return outgoing.run(I.scanner) end),"outgoing controller",{"stop"})
-    phase("TRADING","Opponent-added-only increases (+10 or 5%); no timed sweetening | Supreme +15 | V14 transaction owner preserved | Accept/Discord OFF | gate="..tostring(I.lastDecision))
+    phase("TRADING","Opponent-added-only increases (+10 or 5%); no timed sweetening | Supreme +15 | HEADLESS BOT GATE | Accept/Discord OFF | gate="..tostring(I.lastDecision))
     monitor()
 end
 task.spawn(function()
