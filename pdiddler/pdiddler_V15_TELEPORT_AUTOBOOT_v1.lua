@@ -10,7 +10,7 @@ local ENV=(getgenv and getgenv()) or _G
 local KEY="PDIDDLER_V15_TELEPORT_AUTOBOOT_v1"
 local URL_KEY="PDIDDLER_V15_AUTOBOOT_URL"
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
-local V15_SHA="fef00c2aebb3ebe14fd25d074c6f64b1e7b42f91"
+local V15_SHA="9670c10beec0065fed8bfdac05e5b3a0cb70b7d8"
 local V15_BASE=ROOT..V15_SHA.."/pdiddler/"
 local BOOT_NAME="pdiddler_V15_TELEPORT_AUTOBOOT_v1.lua"
 

@@ -32,6 +32,15 @@ jobs:
           /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_V15_TELEPORT_AUTOBOOT_v1.lua >/dev/null
       - name: Execute new V15 pure negotiation regressions
         run: lua5.4 pdiddler/tests/v15_opponent_addition_test.lua
+      - name: Execute actual V15 controller, loader and bootstrap QA
+        env:
+          LUAU_BIN: /tmp/pdiddler-luau/luau
+          LUAU_COMPILE: /tmp/pdiddler-luau/luau-compile
+        run: |
+          python3 pdiddler/tests/run_issue19_runtime.py
+          lua5.4 pdiddler/tests/issue19_integration_test.lua
+          lua5.4 pdiddler/tests/issue19_bootstrap_test.lua
+          python3 pdiddler/tests/check_issue19_baseline.py
       - name: Preserve complete V14 production regression suite
         env:
           LUAU_BIN: /tmp/pdiddler-luau/luau
