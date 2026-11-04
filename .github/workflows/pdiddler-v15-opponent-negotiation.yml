@@ -31,7 +31,7 @@ jobs:
           /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v15_OPPONENT_ADDED.lua >/dev/null
           /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_V15_TELEPORT_AUTOBOOT_v1.lua >/dev/null
       - name: Execute new V15 pure negotiation regressions
-        run: /tmp/pdiddler-luau/luau pdiddler/tests/v15_opponent_addition_test.lua
+        run: lua5.4 pdiddler/tests/v15_opponent_addition_test.lua
       - name: Preserve complete V14 production regression suite
         env:
           LUAU_BIN: /tmp/pdiddler-luau/luau
