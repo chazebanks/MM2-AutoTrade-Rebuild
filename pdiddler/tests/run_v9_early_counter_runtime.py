@@ -31,15 +31,15 @@ new_start='''function f:start()
     end'''
 fixture=fixture.replace(old_start,new_start)
 extra=(ROOT/"pdiddler/tests/v9_early_counter_runtime_test.lua").read_text()
-bundle='local POLICY=(function()\\n'+policy+'\\nend)()\\n'
-bundle+='local EARLY=(function()\\n'+early+'\\nend)()\\n'
-bundle+='local function NEW_PART4(f)\\n'
-bundle+='local game,task=f.game,f.task\\n'
-bundle+='local os={clock=function() return f.now+(f.clockOffset or 0) end}\\n'
-bundle+='local function getgenv() return f.env end\\n'
-bundle+='local function print() end\\n'
-bundle+='local function warn() end\\n'
-bundle+=p4+'\\nend\\n'+fixture+extra
+bundle='local POLICY=(function()\n'+policy+'\nend)()\n'
+bundle+='local EARLY=(function()\n'+early+'\nend)()\n'
+bundle+='local function NEW_PART4(f)\n'
+bundle+='local game,task=f.game,f.task\n'
+bundle+='local os={clock=function() return f.now+(f.clockOffset or 0) end}\n'
+bundle+='local function getgenv() return f.env end\n'
+bundle+='local function print() end\n'
+bundle+='local function warn() end\n'
+bundle+=p4+'\nend\n'+fixture+extra
 with tempfile.TemporaryDirectory(prefix="pdiddler-v9-runtime-") as td:
     test_file=Path(td)/"v9_runtime.luau"
     test_file.write_text(bundle)
