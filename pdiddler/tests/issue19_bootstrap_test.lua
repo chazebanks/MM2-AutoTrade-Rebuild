@@ -1,6 +1,6 @@
 local file=assert(io.open('pdiddler/tests/v10_teleport_autoexec_test.lua'))
 local source=file:read('*a');file:close()
-source=source:gsub('V10','V15'):gsub('58c9aede108b60278b9baa9dd7da73f7a4d95ac5','fef00c2aebb3ebe14fd25d074c6f64b1e7b42f91')
+source=source:gsub('V10','V15'):gsub('58c9aede108b60278b9baa9dd7da73f7a4d95ac5','9670c10beec0065fed8bfdac05e5b3a0cb70b7d8')
 source=source..[[
 for _,key in ipairs({'PDIDDLER_V13_TELEPORT_AUTOBOOT_v1','PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS'}) do
  test('preservedV13 owner prevents V15 queue '..key,function()
