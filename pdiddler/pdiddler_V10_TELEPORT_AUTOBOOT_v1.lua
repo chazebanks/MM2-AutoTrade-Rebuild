@@ -60,7 +60,9 @@ if type(queuer)=="function" then
     -- No moving-branch URL: the queued bootstrap refers to the same commit
     -- as the initial entry, and each new execution queues the next hop.
     local quoted=string.format("%q",bootUrl)
-    local reentry='local e=(getgenv and getgenv()) or _G; e.'..URL_KEY..
+    local reentry='local e=(getgenv and getgenv()) or _G; '..
+        'local old=e.'..KEY..'; if type(old)=="table" and old.jobId==game.JobId '..
+        'and old.started==true then return end; e.'..URL_KEY..
         '='..quoted..'; local deadline=os.clock()+30; '..
         'while not game:IsLoaded() and os.clock()<deadline do task.wait(0.25) end; '..
         'if game:IsLoaded() then local code=game:HttpGet('..quoted..
