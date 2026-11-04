@@ -1,0 +1,122 @@
+{
+  "kind": "SYNTHETIC feasibility comparison; not a historical backtest",
+  "inventory": [
+    {
+      "id": "A",
+      "value": 90,
+      "demand": 5
+    },
+    {
+      "id": "B",
+      "value": 60,
+      "demand": 3
+    },
+    {
+      "id": "C",
+      "value": 20,
+      "demand": 2
+    },
+    {
+      "id": "D",
+      "value": 10,
+      "demand": 1
+    }
+  ],
+  "partner_offer": {
+    "id": "T",
+    "value": 100,
+    "demand": 3,
+    "arrives_seconds": 1
+  },
+  "constraints": {
+    "all_stable": true,
+    "quantity_each": 1,
+    "minimum_profit": 15,
+    "max_copies": 4,
+    "prices_known": true
+  },
+  "all_safe_plans": [
+    {
+      "give": [
+        "B"
+      ],
+      "total": 60,
+      "profit": 40,
+      "copies": 1
+    },
+    {
+      "give": [
+        "C"
+      ],
+      "total": 20,
+      "profit": 80,
+      "copies": 1
+    },
+    {
+      "give": [
+        "D"
+      ],
+      "total": 10,
+      "profit": 90,
+      "copies": 1
+    },
+    {
+      "give": [
+        "B",
+        "C"
+      ],
+      "total": 80,
+      "profit": 20,
+      "copies": 2
+    },
+    {
+      "give": [
+        "B",
+        "D"
+      ],
+      "total": 70,
+      "profit": 30,
+      "copies": 2
+    },
+    {
+      "give": [
+        "C",
+        "D"
+      ],
+      "total": 30,
+      "profit": 70,
+      "copies": 2
+    }
+  ],
+  "defined_policy_examples": {
+    "A": [
+      "B",
+      "C"
+    ],
+    "B": [
+      "B",
+      "D"
+    ],
+    "C": [
+      "D"
+    ],
+    "D": [
+      "B"
+    ],
+    "E": [
+      "B"
+    ],
+    "F": [
+      "B"
+    ]
+  },
+  "acceptance_probabilities": null,
+  "observed_completions": null,
+  "comparison_assumption": "Conditional completion at the first safe selected offer before sweetening; not observed execution.",
+  "unchanged_unaccepted_B_trajectory": {
+    "initial_total": 70,
+    "after_first_five_second_window": 80,
+    "conditional_profit_at_80": 20,
+    "termination": "final five-second wait then decline when no better safe plan exists"
+  }
+}

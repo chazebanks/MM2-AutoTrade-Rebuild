@@ -1,0 +1,176 @@
+{
+  "kind": "Offline source-level counterexamples and analytic break-even bounds; NOT a backtest",
+  "runtime_commit": "b92348125372026393c3815ecabbc8f3be1df32b",
+  "market_input_date": "2026-11-03",
+  "research_date": "2026-11-04",
+  "verified_completed_trade_sample_size": 0,
+  "acceptance_probability_estimates": null,
+  "native_actions_executed": false,
+  "fixture_type_and_raw_ids_are_synthetic": true,
+  "cases": {
+    "quote_gap": {
+      "opponent_total": 235,
+      "inventory": [
+        145,
+        23
+      ],
+      "with_add_given": 23,
+      "with_add_profit": 212,
+      "without_add_given": 145,
+      "without_add_profit": 90,
+      "late_reachable_from23": false
+    },
+    "equivalent_offer_edits": {
+      "opponent_total_each": 101,
+      "start_given": 7,
+      "verified_policy_choices": [
+        38,
+        54,
+        65
+      ],
+      "conditional_profits": [
+        63,
+        47,
+        36
+      ],
+      "concession_total": 58,
+      "individual_early_cap": 40,
+      "meaning": "Per-signature limits hold; they do not impose a trade-wide40 budget"
+    },
+    "published_range": {
+      "given": 75,
+      "received_base": 90,
+      "base_profit": 15,
+      "received_published_lower": 85,
+      "lower_scenario_profit": 10,
+      "published_lower_is_executable_bid": false
+    },
+    "quality_anchor": {
+      "given": 160,
+      "received": 195,
+      "base_profit": 35,
+      "demand_before": 3,
+      "demand_received": 1,
+      "held_value_at_demand_ge3_before": 160,
+      "held_value_at_demand_ge3_after": 0,
+      "lower_demand_is_proven_slower": false
+    },
+    "equal_stats_pruning": {
+      "given_each": 33,
+      "received": 65,
+      "profit_each": 32,
+      "candidate_count": 1,
+      "post_total": 164,
+      "selected_hhi": 0.5214901844140393,
+      "discarded_alternative_hhi": 0.35953301606186794,
+      "hhi_is_return_forecast": false
+    },
+    "absolute_floor": {
+      "given": 2,
+      "received": 7,
+      "positive_gain": 5,
+      "safe_plans": 0,
+      "approved_floor_changed": false
+    },
+    "risk_metric": {
+      "given_each": 100,
+      "profit_each": 100,
+      "selected_unstable_value_share": 0.9,
+      "alternative_unstable_value_share": 0.1,
+      "selected_copy_risk": 0.3333333333333333,
+      "alternative_copy_risk": 0.5,
+      "market_offer": false
+    }
+  },
+  "analytic_break_even": [
+    {
+      "case": "early56_to85",
+      "old_conditional_profit": 94,
+      "new_conditional_profit": 65,
+      "required_completion_probability_ratio_equal_duration": 1.4461538461538461,
+      "required_ratio_if_new_cycle_20pct_longer": 1.7353846153846153,
+      "completion_probabilities_measured": false
+    },
+    {
+      "case": "quote23_vs145",
+      "old_conditional_profit": 212,
+      "new_conditional_profit": 90,
+      "required_completion_probability_ratio_equal_duration": 2.3555555555555556,
+      "required_ratio_if_new_cycle_20pct_longer": 2.8266666666666667,
+      "completion_probabilities_measured": false
+    },
+    {
+      "case": "old_quality60_vs10",
+      "old_conditional_profit": 90,
+      "new_conditional_profit": 40,
+      "required_completion_probability_ratio_equal_duration": 2.25,
+      "required_ratio_if_new_cycle_20pct_longer": 2.6999999999999997,
+      "completion_probabilities_measured": false
+    },
+    {
+      "case": "late_profit30_to20",
+      "old_conditional_profit": 30,
+      "new_conditional_profit": 20,
+      "required_completion_probability_ratio_equal_duration": 1.5,
+      "required_ratio_if_new_cycle_20pct_longer": 1.7999999999999998,
+      "completion_probabilities_measured": false
+    }
+  ],
+  "absolute_floor_friction": [
+    {
+      "our_offer_value": 2,
+      "minimum_their_value": 17,
+      "minimum_counterparty_overpay_relative_to_ours": 7.5
+    },
+    {
+      "our_offer_value": 5,
+      "minimum_their_value": 20,
+      "minimum_counterparty_overpay_relative_to_ours": 3.0
+    },
+    {
+      "our_offer_value": 10,
+      "minimum_their_value": 25,
+      "minimum_counterparty_overpay_relative_to_ours": 1.5
+    },
+    {
+      "our_offer_value": 15,
+      "minimum_their_value": 30,
+      "minimum_counterparty_overpay_relative_to_ours": 1.0
+    },
+    {
+      "our_offer_value": 20,
+      "minimum_their_value": 35,
+      "minimum_counterparty_overpay_relative_to_ours": 0.75
+    },
+    {
+      "our_offer_value": 50,
+      "minimum_their_value": 65,
+      "minimum_counterparty_overpay_relative_to_ours": 0.3
+    },
+    {
+      "our_offer_value": 100,
+      "minimum_their_value": 115,
+      "minimum_counterparty_overpay_relative_to_ours": 0.15
+    },
+    {
+      "our_offer_value": 250,
+      "minimum_their_value": 265,
+      "minimum_counterparty_overpay_relative_to_ours": 0.06
+    },
+    {
+      "our_offer_value": 500,
+      "minimum_their_value": 515,
+      "minimum_counterparty_overpay_relative_to_ours": 0.03
+    },
+    {
+      "our_offer_value": 1000,
+      "minimum_their_value": 1015,
+      "minimum_counterparty_overpay_relative_to_ours": 0.015
+    },
+    {
+      "our_offer_value": 5000,
+      "minimum_their_value": 5015,
+      "minimum_counterparty_overpay_relative_to_ours": 0.003
+    }
+  ]
+}

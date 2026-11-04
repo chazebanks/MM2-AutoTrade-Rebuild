@@ -1,0 +1,83 @@
+[
+  {
+    "page": "godly",
+    "source_name": "Batwing",
+    "supreme_value": 1000000,
+    "class": "Godly",
+    "source_hidden": true,
+    "source_image_key": "mm2godlies/Batwing",
+    "status": "UNMAPPED; inspect class/native tradability; do not invent checker/raw ID"
+  },
+  {
+    "page": "godly",
+    "source_name": "Black Luger",
+    "supreme_value": 1000000,
+    "class": "Godly",
+    "source_hidden": true,
+    "source_image_key": "mm2godlies/Black_Luger",
+    "status": "UNMAPPED; inspect class/native tradability; do not invent checker/raw ID"
+  },
+  {
+    "page": "chroma",
+    "source_name": "Chroma Fire Bat",
+    "supreme_value": 3,
+    "class": "Godly",
+    "source_hidden": false,
+    "source_image_key": "mm2chromas/CBat",
+    "status": "UNMAPPED; inspect class/native tradability; do not invent checker/raw ID"
+  },
+  {
+    "page": "chroma",
+    "source_name": "Chroma Fire Bear",
+    "supreme_value": 3,
+    "class": "Godly",
+    "source_hidden": false,
+    "source_image_key": "mm2chromas/CBear",
+    "status": "UNMAPPED; inspect class/native tradability; do not invent checker/raw ID"
+  },
+  {
+    "page": "chroma",
+    "source_name": "Chroma Fire Bunny",
+    "supreme_value": 3,
+    "class": "Godly",
+    "source_hidden": false,
+    "source_image_key": "mm2chromas/CBunny",
+    "status": "UNMAPPED; inspect class/native tradability; do not invent checker/raw ID"
+  },
+  {
+    "page": "chroma",
+    "source_name": "Chroma Fire Cat",
+    "supreme_value": 3,
+    "class": "Godly",
+    "source_hidden": false,
+    "source_image_key": "mm2chromas/CCat",
+    "status": "UNMAPPED; inspect class/native tradability; do not invent checker/raw ID"
+  },
+  {
+    "page": "chroma",
+    "source_name": "Chroma Fire Dog",
+    "supreme_value": 3,
+    "class": "Godly",
+    "source_hidden": false,
+    "source_image_key": "mm2chromas/CDog",
+    "status": "UNMAPPED; inspect class/native tradability; do not invent checker/raw ID"
+  },
+  {
+    "page": "chroma",
+    "source_name": "Chroma Fire Fox",
+    "supreme_value": 3,
+    "class": "Godly",
+    "source_hidden": false,
+    "source_image_key": "mm2chromas/CFox",
+    "status": "UNMAPPED; inspect class/native tradability; do not invent checker/raw ID"
+  },
+  {
+    "page": "chroma",
+    "source_name": "Chroma Fire Pig",
+    "supreme_value": 3,
+    "class": "Godly",
+    "source_hidden": false,
+    "source_image_key": "mm2chromas/CPig",
+    "status": "UNMAPPED; inspect class/native tradability; do not invent checker/raw ID"
+  }
+]
