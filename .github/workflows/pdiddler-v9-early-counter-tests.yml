@@ -1,0 +1,77 @@
+name: Pdiddler V9 early counteroffer policy
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/**'
+      - '.github/workflows/pdiddler-v9-early-counter-tests.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  safety-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Install Lua and official pinned Luau compiler
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4 unzip
+          curl --fail --location --retry 2 --max-time 60 -o /tmp/luau.zip https://github.com/luau-lang/luau/releases/download/0.745/luau-ubuntu.zip
+          echo '186e5ddaa2b048ebc7390c11ed1b00c04e7d3beaffed429250329e3575d2ece2  /tmp/luau.zip' | sha256sum --check
+          unzip -q /tmp/luau.zip -d /tmp/pdiddler-luau
+          chmod +x /tmp/pdiddler-luau/luau /tmp/pdiddler-luau/luau-compile
+      - name: Run V6-V8 regressions and V9 counteroffer policy scenarios
+        run: |
+          lua5.4 pdiddler/tests/v6_final_wait_policy_test.lua
+          lua5.4 pdiddler/tests/v7_delayed_sweeten_policy_test.lua
+          lua5.4 pdiddler/tests/v8_visible_accept_gate_test.lua
+          lua5.4 pdiddler/tests/v9_early_counter_policy_test.lua
+      - name: Verify pinned V8 sources unchanged and early policy is read-only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          loader=Path("pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v8_VISIBLE_ACCEPT.lua").read_text()
+          pins=[
+              ("strict","pdiddler4_supreme_policy_v5_NATIVE_READY.lua","1d4b293df0fbc01c1191005a2924a4b6d5105261"),
+              ("p4","pdiddler4_balancer_SUPREME_v3_VISIBLE_ACCEPT.lua","12288474e56df7e0779704ac7c42622d8d17cf1c"),
+              ("acceptGate","pdiddler4_accept_ui_gate_v1.lua","55c5b4a46c26294f3d97ba61dfd43fadd4f07d02"),
+          ]
+          for key,name,sha in pins:
+              assert f'{key}={{"{name}","{sha}"}}' in loader,key
+              path="pdiddler/"+name
+              assert subprocess.check_output(["git","show",sha+":"+path])==Path(path).read_bytes(),name
+          for key in ["PDIDDLER_INTEGRATION_V5_ADAPTIVE","PDIDDLER_INTEGRATION_V6_FINAL_WAIT","PDIDDLER_INTEGRATION_V7_DELAYED_SWEETEN"]:
+              assert '"'+key+'"' in loader,key
+          assert 'p4.run(I.scanner,I.profile,I.strict,I.strict,{build=function() return nil end},I.acceptGate)' in loader
+          early=Path("pdiddler/pdiddler4_early_counter_policy_v1.lua").read_text()
+          for forbidden in [":FireServer(",":HttpPost(",":Teleport(", "VirtualInputManager", "firesignal(", "game:GetService("]:
+              assert forbidden not in early,"Early planner must be pure"
+          gate=Path("pdiddler/pdiddler4_accept_ui_gate_v1.lua").read_text()
+          for forbidden in [":FireServer(",":HttpPost(",":Teleport(", "VirtualInputManager", "firesignal("]:
+              assert forbidden not in gate,"Readiness gate must be read-only"
+          probe=Path("pdiddler/pdiddler_native_trade_probe_v1.lua").read_text()
+          for forbidden in [":FireServer(",":HttpPost(",":Teleport(", "VirtualInputManager", "firesignal("]:
+              assert forbidden not in probe, "Read-only probe contains mutation: "+forbidden
+          print("PASS V8 pinned source, prior build owners, and read-only probe audit")
+          PY
+      - name: Compile runtime files with official Luau
+        run: |
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_supreme_policy_v5_NATIVE_READY.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_accept_ui_gate_v1.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_balancer_SUPREME_v3_VISIBLE_ACCEPT.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_early_counter_policy_v1.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v8_VISIBLE_ACCEPT.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_native_trade_probe_v1.lua >/dev/null
+      - name: Run original PR5 and PR3 regression suites
+        env:
+          LUAU_BIN: /tmp/pdiddler-luau/luau
+          LUAU_COMPILE: /tmp/pdiddler-luau/luau-compile
+        run: |
+          python3 pdiddler/tests/run_integration_tests.py
+          python3 pdiddler/tests/run_trading_tests.py
+          python3 -m unittest discover -s pdiddler/tests -p test_refresh_supreme_snapshot.py
+          python3 pdiddler/tests/run_issue4_tests.py
