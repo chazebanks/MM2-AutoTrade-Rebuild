@@ -1,0 +1,37 @@
+name: Pdiddler V11 verified trading and readiness
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/**'
+      - '.github/workflows/pdiddler-v11-verified-readiness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install reproducible Lua and Luau tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4 unzip
+          curl --fail --location --retry 2 --max-time 60 -o /tmp/luau.zip https://github.com/luau-lang/luau/releases/download/0.745/luau-ubuntu.zip
+          echo '186e5ddaa2b048ebc7390c11ed1b00c04e7d3beaffed429250329e3575d2ece2  /tmp/luau.zip' | sha256sum --check
+          unzip -q /tmp/luau.zip -d /tmp/pdiddler-luau
+          chmod +x /tmp/pdiddler-luau/luau /tmp/pdiddler-luau/luau-compile
+      - name: Verify frozen baseline, immutable dependencies and all regression suites
+        env:
+          LUAU_BIN: /tmp/pdiddler-luau/luau
+          LUAU_COMPILE: /tmp/pdiddler-luau/luau-compile
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 pdiddler/tests/run_v11_checks.py
+      - name: Retain complete offline test output
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pdiddler-v11-offline-test-results
+          path: /tmp/pdiddler-v11-results.txt
+          if-no-files-found: ignore
