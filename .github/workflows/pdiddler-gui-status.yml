@@ -1,0 +1,71 @@
+name: Pdiddler startup GUI and headless detector
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/**'
+      - '.github/workflows/pdiddler-gui-status.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  negotiation-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install pinned Lua and Luau test tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4 unzip
+          curl --fail --location --retry 2 --max-time 60 -o /tmp/luau.zip https://github.com/luau-lang/luau/releases/download/0.745/luau-ubuntu.zip
+          echo '186e5ddaa2b048ebc7390c11ed1b00c04e7d3beaffed429250329e3575d2ece2  /tmp/luau.zip' | sha256sum --check
+          unzip -q /tmp/luau.zip -d /tmp/pdiddler-luau
+          chmod +x /tmp/pdiddler-luau/luau /tmp/pdiddler-luau/luau-compile
+      - name: Verify V15 source invariants
+        run: python3 pdiddler/tests/v15_source_guard.py
+      - name: Compile versioned V15 Luau runtimes
+        run: |
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_early_counter_policy_v5_OPPONENT_ADDED.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_balancer_SUPREME_v9_OPPONENT_ADDED.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v15_OPPONENT_ADDED.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_V15_TELEPORT_AUTOBOOT_v1.lua >/dev/null
+      - name: Execute new V15 pure negotiation regressions
+        run: lua5.4 pdiddler/tests/v15_opponent_addition_test.lua
+      - name: Execute actual V15 controller, loader and bootstrap QA
+        env:
+          LUAU_BIN: /tmp/pdiddler-luau/luau
+          LUAU_COMPILE: /tmp/pdiddler-luau/luau-compile
+        run: |
+          python3 pdiddler/tests/run_issue19_runtime.py
+          lua5.4 pdiddler/tests/issue19_integration_test.lua
+          lua5.4 pdiddler/tests/issue19_bootstrap_test.lua
+          python3 pdiddler/tests/check_issue19_baseline.py
+      - name: Preserve complete V14 production regression suite
+        env:
+          LUAU_BIN: /tmp/pdiddler-luau/luau
+          LUAU_COMPILE: /tmp/pdiddler-luau/luau-compile
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 pdiddler/tests/run_v14_checks.py
+
+      - name: Check refreshed canonical prices and successor entry
+        run: |
+          python3 pdiddler/tests/check_price_refresh_scope.py
+          lua5.4 pdiddler/tests/current_snapshot_test.lua
+          lua5.4 pdiddler/tests/current_price_integration_test.lua
+          lua5.4 pdiddler/tests/current_price_bootstrap_test.lua
+          /tmp/pdiddler-luau/luau-compile pdiddler/snapshots/pdiddler_supreme_snapshot_2026_11_04.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v15_1_CURRENT_PRICES.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_V15_1_TELEPORT_AUTOBOOT_v1.lua >/dev/null
+
+      - name: Verify startup GUI lifecycle and unchanged detector evidence
+        env:
+          LUAU_BIN: /tmp/pdiddler-luau/luau
+          LUAU_COMPILE: /tmp/pdiddler-luau/luau-compile
+        run: |
+          python3 pdiddler/tests/check_gui_scope.py
+          python3 pdiddler/tests/run_headless_gate.py
+          lua5.4 pdiddler/tests/gui_integration_test.lua
+          lua5.4 pdiddler/tests/gui_bootstrap_test.lua
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v15_3_GUI_STATUS.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_V15_3_TELEPORT_AUTOBOOT_v1.lua >/dev/null
