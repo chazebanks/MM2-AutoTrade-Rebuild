@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-11-04",
+  "repository": "chazebanks/MM2-AutoTrade-Rebuild",
+  "pins": [
+    {
+      "key": "readiness",
+      "ref": "962dcafe2b5c535ed7c94293ebb812693404d4e7",
+      "blob": "d6ac68e92f19a20b6de29ba1097ab0f254e8d54a"
+    },
+    {
+      "key": "strict",
+      "ref": "43c59d3eac0acbb9e94f35170adf77b4c2be2845",
+      "blob": "e9a59eff4b61387c2268842c001233af5623f82e"
+    },
+    {
+      "key": "gate",
+      "ref": "962dcafe2b5c535ed7c94293ebb812693404d4e7",
+      "blob": "9b9681bcab82bc6654ad0174aa448c3c6e00bcc5"
+    },
+    {
+      "key": "p4",
+      "ref": "962dcafe2b5c535ed7c94293ebb812693404d4e7",
+      "blob": "844593bcb64a24dee350573075ee49158b965d7d"
+    },
+    {
+      "key": "loader",
+      "ref": "e6472342ca39df0f6cd5217c368631bd06613c20",
+      "blob": "a331b1d9564540472fd7d0e17ae0aca83d573982"
+    },
+    {
+      "key": "bootstrap",
+      "ref": "e8957cd4d17cf569e52ad4f62b0442ededa50577",
+      "blob": "a1573a6977f333578d76f4e81a162f3cf0992c68"
+    }
+  ]
+}

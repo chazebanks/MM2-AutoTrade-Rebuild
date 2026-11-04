@@ -24,6 +24,6 @@ The [Player CharacterAdded documentation](https://create.roblox.com/docs/referen
 
 ## Verification and live blocker
 
-Offline:8 readiness tests,14 revised-loader integration tests, and two additional full production-P4 inventory-yield/readiness regressions pass. All are mocked Roblox/scheduler tests. The original outgoing v16 suite's34 cases pass unchanged. Exact loading UI/hang cause and physical interactions still need native MM2/iPad validation.
+Offline:10 readiness tests,16 revised-loader integration tests, and two additional full production-P4 inventory-yield/readiness regressions pass. All are mocked Roblox/scheduler tests. The original outgoing v16 suite's34 cases pass unchanged. Exact loading UI/hang cause and physical interactions still need native MM2/iPad validation.
 
 Precise capture needed if it holds: integration stage/reason, readinessState.loading.path/text if present, readinessState.character/root/playerGui presence, CoreGui observation availability, and the last native console exception. Compare an ordinary clean join, a delayed join that resolves, and a stuck join with only this one pinned build. Do not execute several versions in the same JobId. This separates normal delayed readiness from reproducible interference without attributing a cause from a screenshot alone.

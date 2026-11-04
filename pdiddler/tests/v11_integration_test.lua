@@ -106,4 +106,14 @@ test('V11 refuses live V10 owner without replacing it',function()
  local f=fixture();local old={jobId='job',running=true};f.env.PDIDDLER_INTEGRATION_V10_BOUNDED_SELECTION=old
  assert(f:run(path)==old);f:advance(20);assert(f:count('p2')==0)
 end)
+test('pending request or visible trade continues to block exhaustion hopping',function()
+ for _,which in ipairs({'SendingRequest','Trade'}) do
+  local f=fixture();f:run(path);f:advance(20);f.nodes[which].Visible=true;f:advance(85)
+  assert(f:count('hop')==0)
+ end
+end)
+test('reexecuting V11 returns the current owner without restarting selectors',function()
+ local f=fixture();local owner=f:run(path);f:advance(20);assert(f:run(path)==owner)
+ f:advance(25);assert(f:count('p2')==1 and f:count('gate')==1 and f:count('outgoing')==1)
+end)
 print('TOTAL '..n..' V11 integration tests')
