@@ -58,12 +58,40 @@ jobs:
               assert forbidden not in probe, "Read-only probe contains mutation: "+forbidden
           print("PASS V8 pinned source, prior build owners, and read-only probe audit")
           PY
+      - name: Verify V9 loader immutably pins the early policy and production P4
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          loader=Path("pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v9_EARLY_COUNTER.lua").read_text()
+          pins=[
+              ("early","pdiddler4_early_counter_policy_v1.lua","c8807e818fa9482b498430c2909e3c1872540125"),
+              ("p4","pdiddler4_balancer_SUPREME_v4_EARLY_COUNTER.lua","a996125cc7330cbb84f2a5a89432c749e7ae1d13"),
+          ]
+          for key,name,commit in pins:
+              assert f'{key}={{"{name}","{commit}"}}' in loader,key
+              assert subprocess.check_output(["git","show",commit+":pdiddler/"+name])==Path("pdiddler/"+name).read_bytes()
+          assert 'p4.run(I.scanner,I.profile,I.strict,I.strict,{build=function() return nil end},I.acceptGate,I.earlyPolicy)' in loader
+          assert '"PDIDDLER_INTEGRATION_V8_VISIBLE_ACCEPT"' in loader
+          assert 'local KEY="PDIDDLER_INTEGRATION_V9_EARLY_COUNTER"' in loader
+          code=Path("pdiddler/pdiddler4_balancer_SUPREME_v4_EARLY_COUNTER.lua").read_text()
+          assert 'if not earlyPlan then' in code and 'EARLY_COUNTER_POLICY.choose' in code
+          assert code.index('EARLY_COUNTER_POLICY.choose')<code.index('MARKET_LOGIC.negotiate(\n                    negotiation')
+          print("PASS immutable V9 policy/P4 pins; early stage precedes late stage")
+          PY
+      - name: Verify actual V9 P4 rebalancer against Roblox-style Luau fixture
+        env:
+          LUAU_BIN: /tmp/pdiddler-luau/luau
+          LUAU_COMPILE: /tmp/pdiddler-luau/luau-compile
+        run: python3 pdiddler/tests/run_v9_early_counter_runtime.py
       - name: Compile runtime files with official Luau
         run: |
           /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_supreme_policy_v5_NATIVE_READY.lua >/dev/null
           /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_accept_ui_gate_v1.lua >/dev/null
           /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_balancer_SUPREME_v3_VISIBLE_ACCEPT.lua >/dev/null
           /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_early_counter_policy_v1.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_balancer_SUPREME_v4_EARLY_COUNTER.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v9_EARLY_COUNTER.lua >/dev/null
           /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_FASTGATE_V5_INTEGRATED_TEST_v8_VISIBLE_ACCEPT.lua >/dev/null
           /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_native_trade_probe_v1.lua >/dev/null
       - name: Run original PR5 and PR3 regression suites
