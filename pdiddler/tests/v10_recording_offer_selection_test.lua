@@ -28,9 +28,9 @@ local theirItems={
 -- Our actually observed / plausible inventory: 7,13,18,22,23,40,65.
 local ownItems={
     put("Boneblade","godly",7),
-    put("Jinglegun","godly",13,"1","Stable"),
+    put("Jinglegun","godly",13,1,"Stable"),
     put("Plasmabeam","godly",18),
-    put("Laser","godly",22,"1","Stable","Gun"),
+    put("Laser","godly",22,1,"Stable","Gun"),
     put("Green Luger","godly",23,1,"Stable","Gun"),
     put("Chroma Laser","chroma",40,1,"Stable","Gun"),
     put("Ornament","godly",65),
@@ -77,18 +77,18 @@ test("opponent accepted blocks early reoffer",function()
     eq(state.spent,false)
 end)
 test("late +94 concession never exceeds 25% headroom or 20 value",function()
-    local p,why,details=Market.selectLateConcession(plans,7,1)
+    local p,why,details=Market.selectLateConcession(plans,7,1,101)
     assert(p,why)
     assert(p.rawTotal>7 and p.rawTotal<=26.75)
     assert(p.rawProfit>=74.25 and p.rawProfit>=15)
     assert(details.increment<=19.75)
 end)
 test("late cannot choose raw offer 78 from raw 7",function()
-    local p=Market.selectLateConcession(plans,7,1)
+    local p=Market.selectLateConcession(plans,7,1,101)
     assert(p and p.rawTotal<78,p and p.rawTotal)
 end)
 test("late from +65 can only sacrifice up to 12.5 (raw 36 -> <=48.5)",function()
-    local p,why,details=Market.selectLateConcession(plans,36,2)
+    local p,why,details=Market.selectLateConcession(plans,36,2,101)
     assert(p,why)
     assert(p.rawTotal>36 and p.rawTotal<=48.5)
     assert(p.rawProfit>=52.5)
@@ -96,7 +96,7 @@ test("late from +65 can only sacrifice up to 12.5 (raw 36 -> <=48.5)",function()
 end)
 test("later from +26 / 40 on their revised 66 protects small increment",function()
     local p={ok=true,rawTotal=45,rawProfit=21,units=2,givenExitScore=1,givenRisk=0,key="Laser+Green Luger"}
-    local chosen,why=Market.selectLateConcession({p},40,1)
+    local chosen,why=Market.selectLateConcession({p},40,1,66)
     -- Headroom 26-15=11; 25%=2.75 < min meaningful 3.2.
     eq(chosen,nil);eq(why,"no-meaningful-safe-increment")
 end)
@@ -104,14 +104,14 @@ test("late cannot accept a bogus raw profit or below +15",function()
     local p,why=Market.selectLateConcession({
         {ok=true,rawTotal=23,rawProfit=500,units=1,givenExitScore=1,givenRisk=0,key="phantom"},
         {ok=true,rawTotal=87,rawProfit=14,units=1,givenExitScore=1,givenRisk=0,key="unsafe"},
-    },7,1)
+    },7,1,101)
     eq(p,nil);eq(why,"no-meaningful-capped-plan")
 end)
 test("late wait preserves 9s and only changes after real readiness",function()
     local s={}
-    eq(Market.negotiate(s,"101",7,plans,0,false,false),"accept-not-ready")
-    eq(Market.negotiate(s,"101",7,plans,9,false,false),"accept-not-ready")
-    local action,p=Market.negotiate(s,"101",7,plans,9.1,false,true)
+    eq(Market.negotiate(s,"101",7,plans,0,false,false,101),"accept-not-ready")
+    eq(Market.negotiate(s,"101",7,plans,9,false,false,101),"accept-not-ready")
+    local action,p=Market.negotiate(s,"101",7,plans,9.1,false,true,101)
     eq(action,"improve");assert(p.rawProfit>=74.25)
 end)
 test("first-response planner never immediately selects +15-floor exchange",function()
@@ -127,9 +127,9 @@ test("first-response fallback retains highest margin when no capped item fits",f
 end)
 test("final 5s window and two-sweeten cap preserved after full readiness",function()
     local s={signature="sig",total=23,steps=2,since=0}
-    eq(Market.negotiate(s,"sig",23,plans,8.9,false,true),"wait")
-    eq(Market.negotiate(s,"sig",23,plans,9,false,true),"final-wait")
-    eq(Market.negotiate(s,"sig",23,plans,13.9,false,true),"final-wait")
-    eq(Market.negotiate(s,"sig",23,plans,14,false,true),"decline")
+    eq(Market.negotiate(s,"sig",23,plans,8.9,false,true,101),"wait")
+    eq(Market.negotiate(s,"sig",23,plans,9,false,true,101),"final-wait")
+    eq(Market.negotiate(s,"sig",23,plans,13.9,false,true,101),"final-wait")
+    eq(Market.negotiate(s,"sig",23,plans,14,false,true,101),"decline")
 end)
 print("RESULT "..passed.." V10 bounded live-recording regressions passed")
