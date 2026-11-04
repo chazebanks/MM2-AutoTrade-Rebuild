@@ -12,7 +12,9 @@ local function plan(id,value,marketDemand,risk,qty,theirValue)
     qty=qty or 1
     return {ok=true,key=id,rawTotal=value,rawProfit=(theirValue or 150)-value,
         givenExitScore=marketDemand,givenRisk=risk,units=qty,
-        picks={{page="godly",id=id,qty=qty}}}
+        picks={{page="godly",id=id,qty=qty,value=value/qty,
+            demand=marketDemand,stability=risk>=0.5 and "Fluctuating" or "Stable",
+            cat="Weapons",type="Knife"}}}
 end
 local function live(value,demand,risk,counts)
     return {rawTotal=value,unresolved={},counts=counts or {["godly:Original"]=1},
@@ -162,5 +164,35 @@ test("actual Supreme buildPlans fixture selects high-demand +65 from +94",functi
     local action,candidate=call({},"target-signature",cur,their,plans)
     eq(action,"counter");eq(candidate.rawTotal,85);eq(candidate.rawProfit,65)
     assert(candidate.picks[1].id=="raw_Attractive")
+end)
+test("mixed-value bundle uses comparable VALUE-WEIGHTED stability risk",function()
+    local cur=live(56,2,0.65)
+    local mixed={ok=true,key="MixedStable",rawTotal=80,rawProfit=70,
+        givenExitScore=2,givenRisk=0.5,units=2,
+        picks={
+            {page="godly",id="StableBig",qty=1,value=70,demand=2,
+                stability="Stable",cat="Weapons",type="Knife"},
+            {page="godly",id="UnstableSmall",qty=1,value=10,demand=2,
+                stability="Fluctuating",cat="Weapons",type="Gun"},
+        }}
+    local action,p=call({},"sig",cur,theirs,{mixed})
+    eq(action,"counter");eq(p.key,"MixedStable")
+end)
+test("candidate raw value must equal all priced pick subtotals",function()
+    local bad=plan("BadPrice",85,6,0)
+    bad.picks[1].value=84
+    eq(call({},"sig",original,theirs,{bad}),"keep")
+end)
+test("candidate demand score must match its actual verified items",function()
+    local bad=plan("FalseDemand",85,6,0)
+    bad.givenExitScore=10
+    eq(call({},"sig",original,theirs,{bad}),"keep")
+end)
+test("candidate missing demand, category or stability is rejected",function()
+    local bad=plan("UnknownMarket",85,6,0)
+    bad.picks[1].stability=nil
+    local wrong=plan("NotWeapon",85,6,0)
+    wrong.picks[1].cat="Pets"
+    eq(call({},"sig",original,theirs,{bad,wrong}),"keep")
 end)
 print("RESULT "..n.." V9 early counteroffer tests passed")
