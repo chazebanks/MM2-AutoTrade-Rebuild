@@ -1,0 +1,30 @@
+{
+  "checked_at": "2026-11-04",
+  "pins": [
+    {
+      "path": "pdiddler/pdiddler4_supreme_policy_v8_PORTFOLIO_LEDGER.lua",
+      "ref": "a8b2e1641297678a51cb2ed04fe0932830b4a22d",
+      "blob": "0a60a6761721ce4fc1c14b91ee996e7fc4c1b19a"
+    },
+    {
+      "path": "pdiddler/pdiddler4_early_counter_policy_v3_TRADE_BUDGET.lua",
+      "ref": "a8b2e1641297678a51cb2ed04fe0932830b4a22d",
+      "blob": "e786f5aba54693b88d01f9bcf3ce8c366ae0979b"
+    },
+    {
+      "path": "pdiddler/pdiddler4_balancer_SUPREME_v7_PORTFOLIO_LEDGER.lua",
+      "ref": "a8b2e1641297678a51cb2ed04fe0932830b4a22d",
+      "blob": "2c54876bc29e9f42d59c5abc85c7c0219ff24ede"
+    },
+    {
+      "path": "pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v12_PORTFOLIO_LEDGER.lua",
+      "ref": "8bd4fd7f08301ae2752ed67bfa013d4302f6cb9a",
+      "blob": "cf0a01f4ae291ff80fb0c4a1b9aa49345a179ef5"
+    },
+    {
+      "path": "pdiddler/pdiddler_V12_TELEPORT_AUTOBOOT_v1.lua",
+      "ref": "e468820916abf6825427fd69559d0dadc561deeb",
+      "blob": "be6dd97e8fd04fb0c4aac9548472c5e29c30f332"
+    }
+  ]
+}

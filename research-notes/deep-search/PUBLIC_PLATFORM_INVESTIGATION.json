@@ -1,0 +1,103 @@
+{
+  "status": "failed",
+  "stop_reason": "credit_limit_reached",
+  "notice": "This agent run stopped at its credit limit (maxCredits) before finishing. `partial` is an INCOMPLETE best-effort result, not a finished answer; tell the user it is incomplete. Agent message: Incomplete: public pages and platform methods were documented, but no individually verified completed MM2 trade with exact variants, quantities, and exit proof was found. To continue, call firecrawl_agent with threadId \"01a1a58b-e285-76a6-b9fd-a8db90560221\" and a prompt to finish the task (the follow-up resumes from this partial), or start a new run with a higher maxCredits.",
+  "configured_credit_cap": 30,
+  "reported_credits_used": 0,
+  "partial_observations": {
+    "sources": [
+      {
+        "title": "Neblio MM2 Trading",
+        "url": "https://neblio.com/mm2",
+        "observations": [
+          "Public page exposes Calculator, Values, Servers, Discord, Value Changes, Offers, Search, and Filters.",
+          "Page displayed 'Matching Offers 3,138 Results' and live offer cards with usernames, timestamps, offered totals, item counts, and trade controls.",
+          "A public 'Submit Completed' control was observed.",
+          "The page explains that accepted Neblio trades are followed by an in-game trade, but the captured evidence does not show an individual completed-trade record or exit proof."
+        ],
+        "evidence_type": "Public offer feed and platform-method description",
+        "proof_limit": "Displayed offers are not independently verified completed trades."
+      },
+      {
+        "title": "Traderie MM2 marketplace",
+        "url": "https://traderie.com/mm2",
+        "observations": [
+          "Public navigation exposes marketplace listings, value list, guides, FAQ, safe-trading guide, review standards, and product categories.",
+          "The homepage states '20,391,763 Successful Trades.'",
+          "A public listing showed 1 x Raygun Gun 2025 requested in exchange for either 1 x Chroma Mortal Knife 2026 or 1 x Chroma Immortal Gun 2026, listed 9 hours earlier.",
+          "The listing showed seller rating 5.00 and 13 reviews, but required sign-up to view contact details and make offers."
+        ],
+        "evidence_type": "Public listing and platform aggregate claim",
+        "proof_limit": "The listing is a posted ask, not proof that the trade occurred; the aggregate successful-trade number was not supported by an inspectable individual transaction in the captured material."
+      },
+      {
+        "title": "Traderie Review Standards",
+        "url": "https://traderie.com/mm2/review-standards?mm2",
+        "observations": [
+          "Traderie permits reviews for completed trades and for a seller or buyer canceling after acceptance.",
+          "It prohibits reviews based on fabricated or mostly incorrect information and prohibits reviews for merely commenting on listings or pricing."
+        ],
+        "evidence_type": "Platform policy",
+        "proof_limit": "A permitted review is not independently observable transaction proof, and no individual review passage or matching item/quantity pair was captured."
+      },
+      {
+        "title": "MM2 Trade Hub Trade Feed",
+        "url": "https://mm2tradehub.com/trade",
+        "observations": [
+          "The site describes its feed as live community trade posts, with item sides, total MM2 trade values, and messaging.",
+          "It explicitly says users post trades and use DMs to agree and close.",
+          "Its explanatory text states that trade counts are based on posted offers, not completed trades."
+        ],
+        "evidence_type": "Public trade-feed description and editorial disclosure",
+        "proof_limit": "The feed is offer evidence, not completed-trade evidence. No individual completed example with exact exit proof was captured."
+      },
+      {
+        "title": "MM2 Trade Hub Editorial Policy",
+        "url": "https://mm2tradehub.com/editorial-policy",
+        "observations": [
+          "The page says values are published by MM2Values.com and Supreme Values and that the site reads both lists several times daily.",
+          "It says some item values are estimated and that some items have no agreed value.",
+          "It states that the site's own trade counts come from player-posted trades and are not completed trades."
+        ],
+        "evidence_type": "Platform methodology disclosure",
+        "proof_limit": "This supports source provenance and the distinction between asks and completions, but does not establish realized prices."
+      },
+      {
+        "title": "Traderie Safe Trading Guide",
+        "url": "https://traderie.com/mm2/trading-guide?mm2",
+        "observations": [
+          "A public safe-trading-guide page was accessible and exposed navigation to related support pages."
+        ],
+        "evidence_type": "Public navigation",
+        "proof_limit": "The captured page contained no detailed, item-specific completion evidence."
+      }
+    ],
+    "completed_examples": [],
+    "conclusions": [
+      "The completed evidence is insufficient to claim any individual MM2 trade with exact variants, quantities, and independently observable completion or exit proof.",
+      "Neblio exposes completed-trade submission/navigation, but the captured public record did not provide inspectable proof for a specific completion.",
+      "Traderie reviews and its headline successful-trade count may indicate platform activity, but the captured material does not tie them to a specific item pair, quantity, date, and realized exit.",
+      "MM2 Trade Hub explicitly distinguishes posted offers from completed trades; its trade feed should therefore be treated as ask/intent evidence.",
+      "No supported acceptance or profit probabilities can be derived from the captured evidence.",
+      "For a trader requiring a strict Supreme +15 floor and four-copy constraint, the evidence supports using public feeds only to identify candidate asks and platform mechanics. Any concession should be justified by an independently verified completed transaction or a documented, repeatable exit—not by a listing, value-list number, review count, or platform aggregate.",
+      "The captured material does not establish whether compact upgrades outperform liquid denominations, whether popular items outperform base values, or a quantitative concession threshold."
+    ],
+    "access_failures": [
+      "No individual public completed-trade record with full exact item variants and quantities was captured.",
+      "No observable in-game completion, acceptance event, or subsequent resale/exit was captured.",
+      "Traderie required sign-up to view contact details and make offers on the inspected listing.",
+      "Public platform claims and review systems were not sufficient to verify a specific completed trade."
+    ]
+  },
+  "verified_settlements": 0,
+  "independent_checks": [
+    {
+      "url": "https://traderie.com/mm2/review-standards?mm2",
+      "scrape_id": "01a1a594-ee67-720e-a242-cb92755795f8"
+    },
+    {
+      "url": "https://mm2tradehub.com/editorial-policy",
+      "scrape_id": "01a1a594-ee1b-757b-85bf-45e20c96341c"
+    }
+  ]
+}
