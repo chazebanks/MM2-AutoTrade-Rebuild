@@ -1,0 +1,40 @@
+name: Pdiddler V15 opponent-added negotiation
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/**'
+      - '.github/workflows/pdiddler-v15-opponent-negotiation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  negotiation-regressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install pinned Lua and Luau test tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4 unzip
+          curl --fail --location --retry 2 --max-time 60 -o /tmp/luau.zip https://github.com/luau-lang/luau/releases/download/0.745/luau-ubuntu.zip
+          echo '186e5ddaa2b048ebc7390c11ed1b00c04e7d3beaffed429250329e3575d2ece2  /tmp/luau.zip' | sha256sum --check
+          unzip -q /tmp/luau.zip -d /tmp/pdiddler-luau
+          chmod +x /tmp/pdiddler-luau/luau /tmp/pdiddler-luau/luau-compile
+      - name: Verify V15 source invariants
+        run: python3 pdiddler/tests/v15_source_guard.py
+      - name: Compile versioned V15 Luau runtimes
+        run: |
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_early_counter_policy_v5_OPPONENT_ADDED.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler4_balancer_SUPREME_v9_OPPONENT_ADDED.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v15_OPPONENT_ADDED.lua >/dev/null
+          /tmp/pdiddler-luau/luau-compile pdiddler/pdiddler_V15_TELEPORT_AUTOBOOT_v1.lua >/dev/null
+      - name: Execute new V15 pure negotiation regressions
+        run: lua5.4 pdiddler/tests/v15_opponent_addition_test.lua
+      - name: Preserve complete V14 production regression suite
+        env:
+          LUAU_BIN: /tmp/pdiddler-luau/luau
+          LUAU_COMPILE: /tmp/pdiddler-luau/luau-compile
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 pdiddler/tests/run_v14_checks.py
