@@ -1,0 +1,168 @@
+{
+  "description": "Actual GitHub blob metadata verified against local bytes; native gameplay not executed",
+  "moduleCommit": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+  "loaderCommit": "461f8fc0e6a3392460922e28f54bc178967647ad",
+  "bootstrapCommit": "0de09a34efa91fae85c4f8069c9321a7db5aa3fc",
+  "checks": [
+    {
+      "key": "readiness",
+      "path": "pdiddler/pdiddler_readiness_v2_VISIBLE_SCAN.lua",
+      "ref": "8144fd2dc9b1a446c336adeeea8dfd6139a7aab3",
+      "expectedBlob": "409b6e4fdf85447859da0180bfc3e807520cdb09",
+      "remoteBlob": "409b6e4fdf85447859da0180bfc3e807520cdb09",
+      "match": true
+    },
+    {
+      "key": "profile",
+      "path": "pdiddler/pdiddler_supreme_snapshot_2026_11_03_ISSUE4.lua",
+      "ref": "7ecd5b44b30f513a16061f0cb92476cb8cd2e6fa",
+      "expectedBlob": "9b6bbb43245e4ee1d95f627657cbe8d4d8723206",
+      "remoteBlob": "9b6bbb43245e4ee1d95f627657cbe8d4d8723206",
+      "match": true
+    },
+    {
+      "key": "strict",
+      "path": "pdiddler/pdiddler4_supreme_policy_v9_CONSISTENT_QUOTES.lua",
+      "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+      "expectedBlob": "4aac33d5ac32cba3c83562e53644099f377ac2e2",
+      "remoteBlob": "4aac33d5ac32cba3c83562e53644099f377ac2e2",
+      "match": true
+    },
+    {
+      "key": "p2",
+      "path": "pdiddler/pdiddler2_KNOWN_GOOD.lua",
+      "ref": "b097c1862db4cff7394d6a5e6764d34191df3283",
+      "expectedBlob": "463915e34d509b55b1a17634ec74396e7d82b76c",
+      "remoteBlob": "463915e34d509b55b1a17634ec74396e7d82b76c",
+      "match": true
+    },
+    {
+      "key": "gate",
+      "path": "pdiddler/pdiddler1_fast_gate_TEST_v6_VALID_EVIDENCE.lua",
+      "ref": "962dcafe2b5c535ed7c94293ebb812693404d4e7",
+      "expectedBlob": "9b9681bcab82bc6654ad0174aa448c3c6e00bcc5",
+      "remoteBlob": "9b9681bcab82bc6654ad0174aa448c3c6e00bcc5",
+      "match": true
+    },
+    {
+      "key": "scanner",
+      "path": "pdiddler/pdiddler3_scanner_MODULE_v6_8_CRITICAL_PAUSE.lua",
+      "ref": "3c48b49c1e750d91bfbf088fbc737185bddf39be",
+      "expectedBlob": "f1d4b5393846289fee766f06591dc1d5d5eda890",
+      "remoteBlob": "f1d4b5393846289fee766f06591dc1d5d5eda890",
+      "match": true
+    },
+    {
+      "key": "p4",
+      "path": "pdiddler/pdiddler4_balancer_SUPREME_v8_TRANSACTION_OWNER.lua",
+      "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+      "expectedBlob": "bdaafcd419e6d6b768399c35b5146a5538bab198",
+      "remoteBlob": "bdaafcd419e6d6b768399c35b5146a5538bab198",
+      "match": true
+    },
+    {
+      "key": "early",
+      "path": "pdiddler/pdiddler4_early_counter_policy_v4_MEASURED_APPEAL.lua",
+      "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+      "expectedBlob": "ee1e8bf27eb248fecd9cba8c72fd0bdeaf0b6b4e",
+      "remoteBlob": "ee1e8bf27eb248fecd9cba8c72fd0bdeaf0b6b4e",
+      "match": true
+    },
+    {
+      "key": "acceptGate",
+      "path": "pdiddler/pdiddler4_accept_ui_gate_v1.lua",
+      "ref": "55c5b4a46c26294f3d97ba61dfd43fadd4f07d02",
+      "expectedBlob": "f931faaaef5cd806db36872561641b6b080cfe0a",
+      "remoteBlob": "f931faaaef5cd806db36872561641b6b080cfe0a",
+      "match": true
+    },
+    {
+      "key": "outgoing",
+      "path": "pdiddler/pdiddler3_outgoing_ROTATING_v17_TRANSACTION_LEASE.lua",
+      "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+      "expectedBlob": "7d709c2623657d25aac24f2f0c41516f93e48019",
+      "remoteBlob": "7d709c2623657d25aac24f2f0c41516f93e48019",
+      "match": true
+    },
+    {
+      "key": "policy",
+      "path": "pdiddler/pdiddler5_server_hopper_policy_v1.lua",
+      "ref": "3be1c15f435389ff518cf3a4594b34efc08e84de",
+      "expectedBlob": "fbd4643340e0f415c51538194a151340d556b7c9",
+      "remoteBlob": "fbd4643340e0f415c51538194a151340d556b7c9",
+      "match": true
+    },
+    {
+      "key": "transport",
+      "path": "pdiddler/pdiddler5_server_hopper_v2.lua",
+      "ref": "a20e96fff663e42e50bf668d5be5c7b148a70b9e",
+      "expectedBlob": "13d663c12431610edc036f709e998e9a0b2ad27d",
+      "remoteBlob": "13d663c12431610edc036f709e998e9a0b2ad27d",
+      "match": true
+    },
+    {
+      "key": "lifecycle",
+      "path": "pdiddler/pdiddler_trade_lifecycle_v1.lua",
+      "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+      "expectedBlob": "c0d20f34e5abb73336f61f06b0f1ff38b801f3b9",
+      "remoteBlob": "c0d20f34e5abb73336f61f06b0f1ff38b801f3b9",
+      "match": true
+    },
+    {
+      "key": "verifier",
+      "path": "pdiddler/pdiddler_trade_verification_v2.lua",
+      "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+      "expectedBlob": "bd3cfd32663371a7bfd20800cbb1e99472038772",
+      "remoteBlob": "bd3cfd32663371a7bfd20800cbb1e99472038772",
+      "match": true
+    },
+    {
+      "key": "outbox",
+      "path": "pdiddler/pdiddler_webhook_outbox_v3.lua",
+      "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+      "expectedBlob": "8182e84e6d64476b007a68d7b9c984bf54a9ac5a",
+      "remoteBlob": "8182e84e6d64476b007a68d7b9c984bf54a9ac5a",
+      "match": true
+    },
+    {
+      "key": "journal",
+      "path": "pdiddler/pdiddler_runtime_journal_v1.lua",
+      "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+      "expectedBlob": "f437031d3d406217f63d6793cfd0512aff78a51a",
+      "remoteBlob": "f437031d3d406217f63d6793cfd0512aff78a51a",
+      "match": true
+    },
+    {
+      "key": "discord",
+      "path": "pdiddler/pdiddler_discord_transport_v1.lua",
+      "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+      "expectedBlob": "9f532ad6ba1324dc123e54ad95cc6dab7195e811",
+      "remoteBlob": "9f532ad6ba1324dc123e54ad95cc6dab7195e811",
+      "match": true
+    },
+    {
+      "key": "loader",
+      "path": "pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v14_VERIFIED_WORKFLOW.lua",
+      "ref": "461f8fc0e6a3392460922e28f54bc178967647ad",
+      "expectedBlob": "9f2b8d22224078c605d6cf2bcb3039b9b0706d1a",
+      "remoteBlob": "9f2b8d22224078c605d6cf2bcb3039b9b0706d1a",
+      "match": true
+    },
+    {
+      "key": "probe",
+      "path": "pdiddler/pdiddler_native_trade_probe_v2.lua",
+      "ref": "461f8fc0e6a3392460922e28f54bc178967647ad",
+      "expectedBlob": "bd3edb457f48c92717c20dfcfe1bccb402e2bca2",
+      "remoteBlob": "bd3edb457f48c92717c20dfcfe1bccb402e2bca2",
+      "match": true
+    },
+    {
+      "key": "bootstrap",
+      "path": "pdiddler/pdiddler_V14_TELEPORT_AUTOBOOT_v1.lua",
+      "ref": "0de09a34efa91fae85c4f8069c9321a7db5aa3fc",
+      "expectedBlob": "ee4fea6148d6d28b35969173409b035dd14d9be3",
+      "remoteBlob": "ee4fea6148d6d28b35969173409b035dd14d9be3",
+      "match": true
+    }
+  ]
+}

@@ -96,3 +96,13 @@ Final fix-pass verification:37 leaf commands PASS,248 original files byte-identi
 independent exhaustive inventories. Counts overlap inherited fixtures; not native
 trades. Full immutable-pin verification will run again afterpublication.
 No deferred review minors. No nativeMM2/Delta execution or realDiscordPOST performed.
+
+Final publication ruling: automatic review rejected propagating private webhook
+configuration through executor queued source. Removed that mechanism entirely;
+new test went RED→GREEN. Only the public pinned loader URL is queued. Private
+configuration must be supplied independently before eachsession; no credential
+is committed, printed, stored in journal or passed throughqueuedsource.
+
+Release verification afterthe saferchange:37leaf commands pass (strict immutable
+manifest),20actual GitHubblob reads match localbytes. Runtime modulepinb23138cc,
+loaderpin461f8fc0, bootstrap pin0de09a34. Native contract/realDiscord still unproved.
