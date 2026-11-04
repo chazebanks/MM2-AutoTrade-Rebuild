@@ -1,0 +1,86 @@
+[
+  {
+    "key": "readiness",
+    "path": "pdiddler/pdiddler_readiness_v2_VISIBLE_SCAN.lua",
+    "local_path": "pdiddler/pdiddler_readiness_v2_VISIBLE_SCAN.lua",
+    "ref": "8144fd2dc9b1a446c336adeeea8dfd6139a7aab3",
+    "blob": "409b6e4fdf85447859da0180bfc3e807520cdb09"
+  },
+  {
+    "key": "profile",
+    "path": "pdiddler/pdiddler_supreme_snapshot_2026_11_03_ISSUE4.lua",
+    "local_path": "pdiddler/pdiddler_supreme_snapshot_2026_11_03_ISSUE4.lua",
+    "ref": "7ecd5b44b30f513a16061f0cb92476cb8cd2e6fa",
+    "blob": "9b6bbb43245e4ee1d95f627657cbe8d4d8723206"
+  },
+  {
+    "key": "strict",
+    "path": "pdiddler/pdiddler4_supreme_policy_v8_PORTFOLIO_LEDGER.lua",
+    "local_path": "pdiddler/pdiddler4_supreme_policy_v8_PORTFOLIO_LEDGER.lua",
+    "ref": "a8b2e1641297678a51cb2ed04fe0932830b4a22d",
+    "blob": "0a60a6761721ce4fc1c14b91ee996e7fc4c1b19a"
+  },
+  {
+    "key": "p2",
+    "path": "pdiddler/pdiddler2_KNOWN_GOOD.lua",
+    "local_path": "pdiddler/pdiddler2_KNOWN_GOOD.lua",
+    "ref": "b097c1862db4cff7394d6a5e6764d34191df3283",
+    "blob": "463915e34d509b55b1a17634ec74396e7d82b76c"
+  },
+  {
+    "key": "gate",
+    "path": "pdiddler/pdiddler1_fast_gate_TEST_v6_VALID_EVIDENCE.lua",
+    "local_path": "pdiddler/pdiddler1_fast_gate_TEST_v6_VALID_EVIDENCE.lua",
+    "ref": "962dcafe2b5c535ed7c94293ebb812693404d4e7",
+    "blob": "9b9681bcab82bc6654ad0174aa448c3c6e00bcc5"
+  },
+  {
+    "key": "scanner",
+    "path": "pdiddler/pdiddler3_scanner_MODULE_v6_8_CRITICAL_PAUSE.lua",
+    "local_path": "pdiddler/pdiddler3_scanner_MODULE_v6_8_CRITICAL_PAUSE.lua",
+    "ref": "3c48b49c1e750d91bfbf088fbc737185bddf39be",
+    "blob": "f1d4b5393846289fee766f06591dc1d5d5eda890"
+  },
+  {
+    "key": "p4",
+    "path": "pdiddler/pdiddler4_balancer_SUPREME_v7_PORTFOLIO_LEDGER.lua",
+    "local_path": "pdiddler/pdiddler4_balancer_SUPREME_v7_PORTFOLIO_LEDGER.lua",
+    "ref": "a8b2e1641297678a51cb2ed04fe0932830b4a22d",
+    "blob": "2c54876bc29e9f42d59c5abc85c7c0219ff24ede"
+  },
+  {
+    "key": "early",
+    "path": "pdiddler/pdiddler4_early_counter_policy_v3_TRADE_BUDGET.lua",
+    "local_path": "pdiddler/pdiddler4_early_counter_policy_v3_TRADE_BUDGET.lua",
+    "ref": "a8b2e1641297678a51cb2ed04fe0932830b4a22d",
+    "blob": "e786f5aba54693b88d01f9bcf3ce8c366ae0979b"
+  },
+  {
+    "key": "acceptGate",
+    "path": "pdiddler/pdiddler4_accept_ui_gate_v1.lua",
+    "local_path": "pdiddler/pdiddler4_accept_ui_gate_v1.lua",
+    "ref": "55c5b4a46c26294f3d97ba61dfd43fadd4f07d02",
+    "blob": "f931faaaef5cd806db36872561641b6b080cfe0a"
+  },
+  {
+    "key": "outgoing",
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v16_EXACT_IDENTITY.lua",
+    "local_path": "pdiddler/pdiddler3_outgoing_ROTATING_v16_EXACT_IDENTITY.lua",
+    "ref": "c37c6db25a01f3c12cac98e46a1a9aedab64f675",
+    "blob": "b652dbd8f90aeec30af6a0d4fef6c190fea35b4f"
+  },
+  {
+    "key": "policy",
+    "path": "pdiddler/pdiddler5_server_hopper_policy_v1.lua",
+    "local_path": "pdiddler/tests/fixtures/p5_policy_v1.lua",
+    "ref": "3be1c15f435389ff518cf3a4594b34efc08e84de",
+    "blob": "fbd4643340e0f415c51538194a151340d556b7c9"
+  },
+  {
+    "key": "transport",
+    "path": "pdiddler/pdiddler5_server_hopper_v2.lua",
+    "local_path": "pdiddler/pdiddler5_server_hopper_v2.lua",
+    "ref": "a20e96fff663e42e50bf668d5be5c7b148a70b9e",
+    "blob": "13d663c12431610edc036f709e998e9a0b2ad27d"
+  }
+]
