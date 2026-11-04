@@ -52,17 +52,41 @@ local function picksValid(plan)
     end
     return copies<=4 and distinct<=4 and copies==plan.units
 end
-local function planValid(plan,theirValue)
+local function verifiedRisk(plan,theirValue)
+    -- The legacy plan.givenRisk is an *unweighted copy average*, while the
+    -- current live offer's market.riskPoints is value-weighted. Comparing
+    -- them would rank mixed bundles incorrectly. Recompute and VERIFY the
+    -- actual candidate value-weighted risk from already-priced plan picks.
     if type(plan)~="table" or plan.ok~=true or not picksValid(plan)
         or not finite(plan.givenExitScore) or plan.givenExitScore<0 or plan.givenExitScore>11
         or not finite(plan.givenRisk) or plan.givenRisk<0 or plan.givenRisk>1 then
-        return false
+        return nil
     end
     local tv=cents(theirValue)
     local pv=cents(plan.rawTotal)
     local profit=cents(plan.rawProfit)
-    return tv~=nil and pv~=nil and profit~=nil and pv>0
-        and tv-pv==profit and profit>=P.MinProfit*100
+    if tv==nil or pv==nil or profit==nil or pv<=0
+        or tv-pv~=profit or profit<P.MinProfit*100 then return nil end
+    local subtotal,weightedDemand,weightedRisk=0,0,0
+    for _,it in ipairs(plan.picks) do
+        local itemValue=cents(it.value)
+        if not itemValue or itemValue<=0
+            or not finite(it.demand) or it.demand<0 or it.demand>11
+            or type(it.stability)~="string" or it.stability==""
+            or it.cat~="Weapons"
+            or (it.type~="Knife" and it.type~="Gun") then
+            return nil
+        end
+        local extension=itemValue*it.qty
+        subtotal=subtotal+extension
+        weightedDemand=weightedDemand+extension*it.demand
+        weightedRisk=weightedRisk+extension*(it.stability=="Stable" and 0 or 1)
+    end
+    if subtotal~=pv or subtotal<=0
+        or math.abs(weightedDemand/subtotal-plan.givenExitScore)>1e-6 then
+        return nil
+    end
+    return weightedRisk/subtotal
 end
 local function equivalent(plan,current)
     local counts=current and current.counts
@@ -135,14 +159,15 @@ function P.choose(state,opponentSignature,current,theirs,plans,options)
     local best
     local stats={safe=0,appealing=0,underBudget=0}
     for _,plan in ipairs(plans) do
-        if planValid(plan,theirs.rawTotal) and not equivalent(plan,current) then
+        local candidateRisk=verifiedRisk(plan,theirs.rawTotal)
+        if candidateRisk~=nil and not equivalent(plan,current) then
             stats.safe=stats.safe+1
             local pc=cents(plan.rawTotal)
             local concessionCents=pc-cv
             if concessionCents>=0 and concessionCents<=budgetCents then
                 stats.underBudget=stats.underBudget+1
                 local deltaDemand=plan.givenExitScore-current.market.exitScore
-                local deltaRisk=current.market.riskPoints-plan.givenRisk
+                local deltaRisk=current.market.riskPoints-candidateRisk
                 local rank=tier(deltaDemand,deltaRisk)
                 if rank>0 then
                     stats.appealing=stats.appealing+1
