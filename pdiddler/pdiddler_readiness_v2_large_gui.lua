@@ -46,25 +46,30 @@ end
 local function loading(root)
     local now=os.clock()
     local cached=LOADING_CACHE[root]
-    if cached and now-cached.at<LOADING_RESCAN_SECONDS then
-        return cached.found,nil,cached.count
+    if not cached or now-cached.at>=LOADING_RESCAN_SECONDS then
+        local nodes=root:GetDescendants()
+        local labels={}
+        for _,node in ipairs(nodes) do
+            if node:IsA('TextLabel') or node:IsA('TextButton') then
+                labels[#labels+1]=node
+            end
+        end
+        cached={at=now,labels=labels,count=#nodes}
+        LOADING_CACHE[root]=cached
     end
-    local nodes=root:GetDescendants()
-    local found=nil
-    for _,node in ipairs(nodes) do
-        if (node:IsA('TextLabel') or node:IsA('TextButton')) and visible(node)
+    -- Recheck current text and ancestor visibility on every call. Only tree
+    -- enumeration is throttled, so existing labels can resolve immediately.
+    for _,node in ipairs(cached.labels) do
+        if node.Parent and visible(node)
             and (node.TextTransparency==nil or node.TextTransparency<1) then
             local text=tostring(node.Text or ''):gsub('<[^>]->',''):lower():gsub('[%s%p]','')
             if text=='loadingcharacter' or text=='loadingworld' then
-                found={phase=text=='loadingcharacter' and 'loading-character' or 'loading-world',
-                    path=path(node),text=tostring(node.Text)}
-                break
+                return {phase=text=='loadingcharacter' and 'loading-character' or 'loading-world',
+                    path=path(node),text=tostring(node.Text)},nil,cached.count
             end
         end
     end
-    -- A positive result holds readiness; a negative result is at most 200 ms old.
-    LOADING_CACHE[root]={at=now,found=found,count=#nodes}
-    return found,nil,#nodes
+    return nil,nil,cached.count
 end
 local function inspect(game,player)
     local s={ready=false,jobId=game.JobId,player=player}
