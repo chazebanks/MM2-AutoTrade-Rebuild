@@ -1,8 +1,18 @@
-V15.2 GUI OFFLINE RESULTS — native MM2/iPad/Delta NOT RUN
+V15.3 GUI OFFLINE RESULTS — native MM2/iPad/Delta NOT RUN
 All listed verification commands exited 0.
+PR #22 headless V15.2 preserved; 330 baseline files protected.
 
 OUTPUT: gui-scope-tests.txt
-PASS every previous repository file unchanged; loader trading and detector evidence are unchanged
+PASS every previous repository file unchanged; startup-only loader delta and preserved headless detector
+
+OUTPUT: gui-headless-scope.txt
+PASS exact isolated transform gate
+PASS no bot overlay; full result/console/ten-second scoring preserved
+PASS exact isolated transform loader
+PASS current prices, negotiation, loading, bot/hop, manual Accept and Discord gates unchanged
+PASS exact isolated transform wrapper
+PASS unique auto-entry and legacy owner refusal, no duplicated gate
+PASS V15.2 headless-only scope
 
 OUTPUT: gui-loader-tests.txt
 PASS ready stack preserves repricing and launches one existing outgoing owner
@@ -45,6 +55,7 @@ PASS reexecution cannot duplicate the startup panel or selector owner
 PASS post-handoff expiry uses existing scanner status without creating another GUI
 PASS ordinary monitor updates do not overwrite scanner or P4 status
 PASS predecessor V15.1 owner prevents competing GUI or scanner initialization
+PASS V15.2 headless integration prevents competing startup GUI
 PASS startup GUI regression cases
 
 OUTPUT: gui-headless-tests.txt
@@ -61,34 +72,36 @@ TOTAL 9 actual fast-gate runtime tests
 PASS headless detector never reads PlayerGui or creates GUI; evidence unchanged
 
 OUTPUT: gui-boot-tests.txt
-PASS direct queue adds only one hook and starts pinned V15_2
+PASS direct queue adds only one hook and starts pinned V15_3
 PASS two launch sources in one JobId cannot double-load or double-queue
 PASS queued code starts another job and queues for a third
 PASS syn.queue_on_teleport fallback supported without touching global queue
 PASS queue unavailable doesn't prevent initial launch
-PASS rejected queue reports failure but still starts initial V15_2
+PASS rejected queue reports failure but still starts initial V15_3
 PASS other Roblox places do not run the trader or create queue
 PASS no fixed commit URL refuses to queue or run
-RESULT 8 V15_2 teleport auto-reentry mock tests passed
-PASS preservedV13 owner prevents V15_2 queue PDIDDLER_V13_TELEPORT_AUTOBOOT_v1
-PASS preservedV13 owner prevents V15_2 queue PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS
+RESULT 8 V15_3 teleport auto-reentry mock tests passed
+PASS preservedV13 owner prevents V15_3 queue PDIDDLER_V13_TELEPORT_AUTOBOOT_v1
+PASS preservedV13 owner prevents V15_3 queue PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS
 PASS runtime endpoint never enters queued code or console output
-PASS preserved owner PDIDDLER_V10_TELEPORT_AUTOBOOT_v1 prevents V15_2 queue or probe
-PASS preserved owner PDIDDLER_V11_TELEPORT_AUTOBOOT_v1 prevents V15_2 queue or probe
-PASS preserved owner PDIDDLER_V12_TELEPORT_AUTOBOOT_v1 prevents V15_2 queue or probe
-PASS preserved owner PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents V15_2 queue or probe
-PASS preserved owner PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents V15_2 queue or probe
-PASS dirty V12 integration prevents V15_2 even after a partial launch
+PASS preserved owner PDIDDLER_V10_TELEPORT_AUTOBOOT_v1 prevents V15_3 queue or probe
+PASS preserved owner PDIDDLER_V11_TELEPORT_AUTOBOOT_v1 prevents V15_3 queue or probe
+PASS preserved owner PDIDDLER_V12_TELEPORT_AUTOBOOT_v1 prevents V15_3 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents V15_3 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents V15_3 queue or probe
+PASS dirty V12 integration prevents V15_3 even after a partial launch
 PASS independent P5 owner prevents another bootstrap queue
 PASS private configuration never appears in queue throw failure
 PASS private configuration never appears in queue return failure
-PASS active V14 blocks V15_2 PDIDDLER_V14_TELEPORT_AUTOBOOT_v1
-PASS active V14 blocks V15_2 PDIDDLER_INTEGRATION_V14_VERIFIED_WORKFLOW
+PASS active V14 blocks V15_3 PDIDDLER_V14_TELEPORT_AUTOBOOT_v1
+PASS active V14 blocks V15_3 PDIDDLER_INTEGRATION_V14_VERIFIED_WORKFLOW
 PASS old V15 blocks price refresh owner PDIDDLER_V15_TELEPORT_AUTOBOOT_v1
 PASS old V15 blocks price refresh owner PDIDDLER_INTEGRATION_V15_OPPONENT_ADDED
 PASS V15.1 predecessor prevents GUI build queue PDIDDLER_V15_1_TELEPORT_AUTOBOOT_v1
 PASS V15.1 predecessor prevents GUI build queue PDIDDLER_INTEGRATION_V15_1_CURRENT_PRICES
-TOTAL 26 V15_2 teleport tests
+PASS existing V15.2 headless build prevents startup-GUI queue PDIDDLER_V15_2_TELEPORT_AUTOBOOT_v1
+PASS existing V15.2 headless build prevents startup-GUI queue PDIDDLER_INTEGRATION_V15_2_HEADLESS_GATE
+TOTAL 28 V15_3 teleport tests
 
 OUTPUT: gui-p4-tests.txt
 PASS 200 205 210 cumulative trigger and verified reward watermark
@@ -177,7 +190,7 @@ TOTAL 24 V15_1 teleport tests
 OUTPUT: gui-full-suite.txt
 PASS all 248 PR15 baseline files unchanged
 PASS 17 dependency blobs and manifest
-PASS 24 added runtimes compile; no personal named objective
+PASS 26 added runtimes compile; no personal named objective
 CHECK1/16 exit=0: python3 pdiddler/tests/run_v12_checks.py
 CHECK2/16 exit=0: /usr/bin/texlua pdiddler/tests/v13_readiness_test.lua
 CHECK3/16 exit=0: /usr/bin/texlua pdiddler/tests/v13_integration_test.lua
@@ -199,7 +212,7 @@ PASS 37 leaf verification commands; full output /tmp/pdiddler-v14-results.txt
 OUTPUT: pdiddler-v14-results.txt
 V14 OFFLINE VERIFICATION — native MM2/Delta NOT executed
 IMMUTABLE RELEASE MANIFEST CHECKED
-Protected PR15 files:248; dependencies:17; added compiled runtimes:24
+Protected PR15 files:248; dependencies:17; added compiled runtimes:26
 
 COMMAND: python3 pdiddler/tests/run_v12_checks.py
 EXIT: 0
@@ -901,7 +914,7 @@ EXIT: 0
 PASS 190 real Lua records and fixed expiry across reload
 .............
 ----------------------------------------------------------------------
-Ran 13 tests in 0.014s
+Ran 13 tests in 0.012s
 
 OK
 
