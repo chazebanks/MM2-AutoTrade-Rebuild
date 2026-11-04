@@ -59,8 +59,10 @@ test("V10 early counter chooses a bounded +65-ish offer despite demand=1 tie",fu
     assert(p.rawTotal>7 and p.rawTotal<=38.6,p.rawTotal)
     assert(p.rawProfit>=62.4 and p.rawProfit<94,p.rawProfit)
     eq(m.reason,"bounded-value-lift")
-    -- Live inventory allows Jinglegun(13)+Green Luger(23)=36 -> +65.
-    eq(p.rawTotal,36);eq(p.rawProfit,65)
+    -- The actual inventory also permits Boneblade(7)+Jinglegun(13)+
+    -- Plasmabeam(18)=38. This stays inside the 31.6-value max concession
+    -- from current 7 while retaining +63, and is preferable to +23.
+    eq(p.rawTotal,38);eq(p.rawProfit,63)
 end)
 test("V10 early cannot fall from +94 to +23 (Ornament+Jinglegun)",function()
     local a,p=Early.choose({},"theirs101",ourState,theirState,plans,{accepted=false,localAccepted=false})
