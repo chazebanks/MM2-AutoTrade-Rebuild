@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Traveler's Set",
+    "value": "12,700",
+    "range": "12,600 - 12,700",
+    "stability": "Underpaid For",
+    "demand": "5",
+    "source": "https://supremevalues.com/mm2/sets"
+  },
+  {
+    "name": "Ever Set",
+    "value": "6,150",
+    "range": "[N/A]",
+    "stability": "Stable",
+    "demand": "5",
+    "source": "https://supremevalues.com/mm2/sets"
+  },
+  {
+    "name": "Alien Set",
+    "value": "3,775",
+    "range": "[N/A]",
+    "stability": "Stable",
+    "demand": "6",
+    "source": "https://supremevalues.com/mm2/sets"
+  },
+  {
+    "name": "Dark Set",
+    "value": "2,975",
+    "range": "2,925 - 2,975",
+    "stability": "Underpaid For",
+    "demand": "5",
+    "source": "https://supremevalues.com/mm2/sets"
+  },
+  {
+    "name": "Sakura Set",
+    "value": "2,310",
+    "range": "[N/A]",
+    "stability": "Stable",
+    "demand": "5",
+    "source": "https://supremevalues.com/mm2/sets"
+  },
+  {
+    "name": "Candy Set",
+    "value": "112",
+    "range": "[N/A]",
+    "stability": "Stable",
+    "demand": "1",
+    "source": "https://supremevalues.com/mm2/sets"
+  },
+  {
+    "name": "Ice Set",
+    "value": "98",
+    "range": "[N/A]",
+    "stability": "Stable",
+    "demand": "1",
+    "source": "https://supremevalues.com/mm2/sets"
+  }
+]

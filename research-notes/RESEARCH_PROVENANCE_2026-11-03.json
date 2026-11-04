@@ -1,0 +1,745 @@
+{
+  "research_cutoff": "2026-11-03",
+  "engineering_checkpoint": "4b5c6d9095d21643349cee32d43719e515e294d1",
+  "sources": [
+    {
+      "key": "supreme-ancients",
+      "url": "https://supremevalues.com/mm2/ancients?item=Gingerscope",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a368-8809-71be-891a-181873492518",
+      "error": null,
+      "available_formats": [
+        "markdown",
+        "html"
+      ]
+    },
+    {
+      "key": "supreme-godlies",
+      "url": "https://supremevalues.com/mm2/godlies",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a368-87c3-7430-bae4-0573897722fb",
+      "error": null,
+      "available_formats": [
+        "markdown",
+        "html"
+      ]
+    },
+    {
+      "key": "supreme-chromas",
+      "url": "https://supremevalues.com/mm2/chromas",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a368-9a60-756e-a0d0-b76d9ab94164",
+      "error": null,
+      "available_formats": [
+        "markdown",
+        "html"
+      ]
+    },
+    {
+      "key": "supreme-ancients-all",
+      "url": "https://supremevalues.com/mm2/ancients",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a369-9907-763c-ab59-636f47e654a4",
+      "error": null,
+      "available_formats": [
+        "markdown",
+        "html",
+        "rawHtml"
+      ]
+    },
+    {
+      "key": "supreme-sets",
+      "url": "https://supremevalues.com/mm2/sets",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a369-9816-711b-a7d8-c39664922ccd",
+      "error": null,
+      "available_formats": [
+        "markdown",
+        "html"
+      ]
+    },
+    {
+      "key": "supreme-ginger-raw",
+      "url": "https://supremevalues.com/mm2/ancients?item=Gingerscope",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a369-9806-7485-95eb-0d29db479565",
+      "error": null,
+      "available_formats": [
+        "rawHtml"
+      ]
+    },
+    {
+      "key": "mm2-ancient",
+      "url": "https://mm2values.com/?p=ancient",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a369-97d8-7211-b01f-9b2be542ba83",
+      "error": null,
+      "available_formats": [
+        "markdown",
+        "html"
+      ]
+    },
+    {
+      "key": "hub-policy",
+      "url": "https://mm2tradehub.com/editorial-policy",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a369-98a6-762b-b7f7-6c0595a2e16b",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "timesaver",
+      "url": "https://timesaver.gg/blog/mm2-gingerscope-value",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a369-97ea-7138-a7dd-6ac965718cf8",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "neblio",
+      "url": "https://neblio.com/mm2",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36a-70ad-719e-9802-144878782fe8",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "neblio-method",
+      "url": "https://neblio.com/mm2/value-list/uniques",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36a-7055-7309-b259-a54d6fa9c29d",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "traderie",
+      "url": "https://traderie.com/mm2",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36a-707d-7332-9023-e87ebdd743e3",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "cosmic",
+      "url": "https://mm2.cosmicvalues.gg/",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36a-7168-70e8-97b5-7614846f2528",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "mm2-godly",
+      "url": "https://mm2values.com/?p=godly",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36a-7067-700f-923b-d98fcd285712",
+      "error": null,
+      "available_formats": [
+        "markdown",
+        "html"
+      ]
+    },
+    {
+      "key": "mm2-chroma",
+      "url": "https://mm2values.com/?p=chroma",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36a-7057-70fb-92b0-8d6ce2a56621",
+      "error": null,
+      "available_formats": [
+        "markdown",
+        "html"
+      ]
+    },
+    {
+      "key": "hub-harvester",
+      "url": "https://mm2tradehub.com/values/harvester",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36a-70d8-7057-9855-082cc8102bb9",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "hub-ginger",
+      "url": "https://mm2tradehub.com/values/gingerscope",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36a-70c3-775a-9df8-d6acbf1be731",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "neblio-ginger",
+      "url": "https://neblio.com/mm2/value/Gingerscope/15814",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36b-2048-7357-9860-b91413282303",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "traderie-ginger",
+      "url": "https://traderie.com/mm2/product/gingerscope-gun-2023",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36b-1f96-753b-9d73-0092a6a90f43",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "cosmic-board",
+      "url": "https://mm2.cosmicvalues.gg/trading",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36b-1fac-774c-baa5-a20dfacff96e",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "supreme-discord",
+      "url": "https://supremevalues.com/discord/",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36b-1f7d-733f-9be1-f526c5ec95fd",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "reddit-independent",
+      "url": "https://www.reddit.com/r/MurderMystery2/comments/1j6hpr1/what_happened_to_values/",
+      "observed_date": "2026-11-03",
+      "http_status": 403,
+      "scrape_id": null,
+      "error": {
+        "code": "forbidden",
+        "status": 403,
+        "message": "We apologize for the inconvenience but we do not support this site. If you are part of an enterprise and want to have a further conversation about this, please contact our sales team here: https://www.firecrawl.dev/contact-sales"
+      },
+      "available_formats": []
+    },
+    {
+      "key": "traderie-recent",
+      "url": "https://traderie.com/mm2/product/gingerscope-gun-2023/recent",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36b-8ee9-75fe-84a1-85a969b7f82c",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "supreme-harvester-raw",
+      "url": "https://supremevalues.com/mm2/ancients?item=Harvester",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36b-8f0d-7338-96cd-1fbbcc68b28a",
+      "error": null,
+      "available_formats": [
+        "markdown",
+        "rawHtml"
+      ]
+    },
+    {
+      "key": "supreme-embersickle-raw",
+      "url": "https://supremevalues.com/mm2/godlies?item=Embersickle",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36b-8f7e-7159-b7e0-5cfedaff030e",
+      "error": null,
+      "available_formats": [
+        "markdown",
+        "rawHtml"
+      ]
+    },
+    {
+      "key": "supreme-watergun-raw",
+      "url": "https://supremevalues.com/mm2/godlies?item=Watergun",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36b-90dd-7168-856a-e666f7d82abc",
+      "error": null,
+      "available_formats": [
+        "markdown",
+        "rawHtml"
+      ]
+    },
+    {
+      "key": "neblio-ginger-correct",
+      "url": "https://neblio.com/mm2/value/Gingerscope/15365",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36b-f131-72dc-9219-b0167a416bc9",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "supreme-use-current",
+      "url": "https://supremevalues.com/use",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36b-f1f3-746e-8448-7bd29f109e53",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "supreme-tos",
+      "url": "https://supremevalues.com/tos",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36b-f1dd-7203-bc30-104a6f6aef85",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "supreme-home",
+      "url": "https://supremevalues.com/",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36b-f1b7-757f-9d07-38c646af2908",
+      "error": null,
+      "available_formats": [
+        "markdown"
+      ]
+    },
+    {
+      "key": "supreme-evergun-raw",
+      "url": "https://supremevalues.com/mm2/godlies?item=Evergun",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36b-f214-734d-991c-129ce777e216",
+      "error": null,
+      "available_formats": [
+        "markdown",
+        "rawHtml"
+      ]
+    },
+    {
+      "key": "mm2-ancient-gun",
+      "url": "https://mm2values.com/?p=ancient&f=gun",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36e-d4f7-7188-a71c-3c71a0afcba0",
+      "error": null,
+      "available_formats": [
+        "html"
+      ]
+    },
+    {
+      "key": "mm2-ancient-knife",
+      "url": "https://mm2values.com/?p=ancient&f=knife",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36e-d476-72eb-a3ba-20863e550dc5",
+      "error": null,
+      "available_formats": [
+        "html"
+      ]
+    },
+    {
+      "key": "mm2-godly-gun",
+      "url": "https://mm2values.com/?p=godly&f=gun",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36e-d480-775f-ac97-f2913ec5c6cc",
+      "error": null,
+      "available_formats": [
+        "html"
+      ]
+    },
+    {
+      "key": "mm2-godly-knife",
+      "url": "https://mm2values.com/?p=godly&f=knife",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36e-d4d7-7718-b827-60ab6f56c299",
+      "error": null,
+      "available_formats": [
+        "html"
+      ]
+    },
+    {
+      "key": "mm2-chroma-gun",
+      "url": "https://mm2values.com/?p=chroma&f=gun",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36e-d501-7329-97d8-c4d5d018afb2",
+      "error": null,
+      "available_formats": [
+        "html"
+      ]
+    },
+    {
+      "key": "mm2-chroma-knife",
+      "url": "https://mm2values.com/?p=chroma&f=knife",
+      "observed_date": "2026-11-03",
+      "http_status": 200,
+      "scrape_id": "01a1a36e-d46f-71ac-a4f4-b787dbb42603",
+      "error": null,
+      "available_formats": [
+        "html"
+      ]
+    }
+  ],
+  "searches": [
+    {
+      "key": "histories",
+      "query_id": "01a1a368-a0c9-7127-9974-f131f915bfab",
+      "credits_used": 2,
+      "results": [
+        {
+          "title": "MM2 Gingerscope Value (October 2026): What It's Worth + Fair Trades",
+          "url": "https://timesaver.gg/blog/mm2-gingerscope-value"
+        },
+        {
+          "title": "Gingerscope Value in Murder Mystery 2 - Supreme Values",
+          "url": "https://supremevalues.com/mm2/ancients?item=Gingerscope"
+        },
+        {
+          "title": "Supreme Values - MM2 Value List",
+          "url": "https://supremevalues.com/"
+        },
+        {
+          "title": "MM2 Ancient Values",
+          "url": "https://supremevalues.com/mm2/ancients"
+        },
+        {
+          "title": "MM2 Gingerscope Value (2026): Current Price, Demand & How to ...",
+          "url": "https://www.eldorado.gg/blog/murder-mystery-2-en/mm2-gingerscope-value/"
+        },
+        {
+          "title": "WHAT HAPPENED TO GINGERSCOPE IN ROBLOX MM2 ...",
+          "url": "https://www.youtube.com/watch?v=rIlEzB9t62A"
+        }
+      ]
+    },
+    {
+      "key": "completed",
+      "query_id": "01a1a368-a00a-7229-9d43-424f686ccb24",
+      "credits_used": 2,
+      "results": [
+        {
+          "title": "What Do People Offer for my GINGERSCOPE (MM2) - YouTube",
+          "url": "https://www.youtube.com/watch?v=l_W7n_6Bnuw"
+        },
+        {
+          "title": "MM2 Gingerscope Value (October 2026): What It's Worth + Fair Trades",
+          "url": "https://timesaver.gg/blog/mm2-gingerscope-value"
+        },
+        {
+          "title": "Common To Gingerscope #3 (MM2 Trading Challenge) - YouTube",
+          "url": "https://www.youtube.com/watch?v=cDuVrVHzjRk"
+        },
+        {
+          "title": "MM2 Trading Website - Neblio",
+          "url": "https://neblio.com/mm2"
+        },
+        {
+          "title": "What Do People Offer For GINGERSCOPE? (MM2) - YouTube",
+          "url": "https://www.youtube.com/watch?v=Who88tdJ5dM"
+        },
+        {
+          "title": "Trading Gingerscope (Not selling) - Facebook",
+          "url": "https://www.facebook.com/groups/629983537598474/posts/1915708935692588/"
+        }
+      ]
+    },
+    {
+      "key": "community",
+      "query_id": "01a1a368-a01a-72e8-9a09-2efacec61115",
+      "credits_used": 2,
+      "results": [
+        {
+          "title": "How much would u overpay by if people had something u want?",
+          "url": "https://www.reddit.com/r/MurderMystery2/comments/1jksgfd/how_much_would_u_overpay_by_if_people_had/"
+        }
+      ]
+    },
+    {
+      "key": "social",
+      "query_id": "01a1a368-a06a-74be-845f-16b870e58458",
+      "credits_used": 2,
+      "results": [
+        {
+          "title": "What Do People Offer for my GINGERSCOPE (MM2) - YouTube",
+          "url": "https://www.youtube.com/watch?v=3Ew62RWyXd8"
+        },
+        {
+          "title": "LIVE MM2! TRADING TO GINGERSCOPE?! | MM2 Gameplay",
+          "url": "https://www.youtube.com/watch?v=XALlrLuYk6A"
+        },
+        {
+          "title": "Mastering MM2 Trading Strategies - TikTok",
+          "url": "https://www.tiktok.com/@be4r47/video/7613790762160901398"
+        },
+        {
+          "title": "MM2 Gingerscope Value (October 2026): What It's Worth + Fair Trades",
+          "url": "https://timesaver.gg/blog/mm2-gingerscope-value"
+        },
+        {
+          "title": "Beachy Set To GINGERSCOPE #3 (MM2 Trading Challenge) - YouTube",
+          "url": "https://m.youtube.com/watch?v=pjsad1b7DII"
+        },
+        {
+          "title": "MM2 Gingerscope Value (2026): Current Price, Demand & How to ...",
+          "url": "https://www.eldorado.gg/blog/murder-mystery-2-en/mm2-gingerscope-value/"
+        }
+      ]
+    },
+    {
+      "key": "liquidity",
+      "query_id": "01a1a369-8fa5-7682-93e7-1385dd6d4062",
+      "credits_used": 2,
+      "results": [
+        {
+          "title": "Creating a Trade Hub in Roblox MM2 - TikTok",
+          "url": "https://www.tiktok.com/@cezorblx/video/7617449656028630294"
+        },
+        {
+          "title": "How to Get MORE TRADES in MM2... - YouTube",
+          "url": "https://www.youtube.com/watch?v=BoYK3AU2bWE"
+        },
+        {
+          "title": "MM2 Demand & Liquidity: Why Some Items Never Sell - Game Value Hub",
+          "url": "https://gamevaluehub.com/mm2-demand-and-liquidity/"
+        },
+        {
+          "title": "Trade Roblox Murder Mystery 2 Items - Traderie",
+          "url": "https://traderie.com/mm2"
+        },
+        {
+          "title": "MM2 Values: Trade Calculator - Apps on Google Play",
+          "url": "https://play.google.com/store/apps/details?id=com.mm2tradesvalues&hl=en_US&referrer=utm_source%3Dgoogle%26utm_medium%3Dorganic%26utm_term%3Dmm2+trade+hub+posted+offers+completed+trades+demand+data+editorial+methodology"
+        },
+        {
+          "title": "MM2 Value List vs Demand: Avoid Overpay Trades - U7BUY",
+          "url": "https://www.u7buy.com/blog/mm2-value-list-vs-trading-demand/"
+        }
+      ]
+    },
+    {
+      "key": "neblio",
+      "query_id": "01a1a369-8f5c-7398-abe0-8300aeb5a8ba",
+      "credits_used": 2,
+      "results": [
+        {
+          "title": "MM2 Trading Website - Neblio",
+          "url": "https://neblio.com/mm2"
+        },
+        {
+          "title": "MM2 Unique Value List - Neblio",
+          "url": "https://neblio.com/mm2/value-list/uniques"
+        },
+        {
+          "title": "Neblio: Roblox Trading - Apps on Google Play",
+          "url": "https://play.google.com/store/apps/details?id=com.neblio.app&hl=en_US&referrer=utm_source%3Dgoogle%26utm_medium%3Dorganic%26utm_term%3Dneblio+mm2+completed+trades+history+verification+value+history+charts"
+        },
+        {
+          "title": "MM2 Trading Servers - Neblio",
+          "url": "https://neblio.com/mm2/trading-servers"
+        },
+        {
+          "title": "Neblio Beginner's Guide - YouTube",
+          "url": "https://www.youtube.com/watch?v=XKLcSw9tTe4"
+        },
+        {
+          "title": "Neblio | Roblox Trading & Values Platform",
+          "url": "https://neblio.com/"
+        }
+      ]
+    },
+    {
+      "key": "dynamics",
+      "query_id": "01a1a369-9036-728f-916d-7ef1f56c3918",
+      "credits_used": 2,
+      "results": [
+        {
+          "title": "MM2 Harvester Value (October 2026): What Harvester Is Worth + Fair Trades",
+          "url": "https://timesaver.gg/blog/mm2-harvester-value"
+        },
+        {
+          "title": "How to get All MM2 Halloween 2026 Items - YouTube",
+          "url": "https://www.youtube.com/watch?v=3TaYqny3eMQ"
+        },
+        {
+          "title": "How Much Embersickle Worths TODAY? - MM2 - U7BUY",
+          "url": "https://www.u7buy.com/blog/mm2-embersickle-value/"
+        },
+        {
+          "title": "MM2 Harvester Value (2026): Current Price, Demand & How to Get It",
+          "url": "https://www.eldorado.gg/blog/murder-mystery-2-en/mm2-harvester-value/"
+        },
+        {
+          "title": "Roblox Murder Mystery 2 (MM2) Value List - Traderie",
+          "url": "https://traderie.com/mm2/values"
+        },
+        {
+          "title": "Harvester Value in MM2 2026: Was It the Highest Value? | TikTok",
+          "url": "https://www.tiktok.com/@nyplav/video/7616380848132132117"
+        }
+      ]
+    },
+    {
+      "key": "independent",
+      "query_id": "01a1a369-9037-74ea-b75b-836841bf56a1",
+      "credits_used": 2,
+      "results": [
+        {
+          "title": "The Problem with MM2 Values - YouTube",
+          "url": "https://www.youtube.com/watch?v=C7ZPB-fj0GI"
+        },
+        {
+          "title": "Why Some MM2 Godlies Are Impossible to Trade - U7BUY",
+          "url": "https://www.u7buy.com/blog/some-godlies-are-impossible-to-trade/"
+        },
+        {
+          "title": "MM2 Trading Guide: How Values, Demand & Rarity Work - RPGStash",
+          "url": "https://www.rpgstash.com/blog/mm2-trading-guide?srsltid=AYCX9vL0iJDIWQbuICwoZzJ6ENgtt8jzbDL5vfJhQaIJ5AXRwiWhTEkD"
+        },
+        {
+          "title": "what happened to values : r/MurderMystery2 - Reddit",
+          "url": "https://www.reddit.com/r/MurderMystery2/comments/1j6hpr1/what_happened_to_values/"
+        },
+        {
+          "title": "The MM2 Demand System Explained: Why It Matters More Than Value",
+          "url": "https://murder-mystery-2.fandom.com/wiki/User_blog:Mm2bro/The_MM2_Demand_System_Explained:_Why_It_Matters_More_Than_Value"
+        },
+        {
+          "title": "MM2's Trading Recession - YouTube",
+          "url": "https://www.youtube.com/watch?v=4-3aUoCnBQQ"
+        }
+      ]
+    },
+    {
+      "key": "neblio-id",
+      "query_id": "01a1a36b-8a5c-74de-a322-ee3517f63e0c",
+      "credits_used": 2,
+      "results": [
+        {
+          "title": "Gingerscope Value MM2 | Neblio",
+          "url": "https://neblio.com/mm2/value/Gingerscope/15365"
+        }
+      ]
+    },
+    {
+      "key": "recent-completed",
+      "query_id": "01a1a36b-89e0-7006-af60-447dd893f998",
+      "credits_used": 2,
+      "results": [
+        {
+          "title": "Gingerscope Gun 2023 - Traderie",
+          "url": "https://traderie.com/mm2/product/gingerscope-gun-2023/recent"
+        },
+        {
+          "title": "Roblox Murder Mystery 2 (MM2) - Traderie",
+          "url": "https://traderie.com/mm2/product/gingerscope-gun-2023/recent/privacypolicy"
+        },
+        {
+          "title": "Roblox Murder Mystery 2 (MM2) - Traderie",
+          "url": "https://traderie.com/mm2/product/gingerscope-gun-2023/recent/community-guidelines"
+        }
+      ]
+    },
+    {
+      "key": "history-supreme",
+      "query_id": "01a1a36b-899c-71a0-bb57-5db9683a01a5",
+      "credits_used": 2,
+      "results": [
+        {
+          "title": "Supreme Values - MM2 Value List",
+          "url": "https://supremevalues.com/"
+        },
+        {
+          "title": "Use - Supreme Values",
+          "url": "https://supremevalues.com/use"
+        },
+        {
+          "title": "Supreme Values V4 - Everything You Need to Know! - YouTube",
+          "url": "https://www.youtube.com/watch?v=8IbHgddpbEY"
+        },
+        {
+          "title": "FAQ - Supreme Values",
+          "url": "https://supremevalues.com/faq"
+        }
+      ]
+    }
+  ],
+  "new_video_metadata": [
+    {
+      "id": "C7ZPB-fj0GI",
+      "url": "https://www.youtube.com/watch?v=C7ZPB-fj0GI",
+      "title": "The Problem with MM2 Values",
+      "published_at": "2025-03-25T00:23:29Z",
+      "channel": "Colbe",
+      "transcript_retrieved": true
+    },
+    {
+      "id": "rIlEzB9t62A",
+      "url": "https://www.youtube.com/watch?v=rIlEzB9t62A",
+      "title": "WHAT HAPPENED TO GINGERSCOPE IN ROBLOX MM2?! (MM2 Valuelist Update)",
+      "published_at": "2026-05-10T14:01:30Z",
+      "channel": "Flutteryn",
+      "transcript_retrieved": false
+    },
+    {
+      "id": "l_W7n_6Bnuw",
+      "url": "https://www.youtube.com/watch?v=l_W7n_6Bnuw",
+      "title": "What Do People Offer for my GINGERSCOPE (MM2)",
+      "published_at": "2026-08-30T22:03:46Z",
+      "channel": "Breeze",
+      "transcript_retrieved": true
+    }
+  ],
+  "access_limits": {
+    "reddit": "403 unsupported",
+    "traderie_recent": "login required",
+    "neblio_completeds_interaction": "INVALID_ARGUMENT; individual records not inspected",
+    "discord": "public landing information only; no channel messages",
+    "tiktok": "existing 3 indexed text records reused; new guide remains index-only; new full paid lookup not executed",
+    "supreme_bulk_reuse": "publisher terms restrict copying/collection; no permission established; no additional bulk popup crawl after reading terms"
+  }
+}
