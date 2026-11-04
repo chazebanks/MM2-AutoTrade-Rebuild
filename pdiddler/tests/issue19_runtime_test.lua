@@ -1,0 +1,85 @@
+local passed,failed=0,0
+local function test(name,fn) local ok,why=pcall(fn);if ok then passed=passed+1;print('PASS '..name) else failed=failed+1;print('FAIL '..name..': '..tostring(why)) end end
+local function setup(base,values,received)
+ local f=fixture();f.own.items={}
+ for i,v in ipairs(values) do f.own.items[i]=f:item('Our'..i,v) end
+ f.partnerInv.items={};for i,v in ipairs(received) do f.partnerInv.items[i]=f:item('Their'..i,v) end
+ f.policy={};for k,v in pairs(POLICY) do f.policy[k]=v end
+ f.policy.selectOpener=function() return f.own.items[1],'fixture' end
+ f:start();f:advance(3.4);eq(f:total(),base);return f
+end
+local function change(f,index,at) f:setTheir({f.partnerInv.items[index]});f:advance(at) end
+test('200 205 210 cumulative trigger and verified reward watermark',function()
+ local f=setup(100,{100,105,110,120},{200,205,210,220,220.5})
+ change(f,1,7);eq(f:total(),100);change(f,2,11);eq(f:total(),100)
+ change(f,3,15);eq(f:total(),105)
+ change(f,1,19);eq(f:total(),105);change(f,3,23);eq(f:total(),105)
+ change(f,4,27);eq(f:total(),105);change(f,5,31);eq(f:total(),110);eq(f.accepts,0)
+end)
+test('1000 to1049 holds then1050 permits capped increase',function()
+ local f=setup(500,{500,510,525,540},{1000,1049,1050})
+ change(f,1,7);change(f,2,11);eq(f:total(),500)
+ change(f,3,15);assert(f:total()>500 and f:total()<=525)
+end)
+test('same value swaps and time alone never increase',function()
+ local f=setup(100,{100,105,110},{200,200})
+ change(f,1,7);change(f,2,18);eq(f:total(),100);eq(f.offers,1)
+end)
+test('no new budget after removal and readd at the same value',function()
+ local f=setup(100,{100,105,110},{200,190,200})
+ change(f,1,7);change(f,2,11);change(f,3,16);eq(f:total(),100)
+end)
+test('safety replacement cannot increase without qualifying net addition',function()
+ local f=setup(7,{7,20},{200})
+ change(f,1,7);eq(f:total(),7)
+ local same=f:item('Our1',7);f.partnerInv.items[#f.partnerInv.items+1]=same
+ f:setTheir({f.partnerInv.items[1],same});f:advance(12)
+ assert(f:total()<=7 or f.declines==1,'nonqualifying +7 triggered a +13 increase')
+end)
+test('actual expired prices decline without a concession',function()
+ local f=setup(100,{100,105},{200,210});change(f,1,7)
+ f.profile.isFresh=function() return false end;change(f,2,10)
+ eq(f.offers,1);eq(f.declines,1);eq(f.accepts,0)
+end)
+test('Accepted forbids upward changes',function()
+ local f=setup(100,{100,105},{200,210});change(f,1,7)
+ f.accepted.Visible=true;change(f,2,12);eq(f:total(),100);eq(f.offers,1)
+end)
+test('downward safety repricing survives removals',function()
+ local f=setup(100,{100,70,30,10},{200,80});change(f,1,7);change(f,2,13)
+ assert(f.declines==1 or (f:total()>0 and f:total()<=65));eq(f.accepts,0)
+end)
+test('qualified mirrored replacement commits reward watermark exactly once',function()
+ local f=setup(7,{7,20,25},{200,230,220})
+ change(f,1,7)
+ local same=f:item('Our1',7);f.partnerInv.items[#f.partnerInv.items+1]=same
+ f:setTheir({f.partnerInv.items[2],same});f:advance(12);eq(f:total(),20)
+ change(f,3,16);f:setTheir({f.partnerInv.items[2],same});f:advance(21)
+ eq(f:total(),20);eq(f.accepts,0)
+end)
+test('opponent changes while a reward is mutating cannot commit a stale reward',function()
+ local f=setup(100,{100,105,110},{200,210,200});change(f,1,7)
+ local changed=false
+ f.onRemove=function() if not changed then changed=true;f:setTheir({f.partnerInv.items[3]}) end end
+ change(f,2,14);assert(changed);eq(f:total(),100);eq(f.declines,0)
+ eq(f.accepts,0)
+end)
+test('accepted-empty and no safe plan have bounded single decline',function()
+ local f=setup(100,{100,105},{200});f.accepted.Visible=true;f:advance(6)
+ eq(f.declines,1);eq(f.accepts,0)
+ local g=setup(100,{100,105},{10});change(g,1,10);eq(g.declines,1);eq(g.accepts,0)
+end)
+test('cancel and partner departure cannot become completed trades',function()
+ local f=setup(100,{100,105},{200});change(f,1,7);f.root.Visible=false;f:advance(9)
+ eq(f.lifecycle.state.completed,0);assert(f.lifecycle:canStartWork())
+ local g=setup(100,{100,105},{200});change(g,1,7);g.target.Parent=nil;g:advance(9)
+ eq(g.lifecycle.state.completed,0);eq(g.accepts,0)
+end)
+test('native ready timeout closes without time-driven generosity',function()
+ local f=fixture();f.own.items={f:item('A',100),f:item('B',105)};f.partnerInv.items={f:item('T',200)}
+ f.policy={};for k,v in pairs(POLICY) do f.policy[k]=v end;f.policy.selectOpener=function() return f.own.items[1],'fixture' end
+ f.gate={read=function() return 'ready' end,step=function() return true end}
+ f:start();f:advance(3.4);f:setTheir(f.partnerInv.items);f:advance(25)
+ eq(f.offers,1);eq(f.declines,1);eq(f.accepts,0)
+end)
+print('RESULT '..passed..' passed; '..failed..' failed');assert(failed==0,'V15 production QA failures')

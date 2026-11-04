@@ -1732,6 +1732,36 @@ local function runTrade(scanner,session,sessionAlive,tradeTelemetry,publishWebho
             continue
         end
 
+        -- Every economic increase uses the same opponent-addition policy,
+        -- including safety replacements of a mirrored quote. An exact technical
+        -- restoration is measured against the last committed quote, not zero.
+        local lastVerified=negotiation.ledger and negotiation.ledger.lastVerifiedTotal or 0
+        local economicBase=math.max(ourEval.rawTotal,lastVerified)
+        if additionAnchor and planStage~="early" and plan.rawTotal>economicBase then
+            local action,candidate
+            if ourEval.slots>0 then
+                action,candidate=EARLY_COUNTER_POLICY.choose(earlyCounterState,theirEval.signature,
+                    ourEval,theirEval,plans,{accepted=accepted,localAccepted=localAccepted,
+                        earlyRemaining=MARKET_LOGIC.earlyAllowance(negotiation,ourEval.rawTotal,theirEval.rawTotal),
+                        anchorTotal=additionAnchor})
+            end
+            if action=="counter" and candidate then
+                plan=candidate;planStage="early"
+            else
+                local downward={}
+                for _,alternative in ipairs(plans) do
+                    if alternative.rawTotal<=economicBase then
+                        downward[#downward+1]=alternative
+                    end
+                end
+                plan=MARKET_LOGIC.selectInitialOffer(downward,theirEval.rawTotal,theirEval.market)
+                if not plan then
+                    local declined,why=declineTrade("no nonincreasing safe replacement; opponent addition did not authorize increase")
+                    return declined and finishTradeClosed("net-addition-replacement-declined") or tostring(why)
+                end
+            end
+        end
+
         local reserved,reserveWhy=MARKET_LOGIC.reserveOffer(
             negotiation,planStage,theirEval.signature,plan,ourEval.rawTotal,theirEval.rawTotal,os.clock()
         )
