@@ -278,18 +278,15 @@ end
 
 -- ONLY for post-cooldown concessions. Each step is bounded relative to the
 -- actual current offer and current profit; never use minimum-safe-plan bands.
-function P.selectLateConcession(plans,currentTotal,step)
+function P.selectLateConcession(plans,currentTotal,step,verifiedReceived)
+    -- Never infer opponent value from candidate data: the live, resolved
+    -- their-offer total is supplied separately by the trade controller.
     local ours=cents(currentTotal)
     if not ours or ours<=0 then return nil,"invalid-current-total" end
-    local received
-    for _,plan in ipairs(plans or {}) do
-        if type(plan)=="table" and plan.ok==true
-            and finite(plan.rawTotal) and finite(plan.rawProfit) then
-            local v=cents(plan.rawTotal+plan.rawProfit)
-            if v and v>ours then received=v;break end
-        end
+    local received=cents(verifiedReceived)
+    if not received or received<=ours then
+        return nil,"missing-or-unsafe-verified-received"
     end
-    if not received then return nil,"no-priced-received-total" end
     local headroom=received-ours-P.minimumProfit*100
     if headroom<=0 then return nil,"no-profit-headroom" end
     local maxIncrement=math.min(P.maxLateConcession*100,
@@ -332,7 +329,7 @@ function P.selectLateConcession(plans,currentTotal,step)
     return nil,"no-meaningful-capped-plan"
 end
 
-function P.negotiate(state,signature,total,plans,now,accepted,acceptReady)
+function P.negotiate(state,signature,total,plans,now,accepted,acceptReady,verifiedReceived)
     -- One trade-generation owns one negotiation. A change invalidates old waits.
     -- MM2's observed cooldown was approximately 6s; wait 9s after the
     -- verified offer/state change before sweetening, leaving ~3s to accept.
@@ -362,6 +359,9 @@ function P.negotiate(state,signature,total,plans,now,accepted,acceptReady)
         state.finalSince=nil
         return "accept-not-ready"
     end
+    if not cents(verifiedReceived) or cents(verifiedReceived)<=cents(total) then
+        return "hold"
+    end
     if state.finalSince then
         if now-state.finalSince>=P.finalWaitSeconds then return "decline" end
         return "final-wait"
@@ -374,7 +374,7 @@ function P.negotiate(state,signature,total,plans,now,accepted,acceptReady)
         return "final-wait"
     end
     if now-(state.since or now)<P.sweetenWaitSeconds then return "wait" end
-    local candidate,why=P.selectLateConcession(plans,total,state.steps+1)
+    local candidate,why=P.selectLateConcession(plans,total,state.steps+1,verifiedReceived)
     if candidate then
         state.steps=state.steps+1
         state.since=now
