@@ -19,6 +19,17 @@ local function int(n,lo,hi)
     return type(n)=="number" and n==n and n~=math.huge and n~=-math.huge
         and n==math.floor(n) and n>=lo and n<=hi
 end
+local function denseArray(rows,low,high)
+    if type(rows)~="table" then return false end
+    local n=#rows
+    if not int(n,low,high) then return false end
+    local count=0
+    for k in pairs(rows) do
+        if not int(k,1,n) then return false end
+        count=count+1
+    end
+    return count==n
+end
 local function validKey(key)
     if type(key)~="string" then return false end
     local page,num=key:match("^(%a+):(%d+):checker%-id$")
@@ -65,7 +76,7 @@ local function marketRow(c,id)
     return it,nil
 end
 local function bundle(rows,stock,market,label)
-    if type(rows)~="table" or not int(#rows,1,4)
+    if not denseArray(rows,1,4)
         or type(stock)~="table" then return nil,label.."-bundle-or-inventory-missing" end
     local out={base=0,lo=0,hi=0,rangeComplete=true,demand={},flip={},
         flipComplete=true,atRisk=0,serious=false,items={},copyCount=0,
@@ -188,7 +199,7 @@ function M.assess(ctx,proposal)
 end
 function M.reviewCandidates(ctx,candidates,maxCandidates)
     local cap=maxCandidates or 128
-    if not int(cap,1,128) or type(candidates)~="table" or #candidates>cap then
+    if not int(cap,1,128) or not denseArray(candidates,0,cap) then
         return nil,"candidate-budget-or-input-invalid" end
     local rows={}
     for i,candidate in ipairs(candidates) do
