@@ -4,7 +4,7 @@ import json
 import unittest
 from pathlib import Path
 from datetime import datetime,timezone
-from raw_inventory_intake import RawInventoryError,parse_raw_export,reconcile_scanner_output
+from raw_inventory_intake import RawInventoryError,parse_raw_export,reconcile_scanner_output,audit_scanner_observation
 from market_bridge import load_market
 
 HERE=Path(__file__).parent
@@ -71,9 +71,52 @@ class IntakeTests(unittest.TestCase):
         r={'format':'pdiddler-scanner-observation-v1','items':[
             dict(id='WatergunChroma',qty=1,checkerId='810',page='chroma',name='Chroma Watergun',value=1800,type='Gun',cat='Weapons')]}
         got=reconcile_scanner_output(self.raw,r,self.market)
-        self.assertEqual(got[0].reason,'scanner-price-disagrees-with-catalogue')
+        self.assertEqual(got[0].reason,'matched-identity-scanner-price-drift')
+        self.assertEqual(got[0].checker_key,'chroma:810:checker-id')
+        self.assertEqual(str(got[0].pinned_unit_value),'2300')
+        self.assertEqual(str(got[0].scanner_unit_value),'1800')
     def test_scanner_rejects_display_name_collision(self):
         r={'format':'pdiddler-scanner-observation-v1','items':[dict(id='WatergunChroma',qty=1,checkerId='810',page='chroma',name='Watergun',type='Gun',cat='Weapons')]}
         got=reconcile_scanner_output(self.raw,r,self.market)
         self.assertEqual(got[0].reason,'checker-name-mismatch')
+
+    def test_audit_prices_legacy_rows_without_losing_checker_identity(self):
+        scanner={
+            "format":"pdiddler-scanner-observation-v1",
+            "source":"native_scanner_readonly", "marketVersion":self.market.source_version,
+            "marketFresh":True, "rawOwned":22, "unmapped":0, "unpriced":0, "badQty":0,
+            "fingerprint":"|".join(f"{k}x{v}" for k,v in sorted(self.raw.owned.items())),
+            "items":[
+                dict(id="WatergunChroma",qty=1,page="chroma",checkerId="810",name="Chroma Watergun",cat="Weapons",type="Gun",value=2350),
+                dict(id="BaubleKnife",qty=1,page="godly",checkerId="984",name="Ornament",cat="Weapons",type="Knife",value=60),
+                dict(id="Immortal",qty=2,page="godly",checkerId="1032",name="Immortal",cat="Weapons",type="Gun",value=140),
+            ]
+        }
+        r=audit_scanner_observation(self.raw,scanner,self.market)
+        self.assertTrue(r.offline_evidence_consistent)
+        self.assertFalse(r.live_trading_authorized)
+        self.assertEqual((r.identity_matched_rows,r.identity_matched_copies,r.price_drift_rows),(3,4,3))
+        self.assertEqual(str(r.raw_scanner_priced_total),'2690')
+        self.assertEqual(str(r.pinned_market_priced_total),'2635')
+
+    def test_missing_fingerprint_blocks_offline_consistency(self):
+        scanner={"format":"pdiddler-scanner-observation-v1","source":"native_scanner_readonly",
+                 "marketVersion":self.market.source_version,"marketFresh":True,"rawOwned":22,
+                 "unmapped":0,"unpriced":0,"badQty":0,"fingerprint":"wrong","items":[]}
+        r=audit_scanner_observation(self.raw,scanner,self.market)
+        self.assertIn("scanner-fingerprint-mismatch",r.issues)
+        self.assertFalse(r.offline_evidence_consistent)
+
+    def test_invalid_market_version_and_expired_flag_block_offline_consistency(self):
+        scanner={"format":"pdiddler-scanner-observation-v1","source":"native_scanner_readonly",
+                 "marketVersion":"unexpected","marketFresh":False,"rawOwned":22,
+                 "unmapped":0,"unpriced":0,"badQty":0,
+                 "fingerprint":"|".join(f"{k}x{v}" for k,v in sorted(self.raw.owned.items())),
+                 "items":[dict(id="WatergunChroma",qty=1,page="chroma",checkerId="810",
+                               name="Chroma Watergun",cat="Weapons",type="Gun",value=2350)]}
+        r=audit_scanner_observation(self.raw,scanner,self.market)
+        self.assertIn("scanner-market-version-mismatch",r.issues)
+        self.assertIn("scanner-market-not-fresh",r.issues)
+        self.assertFalse(r.offline_evidence_consistent)
+
 if __name__=='__main__':unittest.main()
