@@ -1,0 +1,9 @@
+{
+  "moduleRef": "45e690a32fba27c5b3af92f317fb0084b32bd55a",
+  "moduleBlob": "da37025aabbcd356aadb93fca206253d6716517d",
+  "bootstrapRef": "45e690a32fba27c5b3af92f317fb0084b32bd55a",
+  "bootstrapBlob": "3e485404d6546523639ba9e57c144e7dd12c0a82",
+  "loaderRef": "3daded63893a9165ad6b2a65fcbbf507f1afc571",
+  "entryBlob": "721c7f001e838fd5def0799873181230ad7cb1a6",
+  "stage": "read-only-native-evidence-required"
+}

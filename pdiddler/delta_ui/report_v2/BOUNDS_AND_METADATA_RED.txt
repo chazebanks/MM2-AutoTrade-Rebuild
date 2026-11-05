@@ -1,0 +1,14 @@
+PASS actual module exposes a deterministic native-JSON-independent formatter
+PASS raw invalid byte produces ASCII descriptors without reading private editor content
+PASS high/control bytes produces ASCII descriptors without reading private editor content
+PASS UTF8 cut at64 bytes produces ASCII descriptors without reading private editor content
+PASS cached-v1 invalid byte strings are escaped without changing cached data
+PASS formatter projects known fields and excludes private unknown keys at every level
+PASS JSON quotes backslashes and controls remain independently parseable
+PASS metatable cyclic and live values never trigger methods or private coercion
+FAIL skipped and invalid reports cannot claim that a UI inspection occurred: [string "actual-delta-report-v2-tests"]:247: assertion failed!
+PASS cached-v1 trace cannot claim a new inspection or current visible UI proof
+PASS literal backslash escape-looking names stay distinct from actual high bytes
+FAIL huge known fields produce bounded valid ASCII JSON with explicit trace truncation: [string "actual-delta-report-v2-tests"]:276: owner expansion exceeded structured output budget: 21665
+RESULT 10 report tests passed; 2 failed
+[string "actual-delta-report-v2-tests"]:281: Delta UI report module tests failed

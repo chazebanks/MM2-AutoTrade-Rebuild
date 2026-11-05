@@ -1,0 +1,2 @@
+status=control-inaccessible owners=1 nameBytes=64 lastByte=195 utf8Length=nil invalidByte=64
+/tmp/delta-ui-v1-utf8-repro.lua:146: V1 report descriptor is invalid UTF-8 after its64-byte name clipping
