@@ -193,7 +193,10 @@ test('invalid flippability rejected',function()
     blockedChange(function(c)c.market.items[B].flippability='probably' end,'receive-flippability-invalid')
 end)
 test('unknown checker identity rejected',function()
-    blockedChange(function(c,p)p.receive[1].id='godly:999:checker-id' end,'receive-item-price-demand-or-stability-unverified')
+    blockedChange(function(c,p)
+        p.receive[1].id='godly:999:checker-id'
+        c.opponentInventory['godly:999:checker-id']=1
+    end,'receive-item-price-demand-or-stability-unverified')
 end)
 test('display name not a source variant identity',function()
     blockedChange(function(c,p)p.give[1].id='Laser' end,'give-identity-quantity-or-duplicate-invalid')
