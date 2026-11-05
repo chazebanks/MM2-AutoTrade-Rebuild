@@ -27,6 +27,11 @@ end
 
 local function validQuantity(text)
     if type(text) ~= "string" then return nil end
+    -- Stage 12 Delta evidence: on a populated trade slot, the Amount
+    -- TextLabel has Text="" for one copy and Text="x2" for two copies.
+    -- A missing Amount node returns nil and must remain unverified.
+    -- Identity, chroma and scanner-quantity checks still run in resolve().
+    if text=="" then return 1 end
     local s=text:gsub("^%s+",""):gsub("%s+$","")
     s=s:gsub("^[xX]%s*","")
     if s:sub(1, #"×")=="×" then
