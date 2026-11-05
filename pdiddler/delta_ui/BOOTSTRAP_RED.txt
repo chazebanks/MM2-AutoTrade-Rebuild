@@ -1,0 +1,41 @@
+PASS direct queue adds only one hook and starts pinned V15_8
+PASS two launch sources in one JobId cannot double-load or double-queue
+PASS queued code starts another job and queues for a third
+PASS syn.queue_on_teleport fallback supported without touching global queue
+PASS queue unavailable doesn't prevent initial launch
+PASS rejected queue reports failure but still starts initial V15_8
+PASS other Roblox places do not run the trader or create queue
+PASS no fixed commit URL refuses to queue or run
+RESULT 8 V15_8 teleport auto-reentry mock tests passed
+PASS preservedV13 owner prevents V15_8 queue PDIDDLER_V13_TELEPORT_AUTOBOOT_v1
+PASS preservedV13 owner prevents V15_8 queue PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS
+PASS runtime endpoint never enters queued code or console output
+PASS preserved owner PDIDDLER_V10_TELEPORT_AUTOBOOT_v1 prevents V15_8 queue or probe
+PASS preserved owner PDIDDLER_V11_TELEPORT_AUTOBOOT_v1 prevents V15_8 queue or probe
+PASS preserved owner PDIDDLER_V12_TELEPORT_AUTOBOOT_v1 prevents V15_8 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents V15_8 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents V15_8 queue or probe
+PASS dirty V12 integration prevents V15_8 even after a partial launch
+PASS independent P5 owner prevents another bootstrap queue
+PASS private configuration never appears in queue throw failure
+PASS private configuration never appears in queue return failure
+PASS active V14 blocks V15_8 PDIDDLER_V14_TELEPORT_AUTOBOOT_v1
+PASS active V14 blocks V15_8 PDIDDLER_INTEGRATION_V14_VERIFIED_WORKFLOW
+PASS old V15 blocks price refresh owner PDIDDLER_V15_TELEPORT_AUTOBOOT_v1
+PASS old V15 blocks price refresh owner PDIDDLER_INTEGRATION_V15_OPPONENT_ADDED
+PASS V15.1 predecessor prevents GUI build queue PDIDDLER_V15_1_TELEPORT_AUTOBOOT_v1
+PASS V15.1 predecessor prevents GUI build queue PDIDDLER_INTEGRATION_V15_1_CURRENT_PRICES
+PASS existing V15.2 headless build prevents startup-GUI queue PDIDDLER_V15_2_TELEPORT_AUTOBOOT_v1
+PASS existing V15.2 headless build prevents startup-GUI queue PDIDDLER_INTEGRATION_V15_2_HEADLESS_GATE
+TOTAL 28 V15_8 teleport tests
+PASS predecessor prevents audit enumeration PDIDDLER_V15_3_TELEPORT_AUTOBOOT_v1
+PASS predecessor prevents audit enumeration PDIDDLER_INTEGRATION_V15_3_GUI_STATUS
+PASS predecessor prevents audit enumeration PDIDDLER_V15_4_TELEPORT_AUTOBOOT_v1
+PASS predecessor prevents audit enumeration PDIDDLER_INTEGRATION_V15_4_REACHABLE
+PASS predecessor prevents audit enumeration PDIDDLER_V15_5_TELEPORT_AUTOBOOT_v1
+PASS predecessor prevents audit enumeration PDIDDLER_INTEGRATION_V15_5_SCANNER_EVIDENCE
+PASS predecessor prevents audit enumeration PDIDDLER_V15_6_TELEPORT_AUTOBOOT_v1
+PASS predecessor prevents audit enumeration PDIDDLER_INTEGRATION_V15_6_IMMEDIATE_SAFETY
+PASS predecessor prevents audit enumeration PDIDDLER_V15_7_TELEPORT_AUTOBOOT_v1
+PASS predecessor prevents audit enumeration PDIDDLER_INTEGRATION_V15_7_INVENTORY_GROWTH
+FAIL one read-only snapshot is emitted before the original two pinned HTTP fetches: [string "v13-bootstrap-contract"]:237: actual bootstrap did not emit exactly one audit snapshot
