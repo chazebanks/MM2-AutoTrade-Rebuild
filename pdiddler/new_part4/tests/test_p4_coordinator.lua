@@ -7,6 +7,15 @@ local Contract=require('p4_observer_contract')
 local Observer=require('p4_native_observer')
 local Exec=require('p4_removal_executor')
 local Native=require('p4_native_removal')
+local Stability=require('p4_stability_gate')
+-- Legacy coordinator integration cases test Stage 11 behavior separately from
+-- the newly mandatory Stage 14 preflight. Only dedicated Stage 14 cases below
+-- exercise the real stabilization module; production injects Stability itself.
+local ImmediateTestGate={
+    new=function() return {samples=0} end,
+    reset=function(s) s.samples=0 end,
+    observe=function() return true,'legacy-coordinator-regression' end,
+}
 local n=0
 local function eq(a,b,label)
     assert(a==b,(label or 'equality')..' expected '..tostring(b)..', got '..tostring(a))
@@ -105,6 +114,8 @@ local function fixture(opts)
     f.coord=Controller.new({session=f.session,clock=function()return f.time end,
         observer=Observer,obsHandle=f.handle,safety=Safety,executor=Exec,
         native=Native,nativeHandle=f.nativeHandle,
+        stability=opts.realStability and Stability or ImmediateTestGate,
+        stabilityOptions=opts.stabilityOptions,
         safetyOptions=opts.safetyOptions,executorOptions=opts.executorOptions})
     function f:tick(t) self.time=t;return Controller.tick(self.coord) end
     function f:status() return Controller.status(self.coord) end
@@ -327,4 +338,64 @@ test('native quote changes between coordinator read and click: blocked',function
     eq(f:tick(0),'DECLINE');eq(#f.clicks,0)
 end)
 
-print('PASS',n,'Stage 11 integrated observer/safety/removal tests')
+test('Stage14 real gate waits for three samples spanning at least 200ms',function()
+    local f=fixture({realStability=true})
+    eq(f:tick(0),'HOLD');eq(#f.clicks,0)
+    eq(f:tick(.08),'HOLD');eq(#f.clicks,0)
+    eq(f:tick(.16),'HOLD');eq(#f.clicks,0)
+    eq(f:tick(.24),'HOLD');eq(#f.clicks,1)
+    eq(f:status().waitingProof,true)
+    eq(f.clicks[1].slot,3)
+end)
+
+test('Stage14 opponent changes reset preflight instead of clicking stale offer',function()
+    local f=fixture({realStability=true})
+    eq(f:tick(0),'HOLD');eq(f:tick(.08),'HOLD');eq(#f.clicks,0)
+    f.theirSlots:remove('NewItem1')
+    createSlot(f.theirSlots,1,'Sugar','Sugar','x1',false)
+    eq(f:tick(.16),'HOLD');eq(#f.clicks,0)
+    eq(f:tick(.24),'HOLD');eq(#f.clicks,0)
+    eq(f:tick(.32),'HOLD');eq(#f.clicks,0)
+    eq(f:tick(.43),'HOLD');eq(#f.clicks,1)
+end)
+
+test('Stage14 native offer swap after preflight blocks click and declines intent',function()
+    local f=fixture({realStability=true})
+    eq(f:tick(0),'HOLD');eq(f:tick(.08),'HOLD');eq(f:tick(.16),'HOLD')
+    local original=Observer.capture
+    local calls=0
+    local proxy={capture=function(h)
+        calls=calls+1
+        -- At .24, coordinator reads once, then native re-reads just before click.
+        if calls==2 then
+            f.theirSlots:remove('NewItem1')
+            createSlot(f.theirSlots,1,'Sugar','Sugar','x1',false)
+        end
+        return original(h)
+    end}
+    f.coord.observer=proxy
+    f.nativeHandle.config.observer=proxy
+    eq(f:tick(.24),'DECLINE')
+    eq(#f.clicks,0)
+end)
+
+test('Stage14 acceptance while preflight pending cannot click',function()
+    local f=fixture({realStability=true})
+    eq(f:tick(0),'HOLD');eq(f:tick(.08),'HOLD')
+    f.theirs:find('Accepted').Visible=true
+    eq(f:tick(.16),'DECLINE')
+    eq(#f.clicks,0)
+end)
+
+test('Stage14 independently stabilizes next offer after verified removal',function()
+    local f=fixture({realStability=true})
+    for _,t in ipairs({0,.08,.16,.24}) do eq(f:tick(t),'HOLD') end
+    eq(#f.clicks,1)
+    eq(f:tick(.30),'HOLD') -- independently verifies the removal; no second click
+    eq(#f.clicks,1)
+    for _,t in ipairs({.38,.46,.54}) do eq(f:tick(t),'HOLD');eq(#f.clicks,1) end
+    eq(f:tick(.62),'HOLD');eq(#f.clicks,2)
+    eq(f.clicks[2].qty,2)
+end)
+
+print('PASS',n,'Stage 11 + Stage 14 integrated observer/safety/removal tests')
