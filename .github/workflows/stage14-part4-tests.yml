@@ -33,7 +33,8 @@ jobs:
             test_p4_stability_gate \
             test_p4_risk_review \
             test_p4_dual_perspective \
-            test_p4_replacement_cutover; do
+            test_p4_replacement_cutover \
+            test_p4_replacement_native_lifecycle; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
