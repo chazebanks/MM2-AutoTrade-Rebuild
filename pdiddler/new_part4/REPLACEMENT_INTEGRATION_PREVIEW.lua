@@ -165,7 +165,7 @@ local PINS={
     eligibility={"pdiddler3_outgoing_eligibility_v2_SCANNER_EVIDENCE.lua","0230ed1481768e7b8ddfee87e9022f6d27462674"},
     readiness={"pdiddler_readiness_v2_VISIBLE_SCAN.lua","8144fd2dc9b1a446c336adeeea8dfd6139a7aab3"},
     profile={"snapshots/pdiddler_supreme_snapshot_2026_11_04.lua","11537dfd47f8df72aec7aeba9ecaffdfc5c879d4"},
-    strict={"pdiddler4_supreme_policy_v10_INVENTORY_GROWTH.lua","7fc6b357546cf14a168bb2402438312ef638b767"},
+    strict={"new_part4/P4_REPRICE_ONLY.lua","daf42166b9a713b69b0a8c93708ff13e86b36283"},
     p2={"pdiddler2_KNOWN_GOOD.lua","b097c1862db4cff7394d6a5e6764d34191df3283"},
     gate={"pdiddler1_fast_gate_v7_HEADLESS.lua","1bcc13d857489376ee57eae42ee34de33323bbeb"},
     scanner={"presentation/pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION.lua","0230ed1481768e7b8ddfee87e9022f6d27462674"},
@@ -491,7 +491,7 @@ local function boot()
     I.profile=api(module("profile",5,false),"Supreme profile",{"get","coverage","isFresh"})
     assert(I.profile.liveReady==true and I.profile.coverage().total==190,"Supreme profile coverage invalid")
     assert(I.profile.isFresh(),"Supreme snapshot expired; refresh snapshot before new trading")
-    I.strict=api(module("strict",5,false),"strict Supreme policy",{"reprice","buildPlans","tradeDecision","observe","negotiate","selectLateConcession","selectInitialOffer","confirmConcession","cancelConcession","observeQuote","earlyAllowance","reserveOffer"})
+    I.strict=api(module("strict",5,false),"Supreme scanner repricer only",{"reprice"})
     workerGui=LP:FindFirstChildOfClass("PlayerGui")
     assert(workerGui,"PlayerGui unavailable before scanner startup")
     I.scannerView=api(module("scannerView",5,false),"scanner current-price view",{"inventory","row","summary"})
