@@ -1,0 +1,25 @@
+/tmp/pdiddler-issue28-runtime-f7lembon/runtime.luau:3968: Issue28 actual strategy runtime failures
+stacktrace:
+[C] function assert
+/tmp/pdiddler-issue28-runtime-f7lembon/runtime.luau:3968
+PASS opponent-first 35 selects the available size-aware neutral quote
+PASS opponent-first 60 selects the available size-aware neutral quote
+FAIL opponent-first 100 selects the available size-aware neutral quote: /tmp/pdiddler-issue28-runtime-f7lembon/runtime.luau:3708: 18 ~= 75
+FAIL opponent-first 200 selects the available size-aware neutral quote: /tmp/pdiddler-issue28-runtime-f7lembon/runtime.luau:3708: 18 ~= 170
+FAIL opponent-first 500 selects the available size-aware neutral quote: /tmp/pdiddler-issue28-runtime-f7lembon/runtime.luau:3708: 18 ~= 425
+FAIL opponent-first 1295 selects the available size-aware neutral quote: /tmp/pdiddler-issue28-runtime-f7lembon/runtime.luau:3708: 18 ~= 1100
+FAIL actual opener chooses owned18 over40 against likely single42 reply: /tmp/pdiddler-issue28-runtime-f7lembon/runtime.luau:3708: 40 ~= 18
+PASS safe25 against42 remains25 after addition to60 without an authorized denomination
+PASS plus5 plus5 plus33 preserves cumulative thresholds and exact quarter-value concessions
+PASS unsafe opponent removal still withdraws immediately before selecting a lower quote
+FAIL neutral incoming100 selects75 when equally desirable55 is also available: /tmp/pdiddler-issue28-runtime-f7lembon/runtime.luau:3708: 55 ~= 75
+PASS source-verified incoming fluctuation increases the chosen initial margin
+PASS giving materially stronger demand preserves the disclosed reserve margin
+PASS missing source demand cannot produce a verified initial economic quote
+RESULT 8 passed; 6 failed
+Traceback (most recent call last):
+  File "/workspace/MM2-issue28-strategy/pdiddler/tests/run_issue28_runtime.py", line 86, in <module>
+    subprocess.run([luau,str(path)],check=True,cwd=ROOT)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/tmp/pdiddler-luau/luau', '/tmp/pdiddler-issue28-runtime-f7lembon/runtime.luau']' returned non-zero exit status 1.

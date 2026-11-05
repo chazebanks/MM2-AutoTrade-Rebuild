@@ -1,0 +1,38 @@
+PASS low-mid initial quote can approach +25 beyond obsolete sixty-percent ceiling
+PASS size preference uses practical15to25 on small trades and proportional high-value gains
+PASS source-condition risk raises a high-value profit preference without changing Supreme totals
+PASS real Batwing42 reply prefers stable owned18 opener over unsafe40
+COMPARE real received=35 owned-give=18.0 verified-profit=17.0 target=15.0 distance=2.0 candidates=2
+PASS real source comparison 35 enumerates only physically owned safe combinations
+COMPARE real received=60 owned-give=40.0 verified-profit=20.0 target=15.0 distance=5.0 candidates=5
+PASS real source comparison 60 enumerates only physically owned safe combinations
+COMPARE real received=100 owned-give=75.0 verified-profit=25.0 target=25.0 distance=0.0 candidates=9
+PASS real source comparison 100 enumerates only physically owned safe combinations
+COMPARE real received=200 owned-give=133.0 verified-profit=67.0 target=30.0 distance=37.0 candidates=15
+PASS real source comparison 200 enumerates only physically owned safe combinations
+COMPARE real received=500 owned-give=425.0 verified-profit=75.0 target=75.0 distance=0.0 candidates=66
+PASS real source comparison 500 enumerates only physically owned safe combinations
+COMPARE real received=1295 owned-give=451.0 verified-profit=844.0 target=312.25 distance=531.75 candidates=162
+PASS real source comparison 1295 enumerates only physically owned safe combinations
+PASS real1295 receipt cannot fabricate1260 when actual owned maximum is405
+PASS exact100 knife can gain three useful125 knives without fabricated quantities
+PASS low demand140 receipt remains visibly poorer quality despite greater numeric gain
+PASS two100 knives may consolidate to one desirable130 item with strict net gain
+PASS low-demand numerical140 gain cannot outrank preserving valuable100 quality
+PASS multiple low-demand knives do not justify donating a high-tier stable asset
+PASS economic and quality ties can preserve one knife by giving an equivalent gun
+PASS useful knife count cannot overrule a better attainable value margin
+PASS useful knife count cannot override preservation of stronger demand inventory
+PASS unavailable near-target combinations fall back safely without inventing inventory
+PASS extreme ordinal demand gaps cannot consume more than twenty percent of received value
+PASS only available quote reports a soft quality fallback without pretending the reserve passed
+PASS missing source-quality comparison preserves the smallest verified safe giveaway
+PASS nonfinite or invalid market metadata never claims a verified preference
+PASS real35 Chroma Swirly Gun chooses useful Plasmabeam18 over Boneblade7
+PASS hard plus15 floor survives desirability and item count preferences
+PASS normal and chroma price identities remain distinct while canonical mirrors are excluded
+PASS duplicate owned copies stay bounded by actual quantity and four physical copies
+PASS expired source and unknown or Priceless identities produce no safe plans
+FAIL real1295 demand threshold cannot outweigh a near-target owned960 quote by509 value: pdiddler/tests/issue28_policy_test.lua:9: 451.0 ~= 960
+RESULT 29 passed; 1 failed
+pdiddler/tests/issue28_policy_test.lua:292: Issue28 production policy failures
