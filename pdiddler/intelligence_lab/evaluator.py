@@ -15,7 +15,7 @@ class AssessmentError(ValueError):
     """A quote cannot be assessed using verified evidence."""
 
 
-VALID_STABILITY = frozenset({"stable", "fluctuating", "underpaid", "unknown"})
+VALID_STABILITY = frozenset({"stable", "fluctuating", "underpaid", "doing_well", "overpaid", "unknown"})
 
 
 def money(value: object) -> Decimal:
@@ -45,7 +45,7 @@ class Item:
         if not isinstance(self.identity, str) or self.identity.count(":") < 2:
             raise AssessmentError("item-identity-missing-variant")
         object.__setattr__(self, "value", money(self.value))
-        if isinstance(self.demand, bool) or not isinstance(self.demand, int) or not 0 <= self.demand <= 10:
+        if isinstance(self.demand, bool) or not isinstance(self.demand, int) or not 0 <= self.demand <= 11:
             raise AssessmentError("invalid-demand-ordinal")
         if self.stability not in VALID_STABILITY:
             raise AssessmentError("invalid-stability")
@@ -120,7 +120,7 @@ def portfolio_metrics(holdings: Mapping[str, int], catalog: Catalog) -> Metrics:
     check_counts(holdings, allow_empty=True)
     total = Decimal(0)
     stable_value = Decimal(0)
-    demand_values = [Decimal(0) for _ in range(11)]
+    demand_values = [Decimal(0) for _ in range(12)]
     four_copy_values: list[Decimal] = []
     four_type_values: list[Decimal] = []
     unknown = 0
@@ -152,7 +152,7 @@ def portfolio_metrics(holdings: Mapping[str, int], catalog: Catalog) -> Metrics:
         stable_share=(stable_value / total if total else None),
         four_copy_ceiling=sum(four_copy_values[:4], Decimal(0)),
         four_type_stack_ceiling=sum(four_type_values[:4], Decimal(0)),
-        demand_at_least_share=tuple(v / total for v in demand_values) if total else tuple(Decimal(0) for _ in range(11)),
+        demand_at_least_share=tuple(v / total for v in demand_values) if total else tuple(Decimal(0) for _ in range(12)),
     )
 
 
