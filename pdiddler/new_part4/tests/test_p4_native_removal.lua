@@ -28,7 +28,7 @@ local function fixture()
     local a=container:add('NewItem1');a:add('Container'):add('ActionButton','TextButton')
     local b=container:add('NewItem2');b:add('Container'):add('ActionButton','TextButton')
     local state={tradeOpen=true,session='sess',contextOK=true,
-        ourAccepted=false,theirAccepted=false,ourSig='base',
+        ourAccepted=false,theirAccepted=false,ourSig='base',theirSig='opponent-initial',
         ownItems={{slot=1,id='Mortal',qty=1},{slot=2,id='Immortal',qty=2}},ourSlots=2}
     local read={capture=function(_handle) return state,{authorizesTrade=false} end}
     local handle={config={session='sess',root=rootTrade}}
@@ -52,9 +52,9 @@ check('replaying same token cannot click twice',function()
     local f=fixture();eq(Native.execute(f.native,f.intent).status,'SENT_ONCE')
     eq(Native.execute(f.native,f.intent).status,'BLOCKED');eq(f.getCalls(),1)
 end)
-check('changed opponent items do not block safe local withdrawal',function()
+check('changed opponent offer after preflight blocks native removal',function()
     local f=fixture();f.state.theirSig='opponent-replaced'
-    eq(Native.execute(f.native,f.intent).status,'SENT_ONCE');eq(f.getCalls(),1)
+    eq(Native.execute(f.native,f.intent).status,'BLOCKED');eq(f.getCalls(),0)
 end)
 check('changed own signature blocks the removal',function()
     local f=fixture();f.state.ourSig='different'
