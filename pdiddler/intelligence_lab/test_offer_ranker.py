@@ -138,6 +138,14 @@ class QuoteRankingTests(unittest.TestCase):
                             for i in range(len(r.progression_offers)-1)))
         self.assertTrue(all(o.review_label == "offline-human-review-only" for o in r.progression_offers))
 
+    def test_accumulation_review_lane_tracks_profit_not_closeness(self):
+        ranked=self.rank(limit=100)
+        self.assertTrue(ranked.accumulation_offers)
+        gains=[x.gain for x in ranked.accumulation_offers]
+        self.assertEqual(gains,sorted(gains,reverse=True))
+        self.assertTrue(all(x.gain>=0 for x in ranked.accumulation_offers))
+        self.assertEqual(ranked.accumulation_offers[0].review_label,'offline-human-review-only')
+
     def test_low_demand_items_flagged_not_called_personally_unwanted(self):
         b = rank_offers({key("godly", "27"):1}, self.their, self.want, self.catalog, NOW, min_review_coverage=Decimal(0))
         self.assertEqual(len(b.offers),1)
