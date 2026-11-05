@@ -1,0 +1,108 @@
+V15.5 scanner evidence RED — offline production helpers/fixtures, no native gameplay
+
+SOURCE issue24-presentation-red.txt
+FAIL own-proof pending preserves verified BLACKLIST heading and exposes economic reason separately: pdiddler/tests/issue24_scanner_presentation_test.lua:40: [UNKNOWN]  Target
+Outgoing: unknown | own-proof-pending
+Eligible: 0 | Total value: 0
+Items: No eligible Ancient/Godly/Chroma Godly
+FAIL scanner base and initial item formatter show canonical current Immortal135 and Embersickle95: pdiddler/tests/issue24_scanner_presentation_test.lua:46: Immortal (140), Embersickle (80)
+FAIL economic pause cannot overwrite REQUESTING or PROCESSED request state: pdiddler/tests/issue24_scanner_presentation_test.lua:57: [UNKNOWN]  Target
+Outgoing: unknown | own-proof-paused:pending-request
+Eligible: 1 | Total value: 140
+Items: Immortal (140)
+FAIL raw rarity and outgoing counts are separately labeled: pdiddler/tests/issue24_scanner_presentation_test.lua:65: Whitelist 0  |  Blacklist 1  |  Unknown 0
+FAIL periodic repaint reflects price expiry without changing raw eligibility or request ownership: pdiddler/tests/issue24_scanner_presentation_test.lua:71: [PROCESSED]  Target
+attempt finished
+Eligible: 1 | Total value: 140
+Items: Immortal (140)
+FAIL clearing request state restores rarity heading with current economic detail: pdiddler/tests/issue24_scanner_presentation_test.lua:78: [REQUESTING]  Target
+pending
+Eligible: 1 | Total value: 140
+Items: Immortal (140)
+pdiddler/tests/issue24_scanner_presentation_test.lua:80: 6 presentation cases failed
+
+SOURCE issue24-scanner-view-red.txt
+FAIL Immortal and Embersickle display current canonical135 and95 instead of legacy140 and80: pdiddler/tests/issue24_scanner_view_test.lua:43: assertion failed!
+FAIL real quantities multiply only newly verified unit prices: pdiddler/tests/issue24_scanner_view_test.lua:49: assertion failed!
+FAIL normal and Chroma identities remain distinct: pdiddler/tests/issue24_scanner_view_test.lua:54: assertion failed!
+FAIL expired profile displays no cached or current numeric price as verified: pdiddler/tests/issue24_scanner_view_test.lua:59: assertion failed!
+FAIL missing profile metadata preserves raw eligible item as unpriced: pdiddler/tests/issue24_scanner_view_test.lua:66: assertion failed!
+FAIL Priceless remains visible and unpriced instead of a zero-value item: pdiddler/tests/issue24_scanner_view_test.lua:31: Nik's Scythe (250000000) lacks UNPRICED
+FAIL malformed quantities and incomplete inventories visibly remain unverified: pdiddler/tests/issue24_scanner_view_test.lua:31: 1 lacks UNVERIFIED
+FAIL parser-dropped malformed quantities cannot display a verified zero-copy inventory: pdiddler/tests/issue24_scanner_view_test.lua:31: 0 lacks UNVERIFIED
+PASS presentation never mutates scanner inventory or canonical market records
+FAIL outgoing own-proof pending cannot replace blacklist rarity header: pdiddler/tests/issue24_scanner_view_test.lua:94: assertion failed!
+FAIL outgoing paused reason preserves rarity instead of implying rarity uncertainty: pdiddler/tests/issue24_scanner_view_test.lua:98: assertion failed!
+FAIL real request status has visual priority while raw rarity and outgoing reason stay explicit: pdiddler/tests/issue24_scanner_view_test.lua:31: Immortal (140) lacks Waiting for opponent
+FAIL missing record does not fabricate whitelist or eligible inventory: pdiddler/tests/issue24_scanner_view_test.lua:23: attempt to index a nil value (local 'rec')
+FAIL summary labels raw rarity and outgoing uncertainty as separate counts: pdiddler/tests/issue24_scanner_view_test.lua:31: Whitelist 2 | Blacklist 1 | Unknown 0 lacks Inventory rarity:
+pdiddler/tests/issue24_scanner_view_test.lua:118: 13 view tests failed
+
+SOURCE issue24-scanner-economics-red.txt
+pdiddler/tests/issue24_scanner_economics_test.lua:45: unknown:own-inventory-unavailable
+
+SOURCE issue24-scanner-loader-red.txt
+PASS Seer3 exhausts the server without an outgoing availability blocker
+PASS concrete Batwing42 Luger18 offer remains available and blocks hopping
+PASS unknown expires30 second verification allowance but never becomes unprofitable
+PASS unresolved fingerprint churn cannot restart verification allowance
+PASS unknown gaining authoritative reachable inventory cancels exhaustion
+PASS processed player with unknown inventory or an active rescan cannot block hopping
+PASS identical own cache loss and recovery does not rediscover a reachable player
+PASS price expiry cannot age into hopping permission
+PASS native loading hold cannot age into hopping permission
+PASS transaction ownership cannot age into hopping permission
+PASS final transport recheck rejects a newly reachable target
+PASS V15.3 owner prevents competing successor controllers or startup UI
+PASS same-job execution keeps one startup and trading owner
+FAIL scanner executes with current profile strict policy and view before its initial rows: [string "actual-scanner-evidence-loader-tests"]:217: initial scanner profile/view binding absent
+FAIL own proof pending never repaints rarity blacklist as UNKNOWN: [string "actual-scanner-evidence-loader-tests"]:226: separate economic display was not updated
+FAIL economic refresh never writes request state or overrides an active request header: [string "actual-scanner-evidence-loader-tests"]:233: loader economics used setRequestState
+FAIL outgoing summary counts remain distinct from raw rarity counts through global holds: [string "actual-scanner-evidence-loader-tests"]:242: outgoing summary bridge not called
+FAIL bound scanner presentation reflects profile expiry without fallback to legacy prices: [string "actual-scanner-evidence-loader-tests"]:254: assertion failed!
+FAIL expired own proof cannot authorize a click while display preserves raw rarity: [string "actual-scanner-evidence-loader-tests"]:263: assertion failed!
+PASS active V15.4 predecessor refuses new scanner display and controller initialization
+[string "actual-scanner-evidence-loader-tests"]:271: 6 loader cases failed
+
+SOURCE issue24-presentation-rescan-red.txt
+PASS own-proof pending preserves verified BLACKLIST heading and exposes economic reason separately
+PASS scanner base and initial item formatter show canonical current Immortal135 and Embersickle95
+PASS economic pause cannot overwrite REQUESTING or PROCESSED request state
+FAIL a rescan result published after a request starts preserves request and outgoing fields atomically: pdiddler/tests/issue24_scanner_presentation_test.lua:66: [WHITELIST]  Target
+Eligible: 1  |  Total value: 135
+Items: Immortal x1 (135)
+PASS raw rarity and outgoing counts are separately labeled
+PASS periodic repaint reflects price expiry without changing raw eligibility or request ownership
+PASS clearing request state restores rarity heading with current economic detail
+pdiddler/tests/issue24_scanner_presentation_test.lua:87: 1 presentation cases failed
+
+SOURCE issue24-presentation-scan-start-red.txt
+PASS own-proof pending preserves verified BLACKLIST heading and exposes economic reason separately
+PASS scanner base and initial item formatter show canonical current Immortal135 and Embersickle95
+PASS economic pause cannot overwrite REQUESTING or PROCESSED request state
+PASS a rescan result published after a request starts preserves request and outgoing fields atomically
+PASS raw rarity and outgoing counts are separately labeled
+PASS periodic repaint reflects price expiry without changing raw eligibility or request ownership
+PASS clearing request state restores rarity heading with current economic detail
+FAIL periodic scan startup preserves processed request heading during inventory RPC: pdiddler/tests/issue24_scanner_presentation_test.lua:93: [SCANNING]  Target
+Reading inventory...
+pdiddler/tests/issue24_scanner_presentation_test.lua:96: 1 presentation cases failed
+
+SOURCE issue24-presentation-expiry-red.txt
+PASS own-proof pending preserves verified BLACKLIST heading and exposes economic reason separately
+PASS scanner base and initial item formatter show canonical current Immortal135 and Embersickle95
+PASS economic pause cannot overwrite REQUESTING or PROCESSED request state
+PASS a rescan result published after a request starts preserves request and outgoing fields atomically
+PASS raw rarity and outgoing counts are separately labeled
+FAIL periodic repaint reflects price expiry without changing raw eligibility or request ownership: pdiddler/tests/issue24_scanner_presentation_test.lua:83: [PROCESSED]  Target
+attempt finished
+Inventory rarity: WHITELIST
+Eligible copies: 1 | Total value: UNVERIFIED
+Items: Immortal x1 (UNVERIFIED: price expired or unavailable)
+Source: Supreme | supreme-2026-11-04-97613e277b36 | prices expired or unavailable
+Verification: unmapped=0 | unpriced=0 | badQty=0
+Outgoing: REACHABLE | verified-feasible-witness
+PASS clearing request state restores rarity heading with current economic detail
+FAIL periodic scan startup preserves processed request heading during inventory RPC: pdiddler/tests/issue24_scanner_presentation_test.lua:96: [SCANNING]  Target
+Reading inventory...
+pdiddler/tests/issue24_scanner_presentation_test.lua:99: 2 presentation cases failed
