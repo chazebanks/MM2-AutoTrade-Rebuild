@@ -1,0 +1,175 @@
+{
+  "format": "pdiddler-supreme-checker-snapshot-v1",
+  "original_commit": "11537dfd47f8df72aec7aeba9ecaffdfc5c879d4",
+  "version": "supreme-2026-11-04-97613e277b36",
+  "observed_at": "2026-11-04T21:55:32Z",
+  "published_at": "2026-11-04T17:27:12Z",
+  "valid_until": "2026-11-05T21:55:32Z",
+  "sources": {
+    "ancient": {
+      "url": "https://supremevalues.com/mm2/ancients",
+      "observed_at": "2026-11-04T21:55:32Z",
+      "published_at": "2026-11-04T17:27:12Z",
+      "sha256": "97d5b82bb62e6cb0af80805d620403744e18ddf7bdba830371e1d7c44e5af030"
+    },
+    "chroma": {
+      "url": "https://supremevalues.com/mm2/chromas",
+      "observed_at": "2026-11-04T21:55:32Z",
+      "published_at": "2026-11-04T17:27:12Z",
+      "sha256": "02c61daef40743be630ab50ffe6d8637f277ff501a0fdfae2ce0e4ba5efb2a52"
+    },
+    "godly": {
+      "url": "https://supremevalues.com/mm2/godlies",
+      "observed_at": "2026-11-04T21:55:32Z",
+      "published_at": "2026-11-04T17:27:12Z",
+      "sha256": "22c1b446bb33c5264c292553399803ad3c8bf7fc6772a1eb3cdf862b8433f8e9"
+    }
+  },
+  "profile_count": 16,
+  "items": [
+    {
+      "page": "ancient",
+      "id": "771",
+      "name": "Gingerscope",
+      "value": 16000,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "810",
+      "name": "Chroma Watergun",
+      "value": 2300,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "1029",
+      "name": "Chroma Embersickle",
+      "value": 1300,
+      "demand": 5,
+      "stability": "Fluctuating",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "8",
+      "name": "Chroma Laser",
+      "value": 40,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "527",
+      "name": "Chroma Swirly Gun",
+      "value": 35,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "1033",
+      "name": "Chroma Mortal",
+      "value": 1600,
+      "demand": 5,
+      "stability": "Doing Well",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "1031",
+      "name": "Mortal",
+      "value": 135,
+      "demand": 3,
+      "stability": "Fluctuating",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "1032",
+      "name": "Immortal",
+      "value": 135,
+      "demand": 3,
+      "stability": "Fluctuating",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "481",
+      "name": "Iceblaster",
+      "value": 33,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "448",
+      "name": "Darkbringer",
+      "value": 33,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "984",
+      "name": "Ornament",
+      "value": 65,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "524",
+      "name": "Candleflame",
+      "value": 33,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "21",
+      "name": "Green Luger",
+      "value": 23,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "46",
+      "name": "Laser",
+      "value": 22,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "572",
+      "name": "Plasmabeam",
+      "value": 18,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "27",
+      "name": "Boneblade",
+      "value": 7,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    }
+  ]
+}
