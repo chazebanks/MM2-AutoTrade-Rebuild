@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'pdiddler/new_part4/**'
+      - 'pdiddler/intelligence_lab/**'
       - '.github/workflows/stage14-part4-tests.yml'
   workflow_dispatch:
 jobs:
