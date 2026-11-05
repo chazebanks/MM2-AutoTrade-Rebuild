@@ -1,0 +1,44 @@
+FAIL real380 quote keeps selected310 plan but inserts Immortal twice then Ice then Bone: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: 7 ~= 135
+PASS contribution200 from two100 copies precedes a single150 unit
+PASS equal contributions preserve original selected-row order
+PASS execution reordering retains reservation plan identity and zero initial concession spend
+FAIL delayed native slot acknowledgement cannot verify an invisible310 offer: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade,Iceblaster,Immortal,Immortal ~= Immortal,Immortal,Iceblaster,Boneblade
+FAIL first large copy cannot become a verified310 quote or completion: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade ~= Immortal
+FAIL second large copy cannot become a verified310 quote or completion: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade ~= Immortal
+FAIL missing large acknowledgement cannot become a verified310 quote or completion: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade ~= Immortal
+FAIL opponent removal after first large copy stops the unsafe duplicate insertion: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade,Boneblade,Iceblaster ~= Immortal
+FAIL local true after first large copy forbids another insertion: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade ~= Immortal
+FAIL local unknown after first large copy forbids another insertion: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade ~= Immortal
+FAIL partner true after first large copy forbids another insertion: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade ~= Immortal
+FAIL late large slot after opponent change cannot resume the abandoned310 transaction: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade ~= Immortal
+FAIL later replacement removes last cheap filler then protects remaining large exposure: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Bone,Ice,Immortal,Immortal ~= Immortal,Immortal,Ice,Bone
+FAIL invalid selected-row missing value aborts before native mutation: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: 4 ~= 0
+FAIL invalid selected-row numeric string value aborts before native mutation: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: 4 ~= 0
+FAIL invalid selected-row zero value aborts before native mutation: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: 4 ~= 0
+FAIL invalid selected-row negative value aborts before native mutation: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: 4 ~= 0
+FAIL invalid selected-row NaN value aborts before native mutation: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: 4 ~= 0
+FAIL invalid selected-row infinite value aborts before native mutation: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: 4 ~= 0
+FAIL invalid selected-row missing quantity aborts before native mutation: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: 4 ~= 0
+FAIL invalid selected-row numeric string quantity aborts before native mutation: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: 4 ~= 0
+FAIL invalid selected-row zero quantity aborts before native mutation: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: 3 ~= 0
+FAIL invalid selected-row fractional quantity aborts before native mutation: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: 4 ~= 0
+FAIL invalid selected-row infinite quantity aborts before native mutation: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: 2 ~= 0
+FAIL invalid selected-row overflow contribution aborts before native mutation: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: 2 ~= 0
+FAIL changed exact partner username or UserId proof stops after the first large copy: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade ~= Immortal
+JOBID INVESTIGATION controller=supreme-v10-immediate-safety changed-after-send=3 later-sends=1 sequence=Boneblade,Iceblaster,Immortal,Immortal final-value=31/tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:4475: Value-first full controller runtime failures
+stacktrace:
+[C] function assert
+/tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:4475
+0 commits=1 completed=0
+PASS inherited JobId-only mutation has no direct standalone P4 fence
+FAIL JobId change with an invalidated owner or native root stops after first large copy: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade ~= Immortal
+FAIL expired source profile stops after the first large copy: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade ~= Immortal
+FAIL partner closing native window stops after the first large copy: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade ~= Immortal
+FAIL controller stop or stale transaction session stops after the first large copy: /tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau:3999: Boneblade ~= Immortal
+RESULT 4 passed; 28 failed
+Traceback (most recent call last):
+  File "/workspace/MM2-insertion-order/pdiddler/tests/run_insertion_runtime.py", line 95, in <module>
+    subprocess.run([luau,str(path)],check=True,cwd=ROOT)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/tmp/pdiddler-luau/luau', '/tmp/pdiddler-insertion-runtime-kt8c5avp/runtime.luau']' returned non-zero exit status 1.

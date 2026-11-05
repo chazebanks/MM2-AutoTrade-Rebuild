@@ -1,0 +1,13 @@
+JOBID INVESTIGATION controller=supreme-v10-immediate-safety changed-after-send=3 later-sends=1 sequence=Boneblade,Iceblaster,Immortal,Immortal final-value=310 commits=1 completed=0
+FAIL inherited JobId-only mutation has no direct standalone P4 fence: /tmp/pdiddler-insertion-runtime-97rnaqgl/runtime.luau:3999: 4 ~= 3
+RESULT 0 passed; 1 failed
+/tmp/pdiddler-insertion-runtime-97rnaqgl/runtime.luau:4475: Value-first full controller runtime failures
+stacktrace:
+[C] function assert
+/tmp/pdiddler-insertion-runtime-97rnaqgl/runtime.luau:4475
+Traceback (most recent call last):
+  File "/workspace/MM2-insertion-order/pdiddler/tests/run_insertion_runtime.py", line 95, in <module>
+    subprocess.run([luau,str(path)],check=True,cwd=ROOT)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/tmp/pdiddler-luau/luau', '/tmp/pdiddler-insertion-runtime-97rnaqgl/runtime.luau']' returned non-zero exit status 1.
