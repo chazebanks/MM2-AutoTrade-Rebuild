@@ -29,7 +29,8 @@ jobs:
             test_p4_native_removal \
             test_p4_stage8_stage9_stage10_integration \
             test_p4_coordinator \
-            test_p4_stability_gate; do
+            test_p4_stability_gate \
+            test_p4_risk_review; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
