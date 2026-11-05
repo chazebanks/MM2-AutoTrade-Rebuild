@@ -1,0 +1,12 @@
+/tmp/pdiddler-insertion-runtime-d0gsnb21/runtime.luau:4203: Value-first full controller runtime failures
+stacktrace:
+[C] function assert
+/tmp/pdiddler-insertion-runtime-d0gsnb21/runtime.luau:4203
+FAIL real380 quote keeps selected310 plan but inserts Immortal twice then Ice then Bone: /tmp/pdiddler-insertion-runtime-d0gsnb21/runtime.luau:3999: Boneblade,Iceblaster,Immortal,Immortal ~= Immortal,Immortal,Iceblaster,Boneblade
+RESULT 0 passed; 1 failed
+Traceback (most recent call last):
+  File "/workspace/MM2-insertion-order/pdiddler/tests/run_insertion_runtime.py", line 93, in <module>
+    subprocess.run([luau,str(path)],check=True,cwd=ROOT)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/tmp/pdiddler-luau/luau', '/tmp/pdiddler-insertion-runtime-d0gsnb21/runtime.luau']' returned non-zero exit status 1.
