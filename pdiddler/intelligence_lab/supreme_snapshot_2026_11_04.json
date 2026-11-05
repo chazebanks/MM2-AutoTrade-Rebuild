@@ -1,0 +1,1741 @@
+{
+  "format": "pdiddler-supreme-checker-snapshot-v1",
+  "original_commit": "11537dfd47f8df72aec7aeba9ecaffdfc5c879d4",
+  "version": "supreme-2026-11-04-97613e277b36",
+  "observed_at": "2026-11-04T21:55:32Z",
+  "published_at": "2026-11-04T17:27:12Z",
+  "valid_until": "2026-11-05T21:55:32Z",
+  "sources": {
+    "ancient": {
+      "url": "https://supremevalues.com/mm2/ancients",
+      "observed_at": "2026-11-04T21:55:32Z",
+      "published_at": "2026-11-04T17:27:12Z",
+      "sha256": "97d5b82bb62e6cb0af80805d620403744e18ddf7bdba830371e1d7c44e5af030"
+    },
+    "chroma": {
+      "url": "https://supremevalues.com/mm2/chromas",
+      "observed_at": "2026-11-04T21:55:32Z",
+      "published_at": "2026-11-04T17:27:12Z",
+      "sha256": "02c61daef40743be630ab50ffe6d8637f277ff501a0fdfae2ce0e4ba5efb2a52"
+    },
+    "godly": {
+      "url": "https://supremevalues.com/mm2/godlies",
+      "observed_at": "2026-11-04T21:55:32Z",
+      "published_at": "2026-11-04T17:27:12Z",
+      "sha256": "22c1b446bb33c5264c292553399803ad3c8bf7fc6772a1eb3cdf862b8433f8e9"
+    }
+  },
+  "profile_count": 190,
+  "items": [
+    {
+      "page": "ancient",
+      "id": "1",
+      "name": "Nik's Scythe",
+      "value": null,
+      "demand": 11,
+      "stability": "Overpaid For",
+      "verified": false
+    },
+    {
+      "page": "ancient",
+      "id": "771",
+      "name": "Gingerscope",
+      "value": 16000,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "743",
+      "name": "Traveler's Axe",
+      "value": 7300,
+      "demand": 5,
+      "stability": "Underpaid For",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "860",
+      "name": "Celestial",
+      "value": 1950,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "829",
+      "name": "Vampire's Axe",
+      "value": 1425,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "1026",
+      "name": "Emberbow",
+      "value": 400,
+      "demand": 5,
+      "stability": "Fluctuating",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "1027",
+      "name": "Emberscythe",
+      "value": 400,
+      "demand": 5,
+      "stability": "Fluctuating",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "526",
+      "name": "Harvester",
+      "value": 250,
+      "demand": 3,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "661",
+      "name": "Icepiercer",
+      "value": 160,
+      "demand": 3,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "480",
+      "name": "Icebreaker",
+      "value": 65,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "3",
+      "name": "Batwing",
+      "value": 42,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "2",
+      "name": "Elderwood Scythe",
+      "value": 38,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "529",
+      "name": "Swirly Axe",
+      "value": 38,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "471",
+      "name": "Hallowscythe",
+      "value": 30,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "404",
+      "name": "Logchopper",
+      "value": 18,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "ancient",
+      "id": "4",
+      "name": "Icewing",
+      "value": 13,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "739",
+      "name": "Chroma Traveler's Gun",
+      "value": 140000,
+      "demand": 8,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "772",
+      "name": "Chroma Evergun",
+      "value": 47000,
+      "demand": 7,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "773",
+      "name": "Chroma Evergreen",
+      "value": 33000,
+      "demand": 7,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "855",
+      "name": "Chroma Bauble",
+      "value": 29000,
+      "demand": 7,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "857",
+      "name": "Chroma Constellation",
+      "value": 27000,
+      "demand": 6,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "831",
+      "name": "Chroma Vampire's Gun",
+      "value": 24500,
+      "demand": 6,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "927",
+      "name": "Chroma Alienbeam",
+      "value": 23000,
+      "demand": 6,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "1036",
+      "name": "Chroma Emberscythe",
+      "value": 11000,
+      "demand": 6,
+      "stability": "Fluctuating",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "928",
+      "name": "Chroma Raygun",
+      "value": 12500,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "899",
+      "name": "Chroma Sunrise",
+      "value": 8500,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "962",
+      "name": "Chroma Snowcannon",
+      "value": 7750,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "1030",
+      "name": "Chroma Emberbow",
+      "value": 5000,
+      "demand": 6,
+      "stability": "Fluctuating",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "900",
+      "name": "Chroma Sunset",
+      "value": 5500,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "957",
+      "name": "Chroma Blizzard",
+      "value": 5500,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "958",
+      "name": "Chroma Snowstorm",
+      "value": 4250,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "990",
+      "name": "Chroma Heart Wand",
+      "value": 3500,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "960",
+      "name": "Chroma Snow Dagger",
+      "value": 2350,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "810",
+      "name": "Chroma Watergun",
+      "value": 2300,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "1006",
+      "name": "Chroma Icecream",
+      "value": 1850,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "1033",
+      "name": "Chroma Mortal",
+      "value": 1600,
+      "demand": 5,
+      "stability": "Doing Well",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "1034",
+      "name": "Chroma Immortal",
+      "value": 1600,
+      "demand": 5,
+      "stability": "Doing Well",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "985",
+      "name": "Chroma Ornament",
+      "value": 1825,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "992",
+      "name": "Chroma Treat",
+      "value": 1775,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "991",
+      "name": "Chroma Sweet",
+      "value": 1725,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "1007",
+      "name": "Chroma Sands",
+      "value": 1200,
+      "demand": 5,
+      "stability": "Underpaid For",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "1008",
+      "name": "Chroma Beachy",
+      "value": 1150,
+      "demand": 5,
+      "stability": "Underpaid For",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "1029",
+      "name": "Chroma Embersickle",
+      "value": 1300,
+      "demand": 5,
+      "stability": "Fluctuating",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "447",
+      "name": "Chroma Darkbringer",
+      "value": 65,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "446",
+      "name": "Chroma Lightbringer",
+      "value": 60,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "6",
+      "name": "Chroma Luger",
+      "value": 50,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "8",
+      "name": "Chroma Laser",
+      "value": 40,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "525",
+      "name": "Chroma Candleflame",
+      "value": 40,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "13",
+      "name": "Chroma Deathshard",
+      "value": 35,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "527",
+      "name": "Chroma Swirly Gun",
+      "value": 35,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "616",
+      "name": "Chroma Elderwood Blade",
+      "value": 37,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "7",
+      "name": "Chroma Shark",
+      "value": 32,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "9",
+      "name": "Chroma Slasher",
+      "value": 32,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "10",
+      "name": "Chroma Fang",
+      "value": 32,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "439",
+      "name": "Chroma Gemstone",
+      "value": 32,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "11",
+      "name": "Chroma Heat",
+      "value": 28,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "659",
+      "name": "Chroma Cookiecane",
+      "value": 32,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "14",
+      "name": "Chroma Tides",
+      "value": 27,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "15",
+      "name": "Chroma Seer",
+      "value": 28,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "17",
+      "name": "Chroma Gingerblade",
+      "value": 27,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "12",
+      "name": "Chroma Saw",
+      "value": 23,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "chroma",
+      "id": "16",
+      "name": "Chroma Boneblade",
+      "value": 22,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "740",
+      "name": "Traveler's Gun",
+      "value": 5200,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "770",
+      "name": "Evergun",
+      "value": 3450,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "769",
+      "name": "Evergreen",
+      "value": 2700,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "856",
+      "name": "Constellation",
+      "value": 2500,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "830",
+      "name": "Vampire's Gun",
+      "value": 1900,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "762",
+      "name": "Turkey",
+      "value": 1850,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "926",
+      "name": "Alienbeam",
+      "value": 1900,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "925",
+      "name": "Raygun",
+      "value": 1875,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "741",
+      "name": "Darkshot",
+      "value": 1475,
+      "demand": 5,
+      "stability": "Underpaid For",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "742",
+      "name": "Darksword",
+      "value": 1450,
+      "demand": 5,
+      "stability": "Underpaid For",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "696",
+      "name": "Blossom",
+      "value": 1160,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "697",
+      "name": "Sakura",
+      "value": 1150,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "901",
+      "name": "Sunrise",
+      "value": 800,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "961",
+      "name": "Snowcannon",
+      "value": 675,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "854",
+      "name": "Bauble",
+      "value": 675,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "902",
+      "name": "Sunset",
+      "value": 650,
+      "demand": 5,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "833",
+      "name": "Soul",
+      "value": 595,
+      "demand": 5,
+      "stability": "Underpaid For",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "832",
+      "name": "Spirit",
+      "value": 585,
+      "demand": 5,
+      "stability": "Underpaid For",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "924",
+      "name": "Xenoshot",
+      "value": 410,
+      "demand": 4,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "923",
+      "name": "Xenoknife",
+      "value": 410,
+      "demand": 4,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "715",
+      "name": "Rainbow Gun",
+      "value": 405,
+      "demand": 4,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "891",
+      "name": "Flora",
+      "value": 400,
+      "demand": 4,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "714",
+      "name": "Rainbow",
+      "value": 400,
+      "demand": 4,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "890",
+      "name": "Bloom",
+      "value": 395,
+      "demand": 4,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "989",
+      "name": "Heart Wand",
+      "value": 340,
+      "demand": 4,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "955",
+      "name": "Blizzard",
+      "value": 250,
+      "demand": 3,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "956",
+      "name": "Snowstorm",
+      "value": 250,
+      "demand": 3,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "728",
+      "name": "Ocean",
+      "value": 245,
+      "demand": 3,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "795",
+      "name": "Flowerwood Gun",
+      "value": 240,
+      "demand": 3,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "727",
+      "name": "Waves",
+      "value": 240,
+      "demand": 3,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "794",
+      "name": "Flowerwood",
+      "value": 235,
+      "demand": 3,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "959",
+      "name": "Snow Dagger",
+      "value": 175,
+      "demand": 3,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "988",
+      "name": "Treat",
+      "value": 155,
+      "demand": 3,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "1005",
+      "name": "Icecream",
+      "value": 140,
+      "demand": 2,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "811",
+      "name": "Watergun",
+      "value": 140,
+      "demand": 2,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "987",
+      "name": "Sweet",
+      "value": 150,
+      "demand": 3,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "1031",
+      "name": "Mortal",
+      "value": 135,
+      "demand": 3,
+      "stability": "Fluctuating",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "1032",
+      "name": "Immortal",
+      "value": 135,
+      "demand": 3,
+      "stability": "Fluctuating",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "859",
+      "name": "Borealis",
+      "value": 135,
+      "demand": 2,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "858",
+      "name": "Australis",
+      "value": 130,
+      "demand": 2,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "618",
+      "name": "Bat",
+      "value": 125,
+      "demand": 2,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "23",
+      "name": "Candy",
+      "value": 80,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "1028",
+      "name": "Embersickle",
+      "value": 95,
+      "demand": 2,
+      "stability": "Fluctuating",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "813",
+      "name": "Pearlshine",
+      "value": 80,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "1003",
+      "name": "Beachy",
+      "value": 75,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "1004",
+      "name": "Sands",
+      "value": 75,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "812",
+      "name": "Pearl",
+      "value": 75,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "512",
+      "name": "Heartblade",
+      "value": 65,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "984",
+      "name": "Ornament",
+      "value": 65,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "20",
+      "name": "Red Luger",
+      "value": 35,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "620",
+      "name": "Phantom",
+      "value": 35,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "621",
+      "name": "Spectre",
+      "value": 35,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "524",
+      "name": "Candleflame",
+      "value": 33,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "18",
+      "name": "Elderwood Revolver",
+      "value": 33,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "448",
+      "name": "Darkbringer",
+      "value": 33,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "481",
+      "name": "Iceblaster",
+      "value": 33,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "22",
+      "name": "Sugar",
+      "value": 32,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "617",
+      "name": "Makeshift",
+      "value": 33,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "445",
+      "name": "Lightbringer",
+      "value": 32,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "619",
+      "name": "Elderwood Blade",
+      "value": 33,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "21",
+      "name": "Green Luger",
+      "value": 23,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "30",
+      "name": "Amerilaser",
+      "value": 22,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "46",
+      "name": "Laser",
+      "value": 22,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "472",
+      "name": "Hallowgun",
+      "value": 20,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "532",
+      "name": "Icebeam",
+      "value": 18,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "48",
+      "name": "Shark",
+      "value": 20,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "572",
+      "name": "Plasmabeam",
+      "value": 18,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "63",
+      "name": "Nightblade",
+      "value": 20,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "528",
+      "name": "Swirly Gun",
+      "value": 18,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "531",
+      "name": "Iceflake",
+      "value": 15,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "32",
+      "name": "BattleAxe II",
+      "value": 17,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "34",
+      "name": "Pixel",
+      "value": 17,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "36",
+      "name": "Ginger Luger",
+      "value": 17,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "31",
+      "name": "Old Glory",
+      "value": 15,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "35",
+      "name": "Blaster",
+      "value": 17,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "39",
+      "name": "Luger",
+      "value": 18,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "573",
+      "name": "Plasmablade",
+      "value": 15,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "37",
+      "name": "Virtual",
+      "value": 13,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "43",
+      "name": "Slasher",
+      "value": 15,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "405",
+      "name": "Minty",
+      "value": 13,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "408",
+      "name": "Lugercane",
+      "value": 13,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "473",
+      "name": "Vampire's Edge",
+      "value": 15,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "482",
+      "name": "Jinglegun",
+      "value": 13,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "660",
+      "name": "Cookiecane",
+      "value": 13,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "662",
+      "name": "Gingermint",
+      "value": 12,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "522",
+      "name": "Nebula",
+      "value": 13,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "530",
+      "name": "Swirly Blade",
+      "value": 12,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "49",
+      "name": "Deathshard",
+      "value": 13,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "57",
+      "name": "BattleAxe",
+      "value": 12,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "60",
+      "name": "Gingerblade",
+      "value": 13,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "379",
+      "name": "Eternalcane",
+      "value": 13,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "440",
+      "name": "Gemstone",
+      "value": 15,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "24",
+      "name": "Chill",
+      "value": 10,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "28",
+      "name": "Clockwork",
+      "value": 10,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "33",
+      "name": "Spider",
+      "value": 10,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "40",
+      "name": "Heat",
+      "value": 10,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "42",
+      "name": "Tides",
+      "value": 10,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "47",
+      "name": "Fang",
+      "value": 10,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "26",
+      "name": "Eternal",
+      "value": 7,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "41",
+      "name": "Xmas",
+      "value": 7,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "58",
+      "name": "Frostsaber",
+      "value": 10,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "441",
+      "name": "Eternal III",
+      "value": 8,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "444",
+      "name": "Bioblade",
+      "value": 8,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "467",
+      "name": "Eternal IV",
+      "value": 8,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "25",
+      "name": "Handsaw",
+      "value": 8,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "29",
+      "name": "Hallow's Edge",
+      "value": 8,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "59",
+      "name": "Ice Shard",
+      "value": 7,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "19",
+      "name": "Eternal II",
+      "value": 7,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "27",
+      "name": "Boneblade",
+      "value": 7,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "44",
+      "name": "Pumpking",
+      "value": 7,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "45",
+      "name": "Saw",
+      "value": 7,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "62",
+      "name": "Ghostblade",
+      "value": 7,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "38",
+      "name": "Flames",
+      "value": 5,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "50",
+      "name": "Winter's Edge",
+      "value": 5,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "51",
+      "name": "Ice Dragon",
+      "value": 7,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "64",
+      "name": "Hallow's Blade",
+      "value": 8,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "407",
+      "name": "Frostbite",
+      "value": 7,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "521",
+      "name": "Eggblade",
+      "value": 5,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "61",
+      "name": "Snowflake",
+      "value": 5,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "468",
+      "name": "Prismatic",
+      "value": 7,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "479",
+      "name": "Peppermint",
+      "value": 4,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "483",
+      "name": "Cookieblade",
+      "value": 3,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "52",
+      "name": "Red Seer",
+      "value": 3,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "53",
+      "name": "Blue Seer",
+      "value": 3,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "54",
+      "name": "Purple Seer",
+      "value": 3,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "889",
+      "name": "Seer",
+      "value": 3,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "55",
+      "name": "Orange Seer",
+      "value": 2,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    },
+    {
+      "page": "godly",
+      "id": "56",
+      "name": "Yellow Seer",
+      "value": 2,
+      "demand": 1,
+      "stability": "Stable",
+      "verified": true
+    }
+  ]
+}
