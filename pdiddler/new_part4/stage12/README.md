@@ -32,3 +32,17 @@ lua pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/s
 ```
 
 These pure/helper and mock-GUI tests do **not** replace a native iPad/Delta read-only run. Existing Stage 11 production pins are untouched. Stage 12 does not enable final Accept or the Stage 7 strategy.
+
+
+## First native Delta result — 2026-11-05 14:51 EST (read-only evidence)
+
+User-supplied anonymized Stage12 export from one real MM2 trading session:
+- 19 logged events: 1 probe start, 1 trade open, **16 offer/indicator changes**, 1 close. Previous prose incorrectly reported 17 changes; correct count is 16.
+- Layout `TradeGUI`, one active root, partner identity matched, native accept/decline buttons visible. Both acceptance indicators stayed `false/false` during observation. No accepted or completed transaction was demonstrated.
+- Local `YourOffer` remained empty throughout. The opponent added, removed, and swapped Darkbringer, Mortal, Chroma Watergun, Iceblaster and Sunset. The offer was briefly empty and then repopulated; no premature auto-decline occurred because this was a read-only probe.
+- Every occupied slot emitted `#NO_ID[]`. In the probe's `lineForSide`, `[]` means **the Amount TextLabel exists and its `Text` is the empty string** (a missing node would report `[NO_QTY]`). `NO_ID` means no ID was found using the probe's currently searched attribute/value names; it does not prove that names are ambiguous or unresolvable.
+- **Stage 9 integration blocker:** strict `parseQuantity` rejects blank text, so every single-item slot in this capture would be unresolved. Do not silently default blank to one until native evidence distinguishes single-copy blank from stacked quantities. Stage 9 already has a unique display-name/chroma reconciliation fallback, but this must be verified per weapon against scanner inventory; `NO_ID` alone isn't a reason to invent an ID.
+- A trade with an actual two-copy stack remains necessary. Run the **same unchanged read-only Stage12 probe** and have either participant add an item with two copies in one visible slot (no acceptance, no completed valuable trade). Copy the `OURS`/`THEIRS` output showing the stack quantity. If possible, also add and then remove one local item to validate the local-side path. These are observation-only tests; do not trigger an executor.
+- User event output is recorded only as anonymized findings here; no personal identifiers, webhook tokens, job IDs or raw inventory exports are committed.
+
+Verified probe loader pin: `ead6691b5d65300fcdd8cd9b3bb84982783713be`. All deployed and production Part 4 modules remain untouched.
