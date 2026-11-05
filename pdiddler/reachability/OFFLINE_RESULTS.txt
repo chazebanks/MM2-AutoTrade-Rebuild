@@ -1,6 +1,6 @@
-V15.4 PREPUBLICATION OFFLINE VERIFICATION — native MM2/iPad NOT RUN
+V15.4 FINAL PINNED OFFLINE VERIFICATION — native MM2/iPad NOT RUN
 PASS all 342 V15.3 predecessor files byte-identical
-PREPUBLICATION: zero pins permitted for local tests only
+PASS 19 immutable dependency pins and loader manifest
 EXIT 0: python3 pdiddler/tests/run_v14_checks.py
 EXIT 0: python3 pdiddler/tests/run_issue19_runtime.py
 EXIT 0: python3 pdiddler/tests/run_issue24_outgoing_runtime.py
@@ -1263,7 +1263,7 @@ EXIT: 0
 PASS 190 real Lua records and fixed expiry across reload
 .............
 ----------------------------------------------------------------------
-Ran 13 tests in 0.017s
+Ran 13 tests in 0.013s
 
 OK
 

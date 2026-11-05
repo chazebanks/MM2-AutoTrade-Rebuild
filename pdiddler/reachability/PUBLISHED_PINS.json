@@ -1,0 +1,170 @@
+[
+  {
+    "key": "feasibility",
+    "path": "pdiddler/pdiddler3_feasibility_v1.lua",
+    "ref": "b411a5eca727649c86f079b22a5368039cc60fc3",
+    "blob": "139466167804777edb3ddaccf587a35bfb2f9b3f",
+    "verified": true,
+    "bytes": 6965
+  },
+  {
+    "key": "eligibility",
+    "path": "pdiddler/pdiddler3_outgoing_eligibility_v1.lua",
+    "ref": "b411a5eca727649c86f079b22a5368039cc60fc3",
+    "blob": "6d7ed2d168a3fbb23efa9e0a98d64743567115b7",
+    "verified": true,
+    "bytes": 6433
+  },
+  {
+    "key": "readiness",
+    "path": "pdiddler/pdiddler_readiness_v2_VISIBLE_SCAN.lua",
+    "ref": "8144fd2dc9b1a446c336adeeea8dfd6139a7aab3",
+    "blob": "409b6e4fdf85447859da0180bfc3e807520cdb09",
+    "verified": true,
+    "bytes": 7533
+  },
+  {
+    "key": "profile",
+    "path": "pdiddler/snapshots/pdiddler_supreme_snapshot_2026_11_04.lua",
+    "ref": "11537dfd47f8df72aec7aeba9ecaffdfc5c879d4",
+    "blob": "3e085101e257e615cf56561f0181bd5182d1bd68",
+    "verified": true,
+    "bytes": 14183
+  },
+  {
+    "key": "strict",
+    "path": "pdiddler/pdiddler4_supreme_policy_v9_CONSISTENT_QUOTES.lua",
+    "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+    "blob": "4aac33d5ac32cba3c83562e53644099f377ac2e2",
+    "verified": true,
+    "bytes": 35153
+  },
+  {
+    "key": "p2",
+    "path": "pdiddler/pdiddler2_KNOWN_GOOD.lua",
+    "ref": "b097c1862db4cff7394d6a5e6764d34191df3283",
+    "blob": "463915e34d509b55b1a17634ec74396e7d82b76c",
+    "verified": true,
+    "bytes": 12576
+  },
+  {
+    "key": "gate",
+    "path": "pdiddler/pdiddler1_fast_gate_v7_HEADLESS.lua",
+    "ref": "1bcc13d857489376ee57eae42ee34de33323bbeb",
+    "blob": "b213fbc30a65d98b370861e5b457e83e8274590f",
+    "verified": true,
+    "bytes": 30862
+  },
+  {
+    "key": "scanner",
+    "path": "pdiddler/reachability/pdiddler3_scanner_MODULE_v6_9_VERIFICATION_STATE.lua",
+    "ref": "b411a5eca727649c86f079b22a5368039cc60fc3",
+    "blob": "8aaca2fa0aa1290e372b8533b71788b7f0da1ea1",
+    "verified": true,
+    "bytes": 60934
+  },
+  {
+    "key": "p4",
+    "path": "pdiddler/pdiddler4_balancer_SUPREME_v9_OPPONENT_ADDED.lua",
+    "ref": "54c9ff4b999f67b2a257be10747c32916051bdd4",
+    "blob": "20d0545e69fe0405f197132da091d8e5201dd6ee",
+    "verified": true,
+    "bytes": 80966
+  },
+  {
+    "key": "early",
+    "path": "pdiddler/pdiddler4_early_counter_policy_v5_OPPONENT_ADDED.lua",
+    "ref": "c6b135289f86d87664d59e2559cc95c9f67dae66",
+    "blob": "1be4581cbcc9ef78349561cca918fe145df2aa74",
+    "verified": true,
+    "bytes": 11646
+  },
+  {
+    "key": "acceptGate",
+    "path": "pdiddler/pdiddler4_accept_ui_gate_v1.lua",
+    "ref": "55c5b4a46c26294f3d97ba61dfd43fadd4f07d02",
+    "blob": "f931faaaef5cd806db36872561641b6b080cfe0a",
+    "verified": true,
+    "bytes": 3315
+  },
+  {
+    "key": "outgoing",
+    "path": "pdiddler/pdiddler3_outgoing_ROTATING_v18_REACHABLE.lua",
+    "ref": "b411a5eca727649c86f079b22a5368039cc60fc3",
+    "blob": "7937e467ed50ea9a2def83c7a9565e42cc0b81cc",
+    "verified": true,
+    "bytes": 82440
+  },
+  {
+    "key": "policy",
+    "path": "pdiddler/pdiddler5_server_hopper_policy_v1.lua",
+    "ref": "3be1c15f435389ff518cf3a4594b34efc08e84de",
+    "blob": "fbd4643340e0f415c51538194a151340d556b7c9",
+    "verified": true,
+    "bytes": 2192
+  },
+  {
+    "key": "transport",
+    "path": "pdiddler/pdiddler5_server_hopper_v2.lua",
+    "ref": "a20e96fff663e42e50bf668d5be5c7b148a70b9e",
+    "blob": "13d663c12431610edc036f709e998e9a0b2ad27d",
+    "verified": true,
+    "bytes": 10201
+  },
+  {
+    "key": "discord",
+    "path": "pdiddler/pdiddler_discord_transport_v1.lua",
+    "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+    "blob": "9f532ad6ba1324dc123e54ad95cc6dab7195e811",
+    "verified": true,
+    "bytes": 2884
+  },
+  {
+    "key": "journal",
+    "path": "pdiddler/pdiddler_runtime_journal_v1.lua",
+    "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+    "blob": "f437031d3d406217f63d6793cfd0512aff78a51a",
+    "verified": true,
+    "bytes": 7619
+  },
+  {
+    "key": "outbox",
+    "path": "pdiddler/pdiddler_webhook_outbox_v3.lua",
+    "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+    "blob": "8182e84e6d64476b007a68d7b9c984bf54a9ac5a",
+    "verified": true,
+    "bytes": 9571
+  },
+  {
+    "key": "verifier",
+    "path": "pdiddler/pdiddler_trade_verification_v2.lua",
+    "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+    "blob": "bd3cfd32663371a7bfd20800cbb1e99472038772",
+    "verified": true,
+    "bytes": 7964
+  },
+  {
+    "key": "lifecycle",
+    "path": "pdiddler/pdiddler_trade_lifecycle_v1.lua",
+    "ref": "b23138cc769a632b8791fe1d50776faf1c7ac1dd",
+    "blob": "c0d20f34e5abb73336f61f06b0f1ff38b801f3b9",
+    "verified": true,
+    "bytes": 11198
+  },
+  {
+    "key": "loader",
+    "path": "pdiddler/pdiddler_FASTGATE_V6_INTEGRATED_TEST_v15_4_REACHABLE.lua",
+    "ref": "36c601fcd08a8c9fe7a318b2c52d6f1449b266c9",
+    "blob": "0eae176c001dfa2d176ed1de8e7812414165beea",
+    "verified": true,
+    "bytes": 34161
+  },
+  {
+    "key": "bootstrap",
+    "path": "pdiddler/pdiddler_V15_4_TELEPORT_AUTOBOOT_v1.lua",
+    "ref": "5d44c0cc5563b988ea3004893f4b53ce0338ea62",
+    "blob": "c3ba48d4621f71f64b2baede331d58d293d25e83",
+    "verified": true,
+    "bytes": 5843
+  }
+]

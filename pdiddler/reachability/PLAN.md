@@ -13,7 +13,7 @@ Tasks:
 - [x] Implement pure feasibility and strict incomplete/expired/quantity/canonical boundaries; test exact +15, slots and quantities.
 - [x] Version outgoing and loader/bootstrap; cache bounded own reads outside trades; recheck before send; use shared reachability for exhaustion/final hop gates.
 - [x] Run production queue/loader regressions: reachable/incomplete/rescan/join/processed/request ownership/incoming/hop countdown/late final check; run inherited suites and preserve every predecessor blob.
-- [ ] Review, publish immutable dependency→loader→bootstrap chain, fetch matching blobs, open unmerged draft PR; report native limitations and stop.
+- [x] Review, publish immutable dependency→loader→bootstrap chain, fetch matching blobs, open unmerged draft PR; report native limitations and stop.
 
 Review focus: interrupted own reads; stale classification during yielding card navigation; mirrored identity eliminating apparent profitability; partial inventories mistaken for complete; processed players rediscovered by rescan; unknown players preventing unsafe hopping.
 
@@ -26,3 +26,5 @@ Approved safeguards: fixed unknown30s; own retries0/5/15 then45/90/... with no c
 Verification ruling: inherited V14 named-objective text guard flags unchanged Gingerscope catalog data in a new root scanner copy. Keep scanner derivative in reachability/ alongside its scope record; compile it explicitly and require removing only additive API to reproduce exact v6_8 bytes. No inherited test or source/catalog content changed.
 
 Final review: independent review found incomplete-own retry and suppressed-row rendering issues, both reproduced RED and fixed GREEN. Transaction cache invalidation moved before lifecycle early return. Added full unchanged outgoing-worker runtime fixture after review identified extracted-helper coverage gap: original v17 physically requests Seer3 (RED); v18 six scenarios GREEN. Current full gate25 top-level checks (including inherited37-command suite) PASS, all342 predecessor files unchanged. Scanner rows use existing distinct WHITELIST/UNAVAILABLE/UNKNOWN styles plus explicit outgoing classification/reason.
+
+Publication: dependencies b411a5eca727649c86f079b22a5368039cc60fc3 → loader36c601fcd08a8c9fe7a318b2c52d6f1449b266c9 → bootstrap5d44c0cc5563b988ea3004893f4b53ce0338ea62. Full pinned gate PASS. All21 immutable blobs independently fetched through GitHub connector and match local hashes; interrupted raw-network attempt is not counted as verification. Native iPad remains NOT RUN.
