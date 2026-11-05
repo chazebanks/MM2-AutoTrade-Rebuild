@@ -41,10 +41,38 @@ check('parses exact x2, ×2, 2 and 1',function()
     equal(O.parseQuantity('1'),1)
 end)
 check('rejects missing, decimals, negatives, zero, scientific and giant qty',function()
-    for _,q in ipairs({'','x','0','-1','1.0','1e4','x-2','x1000001','999999999999999','1,000','x2 boxes'}) do
+    for _,q in ipairs({' ','x','0','-1','1.0','1e4','x-2','x1000001','999999999999999','1,000','x2 boxes'}) do
         equal(O.parseQuantity(q),nil)
     end
     equal(O.parseQuantity(nil),nil)
+end)
+check('native blank amount means exactly one copy, not missing quantity',function()
+    equal(O.parseQuantity(''),1)
+    equal(O.parseQuantity('x2'),2)
+    equal(O.parseQuantity(nil),nil)
+    equal(O.parseQuantity(false),nil)
+    equal(O.parseQuantity('  '),nil)
+end)
+check('blank Amount with unique inventory match resolves to one',function()
+    local x=fixture()
+    x.our.slots[2].amountText=''
+    x.their.slots[1].amountText=''
+    x.their.slots[1].rawId=nil
+    local o,d=normalize(x)
+    equal(o.contextOK,true)
+    equal(o.ownItems[2].qty,1)
+    equal(o.theirResolved,true)
+    equal(d.theirItems[1].qty,1)
+    equal(d.theirItems[1].origin,'unique-scanner-name')
+    equal(o.quoteSafe,false)
+end)
+check('blank Amount never rescues a missing weapon name',function()
+    local x=fixture()
+    x.our.slots[2].amountText=''
+    x.our.slots[2].label=''
+    local o,d=normalize(x)
+    equal(o.contextOK,false)
+    assert(table.concat(d.errors,'|'):find('name-unavailable',1,true))
 end)
 check('verified quantities and slot layout pass to safety core shape',function()
     local o,d=normalize(fixture())
