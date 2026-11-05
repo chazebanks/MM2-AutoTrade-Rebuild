@@ -6,12 +6,11 @@
 local M={}
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local PIN="1971b93d324f0275e6a9affb472ac3e804439ed8"
-local function existing(name)
-    local E=(getgenv and getgenv()) or _G
-    return E[name]
-end
+local PLACEMENT_PIN="8b51d5f631a92b3e376fb6cf94d8048bb8e777a1"
 local function readModule(name)
-    local src=game:HttpGet(ROOT..PIN.."/pdiddler/new_part4/"..name..".lua",true)
+    local pin=(name=="p4_offer_executor" or name=="p4_native_offer")
+        and PLACEMENT_PIN or PIN
+    local src=game:HttpGet(ROOT..pin.."/pdiddler/new_part4/"..name..".lua",true)
     assert(type(src)=="string" and #src>10,"replacement observer source unavailable")
     local fn,why=loadstring(src,"="..name)
     assert(fn,why)
@@ -50,7 +49,7 @@ local function partnerOf(root,players,localPlayer)
     end
     return nil
 end
-function M.run(scanner,profile)
+function M.run(scanner,profile,placement)
     assert(type(scanner)=="table" and type(scanner.getRecord)=="function"
         and type(scanner.getOwnInventory)=="function"
         and type(scanner.claimStatusOwner)=="function"
@@ -65,18 +64,36 @@ function M.run(scanner,profile)
     assert(lp,"LocalPlayer unavailable")
     local contract=readModule("p4_observer_contract")
     local native=readModule("p4_native_observer")
+    -- The normal bootstrap passes NO placement capability. This branch has
+    -- no native economic authorization; only a separately injected, tested
+    -- source-backed permit validator may enable a one-shot ADD in a lab.
+    local placementEnabled=type(placement)=="table" and placement.enabled==true
+    local offerCore,offerNative
+    if placementEnabled then
+        assert(type(placement.validatePermit)=="function"
+            and type(placement.nextProposal)=="function"
+            and type(placement.sendOnce)=="function",
+            "verified placement callbacks missing")
+        offerCore=readModule("p4_offer_executor")
+        offerNative=readModule("p4_native_offer")
+    end
     local session=1
     E.PDIDDLER_PART4_SESSION=session
-    local S={active=false,mode="READ_ONLY",tradesSeen=0,
+    local S={active=false,mode=placementEnabled and "INJECTED_ONE_SHOT_TEST" or "READ_ONLY",
+        tradesSeen=0,placementStatus="NOT_ENABLED",
         lastReason="initialized",lastObservation=nil,quoteSafe=false,
         authorizesTrade=false,authorizesAccept=false}
     local controller={kind="gingerscope-replacement-observer",session=session,
         jobId=game.JobId,state=S}
     local running=true
     local handle=nil
+    local offerState,offerHandle=nil,nil
     local boundRoot=nil
     local function release()
-        if handle then pcall(native.close,handle) end
+        if offerHandle and offerNative then pcall(offerNative.close,offerHandle) end
+        if offerState and offerCore then pcall(offerCore.stop,offerState) end
+        offerState=nil;offerHandle=nil
+        if handle then handle.closed=true end
         handle=nil
         if S.active then pcall(scanner.releaseStatusOwner,"P4") end
         S.active=false
@@ -116,6 +133,7 @@ function M.run(scanner,profile)
                     local ownOK,own=pcall(scanner.getOwnInventory)
                     local record=partner and scanner.getRecord(partner.UserId)
                     local theirs=record and record.state=="whitelist" and record.inv
+                    S.placementStatus="NOT_ENABLED"
                     if partner and ownOK and type(own)=="table" and type(theirs)=="table" then
                         local okay,result=pcall(native.new,{
                             game=game,players=players,root=root,
@@ -128,7 +146,22 @@ function M.run(scanner,profile)
                                 return ok and f==true
                             end
                         })
-                        if okay then handle=result
+                        if okay then
+                            handle=result
+                            if placementEnabled then
+                                local okCore,core=pcall(offerCore.new,result.config.session,{
+                                    validatePermit=placement.validatePermit})
+                                local okNative,nativeHandle=pcall(offerNative.new,{
+                                    observer=native,handle=result,
+                                    session=result.config.session,
+                                    ownInventory=own,sendOnce=placement.sendOnce})
+                                if okCore and okNative then
+                                    offerState=core;offerHandle=nativeHandle
+                                    S.placementStatus="AWAIT_PERMITTED_PROPOSAL"
+                                else
+                                    S.placementStatus="PLACEMENT_BIND_FAILED"
+                                end
+                            end
                         else S.lastReason="observer-init-unverified" end
                     else
                         S.lastReason="scanner-or-partner-unverified"
@@ -150,6 +183,33 @@ function M.run(scanner,profile)
                         S.lastReason=obs.contextOK and
                             "verified-layout;strategy-not-authorized" or
                             "trade-observation-unverified"
+                        -- In the normal bootstrap offerState=nil, so this path
+                        -- cannot send any offer, including after a good scan.
+                        if offerState and offerHandle
+                           and (offerState.mode=="SENT" or offerState.mode=="IDLE") then
+                            local now=os.clock()
+                            if offerState.mode=="SENT" then
+                                local result,why=offerCore.observe(offerState,obs,now)
+                                S.placementStatus=tostring(result)..":"..tostring(why)
+                            elseif obs.contextOK and obs.marketFresh
+                                and obs.theirResolved and obs.ourAccepted==false
+                                and obs.theirAccepted==false then
+                                local okPlan,proposal=pcall(placement.nextProposal,obs,diagnostics)
+                                if okPlan and type(proposal)=="table" then
+                                    local kind,intent=offerCore.prepare(offerState,proposal,obs,now)
+                                    if kind=="DISPATCH" then
+                                        local receipt=offerNative.execute(offerHandle,intent)
+                                        local status,why=offerCore.dispatched(
+                                            offerState,intent,receipt,os.clock())
+                                        S.placementStatus=tostring(status)..":"..tostring(why)
+                                    else
+                                        S.placementStatus=tostring(kind)..":"..tostring(intent)
+                                    end
+                                elseif not okPlan then
+                                    S.placementStatus="PROPOSAL_CALLBACK_FAILED"
+                                end
+                            end
+                        end
                     else
                         S.lastReason="native-trade-observation-unavailable"
                     end
