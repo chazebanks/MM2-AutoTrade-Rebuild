@@ -1,0 +1,12 @@
+FAIL encoder throws still prints full fresh owner and Exit evidence before trader starts: pdiddler/tests/delta_ui_report_bootstrap_test.lua:10: 0 ~= 1
+FAIL HttpService unavailable still prints full fresh owner and Exit evidence before trader starts: pdiddler/tests/delta_ui_report_bootstrap_test.lua:10: 0 ~= 1
+FAIL same-JobId fresh execution emits once without another scan queue or controller: pdiddler/tests/delta_ui_report_bootstrap_test.lua:10: 0 ~= 1
+FAIL cached-v1 report is replayed before the existing active trader early return: pdiddler/tests/delta_ui_report_bootstrap_test.lua:10: 0 ~= 1
+FAIL cached-v1 binary owner data can be recovered without modifying the cache: pdiddler/tests/delta_ui_report_bootstrap_test.lua:10: 0 ~= 1
+PASS cache job cannot replay stale native evidence into another JobId
+PASS report job cannot replay stale native evidence into another JobId
+FAIL failed print leaves cached replay retryable instead of setting the once tag: pdiddler/tests/delta_ui_report_bootstrap_test.lua:10: 0 ~= 1
+PASS existing trader without a cached report causes no scan fetch or queued restart
+FAIL queued new JobId prints one fresh report and preserves original pinned transport: pdiddler/tests/delta_ui_report_bootstrap_test.lua:10: 0 ~= 1
+RESULT 3 bootstrap report tests passed; 7 failed
+pdiddler/tests/delta_ui_report_bootstrap_test.lua:161: Delta UI structured report bootstrap tests failed

@@ -1,0 +1,9 @@
+FAIL actual module exposes a deterministic native-JSON-independent formatter: [string "actual-delta-report-v2-tests"]:154: native-JSON-independent formatter missing
+FAIL raw invalid byte produces ASCII descriptors without reading private editor content: [string "actual-delta-report-v2-tests"]:154: native-JSON-independent formatter missing
+FAIL high/control bytes produces ASCII descriptors without reading private editor content: [string "actual-delta-report-v2-tests"]:154: native-JSON-independent formatter missing
+FAIL UTF8 cut at64 bytes produces ASCII descriptors without reading private editor content: [string "actual-delta-report-v2-tests"]:154: native-JSON-independent formatter missing
+FAIL cached-v1 invalid byte strings are escaped without changing cached data: [string "actual-delta-report-v2-tests"]:154: native-JSON-independent formatter missing
+FAIL formatter projects known fields and excludes private unknown keys at every level: [string "actual-delta-report-v2-tests"]:154: native-JSON-independent formatter missing
+FAIL JSON quotes backslashes and controls remain independently parseable: [string "actual-delta-report-v2-tests"]:154: native-JSON-independent formatter missing
+RESULT 0 report tests passed; 7 failed
+[string "actual-delta-report-v2-tests"]:218: Delta UI report module tests failed
