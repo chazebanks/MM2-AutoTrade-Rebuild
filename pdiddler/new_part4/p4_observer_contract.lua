@@ -19,6 +19,15 @@ local function startsChroma(s)
     return canon(s):sub(1,7) == "chroma "
 end
 
+-- Stage 15: known cross-tier name collisions from native inventory evidence
+-- and independent MM2 catalogs. Stage 9's scanner intentionally excludes
+-- Vintage and lower rarity tiers; a unique eligible scanner name is NOT
+-- sufficient when an excluded weapon shares the same GUI display name.
+-- Canonical names here are for NON-chroma, name-only fallback only.
+-- Extend this map only with independently verified collisions.
+local crossTierNameCollisions = { laser = true }
+
+
 local function fullName(label, chroma)
     local n = canon(label)
     if chroma and not startsChroma(label) then n = "chroma "..n end
@@ -124,6 +133,9 @@ local function resolve(slot,index)
         if not it then return nil,"raw-id-not-in-scanner" end
         if canon(it.name)~=matchingName then return nil,"raw-id-name-disagreement" end
     else
+        if crossTierNameCollisions[matchingName] then
+            return nil,"cross-tier-display-name-ambiguous"
+        end
         it=index.byName[matchingName]
         if type(it)~="table" then return nil,"unproven-or-ambiguous-display-identity" end
     end

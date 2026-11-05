@@ -142,6 +142,22 @@ check('blank native Amount label resolves one only with valid weapon identity',f
     equal(d.ourItems[1].origin,'unique-scanner-name')
     equal(o.quoteSafe,false)
 end)
+check('Stage15 real-GUI-shaped Laser with NO_ID cannot impersonate Godly',function()
+    local t=setup()
+    t.config.ownInventory=inventory({
+        {id='LaserGodly',name='Laser',qty=2,checkerId='501',
+            page='godly',cat='Weapons',type='Gun'},
+    })
+    local item=t.ours:FindFirstChild('Container'):FindFirstChild('NewItem1')
+    item.attrs={}
+    item:FindFirstChild('ItemName'):FindFirstChild('Label').Text='Laser'
+    item:FindFirstChild('Container'):FindFirstChild('Amount').Text=''
+    local o,d=Native.capture(Native.new(t.config))
+    equal(o.contextOK,false)
+    equal(#o.ownItems,0)
+    equal(o.quoteSafe,false)
+    assert(table.concat(d.errors,'|'):find('cross-tier-display-name-ambiguous',1,true))
+end)
 check('missing amount label never assumes qty one',function()
     local t=setup()
     local item=t.ours:FindFirstChild('Container'):FindFirstChild('NewItem1')
