@@ -160,6 +160,20 @@ class Stage19Tests(unittest.TestCase):
         with self.assertRaisesRegex(AssessmentError,"ledger-transfer-must-conserve-assets"):
             reconcile_value_change(before,after,market(),market(),BEFORE,AFTER,(bad,))
 
+    def test_events_cannot_sell_weapons_before_they_are_owned(self):
+        before=starting()
+        after=starting(AFTER)
+        # Two invented trades cancel out in the final snapshot. The first
+        # falsely gives two A copies even though the account holds only one.
+        first=CompletedEvent("earlier","external_trade",
+                             {"main":{A:-2,B:1}})
+        second=CompletedEvent("later","external_trade",
+                              {"main":{B:-1,A:2}})
+        with self.assertRaisesRegex(AssessmentError,
+                                    "ledger-event-not-owned-at-time"):
+            reconcile_value_change(before,after,market(),market(),
+                                   BEFORE,AFTER,(first,second))
+
     def test_unpriced_event_asset_cannot_be_valued_as_zero(self):
         before=starting()
         after=(snap("main",{A:1,"godly:999:checker-id":1},AFTER),
