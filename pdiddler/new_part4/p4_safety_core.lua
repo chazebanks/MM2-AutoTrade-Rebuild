@@ -72,6 +72,7 @@ local function beginRemoval(s,counts,obs,now,reason)
     if not s.clearingSince then s.clearingSince = now end
     s.mode = "AWAIT_REMOVAL"
     s.pending = counts
+    s.pendingOurSig = obs.ourSig
     s.pendingSince = now
     s.plan = nil
     s.quoteApproved = false
@@ -109,10 +110,12 @@ end
 function M.step(s,o,now)
     assert(type(s) == "table" and type(s.config) == "table", "state required")
     if s.mode == "STOPPED" then return result(s,"STOP","already-stopped") end
+    -- Even after requesting a decline, never carry its command into a new
+    -- trade session or repeat it after the original window has closed.
+    if type(o) == "table" and o.tradeOpen == false then return stopped(s,"trade-closed") end
+    if type(o) == "table" and o.session ~= s.session then return stopped(s,"trade-session-mismatch") end
     if s.mode == "DECLINE_REQUIRED" then return result(s,"DECLINE","decline-not-yet-confirmed") end
     if type(o) ~= "table" or not finite(now) then return decline(s,"invalid-observation") end
-    if o.tradeOpen == false then return stopped(s,"trade-closed") end
-    if o.session ~= s.session then return stopped(s,"trade-session-mismatch") end
     if o.tradeOpen ~= true or o.contextOK ~= true or o.marketFresh ~= true
         or type(o.ourSig) ~= "string" or o.ourSig == ""
         or type(o.theirSig) ~= "string" or o.theirSig == ""
@@ -156,6 +159,12 @@ function M.step(s,o,now)
                 return decline(s,"unverified-removal-timeout")
             end
             return result(s,"HOLD","awaiting-removal-proof")
+        end
+        -- The independent raw GUI signature must agree that the physical
+        -- offer changed. A quantity delta with the same raw signature is not
+        -- sufficient to acknowledge a native removal.
+        if o.ourSig == s.pendingOurSig then
+            return decline(s,"removal-signature-not-changed")
         end
         if slots == 0 then
             s.clearingSince = nil
