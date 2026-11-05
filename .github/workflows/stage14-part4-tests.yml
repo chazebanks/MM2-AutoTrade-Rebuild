@@ -1,0 +1,35 @@
+name: Staged Part 4 Lua regression tests
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/**'
+      - '.github/workflows/stage14-part4-tests.yml'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lua 5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Run isolated safety, observer, removal, and preflight tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in \
+            test_p4_safety_core \
+            test_p4_observer_contract \
+            test_p4_native_mock \
+            test_p4_removal_executor \
+            test_p4_native_removal \
+            test_p4_stage8_stage9_stage10_integration \
+            test_p4_coordinator \
+            test_p4_stability_gate; do
+            lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
+          done
+          lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
