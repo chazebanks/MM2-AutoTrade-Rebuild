@@ -1,0 +1,1543 @@
+V15.4 PREPUBLICATION OFFLINE VERIFICATION — native MM2/iPad NOT RUN
+PASS all 342 V15.3 predecessor files byte-identical
+PREPUBLICATION: zero pins permitted for local tests only
+EXIT 0: python3 pdiddler/tests/run_v14_checks.py
+EXIT 0: python3 pdiddler/tests/run_issue19_runtime.py
+EXIT 0: python3 pdiddler/tests/run_issue24_outgoing_runtime.py
+EXIT 0: python3 pdiddler/tests/v15_source_guard.py
+EXIT 0: python3 pdiddler/tests/check_issue19_baseline.py
+EXIT 0: python3 pdiddler/tests/check_price_refresh_scope.py
+EXIT 0: python3 pdiddler/tests/check_v15_2_headless_scope.py
+EXIT 0: python3 pdiddler/tests/check_gui_scope.py
+EXIT 0: python3 pdiddler/tests/run_headless_gate.py
+EXIT 0: python3 pdiddler/tests/issue24_scanner_scope.py
+EXIT 0: python3 -m unittest discover -s pdiddler/tests -p test_refresh_supreme_snapshot.py
+EXIT 0: /usr/bin/texlua pdiddler/tests/v15_opponent_addition_test.lua
+EXIT 0: /usr/bin/texlua pdiddler/tests/issue19_integration_test.lua
+EXIT 0: /usr/bin/texlua pdiddler/tests/issue19_bootstrap_test.lua
+EXIT 0: /usr/bin/texlua pdiddler/tests/current_snapshot_test.lua
+EXIT 0: /usr/bin/texlua pdiddler/tests/current_price_integration_test.lua
+EXIT 0: /usr/bin/texlua pdiddler/tests/current_price_bootstrap_test.lua
+EXIT 0: /usr/bin/texlua pdiddler/tests/gui_integration_test.lua
+EXIT 0: /usr/bin/texlua pdiddler/tests/gui_bootstrap_test.lua
+EXIT 0: /usr/bin/texlua pdiddler/tests/issue24_scanner_state_test.lua
+EXIT 0: /usr/bin/texlua pdiddler/tests/issue24_feasibility_test.lua
+EXIT 0: /usr/bin/texlua pdiddler/tests/issue24_eligibility_test.lua
+EXIT 0: /usr/bin/texlua pdiddler/tests/issue24_outgoing_test.lua
+EXIT 0: /usr/bin/texlua pdiddler/tests/issue24_loader_test.lua
+EXIT 0: /usr/bin/texlua pdiddler/tests/issue24_bootstrap_test.lua
+PASS 25 top-level checks including inherited37-command V14 suite; /tmp/issue24-all-results.txt
+
+COMMAND: python3 pdiddler/tests/run_v14_checks.py
+EXIT: 0
+PASS all 248 PR15 baseline files unchanged
+PASS 17 dependency blobs and manifest
+PASS 31 added runtimes compile; no personal named objective
+CHECK1/16 exit=0: python3 pdiddler/tests/run_v12_checks.py
+CHECK2/16 exit=0: /usr/bin/texlua pdiddler/tests/v13_readiness_test.lua
+CHECK3/16 exit=0: /usr/bin/texlua pdiddler/tests/v13_integration_test.lua
+CHECK4/16 exit=0: /usr/bin/texlua pdiddler/tests/v13_teleport_autoexec_test.lua
+CHECK5/16 exit=0: /usr/bin/texlua pdiddler/tests/v14_strategy_test.lua
+CHECK6/16 exit=0: /usr/bin/texlua pdiddler/tests/v14_early_test.lua
+CHECK7/16 exit=0: /usr/bin/texlua pdiddler/tests/v14_transaction_test.lua
+CHECK8/16 exit=0: /usr/bin/texlua pdiddler/tests/v14_lifecycle_test.lua
+CHECK9/16 exit=0: /usr/bin/texlua pdiddler/tests/v14_outgoing_test.lua
+CHECK10/16 exit=0: /usr/bin/texlua pdiddler/tests/v14_retry_clock_test.lua
+CHECK11/16 exit=0: python3 pdiddler/tests/run_v14_trading_runtime.py
+CHECK12/16 exit=0: python3 pdiddler/tests/run_v14_delivery.py
+CHECK13/16 exit=0: python3 pdiddler/tests/v14_probe_runtime.py
+CHECK14/16 exit=0: /usr/bin/texlua pdiddler/tests/v14_integration_test.lua
+CHECK15/16 exit=0: /usr/bin/texlua pdiddler/tests/v14_teleport_autoexec_test.lua
+CHECK16/16 exit=0: /usr/bin/texlua pdiddler/tests/v14_portfolio_oracle_test.lua
+PASS 37 leaf verification commands; full output /tmp/pdiddler-v14-results.txt
+
+
+COMMAND: python3 pdiddler/tests/run_issue19_runtime.py
+EXIT: 0
+PASS 200 205 210 cumulative trigger and verified reward watermark
+PASS 1000 to1049 holds then1050 permits capped increase
+PASS same value swaps and time alone never increase
+PASS no new budget after removal and readd at the same value
+PASS safety replacement cannot increase without qualifying net addition
+PASS actual expired prices decline without a concession
+PASS Accepted forbids upward changes
+PASS downward safety repricing survives removals
+PASS qualified mirrored replacement commits reward watermark exactly once
+PASS opponent changes while a reward is mutating cannot commit a stale reward
+PASS accepted-empty and no safe plan have bounded single decline
+PASS cancel and partner departure cannot become completed trades
+PASS native ready timeout closes without time-driven generosity
+PASS qualifying addition with no eligible denomination holds the quote
+PASS local Accepted invalidation cannot mutate into a new reward
+RESULT 15 passed; 0 failed
+
+
+COMMAND: python3 pdiddler/tests/run_issue24_outgoing_runtime.py
+EXIT: 0
+PASS complete outgoing worker skips Seer3 and owns one reachable request for15 seconds
+PASS native pending request is cancelled after15 seconds and marked ignored once
+PASS native trade opening pauses rotation and closure resumes toward a newly joined target
+PASS fresh own inventory changing during actual card preparation aborts before Trade input
+PASS opponent inventory changing during actual fresh read aborts without processing
+PASS incoming request remains secondary and outgoing rotation continues
+TOTAL 6 complete outgoing runtime tests
+
+
+COMMAND: python3 pdiddler/tests/v15_source_guard.py
+EXIT: 0
+PASS threshold floor
+PASS threshold fraction
+PASS half-new-value cap
+PASS cautious quarter target
+PASS verified opponent anchor
+PASS positive actual concession
+PASS early market and amount validation
+PASS no same-value reward
+PASS P4 anchor from committed actual quote
+PASS P4 opponent anchor supplied
+PASS P4 early plan only
+PASS P4 no time-driven plan stage
+PASS P4 fail-closed unexpected late
+PASS P4 passes empty late candidates
+PASS P4 retains accepted safeguard
+PASS P4 retains +15 verification
+PASS P4 retains exact actual offer check
+PASS P4 retains transaction reservation
+PASS P4 retains verified concession commit
+PASS P4 retains no-plan safety
+PASS P4 retains accepted-empty
+PASS P4 retains bounded no-response timeout
+PASS loader pins versioned P4
+PASS loader pins versioned early
+PASS loader preserves fixed V14 strict
+PASS loader disables unverified auto accept
+PASS loader preserves webhook gate
+PASS wrapper pins V15 integration
+PASS wrapper rejects running V14
+PASS all 29 V15 source fences
+
+
+COMMAND: python3 pdiddler/tests/check_issue19_baseline.py
+EXIT: 0
+PASS all 294 V14 files byte-identical
+
+
+COMMAND: python3 pdiddler/tests/check_price_refresh_scope.py
+EXIT: 0
+PASS price-only loader delta, unchanged canonical mapping, nine excluded rows and fixed source timestamps
+
+
+COMMAND: python3 pdiddler/tests/check_v15_2_headless_scope.py
+EXIT: 0
+PASS exact isolated transform gate
+PASS no bot overlay; full result/console/ten-second scoring preserved
+PASS exact isolated transform loader
+PASS current prices, negotiation, loading, bot/hop, manual Accept and Discord gates unchanged
+PASS exact isolated transform wrapper
+PASS unique auto-entry and legacy owner refusal, no duplicated gate
+PASS V15.2 headless-only scope
+
+
+COMMAND: python3 pdiddler/tests/check_gui_scope.py
+EXIT: 0
+PASS every previous repository file unchanged; startup-only loader delta and preserved headless detector
+
+
+COMMAND: python3 pdiddler/tests/run_headless_gate.py
+EXIT: 0
+PASS two positive complete scans retain existing bot classification at ten seconds
+PASS diverse older avatars do not become positive bot evidence
+PASS unreadable required avatar fields cannot form a valid shared fingerprint
+PASS hung appearance fetch cannot delay the ten-second watchdog
+PASS stopped generation cannot publish a delayed result
+PASS positive scans from an old roster cannot reject the final roster
+PASS finished watchdog fences remaining description work
+PASS movement in two windows is not missing-animation evidence in two windows
+PASS respawned characters invalidate positive scans without changing the roster
+TOTAL 9 actual fast-gate runtime tests
+PASS headless detector never reads PlayerGui or creates GUI; evidence unchanged
+
+
+COMMAND: python3 pdiddler/tests/issue24_scanner_scope.py
+EXIT: 0
+PASS scanner GUI, parsing, scanning/retry and critical-pause code byte-identical
+
+
+COMMAND: python3 -m unittest discover -s pdiddler/tests -p test_refresh_supreme_snapshot.py
+EXIT: 0
+PASS 190 real Lua records and fixed expiry across reload
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 0.014s
+
+OK
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v15_opponent_addition_test.lua
+EXIT: 0
+PASS V15 no concession on unchanged opponent offer
+PASS V15 first five is below the ten-value minimum
+PASS V15 same-value swap never authorizes more
+PASS V15 removing value never authorizes more
+PASS V15 a verified reward resets net-addition baseline
+PASS V15 one decision per exact stable generation
+PASS V15 the half-of-new-value cap rejects excessive concession
+PASS V15 the 5 percent branch scales for expensive trades
+PASS V15 unknown or accepted local state freezes all changes
+PASS V15 missing verified anchor fails closed
+PASS V15 zero budget does not spend
+PASS V15 price floor remains a hard requirement
+TOTAL V15 12 pure opponent-addition cases
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/issue19_integration_test.lua
+EXIT: 0
+PASS ready stack preserves repricing and launches one existing outgoing owner
+PASS visible Loading World blocks gate and scanner until it resolves
+PASS persistent Loading Character enters bounded hold without restarting selectors
+PASS character can arrive after selector without premature automation
+PASS bot branch preserves sole P5 transport owner
+PASS wrong-generation bot result does not authorize a hop
+PASS unknown and animation-only evidence still permits trading without bot hop
+PASS runtime loading fences whitelist copies while preserving eligibility records
+PASS brief runtime loading recovers without duplicate outgoing controller
+PASS persistent runtime loading stops new requests and hopping after bounded wait
+PASS uncertain accepted outcome synchronously stops outgoing and hopping
+PASS native acceptance and Discord cannot be enabled by legacy globals
+PASS expiry retains independent price hold and safe P4 close path
+PASS V15 refuses live V10 owner without replacing it
+PASS pending request or visible trade continues to block exhaustion hopping
+PASS reexecuting V15 returns the current owner without restarting selectors
+TOTAL 16 V15 integration tests
+PASS legacy integration PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V14_VERIFIED_WORKFLOW prevents a competing V13 owner
+PASS large hidden native GUI reaches gate and the existing trading owner exactly once
+PASS real loading alongside large hidden inventory still fences all automation
+PASS incoming request alongside large hidden inventory still blocks bot hopping
+PASS transaction lease fences outgoing copies and hopping after GUI close
+PASS no runtime flags turn a quote into an evidenced native completion contract
+TOTAL 25 V14 loader integration tests
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/issue19_bootstrap_test.lua
+EXIT: 0
+PASS direct queue adds only one hook and starts pinned V15
+PASS two launch sources in one JobId cannot double-load or double-queue
+PASS queued code starts another job and queues for a third
+PASS syn.queue_on_teleport fallback supported without touching global queue
+PASS queue unavailable doesn't prevent initial launch
+PASS rejected queue reports failure but still starts initial V15
+PASS other Roblox places do not run the trader or create queue
+PASS no fixed commit URL refuses to queue or run
+RESULT 8 V15 teleport auto-reentry mock tests passed
+PASS preservedV13 owner prevents V15 queue PDIDDLER_V13_TELEPORT_AUTOBOOT_v1
+PASS preservedV13 owner prevents V15 queue PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS
+PASS runtime endpoint never enters queued code or console output
+PASS preserved owner PDIDDLER_V10_TELEPORT_AUTOBOOT_v1 prevents V15 queue or probe
+PASS preserved owner PDIDDLER_V11_TELEPORT_AUTOBOOT_v1 prevents V15 queue or probe
+PASS preserved owner PDIDDLER_V12_TELEPORT_AUTOBOOT_v1 prevents V15 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents V15 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents V15 queue or probe
+PASS dirty V12 integration prevents V15 even after a partial launch
+PASS independent P5 owner prevents another bootstrap queue
+PASS private configuration never appears in queue throw failure
+PASS private configuration never appears in queue return failure
+PASS active V14 blocks V15 PDIDDLER_V14_TELEPORT_AUTOBOOT_v1
+PASS active V14 blocks V15 PDIDDLER_INTEGRATION_V14_VERIFIED_WORKFLOW
+TOTAL 22 V15 teleport tests
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/current_snapshot_test.lua
+EXIT: 0
+PASS190 canonical identities,189 repricings,22 changed prices,expiry edges and +15 floor
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/current_price_integration_test.lua
+EXIT: 0
+PASS ready stack preserves repricing and launches one existing outgoing owner
+PASS visible Loading World blocks gate and scanner until it resolves
+PASS persistent Loading Character enters bounded hold without restarting selectors
+PASS character can arrive after selector without premature automation
+PASS bot branch preserves sole P5 transport owner
+PASS wrong-generation bot result does not authorize a hop
+PASS unknown and animation-only evidence still permits trading without bot hop
+PASS runtime loading fences whitelist copies while preserving eligibility records
+PASS brief runtime loading recovers without duplicate outgoing controller
+PASS persistent runtime loading stops new requests and hopping after bounded wait
+PASS uncertain accepted outcome synchronously stops outgoing and hopping
+PASS native acceptance and Discord cannot be enabled by legacy globals
+PASS expiry retains independent price hold and safe P4 close path
+PASS V15 refuses live V10 owner without replacing it
+PASS pending request or visible trade continues to block exhaustion hopping
+PASS reexecuting V15 returns the current owner without restarting selectors
+TOTAL 16 V15 integration tests
+PASS legacy integration PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V14_VERIFIED_WORKFLOW prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V15_OPPONENT_ADDED prevents a competing V13 owner
+PASS large hidden native GUI reaches gate and the existing trading owner exactly once
+PASS real loading alongside large hidden inventory still fences all automation
+PASS incoming request alongside large hidden inventory still blocks bot hopping
+PASS transaction lease fences outgoing copies and hopping after GUI close
+PASS no runtime flags turn a quote into an evidenced native completion contract
+TOTAL 26 V14 loader integration tests
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/current_price_bootstrap_test.lua
+EXIT: 0
+PASS direct queue adds only one hook and starts pinned V15_1
+PASS two launch sources in one JobId cannot double-load or double-queue
+PASS queued code starts another job and queues for a third
+PASS syn.queue_on_teleport fallback supported without touching global queue
+PASS queue unavailable doesn't prevent initial launch
+PASS rejected queue reports failure but still starts initial V15_1
+PASS other Roblox places do not run the trader or create queue
+PASS no fixed commit URL refuses to queue or run
+RESULT 8 V15_1 teleport auto-reentry mock tests passed
+PASS preservedV13 owner prevents V15_1 queue PDIDDLER_V13_TELEPORT_AUTOBOOT_v1
+PASS preservedV13 owner prevents V15_1 queue PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS
+PASS runtime endpoint never enters queued code or console output
+PASS preserved owner PDIDDLER_V10_TELEPORT_AUTOBOOT_v1 prevents V15_1 queue or probe
+PASS preserved owner PDIDDLER_V11_TELEPORT_AUTOBOOT_v1 prevents V15_1 queue or probe
+PASS preserved owner PDIDDLER_V12_TELEPORT_AUTOBOOT_v1 prevents V15_1 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents V15_1 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents V15_1 queue or probe
+PASS dirty V12 integration prevents V15_1 even after a partial launch
+PASS independent P5 owner prevents another bootstrap queue
+PASS private configuration never appears in queue throw failure
+PASS private configuration never appears in queue return failure
+PASS active V14 blocks V15_1 PDIDDLER_V14_TELEPORT_AUTOBOOT_v1
+PASS active V14 blocks V15_1 PDIDDLER_INTEGRATION_V14_VERIFIED_WORKFLOW
+PASS old V15 blocks price refresh owner PDIDDLER_V15_TELEPORT_AUTOBOOT_v1
+PASS old V15 blocks price refresh owner PDIDDLER_INTEGRATION_V15_OPPONENT_ADDED
+TOTAL 24 V15_1 teleport tests
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/gui_integration_test.lua
+EXIT: 0
+PASS ready stack preserves repricing and launches one existing outgoing owner
+PASS visible Loading World blocks gate and scanner until it resolves
+PASS persistent Loading Character enters bounded hold without restarting selectors
+PASS character can arrive after selector without premature automation
+PASS bot branch preserves sole P5 transport owner
+PASS wrong-generation bot result does not authorize a hop
+PASS unknown and animation-only evidence still permits trading without bot hop
+PASS runtime loading fences whitelist copies while preserving eligibility records
+PASS brief runtime loading recovers without duplicate outgoing controller
+PASS persistent runtime loading stops new requests and hopping after bounded wait
+PASS uncertain accepted outcome synchronously stops outgoing and hopping
+PASS native acceptance and Discord cannot be enabled by legacy globals
+PASS expiry retains independent price hold and safe P4 close path
+PASS V15 refuses live V10 owner without replacing it
+PASS pending request or visible trade continues to block exhaustion hopping
+PASS reexecuting V15 returns the current owner without restarting selectors
+TOTAL 16 V15 integration tests
+PASS legacy integration PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V14_VERIFIED_WORKFLOW prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V15_OPPONENT_ADDED prevents a competing V13 owner
+PASS large hidden native GUI reaches gate and the existing trading owner exactly once
+PASS real loading alongside large hidden inventory still fences all automation
+PASS incoming request alongside large hidden inventory still blocks bot hopping
+PASS transaction lease fences outgoing copies and hopping after GUI close
+PASS no runtime flags turn a quote into an evidenced native completion contract
+TOTAL 26 V14 loader integration tests
+PASS startup panel appears while selectors are still pending
+PASS expired prices remain visible without loading scanner or sending a request
+PASS genuine native loading is shown through bounded hold without self-blocking
+PASS persistent loading leaves the reason on screen after its bounded wait
+PASS scanner handoff hides startup UI while real scanner initialization yields
+PASS scanner fetch failure restores visible error panel
+PASS scanner execution failure restores visible error panel
+PASS GUI creation failure cannot change trading or detector verdicts
+PASS reexecution cannot duplicate the startup panel or selector owner
+PASS post-handoff expiry uses existing scanner status without creating another GUI
+PASS ordinary monitor updates do not overwrite scanner or P4 status
+PASS predecessor V15.1 owner prevents competing GUI or scanner initialization
+PASS V15.2 headless integration prevents competing startup GUI
+PASS startup GUI regression cases
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/gui_bootstrap_test.lua
+EXIT: 0
+PASS direct queue adds only one hook and starts pinned V15_3
+PASS two launch sources in one JobId cannot double-load or double-queue
+PASS queued code starts another job and queues for a third
+PASS syn.queue_on_teleport fallback supported without touching global queue
+PASS queue unavailable doesn't prevent initial launch
+PASS rejected queue reports failure but still starts initial V15_3
+PASS other Roblox places do not run the trader or create queue
+PASS no fixed commit URL refuses to queue or run
+RESULT 8 V15_3 teleport auto-reentry mock tests passed
+PASS preservedV13 owner prevents V15_3 queue PDIDDLER_V13_TELEPORT_AUTOBOOT_v1
+PASS preservedV13 owner prevents V15_3 queue PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS
+PASS runtime endpoint never enters queued code or console output
+PASS preserved owner PDIDDLER_V10_TELEPORT_AUTOBOOT_v1 prevents V15_3 queue or probe
+PASS preserved owner PDIDDLER_V11_TELEPORT_AUTOBOOT_v1 prevents V15_3 queue or probe
+PASS preserved owner PDIDDLER_V12_TELEPORT_AUTOBOOT_v1 prevents V15_3 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents V15_3 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents V15_3 queue or probe
+PASS dirty V12 integration prevents V15_3 even after a partial launch
+PASS independent P5 owner prevents another bootstrap queue
+PASS private configuration never appears in queue throw failure
+PASS private configuration never appears in queue return failure
+PASS active V14 blocks V15_3 PDIDDLER_V14_TELEPORT_AUTOBOOT_v1
+PASS active V14 blocks V15_3 PDIDDLER_INTEGRATION_V14_VERIFIED_WORKFLOW
+PASS old V15 blocks price refresh owner PDIDDLER_V15_TELEPORT_AUTOBOOT_v1
+PASS old V15 blocks price refresh owner PDIDDLER_INTEGRATION_V15_OPPONENT_ADDED
+PASS V15.1 predecessor prevents GUI build queue PDIDDLER_V15_1_TELEPORT_AUTOBOOT_v1
+PASS V15.1 predecessor prevents GUI build queue PDIDDLER_INTEGRATION_V15_1_CURRENT_PRICES
+PASS existing V15.2 headless build prevents startup-GUI queue PDIDDLER_V15_2_TELEPORT_AUTOBOOT_v1
+PASS existing V15.2 headless build prevents startup-GUI queue PDIDDLER_INTEGRATION_V15_2_HEADLESS_GATE
+TOTAL 28 V15_3 teleport tests
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/issue24_scanner_state_test.lua
+EXIT: 0
+PASS exact current player is distinct from stale record identity
+PASS numeric and string UserIds resolve the same scanner key
+PASS retained whitelist record cannot hide an active scan
+PASS retained blacklist record cannot hide an active scan
+PASS scheduled retry and scan are independently observable
+PASS departed player does not inherit a stale record identity
+PASS new player without a record remains observable without inventing data
+PASS invalid UserId does not call native player lookup
+TOTAL 8 scanner verification-state tests
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/issue24_feasibility_test.lua
+EXIT: 0
+PASS current-clock snapshot freshness is independently verified
+PASS own-read validation requires current complete canonically priced data
+PASS actual Seer3 is unreachable against Boneblade7
+PASS Batwing42 Luger18 yields a strict-planner-verified owned witness
+PASS exact +15 is reachable but +14.99 is not
+PASS matching identities cannot manufacture profit and ownership alone does not exclude a feasible subset
+PASS Chroma and normal variants remain separate
+PASS full quantity upper bound prevents false unprofitable verdicts when stacking is unproved
+PASS witness uses at most four distinct available raw rows with quantity one
+PASS missing empty malformed partial unpriced and unverified data do not prove unprofitability
+PASS precision and overflowing quantity totals cannot be trusted as an impossibility proof
+PASS profile expiry or unreadable profile is a hold despite cached values
+PASS planner absence budget failure or empty results remain unknown rather than unprofitable
+PASS empty authoritative opponent inventory is unprofitable but no owned item is a hold
+TOTAL 14 feasibility tests
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/issue24_eligibility_test.lua
+EXIT: 0
+PASS unknown deadline is fixed despite fingerprint churn and scanner retries
+PASS classification suppressed during an active request is rendered when request ownership releases
+PASS own read retry offsets and no catch-up bursts are bounded
+PASS fingerprinted partial own inventories retain bounded retry schedule
+PASS failed own read ages out only inventory uncertainty, never global protection
+PASS processed players and stale player instances cannot block exhaustion
+PASS late authoritative reachability restores requests but identical cache recovery is not discovery
+PASS proof binds exact target and inventories across fresh own read and final nonyielding check
+PASS final click guard rejects user id
+PASS final click guard rejects exact player
+PASS final click guard rejects opponent fingerprint
+PASS final click guard rejects own inventory
+PASS final click guard rejects JobId
+PASS final click guard rejects GUI
+PASS final click guard rejects outgoing owner
+PASS final click guard rejects outgoing generation
+PASS final click guard rejects P4 generation
+PASS final click guard rejects transaction owner
+PASS final click guard rejects transaction phase
+PASS final click guard rejects price version
+PASS final click guard rejects price freshness
+PASS final click guard rejects active scan
+PASS final click guard rejects own read expiry
+PASS unchanged final input proof permits exactly one mouse-down
+PASS own refresh result is discarded if a transaction starts during yielding read
+PASS prepare rejects failed read and changed ownership without making a new token
+PASS 45 seconds counts only exhausted time and discoveries reset it
+TOTAL 27 eligibility tests
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/issue24_outgoing_test.lua
+EXIT: 0
+PASS card proof rejects Alice123 for Alice
+PASS card proof preserves underscore distinctions
+PASS card proof rejects DisplayName identity
+PASS player resolver rejects DisplayName and underscore collision
+PASS leaderboard fallback rejects longer usernames
+PASS nearby card header requires an exact username
+PASS exact popup refuses DisplayName identity
+PASS pending identity rejects underscore collision
+PASS trade identity rejects DisplayName ownership
+PASS valid case-insensitive exact username proves ownership
+PASS hidden phone cannot mask active tablet leaderboard or pending owner
+PASS request cache revalidates full ancestry after container replacement
+PASS request cache rejects retained old PlayerGui after replacement
+PASS request lookup follows current GUI ancestry and active layout changes
+PASS duplicate run retains current controller without invalidating its session
+PASS incompatible legacy owner is preserved and rejected
+PASS processed queue ledger survives safe restart in the same JobId
+PASS processed queue ledger is separate per JobId
+PASS stopped controller cannot relinquish unresolved outgoing ownership
+PASS one successful physical Trade tap owns the full no-proof response window
+PASS successful Trade tap protects the queue before yielding for response proof
+PASS hidden enabled phone trade cannot mask active tablet trade
+PASS enabled trade GUI with hidden Trade frame is not an active trade
+PASS delayed cancellation revalidates stop
+PASS delayed cancellation revalidates PlayerGui replacement
+PASS delayed cancellation revalidates new active trade
+PASS delayed cancellation revalidates changed pending owner
+PASS delayed cancellation revalidates replacement request ancestry
+PASS successful Cancel tap with uncertain acknowledgement is never duplicated
+PASS uncertain cancellation remote delivery cannot cause another action
+PASS changed pending owner cannot steal uncertain cancellation ownership
+PASS observed cleared pending UI releases cancellation ownership for a new request
+PASS uncertain cancellation ownership cannot be abandoned by a safe restart
+PASS unchanged exact pending owner permits one cancellation remote
+34 passed, 0 failed (pdiddler/pdiddler3_outgoing_ROTATING_v18_REACHABLE.lua)
+PASS Seer3 is skipped by actual P3 rotation after actual scanner and planner verify no +15 plan
+PASS rotation skips Seer3 and chooses Batwing42 plus Luger18 without processing the skip
+PASS target becoming unreachable during yielding card navigation is not tapped
+TOTAL 37 Issue24 outgoing tests
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/issue24_loader_test.lua
+EXIT: 0
+PASS Seer3 exhausts the server without an outgoing availability blocker
+PASS concrete Batwing42 Luger18 offer remains available and blocks hopping
+PASS unknown expires30 second verification allowance but never becomes unprofitable
+PASS unresolved fingerprint churn cannot restart verification allowance
+PASS unknown gaining authoritative reachable inventory cancels exhaustion
+PASS processed player with unknown inventory or an active rescan cannot block hopping
+PASS identical own cache loss and recovery does not rediscover a reachable player
+PASS price expiry cannot age into hopping permission
+PASS native loading hold cannot age into hopping permission
+PASS transaction ownership cannot age into hopping permission
+PASS final transport recheck rejects a newly reachable target
+PASS scanner rows distinguish reachable unprofitable and unknown with reasons
+PASS V15.3 owner prevents competing successor controllers or startup UI
+PASS same-job execution keeps one startup and trading owner
+TOTAL 14 actual successor loader integration tests
+
+
+COMMAND: /usr/bin/texlua pdiddler/tests/issue24_bootstrap_test.lua
+EXIT: 0
+PASS direct queue adds only one hook and starts pinned V15_4
+PASS two launch sources in one JobId cannot double-load or double-queue
+PASS queued code starts another job and queues for a third
+PASS syn.queue_on_teleport fallback supported without touching global queue
+PASS queue unavailable doesn't prevent initial launch
+PASS rejected queue reports failure but still starts initial V15_4
+PASS other Roblox places do not run the trader or create queue
+PASS no fixed commit URL refuses to queue or run
+RESULT 8 V15_4 teleport auto-reentry mock tests passed
+PASS preservedV13 owner prevents V15_3 queue PDIDDLER_V13_TELEPORT_AUTOBOOT_v1
+PASS preservedV13 owner prevents V15_3 queue PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS
+PASS runtime endpoint never enters queued code or console output
+PASS preserved owner PDIDDLER_V10_TELEPORT_AUTOBOOT_v1 prevents V15_3 queue or probe
+PASS preserved owner PDIDDLER_V11_TELEPORT_AUTOBOOT_v1 prevents V15_3 queue or probe
+PASS preserved owner PDIDDLER_V12_TELEPORT_AUTOBOOT_v1 prevents V15_3 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents V15_3 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents V15_3 queue or probe
+PASS dirty V12 integration prevents V15_3 even after a partial launch
+PASS independent P5 owner prevents another bootstrap queue
+PASS private configuration never appears in queue throw failure
+PASS private configuration never appears in queue return failure
+PASS active V14 blocks V15_3 PDIDDLER_V14_TELEPORT_AUTOBOOT_v1
+PASS active V14 blocks V15_3 PDIDDLER_INTEGRATION_V14_VERIFIED_WORKFLOW
+PASS old V15 blocks price refresh owner PDIDDLER_V15_TELEPORT_AUTOBOOT_v1
+PASS old V15 blocks price refresh owner PDIDDLER_INTEGRATION_V15_OPPONENT_ADDED
+PASS V15.1 predecessor prevents GUI build queue PDIDDLER_V15_1_TELEPORT_AUTOBOOT_v1
+PASS V15.1 predecessor prevents GUI build queue PDIDDLER_INTEGRATION_V15_1_CURRENT_PRICES
+PASS existing V15.2 headless build prevents startup-GUI queue PDIDDLER_V15_2_TELEPORT_AUTOBOOT_v1
+PASS existing V15.2 headless build prevents startup-GUI queue PDIDDLER_INTEGRATION_V15_2_HEADLESS_GATE
+TOTAL 28 V15_3 teleport tests
+PASS V15.3 predecessor prevents reachable build queue PDIDDLER_V15_3_TELEPORT_AUTOBOOT_v1
+PASS V15.3 predecessor prevents reachable build queue PDIDDLER_INTEGRATION_V15_3_GUI_STATUS
+TOTAL 30 V15.4 teleport tests
+
+INHERITED V14 FULL OUTPUT
+V14 OFFLINE VERIFICATION — native MM2/Delta NOT executed
+IMMUTABLE RELEASE MANIFEST CHECKED
+Protected PR15 files:248; dependencies:17; added compiled runtimes:31
+
+COMMAND: python3 pdiddler/tests/run_v12_checks.py
+EXIT: 0
+PASS all224 PR14 baseline blobs unchanged
+PASS12 immutable dependencies and exact Git blobs
+PASS five new runtime sources compile; no personal named objective
+CHECK1/6 exit=0: python3 pdiddler/tests/run_v11_checks.py
+CHECK2/6 exit=0: /usr/bin/texlua pdiddler/tests/v12_portfolio_ledger_policy_test.lua
+CHECK3/6 exit=0: /usr/bin/texlua pdiddler/tests/v11_verified_negotiation_test.lua pdiddler/pdiddler4_supreme_policy_v8_PORTFOLIO_LEDGER.lua
+CHECK4/6 exit=0: python3 pdiddler/tests/run_v12_trading_runtime.py
+CHECK5/6 exit=0: /usr/bin/texlua pdiddler/tests/v12_integration_test.lua
+CHECK6/6 exit=0: /usr/bin/texlua pdiddler/tests/v12_teleport_autoexec_test.lua
+PASS22 verification commands (17 preserved +5 current), report /tmp/pdiddler-v12-results.txt
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v13_readiness_test.lua
+EXIT: 0
+PASS large hidden inventory cannot block a fully ready lobby
+PASS visible loading survives large hidden inventory and records exact native path
+PASS disabled ScreenGui templates are never enumerated
+PASS hidden branch becoming visible immediately restores loading protection
+PASS transparent frame backgrounds do not hide loading text or Folder descendants
+PASS fully transparent text does not block readiness
+PASS active traversal remains bounded and an incomplete scan never grants readiness
+PASS excessive active hierarchy depth remains a safe bounded hold
+PASS readiness does not materialize the entire PlayerGui descendant list
+PASS optional CoreGui scan uses the same hidden subtree protection
+PASS CoreGui access restrictions remain explicit without mutating UI
+PASS structural request fallback still finds a hidden idle request widget
+TOTAL 12 visible-scan regression tests
+PASS loaded game and PlayerGui are insufficient without character
+PASS unparented or dead character is not ready
+PASS native visible loading text blocks ready UI and records its exact path
+PASS hidden ancestor loading label does not stall startup
+PASS missing request UI cannot be mistaken for world readiness
+PASS post-selector readiness may wait for real progress and returns after stable state
+PASS permanent loading exits its deadline without UI clicks or re-running P2
+PASS job change cancels an old readiness wait
+PASS tablet request path stays ready after the phone layout disappears
+PASS structural request fallback preserves an unrecognized native layout
+TOTAL 10 readiness tests
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v13_integration_test.lua
+EXIT: 0
+PASS ready stack preserves repricing and launches one existing outgoing owner
+PASS visible Loading World blocks gate and scanner until it resolves
+PASS persistent Loading Character enters bounded hold without restarting selectors
+PASS character can arrive after selector without premature automation
+PASS bot branch preserves sole P5 transport owner
+PASS wrong-generation bot result does not authorize a hop
+PASS unknown and animation-only evidence still permits trading without bot hop
+PASS runtime loading fences whitelist copies while preserving eligibility records
+PASS brief runtime loading recovers without duplicate outgoing controller
+PASS persistent runtime loading stops new requests and hopping after bounded wait
+PASS uncertain accepted outcome synchronously stops outgoing and hopping
+PASS native acceptance and Discord cannot be enabled by legacy globals
+PASS expiry retains independent price hold and safe P4 close path
+PASS V13 refuses live V10 owner without replacing it
+PASS pending request or visible trade continues to block exhaustion hopping
+PASS reexecuting V13 returns the current owner without restarting selectors
+TOTAL 16 V13 integration tests
+PASS legacy integration PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents a competing V13 owner
+PASS large hidden native GUI reaches gate and the existing trading owner exactly once
+PASS real loading alongside large hidden inventory still fences all automation
+PASS incoming request alongside large hidden inventory still blocks bot hopping
+TOTAL 21 V13 loader integration tests
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v13_teleport_autoexec_test.lua
+EXIT: 0
+PASS direct queue adds only one hook and starts pinned V13
+PASS two launch sources in one JobId cannot double-load or double-queue
+PASS queued code starts another job and queues for a third
+PASS syn.queue_on_teleport fallback supported without touching global queue
+PASS queue unavailable doesn't prevent initial launch
+PASS rejected queue reports failure but still starts initial V13
+PASS other Roblox places do not run the trader or create queue
+PASS no fixed commit URL refuses to queue or run
+RESULT 8 V13 teleport auto-reentry mock tests passed
+PASS preserved owner PDIDDLER_V10_TELEPORT_AUTOBOOT_v1 prevents V13 queue or probe
+PASS preserved owner PDIDDLER_V11_TELEPORT_AUTOBOOT_v1 prevents V13 queue or probe
+PASS preserved owner PDIDDLER_V12_TELEPORT_AUTOBOOT_v1 prevents V13 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents V13 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents V13 queue or probe
+PASS dirty V12 integration prevents V13 even after a partial launch
+PASS independent P5 owner prevents another bootstrap queue
+TOTAL 15 V13 teleport tests
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v14_strategy_test.lua
+EXIT: 0
+PASS unselected candidate cannot move first quote through tolerance drift
+PASS candidate permutations preserve the exact selected quote
+PASS hard +15 and unknown prices remain independent of preference ordering
+PASS source conditions are retained without equating Doing Well with volatility
+PASS planner never offers the same canonical item already received
+PASS canonical aliases cannot evade the no matching items rule
+PASS a profitable existing offer is invalid when either exact item overlaps
+PASS retained-inventory preference does not dispose of Doing Well as unstable
+TOTAL 8 V14 strategy tests
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v14_early_test.lua
+EXIT: 0
+PASS tied appeal preserves early budget for deliberate late negotiation
+PASS comparable genuine demand improvement chooses lower cost
+PASS opponent Accepted still freezes voluntary early changes
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v14_transaction_test.lua
+EXIT: 0
+PASS missing native evidence cannot be enabled by a requested flag
+PASS first acceptance requires an uninterrupted extra second and acts once
+PASS changed offer restarts eligibility before any native click
+PASS unsafe unknown mismatched and expired proofs never authorize
+PASS read-control yield cannot authorize a stale proof
+PASS uncertain click outcome is consumed and blocks subsequent work
+PASS accepted close retains lease while unaccepted close preserves rotation
+PASS old transaction callbacks cannot close the new transaction
+PASS open quote can never be sent as a completed report
+PASS uncaught proof reader error cannot perform or repeat a native action
+PASS only correlated completed event and two stable raw reads release ownership
+PASS close observation and terminal counters are idempotent
+PASS verified completion survives unavailable reporting and is counted once
+TOTAL 13 transaction lifecycle tests
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v14_lifecycle_test.lua
+EXIT: 0
+PASS final proof needs uninterrupted extra second and one-use consumption
+PASS changed offer and unknown cooldown restart final proof
+PASS invalidated ready proof cannot be consumed
+PASS below-floor and nonfinite final proof never becomes ready
+PASS completed proof has distinct provenance and exact totals
+PASS unchanged unpriced raw holdings permit completed subtotal report
+PASS unpriceable metadata counts as unknown without invented zero value
+PASS partial priced row coverage counts remaining copies accurately
+PASS caller monetary totals never override canonical subtotal
+PASS missing complete before evidence rejects even exact delta
+PASS incomplete after and one stable read reject outcome
+PASS bare boolean closure and wrong correlation never prove completion
+PASS unrelated positive and negative raw deltas reject completion
+PASS invalid raw identifiers quantities and negative ownership reject
+PASS traded items require exact canonical prices and fifteen profit
+PASS duplicate traded raw IDs and duplicate inventory metadata reject
+PASS priced subset cannot exceed or invent raw holdings
+PASS pinned pre-expiry submission may reconcile after expiry
+PASS expiry exception requires matching verified submission identity
+PASS expiry exception rejects boundary future and unsupported profile bounds
+PASS outbox refuses open-trade quote even if verified flag is true
+PASS outbox refuses tampered completed totals and unknown coverage
+PASS enabled outbox requires explicit durable persistence
+PASS disabled outbox invokes no persistence or transport
+PASS enqueue persists copied report before accepting ownership
+PASS failed enqueue persistence rolls back without ownership
+PASS durable sending precedes transport and acknowledged result is persisted
+PASS failed sending persistence prevents transport and preserves queued row
+PASS status-only success remains ambiguous and cannot retry
+PASS lost acknowledgement server error and malformed response never retry
+PASS full 120 second retry delay is honored with three total attempts
+PASS invalid rate-limit delay does not create blind immediate retry
+PASS rejected client responses and invalid delivery time never send again
+PASS persistence loss after send retains nonretry ownership
+PASS reloaded in-flight delivery becomes uncertain and stays deduplicated
+PASS yielding or reentrant persistence cannot duplicate a delivery
+PASS failed persistence releases operation ownership for a later retry
+PASS payload clearly distinguishes partial subtotal from whole value
+RESULT 38 passed; 0 failed
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v14_outgoing_test.lua
+EXIT: 0
+PASS card proof rejects Alice123 for Alice
+PASS card proof preserves underscore distinctions
+PASS card proof rejects DisplayName identity
+PASS player resolver rejects DisplayName and underscore collision
+PASS leaderboard fallback rejects longer usernames
+PASS nearby card header requires an exact username
+PASS exact popup refuses DisplayName identity
+PASS pending identity rejects underscore collision
+PASS trade identity rejects DisplayName ownership
+PASS valid case-insensitive exact username proves ownership
+PASS hidden phone cannot mask active tablet leaderboard or pending owner
+PASS request cache revalidates full ancestry after container replacement
+PASS request cache rejects retained old PlayerGui after replacement
+PASS request lookup follows current GUI ancestry and active layout changes
+PASS duplicate run retains current controller without invalidating its session
+PASS incompatible legacy owner is preserved and rejected
+PASS processed queue ledger survives safe restart in the same JobId
+PASS processed queue ledger is separate per JobId
+PASS stopped controller cannot relinquish unresolved outgoing ownership
+PASS one successful physical Trade tap owns the full no-proof response window
+PASS successful Trade tap protects the queue before yielding for response proof
+PASS hidden enabled phone trade cannot mask active tablet trade
+PASS enabled trade GUI with hidden Trade frame is not an active trade
+PASS delayed cancellation revalidates stop
+PASS delayed cancellation revalidates PlayerGui replacement
+PASS delayed cancellation revalidates new active trade
+PASS delayed cancellation revalidates changed pending owner
+PASS delayed cancellation revalidates replacement request ancestry
+PASS successful Cancel tap with uncertain acknowledgement is never duplicated
+PASS uncertain cancellation remote delivery cannot cause another action
+PASS changed pending owner cannot steal uncertain cancellation ownership
+PASS observed cleared pending UI releases cancellation ownership for a new request
+PASS uncertain cancellation ownership cannot be abandoned by a safe restart
+PASS unchanged exact pending owner permits one cancellation remote
+34 passed, 0 failed (pdiddler/pdiddler3_outgoing_ROTATING_v17_TRANSACTION_LEASE.lua)
+PASS outcome ownership survives trade GUI disappearance in outgoing guards
+PASS unreadable lifecycle never grants outgoing permission
+TOTAL 36 V14 outgoing tests
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v14_retry_clock_test.lua
+EXIT: 0
+PASS response-time wall clock preserves full retry delay across restart
+
+COMMAND: python3 pdiddler/tests/run_v14_trading_runtime.py
+EXIT: 0
+PASS V14 accepted window closing retains outcome ownership
+PASS V14 first safe quote agrees after an unsafe opener or opponent first
+PASS V14 tied market conditions do not trigger an immediate value-only increase
+PASS V14 accepted indicator observed between polling frames survives close
+PASS V14 normal unaccepted decline still releases the existing rotation
+PASS V14 accepted offer modification cannot cause a completed report
+PASS V14 legacy globals cannot invent native contract verification
+PASS V14 native two-step negotiation budget and final decline remain bounded
+PASS V14 opponent adding one of our items replaces the mirrored quote
+PASS V14 no nonmatching safe plan declines instead of offering their item
+PASS V14 evidenced fixture executes one accept then reconciles and reports once
+PASS V14 native before-read cannot escape a close and reopen between polling frames
+TOTAL 12 V14 production P4 tests
+
+COMMAND: python3 pdiddler/tests/run_v14_delivery.py
+EXIT: 0
+PASS journal uses exactly two fixed slots and restores highest verified revision
+PASS sending state is durable before HTTP and crash recovery never resends
+PASS write failure and wrong readback block later writes and sends
+PASS corruption in either existing slot fails closed despite healthy other slot
+PASS account mismatch schema mismatch and conflicting revisions reject restore
+PASS journal rejects invalid rows cyclic values and credentials without writes
+PASS external corruption deletion and concurrent changes cannot be overwritten
+PASS storage exceptions and invalid dependencies return sanitized failures
+PASS Discord wait response requires returned decimal message ID
+PASS 204 status-only malformed and nonmessage success stay ambiguous
+PASS Discord 429 honors complete body and header delays without retrying
+PASS timeouts HTTP failures malformed HTTP and server errors are single attempt
+PASS transport calls HTTP once even if bounding callback is invoked twice
+PASS noncanonical URLs and missing boundaries fail without exposing credentials
+PASS transport acknowledgement and full rate limit flow through durable outbox
+PASS HTTP and encoder failures never return secret-bearing errors
+RESULT 16 passed; 0 failed
+
+COMMAND: python3 pdiddler/tests/v14_probe_runtime.py
+EXIT: 0
+PASS report remains visible after polling exhausted v1 global output cap
+PASS native scalar identifiers and allowlisted structured fields survive sanitization
+PASS same root hidden and reopened between polls creates a new observed lifetime
+PASS before read crossing close reopen is discarded instead of relabeled at response
+PASS partner change while read pending discards snapshot
+PASS new lifetime cannot supply after reads for older pending transaction
+PASS same pending transaction permits after reads after observed closure but reports unconfirmed
+PASS after raw counts must match exactly even when old serialized keys collide
+PASS mismatched snapshot transaction context rejects reporting
+PASS one outstanding inventory read persists through timeout and discards late result
+PASS stopped probe cannot release an outstanding invocation to a replacement
+PASS request time player and JobId changes fence result
+PASS invalid counts and remote failure emit terminal evidence without snapshot
+PASS event storage stays bounded and unrelated polling cannot evict terminal evidence
+PASS inspection and stop remain observational and stop disconnects callbacks
+PASS ancestor Enabled close reopen and root ancestry reuse advance lifetime synchronously
+PASS manual button observation connections remain bounded during UI churn
+PASS timeout boundary accepts earlier response and rejects response at four seconds
+PASS after without before and wrong native remote class invoke nothing
+PASS two most recent after reads may settle without accepting unequal raw maps
+PASS structured cyclic payload has depth and string bounds without inventory expansion
+RESULT 21 passed; 0 failed
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v14_integration_test.lua
+EXIT: 0
+PASS ready stack preserves repricing and launches one existing outgoing owner
+PASS visible Loading World blocks gate and scanner until it resolves
+PASS persistent Loading Character enters bounded hold without restarting selectors
+PASS character can arrive after selector without premature automation
+PASS bot branch preserves sole P5 transport owner
+PASS wrong-generation bot result does not authorize a hop
+PASS unknown and animation-only evidence still permits trading without bot hop
+PASS runtime loading fences whitelist copies while preserving eligibility records
+PASS brief runtime loading recovers without duplicate outgoing controller
+PASS persistent runtime loading stops new requests and hopping after bounded wait
+PASS uncertain accepted outcome synchronously stops outgoing and hopping
+PASS native acceptance and Discord cannot be enabled by legacy globals
+PASS expiry retains independent price hold and safe P4 close path
+PASS V14 refuses live V10 owner without replacing it
+PASS pending request or visible trade continues to block exhaustion hopping
+PASS reexecuting V14 returns the current owner without restarting selectors
+TOTAL 16 V14 integration tests
+PASS legacy integration PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents a competing V13 owner
+PASS legacy integration PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS prevents a competing V13 owner
+PASS large hidden native GUI reaches gate and the existing trading owner exactly once
+PASS real loading alongside large hidden inventory still fences all automation
+PASS incoming request alongside large hidden inventory still blocks bot hopping
+PASS transaction lease fences outgoing copies and hopping after GUI close
+PASS no runtime flags turn a quote into an evidenced native completion contract
+TOTAL 24 V14 loader integration tests
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v14_teleport_autoexec_test.lua
+EXIT: 0
+PASS direct queue adds only one hook and starts pinned V14
+PASS two launch sources in one JobId cannot double-load or double-queue
+PASS queued code starts another job and queues for a third
+PASS syn.queue_on_teleport fallback supported without touching global queue
+PASS queue unavailable doesn't prevent initial launch
+PASS rejected queue reports failure but still starts initial V14
+PASS other Roblox places do not run the trader or create queue
+PASS no fixed commit URL refuses to queue or run
+RESULT 8 V14 teleport auto-reentry mock tests passed
+PASS preservedV13 owner prevents V14 queue PDIDDLER_V13_TELEPORT_AUTOBOOT_v1
+PASS preservedV13 owner prevents V14 queue PDIDDLER_INTEGRATION_V13_VISIBLE_READINESS
+PASS runtime endpoint never enters queued code or console output
+PASS preserved owner PDIDDLER_V10_TELEPORT_AUTOBOOT_v1 prevents V14 queue or probe
+PASS preserved owner PDIDDLER_V11_TELEPORT_AUTOBOOT_v1 prevents V14 queue or probe
+PASS preserved owner PDIDDLER_V12_TELEPORT_AUTOBOOT_v1 prevents V14 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents V14 queue or probe
+PASS preserved owner PDIDDLER_INTEGRATION_V12_PORTFOLIO_LEDGER prevents V14 queue or probe
+PASS dirty V12 integration prevents V14 even after a partial launch
+PASS independent P5 owner prevents another bootstrap queue
+PASS private configuration never appears in queue throw failure
+PASS private configuration never appears in queue return failure
+TOTAL 20 V14 teleport tests
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v14_portfolio_oracle_test.lua
+EXIT: 0
+PASS guarded quote extension bridges23 to145 against235 with known matching demand
+PASS unknown incoming comparison retains legacy60percent ceiling
+PASS extension never crosses its bounded region or15floor
+PASS all comparisons retain independent15cents floor
+PASS planner risk is value weighted
+PASS equal given statistics preserve distinct post-trade concentration
+PASS fifty interchangeable equal-stat items merge without exhausting budget
+PASS missing incoming items marks portfolio facts unknown
+PASS planner retains demand-threshold shapes at equal weighted demand
+PASS planner remains explicitly bounded
+PASS first verified safe quote initializes one anchor and failed quotes do not
+PASS equal edits do not replenish committed early spending
+PASS genuine larger received value enlarges only bounded remaining envelope
+PASS unverified reservation cannot spend and exact pending owns confirmation
+PASS recovery restoration is free but cannot create a larger fresh quote
+PASS first initial baseline commits only exact verified safe plan
+PASS safe decreases do not refund spent early allowance
+PASS two verified late steps survive exact opponent signature changes
+PASS early policy requires strict remaining allowance and caps proposal by it
+PASS unsafe opener can reserve its first safe reducing rebalance
+PASS portfolio tie-break order cannot create a comparison cycle
+PASS cancelled signature cannot reserve again until a new offer generation
+PASS unsupported price precision returns a controlled planner result
+PASS uncommitted actual quote cannot silently establish a free spending reference
+PASS confirmed quote may subsequently be observed without spending again
+PASS late wait acceptance freeze and final window remain unchanged
+PASS quote ownership mismatch is visible even after their value falls below safety
+PASS grouped planner preserves the compact120 C plus F triple plan
+PASS bounded exhaustive oracle retains all feasible final feature states
+PASS valid distinct raw rows sharing canonical prices retain exact availability
+RESULT 30 passed, 0 failed
+
+PRESERVED FULL OUTPUT
+V12 OFFLINE VERIFICATION; native MM2/Delta NOT executed
+Protected baseline:224 blobs; immutable dependencies:12; new compiled runtimes:5
+
+COMMAND: python3 pdiddler/tests/run_v11_checks.py
+EXIT: 0
+PASS 199 latest PR12 baseline files byte-identical
+PASS all12 immutable V11 dependencies match recorded Git blobs
+PASS six new complete runtime sources compile with official Luau
+CHECK 1/17 exit=0: python3 pdiddler/tests/run_integration_tests.py
+CHECK 2/17 exit=0: python3 pdiddler/tests/run_trading_tests.py
+CHECK 3/17 exit=0: python3 -m unittest discover -s pdiddler/tests -p test_refresh_supreme_snapshot.py
+CHECK 4/17 exit=0: python3 pdiddler/tests/run_issue4_tests.py
+CHECK 5/17 exit=0: /usr/bin/texlua pdiddler/tests/v6_final_wait_policy_test.lua
+CHECK 6/17 exit=0: /usr/bin/texlua pdiddler/tests/v7_delayed_sweeten_policy_test.lua
+CHECK 7/17 exit=0: /usr/bin/texlua pdiddler/tests/v8_visible_accept_gate_test.lua
+CHECK 8/17 exit=0: /usr/bin/texlua pdiddler/tests/v9_early_counter_policy_test.lua
+CHECK 9/17 exit=0: /usr/bin/texlua pdiddler/tests/v10_recording_offer_selection_test.lua
+CHECK 10/17 exit=0: /usr/bin/texlua pdiddler/tests/v10_teleport_autoexec_test.lua
+CHECK 11/17 exit=0: /usr/bin/texlua pdiddler/tests/v11_verified_negotiation_test.lua
+CHECK 12/17 exit=0: /usr/bin/texlua pdiddler/tests/v11_readiness_test.lua
+CHECK 13/17 exit=0: /usr/bin/texlua pdiddler/tests/v11_integration_test.lua
+CHECK 14/17 exit=0: /usr/bin/texlua pdiddler/tests/v11_teleport_autoexec_test.lua
+CHECK 15/17 exit=0: python3 pdiddler/tests/run_v10_bounded_runtime.py
+CHECK 16/17 exit=0: python3 pdiddler/tests/run_v11_trading_runtime.py
+CHECK 17/17 exit=0: python3 pdiddler/tests/run_v11_fast_gate.py
+PASS 17 verification commands; full output: /tmp/pdiddler-v11-results.txt
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v12_portfolio_ledger_policy_test.lua
+EXIT: 0
+PASS guarded quote extension bridges23 to145 against235 with known matching demand
+PASS unknown incoming comparison retains legacy60percent ceiling
+PASS extension never crosses its bounded region or15floor
+PASS all comparisons retain independent15cents floor
+PASS planner risk is value weighted
+PASS equal given statistics preserve distinct post-trade concentration
+PASS fifty interchangeable equal-stat items merge without exhausting budget
+PASS missing incoming items marks portfolio facts unknown
+PASS planner retains demand-threshold shapes at equal weighted demand
+PASS planner remains explicitly bounded
+PASS first verified safe quote initializes one anchor and failed quotes do not
+PASS equal edits do not replenish committed early spending
+PASS genuine larger received value enlarges only bounded remaining envelope
+PASS unverified reservation cannot spend and exact pending owns confirmation
+PASS recovery restoration is free but cannot create a larger fresh quote
+PASS first initial baseline commits only exact verified safe plan
+PASS safe decreases do not refund spent early allowance
+PASS two verified late steps survive exact opponent signature changes
+PASS early policy requires strict remaining allowance and caps proposal by it
+PASS unsafe opener can reserve its first safe reducing rebalance
+PASS portfolio tie-break order cannot create a comparison cycle
+PASS cancelled signature cannot reserve again until a new offer generation
+PASS unsupported price precision returns a controlled planner result
+PASS uncommitted actual quote cannot silently establish a free spending reference
+PASS confirmed quote may subsequently be observed without spending again
+PASS late wait acceptance freeze and final window remain unchanged
+PASS quote ownership mismatch is visible even after their value falls below safety
+PASS grouped planner preserves the compact120 C plus F triple plan
+PASS bounded exhaustive oracle retains all feasible final feature states
+PASS valid distinct raw rows sharing canonical prices retain exact availability
+RESULT 30 passed, 0 failed
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v11_verified_negotiation_test.lua pdiddler/pdiddler4_supreme_policy_v8_PORTFOLIO_LEDGER.lua
+EXIT: 0
+PASS proposal does not count as verified late improvement
+PASS wrong actual counts cannot commit a concession
+PASS changed opponent invalidates old pending proposal
+PASS 3 verified-negotiation tests
+
+COMMAND: python3 pdiddler/tests/run_v12_trading_runtime.py
+EXIT: 0
+PASS real P4 opens weak quote then promptly counters +94 to +65 during countdown
+PASS early adjustment happens before native readiness is ever true
+PASS same opponent offer cannot repeatedly trigger early concessions
+PASS bounded value increase also applies when demand ties
+PASS opponent already Accepted freezes early quote adjustment
+PASS missing market confidence cannot authorize an early trade mutation
+PASS policy exception holds offer with no repeated mutation
+RESULT 7 V9 fully integrated Part4 Roblox-fixture tests passed
+PASS opponent-first quote is the one early response for its signature
+PASS new visible lifetime rearms after old inventory result is fenced
+PASS paired manual Accepted is unconfirmed and cannot receive timeout decline
+PASS verified late lift occurs once after real offer verification
+PASS paired Accepted cannot bypass changed-offer invalidation
+PASS failed late replacement cannot become a larger fresh opening quote
+PASS Accepted immediately after physical verification uses the verified signature
+PASS loading readiness lost during inventory yield fences opening action
+PASS initial readiness loss closes safely instead of stranding visible ownership
+TOTAL 9 V11 trading runtime tests
+PASS V12 guarded comparable quote avoids a tiny disconnected initial region
+PASS V12 equivalent opponent edits cannot refill early spending
+PASS V12 two late verified steps remain global across exact offer changes
+PASS V12 equal giveaway economics retain the less concentrated portfolio
+PASS V12 an unprofitable first reply can safely reduce our real opener
+PASS V12 an opponent edit after apply verification cannot make an increase free
+PASS V12 failed physical removal cannot repeat a cancelled reservation
+PASS V12 a falling offer in the post-apply race closes promptly
+TOTAL 8 V12 actual P4 runtime tests
+PASS V12 actual P4 module compiles and runs in native Luau fixture
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v12_integration_test.lua
+EXIT: 0
+PASS ready stack preserves repricing and launches one existing outgoing owner
+PASS visible Loading World blocks gate and scanner until it resolves
+PASS persistent Loading Character enters bounded hold without restarting selectors
+PASS character can arrive after selector without premature automation
+PASS bot branch preserves sole P5 transport owner
+PASS wrong-generation bot result does not authorize a hop
+PASS unknown and animation-only evidence still permits trading without bot hop
+PASS runtime loading fences whitelist copies while preserving eligibility records
+PASS brief runtime loading recovers without duplicate outgoing controller
+PASS persistent runtime loading stops new requests and hopping after bounded wait
+PASS uncertain accepted outcome synchronously stops outgoing and hopping
+PASS native acceptance and Discord cannot be enabled by legacy globals
+PASS expiry retains independent price hold and safe P4 close path
+PASS V12 refuses live V10 owner without replacing it
+PASS pending request or visible trade continues to block exhaustion hopping
+PASS reexecuting V12 returns the current owner without restarting selectors
+TOTAL 16 V12 integration tests
+PASS V12 refuses the preserved V11 integration before starting another owner
+TOTAL 17 V12 loader integration tests
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v12_teleport_autoexec_test.lua
+EXIT: 0
+PASS direct queue adds only one hook and starts pinned V12
+PASS two launch sources in one JobId cannot double-load or double-queue
+PASS queued code starts another job and queues for a third
+PASS syn.queue_on_teleport fallback supported without touching global queue
+PASS queue unavailable doesn't prevent initial launch
+PASS rejected queue reports failure but still starts initial V12
+PASS other Roblox places do not run the trader or create queue
+PASS no fixed commit URL refuses to queue or run
+RESULT 8 V12 teleport auto-reentry mock tests passed
+PASS preserved owner PDIDDLER_V10_TELEPORT_AUTOBOOT_v1 prevents competing V12 reentry
+PASS preserved owner PDIDDLER_V11_TELEPORT_AUTOBOOT_v1 prevents competing V12 reentry
+PASS preserved owner PDIDDLER_INTEGRATION_V11_VERIFIED_READINESS prevents competing V12 reentry
+TOTAL 11 V12 teleport tests
+
+FULL PRESERVED SUITE OUTPUT
+PDIDDLER V11 OFFLINE VERIFICATION
+Native MM2/Delta gameplay: NOT EXECUTED
+Frozen latest-baseline blobs: 199
+Immutable module pins:12
+Official Luau sources compiled:6
+
+COMMAND: python3 pdiddler/tests/run_integration_tests.py
+EXIT: 0
+PASS 7 immutable dependency pins and Git blob hashes
+PASS tablet then nil-returning gate then scanner/P4/outgoing
+PASS correct Container request path permits exhaustion hop
+PASS exhausted hop quiesces outgoing and P4 before transport
+PASS corroborated bot rejects before starting scanner
+PASS ANIMATION_CLUSTER_FOR_REVIEW permits trading without bot hop
+PASS HIGH_SUSPICION_CLUSTER permits trading without bot hop
+PASS LOW_COVERAGE_CLUSTER_FOR_REVIEW permits trading without bot hop
+PASS low appearance score cannot reject
+PASS gate timeout proceeds unverified
+PASS wrong job result never rejects
+PASS superseding generation is rejected
+PASS gate ten seconds begins after download
+PASS compile error is terminal and releases clean lock
+PASS bounded tablet startup
+PASS blocked HTTP has bounded fetch-only retries
+PASS scanner yields legitimately before exposing API
+PASS scanner timeout locks partial initialization against reruns
+PASS outgoing failure stops P4 and prevents unsafe retry
+PASS active trade blocks bot rejection
+PASS pending request blocks bot rejection
+PASS desktop tablet request layout permits corroborated bot hop
+PASS desktop tablet request layout supports exhaustion
+PASS desktop tablet sending request blocks bot hop
+PASS desktop tablet receiving request blocks bot hop
+PASS hidden phone layout cannot mask active desktop request
+PASS request frame moved under another GUI root is structurally located
+PASS missing all request frames stays blocked with a precise diagnostic
+PASS missing/recreated request UI blocks then recovers
+PASS replaced PlayerGui stops frozen workers instead of reusing stale caches
+PASS PlayerGui replacement during scanner startup cannot arm controllers
+PASS PlayerGui replacement during yielded P4 run cleans returned controller
+PASS gate GUI wait has margin and unverified recovery
+PASS unavailable detector permits explicitly unverified trading
+PASS trade and outgoing ownership block exhausted hop
+PASS scanner pending blocks without restarting 45 second window
+PASS new unknown player cannot bypass scanner authority
+PASS new eligible trader resets exhaustion
+PASS join during final recheck cancels hop
+PASS eligible trader processed inside final recheck resets full window
+PASS duplicate execution retains a single owner
+PASS legacy integration blocks new controller
+PASS executor without task cancellation fails before module side effects
+PASS hop refusal stops monitor rather than unbounded retries
+PASS unexpected monitor exception becomes phase diagnostic
+44 passed, 0 failed
+PASS 11/12 before 10/12; synchronous failures serialize
+PASS HTTP permission failure terminates within budget
+PASS hung HTTP cannot later initiate teleport
+PASS malformed server JSON stops bounded discovery
+PASS Started without completion enters terminal hold
+PASS silent teleport response never causes competing attempt
+PASS yielding teleport call enters hold without retry
+PASS explicit late failure releases attempt and tries next
+PASS actual job change ends hop monitor
+PASS duplicate bootstrap retains controller
+PASS visited teleport settings exclude previous targets
+PASS stop refuses to abandon an in-flight teleport
+PASS late unattributed failure cannot supersede progressing next attempt
+PASS safety change during server discovery prevents delayed teleport
+14 passed, 0 failed
+PASS syntax checks for both new runtime files and all isolated Lua tests
+
+COMMAND: python3 pdiddler/tests/run_trading_tests.py
+EXIT: 0
+PASS 9 V4 immutable pins and source hashes
+PASS Supreme replaces stale scanner prices without changing raw identity
+PASS exactly +15 passes
+PASS +14 fails
+PASS exact decimal +15 uses integer cents
+PASS one cent below profit floor fails
+PASS raw loss has no quality upgrade exception
+PASS empty received offer fails
+PASS empty own offer fails
+PASS unknown identity fails instead of zero
+PASS contradictory profile name fails
+PASS non-finite or unpriced value rejected 0
+PASS non-finite or unpriced value rejected -1
+PASS non-finite or unpriced value rejected inf
+PASS non-finite or unpriced value rejected -inf
+PASS non-finite or unpriced value rejected Priceless
+PASS NaN rejected
+PASS invalid inventory quantity rejected 0
+PASS invalid inventory quantity rejected -1
+PASS invalid inventory quantity rejected 1.5
+PASS invalid inventory quantity rejected inf
+PASS invalid inventory quantity rejected x2
+PASS stale price profile fails closed
+PASS duplicate inventory rows rejected
+PASS pets and unknown weapon types cannot enter an offer plan
+PASS equal-value plans preserve stronger-demand inventory
+PASS normal quantity parser handles blank singleton and grouped counts
+PASS malformed slot quantity rejected x0
+PASS malformed slot quantity rejected x1.5
+PASS malformed slot quantity rejected 2?
+PASS malformed slot quantity rejected x1,2
+PASS malformed slot quantity rejected -1
+PASS malformed slot quantity rejected xnan
+PASS username comparison preserves underscores and ignores DisplayName
+PASS planner uses real quantities, checker identity and at most four copies
+PASS unknown items never enter a plan
+PASS impossible resolved trade has no safe plans
+PASS plan match requires exact counts and rejects additional unknown slots
+PASS bounded planner fails closed when state budget is exhausted
+PASS negotiation waits five seconds and selects nearest better safe offer
+PASS best safe offer gets final five seconds then declines
+PASS offer mutation resets negotiation
+PASS partner acceptance stops negotiation changes
+PASS empty timer restarts after previously nonempty offer
+PASS accepted empty declines immediately
+PASS overall sixty seconds is nonresetting from first offer
+PASS planner agrees with exhaustive four-copy search
+PASS 46 Supreme policy tests
+PASS hidden phone cannot mask visible tablet
+PASS exact username wins over another player's display name
+PASS underscores remain meaningful in partner identity
+PASS explicit contradictory item id cannot fall back to name
+PASS unknown visible item remains unresolved
+PASS invalid live quantity cannot silently become one
+PASS live quantity cannot exceed verified inventory
+PASS correct raw id and name retain separate checker id
+PASS valid id with contradictory name remains unresolved
+PASS ambiguous same-name items remain unresolved
+PASS slot malformed count is unresolved
+RESULT 11 passed, 0 failed
+PASS card proof rejects Alice123 for Alice
+PASS card proof preserves underscore distinctions
+PASS card proof rejects DisplayName identity
+PASS player resolver rejects DisplayName and underscore collision
+PASS leaderboard fallback rejects longer usernames
+PASS nearby card header requires an exact username
+PASS exact popup refuses DisplayName identity
+PASS pending identity rejects underscore collision
+PASS trade identity rejects DisplayName ownership
+PASS valid case-insensitive exact username proves ownership
+PASS hidden phone cannot mask active tablet leaderboard or pending owner
+PASS request cache revalidates full ancestry after container replacement
+PASS request cache rejects retained old PlayerGui after replacement
+PASS request lookup follows current GUI ancestry and active layout changes
+PASS duplicate run retains current controller without invalidating its session
+PASS incompatible legacy owner is preserved and rejected
+PASS processed queue ledger survives safe restart in the same JobId
+PASS processed queue ledger is separate per JobId
+PASS stopped controller cannot relinquish unresolved outgoing ownership
+PASS one successful physical Trade tap owns the full no-proof response window
+PASS successful Trade tap protects the queue before yielding for response proof
+PASS hidden enabled phone trade cannot mask active tablet trade
+PASS enabled trade GUI with hidden Trade frame is not an active trade
+PASS delayed cancellation revalidates stop
+PASS delayed cancellation revalidates PlayerGui replacement
+PASS delayed cancellation revalidates new active trade
+PASS delayed cancellation revalidates changed pending owner
+PASS delayed cancellation revalidates replacement request ancestry
+PASS successful Cancel tap with uncertain acknowledgement is never duplicated
+PASS uncertain cancellation remote delivery cannot cause another action
+PASS changed pending owner cannot steal uncertain cancellation ownership
+PASS observed cleared pending UI releases cancellation ownership for a new request
+PASS uncertain cancellation ownership cannot be abandoned by a safe restart
+PASS unchanged exact pending owner permits one cancellation remote
+34 passed, 0 failed (pdiddler/pdiddler3_outgoing_ROTATING_v16_EXACT_IDENTITY.lua)
+PASS new build injects Supreme policy and preserves frozen inventory
+PASS stale snapshot blocks before scanner and outgoing startup
+PASS expiry stops outgoing and hopping while P4 can close a trade
+PASS new build refuses to steal a V3 owner
+PASS corroborated bot still hops before loading prices or scanner
+PASS new build declines no completion claim when trade GUI closes
+PASS 6 Supreme loader integration tests
+PASS actual Part 4 offers highest item before their offer
+PASS stop during inventory yield cannot offer
+PASS partner change during inventory yield cannot offer
+PASS PlayerGui replacement during inventory yield cannot offer
+PASS actual empty offer declines after twelve seconds
+PASS removing their complete offer starts a new empty timeout
+PASS actual accepted empty declines immediately
+PASS actual negotiation waits then improves to nearest safe total
+PASS offer change triggers full rebalance
+PASS best safe unchanged offer declines after final five seconds
+PASS second run returns existing compatible controller
+PASS manual acceptance indication pauses negotiation without automatic accept
+PASS same GUI close-reopen while inventory yields cannot inherit old session
+PASS missing partner snapshot cannot suppress accepted-empty decline
+PASS expired snapshot permits a safe decline but no new offers
+PASS preexisting own offer is declined with a bound identity
+PASS duplicate invocation cannot replace active controller policy
+PASS partner accepting during a remove wait blocks subsequent offer actions
+PASS expiry during inventory yield declines before opening item
+PASS expiry after opening action declines instead of waiting forever
+PASS transaction crossing sixty-second backstop stops offering and declines
+PASS 21 full Part 4 Luau runtime tests
+PASS complete new runtime syntax with official Luau
+
+COMMAND: python3 -m unittest discover -s pdiddler/tests -p test_refresh_supreme_snapshot.py
+EXIT: 0
+PASS 190 real Lua records and fixed expiry across reload
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 0.017s
+
+OK
+
+COMMAND: python3 pdiddler/tests/run_issue4_tests.py
+EXIT: 0
+PASS 146 immutable PR3 baseline files
+PASS 9 V5 immutable dependency pins and blob hashes
+PASS opener rejects highest unreachable and prefers reachable demand
+PASS opener does not guess incomplete partner capacity
+PASS no feasible opener is explicit
+PASS Priceless cannot be opener
+PASS raw canonical ID contradiction stays unpriced
+PASS ranking retains initial negotiation headroom instead of max giveaway
+PASS same-price DP retains appealing alternatives rather than only weakest demand
+PASS plus 14.99 blocked, plus 15.00 allowed
+PASS many safe plans permit at most two sweetens then final five seconds
+PASS changed opponent signature resets steps
+PASS manual Accepted freezes negotiation
+PASS four copies and actual owned quantity remain conservative
+PASS expiry blocks opener selection
+RESULT 13 passed, 0 failed
+PASS final eligibility requires uninterrupted extra second
+PASS offer change invalidates prior final eligibility
+PASS unproved cooldown and mismatched plan block final eligibility
+PASS a different partner restarts verification
+PASS final eligibility is consumed only once
+PASS invalid snapshot types cannot throw
+PASS an unready token cannot be consumed
+PASS close or bare boolean never proves completion
+PASS late or wrong-partner completion is rejected
+PASS exact correlated event plus raw inventory delta produces report
+PASS unrelated inventory changes reject completion proof
+PASS unverified whole inventory blocks report
+PASS one inventory read is not stable proof
+PASS whole inventory totals are recomputed rather than trusted
+PASS unknown whole inventory item prevents reconciliation
+PASS unknown item value is never zero
+PASS below 15 profit blocks completion report
+PASS duplicate raw item rows and invalid quantities are rejected
+PASS Discord payload includes item metadata and verified totals
+PASS disabled outbox never reads credentials or sends
+PASS verified report sends once
+PASS unknown acknowledgement is not retried
+PASS server error is ambiguous rather than retryable
+PASS 429 retry is bounded and respects backoff
+PASS restart after sending retains uncertain ownership
+PASS 25 lifecycle/outbox tests
+PASS new build injects Supreme policy and preserves frozen inventory
+PASS stale snapshot blocks before scanner and outgoing startup
+PASS expiry stops outgoing and hopping while P4 can close a trade
+PASS new build refuses to steal a V3 owner
+PASS corroborated bot still hops before loading prices or scanner
+PASS new build declines no completion claim when trade GUI closes
+PASS unsupported native capabilities cannot be enabled by old globals
+PASS V5 refuses a live tested V4 controller
+PASS 8 adaptive loader integration tests
+PASS confirmed opening observes 2.5 seconds before offering
+PASS unreachable highest is replaced by partner-reachable opener
+PASS opponent-first visible offer skips speculative opener
+PASS visible unknown offer during observe never becomes zero or an opener
+PASS no reachable opener still expires empty at twelve seconds
+PASS missing own inventory still handles accepted empty
+PASS manual own Accepted freezes voluntary offer changes
+PASS opponent change invalidates unsafe manual acceptance by safe decline
+PASS stop during inventory yield prevents later offers
+PASS same root close-reopen during observe invalidates old trade
+PASS price expiry during observation closes safely
+PASS partner leaving during observe prevents opener
+PASS missing local Accepted indicator blocks mutations but not timeout
+PASS manual approval is invalidated by even a still-profitable changed offer
+PASS missing partner record from startup still expires empty
+PASS manual acceptance just after our verified rebalance is not a changed offer
+PASS native unaccept reset cannot erase prior approval signature
+PASS 17 issue4 full P4 runtime tests
+PASS issue4 native Luau compile
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v6_final_wait_policy_test.lua
+EXIT: 0
+PASS no safe improvement gets a FULL separate final 5s window
+PASS second sweeten yields one last 5s decision window
+PASS partner change invalidates old final countdown and sweeten count
+PASS manual/partner acceptance freezes countdown and avoids stale decline
+PASS verified local offer change invalidates final countdown
+PASS under +15 value cannot appear as sweetening candidate
+PASS two improvements are an absolute maximum
+RESULT 7 final-window policy regressions passed
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v7_delayed_sweeten_policy_test.lua
+EXIT: 0
+PASS 9s sweetening and 5s final wait are explicit
+PASS first offer leaves approximately 3s beyond observed 6s cooldown
+PASS each sweeten has 9s cooldown buffer BEFORE final 5s window
+PASS no feasible sweeten: 9s initial window plus full 5s final
+PASS opponent offer change invalidates all older countdowns
+PASS partner Accepted holds changes and resets full sweeten interval
+PASS unexpected own-side mutation restarts 9s interval
+PASS never sweeten below +15 Supreme floor
+PASS overall timeout independent from sweeten timing
+RESULT 9 V7 delayed-sweetening regressions passed
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v8_visible_accept_gate_test.lua
+EXIT: 0
+PASS visible native countdown takes precedence over green accept label
+PASS verified green ACCEPT only after countdown disappears
+PASS a hidden ACCEPT or missing action fails closed
+PASS other player Accepted marker does not count as button ready
+PASS the entire native 6-to-1 countdown blocks sweetening
+PASS green Accept must stay present for 2.5s
+PASS offer replacement resets ready buffer
+PASS brief reappearing countdown resets ready timer
+PASS Accepted state freezes eligibility until ready re-proven
+PASS policy cannot sweeten before confirmed native gate
+PASS policy cannot decline while button readiness is unknown
+PASS after last sweeten, final decline requires native readiness again
+RESULT 12 V8 visible-accept-gate tests passed
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v9_early_counter_policy_test.lua
+EXIT: 0
+PASS +94 weak current changes to strong +65, not +30
+PASS market appeal outranks largest theoretical profit
+PASS same appeal favors higher remaining profit
+PASS no appealing improvement does not donate value
+PASS slight extra demand is insufficient to make expensive concession
+PASS risk degradation blocks apparent demand upgrade
+PASS major stability improvement can justify early response
+PASS one deliberate early decision per unchanged opponent offer
+PASS stable opponent offer change resets one-decision budget
+PASS an opponent Accept freezes early counter without consuming it
+PASS unknown local accepted state freezes mutation
+PASS unresolved trade items never trigger a replacement
+PASS market bundle confidence is mandatory
+PASS mispriced live totals and phantom margin are rejected
+PASS missing/opponent signature cannot consume early budget
+PASS invalid requested quantities and nonweapon pages never counter
+PASS multiple verified copies up to four are supported
+PASS invented profit and +14 offers cannot enter policy
+PASS already-offered exact items are not an early counter
+PASS no current inventory proof or missing plans is a HOLD
+PASS at +15, there is no budget for a bigger giveaway
+PASS actual Supreme buildPlans fixture selects high-demand +65 from +94
+PASS mixed-value bundle uses comparable VALUE-WEIGHTED stability risk
+PASS candidate raw value must equal all priced pick subtotals
+PASS candidate demand score must match its actual verified items
+PASS candidate missing demand, category or stability is rejected
+RESULT 26 V9 early counteroffer tests passed
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v10_recording_offer_selection_test.lua
+EXIT: 0
+PASS recording opponent offer is 35+33+33=101 and current profit +94
+PASS V10 early counter chooses a bounded +65-ish offer despite demand=1 tie
+PASS V10 early cannot fall from +94 to +23 (Ornament+Jinglegun)
+PASS same opponent offer gets only one early counter
+PASS opponent accepted blocks early reoffer
+PASS late +94 concession never exceeds 25% headroom or 20 value
+PASS late cannot choose raw offer 78 from raw 7
+PASS late from +65 can only sacrifice up to 12.5 (raw 36 -> <=48.5)
+PASS later from +26 / 40 on their revised 66 protects small increment
+PASS late cannot accept a bogus raw profit or below +15
+PASS late wait preserves 9s and only changes after real readiness
+PASS first-response planner never immediately selects +15-floor exchange
+PASS first-response fallback retains highest margin when no capped item fits
+PASS final 5s window and two-sweeten cap preserved after full readiness
+RESULT 14 V10 bounded live-recording regressions passed
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v10_teleport_autoexec_test.lua
+EXIT: 0
+PASS direct queue adds only one hook and starts pinned V10
+PASS two launch sources in one JobId cannot double-load or double-queue
+PASS queued code starts another job and queues for a third
+PASS syn.queue_on_teleport fallback supported without touching global queue
+PASS queue unavailable doesn't prevent initial launch
+PASS rejected queue reports failure but still starts initial V10
+PASS other Roblox places do not run the trader or create queue
+PASS no fixed commit URL refuses to queue or run
+RESULT 8 V10 teleport auto-reentry mock tests passed
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v11_verified_negotiation_test.lua
+EXIT: 0
+PASS proposal does not count as verified late improvement
+PASS wrong actual counts cannot commit a concession
+PASS changed opponent invalidates old pending proposal
+PASS 3 verified-negotiation tests
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v11_readiness_test.lua
+EXIT: 0
+PASS loaded game and PlayerGui are insufficient without character
+PASS unparented or dead character is not ready
+PASS native visible loading text blocks ready UI and records its exact path
+PASS hidden ancestor loading label does not stall startup
+PASS missing request UI cannot be mistaken for world readiness
+PASS post-selector readiness may wait for real progress and returns after stable state
+PASS permanent loading exits its deadline without UI clicks or re-running P2
+PASS job change cancels an old readiness wait
+PASS tablet request path stays ready after the phone layout disappears
+PASS structural request fallback preserves an unrecognized native layout
+TOTAL 10 readiness tests
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v11_integration_test.lua
+EXIT: 0
+PASS ready stack preserves repricing and launches one existing outgoing owner
+PASS visible Loading World blocks gate and scanner until it resolves
+PASS persistent Loading Character enters bounded hold without restarting selectors
+PASS character can arrive after selector without premature automation
+PASS bot branch preserves sole P5 transport owner
+PASS wrong-generation bot result does not authorize a hop
+PASS unknown and animation-only evidence still permits trading without bot hop
+PASS runtime loading fences whitelist copies while preserving eligibility records
+PASS brief runtime loading recovers without duplicate outgoing controller
+PASS persistent runtime loading stops new requests and hopping after bounded wait
+PASS uncertain accepted outcome synchronously stops outgoing and hopping
+PASS native acceptance and Discord cannot be enabled by legacy globals
+PASS expiry retains independent price hold and safe P4 close path
+PASS V11 refuses live V10 owner without replacing it
+PASS pending request or visible trade continues to block exhaustion hopping
+PASS reexecuting V11 returns the current owner without restarting selectors
+TOTAL 16 V11 integration tests
+
+COMMAND: /usr/bin/texlua pdiddler/tests/v11_teleport_autoexec_test.lua
+EXIT: 0
+PASS direct queue adds only one hook and starts pinned V11
+PASS two launch sources in one JobId cannot double-load or double-queue
+PASS queued code starts another job and queues for a third
+PASS syn.queue_on_teleport fallback supported without touching global queue
+PASS queue unavailable doesn't prevent initial launch
+PASS rejected queue reports failure but still starts initial V11
+PASS other Roblox places do not run the trader or create queue
+PASS no fixed commit URL refuses to queue or run
+RESULT 8 V11 teleport auto-reentry mock tests passed
+PASS legacy bootstrap cannot create a competing V11 teleport queue
+TOTAL 9 V11 teleport tests
+
+COMMAND: python3 pdiddler/tests/run_v10_bounded_runtime.py
+EXIT: 0
+PASS real P4 opens weak quote then promptly counters +94 to +65 during countdown
+PASS early adjustment happens before native readiness is ever true
+PASS same opponent offer cannot repeatedly trigger early concessions
+PASS bounded value increase also applies when demand ties
+PASS opponent already Accepted freezes early quote adjustment
+PASS missing market confidence cannot authorize an early trade mutation
+PASS policy exception holds offer with no repeated mutation
+RESULT 7 V9 fully integrated Part4 Roblox-fixture tests passed
+PASS V10 actual P4 module compiles and runs in native Luau fixture
+
+COMMAND: python3 pdiddler/tests/run_v11_trading_runtime.py
+EXIT: 0
+PASS real P4 opens weak quote then promptly counters +94 to +65 during countdown
+PASS early adjustment happens before native readiness is ever true
+PASS same opponent offer cannot repeatedly trigger early concessions
+PASS bounded value increase also applies when demand ties
+PASS opponent already Accepted freezes early quote adjustment
+PASS missing market confidence cannot authorize an early trade mutation
+PASS policy exception holds offer with no repeated mutation
+RESULT 7 V9 fully integrated Part4 Roblox-fixture tests passed
+PASS opponent-first quote is the one early response for its signature
+PASS new visible lifetime rearms after old inventory result is fenced
+PASS paired manual Accepted is unconfirmed and cannot receive timeout decline
+PASS verified late lift occurs once after real offer verification
+PASS paired Accepted cannot bypass changed-offer invalidation
+PASS failed late replacement cannot become a larger fresh opening quote
+PASS Accepted immediately after physical verification uses the verified signature
+PASS loading readiness lost during inventory yield fences opening action
+PASS initial readiness loss closes safely instead of stranding visible ownership
+TOTAL 9 V11 trading runtime tests
+PASS V11 actual P4 module compiles and runs in native Luau fixture
+
+COMMAND: python3 pdiddler/tests/run_v11_fast_gate.py
+EXIT: 0
+PASS two positive complete scans retain existing bot classification at ten seconds
+PASS diverse older avatars do not become positive bot evidence
+PASS unreadable required avatar fields cannot form a valid shared fingerprint
+PASS hung appearance fetch cannot delay the ten-second watchdog
+PASS stopped generation cannot publish a delayed result
+PASS positive scans from an old roster cannot reject the final roster
+PASS finished watchdog fences remaining description work
+PASS movement in two windows is not missing-animation evidence in two windows
+PASS respawned characters invalidate positive scans without changing the roster
+TOTAL 9 actual fast-gate runtime tests

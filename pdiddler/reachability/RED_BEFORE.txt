@@ -1,0 +1,111 @@
+ISSUE24 RED evidence — baseline/runtime fixtures only, no native MM2 execution
+
+SOURCE issue24-red.txt
+PASS card proof rejects Alice123 for Alice
+PASS card proof preserves underscore distinctions
+PASS card proof rejects DisplayName identity
+PASS player resolver rejects DisplayName and underscore collision
+PASS leaderboard fallback rejects longer usernames
+PASS nearby card header requires an exact username
+PASS exact popup refuses DisplayName identity
+PASS pending identity rejects underscore collision
+PASS trade identity rejects DisplayName ownership
+PASS valid case-insensitive exact username proves ownership
+PASS hidden phone cannot mask active tablet leaderboard or pending owner
+PASS request cache revalidates full ancestry after container replacement
+PASS request cache rejects retained old PlayerGui after replacement
+PASS request lookup follows current GUI ancestry and active layout changes
+PASS duplicate run retains current controller without invalidating its session
+PASS incompatible legacy owner is preserved and rejected
+PASS processed queue ledger survives safe restart in the same JobId
+PASS processed queue ledger is separate per JobId
+PASS stopped controller cannot relinquish unresolved outgoing ownership
+PASS one successful physical Trade tap owns the full no-proof response window
+PASS successful Trade tap protects the queue before yielding for response proof
+PASS hidden enabled phone trade cannot mask active tablet trade
+PASS enabled trade GUI with hidden Trade frame is not an active trade
+PASS delayed cancellation revalidates stop
+PASS delayed cancellation revalidates PlayerGui replacement
+PASS delayed cancellation revalidates new active trade
+PASS delayed cancellation revalidates changed pending owner
+PASS delayed cancellation revalidates replacement request ancestry
+PASS successful Cancel tap with uncertain acknowledgement is never duplicated
+PASS uncertain cancellation remote delivery cannot cause another action
+PASS changed pending owner cannot steal uncertain cancellation ownership
+PASS observed cleared pending UI releases cancellation ownership for a new request
+PASS uncertain cancellation ownership cannot be abandoned by a safe restart
+PASS unchanged exact pending owner permits one cancellation remote
+34 passed, 0 failed (pdiddler/pdiddler3_outgoing_ROTATING_v17_TRANSACTION_LEASE.lua)
+FAIL Seer3 is skipped by actual P3 rotation after actual scanner and planner verify no +15 plan: [string "issue24-production-outgoing"]:11: table: 0x55ad5b931e60 ~= nil
+FAIL rotation skips Seer3 and chooses Batwing42 plus Luger18 without processing the skip: [string "issue24-production-outgoing"]:11: table: 0x55ad5b7de1c0 ~= table: 0x55ad5b7de710
+FAIL target becoming unreachable during yielding card navigation is not tapped: [string "issue24-production-outgoing"]:11: 1 ~= 0
+[string "issue24-production-outgoing"]:375: 3 failed
+
+SOURCE issue24-click-red.txt
+PASS unknown deadline is fixed despite fingerprint churn and scanner retries
+PASS own read retry offsets and no catch-up bursts are bounded
+PASS failed own read ages out only inventory uncertainty, never global protection
+PASS processed players and stale player instances cannot block exhaustion
+PASS late authoritative reachability restores requests but identical cache recovery is not discovery
+PASS proof binds exact target and inventories across fresh own read and final nonyielding check
+pdiddler/tests/issue24_eligibility_test.lua:95: unsafe mouse-down or incorrect abort
+
+SOURCE issue24-loader-red.txt
+FAIL Seer3 exhausts the server without an outgoing availability blocker: pdiddler/tests/issue24_loader_test.lua:95: unreachable player blocked exhaustion
+FAIL concrete Batwing42 Luger18 offer remains available and blocks hopping: pdiddler/tests/issue24_loader_test.lua:101: attempt to index a nil value (field 'eligibility')
+FAIL unknown expires30 second verification allowance but never becomes unprofitable: pdiddler/tests/issue24_loader_test.lua:109: pending retry blocked hop indefinitely
+FAIL unresolved fingerprint churn cannot restart verification allowance: pdiddler/tests/issue24_loader_test.lua:118: assertion failed!
+FAIL unknown gaining authoritative reachable inventory cancels exhaustion: pdiddler/tests/issue24_loader_test.lua:123: attempt to index a nil value (field 'eligibility')
+FAIL processed player with unknown inventory or an active rescan cannot block hopping: pdiddler/tests/issue24_loader_test.lua:127: assertion failed!
+FAIL identical own cache loss and recovery does not rediscover a reachable player: pdiddler/tests/issue24_loader_test.lua:131: attempt to index a nil value (local 'e')
+PASS price expiry cannot age into hopping permission
+PASS native loading hold cannot age into hopping permission
+PASS transaction ownership cannot age into hopping permission
+PASS final transport recheck rejects a newly reachable target
+PASS V15.3 owner prevents competing successor controllers or startup UI
+PASS same-job execution keeps one startup and trading owner
+pdiddler/tests/issue24_loader_test.lua:165: 7 loader cases failed
+
+SOURCE issue24-partial-retry-red.txt
+PASS unknown deadline is fixed despite fingerprint churn and scanner retries
+PASS classification suppressed during an active request is rendered when request ownership releases
+PASS own read retry offsets and no catch-up bursts are bounded
+pdiddler/tests/issue24_eligibility_test.lua:61: 6
+
+SOURCE issue24-render-red.txt
+PASS unknown deadline is fixed despite fingerprint churn and scanner retries
+pdiddler/tests/issue24_eligibility_test.lua:50: assertion failed!
+
+SOURCE issue24-scanner-red.txt
+pdiddler/tests/issue24_scanner_state_test.lua:4: missing production verification-state API
+
+SOURCE issue24-outgoing-runtime-red.txt
+/tmp/pdiddler-issue24-outgoing-s97_duns/runtime.luau:4416: Seer3 physically requested by production rotation
+stacktrace:
+[C] function assert
+/tmp/pdiddler-issue24-outgoing-s97_duns/runtime.luau:4416
+/tmp/pdiddler-issue24-outgoing-s97_duns/runtime.luau:4411 function test
+/tmp/pdiddler-issue24-outgoing-s97_duns/runtime.luau:4413
+Traceback (most recent call last):
+  File "/workspace/MM2-AutoTrade-Rebuild/pdiddler/tests/run_issue24_outgoing_runtime.py", line 48, in <module>
+    subprocess.run([luau, str(path)], check=True, cwd=ROOT)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/tmp/pdiddler-luau/luau', '/tmp/pdiddler-issue24-outgoing-s97_duns/runtime.luau']' returned non-zero exit status 1.
+
+SOURCE issue24-row-red.txt
+PASS Seer3 exhausts the server without an outgoing availability blocker
+PASS concrete Batwing42 Luger18 offer remains available and blocks hopping
+PASS unknown expires30 second verification allowance but never becomes unprofitable
+PASS unresolved fingerprint churn cannot restart verification allowance
+PASS unknown gaining authoritative reachable inventory cancels exhaustion
+PASS processed player with unknown inventory or an active rescan cannot block hopping
+PASS identical own cache loss and recovery does not rediscover a reachable player
+PASS price expiry cannot age into hopping permission
+PASS native loading hold cannot age into hopping permission
+PASS transaction ownership cannot age into hopping permission
+PASS final transport recheck rejects a newly reachable target
+FAIL scanner rows distinguish reachable unprofitable and unknown with reasons: pdiddler/tests/issue24_loader_test.lua:159: unknown
+PASS V15.3 owner prevents competing successor controllers or startup UI
+PASS same-job execution keeps one startup and trading owner
+pdiddler/tests/issue24_loader_test.lua:172: 1 loader cases failed
