@@ -42,6 +42,7 @@ class RankedOffer:
 class RankedQuotes:
     offers: tuple[RankedOffer, ...]  # value-competitive review lane
     progression_offers: tuple[RankedOffer, ...]  # four-copy improvement review lane
+    accumulation_offers: tuple[RankedOffer, ...]  # listed value gain within displayed coverage gate
     evaluated_combinations: int
     valid_non_overpay_combinations: int
     wide_gap_combinations: int
@@ -196,6 +197,11 @@ def rank_offers(
     # No scalar demand/stability "acceptance score". Quote competitiveness is
     # value coverage; qualitative warning count and preservation of four-copy
     # power break close ties, not an invented chance to close a trade.
+    accumulation = sorted(offers, key=lambda x: (
+        x.gain < 0, -x.gain if x.gain >= 0 else x.gain,
+        x.four_copy_delta < 0, len(x.notes), -x.coverage,
+        -x.opening_demand_ordinal, x.give,
+    ))
     progression = sorted(offers, key=lambda x: (
         -x.four_copy_delta, len(x.notes), x.gain < 0,
         -x.coverage if x.gain >= 0 else x.coverage,
@@ -207,6 +213,7 @@ def rank_offers(
     ))
     return RankedQuotes(
         offers=tuple(offers[:limit]), progression_offers=tuple(progression[:limit]),
+        accumulation_offers=tuple(accumulation[:limit]),
         evaluated_combinations=evaluated,
         valid_non_overpay_combinations=valid,
         wide_gap_combinations=wide_gap, best_listed_coverage=best_coverage,
