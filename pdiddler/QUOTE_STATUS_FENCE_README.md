@@ -30,10 +30,18 @@ simulation or in-game evidence. After review, run a manual Delta test that
 checks 1) add/remove/swap; 2) same value but different identity; 3) post
 acceptance changes; 4) missing item/quantity; 5) early trade close.
 
+## Manual one-session test loader
+A separate **test-only** integrated copy has exactly one pin change:
+`p4` points to the patched P4 commit `8612f769b877b56220d84536e634a102351f5baf`.
+Entry: `pdiddler/quote_status_test/QUOTE_STATUS_TEST_ENTRY.lua`.
+It does NOT queue itself on teleport. Run it only from a **fresh server**
+with the usual Delta auto-execute loader disabled. Capture the trade
+window and scanner status until the other player removes/swaps an item.
+
 ## Deployment blocker
-The current Delta entrypoint is pinned to an older V15.8 integrated
-commit and that integrated file pins the older P4 commit. Merely merging
-this branch cannot alter the already-pinned active loader. A separate
-reviewed loader repin and native replay are required.
+The current normal Delta entrypoint remains pinned to the older V15.8
+integrated commit. Merely merging this branch cannot alter it.
+**A native replay and separate production-loader repin are still required.**
+The test-only loader has not yet been validated inside Roblox/Delta.
 
 **Do not enable native final Accept from this patch.**
