@@ -21,7 +21,7 @@ Stage 19 reuses Stage 1's exact Decimal pricing and four-copy metrics to add:
 
 ## Trust boundary
 
-The ledger requires **matching complete eligible-weapon snapshots** on both sides of any claimed completed event, and matching event item-quantity deltas. A false or repeated completion reference, a missing account, unpriced asset, nonconserving transfer, or unexplained movement is rejected.
+The ledger requires **matching complete eligible-weapon snapshots** on both sides of any claimed completed event, and matching event item-quantity deltas. A false or repeated completion reference, a missing account, unpriced asset, nonconserving transfer, impossible intermediate ownership, or unexplained movement is rejected.
 
 This is a structural contract. The actual Delta scanner and completed-trade verifier must independently establish that the source, inventory captures, and completion evidence are authentic. Stage 19 never sets authorizes_trade or authorizes_accept true.
 
@@ -34,7 +34,7 @@ Python is the primary test runner:
     cd pdiddler/intelligence_lab
     python3 -m unittest discover -q
 
-The test suite includes inherited strategy evaluation and Stage 18 Python-to-Lua contract tests, and **18 new Stage 19 Python tests** on synthetic data.
+The test suite includes inherited strategy evaluation and Stage 18 Python-to-Lua contract tests, and **19 new Stage 19 Python tests** on synthetic data.
 
 The separate Lua 5.4 suite remains in CI to test the boundary interacting with the actual Roblox-script modules. A passing Python simulation does not prove a native Delta click, item transfer or trade completion.
 
