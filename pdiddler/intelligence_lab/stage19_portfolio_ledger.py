@@ -231,6 +231,12 @@ def reconcile_value_change(
     original: dict[str, dict[str, int]] = {label: _copies(snap) for label, snap in b.items()}
     observed: dict[str, dict[str, int]] = {label: _copies(snap) for label, snap in a.items()}
     expected: dict[str, dict[str, int]] = {label: {} for label in b}
+    # Replay ownership event by event, not just as a net before/after delta.
+    # Otherwise two fake offsetting trades could temporarily spend assets
+    # the account never owned, while passing final reconciliation.
+    holdings_at_event: dict[str, dict[str, int]] = {
+        label: dict(items) for label, items in original.items()
+    }
     seen_refs: set[str] = set()
     external = Decimal(0)
     transfer = Decimal(0)
@@ -258,6 +264,13 @@ def reconcile_value_change(
                     raise AssessmentError("ledger-event-item-or-quantity-invalid")
                 _priced(old_catalog, key)
                 _priced(new_catalog, key)
+                new_balance = holdings_at_event[label].get(key, 0) + quantity
+                if new_balance < 0:
+                    raise AssessmentError("ledger-event-not-owned-at-time")
+                if new_balance == 0:
+                    holdings_at_event[label].pop(key, None)
+                else:
+                    holdings_at_event[label][key] = new_balance
                 outgoing = outgoing or quantity < 0
                 incoming = incoming or quantity > 0
                 expected[label][key] = expected[label].get(key, 0) + quantity
