@@ -39,6 +39,7 @@ function M.execute(h,intent)
         or intent.session~=c.session or type(intent.token)~="number"
         or intent.token~=math.floor(intent.token) or intent.token<1
         or type(intent.ourSig)~="string" or intent.ourSig==""
+        or type(intent.theirSig)~="string" or intent.theirSig==""
         or type(intent.id)~="string" or intent.id==""
         or type(intent.slot)~="number" or intent.slot~=math.floor(intent.slot)
         or intent.slot<1 or intent.slot>4
@@ -53,7 +54,8 @@ function M.execute(h,intent)
     if observation.tradeOpen==false then h.closed=true;return blocked("trade-closed") end
     if observation.session~=c.session or observation.contextOK~=true
         or observation.ourAccepted~=false or observation.theirAccepted~=false
-        or observation.ourSig~=intent.ourSig then
+        or observation.ourSig~=intent.ourSig
+        or observation.theirSig~=intent.theirSig then
         return blocked("trade-or-quote-context-changed") end
     local matched=false
     for _,r in ipairs(observation.ownItems or {}) do

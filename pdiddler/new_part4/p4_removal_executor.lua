@@ -45,6 +45,7 @@ local function validateObs(s,o)
     if o.session~=s.session then return nil,"session-mismatch" end
     if o.tradeOpen~=true or o.contextOK~=true
         or type(o.ourSig)~="string" or o.ourSig==""
+        or type(o.theirSig)~="string" or o.theirSig==""
         or o.ourAccepted~=false or o.theirAccepted~=false then
         return nil,"context-or-acceptance-unverified" end
     -- Removal is protective exposure reduction. No price/quoteSafe conclusion is
@@ -81,9 +82,9 @@ function M.prepare(s,command,o,now)
     s.serial=s.serial+1
     local selected=rows.selection
     local intent={kind="REMOVE_ONE",session=s.session,token=s.serial,
-        ourSig=o.ourSig,slot=selected.slot,id=selected.id,qty=selected.qty}
+        ourSig=o.ourSig,theirSig=o.theirSig,slot=selected.slot,id=selected.id,qty=selected.qty}
     s.pending={token=intent.token,slot=intent.slot,id=intent.id,qty=intent.qty,
-        ourSig=intent.ourSig,before=rows.counts,reservedAt=now}
+        ourSig=intent.ourSig,theirSig=intent.theirSig,before=rows.counts,reservedAt=now}
     s.mode="RESERVED"
     return "DISPATCH",intent
 end
@@ -96,7 +97,8 @@ function M.dispatched(s,intent,receipt,now)
     local p=s.pending
     if type(intent)~="table" or intent.token~=p.token or intent.session~=s.session
         or intent.id~=p.id or intent.slot~=p.slot or intent.qty~=p.qty
-        or intent.ourSig~=p.ourSig then return escalate(s,"dispatch-intent-mismatch") end
+        or intent.ourSig~=p.ourSig or intent.theirSig~=p.theirSig then
+        return escalate(s,"dispatch-intent-mismatch") end
     if not validTime(now) or now<p.reservedAt or now-p.reservedAt>s.dispatchSeconds then
         return escalate(s,"dispatch-window-expired") end
     if type(receipt)~="table" or receipt.attempted~=true
