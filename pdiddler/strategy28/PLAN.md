@@ -7,7 +7,7 @@ Base: independently verified safety PR [#29](https://github.com/chazebanks/MM2-A
 - The pinned policy 9 first-quote selector prefers offers within `min(received - 15, received * 0.60)`, with demand/risk ranking and a bounded comparable-quality extension. Its smallest-safe fallback can produce a very large margin. A 60% giveaway ceiling is a policy choice, not a measured acceptance model; it cannot generally express +15–35 profit on received values above 87.5.
 - `rankPlans` separately uses bands relative to the minimum feasible profit. P4 does not blindly use that first candidate for every initial offer: it calls `selectInitialOffer`. Changing ranking alone would miss the actual first-quote path.
 - The old opener checks the opponent's top-four-copy total, then favors demand/stability and proximity to their largest item. That can choose an opener 40 against Batwing 42 even though that single reply cannot support +15. Eligible total inventory does not prove a stable single-item reply exists.
-- P4 v10 already retains a safe existing offer unless the unchanged addition-only policy authorizes a concession. The old video's proposed 25-to 23 replacement is not a reason to rewrite this working controller.
+- P4 v10 already retains a safe existing offer unless the unchanged addition-only policy authorizes a concession. The old video's proposed 25→23 replacement is not a reason to rewrite this working controller.
 - Equal economic/portfolio planner states can merge a knife and a gun before ranking. Adding a count preference only after planning would lose some relevant choices.
 
 ## Chosen scope and alternatives
@@ -55,6 +55,6 @@ An opener must be owned and have at least one verified nonmatching canonical sin
 - [x] Verify 30 policy tests, 14 strategy controller tests, 44 unchanged safety tests, and 15 unchanged economic-controller tests.
 - [x] Verify 22 successor loader and 36 successor bootstrap cases.
 - [x] Complete the release gate, preservation/hash audit, and immutable dependency publication.
-- [ ] Publish a separate unmerged draft PR and state the remaining native tests.
+- [x] Publish separate unmerged draft PR30 stacked on safety draft PR29; state the remaining native tests.
 
 Release evidence belongs beside this file in the build/results/pin artifacts. Native A/B protocol and limitations are in [README.md](README.md). No P1/P2/P3/P5 behavior, scanner UI, price source/expiry, Common-item classification, native final Accept, or completed-trade Discord delivery is enabled or changed.

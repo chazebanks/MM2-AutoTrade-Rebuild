@@ -57,7 +57,7 @@ That 960-value choice has net useful knives−2 under the stated category: count
 
 In the separate restricted inventory containing only Immortal×2+Mortal, all available eligible value is 405. Against 1295 the selector retains 405/+890. A1260-value giveaway for +35 is unavailable, and this strategy does not fabricate it. Source-based risk preferences also do not require sabotaging a genuine large-margin opportunity.
 
-These are theoretical verified quotes, not completed trades. Exact test fixtures, complete candidate enumeration, and before/after failures are in the Issue 28 test/evidence files. Exact 100/125/140/130 examples use labeled synthetic verified fixtures; they are not additions to the Supreme catalog.
+These are theoretical verified quotes, not completed trades. The Issue 28 tests enumerate and verify every retained planner candidate; evidence logs report selected targets/distances and candidate counts. Exact fixtures and before/after failures are included. Exact 100/125/140/130 examples use labeled synthetic verified fixtures; they are not additions to the Supreme catalog.
 
 ## Verification boundaries
 
