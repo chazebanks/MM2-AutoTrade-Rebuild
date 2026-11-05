@@ -61,8 +61,10 @@ function M.observe(s,o,now)
     local rowKey=identity(o)
     if not rowKey then M.reset(s);return false,"unverified-or-accepted-snapshot" end
     if s.lastAt and now<=s.lastAt then
-        -- Repeated timestamp is never a second independent sample.
-        if now<s.lastAt then M.reset(s) end
+        -- Same-time UI changes still invalidate previous evidence; repeated
+        -- timestamps can never count as separate independent samples.
+        if now<s.lastAt or s.ourSig~=o.ourSig
+            or s.theirSig~=o.theirSig or s.rowKey~=rowKey then M.reset(s) end
         return false,"non-advancing-time"
     end
     if s.lastAt and now-s.lastAt>s.maxGapSeconds then
