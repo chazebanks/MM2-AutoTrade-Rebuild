@@ -223,6 +223,22 @@ end)
 test('empty bundle rejected',function()
     blockedChange(function(c,p)p.give={} end,'give-bundle-or-inventory-missing')
 end)
+test('sparse offer table cannot hide an unseen item',function()
+    blockedChange(function(c,p)
+        p.give={[1]={id=A,qty=1},[3]={id=B,qty=1}}
+    end,'give-bundle-or-inventory-missing')
+end)
+test('non-numeric array key is rejected',function()
+    blockedChange(function(c,p)
+        p.give={{id=A,qty=1},noise={id=B,qty=1}}
+    end,'give-bundle-or-inventory-missing')
+end)
+test('candidate list containing extra keyed entry rejected',function()
+    local c,p=fixture()
+    local values={[1]=p,extra=copy(p)}
+    local out,why=R.reviewCandidates(c,values)
+    eq(out,nil);eq(why,'candidate-budget-or-input-invalid')
+end)
 test('more than four physical rows rejected',function()
     blockedChange(function(c,p)p.give={{id=A,qty=1},{id=B,qty=1},
         {id=C,qty=1},{id=D,qty=1},{id=E,qty=1}}
