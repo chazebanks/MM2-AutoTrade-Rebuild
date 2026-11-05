@@ -144,6 +144,7 @@ end)
 test('partial stack change is verified and requests another removal later',function()
     local f=fixture();f.delayRemoval=true
     f.ownSlots:remove('NewItem1');f.ownSlots:remove('NewItem3')
+    f.ownSlots:find('NewItem2'):find('Container'):find('Amount').Text='x2'
     eq(f:tick(0),'HOLD');eq(#f.clicks,1);eq(f.clicks[1].qty,2)
     -- Live Delta trace: two copies show x2, one copy has an empty Amount label.
     f.ownSlots:find('NewItem2'):find('Container'):find('Amount').Text=''
