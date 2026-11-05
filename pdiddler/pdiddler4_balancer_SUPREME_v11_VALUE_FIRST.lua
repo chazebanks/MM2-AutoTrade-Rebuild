@@ -1383,6 +1383,12 @@ local function runTrade(scanner,session,sessionAlive,tradeTelemetry,publishWebho
         local raw=ourRaw and theirRaw and (ourRaw.."/"..theirRaw) or nil
         if not raw or raw~=bound.safetyRawSig then
             invalidateQuoteEvidence("physical-quote-changed")
+            -- The safety fence must clear the visible profit claim as soon as
+            -- a physical offer changes; otherwise the previous +profit text
+            -- can outlive its evidence while a decline/withdrawal runs.
+            if bound.safetyRawSig then
+                p4Status("P4 QUOTE CHANGED — previous profit invalid | rechecking visible items | FINAL ACCEPT DISABLED")
+            end
             if bound.safetyRawSig and bound.acceptanceObserved then
                 return requestSafetyDecline("physical quote changed after local acceptance")
             end
@@ -1411,6 +1417,7 @@ local function runTrade(scanner,session,sessionAlive,tradeTelemetry,publishWebho
         local decision=tradeDecision(ours,theirs)
         if decision.ok then bound.safeQuoteSeen=true;return "safe" end
         invalidateQuoteEvidence("unsafe-current-physical-quote")
+        p4Status("P4 SAFETY — current quote unsafe | previous profit invalid | FINAL ACCEPT DISABLED")
         local localAccepted=ourAcceptedShown(current)
         if localAccepted==true then
             bound.acceptanceObserved=true
@@ -1893,6 +1900,20 @@ local function runTrade(scanner,session,sessionAlive,tradeTelemetry,publishWebho
                     holdOutcome("unexpected time-triggered concession")
                     return "time-concession-disallowed"
                 else
+                    -- A verified profit is evidence for the exact physical
+                    -- quote observed by safetyInspect, never for a later UI
+                    -- mutation that happened while the planner was running.
+                    local displayTrade=tradeRoot()
+                    local displayOurRaw=displayTrade and rawSideSignature(displayTrade,"YourOffer")
+                    local displayTheirRaw=displayTrade and rawSideSignature(displayTrade,"TheirOffer")
+                    local displayRaw=displayOurRaw and displayTheirRaw
+                        and (displayOurRaw.."/"..displayTheirRaw) or nil
+                    if not displayRaw or displayRaw~=bound.safetyRawSig or bound.quoteInvalidated then
+                        invalidateQuoteEvidence("profit-status-quote-drift")
+                        p4Status("P4 QUOTE CHANGED — previous profit invalid | rechecking visible items | FINAL ACCEPT DISABLED")
+                        task.wait(C.LoopDelay)
+                        continue
+                    end
                     p4Status(string.format(
                         "P4 — verified Supreme profit +%s | %s | FINAL ACCEPT DISABLED",
                         fmt(currentDecision.rawProfit),action
