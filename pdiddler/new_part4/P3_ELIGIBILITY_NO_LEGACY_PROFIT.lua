@@ -58,7 +58,7 @@ function M.evaluate(own,opponent,profile,strict)
  local b,why2=M.validateInventory(opponent,profile,strict)
  if not b then return "unknown",why2 end
  if #a.items==0 or #b.items==0 then return "unprofitable","no-eligible-weapons" end
- -- No policy.buildPlans, tradeDecision or profit floor; this only permits
+ -- No legacy profit planner, trading decision, or numeric floor; this only permits
  -- P3 to request a conversation. New Part4 decides nothing automatically yet.
  return "reachable","both-inventories-verified;new-strategy-review-required",{
    reviewed=false,authorizesTrade=false,authorizesAccept=false,
