@@ -27,11 +27,11 @@ A future observer must supply an independent, **authoritative snapshot** on ever
 Supported output actions: `HOLD`, `REMOVE_ONE`, `REQUEST_PLAN`, `DECLINE`, `STOP`. **None of these perform an action**; the executor will later translate a `REMOVE_ONE` into one physical item removal, then request a new native snapshot. The controller **never repeats a remove request before verifying progress**. It does not accept trades, open trade requests, hop, access Discord, or alter inventories.
 
 - **MONITOR:** Hold an unchanged, verified-safe quote. On any physical change or unsafe quote, invalidate it and begin withdrawal.
-- **AWAIT_REMOVAL:** One item-removal command at a time, awaiting a strict multiset decrease of verified owned item IDs and quantities. Reordering slots is allowed; invented items, no proof, timeout, or partner acceptance leads to decline. Opponent may continue swapping items without resetting the withdrawal transaction.
+- **AWAIT_REMOVAL:** One item-removal command at a time, awaiting a strict multiset decrease of verified owned item IDs and quantities **and** a changed raw physical offer signature. Reordering slots is allowed; invented items, no proof, timeout, or partner acceptance leads to decline. Opponent may continue swapping items without resetting the withdrawal transaction.
 - **WAIT_REPLAN / PLAN_REQUESTED:** Only after our slots reach zero, wait for a stable, resolved opponent offer before requesting the independent growth strategy to design a new plan. No automatic offers.
 - **BUILDING:** A separate strategy must authorize a bounded exact item multiset. The observed items must stay inside the authorized plan, the opponent version must remain fixed, and no acceptance may occur. A complete physical quote is rechecked before entering MONITOR.
 - **ACCEPTED_HOLD:** No offer modifications. Any post-acceptance quote change requires immediate decline.
-- **DECLINE_REQUIRED / STOPPED:** Explicit terminal intent. `STOP` prevents accidentally declining/clicking a different trade after the session changes or the GUI closes.
+- **DECLINE_REQUIRED / STOPPED:** Explicit terminal intent. `STOP` prevents accidentally declining/clicking a different trade after the session changes or the GUI closes, even if a decline had just been requested.
 
 ### Deliberately conservative behavior
 
@@ -39,7 +39,7 @@ An opponent change does **not** instantly decline an unaccepted trade if we can 
 
 ### Validation
 
-Local **Lua 5.4 execution**: 23 tests pass, including 200 deterministic multi-slot sequence trials. These cover Chroma Watergun removed during a 3-slot offer, stacked Immortal x2 in one visible slot, physical item-shift/reordering, opponent swaps, delayed removals, missing proof, accepted-state quote changes, unauthorized build items, price expiry and session changes.
+Local **Lua 5.4 execution**: 25 tests pass, including 200 deterministic multi-slot sequence trials. These cover Chroma Watergun removed during a 3-slot offer, stacked Immortal x2 in one visible slot, physical item-shift/reordering, opponent swaps, delayed removals, missing proof, accepted-state quote changes, unauthorized build items, price expiry and session changes.
 
 ```sh
 lua tests/test_p4_safety_core.lua pdiddler/new_part4
