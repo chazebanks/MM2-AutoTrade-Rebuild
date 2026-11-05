@@ -1,0 +1,36 @@
+PASS dual exact headers and candidate Exit remain read-only and unverified
+PASS absent overlay reports unavailable and never already closed
+PASS hidden known headers never imply already closed or a successful hide
+PASS one exact header remains an incomplete inaccessible overlay
+PASS headers split between different ScreenGuis cannot prove one Delta owner
+PASS nonexact strings and private TextBoxes are not console headers
+PASS partial root access preserves accessible findings without native UI claims
+PASS inaccessible roots produce a bounded unavailable report
+PASS unreadable descendant branch fails harmlessly
+PASS gethui and CoreGui aliases are scanned only once
+FAIL gethui console Frame preserves common ScreenGui owner and Exit across overlapping roots: pdiddler/tests/delta_ui_audit_test.lua:5: 0 ~= 1
+FAIL gethui child Folder preserves common ScreenGui owner and Exit across overlapping roots: pdiddler/tests/delta_ui_audit_test.lua:5: 0 ~= 1
+PASS own scanner and ordinary MM2 controls remain untouched and outside candidate owners
+PASS private editor and console body content never enter report or emitted trace
+PASS untrusted image URLs never enter the safe button descriptor
+PASS only finite geometry is exposed at different viewport sizes
+PASS unavailable or nonfinite geometry is omitted instead of invented zeros
+PASS unknown visibility stays explicitly unknown
+PASS same JobId cache never rescans or emits twice
+PASS new JobId receives a fresh one-shot assessment
+PASS lower node budget truncates explicitly without guessed closure
+PASS requested large budgets cannot raise the 2048-node hard cap
+PASS lower elapsed-time budget truncates a scan safely
+PASS requested long duration cannot raise the .10-second hard cap
+PASS full child arrays stop expanding as soon as the queue budget is exhausted
+PASS elapsed budget is checked inside wide child-array expansion
+PASS new trader ownership interrupts child-array expansion immediately
+PASS non-MM2 prevents root inspection and every UI action
+PASS unloaded prevents root inspection and every UI action
+PASS empty JobId prevents root inspection and every UI action
+PASS outgoing session prevents root inspection and every UI action
+PASS P4 session prevents root inspection and every UI action
+PASS outgoing controller prevents root inspection and every UI action
+PASS P4 controller prevents root inspection and every UI action
+RESULT 32 passed; 2 failed
+pdiddler/tests/delta_ui_audit_test.lua:368: Delta UI audit tests failed
