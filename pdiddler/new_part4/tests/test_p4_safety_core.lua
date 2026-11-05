@@ -192,4 +192,24 @@ check('verified withdrawal progress under 200 deterministic slot permutations',f
     end
 end)
 
+
+check('removal proof requires different physical raw signature',function()
+    local s=S.new('job-a')
+    S.step(s,o(s,{m,i},'watergun',1,true,{ourSig='same'}),0)
+    S.step(s,o(s,{m,i},'empty',0,false,{ourSig='same'}),.1)
+    equal(select(1,S.step(s,o(s,{i},'empty',0,false,{ourSig='same'}),.2)),'DECLINE')
+    equal(s.lastReason,'removal-signature-not-changed')
+end)
+check('completed decline or changed trade cannot receive stale decline command',function()
+    local s=S.new('job-a')
+    S.step(s,o(s,{m},'watergun',1,false,{ourSig='ours1'}),0)
+    equal(s.mode,'AWAIT_REMOVAL')
+    equal(select(1,S.step(s,o(s,{m},'watergun',1,false,{ourSig='ours1',ourAccepted=true}),.1)),'DECLINE')
+    equal(select(1,S.step(s,{tradeOpen=false,session='job-a'},.2)),'STOP')
+    local s2=S.new('job-b')
+    S.step(s2,o(s2,{m},'watergun',1,false,{ourSig='ours1'}),0)
+    equal(select(1,S.step(s2,o(s2,{m},'watergun',1,false,{ourSig='ours1',ourAccepted=true}),.1)),'DECLINE')
+    equal(select(1,S.step(s2,{tradeOpen=true,session='another-job'},.2)),'STOP')
+end)
+
 print('PASS',tests,'Lua safety-core tests')
