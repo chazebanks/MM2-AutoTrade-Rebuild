@@ -1,5 +1,5 @@
-V15.5 PREPUBLICATION OFFLINE RESULTS — native iPad NOT RUN
-PREPUBLICATION ONLY: local successor pin placeholders permitted
+V15.5 FINAL PINNED OFFLINE RESULTS — native iPad NOT RUN
+PASS all20 immutable dependency pins and loader/bootstrap manifest
 EXIT 0 python3 pdiddler/tests/issue24_scanner_evidence_scope.py
 EXIT 0 python3 pdiddler/tests/run_issue24_checks.py
 EXIT 0 /usr/bin/texlua pdiddler/tests/issue24_scanner_view_test.lua
@@ -336,7 +336,7 @@ EXIT: 0
 PASS 190 real Lua records and fixed expiry across reload
 .............
 ----------------------------------------------------------------------
-Ran 13 tests in 0.014s
+Ran 13 tests in 0.013s
 
 OK
 
