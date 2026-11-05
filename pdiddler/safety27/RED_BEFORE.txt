@@ -1,0 +1,55 @@
+FAIL 405/1295 to405/115 declines before debounce without planner: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: unsafe405-value displayed stack remained live throughout debounce
+FAIL 33/101 to33/33 clears before debounce then restores exact +15 quote: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: unsafe single-copy quote remained live throughout debounce
+FAIL multiple visible slots decline without attempting a multi-step clear: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: unsafe multiple-slot quote was not declined
+FAIL stacked offered quantity declines without clicking native stack removal: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: unsafe offered stack was not declined
+FAIL local accepted unsafe quote declines before debounce without any remove: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: unsafe acceptance state held the unsafe quote
+FAIL local unknown unsafe quote declines before debounce without any remove: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: unsafe acceptance state held the unsafe quote
+FAIL partner accepted unsafe quote declines before debounce without any remove: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: unsafe acceptance state held the unsafe quote
+FAIL failed emergency remove gets one click and bounded decline without planner: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: unverified emergency remove did not decline within debounce
+FAIL missing emergency remove button declines immediately without planner: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: missing removal control held unsafe quote
+PASS initial speculative opener keeps the original twelve-second empty grace
+FAIL removing last item after verified safe quote withdraws urgently and remains bounded: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3746: verified-safe quote remained offered after opponent removed everything
+PASS safe low-value quote stays unchanged before and after debounce
+PASS safe qualifying addition cannot mutate before the original stability interval
+PASS unknown Common remains unresolved hold and invalidates prior verified candidate
+PASS malformed opponent quantity holds without assigning a zero-valued economic proof
+FAIL missing opponent offer layout is unknown and cannot start a fake empty timer: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3521: 1 ~= 0
+PASS unknown own internal identity declines before debounce
+PASS internal ID change invalidates verified approval before debounce
+PASS chroma flag change invalidates verified approval before debounce
+PASS malformed raw quantity change invalidates verified approval before debounce
+PASS valid raw quantity formatting during replacement preserves one normal reward
+FAIL unsafe partial insertion declines before adding the remaining plan item: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3667: action latency 1.840s exceeds 0.650s
+FAIL unsafe change at post-insert yield declines with one action path: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3667: action latency 1.840s exceeds 0.650s
+PASS safe-empty change during post-remove yield retains original recovery behavior
+PASS opponent removal during mouse-down permits only the in-flight withdrawal
+FAIL unsafe removal during failed normal-remove verification declines without retry: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: unsafe failed normal remove remained live
+FAIL own identity becomes unknown during post-insert yield and declines once: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3667: action latency 2.830s exceeds 0.650s
+FAIL urgent decline acknowledgement uncertainty never sends another decline path: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: urgent decline remote was never sent
+FAIL missing own offer layout cannot be interpreted as an empty offer to refill: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3521: 1 ~= 0
+FAIL unsafe UI acknowledgement at final verification yield declines before committing plan: /tmp/pdiddler-issue27-runtime-t8_4pbi2/ru/tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:4078: Issue27 production runtime failures
+stacktrace:
+[C] function assert
+/tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:4078
+ntime.luau:3667: action latency 1.770s exceeds 0.650s
+FAIL one offered copy clears even when we own several copies: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: single offered copy was treated as an uncertain stack
+PASS valid quantity formatting alone causes no physical reset or new concession
+PASS malformed quantity during a replacement aborts while our empty side stays safe
+FAIL stable quote validation is independent of optional telemetry snapshots: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3521: nil ~= false
+FAIL failed emergency withdrawal uses one total .24s deadline from mouse-down: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: emergency withdrawal did not begin
+FAIL missing Amount cannot authorize an emergency single-copy withdrawal: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: unverified own live quantity did not decline
+FAIL nontext Amount cannot authorize an emergency single-copy withdrawal: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: unverified own live quantity did not decline
+FAIL unchanged unresolved Common plus local accepted declines immediately: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: unchanged unresolved offer held a local accepted state
+FAIL unchanged unresolved Common plus local unknown declines immediately: /tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau:3665: unchanged unresolved offer held a local unknown state
+PASS first mirrored reply cannot turn emergency clear into an unanchored increase
+PASS unanchored positive subfloor reply cannot erase withdrawn ceiling when opponent changes again
+PASS local accepted missing layout preserves acceptance history before safety early exit
+PASS local accepted unresolved own identity preserves acceptance history before safety early exit
+PASS local accepted expired profile preserves acceptance history before safety early exit
+RESULT 19 passed; 25 failed
+Traceback (most recent call last):
+  File "/workspace/MM2-issue27-safety/pdiddler/tests/run_issue27_runtime.py", line 83, in <module>
+    subprocess.run([luau,str(path)],check=True,cwd=ROOT)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/tmp/pdiddler-luau/luau', '/tmp/pdiddler-issue27-runtime-t8_4pbi2/runtime.luau']' returned non-zero exit status 1.
