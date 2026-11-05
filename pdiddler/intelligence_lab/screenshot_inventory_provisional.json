@@ -1,0 +1,132 @@
+{
+  "source": "screenshot_transcription",
+  "captured_at": "2026-11-05T13:53:00Z",
+  "items": [
+    {
+      "page": "chroma",
+      "checkerId": "810",
+      "id": "810",
+      "name": "Chroma Watergun",
+      "qty": 1,
+      "type": "Gun",
+      "cat": "Weapons"
+    },
+    {
+      "page": "chroma",
+      "checkerId": "1029",
+      "id": "1029",
+      "name": "Chroma Embersickle",
+      "qty": 1,
+      "type": "Knife",
+      "cat": "Weapons"
+    },
+    {
+      "page": "godly",
+      "checkerId": "1032",
+      "id": "1032",
+      "name": "Immortal",
+      "qty": 2,
+      "type": "Gun",
+      "cat": "Weapons"
+    },
+    {
+      "page": "godly",
+      "checkerId": "1031",
+      "id": "1031",
+      "name": "Mortal",
+      "qty": 2,
+      "type": "Knife",
+      "cat": "Weapons"
+    },
+    {
+      "page": "godly",
+      "checkerId": "481",
+      "id": "481",
+      "name": "Iceblaster",
+      "qty": 3,
+      "type": "Gun",
+      "cat": "Weapons"
+    },
+    {
+      "page": "godly",
+      "checkerId": "448",
+      "id": "448",
+      "name": "Darkbringer",
+      "qty": 2,
+      "type": "Gun",
+      "cat": "Weapons"
+    },
+    {
+      "page": "godly",
+      "checkerId": "984",
+      "id": "984",
+      "name": "Ornament",
+      "qty": 1,
+      "type": "Knife",
+      "cat": "Weapons"
+    },
+    {
+      "page": "chroma",
+      "checkerId": "8",
+      "id": "8",
+      "name": "Chroma Laser",
+      "qty": 1,
+      "type": "Gun",
+      "cat": "Weapons"
+    },
+    {
+      "page": "chroma",
+      "checkerId": "527",
+      "id": "527",
+      "name": "Chroma Swirly Gun",
+      "qty": 1,
+      "type": "Gun",
+      "cat": "Weapons"
+    },
+    {
+      "page": "godly",
+      "checkerId": "524",
+      "id": "524",
+      "name": "Candleflame",
+      "qty": 1,
+      "type": "Knife",
+      "cat": "Weapons"
+    },
+    {
+      "page": "godly",
+      "checkerId": "21",
+      "id": "21",
+      "name": "Green Luger",
+      "qty": 1,
+      "type": "Gun",
+      "cat": "Weapons"
+    },
+    {
+      "page": "godly",
+      "checkerId": "46",
+      "id": "46",
+      "name": "Laser",
+      "qty": 1,
+      "type": "Gun",
+      "cat": "Weapons"
+    },
+    {
+      "page": "godly",
+      "checkerId": "572",
+      "id": "572",
+      "name": "Plasmabeam",
+      "qty": 1,
+      "type": "Gun",
+      "cat": "Weapons"
+    },
+    {
+      "page": "godly",
+      "checkerId": "27",
+      "id": "27",
+      "name": "Boneblade",
+      "qty": 1,
+      "type": "Knife",
+      "cat": "Weapons"
+    }
+  ]
+}

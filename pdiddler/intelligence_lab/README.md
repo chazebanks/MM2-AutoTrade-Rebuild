@@ -57,3 +57,102 @@ sets both authorizing the same trade.
   item's listed value in four slots.
 - The old live trader remains unchanged. Its dated price snapshot is not
   silently extended by this laboratory.
+
+---
+
+## Stage 2 — real Supreme snapshot and read-only inventory adapter
+
+This branch adds a new `market_bridge.py` module, a source-linked
+`supreme_snapshot_2026_11_04.json` with **all 190** existing
+Supreme checker-ID records, a 16-row source excerpt fixture, 14 provisional
+high-tier screenshot observations, and 16 new tests.
+
+**Pinned market provenance.**
+The normalized catalogue is derived directly from the immutable Luau
+source commit `11537dfd47f8df72aec7aeba9ecaffdfc5c879d4`
+(`snapshots/pdiddler_supreme_snapshot_2026_11_04.lua`). It retains
+the original Supreme update timestamp, publication source URLs, source
+SHA-256 page digests, and expiry of **2026-11-05 21:55:32 UTC
+(4:55:32 PM EST)**. Importing it never extends freshness; after
+expiry the market adapter fails closed until a genuinely new source
+is verified.
+
+**Exact identity matching.**
+The adapter uses `page:checkerId:checker-id`, plus the exact
+verified item name, and checks quantities, ownership provenance,
+incomplete scanner flags, JobId, playerUserId, placeId and snapshot
+capture time. It handles all five native Supreme status labels without
+misrepresenting `Doing Well` as `Stable`. Priceless weapons have no
+numeric trade price.
+
+**Screenshot assessment versus native authority.**
+Fourteen higher-tier inventory rows transcribed from the user's
+screenshots can be matched provisionally to catalogue identities,
+with a known priced subtotal of **4,548** at the pinned date. This
+excludes Emberknife and other unverified, lower-tier or pet items;
+it is **not** a complete portfolio valuation. The screenshot's
+checker IDs were inferred from labels and are **never** accepted as
+native scanner evidence. The parser cannot currently verify the
+actual MM2 scanner export shape or a full, contemporary live inventory.
+For two-side comparison, fresh, complete `source=native_scanner`
+records with matching job IDs are required.
+
+**Pure Python; no trade actions.** The bridge performs offline
+analysis only. It contains no Roblox services, UI clicks,
+server hopping, webhook, trade acceptance, trade offers, HTTP
+requests or mutation of existing trading modules. It returns
+`human-review-only`, not executable decisions. The older trading
+policy is still present only in the untouched live code; the
+new intelligence does not inherit that old policy.
+
+### Run the 34 tests
+
+From `pdiddler/intelligence_lab`:
+
+```bash
+python -m unittest discover -v
+```
+
+The tests include market expiry, exact identity mismatch, duplicated
+items, invalid quantities, cross-server data, incomplete inventory
+proof, native-versus-screenshot evidence and the original 2,500
+seeded mathematical scenarios. Native scanner fixtures in tests are
+**synthetic**, not evidence that the real iPad executor export
+has been implemented or verified.
+
+### Integration input contract (future native capture)
+
+```json
+{
+  "source": "native_scanner",
+  "captured_at": "2026-11-05T13:53:00Z",
+  "jobId": "real-Roblox-server-job-id",
+  "playerUserId": "player-id",
+  "placeId": 142823291,
+  "fingerprint": "actual-scanner-inventory-fingerprint",
+  "unmapped": 0,
+  "unpriced": 0,
+  "badQty": 0,
+  "items": [
+    {
+      "id": "raw-item-id",
+      "checkerId": "810",
+      "page": "chroma",
+      "name": "Chroma Watergun",
+      "qty": 1,
+      "type": "Gun",
+      "cat": "Weapons"
+    }
+  ]
+}
+```
+
+The JSON is a **contract example**, not a captured native response.
+A future read-only exporter will need to fill and verify it from the
+actual scanner without modifying its logic. The existing code and
+source snapshot must not be repinned simply to satisfy tests.
+
+**Next:** capture and replay the actual scanner's raw inventory
+structure from both parties; refresh expired prices with source
+evidence, then design and test candidate ranking on confirmed
+trade outcomes. Do not connect any automatic final Accept here.
