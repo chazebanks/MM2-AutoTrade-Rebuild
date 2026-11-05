@@ -5,6 +5,7 @@ is authorized for execution. All outputs are offline observations only.
 """
 from __future__ import annotations
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping
 
 FORMAT = "pdiddler-raw-inventory-v1"
@@ -55,6 +56,8 @@ class ScannedMatch:
     checker_key: str | None
     qty: int
     reason: str
+    pinned_unit_value: Decimal | None = None
+    scanner_unit_value: Decimal | None = None
 
 
 def reconcile_scanner_output(raw: RawInventory, scanner: Mapping[str,Any], market) -> tuple[ScannedMatch, ...]:
@@ -100,19 +103,74 @@ def reconcile_scanner_output(raw: RawInventory, scanner: Mapping[str,Any], marke
         if canonical in checker_claims:
             raise RawInventoryError("duplicate-mapped-checker-identity")
         checker_claims.add(canonical)
-        # Old scanner may cache a different price: never silently combine a
-        # contradictory quote with the pinned market catalogue.
-        if "value" in row and row["value"] is not None:
-            from decimal import Decimal, InvalidOperation
-            try:
-                scanner_value = Decimal(str(row["value"]))
-            except InvalidOperation:
-                scanner_value = None
-            if scanner_value != match.value:
-                results.append(ScannedMatch(key,None,qty,"scanner-price-disagrees-with-catalogue"))
-                continue
         if row.get("cat") != "Weapons" or row.get("type") not in ("Knife","Gun"):
             results.append(ScannedMatch(key,None,qty,"item-not-tradable-weapon-type"))
             continue
-        results.append(ScannedMatch(key,canonical,qty,"consistent-scanner-catalogue-match"))
+        # A legacy scanner display quote is not the current source price.
+        # Keep exact checker identity, but report the discrepancy explicitly.
+        scanner_value = None
+        if "value" in row and row["value"] is not None:
+            try:
+                scanner_value = Decimal(str(row["value"]))
+            except (InvalidOperation, TypeError, ValueError):
+                results.append(ScannedMatch(key,canonical,qty,
+                    "matched-identity-scanner-price-invalid",match.value,None))
+                continue
+        if scanner_value is not None and scanner_value != match.value:
+            results.append(ScannedMatch(key,canonical,qty,
+                "matched-identity-scanner-price-drift",match.value,scanner_value))
+            continue
+        results.append(ScannedMatch(key,canonical,qty,
+            "consistent-scanner-catalogue-match",match.value,scanner_value))
     return tuple(results)
+
+
+@dataclass(frozen=True)
+class ObservationReport:
+    matches: tuple[ScannedMatch, ...]
+    identity_matched_rows: int
+    identity_matched_copies: int
+    price_drift_rows: int
+    raw_scanner_priced_total: Decimal
+    pinned_market_priced_total: Decimal
+    issues: tuple[str, ...]
+    # Offline validation is NOT authorization to place or accept trades.
+    offline_evidence_consistent: bool
+    live_trading_authorized: bool = False
+
+
+def audit_scanner_observation(raw: RawInventory, scanner: Mapping[str, Any], market) -> ObservationReport:
+    """Compare native raw inventory and scanner export, without trade actions."""
+    if not isinstance(scanner, Mapping):
+        raise RawInventoryError("scanner-not-an-object")
+    issues: list[str] = []
+    if scanner.get("source") != "native_scanner_readonly":
+        issues.append("scanner-source-not-confirmed")
+    if scanner.get("marketVersion") != market.source_version:
+        issues.append("scanner-market-version-mismatch")
+    if scanner.get("marketFresh") is not True:
+        issues.append("scanner-market-not-fresh")
+    if type(scanner.get("rawOwned")) is not int or scanner["rawOwned"] != raw.total_copies:
+        issues.append("scanner-raw-owned-mismatch")
+    expected_fp = "|".join(f"{item_id}x{qty}" for item_id,qty in sorted(raw.owned.items()))
+    if scanner.get("fingerprint") != expected_fp:
+        issues.append("scanner-fingerprint-mismatch")
+    for flag in ("unmapped", "unpriced", "badQty"):
+        if type(scanner.get(flag)) is not int or scanner[flag] != 0:
+            issues.append(f"scanner-{flag}-nonzero-or-missing")
+    matches = reconcile_scanner_output(raw, scanner, market)
+    matched = [m for m in matches if m.checker_key is not None]
+    if any(m.checker_key is None for m in matches):
+        issues.append("scanner-unresolved-identity-or-quantity")
+    raw_total = sum((m.scanner_unit_value or Decimal(0))*m.qty for m in matched)
+    pinned_total = sum((m.pinned_unit_value or Decimal(0))*m.qty for m in matched)
+    return ObservationReport(
+        matches=matches,
+        identity_matched_rows=len(matched),
+        identity_matched_copies=sum(m.qty for m in matched),
+        price_drift_rows=sum(m.reason=="matched-identity-scanner-price-drift" for m in matched),
+        raw_scanner_priced_total=raw_total,
+        pinned_market_priced_total=pinned_total,
+        issues=tuple(sorted(set(issues))),
+        offline_evidence_consistent=not issues and bool(matched),
+    )
