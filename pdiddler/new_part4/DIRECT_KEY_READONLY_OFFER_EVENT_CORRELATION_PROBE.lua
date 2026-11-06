@@ -359,12 +359,14 @@ local function observe()
      and clock()-candidateAt>=.15 then
      boundRoot=root;boundPartner=partner;boundLabel=label;observer=candidateHandle
      baseline=o;boundAt=clock();ourCount=o.ourSlots;theirCount=o.theirSlots
+     if baseline.ourSlots~=0 or baseline.theirSlots~=0 then finish("OFFERS_NOT_EMPTY_AT_BIND");return end
      if not bindContextSignals(pg)then return end
      local current,invalid=checkedFrame();if not current then finish(invalid);return end
      local remote,missing=exactRemote();if not remote then finish(missing);return end
      boundRemote=remote
      S.phase="LISTENING_UPDATE_TRADE"
      if not connect(remote.OnClientEvent,onUpdate)then return end
+     print("[UPDATE CORRELATION] LISTENING_UPDATE_TRADE: manually add one low-value weapon to one offer; never Accept.")
      break
     end
     candidateFrame=o;candidateAt=clock()
@@ -376,7 +378,6 @@ local function observe()
  end
  if S.finished then return end
  if not boundAt then finish("WINDOW_NOT_OPENED_IN_TIME");return end
- if baseline.ourSlots~=0 or baseline.theirSlots~=0 then finish("OFFERS_NOT_EMPTY_AT_BIND");return end
  while not S.finished and clock()-boundAt<30 do
   local o,why=checkedFrame();if not o then finish(why);return end
   local now=clock()
