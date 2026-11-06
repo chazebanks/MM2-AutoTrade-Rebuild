@@ -93,7 +93,9 @@ class Stage36IconCatalogTests(unittest.TestCase):
             self.assertIn(named,tests)
         src=CORE.read_text()
         self.assertLess(src.index('recordFormat(r.catalogueReferenceFormatCounts,ckFormat)'),
-                        src.index('if not raw then\\n  r.reason="slot-icon-reference-not-comparable"'))
+                        src.index('r.catalogEntriesFormatInspected=#input.entries'))
+        self.assertIn('if not raw then',src)
+        self.assertIn('r.reason="slot-icon-reference-not-comparable"',src)
         self.assertIn('catalogEntriesAudited=0',src)
         self.assertIn('r.catalogEntriesFormatInspected=#input.entries',src)
 
