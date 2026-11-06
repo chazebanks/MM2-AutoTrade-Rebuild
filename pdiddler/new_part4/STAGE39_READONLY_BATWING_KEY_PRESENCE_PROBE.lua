@@ -34,7 +34,7 @@ local BASE="35ec2d9a47048910a464a2ef6eb9b9f52ae306b1"
 -- Immutable reviewed shape-only module; pinning does not request execution.
 local CORE_PIN="b32ed071faf9d7cb390e7d87b70ca57abda151e4"
 local PRESENCE_PIN="bc6eb1394b70b84e20f18f6bcbbadd076e9bf962"
-local SCHEMA_PIN="6507cb29276a1405276f7b950b6883adfa3742be"
+local SCHEMA_PIN="9003ba057f23aa44460dbb2f9895e8ade3d73a3b"
 local function source(pin,name)
  local txt=game:HttpGet(ROOT..pin.."/pdiddler/new_part4/"..name..".lua",true)
  assert(type(txt)=="string" and #txt>100,"source unavailable")
