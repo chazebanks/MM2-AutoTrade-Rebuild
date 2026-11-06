@@ -24,6 +24,12 @@ class Stage36IconCatalogTests(unittest.TestCase):
             'SINGLE_ICON_MATCH_WITH_COVERAGE_GAPS',
             'SPRITESHEET_REFERENCE_NOT_IDENTITY',
             'NO_MATCH_IN_READABLE_CATALOGUE',
+            'ROBLOX_THUMB_ASSET',
+            'ROBLOX_GAMEASSET',
+            'ROBLOX_THUMB_UNSUPPORTED_VARIANT',
+            'catalogEntriesFormatInspected=0',
+            'catalogueReferenceFormatCounts=formatCounts()',
+            'recordFormat(r.catalogueReferenceFormatCounts,ckFormat)',
             'catalogue-entry-invalid-or-duplicate',
             'rawItemIdConfirmed=false,exactWeaponIdentityConfirmed=false',
             'causalAttributionProven=false,authorizesTrade=false',
@@ -42,7 +48,7 @@ class Stage36IconCatalogTests(unittest.TestCase):
             'PDIDDLER_STAGE36_ICON_CATALOG_AUDIT',
             'PDIDDLER_STAGE35_SLOT_METADATA_CENSUS',
             'p4_stage36_icon_catalog_audit.lua',
-            'local PIN36="8203511e4a8b8566c4603e60716ace4e5716354c"',
+            'local PIN36="30eb8498f82fd6a79f2f0fbbfc282e59b97c7bdd"',
             'db:FindFirstChild("Sync")',
             'pcall(require,syncModule)',
             'gather(sync.Weapons)',
@@ -73,6 +79,23 @@ class Stage36IconCatalogTests(unittest.TestCase):
             'r.icon=reference', 'r.image=reference',
         ):
             self.assertNotIn(forbidden,src)
+
+    def test_actual_native_unsupported_format_regression_in_lua(self):
+        tests=TEST.read_text()
+        for named in (
+            "actual Stage36 native unreadable URI case is incomplete",
+            "official rbxthumb Asset URI now comparable",
+            "thumbnail Asset ID shared with excluded tier",
+            "unknown scheme is labeled only by safe family",
+            "undocumented numeric-only icon is not guessed",
+            "Roblox game-local asset path",
+        ):
+            self.assertIn(named,tests)
+        src=CORE.read_text()
+        self.assertLess(src.index('recordFormat(r.catalogueReferenceFormatCounts,ckFormat)'),
+                        src.index('if not raw then\\n  r.reason="slot-icon-reference-not-comparable"'))
+        self.assertIn('catalogEntriesAudited=0',src)
+        self.assertIn('r.catalogEntriesFormatInspected=#input.entries',src)
 
     @unittest.skipUnless(shutil.which("lua5.4"),"Lua5.4 required")
     def test_python_executes_actual_pure_stage36_lua(self):
