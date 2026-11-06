@@ -40,6 +40,29 @@ local function ready(s,o)
    and type(o.ourSig)=="string" and o.ourSig~=""
    and type(o.theirSig)=="string" and o.theirSig~=""
 end
+-- Bind every relevant price and stock field, not just the net value.
+-- Equal net gains can hide a changed risk/demand mixture.
+local function evidenceDigest(ctx,candidate)
+ local p={ctx.session,ctx.ownFingerprint or "",ctx.opponentFingerprint or "",
+  ctx.market.sourceId,tostring(ctx.market.observedAt),
+  tostring(ctx.market.validUntil)}
+ for _,side in ipairs({"give","receive"}) do
+  for _,row in ipairs(candidate[side]) do
+   local m=ctx.market.items and ctx.market.items[row.id]
+   if type(m)~="table" then return nil end
+   for _,v in ipairs({side,row.id,row.qty,
+     m.valueCents or "missing",m.demand or "missing",
+     m.stability or "missing",m.lowCents or "missing",
+     m.highCents or "missing",m.flippability or "missing",
+     tostring(m.verified),tostring(m.tradable),
+     (side=="give" and ctx.ownInventory[row.id]
+       or ctx.opponentInventory[row.id]) or "missing"}) do
+      local s=tostring(v);p[#p+1]=#s..":"..s
+   end
+  end
+ end
+ return table.concat(p,"|")
+end
 local function inspect(s,o,diag,ctx,candidate)
  if not ready(s,o) or type(ctx)~="table" or ctx.session~=s.session
   or type(ctx.market)~="table" or type(ctx.rawOwn)~="table"
@@ -76,9 +99,7 @@ local function inspect(s,o,diag,ctx,candidate)
   or type(review.ourGainCents)~="number"
   or type(review.sellerSurplusCents)~="number" then return nil end
  return {raw=physical,review=review,
-   digest=market.sourceId.."|"..market.observedAt.."|"..market.validUntil
-    .."|"..(ctx.ownFingerprint or "").."|"..(ctx.opponentFingerprint or "")
-    .."|"..a.."|"..b.."|"..review.ourGainCents.."|"..review.sellerSurplusCents,
+   digest=evidenceDigest(ctx,candidate),
    candidateKey=a.."=>"..b}
 end
 function M.new(cfg)
