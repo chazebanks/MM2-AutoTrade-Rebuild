@@ -50,7 +50,8 @@ jobs:
             test_stage29_postclose_ledger \
             test_stage30_client_signal_census \
             test_stage32_result_correlation \
-            test_stage33_transport_window; do
+            test_stage33_transport_window \
+            test_stage34_offer_delta_reconcile; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
