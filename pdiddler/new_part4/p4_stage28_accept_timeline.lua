@@ -105,6 +105,14 @@ function M.ingest(s,o,diag,t)
     s.phase="UNRESOLVED";s.reason="current-offers-not-fully-resolved"
     s.pendingSince=nil
     s.bothAcceptedStable=false
+    -- If a player accepted while an offer was empty or couldn't be
+    -- mapped, this session cannot later claim a stable *bilateral*
+    -- accepted exchange simply by populating the missing item.
+    if o.contextOK==true and (o.ourAccepted==true or
+      o.theirAccepted==true) then
+      s.tainted=true
+      s.reason="accepted-indicator-on-unresolved-or-empty-offer"
+    end
     event(s,"UNRESOLVED",t)
     return "HOLD",s.reason
  end
