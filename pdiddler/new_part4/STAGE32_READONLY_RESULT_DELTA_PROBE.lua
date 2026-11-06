@@ -224,12 +224,15 @@ local function watchCandidateSignals(root,partner,census)
  if not folder then return false,"TRADE_FOLDER_ABSENT" end
  local eventNames={"CompleteTrade","EndTrade","DeclineTrade"}
  local refs={}
- for _,name in ipairs(eventNames) do
-  local node=folder:FindFirstChild(name)
-  if not node or not node:IsA("RemoteEvent") then
-   return false,"CANDIDATE_REMOTE_UNAVAILABLE:"..name
+ local permitted={CompleteTrade=true,EndTrade=true,DeclineTrade=true}
+ for _,node in ipairs(folder:GetDescendants()) do
+  if node:IsA("RemoteEvent") and permitted[node.Name] then
+   if refs[node.Name] then return false,"DUPLICATE_CANDIDATE_REMOTE" end
+   refs[node.Name]=node
   end
-  refs[name]=node
+ end
+ for _,name in ipairs(eventNames) do
+  if not refs[name] then return false,"CANDIDATE_REMOTE_UNAVAILABLE:"..name end
  end
  local ok,why=mods.census.catalog(census,eventNames,os.clock())
  if not ok then return false,why end
