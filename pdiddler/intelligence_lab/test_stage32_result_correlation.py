@@ -127,12 +127,19 @@ class Stage32Tests(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which("lua5.4"),"Lua5.4 in CI")
     def test_actual_stage29_lua_regression_through_python(self):
-        """Execute the real Stage29 Lua ledger test, including excluded-weapon exchange.
+        """Execute real Stage29 Lua ledger regressions, including one-sided receipt.
 
-        This is an offline fixture (not proof of the user's outgoing item tier
-        or of MM2's successful-trade server transport).
+        The one-sided eligible gain fixture mirrors the operator's corrected
+        Iceblaster test. It proves offline ledger semantics, not MM2's
+        successful-trade server transport or the exact item checker ID.
         """
         source=(P4/"tests"/"test_stage29_postclose_ledger.lua").read_text()
+        self.assertIn(
+            "one-sided eligible gift increases raw inventory with no outgoing offer",
+            source,
+        )
+        # Retain the distinct excluded-item hypothetical as an edge case,
+        # but never present that fixture as the user's real transaction.
         self.assertIn(
             "eligible gain plus untracked weapon loss reports zero eligible losses",
             source,
