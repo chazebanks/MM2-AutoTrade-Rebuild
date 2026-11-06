@@ -1,7 +1,9 @@
 """Stage31: false-attribution regressions for local vs partner closing MM2.
 
-The baseline fields match the user's native Stage30 anonymized test.
-Partner trial fixtures are SYNTHETIC and cannot establish native behavior.
+The baseline facts match the user's LIVE Stage30 local-close report.
+The 6.031s counterpart matches the LIVE Stage31 report from the requested
+partner-close trial. Its initiating actor is a USER-REPORTED test condition,
+not authenticated by the received event. Other partner fixtures are synthetic.
 """
 from copy import deepcopy
 from dataclasses import fields, replace
@@ -35,11 +37,17 @@ def baseline():
         "signals":[{"phase":"WHILE_OPEN","name":"DeclineTrade","elapsed":12.575}],
     }
 
+def partner_native_trial():
+    """Actual anonymized client trace; partner action is a declared test condition."""
+    report=baseline()
+    report["signals"][0]["elapsed"]=6.031
+    return report
+
+
 class Stage31Tests(unittest.TestCase):
     def test_matching_decline_signal_in_both_traces_cannot_prove_actor(self):
         local=baseline()
-        partner=baseline()
-        partner["signals"][0]["elapsed"]=17.72
+        partner=partner_native_trial()
         r=compare_local_and_partner(local,partner)
         self.assertEqual(r.status,"SHARED_DECLINE_NAMED_RECEIPT_NO_ACTOR_PROOF")
         self.assertEqual(r.shared_client_signals,("DeclineTrade",))
@@ -50,6 +58,25 @@ class Stage31Tests(unittest.TestCase):
         self.assertFalse(r.may_record_completed_trade)
         self.assertFalse(r.may_report_profit)
         self.assertFalse(r.authorizes_accept)
+
+    def test_paired_native_reports_have_same_single_signal_but_different_elapsed(self):
+        local=baseline()
+        partner=partner_native_trial()
+        self.assertEqual(local["signals"],[{
+            "phase":"WHILE_OPEN","name":"DeclineTrade","elapsed":12.575,
+        }])
+        self.assertEqual(partner["signals"],[{
+            "phase":"WHILE_OPEN","name":"DeclineTrade","elapsed":6.031,
+        }])
+        result=compare_local_and_partner(local,partner)
+        self.assertEqual(result.local_receipts,("DeclineTrade",))
+        self.assertEqual(result.partner_receipts,("DeclineTrade",))
+        self.assertEqual(result.difference_local_only,())
+        self.assertEqual(result.difference_partner_only,())
+        self.assertEqual(result.status,"SHARED_DECLINE_NAMED_RECEIPT_NO_ACTOR_PROOF")
+        self.assertFalse(result.initiator_proven)
+        self.assertFalse(result.decline_proven)
+        self.assertFalse(result.server_completion_proven)
 
     def test_event_absent_in_partner_trace_does_not_prove_origin(self):
         local=baseline();partner=baseline()
