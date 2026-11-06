@@ -144,7 +144,7 @@ local function readOwn()
  if not valid or why or type(inv)~="table" then return nil end
  return inv
 end
-local function watchRemotes(census,partner)
+local function watchRemotes(census,partner,root)
  -- Only evidence source that existing MM2 scripts establish:
  -- ReplicatedStorage.Trade. No global hooks or event payload capture.
  local rs=game:GetService("ReplicatedStorage")
@@ -173,6 +173,9 @@ local function watchRemotes(census,partner)
    return remote.OnClientEvent:Connect(function()
     if S.done or game.JobId~=job or players.LocalPlayer~=me then return end
     if partner.Parent~=players then return end
+    local liveRoot=tradeRoot()
+    if liveRoot and liveRoot~=root then return end
+    if census.closedAt and liveRoot then return end
     -- Nothing reads or logs any event arguments; only local delivery.
     mods.census.received(census,name,os.clock())
    end)
@@ -212,7 +215,7 @@ task.spawn(function()
     partnerUserId=partner.UserId,localUserId=me.UserId,
     contract=mods.contract,ownInventory=own,
     opponentInventory=their,marketFresh=function()return false end})
-   local bound,bindWhy=watchRemotes(S.signals,partner)
+   local bound,bindWhy=watchRemotes(S.signals,partner,root)
    if not bound then
     report("REMOTE_CENSUS_UNAVAILABLE:"..tostring(bindWhy));return
    end
@@ -230,6 +233,10 @@ task.spawn(function()
     if kind=="CLOSED_UNKNOWN" then
       mods.census.closed(S.signals,kind,os.clock())
       task.wait(2.1) -- bounded post-closure signal observation only
+      if game.JobId~=job or players.LocalPlayer~=me or tradeRoot() then
+       mods.census.finish(S.signals,"SESSION_CHANGED",os.clock())
+       report("POST_CLOSE_SCOPE_CHANGED");return
+      end
       mods.census.finish(S.signals,"OBSERVATION_FINISHED",os.clock())
       report("CLOSE_AND_SIGNAL_GRACE_FINISHED");return
     end
