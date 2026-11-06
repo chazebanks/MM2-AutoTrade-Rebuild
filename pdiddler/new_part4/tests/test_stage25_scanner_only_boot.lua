@@ -54,7 +54,7 @@ local function fixture()
   end,
   HttpGet=function(_,url)
     local part=url:match("([^/]+)%.lua$")
-    if part=="pdiddler_supreme_snapshot_2026_11_04" then part="profile"
+    if part=="pdiddler_supreme_snapshot_2026_11_06" then part="profile"
     elseif part=="P4_REPRICE_ONLY" then part="strict"
     elseif part=="pdiddler3_scanner_view_v1" then part="scannerView"
     elseif part=="pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION" then part="scanner"
