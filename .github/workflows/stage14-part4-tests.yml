@@ -44,7 +44,9 @@ jobs:
             test_stage25_scanner_only_boot \
             test_stage26_dated_profile \
             test_stage27_lab_transaction \
-            test_stage27_native_transport; do
+            test_stage27_native_transport \
+            test_stage28_accept_timeline \
+            test_stage28_native_accept_integration; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
