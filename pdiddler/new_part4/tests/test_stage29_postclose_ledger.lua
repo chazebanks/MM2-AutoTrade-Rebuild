@@ -175,10 +175,10 @@ test("eligible gain plus untracked weapon loss reports zero eligible losses",fun
  local exchanged=inventory(2,2)
  exchanged.rawOwned=4 -- four eligible copies, excluded weapon gone
  exchanged.fingerprint="eligible:2,2|excluded:0"
- assert(before(s,scope,original)==="OBSERVED")
- assert(close(s,scope)==="OBSERVED")
- assert(after(s,scope,exchanged,16,2)==="OBSERVED")
- assert(after(s,scope,exchanged,17,3)==="ELIGIBLE_DELTA_UNATTRIBUTED")
+ assert(before(s,scope,original)=="OBSERVED")
+ assert(close(s,scope)=="OBSERVED")
+ assert(after(s,scope,exchanged,16,2)=="OBSERVED")
+ assert(after(s,scope,exchanged,17,3)=="ELIGIBLE_DELTA_UNATTRIBUTED")
  local r=L.summary(s)
  assert(r.gainedEligibleCopies==1 and r.lostEligibleCopies==0)
  assert(r.changedEligibleTypes==1 and r.rawWeaponInventoryChanged==true)
