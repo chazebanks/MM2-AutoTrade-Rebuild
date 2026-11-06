@@ -17,7 +17,8 @@ end
 local function canonId(id) return id:gsub("^0+","") end
 local function iconKey(x)
  if not legal(x) then return nil,"EMPTY_OR_INVALID" end
- local s=trim(x):lower()
+ -- Paths, filenames and query values are not case-insensitive identities.
+ local s=trim(x)
  if s=="" then return nil,"EMPTY_OR_INVALID" end
  local id=s:match("^rbxassetid://(%d+)$") or
   s:match("^https?://www%.roblox%.com/asset/%?id=(%d+)$")
@@ -25,14 +26,16 @@ local function iconKey(x)
   if not validId(id) then return nil,"INVALID_ASSET_ID" end
   return "asset:"..canonId(id),"ROBLOX_ASSET_ID"
  end
- local thumb,w,h=s:match("^rbxthumb://type=asset&id=(%d+)&w=(%d+)&h=(%d+)$")
+ local thumb,w,h=s:match("^rbxthumb://type=Asset&id=(%d+)&w=(%d+)&h=(%d+)$")
  if thumb then
   local wi,hi=tonumber(w),tonumber(h)
   if not validId(thumb) or not wi or not hi or
      wi<1 or hi<1 or wi>2048 or hi>2048 then
    return nil,"ROBLOX_THUMB_INVALID"
   end
-  return "thumb:"..canonId(thumb),"ROBLOX_THUMB_ASSET"
+  -- Different thumbnail dimensions request different renderings. Do not
+  -- assert equivalent pixels merely because the source asset ID agrees.
+  return "thumb:"..canonId(thumb)..":"..w..":"..h,"ROBLOX_THUMB_ASSET"
  end
  if s:match("^rbxgameasset://[%w_/%-%.]+$") then
   return "gameasset:"..s,"ROBLOX_GAMEASSET"
@@ -89,6 +92,7 @@ function M.assess(input)
   nativeOfferSlotObserved=false,slotSide=nil,slotIndex=nil,
   iconReferenceFormat="UNAVAILABLE",catalogEntriesAudited=0,
   catalogEntriesWithComparableArt=0,catalogEntriesWithoutComparableArt=0,
+  catalogEntriesWithUnresolvedArt=0,catalogueCoverageComplete=false,
   catalogImageCandidateReferences=0,
   catalogEntriesFormatInspected=0,catalogueReferenceFormatCounts=formatCounts(),
   slotIconReferenceComparable=false,
@@ -127,7 +131,7 @@ function M.assess(input)
  end
  local seen={}
  local matches=0
- local withArt,missing,refCount=0,0,0
+ local withArt,missing,refCount,unresolved=0,0,0,0
  for i,entry in ipairs(input.entries) do
   if type(entry)~="table" or type(entry.key)~="string" or
      entry.key=="" or #entry.key>150 or seen[entry.key] or
@@ -136,13 +140,14 @@ function M.assess(input)
    r.reason="catalogue-entry-invalid-or-duplicate";return r
   end
   seen[entry.key]=true
-  local keyset,match,hasArt={},false,false
+  local keyset,match,hasArt,hasUnresolved={},false,false,false
   for _,candidate in ipairs(entry.refs) do
    if type(candidate)~="string" or #candidate>512 then
     r.reason="catalogue-art-value-malformed";return r
    end
    local ck,ckFormat=iconKey(candidate)
    recordFormat(r.catalogueReferenceFormatCounts,ckFormat)
+   if not ck then hasUnresolved=true end
    if ck and not keyset[ck] then
     keyset[ck]=true;hasArt=true
     refCount=refCount+1
@@ -150,6 +155,7 @@ function M.assess(input)
    end
   end
   if hasArt then withArt=withArt+1 else missing=missing+1 end
+  if hasUnresolved then unresolved=unresolved+1 end
   if match then matches=matches+1 end
  end
  r.catalogEntriesFormatInspected=#input.entries
@@ -160,6 +166,10 @@ function M.assess(input)
  r.catalogEntriesAudited=#input.entries
  r.catalogEntriesWithComparableArt=withArt
  r.catalogEntriesWithoutComparableArt=missing
+ r.catalogEntriesWithUnresolvedArt=unresolved
+ -- Coverage of the supplied reference set only, not of the game's full
+ -- catalogue, loaded artwork, or the GUI's undocumented rendering path.
+ r.catalogueCoverageComplete=missing==0 and unresolved==0
  r.catalogImageCandidateReferences=refCount
  r.matchingCatalogueEntries=matches
  r.distinctMatchingWeaponKeys=matches
@@ -172,15 +182,15 @@ function M.assess(input)
  elseif r.usesSpriteSheet then
   r.status="SPRITESHEET_REFERENCE_NOT_IDENTITY"
   r.reason="sprite-subregion-not-a-whole-weapon-icon"
- elseif missing>0 then
+ elseif not r.catalogueCoverageComplete then
   r.status="SINGLE_ICON_MATCH_WITH_COVERAGE_GAPS"
-  r.reason="some-catalogue-entries-lack-comparable-image"
+  r.reason="some-catalogue-art-missing-or-unresolved"
  else
   r.status="ONE_ICON_REFERENCE_MATCH_CLIENT_ONLY"
   r.reason="single-match-within-present-client-catalogue-only"
  end
  r.uniqueIconCandidateFound=matches==1 and not r.usesSpriteSheet
- r.imageReferenceAmbiguous=not (matches==1 and missing==0
+ r.imageReferenceAmbiguous=not (matches==1 and r.catalogueCoverageComplete
    and not r.usesSpriteSheet)
  return r
 end

@@ -83,7 +83,7 @@ class Stage36IconCatalogTests(unittest.TestCase):
     def test_actual_native_unsupported_format_regression_in_lua(self):
         tests=TEST.read_text()
         for named in (
-            "actual Stage36 native unreadable URI case is incomplete",
+            "synthetic unsupported thumbnail is incomplete",
             "official rbxthumb Asset URI now comparable",
             "thumbnail Asset ID shared with excluded tier",
             "unknown scheme is labeled only by safe family",

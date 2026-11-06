@@ -81,7 +81,7 @@ check("unrecognized asset-query suffix cannot masquerade as exact link",function
 end)
 check("filename matching only when both use same exact filename",function()
  local inp=one({icon="Iceblaster.png",entries={
-  entry("one","iceblaster.png"),entry("two","Other.png")}})
+  entry("one","Iceblaster.png"),entry("two","Other.png")}})
  local r=M.assess(inp)
  assert(r.status=="ONE_ICON_REFERENCE_MATCH_CLIENT_ONLY")
  assert(r.iconReferenceFormat=="FILENAME")
@@ -191,7 +191,7 @@ end)
 check("official rbxthumb Asset URI now comparable to another thumb reference",function()
  local r=M.assess(one({icon="rbxthumb://type=Asset&id=000123456&w=150&h=150",
   entries={
-   entry("ancient","rbxthumb://type=Asset&id=123456&w=420&h=420"),
+   entry("ancient","rbxthumb://type=Asset&id=123456&w=150&h=150"),
    entry("common","rbxassetid://999999")}}))
  assert(r.status=="ONE_ICON_REFERENCE_MATCH_CLIENT_ONLY")
  assert(r.iconReferenceFormat=="ROBLOX_THUMB_ASSET")
@@ -212,7 +212,7 @@ check("thumbnail Asset ID shared with excluded tier detected as collision",funct
  local r=M.assess(one({icon="rbxthumb://type=Asset&id=123456&w=150&h=150",
   entries={
    entry("ancient","rbxthumb://type=Asset&id=123456&w=150&h=150"),
-   entry("common","rbxthumb://type=Asset&id=123456&w=420&h=420")}}))
+   entry("common","rbxthumb://type=Asset&id=123456&w=150&h=150")}}))
  assert(r.status=="MULTIPLE_CATALOGUE_ENTRIES_SHARE_ICON")
  assert(r.matchingCatalogueEntries==2)
  safe(r)
@@ -287,7 +287,7 @@ check("invalid thumbnail dimensions cannot become an accepted thumbnail ID",func
    r.iconReferenceFormat=="ROBLOX_THUMB_INVALID")
  safe(r)
 end)
-check("actual Stage36 native unreadable URI case is incomplete not empty Sync catalogue",function()
+check("synthetic unsupported thumbnail is incomplete not empty Sync catalogue",function()
  local r=M.assess(one({side="YourOffer",index=1,icon="rbxthumb://type=User&id=123456&w=150&h=150"}))
  assert(r.status=="INCOMPLETE")
  assert(r.nativeOfferSlotObserved==true and r.slotSide=="YourOffer")
