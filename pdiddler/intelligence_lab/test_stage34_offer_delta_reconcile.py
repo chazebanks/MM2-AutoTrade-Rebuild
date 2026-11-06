@@ -84,8 +84,7 @@ class Stage34OfferDeltaTest(unittest.TestCase):
             'mods.ledger.before',
             'mods.ledger.after',
             'mods.compare.new',
-            'two_post_close',  # checked below as test label, not literal code
-        )[:-1]:
+        ):
             self.assertIn(marker,code)
         self.assertIn('finish("TWO_POST_CLOSE_OWN_READS_FINISHED"',code)
         self.assertIn('why=="trade-window-closed"',code)
