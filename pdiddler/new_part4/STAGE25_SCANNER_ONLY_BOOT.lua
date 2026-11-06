@@ -39,8 +39,8 @@ for _,name in ipairs({
 end
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local PINS={
-    profile={"snapshots/pdiddler_supreme_snapshot_2026_11_04.lua",
-        "11537dfd47f8df72aec7aeba9ecaffdfc5c879d4"},
+    profile={"snapshots/pdiddler_supreme_snapshot_2026_11_06.lua",
+        "d9d7970f281f725ff21d1a409495fcc197e3d2dc"},
     strict={"new_part4/P4_REPRICE_ONLY.lua",
         "daf42166b9a713b69b0a8c93708ff13e86b36283"},
     scannerView={"presentation/pdiddler3_scanner_view_v1.lua",
