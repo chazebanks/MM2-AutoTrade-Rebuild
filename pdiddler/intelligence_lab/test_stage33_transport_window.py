@@ -89,6 +89,12 @@ class Stage33TransportTests(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which("lua5.4"),"Lua5.4 required")
     def test_python_executes_actual_pure_stage33_lua(self):
+        # Ensure the native first-result regression is actually exercised by
+        # the exact Lua suite Python executes; do not simulate success in Python.
+        self.assertIn(
+            "first native Stage33 StartTrade then UpdateTrade and two AcceptTrade stays unknown",
+            TEST.read_text(),
+        )
         p=subprocess.run(
             ["lua5.4",str(TEST),str(P4)],
             cwd=str(ROOT.parent),text=True,capture_output=True,timeout=12
