@@ -154,6 +154,30 @@ test("empty our offer is not an accepted exchange",function()
  assert(feed(s,o,d,100.1)=="HOLD")
  assert(not s.anyBothAccepted)
 end)
+test("partner Accept with our side empty is visible but never bilateral",function()
+ local s,o,d=fixture()
+ o.ourSlots=0;d.ourItems={}
+ o.theirAccepted=true
+ assert(feed(s,o,d,100.1)=="HOLD")
+ local report=Timeline.summary(s)
+ assert(report.theirAcceptIndicatorEverVisible)
+ assert(report.offerMutationAfterAccept)
+ assert(not report.bothAcceptedStableObserved)
+ assert(report.reason=="accepted-indicator-on-unresolved-or-empty-offer")
+end)
+test("unresolved early Accept taints later apparently valid bilateral offer",function()
+ local s,o,d=fixture()
+ o.ourSlots=0;d.ourItems={};o.theirAccepted=true
+ feed(s,o,d,100.1)
+ o.ourSlots=1;d.ourItems={{
+   slot=1,id="KnifeA",page="godly",checkerId="11",qty=1}}
+ o.ourAccepted=true
+ assert(feed(s,o,d,100.3)=="HOLD")
+ assert(feed(s,o,d,100.6)=="HOLD")
+ local report=Timeline.summary(s)
+ assert(not report.bothAcceptedStableObserved)
+ assert(not report.mayRecordCompletedTrade)
+end)
 test("unknown tier in observed offer blocks evidence",function()
  local s,o,d=fixture()
  d.theirItems[1].page="vintage"
