@@ -42,7 +42,9 @@ jobs:
             test_p4_live_context \
             test_stage25_readonly_diagnostic \
             test_stage25_scanner_only_boot \
-            test_stage26_dated_profile; do
+            test_stage26_dated_profile \
+            test_stage27_lab_transaction \
+            test_stage27_native_transport; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
