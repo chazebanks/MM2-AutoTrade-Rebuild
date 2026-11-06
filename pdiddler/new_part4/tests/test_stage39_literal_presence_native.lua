@@ -284,6 +284,7 @@ end)
 test("event before local GUI display also compared",function()
  local f=fixture();f:untilPhase("LISTENING_UPDATE_TRADE")
  f:emit({PRIVATE_KEY,2})
+ f.now=f.now+.32 -- real simulated event-to-render delay, not same clock tick
  addBatwing(f)
  f:finishLoop();safe(f,"ONE_UPDATE_NEAR_SINGLE_OFFER_ADD")
  eq(f.state.result.candidateSequence,"EVENT_BEFORE_GUI","event early")
