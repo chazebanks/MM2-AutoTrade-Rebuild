@@ -64,7 +64,8 @@ jobs:
             test_direct_key_offer_event_correlation_native \
             test_stage39_literal_presence \
             test_stage39_literal_presence_native \
-            test_stage40_trade_schema_hypothesis; do
+            test_stage40_trade_schema_hypothesis \
+            test_stage41_key_type_first_failure; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
