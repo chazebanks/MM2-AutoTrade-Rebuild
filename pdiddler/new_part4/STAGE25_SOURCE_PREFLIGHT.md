@@ -20,7 +20,14 @@ The original parser previously traversed every `itemcolumn`; the extra 9 nonweap
 - Require exact visible source totals `ancient=16 / chroma=46 / godly=128` before generating a candidate snapshot.
 - Keep the existing SHA256, published timestamp, retrieved timestamp, canonical name/ID, 190-record/189-priced, and fixed-expiry checks.
 
-The new `.github/workflows/gingerscope-stage25-market-preflight.yml` executes the existing Python parser against actual live pages in CI and uploads a **review-only JSON/Lua candidate artifact**. It does *not* commit or deploy a new snapshot, change the active pinned loader, or assert new prices were published. If any source fetch or parse fails, the job fails and there is no price authority.
+The new `.github/workflows/gingerscope-stage25-market-preflight.yml` first attempts the existing Python parser against **direct official pages**. GitHub's runner returned HTTP 403. Instead of pretending that attempt succeeded, a separate, clearly labeled source path imports immutable browser-retrieved copies:
+
+- `pdiddler/source_evidence/stage25_supreme_browser_import_manifest.json`: exact official URL, browser receipt ID, observed UTC time, original source publication UTC time and Git blob SHA for each source.
+- `pdiddler/stage25_import_source_blobs.py`: retrieves the three immutable Git objects, rechecks their complete Git SHA-1 byte identity, source title and date, fails if observation or publication is stale, and restores the **actual browser retrieval time** as each original HTML file's mtime.
+- Original `pdiddler/refresh_supreme_snapshot.py --input-dir`: independently parses these real source bytes with the same old 190-item checked mapping, records SHA256 of the source, and enforces the existing min(retrieval+24h, publication+72h) expiry.
+- Existing Lua profile consumer and original expiry boundary are tested in CI against the generated candidate.
+
+This browser-import path **is not a direct GitHub-runner fetch and not a new Supreme publication**. The provenance difference remains labeled. The candidate is uploaded as a **review-only ZIP artifact**; it is not committed to the active snapshot path or loaded into Delta. If either direct source or the immutable browser-import fallback fails, the job fails.
 
 ## Delta probe
 
