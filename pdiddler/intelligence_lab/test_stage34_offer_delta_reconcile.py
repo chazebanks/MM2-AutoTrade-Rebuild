@@ -59,6 +59,8 @@ class Stage34OfferDeltaTest(unittest.TestCase):
             'claim popup not required for own inventory already credited after close',
             'wrong item gained is mismatch despite equal net count',
             'gross same-item both directions cannot be proven from net inventory',
+            'name-only scanner resolution is ambiguous even when quantities match',
+            'raw native item ID makes exact offer identity eligible for client-only match',
             'mutation after any observed Accept permanently poisons reconciliation',
             'ledger for other session cannot match identical quantity maps',
         ):
@@ -90,7 +92,7 @@ class Stage34OfferDeltaTest(unittest.TestCase):
         self.assertIn('why=="trade-window-closed"',code)
         self.assertIn('why=="player-gui-missing"',code)
         self.assertIn('marketFresh=function()return false end',code)
-        self.assertIn('PIN34="85ad36c0cdd203b0e5b68f2cf8973ff7e1978e74"',code)
+        self.assertIn('PIN34="c57b1a0f88fd4f26f406d0a491bf4ac836dfb5ce"',code)
         self.assertIn('serverCompletionProven=false',code)
         self.assertIn('authorizesAccept=false',code)
         self.assertIn('mayRecordCompletedTrade=false',code)
