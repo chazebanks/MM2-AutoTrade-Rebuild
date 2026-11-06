@@ -144,6 +144,24 @@ class Stage25Tests(unittest.TestCase):
                 Importer.import_sources(manifest,Path(tmp),fetch=lambda sha:b"",
                     now=datetime(2026,11,7,3,tzinfo=timezone.utc))
 
+    def test_scanner_only_boot_has_no_trade_controller_or_hopper(self):
+        src=(LUA/"STAGE25_SCANNER_ONLY_BOOT.lua").read_text()
+        for banned in ("OfferItem:FireServer", "AcceptTrade", "DeclineTrade",
+                       "outgoing.run(", "transport.bootstrap(",
+                       "p4.run(", "discord.new(", "queue_on_teleport"):
+            self.assertNotIn(banned,src)
+        for approved in ("P4_REPRICE_ONLY.lua",
+                         "pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION.lua",
+                         "pdiddler3_scanner_view_v1.lua",
+                         "pdiddler_supreme_snapshot_2026_11_04.lua"):
+            self.assertIn(approved,src)
+        self.assertIn("PDIDDLER_ALLOW_SCANNER_ONLY_TEST~=true",src)
+        self.assertIn("PDIDDLER_OUTGOING_SESSION",src)
+        self.assertIn("profile.isFresh()",src)
+        self.assertIn("authorizesTrade=false",src)
+        self.assertIn("authorizesAccept=false",src)
+        self.assertIn("marketFresh=false",src)
+
     @unittest.skipUnless(shutil.which("lua5.4"),"Lua 5.4 installed in CI")
     def test_actual_read_only_lua_diagnostic(self):
         result=subprocess.run(
@@ -154,6 +172,14 @@ class Stage25Tests(unittest.TestCase):
                          result.stdout+"\n"+result.stderr)
         self.assertIn("Stage25 read-only scanner proof diagnostic tests",
                       result.stdout)
+        runner=subprocess.run(
+            ["lua5.4",str(LUA/"tests"/"test_stage25_scanner_only_boot.lua"),
+             str(LUA)],cwd=str(ROOT.parent),capture_output=True,text=True,
+             timeout=12,check=False)
+        self.assertEqual(runner.returncode,0,
+                         runner.stdout+"\\n"+runner.stderr)
+        self.assertIn("Stage25 isolated scanner-only Delta bootstrap mock tests",
+                      runner.stdout)
 
 if __name__=="__main__":
     unittest.main()
