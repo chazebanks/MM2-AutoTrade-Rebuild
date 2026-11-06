@@ -1,7 +1,10 @@
 -- Stage 17: counterparty-aware candidate research. Pure, read-only and offline.
 -- Inputs must already have independently verified market/source and ownership.
 -- A seller-side 'case' is NOT evidence of intent, liquidity, or acceptance.
-local Risk = require('p4_risk_review')
+-- Native loadstring can inject the existing Stage16 reviewer; Lua CI
+-- and offline research still use the original require path.
+local injectedRisk = ...
+local Risk = type(injectedRisk)=='table' and injectedRisk or require('p4_risk_review')
 local M = {}
 
 local function blocked(reason, ours, seller)
