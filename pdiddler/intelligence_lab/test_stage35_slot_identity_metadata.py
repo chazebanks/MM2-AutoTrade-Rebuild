@@ -3,6 +3,7 @@ The test runs ACTUAL Lua and compiles the native one-shot Delta launcher.
 """
 from pathlib import Path
 import shutil
+import re
 import subprocess
 import unittest
 
@@ -64,6 +65,36 @@ class Stage35MetadataTests(unittest.TestCase):
             self.assertNotIn(forbidden,code)
         self.assertIn('S.state="WAIT_FOR_POPULATED_MANUAL_SLOT"',code)
         self.assertNotIn('RemoteEvent:FireServer(',code)
+
+    def test_slot_bind_preserves_all_three_filled_slot_returns(self):
+        # Native screenshot showed a populated TheirOffer slot but only the
+        # startup console line. The old "root and filledSlot(root)" expression
+        # collapses a multires return to one value in Lua, leaving side/index nil.
+        source=NATIVE.read_text()
+        self.assertNotIn("root and filledSlot(root)",source)
+        pattern=(r"(  local slot,side,index\\n"
+                 r"  if root then slot,side,index=filledSlot\\(root\\) end)")
+        match=re.search(pattern,source)
+        self.assertIsNotNone(match,"Actual native slot binding no longer matches")
+        snippet=match.group(1)
+        if shutil.which("lua5.4"):
+            test_case=(
+                'local root={}\\n'
+                'local function filledSlot(r) '
+                'assert(r==root); return {}, "TheirOffer", 1 end\\n'
+                +snippet+'\\n'
+                'assert(slot~=nil and side=="TheirOffer" and index==1)\\n'
+                'root=nil\\n'
+                +snippet+'\\n'
+                'assert(slot==nil and side==nil and index==nil)\\n'
+                'print("STAGE35_NATIVE_THREE_RESULTS_PRESERVED")'
+            )
+            run=subprocess.run(["lua5.4","-e",test_case],
+                               cwd=str(ROOT),capture_output=True,
+                               text=True,timeout=10)
+            self.assertEqual(run.returncode,0,run.stdout+"\\n"+run.stderr)
+            self.assertIn("STAGE35_NATIVE_THREE_RESULTS_PRESERVED",
+                          run.stdout)
 
     @unittest.skipUnless(shutil.which("lua5.4"),"Lua 5.4 in GitHub CI")
     def test_python_runs_actual_pure_stage35_lua_tests(self):
