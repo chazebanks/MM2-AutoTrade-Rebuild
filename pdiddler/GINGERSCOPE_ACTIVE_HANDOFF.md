@@ -1,6 +1,6 @@
 # Gingerscope — Active ChatGPT Continuity Handoff
 **Updated:** 2026-11-05 (America/New_York)  
-**Status:** Stage 32 built + offline/CI verified; **FIRST NATIVE STAGE32 iPad RESULT PENDING**.  
+**Status:** Stage32 offline/CI verified and FIRST native iPad JSON RECEIVED; **screen-visible manual exchange outcome still unconfirmed**.  
 **Repository:** https://github.com/chazebanks/MM2-AutoTrade-Rebuild  
 **Active development branch:** `feature/gingerscope-stage32-result-signal-inventory-correlation`  
 **Stage 32 draft PR:** https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/71  
@@ -10,7 +10,7 @@
 
 **User's goal:** Continue building and validating **Gingerscope**, a modular, reliable Roblox Murder Mystery 2 auto-trade system on an **iPad with Delta**. Proceed **one stage / one failure boundary at a time**. User likes the current rigorous workflow: inspect GitHub source first, distinguish offline mock tests from verified iPad behavior, run real GitHub CI, isolate failure causes and regressions, test with one short pinned Lua loader, read anonymized JSON outputs, and save every confirmed checkpoint to GitHub. Avoid speculation, empty affirmations, blind patch-stacking, redundant modules or repeats of previously proven tests.
 
-**NEXT ACTION**: The user is currently testing **Stage 32** on iPad. When they return with `GINGERSCOPE STAGE32 ANONYMIZED` JSON (possibly with their account of what happened on screen), **analyze that specific output first**, call out failures as well as successes, compare native evidence with expected code paths, and record the actual result in Stage32 PR #71. Do not automatically start Stage33 or edit unrelated code. If output is missing or ambiguous, use the source and log evidence and work on the relevant single failure. Never report a trade completed merely from a GUI close, `CompleteTrade` event name, accepted indicators, or inventory delta. If the user instead asks to continue without returning a Stage32 result, distinguish the pending native checkpoint from further offline work.
+**NEXT ACTION**: The user has supplied the FIRST Stage32 native JSON; it is saved in PR #71. One eligible weapon copy appeared in client's own inventory, no copies were lost, local Accept indicator was seen, partner Accept indicator was not observed, and no `CompleteTrade`, `EndTrade`, or `DeclineTrade` inbound receipt was observed. **Ask whether the user personally saw the manual exchange complete and whether the gained copy was the partner's offered weapon.** This is the one missing native experimental condition; the JSON cannot answer it. Do not automatically start Stage33, claim server completion, change unrelated code or issue a completed-trade/profit webhook. Distinguish an unseen partner Accept indicator from proof that the partner never accepted. If the user instead asks to continue without returning a Stage32 result, distinguish the pending native checkpoint from further offline work.
 
 ### The exact Stage 32 Delta test script (pinned, confirmed in GitHub)
 
@@ -50,7 +50,7 @@ The new/current staged work is in `pdiddler/new_part4/` plus `pdiddler/intellige
 
 **Stage31 local vs partner manual decline** (draft PR #70): actual partner-decline test (per user-declared initiating actor) also received exactly one inbound `DeclineTrade` `WHILE_OPEN`, at elapsed **6.031 s**, then `CLOSED_UNKNOWN`, no Accept and no partner departure. Comparison status: `SHARED_DECLINE_NAMED_RECEIPT_NO_ACTOR_PROOF`. **The same event name cannot distinguish who initiated the close in these two test conditions.** Not server-authenticated actor or outcome. Native stage complete, regression tests saved in Python; latest prior CI 273/273.
 
-**Stage32** (draft PR #71): passively correlate Stage28 Accept and GUI close, Stage30 **actually received** named result events, and Stage29 before/after own-inventory reads. Stages 27–31 evidence remains unchanged. Offline code/test **done**; first live manual completed-trade observation **pending**.
+**Stage32** (draft PR #71): passively correlate Stage28 Accept and GUI close, Stage30 actually received named result events, and Stage29 before/after own-inventory reads. Offline code/tests passed (280 Python + 17 Stage32 Lua, CI `42160694122`). **First live iPad JSON RECEIVED**: `status=ELIGIBLE_DELTA_WITHOUT_RESULT_NAMED_RECEIPT`, `inventoryStatus=ELIGIBLE_DELTA_UNATTRIBUTED`, `gainedEligibleCopies=1`, `lostEligibleCopies=0`, `changedEligibleTypes=1`, `rawWeaponInventoryChanged=true`, `beforeObserved=true`, `postReadbacksObserved=2`, `observedOurAccept=true`, `observedTheirAccept=false`, `bothAcceptedStableObserved=false`, `signalReceipts=0`, `completeTradeSignalSeen=false`, `endTradeSignalSeen=false`, `declineTradeSignalSeen=false`, `closureStatus=closed_unknown`, `serverCompletionProven=false`. No on-screen success report was included, so client inventory delta is **not transaction settlement proof**. Confirm whether the manual trade finished on screen and whether the extra copy was the offered weapon before researching any further outcome classification.
 
 ### Crucial boundaries / what is NOT proven
 
@@ -74,6 +74,12 @@ The new/current staged work is in `pdiddler/new_part4/` plus `pdiddler/intellige
 8. Keep answers direct and reasonably compact, independent judgment, anticipate what can go wrong, and only ask a targeted question when a genuinely missing experimental detail prevents interpretation.
 9. If user opens a new chat, direct them to **this exact file on main**; the saved repo handoff is reliable, whereas automatic cross-chat conversational memory is not guaranteed.
 
+## Complete trading strategy + deep research protocol
+
+**Read [GINGERSCOPE_STRATEGY_AND_RESEARCH_PLAYBOOK.md](./GINGERSCOPE_STRATEGY_AND_RESEARCH_PLAYBOOK.md) on main before making any economic or research decision.** This companion file documents the actual target-acquisition objective, conservative four-copy purchasing power, valuation/market-quality/seller-perspective trade-offs, proposed full bot-to-Discord architecture, the archived old +15/v2.6 conflict, and the source-independent Supreme/MM2Values/market-board/Reddit/TikTok/YouTube/Firecrawl-style research procedure with evidence ledgers, independent corroboration and tests. It also contains an exact starter for a new conversation.
+
+Do not confuse the historical v2.6 fixed-profit strategy with the newer Gingerscope intelligence lab: the current offline lab specifically did **not** inherit that +15 rule. Any future actual economic rules require deliberate validation and explicit user approval before production use.
+
 ## Staged PR index
 
 - #64 Stage25: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/64
@@ -85,4 +91,4 @@ The new/current staged work is in `pdiddler/new_part4/` plus `pdiddler/intellige
 - #70 Stage31: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/70
 - #71 Stage32: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/71
 
-**Next stage must be determined from Stage32's actual native result, not guessed.**
+**Next step is interpreting the Stage32 native +1 eligible copy/no named event result in light of the user's on-screen outcome; do not guess a new stage or bypass completion authority.**
