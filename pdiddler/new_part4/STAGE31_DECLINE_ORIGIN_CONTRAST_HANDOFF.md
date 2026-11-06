@@ -16,7 +16,7 @@ Roblox's official API reference states `RemoteEvent.OnClientEvent` receives a se
 
 `intelligence_lab/stage31_decline_signal_contrast.py` compares two anonymized Stage30 reports with declared experimental conditions:
 - **First trial:** the user manually declined (already observed).
-- **Second trial:** the **trade partner** manually declines while the user does not touch Decline or Accept (still needs native testing).
+- **Second trial:** the partner was instructed to manually decline while the user did not touch Decline or Accept. The user's second live client report contains a `DeclineTrade` receipt at **6.031s** while the window was still open. The partner action is a *declared experimental condition*, not authenticated by the diagnostic.
 
 It requires the native Stage30 schema, bounded/valid remote catalog, closed GUI, finished post-close grace, neither side accepting, and no partner departure. The pair is reduced to **sets of client-observed event names only**—not raw arguments, timings, or account identities.
 
@@ -27,20 +27,23 @@ Possible offline results:
 
 Every returned record explicitly retains `initiator_proven=false`, `decline_proven=false`, `server_completion_proven=false`, `may_record_completed_trade=false`, `may_report_profit=false`, and `authorizes_accept=false`.
 
-`intelligence_lab/test_stage31_decline_signal_contrast.py` includes 14 synthetic cases plus the real native Stage30 **local-decline baseline facts**. Synthetic partner reports in tests are not genuine native observations.
+`intelligence_lab/test_stage31_decline_signal_contrast.py` includes the two *actual anonymized client trace facts* (local-close 12.575s; partner-close trial 6.031s), plus synthetic negative cases. Neither native report cryptographically attests the initiator, partner identity, or server outcome.
 
-## ONE next iPad experiment
+## Native contrast result and checkpoint
 
-1. **Rejoin MM2** to clear Stage30's long-lived scanner and client listeners, select Tablet, and run the exact Stage30 one-paste Delta launcher linked above **before opening a trade**. There is no reason to replace tested observer logic.
-2. Let the scanner finish and manually open a trade with a trusted partner. Neither player needs to offer a weapon and **neither player presses Accept**.
-3. When it prints `[GINGERSCOPE STAGE30] TRADE BOUND`, **do not tap Decline or close the window yourself**. Ask the *partner* to click Decline on their client within 30 seconds. The partner should remain connected to the same MM2 server.
-4. The existing observer watches the GUI closure plus about two seconds of inbound client events. It copies and prints anonymized `GINGERSCOPE STAGE30 ANONYMIZED` JSON; send that JSON and say **"partner clicked Decline"** as a self-reported experimental condition.
-5. If you accidentally press Decline or Accept, or the partner leaves/rejoins, the test no longer matches its condition; report the deviation rather than treating it as verified. Rejoin after testing.
+**Stage31's requested partner-close trial was returned by the user.** The user supplied an anonymized Stage30 report with these observations:
 
-**No weapon exchange, final Accept, automated requests, active Part4, webhook, or profit computation is required or permitted by Stage31.**
+- Identical set of **16 discovered trade RemoteEvent names** in both runs.
+- **Stage30 local-close:** one `DeclineTrade` inbound signal while the trade GUI was open at **12.575 seconds**.
+- **Stage31 partner-close trial:** one `DeclineTrade` inbound signal while the trade GUI was open at **6.031 seconds**.
+- In both runs: `CLOSED_WITH_CLIENT_SIGNAL_CENSUS`, `CLOSED_UNKNOWN`, neither Accept indicator observed, no partner departure, no post-close receipts, `serverCompletionProven=false`, `tradeOutcome=UNKNOWN`.
+
+The pair classifies as `SHARED_DECLINE_NAMED_RECEIPT_NO_ACTOR_PROOF`. Under the declared conditions that different players initiated closure, **the `DeclineTrade` event name alone fails to distinguish the initiator**. Time differences are incidental, not actor evidence. The comparison provides no authenticated decline or success conclusion.
+
+This particular two-scenario experiment is **finished**. No need to rerun either decline test unless a later regression changes its result. Continue with a distinct evidence boundary if moving to a later stage. Do not enable automatic final Accept or completed-trade/profit webhooks.
 
 ## Crucial limitation
 
 A comparison of two manually labeled trials cannot *authenticate* an action's source. Even if the partner test shows a different named event, it would be premature to create a classifier; additional controlled scenarios and transaction-correlated server evidence would be needed. A positive `CompleteTrade` receipt still cannot be promoted to completed-trade authority.
 
-This stage is ready only for a controlled **partner-initiated manual decline** test after CI. Do not re-run the already completed local-decline trial.
+**Stage31 checkpoint:** Native comparison received for both requested test conditions; keep them as client observations and preserve the no-actor, no-completion authority boundary.
