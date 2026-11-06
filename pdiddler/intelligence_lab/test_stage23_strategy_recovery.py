@@ -53,7 +53,7 @@ class StrategyRecoveryTests(unittest.TestCase):
                   'readModule("p4_safety_core")',
                   'readModule("p4_native_removal")',
                   'readModule("p4_stability_gate")',
-                  'strategyModule.validate(strategyState,p,o,t)',
+                  'strategyModule.validate(strategyState,p,o,t,diagnostics)',
                   'strategyModule.next',
                   'recoveryLatched=true',
                   'MANUAL_WITHDRAW_OR_DECLINE_REQUIRED',
