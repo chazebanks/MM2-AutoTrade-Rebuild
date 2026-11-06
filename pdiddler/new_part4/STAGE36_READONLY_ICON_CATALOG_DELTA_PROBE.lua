@@ -1,0 +1,186 @@
+-- Stage36: read-only client ICON REFERENCE vs ALL-TIER native Sync
+-- catalogue art collision census. No item transfer, no trade RPC, no auto
+-- Accept/Decline/Claim, no inventory scan and no exported ID or image URL.
+-- A unique UI icon match is only a CLIENT catalogue association.
+local E=(getgenv and getgenv()) or _G
+local KEY="PDIDDLER_STAGE36_ICON_CATALOG_AUDIT"
+if game.PlaceId~=142823291 then warn("[STAGE36] Wrong MM2 place");return end
+for _,name in ipairs({
+ KEY,"PDIDDLER_STAGE35_SLOT_METADATA_CENSUS",
+ "PDIDDLER_STAGE34_OFFER_INVENTORY_PROBE",
+ "PDIDDLER_STAGE33_TRANSPORT_CENSUS",
+ "PDIDDLER_STAGE32_RESULT_CORRELATION_PROBE",
+ "PDIDDLER_STAGE29_POSTCLOSE_PROBE",
+ "PDIDDLER_STAGE25_SCANNER_ONLY",
+ "PDIDDLER_GINGERSCOPE_REPLACEMENT_PREVIEW",
+ "PDIDDLER_OUTGOING_SESSION","PDIDDLER_PART4_SESSION",
+ "PDIDDLER_PART4_CONTROLLER","PDIDDLER_PART5_CONTROLLER",
+ "PDIDDLER_INTEGRATION_V15_8_VALUE_FIRST",
+ "PDIDDLER_STAGE30_PASSIVE_SIGNALS",
+ "PDIDDLER_STAGE28_PASSIVE_ACCEPT_PROBE",
+ "PDIDDLER_STAGE27_NATIVE_LAB"
+}) do
+ if E[name]~=nil then
+  warn("[STAGE36] Competing owner detected; rejoin to test in isolation")
+  return
+ end
+end
+local players=game:GetService("Players")
+local me=players.LocalPlayer
+if not me then warn("[STAGE36] Local player missing");return end
+local job=game.JobId
+local S={state="LOAD_PURE_READ_ONLY",finished=false,
+ authorizesTrade=false,authorizesAccept=false,
+ mayRecordCompletedTrade=false,mayReportProfit=false}
+E[KEY]=S
+local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
+local PIN36="c2485e3422d21c04401b1551b938b24288736ddd"
+local loaded,core=pcall(function()
+ local txt=game:HttpGet(ROOT..PIN36..
+  "/pdiddler/new_part4/p4_stage36_icon_catalog_audit.lua",true)
+ assert(type(txt)=="string" and #txt>100,"missing Stage36 pure module")
+ local fun,msg=loadstring(txt,"=p4_stage36_icon_catalog_audit")
+ assert(fun,msg)
+ local mod=fun()
+ assert(type(mod)=="table" and type(mod.assessExact)=="function" and
+  type(mod.collectExact)=="function")
+ return mod
+end)
+if not loaded then
+ S.state="MODULE_UNAVAILABLE"
+ warn("[STAGE36] Pure read-only module unavailable; no game actions")
+ return S
+end
+local function finish(reason,input)
+ if S.finished then return end
+ S.finished=true
+ local okay,res=pcall(core.assessExact,input)
+ local r=okay and res or core.assessExact(nil)
+ r.stopReason=reason
+ r.anonymizedCountsOnly=true
+ r.tradeOutcome="UNKNOWN";r.rawItemIdConfirmed=false
+ r.exactWeaponIdentityConfirmed=false;r.serverAttestation=false
+ r.serverCompletionProven=false;r.causalAttributionProven=false
+ r.authorizesTrade=false;r.authorizesAccept=false
+ r.mayRecordCompletedTrade=false;r.mayReportProfit=false
+ S.state="FINISHED_READ_ONLY";S.result=r
+ local ok,data=pcall(function()
+  return game:GetService("HttpService"):JSONEncode(r)
+ end)
+ if ok then
+  if type(setclipboard)=="function" then pcall(setclipboard,data) end
+  print("[GINGERSCOPE STAGE36 ANONYMIZED] "..data)
+ else
+  warn("[STAGE36] Anonymized report could not be encoded")
+ end
+end
+local function visible(node,stop)
+ while node do
+  if node:IsA("ScreenGui") and not node.Enabled then return false end
+  if node:IsA("GuiObject") and not node.Visible then return false end
+  if node==stop then return true end
+  node=node.Parent
+ end
+ return false
+end
+local function tradeRoot()
+ local pg=me:FindFirstChildOfClass("PlayerGui")
+ if not pg then return nil end
+ for _,name in ipairs({"TradeGUI_Phone","TradeGUI"}) do
+  local screen=pg:FindFirstChild(name)
+  local container=screen and screen:FindFirstChild("Container")
+  local root=container and container:FindFirstChild("Trade")
+  if root and visible(root,pg) then return root end
+ end
+end
+local function filledSlot(root)
+ for _,sideName in ipairs({"TheirOffer","YourOffer"}) do
+  local side=root:FindFirstChild(sideName)
+  local container=side and side:FindFirstChild("Container")
+  for i=1,4 do
+   local slot=container and container:FindFirstChild("NewItem"..i)
+   local itemName=slot and slot:FindFirstChild("ItemName")
+   local label=itemName and itemName:FindFirstChild("Label")
+   local iconContainer=slot and slot:FindFirstChild("Container")
+   local icon=iconContainer and iconContainer:FindFirstChild("Icon")
+   if slot and visible(slot,root) and
+      label and (label:IsA("TextLabel") or label:IsA("TextButton"))
+      and type(label.Text)=="string" and label.Text~="" and
+      icon and (icon:IsA("ImageLabel") or icon:IsA("ImageButton")) then
+    return slot,sideName,i,icon
+   end
+  end
+ end
+end
+local function readFullSyncCatalog()
+ local rs=game:GetService("ReplicatedStorage")
+ local db=rs:FindFirstChild("Database")
+ local syncModule=db and db:FindFirstChild("Sync")
+ if not syncModule or not syncModule:IsA("ModuleScript") then
+  return nil,"SYNC_MODULE_ABSENT"
+ end
+ -- This game's own scanner already requires Database.Sync. We only read
+ -- the returned table and do not invoke inventory or trade remotes.
+ local got,sync=pcall(require,syncModule)
+ if not got or type(sync)~="table" then
+  return nil,"SYNC_CATALOGUE_UNAVAILABLE"
+ end
+ -- Pure collection preserves source, typed key and original art field bytes.
+ -- No source/key merge, rarity filter, URI parsing or art URL request.
+ return core.collectExact(sync)
+end
+S.state="WAIT_FOR_POPULATED_MANUAL_SLOT"
+print("[GINGERSCOPE STAGE36] READ-ONLY: Open a manual trade; place ONE weapon in either visible offer. No Accept needed. Report compares original icon strings byte-for-byte across all available Sync rows; then manually DECLINE.")
+task.spawn(function()
+ local started=os.clock()
+ local lastRoot,lastSlot,lastSide,lastIndex,lastIcon,lastRef=nil,nil,nil,nil,nil,nil
+ local frames=0
+ while not S.finished and E[KEY]==S and
+   game.JobId==job and players.LocalPlayer==me and
+   os.clock()-started<90 do
+  local root=tradeRoot()
+  local slot,side,index,icon
+  if root then slot,side,index,icon=filledSlot(root) end
+  local reference=icon and icon.Image
+  if slot and side and index and icon and
+     type(reference)=="string" and reference~="" and
+     visible(icon,root) then
+   if root==lastRoot and slot==lastSlot and
+      side==lastSide and index==lastIndex and
+      icon==lastIcon and reference==lastRef then
+    frames=frames+1
+   else
+    lastRoot,lastSlot,lastSide,lastIndex,lastIcon,lastRef=
+      root,slot,side,index,icon,reference
+    frames=1
+   end
+   if frames>=3 then
+    local readOK,catalogue,why=pcall(readFullSyncCatalog)
+    if not readOK then finish("SYNC_READ_EXCEPTION") return end
+    if E[KEY]~=S or game.JobId~=job or
+       players.LocalPlayer~=me or tradeRoot()~=root or
+       not visible(icon,root) or icon.Image~=reference then
+      finish("SLOT_CHANGED_DURING_CATALOGUE_READ")
+      return
+    end
+    if not catalogue then
+      finish(why)
+      return
+    end
+    local rect=icon.ImageRectSize
+    local data={side=side,index=index,slotVisible=true,
+      imageVisible=true,icon=reference,
+      usesSpriteSheet=rect.X~=0 or rect.Y~=0,
+      catalogueVerified=true,catalogue=catalogue}
+    finish("ICON_REFERENCE_CATALOGUE_AUDIT_FINISHED",data)
+    return
+   end
+  else
+   lastRoot,lastSlot,lastSide,lastIndex,lastIcon,lastRef=nil,nil,nil,nil,nil,nil
+   frames=0
+  end
+  task.wait(.1)
+ end
+ finish("NO_STABLE_VISIBLE_ICON_OR_JOB_CHANGED")
+end)
+return S
