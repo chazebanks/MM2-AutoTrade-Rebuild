@@ -1,0 +1,41 @@
+{
+  "schema": "gingerscope-stage26-dated-profile-promotion-v1",
+  "status": "DRAFT_PROFILE_PIN_ONLY_NO_LIVE_TRADE_AUTHORITY",
+  "sourceAcquisition": "third-party-browser-capture-verified-from-immutable-source",
+  "sourceArtifact": {
+    "runId": 42141921414,
+    "artifactName": "supreme-source-checked-candidate",
+    "artifactId": 13468054389
+  },
+  "previousVersion": "supreme-2026-11-04-97613e277b36",
+  "promotedVersion": "supreme-2026-11-06-96f1f6e43707",
+  "publication": "2026-11-04T17:27:12Z",
+  "observed": "2026-11-06T00:47:22Z",
+  "expires": "2026-11-07T00:47:22Z",
+  "candidateFiles": {
+    "pdiddler/snapshots/pdiddler_supreme_snapshot_2026_11_06.lua": {
+      "sha256": "f296cd33637cb62980fd87096c3b3b651cd22ffb32f6348e26dccdf96891ffa5",
+      "bytes": 14183
+    },
+    "pdiddler/snapshots/supreme_snapshot_2026_11_06.json": {
+      "sha256": "9f93f743ea6c7c8475cf5510f7abc9fcbb08e51b4e5da9db5bd7578bb0d19bc3",
+      "bytes": 47535
+    }
+  },
+  "coverage": {
+    "total": 190,
+    "finite": 189,
+    "unpriced": 1,
+    "ancient": 16,
+    "chroma": 46,
+    "godly": 128
+  },
+  "changedValues": 0,
+  "originalProfileRetained": true,
+  "autoRefresh": false,
+  "autoDeploy": false,
+  "authorizesTrade": false,
+  "authorizesAccept": false,
+  "nativePlacementTested": false,
+  "serverCompletionProven": false
+}

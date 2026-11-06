@@ -70,7 +70,7 @@ class Stage25Tests(unittest.TestCase):
         self.assertLessEqual(
             S.epoch(old["expiresAt"]),S.epoch("2026-11-06T00:00:00Z"))
         new=(LUA/"REPLACEMENT_INTEGRATION_PREVIEW.lua").read_text()
-        self.assertIn("supreme_snapshot_2026_11_04.lua",new)
+        self.assertIn("supreme_snapshot_2026_11_06.lua",new)
         self.assertIn("assert(I.profile.isFresh()",new)
 
     def test_probe_cannot_execute_or_expose_identity(self):
@@ -153,7 +153,7 @@ class Stage25Tests(unittest.TestCase):
         for approved in ("P4_REPRICE_ONLY.lua",
                          "pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION.lua",
                          "pdiddler3_scanner_view_v1.lua",
-                         "pdiddler_supreme_snapshot_2026_11_04.lua"):
+                         "pdiddler_supreme_snapshot_2026_11_06.lua"):
             self.assertIn(approved,src)
         self.assertIn("PDIDDLER_ALLOW_SCANNER_ONLY_TEST~=true",src)
         self.assertIn("PDIDDLER_OUTGOING_SESSION",src)
