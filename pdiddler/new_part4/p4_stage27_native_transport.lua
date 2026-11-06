@@ -7,7 +7,8 @@ local function result(reason) return false,reason end
 function M.new(config)
  assert(type(config)=="table" and config.game and
         type(config.confirm)== "function","manual confirmation dependency missing")
- return {game=config.game,confirm=config.confirm,addConsumed=false,
+ return {game=config.game,confirm=config.confirm,
+   targetObscured=config.targetObscured,addConsumed=false,
    removeConsumed=false,sendEvents=0,clickEvents=0}
 end
 function M.add(h,id,category)
@@ -46,6 +47,9 @@ function M.remove(h,button,intent)
   local x=pos.X+size.X/2+inset.X
   local y=pos.Y+size.Y/2+inset.Y
   assert(x>0 and y>0 and x<10000 and y<10000,"invalid click position")
+  if type(h.targetObscured)=="function" then
+    assert(h.targetObscured(x,y)~=true,"test-panel-obscures-remove-button")
+  end
   h.clickEvents=h.clickEvents+1
   vim:SendMouseButtonEvent(x,y,0,true,h.game,0)
   task.wait(0.055)
