@@ -90,6 +90,26 @@ jobs:
           print('Source publication:',p['publishedAt'],'Observation:',p['observedAt'],
                 'Expiry:',p['expiresAt'],'Gingerscope:',scope['supremeValue'])
           PY
+      - name: Check candidate against REAL Lua market consumer and original expiry
+        shell: bash
+        run: |
+          set -euo pipefail
+          file="$(find /tmp/gingerscope-market-preflight -maxdepth 1 -name 'pdiddler_supreme_snapshot_*.lua' -type f)"
+          test -n "$file"
+          LUA_CANDIDATE_PATH="$file" lua5.4 - <<'LUA'
+          local S=assert(dofile(os.getenv("LUA_CANDIDATE_PATH")))
+          local c=S.coverage()
+          assert(S.liveReady and c.total==190 and c.finite==189 and c.unpriced==1)
+          assert(c.ancient==16 and c.chroma==46 and c.godly==128)
+          local g=assert(S.get("ancient","771"))
+          assert(g.name=="Gingerscope" and g.supremeValue==16000 and g.demand==5)
+          assert(g.verified and g.provenance and g.provenance.sha256)
+          assert(S.get("godly","not-a-real-id")==nil)
+          assert(S.isFresh() and S.isFresh(S.expiresAtEpoch-1))
+          assert(not S.isFresh(S.expiresAtEpoch))
+          assert(not S.isFresh(S.observedAtEpoch-1))
+          print("PASS: actual Lua profile, 190 items, canonical Gingerscope and fixed source expiry")
+          LUA
       - name: Upload review-only candidate snapshot (never deploy)
         uses: actions/upload-artifact@v4
         with:
