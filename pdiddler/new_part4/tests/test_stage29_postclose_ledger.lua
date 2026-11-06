@@ -186,4 +186,25 @@ test("eligible gain plus untracked weapon loss reports zero eligible losses",fun
  assert(r.tradeOutcome=="UNKNOWN" and r.mayRecordCompletedTrade==false)
  assert(r.serverCompletionProven==false and r.authorizesAccept==false)
 end)
+test("one-sided eligible gift increases raw inventory with no outgoing offer",function()
+ -- Synthetic ledger fixture matching the native Stage32 user's corrected
+ -- one-sided Iceblaster receipt (+1 eligible, no item offered by receiver).
+ -- The fixture uses generic checker IDs; it does NOT assert Iceblaster's ID.
+ local s,scope=fixture()
+ local baseline=inventory(2,1)
+ local received=inventory(2,2) -- one additional eligible copy
+ assert(baseline.rawOwned==3 and received.rawOwned==4)
+ assert(before(s,scope,baseline)=="OBSERVED")
+ assert(close(s,scope)=="OBSERVED")
+ assert(after(s,scope,received,16,2)=="OBSERVED")
+ assert(after(s,scope,received,17,3)=="ELIGIBLE_DELTA_UNATTRIBUTED")
+ local r=L.summary(s)
+ assert(r.gainedEligibleCopies==1 and r.lostEligibleCopies==0)
+ assert(r.changedEligibleTypes==1 and r.rawWeaponInventoryChanged==true)
+ assert(r.postReadbacksObserved==2)
+ -- Manual user account is separate from client-only settlement authority.
+ assert(r.tradeOutcome=="UNKNOWN")
+ assert(r.serverCompletionProven==false and r.mayRecordCompletedTrade==false)
+ assert(r.mayReportProfit==false and r.authorizesAccept==false)
+end)
 print("PASS",cases,"Stage29 pure post-close own inventory ledger evidence")
