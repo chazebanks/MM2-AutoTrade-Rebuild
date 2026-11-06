@@ -47,6 +47,8 @@ local PINS={
         "0230ed1481768e7b8ddfee87e9022f6d27462674"},
     scanner={"presentation/pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION.lua",
         "001d228a407076d3cc411a5a7132b0076ec4c027"},
+    probe={"new_part4/STAGE25_READONLY_DIAGNOSTIC.lua",
+        "cd8ed9ca5cdc73d98af93059df6b189dcd0a93bc"},
 }
 local S={jobId=JOB,status="LOADING_SCANNER_ONLY",dirty=true,
     authorizesTrade=false,authorizesAccept=false,
@@ -91,7 +93,43 @@ if not ok then
     warn("[GINGERSCOPE STAGE25] initialization blocked; rejoin before retry")
     return S
 end
+-- One diagnostic output only, after the existing scanner's initial
+-- records settle or the bounded evidence window closes. No second scanner,
+-- additional MM2 inventory read, outgoing request, or server hop is started.
+S.probeStatus="AWAITING_STABLE_SCANNER_CACHE"
+task.spawn(function()
+    local start=os.clock()
+    local duration=45
+    while E[KEY]==S and game.JobId==JOB and os.clock()-start<duration do
+        local ready=true
+        local players=game:GetService("Players")
+        for _,p in ipairs(players:GetPlayers()) do
+            if p~=players.LocalPlayer then
+                local yes,state=pcall(S.rawScanner.getVerificationState,p.UserId)
+                if not yes or type(state)~="table" or state.scanning==true
+                    or state.retryScheduled==true or
+                    type(state.record)~="table" then
+                    ready=false
+                    break
+                end
+            end
+        end
+        if ready and os.clock()-start>=1.5 then break end
+        task.wait(0.3)
+    end
+    if E[KEY]~=S or game.JobId~=JOB
+       or E.PDIDDLER_OUTGOING_SESSION~=nil
+       or E.PDIDDLER_PART4_SESSION~=nil then
+        S.probeStatus="ABORTED_SESSION_CHANGED"
+        return
+    end
+    local reportOK=pcall(fetchAndRun,"probe")
+    S.probeStatus=reportOK and "ONE_REPORT_CAPTURED" or "REPORT_UNAVAILABLE"
+    if not reportOK then
+        warn("[GINGERSCOPE STAGE25] read-only report unavailable; no trade actions")
+    end
+end)
 print("[GINGERSCOPE STAGE25] Existing scanner running READ-ONLY; marketFresh="
     ..tostring(S.marketFresh)
-    .." | No outgoing trades, hops, offers or Accept")
+    .." | One anonymized report will be copied after scan | NO TRADING")
 return S
