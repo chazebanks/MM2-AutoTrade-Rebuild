@@ -18,7 +18,7 @@ if E[KEY] or E.PDIDDLER_STAGE27_NATIVE_LAB
 end
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local STAGE26="a2a2e601be864f970da0a69c436ab3b12efd8112"
-local STAGE28="18fba22b036fbb5dd52584746ccaad5a779fe761"
+local STAGE28="800ec9aa5f38b7d06e3af1bbf492dfd79ade3951"
 local players=game:GetService("Players")
 local localPlayer=assert(players.LocalPlayer,"local player unavailable")
 local job=game.JobId
