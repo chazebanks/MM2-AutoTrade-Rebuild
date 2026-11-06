@@ -59,7 +59,7 @@ function M.new(session,firstTime,config)
   ourAcceptIndicatorEverVisible=false,theirAcceptIndicatorEverVisible=false,
   anyAcceptIndicatorUnknown=false,
   stableEver=false,pendingSince=nil,
-  tainted=false,everResolved=false,closed=false,closureStatus=nil}
+  tainted=false,unresolvedAcceptSeen=false,everResolved=false,closed=false,closureStatus=nil}
 end
 function M.ingest(s,o,diag,t)
  assert(type(s)=="table" and s.session,"timeline required")
@@ -122,7 +122,8 @@ function M.ingest(s,o,diag,t)
     -- accepted exchange simply by populating the missing item.
     if o.contextOK==true and (o.ourAccepted==true or
       o.theirAccepted==true) then
-      s.tainted=true
+      s.unresolvedAcceptSeen=true
+      s.hadAnyAccept=true
       s.reason="accepted-indicator-without-verified-offer"
     end
     event(s,"UNRESOLVED",t)
@@ -156,6 +157,11 @@ function M.ingest(s,o,diag,t)
  if s.tainted then
     s.phase="OFFER_CHANGED_AFTER_ACCEPT"
     s.reason="accepted-state-invalidated-by-offer-change"
+    return "HOLD",s.reason
+ end
+ if s.unresolvedAcceptSeen then
+    s.phase="UNRESOLVED_ACCEPT_HISTORY"
+    s.reason="accepted-previously-with-unresolved-offer"
     return "HOLD",s.reason
  end
  if label=="BOTH" then
@@ -192,6 +198,7 @@ function M.summary(s)
    anyAcceptIndicatorUnknown=s.anyAcceptIndicatorUnknown,
    currentBothAcceptedStable=s.bothAcceptedStable,
    offerMutationAfterAccept=s.tainted,
+   acceptedWithUnresolvedOffer=s.unresolvedAcceptSeen,
    closureStatus=s.closureStatus or "not-closed",
    closureProvesCompletion=false,
    serverAttestation=false,
