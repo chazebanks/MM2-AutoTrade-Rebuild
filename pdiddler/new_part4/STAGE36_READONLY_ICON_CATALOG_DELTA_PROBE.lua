@@ -34,7 +34,7 @@ local S={state="LOAD_PURE_READ_ONLY",finished=false,
  mayRecordCompletedTrade=false,mayReportProfit=false}
 E[KEY]=S
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
-local PIN36="30eb8498f82fd6a79f2f0fbbfc282e59b97c7bdd"
+local PIN36="c2485e3422d21c04401b1551b938b24288736ddd"
 local loaded,core=pcall(function()
  local txt=game:HttpGet(ROOT..PIN36..
   "/pdiddler/new_part4/p4_stage36_icon_catalog_audit.lua",true)
