@@ -78,7 +78,7 @@ function M.capture(context)
  assert(type(context)=="table" and type(context.roster)=="table"
   and type(context.mono)=="number" and context.mono>=0
   and type(context.jobId)=="string" and
-  type(context.players)=="table" and
+  context.players~=nil and
   type(context.maxAgeSeconds)=="number"
   and context.maxAgeSeconds>=2 and context.maxAgeSeconds<=120,
   "diagnostic inputs missing")
