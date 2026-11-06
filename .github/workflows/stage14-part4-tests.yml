@@ -58,7 +58,9 @@ jobs:
             test_stage36_exact_reference \
             test_stage36_exact_native \
             test_stage36_image_relation \
-            test_stage36_image_relation_native; do
+            test_stage36_image_relation_native \
+            test_trade_update_shape \
+            test_trade_update_shape_native; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
