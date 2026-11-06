@@ -93,7 +93,7 @@ function M.new(cfg)
    and type(cfg.scanner.getRecord)=="function"
    and type(cfg.scanner.getVerificationState)=="function"
    and type(cfg.profile)=="table"
-   and type(cfg.player)=="table" and
+   and cfg.player~=nil and
    type(cfg.jobId)=="string" and cfg.jobId~=""
    and type(cfg.session)=="string" and cfg.session~=""
    and type(cfg.clock)=="function" and type(cfg.wall)=="function",
