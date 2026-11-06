@@ -140,6 +140,7 @@ test("empty local side tracks theirs Accept as icon only, not valid exchange",fu
  assert(poll(f,1.1)=="HOLD")
  local r=Timeline.summary(f.s)
  assert(r.theirAcceptIndicatorEverVisible)
+ assert(r.offerMutationAfterAccept)
  assert(not r.anyBothAccepted)
  assert(r.status=="UNRESOLVED")
  assert(not r.serverCompletionProven)
