@@ -120,13 +120,47 @@ ui.Name="Gingerscope_Stage27_Controlled_Test"
 ui.ResetOnSpawn=false
 ui.IgnoreGuiInset=false
 ui.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
+-- Original Stage27 left DisplayOrder at 0; when MM2 creates TradeGUI
+-- afterward its fullscreen input layer may be on top of our buttons.
+-- DisplayOrder is per ScreenGui (GuiObject.ZIndex alone cannot fix this).
+ui.DisplayOrder=10
 ui.Parent=pg
+local lastTradeLayer=nil
+local lastTradeOrder=nil
+local function keepPanelAboveTrade()
+ if ui.Parent~=pg then return end
+ local highest=0
+ local topTrade=nil
+ for _,name in ipairs({"TradeGUI_Phone","TradeGUI"}) do
+  local other=pg:FindFirstChild(name)
+  if other and other:IsA("ScreenGui") and other.Enabled==true
+    and (not topTrade or other.DisplayOrder>=highest) then
+   highest=other.DisplayOrder
+   topTrade=other
+  end
+ end
+ if ui.DisplayOrder<=highest then
+  -- Newer Roblox clients permit large orders; older builds may cap them.
+  -- If capped and tied, re-parent our own panel once *after* the trade GUI,
+  -- so it wins equal-order input priority. Never modify MM2's trade GUI.
+  pcall(function() ui.DisplayOrder=math.max(10,highest+1) end)
+  if ui.DisplayOrder<=highest
+    and (topTrade~=lastTradeLayer or highest~=lastTradeOrder) then
+   ui.Parent=nil
+   ui.Parent=pg
+  end
+ end
+ lastTradeLayer=topTrade
+ lastTradeOrder=highest
+end
+keepPanelAboveTrade()
 local frame=Instance.new("Frame")
 frame.Name="Stage27Panel"
 frame.Size=UDim2.new(0,335,0,238)
 frame.Position=UDim2.new(0,8,0,65)
 frame.BackgroundColor3=Color3.fromRGB(28,34,43)
 frame.BorderSizePixel=0
+frame.ZIndex=10
 frame.Active=true
 frame.Draggable=true
 frame.Parent=ui
@@ -140,6 +174,7 @@ local function label(name,text,y,height)
  v.TextSize=13;v.TextWrapped=true
  v.TextXAlignment=Enum.TextXAlignment.Left
  v.TextYAlignment=Enum.TextYAlignment.Center
+ v.ZIndex=11
  v.Text=text;v.Parent=frame
  return v
 end
@@ -155,6 +190,7 @@ local function button(name,text,x,y,w)
  b.Font=Enum.Font.GothamBold;b.TextSize=13
  b.TextColor3=Color3.fromRGB(255,255,255)
  b.BackgroundColor3=Color3.fromRGB(50,87,123)
+ b.ZIndex=12
  b.Text=text;b.Parent=frame
  return b
 end
@@ -375,6 +411,7 @@ local function executeRemove()
  show(action..": "..tostring(why))
 end
 bindButton.Activated:Connect(function()
+ keepPanelAboveTrade()
  if safeLive() then bind() end
 end)
 selectButton.Activated:Connect(function()
@@ -396,6 +433,7 @@ end)
 
 task.spawn(function()
  while safeLive() do
+  keepPanelAboveTrade()
   if S.bound and S.bound.lab and
     (S.phase=="VERIFY_ADD" or S.phase=="VERIFY_REMOVE") then
    local ok,kind,why=pcall(modules.labCore.poll,S.bound.lab)
