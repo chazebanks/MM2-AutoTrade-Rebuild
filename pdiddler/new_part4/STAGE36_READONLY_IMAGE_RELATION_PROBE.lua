@@ -39,8 +39,8 @@ local S={state="LOAD_PURE_READ_ONLY",finished=false,
  mayRecordCompletedTrade=false,mayReportProfit=false}
 E[KEY]=S
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
--- Replaced with the independently reviewed pure-module commit before release.
-local PIN36="52d27bf00002267b54511881ca4852404c99ce6e"
+-- Immutable reviewed pure module; pinning does not request a device test.
+local PIN36="6c053d61344603f93c4810047c3d3211522fcc2c"
 local loaded,core=pcall(function()
  local txt=game:HttpGet(ROOT..PIN36..
   "/pdiddler/new_part4/p4_stage36_image_relation.lua",true)

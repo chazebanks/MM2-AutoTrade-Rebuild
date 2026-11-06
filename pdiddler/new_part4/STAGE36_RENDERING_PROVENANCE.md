@@ -59,3 +59,5 @@ No completed transfer is needed. To obtain the still-missing live representation
 ## Verification record
 
 Real Lua 5.4.8 regression checks pass **16 pure diagnostic cases** and **44 actual-launcher mock cases**. Both suites demonstrated RED before implementation; the additional competing-owner isolation finding reproduced five failures before correction. Independent whole-change review found no remaining material blocker. All **37 workflow Lua suites** and **309 Python tests** pass locally; Python invokes the real Lua suites and compiles the new files. Exact commands are the existing `.github/workflows/stage14-part4-tests.yml` Lua loop plus `python3 -m unittest discover -s pdiddler/intelligence_lab -q`. GitHub run URLs and exact-head results are recorded in PR #75 after log inspection. Offline fixtures are synthetic; they are not new MM2 observations. Stage34, Stage35 and all previous Stage36 implementations are checked unchanged against `52d27bf`.
+
+Reviewed pure-module pin: `6c053d61344603f93c4810047c3d3211522fcc2c`. The new diagnostic has not been run on the device.
