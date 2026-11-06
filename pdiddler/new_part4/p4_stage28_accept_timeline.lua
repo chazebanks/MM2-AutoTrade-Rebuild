@@ -113,7 +113,7 @@ function M.ingest(s,o,diag,t)
     or not validSide(diag.ourItems,o.ourSlots)
     or not validSide(diag.theirItems,o.theirSlots)
     or o.theirResolved~=true
-    or o.ourSlots==0 or o.theirSlots==0 then
+    or o.ourSlots+o.theirSlots==0 then
     s.phase="UNRESOLVED";s.reason="current-offers-not-fully-resolved"
     s.pendingSince=nil
     s.bothAcceptedStable=false
@@ -123,7 +123,7 @@ function M.ingest(s,o,diag,t)
     if o.contextOK==true and (o.ourAccepted==true or
       o.theirAccepted==true) then
       s.tainted=true
-      s.reason="accepted-indicator-on-unresolved-or-empty-offer"
+      s.reason="accepted-indicator-without-verified-offer"
     end
     event(s,"UNRESOLVED",t)
     return "HOLD",s.reason
