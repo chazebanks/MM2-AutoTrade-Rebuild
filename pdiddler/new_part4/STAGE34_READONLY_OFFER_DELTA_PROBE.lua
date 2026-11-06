@@ -218,7 +218,23 @@ task.spawn(function()
     end
     local now=os.clock()
     if o.tradeOpen==false then
-     if current then
+     -- Stage9 distinguishes a genuine disappearance of the bound trade
+     -- window from job/root/player-GUI invalidation. Do NOT recast an
+     -- observer-scope error as the end of a valid manual trade.
+     local cleanClose=false
+     if type(diag.errors)=="table" then
+      for _,why in ipairs(diag.errors) do
+       if why=="trade-window-closed" then cleanClose=true end
+       if why=="place-or-job-changed" or
+          why=="local-player-changed" or
+          why=="trade-root-changed" or
+          why=="player-gui-missing" or why=="already-closed" then
+        cleanClose=false
+        break
+       end
+      end
+     end
+     if current or not cleanClose then
       finish("GUI_CLOSE_SCOPE_UNVERIFIED",match,ledger);return
      end
      local done=mods.compare.close(match.instance,now,bound)
