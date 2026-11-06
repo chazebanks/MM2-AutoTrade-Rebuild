@@ -158,4 +158,37 @@ check("no result leaks account IDs, job IDs, fingerprints or payload",function()
  end
  noAuthority(r)
 end)
+check("first native Stage33 StartTrade then UpdateTrade and two AcceptTrade stays unknown",function()
+ -- Grounded in the first actual iPad Stage33 anonymized JSON.
+ -- StartTrade receipt arrived before GUI window was bound; no attribution.
+ -- The exact inbound times are local elapsed client clocks, not server IDs.
+ local s=new()
+ assert(M.received(s,"StartTrade",10.4)=="PRE_OPEN_UNBOUND")
+ assert(M.open(s,11))
+ assert(M.received(s,"UpdateTrade",20.039))
+ assert(M.received(s,"AcceptTrade",27.736))
+ assert(M.received(s,"AcceptTrade",28.989))
+ assert(M.close(s,29.3))
+ assert(M.finish(s,31.8,true))
+ local r=M.summary(s)
+ assert(r.status=="WINDOW_CLOSED_WITH_CLIENT_CENSUS")
+ assert(r.preOpenUnboundCount==1 and r.preOpenUnboundNames.StartTrade==1)
+ assert(r.scopedReceipts==3 and r.retainedFirstReceipts==3)
+ assert(r.retainedRecentReceipts==3 and not r.earlierReceiptsTruncated)
+ assert(r.catalogSize==16 and r.postCloseReceipts==0)
+ assert(r.perNameCounts.UpdateTrade==1 and r.perNameCounts.AcceptTrade==2)
+ assert(r.perNameCounts.CompleteTrade==nil and
+   r.perNameCounts.EndTrade==nil and r.perNameCounts.DeclineTrade==nil)
+ assert(r.firstReceipts[1].name=="UpdateTrade"
+   and r.firstReceipts[1].phase=="WHILE_OPEN"
+   and r.firstReceipts[1].elapsed==9.039)
+ assert(r.firstReceipts[2].name=="AcceptTrade"
+   and r.firstReceipts[2].elapsed==16.736)
+ assert(r.firstReceipts[3].name=="AcceptTrade"
+   and r.firstReceipts[3].elapsed==17.989)
+ assert(r.recentReceipts[3].name=="AcceptTrade"
+   and r.recentReceipts[3].phase=="WHILE_OPEN")
+ -- Two named receipts cannot establish actors, both-Accept, or settlement.
+ noAuthority(r)
+end)
 print("PASS",passed,"Stage33 bounded read-only full Trade transport window")
