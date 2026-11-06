@@ -7,6 +7,7 @@ end
 local native=read(dir.."/STAGE39_READONLY_BATWING_KEY_PRESENCE_PROBE.lua")
 local core=read(dir.."/p4_trade_update_shape.lua")
 local presence=read(dir.."/p4_stage39_literal_key_presence.lua")
+local schemaSource=read(dir.."/p4_stage40_trade_schema_hypothesis.lua")
 local reader=assert(read(dir.."/p4_native_observer.lua"))
 local contract=assert(read(dir.."/p4_observer_contract.lua"))
 local BASE="35ec2d9a47048910a464a2ef6eb9b9f52ae306b1"
@@ -38,6 +39,7 @@ local function fixture(opts)
  assert(native,"new direct-key launcher is missing")
  assert(core,"new real shape core is missing")
  assert(presence,"stage39 key comparator module is missing")
+ assert(schemaSource,"stage40 trade schema candidate module missing")
  local calls={http={},forbidden={},allConnections={},json=0,inspect=0,prints={},warns={},waits=0,remoteConnects=0}
  local f={calls=calls,now=0,globals={}}
  local function forbidden(name)return function()calls.forbidden[#calls.forbidden+1]=name;error("forbidden boundary "..name,0)end end
@@ -166,10 +168,14 @@ local function fixture(opts)
    eq(pin,"bc6eb1394b70b84e20f18f6bcbbadd076e9bf962","new comparator pin")
    return presence
   end
+  if name=="p4_stage40_trade_schema_hypothesis"then
+   eq(pin,"9003ba057f23aa44460dbb2f9895e8ade3d73a3b","schema candidate pin")
+   return schemaSource
+  end
   error("unexpected remote code module "..tostring(name))
  end
  env.loadstring=function(src,name)
-  assert(src==core or src==reader or src==contract or src==presence,"unreviewed execution")
+  assert(src==core or src==reader or src==contract or src==presence or src==schemaSource,"unreviewed execution")
   local chunk,why=load(src,name,"t",env);if not chunk then return nil,why end
   return function()
    local m=chunk()
@@ -377,6 +383,66 @@ test("single Script instance and no unauthorized remote actions",function()
  eq(f.calls.remoteConnects,1,"one passive transport listener")
  f:finishLoop();safe(f,"NO_CORRELATED_UPDATE_IN_WINDOW")
  eq(#f.calls.forbidden,0,"no outbounds")
+end)
+
+local function anonTrade(me,partner,id)
+ return {Locked=false,LastOffer=1760000123,
+  Player1={Player=me,Accepted=false,Offer={{id,1,"Weapons"}}},
+  Player2={Player=partner,Accepted=false,Offer={}}}
+end
+test("anonymous layout agrees with local and partner objects, but remains unauthenticated",function()
+ local f=fixture();f:untilPhase("LISTENING_UPDATE_TRADE")
+ addBatwing(f);f:emit(anonTrade(f.me,f.partner,PRIVATE_KEY))
+ f:finishLoop();safe(f,"ONE_UPDATE_NEAR_SINGLE_OFFER_ADD")
+ local h=assert(f.state.result.tradeTableHypothesis)
+ eq(h.status,"ANONYMOUS_LAYOUT_HYPOTHESIS_FITS_UNAUTHENTICATED","hypothesis enum")
+ eq(h.hypothesisMatched,true,"matched candidate shape")
+ eq(h.player1ObjectEqualsLocal,true,"local exact object")
+ eq(h.player2ObjectEqualsPartner,true,"partner exact object")
+ eq(h.tripletKeyEqualsCatalogue,true,"same raw key")
+ eq(h.tripletQuantityIsOne,true,"one copy")
+ eq(h.tripletCategoryIsWeapons,true,"expected type")
+ eq(h.candidateKeyEqualsVisibleLabel,false,"private fixture key differs")
+ eq(h.ownerSideSlotBound,false,"never authenticate actual side/slot")
+ eq(f.state.result.rawItemIdConfirmed,false,"no trading authority")
+end)
+test("reversed owners fail the schema candidate check",function()
+ local f=fixture();f:untilPhase("LISTENING_UPDATE_TRADE")
+ addBatwing(f);f:emit(anonTrade(f.partner,f.me,PRIVATE_KEY))
+ f:finishLoop();safe(f,"ONE_UPDATE_NEAR_SINGLE_OFFER_ADD")
+ eq(f.state.result.tradeTableHypothesis.hypothesisMatched,false,"reversed objects")
+end)
+test("same printed name and raw key adds only name-equivalence warning",function()
+ local f=fixture({sync={Weapons={Batwing={ItemName="Batwing"}}}})
+ f:untilPhase("LISTENING_UPDATE_TRADE")
+ addBatwing(f);f:emit(anonTrade(f.me,f.partner,"Batwing"))
+ f:finishLoop();safe(f,"ONE_UPDATE_NEAR_SINGLE_OFFER_ADD")
+ local h=f.state.result.tradeTableHypothesis
+ eq(h.hypothesisMatched,true,"same shape")
+ eq(h.candidateKeyEqualsVisibleLabel,true,"name-only ambiguous")
+ eq(h.rawItemIdConfirmed,false,"no key authority")
+end)
+test("unbound early valid candidate cannot override later unrelated receipt",function()
+ local f=fixture();f:untilPhase("LISTENING_UPDATE_TRADE")
+ f:emit(anonTrade(f.me,f.partner,PRIVATE_KEY))
+ f.now=f.now+3.5;f:step()
+ addBatwing(f);f:emit({other=PRIVATE_KEY})
+ f:finishLoop();safe(f,"ONE_UPDATE_NEAR_SINGLE_OFFER_ADD")
+ eq(f.state.result.tradeTableHypothesis.hypothesisMatched,false,"only near receipt eligible")
+end)
+test("two near schema candidates remain ambiguous rather than picked by key match",function()
+ local f=fixture();f:untilPhase("LISTENING_UPDATE_TRADE")
+ addBatwing(f);f:emit(anonTrade(f.me,f.partner,PRIVATE_KEY));f:emit(anonTrade(f.partner,f.me,PRIVATE_KEY))
+ f:finishLoop();safe(f,"MULTIPLE_UPDATES_NEAR_SINGLE_OFFER_ADD")
+ eq(f.state.result.tradeTableHypothesis,nil,"ambiguous data not exported")
+end)
+test("invalid count or wrong item type cannot establish candidate layout",function()
+ local f=fixture();f:untilPhase("LISTENING_UPDATE_TRADE")
+ addBatwing(f)
+ local t=anonTrade(f.me,f.partner,PRIVATE_KEY)
+ t.Player1.Offer[1][2]=2
+ f:emit(t);f:finishLoop();safe(f,"ONE_UPDATE_NEAR_SINGLE_OFFER_ADD")
+ eq(f.state.result.tradeTableHypothesis.hypothesisMatched,false,"invalid quantity")
 end)
 print("Stage39 literal presence native: "..passed.." passed, "..#failures.." failed")
 if #failures>0 then error(table.concat(failures,"\\n"),0)end
