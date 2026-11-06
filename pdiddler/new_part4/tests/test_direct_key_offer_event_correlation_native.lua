@@ -256,6 +256,7 @@ test("event-before-GUI is preserved through a rendering delay",function()
  f:untilPhase("LISTENING_UPDATE_TRADE")
  f:emit({[1]=SECRET,[2]=2})
  eq(f.state.finished,false,"do not finish from an unbound event")
+ f.now=f.now+.06 -- distinct client-clock sample, still within association window
  addOne(f,"YourOffer")
  f:finishLoop();safe(f,"ONE_UPDATE_NEAR_SINGLE_OFFER_ADD")
  local r=f.state.result
