@@ -56,7 +56,9 @@ jobs:
             test_stage36_icon_catalog_audit \
             test_stage36_reference_safety \
             test_stage36_exact_reference \
-            test_stage36_exact_native; do
+            test_stage36_exact_native \
+            test_stage36_image_relation \
+            test_stage36_image_relation_native; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
