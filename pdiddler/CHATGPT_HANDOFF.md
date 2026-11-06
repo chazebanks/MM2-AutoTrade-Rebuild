@@ -1,5 +1,9 @@
 # PDIDDLER / MM2 AUTOTRADE — CHATGPT HANDOFF & CONTINUITY NOTES
 
+> **ACTIVE PROJECT HANDOFF (2026-11-05):** The current Gingerscope staged project is now tracked in [`pdiddler/GINGERSCOPE_ACTIVE_HANDOFF.md`](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/blob/main/pdiddler/GINGERSCOPE_ACTIVE_HANDOFF.md). **Read that new document FIRST.** This 2026-11-02 file is historical and contains superseded implementations, assumptions and instructions; do not treat it as the active source of truth for Stage25–32, the final Accept boundary, or the next Delta test. Current Stage32 is draft PR #71 with its first real iPad result pending.
+
+
+
 **Last updated:** 2026-11-02  
 **Repository:** `chazebanks/MM2-AutoTrade-Rebuild`  
 **Purpose:** This file is the canonical handoff for continuing the same project in a new ChatGPT conversation without reconstructing the history from scratch.
