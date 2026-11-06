@@ -165,4 +165,25 @@ test("source pricing independent: inventory evidence not a quote",function()
  local r=L.summary(s)
  assert(r.mayReportProfit==false and r.reviewOnly)
 end)
+test("eligible gain plus untracked weapon loss reports zero eligible losses",function()
+ -- Hypothetical successful exchange: give one noneligible/common weapon,
+ -- receive one eligible weapon. Stage29 only counts the eligible rows.
+ local s,scope=fixture()
+ local original=inventory(2,1)
+ original.rawOwned=4 -- three eligible copies plus one excluded weapon
+ original.fingerprint="eligible:2,1|excluded:1"
+ local exchanged=inventory(2,2)
+ exchanged.rawOwned=4 -- four eligible copies, excluded weapon gone
+ exchanged.fingerprint="eligible:2,2|excluded:0"
+ assert(before(s,scope,original)==="OBSERVED")
+ assert(close(s,scope)==="OBSERVED")
+ assert(after(s,scope,exchanged,16,2)==="OBSERVED")
+ assert(after(s,scope,exchanged,17,3)==="ELIGIBLE_DELTA_UNATTRIBUTED")
+ local r=L.summary(s)
+ assert(r.gainedEligibleCopies==1 and r.lostEligibleCopies==0)
+ assert(r.changedEligibleTypes==1 and r.rawWeaponInventoryChanged==true)
+ -- Zero *eligible* losses must not be misread as zero total weapons given.
+ assert(r.tradeOutcome=="UNKNOWN" and r.mayRecordCompletedTrade==false)
+ assert(r.serverCompletionProven==false and r.authorizesAccept==false)
+end)
 print("PASS",cases,"Stage29 pure post-close own inventory ledger evidence")
