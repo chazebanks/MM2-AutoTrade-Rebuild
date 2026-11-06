@@ -9,29 +9,75 @@ end
 local function trim(s)
  return s:match("^%s*(.-)%s*$")
 end
+-- Only exact bounded Roblox-documented URI shapes become keys.
+-- Thumb asset ID remains a separate image-reference family from raw asset ID.
+local function validId(id)
+ return type(id)=="string" and #id>0 and #id<=22 and not id:match("^0+$")
+end
+local function canonId(id) return id:gsub("^0+","") end
 local function iconKey(x)
  if not legal(x) then return nil,"EMPTY_OR_INVALID" end
- local s=trim(x)
+ local s=trim(x):lower()
  if s=="" then return nil,"EMPTY_OR_INVALID" end
- s=s:lower()
- local id=s:match("^rbxassetid://(%d+)$")
- if not id then
-  id=s:match("^https?://www%.roblox%.com/asset/%?id=(%d+)$")
- end
+ local id=s:match("^rbxassetid://(%d+)$") or
+  s:match("^https?://www%.roblox%.com/asset/%?id=(%d+)$")
  if id then
-  if #id>22 or id:match("^0+$") then return nil,"INVALID_ASSET_ID" end
-  id=id:gsub("^0+","")
-  return "id:"..id,"ROBLOX_ASSET_ID"
+  if not validId(id) then return nil,"INVALID_ASSET_ID" end
+  return "asset:"..canonId(id),"ROBLOX_ASSET_ID"
+ end
+ local thumb,w,h=s:match("^rbxthumb://type=asset&id=(%d+)&w=(%d+)&h=(%d+)$")
+ if thumb then
+  local wi,hi=tonumber(w),tonumber(h)
+  if not validId(thumb) or not wi or not hi or
+     wi<1 or hi<1 or wi>2048 or hi>2048 then
+   return nil,"ROBLOX_THUMB_INVALID"
+  end
+  return "thumb:"..canonId(thumb),"ROBLOX_THUMB_ASSET"
+ end
+ if s:match("^rbxgameasset://[%w_/%-%.]+$") then
+  return "gameasset:"..s,"ROBLOX_GAMEASSET"
  end
  if s:match("^rbxasset://[%w_/%-%.]+$") then
   return "builtin:"..s,"ROBLOX_BUILTIN_PATH"
+ end
+ if s:match("^rbxhttp://[%w_/%?&=%.%-%+]+$") then
+  return "rbxhttp:"..s,"ROBLOX_HTTP"
  end
  if s:match("^[%w_%-%.]+%.png$") or
     s:match("^[%w_%-%.]+%.jpg$") or
     s:match("^[%w_%-%.]+%.jpeg$") then
   return "filename:"..s,"FILENAME"
  end
+ if s:match("^rbxthumb://") then
+  return nil,"ROBLOX_THUMB_UNSUPPORTED_VARIANT"
+ end
+ if s:match("^rbxgameasset://") then
+  return nil,"ROBLOX_GAMEASSET_UNSUPPORTED_VARIANT"
+ end
+ if s:match("^rbxassetid://") then
+  return nil,"ROBLOX_ASSET_ID_UNSUPPORTED_VARIANT"
+ end
+ if s:match("^https?://www%.roblox%.com/asset/") then
+  return nil,"ROBLOX_ASSET_URL_UNSUPPORTED_VARIANT"
+ end
+ if s:match("^https?://") then return nil,"OTHER_HTTP_IMAGE_REFERENCE" end
+ if s:match("^%d+$") then return nil,"PLAIN_NUMERIC_REFERENCE" end
+ if s:match("^[%a][%w+%.%-]*://") then
+  return nil,"OTHER_URI_SCHEME"
+ end
  return nil,"INCOMPARABLE_REFERENCE_FORMAT"
+end
+local function formatCounts()
+ return {assetId=0,thumbAsset=0,gameAsset=0,builtin=0,
+  robloxHttp=0,filename=0,unsupported=0}
+end
+local function recordFormat(counts,fmt)
+ local col=({
+  ROBLOX_ASSET_ID="assetId",ROBLOX_THUMB_ASSET="thumbAsset",
+  ROBLOX_GAMEASSET="gameAsset",ROBLOX_BUILTIN_PATH="builtin",
+  ROBLOX_HTTP="robloxHttp",FILENAME="filename"
+ })[fmt] or "unsupported"
+ counts[col]=counts[col]+1
 end
 local function allowCount(x,hi)
  return type(x)=="number" and x==x and
@@ -44,6 +90,8 @@ function M.assess(input)
   iconReferenceFormat="UNAVAILABLE",catalogEntriesAudited=0,
   catalogEntriesWithComparableArt=0,catalogEntriesWithoutComparableArt=0,
   catalogImageCandidateReferences=0,
+  catalogEntriesFormatInspected=0,catalogueReferenceFormatCounts=formatCounts(),
+  slotIconReferenceComparable=false,
   matchingCatalogueEntries=0,distinctMatchingWeaponKeys=0,
   imageReferenceAmbiguous=true,uniqueIconCandidateFound=false,
   usesSpriteSheet=false,catalogueNotServerAttestation=true,
@@ -66,7 +114,7 @@ function M.assess(input)
  r.usesSpriteSheet=input.usesSpriteSheet==true
  local raw,format=iconKey(input.icon)
  r.iconReferenceFormat=format
- if not raw then r.reason="slot-icon-reference-not-comparable";return r end
+ r.slotIconReferenceComparable=raw~=nil
  if input.imageVisible~=true then
   r.reason="slot-icon-image-not-visible";return r
  end
@@ -93,7 +141,8 @@ function M.assess(input)
    if type(candidate)~="string" or #candidate>512 then
     r.reason="catalogue-art-value-malformed";return r
    end
-   local ck=iconKey(candidate)
+   local ck,ckFormat=iconKey(candidate)
+   recordFormat(r.catalogueReferenceFormatCounts,ckFormat)
    if ck and not keyset[ck] then
     keyset[ck]=true;hasArt=true
     refCount=refCount+1
@@ -102,6 +151,11 @@ function M.assess(input)
   end
   if hasArt then withArt=withArt+1 else missing=missing+1 end
   if match then matches=matches+1 end
+ end
+ r.catalogEntriesFormatInspected=#input.entries
+ if not raw then
+  r.reason="slot-icon-reference-not-comparable"
+  return r
  end
  r.catalogEntriesAudited=#input.entries
  r.catalogEntriesWithComparableArt=withArt
