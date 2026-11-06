@@ -75,11 +75,11 @@ class Stage30Tests(unittest.TestCase):
             'STAGE25_SCANNER_ONLY_BOOT.lua',
             'scanner.getRecord',
             'scanner.getOwnInventory',
-            'source' if False else 'import(S26,"p4_native_observer")',
+            'import(S26,"p4_native_observer")',
             'import(S28,"p4_stage28_accept_timeline")',
             'import(S30,"p4_stage30_client_signal_census")',
             'local S30="3ccf9219580726e2b122e1b9d4bdb6039eff96b0"',
-            'scope' if False else 'partnerUserId=partner.UserId',
+            'partnerUserId=partner.UserId',
             'mods.timeline.ingest(S.timeline,o,d,os.clock())',
         ):
             self.assertIn(required,src)
