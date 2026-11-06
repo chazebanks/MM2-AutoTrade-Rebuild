@@ -170,7 +170,8 @@ task.spawn(function()
  while not S.finished and E[KEY]==S and game.JobId==job and
    players.LocalPlayer==me and os.clock()-start<90 do
   local root=tradeRoot()
-  local slot,side,index=root and filledSlot(root)
+  local slot,side,index
+  if root then slot,side,index=filledSlot(root) end
   if slot and side and index then
    if root==lastRoot and slot==lastSlot then
     consecutive=consecutive+1
