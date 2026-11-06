@@ -1462,6 +1462,9 @@ local function renderScannerResult(player,state,detail,order)
     return guiSetPlayer(player,state,detail,order)
 end
 
+-- Stage24: annotate the EXISTING successful scan; no new scanner/RPC.
+-- A timestamp describes this local stable-read event, not server attestation.
+local scanPublicationSerial = 0
 local Live = {
     byUserId = {},
     order = {},
@@ -1646,10 +1649,26 @@ local function applyPlayerResult(p, state, inv)
     local uid = tostring(p.UserId)
     local order = getOrder(p)
 
+    local proof = nil
+    if (state=="whitelist" or state=="blacklist")
+        and type(inv)=="table" and type(inv.fingerprint)=="string"
+        and inv.fingerprint~="" and (inv.unmapped or 0)==0
+        and (inv.badQty or 0)==0 then
+        scanPublicationSerial += 1
+        proof = {
+            kind = "local-stable-scan-publication-v1",
+            jobId = game.JobId,
+            playerUserId = p.UserId,
+            fingerprint = inv.fingerprint,
+            completedAtMono = os.clock(),
+            sequence = scanPublicationSerial,
+        }
+    end
     Live.byUserId[uid] = {
         player = p,
         state = state,
         inv = inv,
+        scanProof = proof,
     }
 
     if state == "whitelist" then
