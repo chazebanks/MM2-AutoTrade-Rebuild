@@ -71,7 +71,7 @@ class Stage28Tests(unittest.TestCase):
         code=TIMELINE.read_text()
         for frag in ('o.contextOK~=true',
                      'o.theirResolved~=true',
-                     'o.ourSlots==0 or o.theirSlots==0',
+                     'o.ourSlots+o.theirSlots==0',
                      's.lastSignature and signature~=s.lastSignature',
                      's.hadAnyAccept or ours or theirs',
                      't-s.pendingSince>=s.minStableGap',
