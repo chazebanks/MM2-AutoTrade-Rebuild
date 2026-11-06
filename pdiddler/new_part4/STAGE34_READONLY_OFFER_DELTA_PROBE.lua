@@ -25,7 +25,7 @@ end
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local PIN26="a2a2e601be864f970da0a69c436ab3b12efd8112"
 local PIN29="06374ead14ce0b18fb05e55c80c2df6a143bf0ce"
-local PIN34="ec6fa655deb9e683b12a072225b24bb6a01e7598"
+local PIN34="85ad36c0cdd203b0e5b68f2cf8973ff7e1978e74"
 local players=game:GetService("Players")
 local me=players.LocalPlayer
 if not me then warn("[STAGE34] player not ready") return end
