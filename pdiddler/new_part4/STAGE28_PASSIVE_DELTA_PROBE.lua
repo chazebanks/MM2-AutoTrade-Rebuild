@@ -38,7 +38,7 @@ E[KEY]=S
 local function report(reason,timeline)
  if S.captured then return end
  S.captured=true
- local summary=timeline and timeline.summary and timeline.module.summary(timeline.state)
+ local summary=timeline and timeline.module and timeline.module.summary(timeline.state)
    or {
     schema="gingerscope-stage28-acceptance-timeline-v1",
     status=S.status,reason=reason,
