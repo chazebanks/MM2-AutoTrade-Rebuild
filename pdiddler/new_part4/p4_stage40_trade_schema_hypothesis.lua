@@ -42,7 +42,7 @@ local ONE={[1]=true}
 local ROW={[1]=true,[2]=true,[3]=true}
 function M.inspect(args,key,visibleName,me,partner)
  local r=report()
- if type(args)~="table" or getmetatable(args)~=nil or rawget(args,"n")~=1
+ if not exactKeys(args,{n=true,[1]=true}) or rawget(args,"n")~=1
   or rawget(args,1)==nil or type(key)~="string" or #key==0 or #key>256
   or type(visibleName)~="string" or #visibleName==0 or #visibleName>256
   or me==nil or partner==nil or me==partner then return r end
