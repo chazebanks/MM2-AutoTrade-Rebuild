@@ -12,6 +12,11 @@ local function fixture()
  local env={}
  local calls={}
  local warnings={}
+ local tasks={}
+ local mono=100
+ os.clock=function()return mono end
+ task={spawn=function(fn)tasks[#tasks+1]=fn end,
+   wait=function(dt)mono=mono+(dt or 0.3) end}
  getgenv=function()return env end
  warn=function(m) warnings[#warnings+1]=tostring(m) end
  loadstring=load
@@ -53,13 +58,20 @@ local function fixture()
     elseif part=="P4_REPRICE_ONLY" then part="strict"
     elseif part=="pdiddler3_scanner_view_v1" then part="scannerView"
     elseif part=="pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION" then part="scanner"
+    elseif part=="STAGE25_READONLY_DIAGNOSTIC" then part="probe"
     end
-    assert(stub[part],"bootstrap fetched unauthorized module: "..tostring(part))
+    assert(stub[part] or part=="probe",
+      "bootstrap fetched unauthorized module: "..tostring(part))
     calls[#calls+1]=part
+    if part=="probe" then
+      local file=assert(io.open(dir.."/STAGE25_READONLY_DIAGNOSTIC.lua","r"))
+      local source=file:read("*a");file:close()
+      return source
+    end
     return stub[part]..string.rep(" ",60)
   end}
  return {env=env,Players=Players,rec=rec,player=p,calls=calls,
-   warnings=warnings,run=run,capture=capture}
+   warnings=warnings,run=run,capture=capture,tasks=tasks}
 end
 
 check("opt-in off means no code downloaded",function()
@@ -89,12 +101,17 @@ check("existing scanner only loads profile+reprice+view+scanner",function()
    and f.calls[3]=="scannerView" and f.calls[4]=="scanner")
  local second=f.run()
  assert(second==owner and #f.calls==4)
+ assert(#f.tasks==1)
 end)
 check("probe can inspect scanner-only cache, never treat it as trading authority",function()
  local f=fixture();f.env.PDIDDLER_ALLOW_SCANNER_ONLY_TEST=true
  local owner=f.run()
- assert(owner)
- os.clock=function()return 100 end
+ assert(owner and #f.tasks==1)
+ -- The launcher must call the existing read-only diagnostic ONCE itself;
+ -- no second user-pasted script or gameplay action.
+ f.tasks[1]()
+ assert(owner.probeStatus=="ONE_REPORT_CAPTURED")
+ assert(#f.calls==5 and f.calls[5]=="probe")
  local probe=f.capture()
  local x=probe.fromActive()
  assert(x.sourceFresh==false)
