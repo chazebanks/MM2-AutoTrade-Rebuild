@@ -27,7 +27,8 @@ class Stage36IconCatalogTests(unittest.TestCase):
             'catalogue-entry-invalid-or-duplicate',
             'rawItemIdConfirmed=false,exactWeaponIdentityConfirmed=false',
             'causalAttributionProven=false,authorizesTrade=false',
-            'mayRecordCompletedTrade=false,mayReportProfit=false',
+            'mayRecordCompletedTrade=false',
+            'mayReportProfit=false',
             'readOnly=true,tradeOutcome="UNKNOWN"',
         ):
             self.assertIn(phrase,src)
