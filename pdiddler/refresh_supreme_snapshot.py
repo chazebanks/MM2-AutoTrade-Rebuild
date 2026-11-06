@@ -26,6 +26,16 @@ from urllib.request import Request, urlopen
 PAGES = {"ancient": "ancients", "chroma": "chromas", "godly": "godlies"}
 EXPECTED = {"ancient": 16, "chroma": 46, "godly": 128}
 STABILITIES = {"Stable", "Fluctuating", "Overpaid For", "Underpaid For", "Doing Well"}
+# Source pages also carry non-weapon entries. Exclude them ONLY with matching
+# structural evidence: Chroma tierpets, or explicitly hidden Godly test rows.
+# Any new non-weapon/hidden row is a hard failure pending manual review.
+KNOWN_NONWEAPON_PETS = {"chroma": {
+    "Chroma Fire Bat", "Chroma Fire Bear", "Chroma Fire Bunny",
+    "Chroma Fire Cat", "Chroma Fire Dog", "Chroma Fire Fox",
+    "Chroma Fire Pig",
+}}
+KNOWN_HIDDEN_PLACEHOLDERS = {"godly": {"Batwing", "Black Luger"}}
+
 VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr", "sep"}
 
 
@@ -110,6 +120,13 @@ def parse_page(text, page):
     if titles and (len(titles) != 1 or f"MM2 {page.title()} Values" not in titles[0]):
         raise ValueError(f"source category mismatch for {page}: {titles}")
     records, identities = [], set()
+    pet_columns = {
+        id(n)
+        for section in nodes
+        if section.tag == "section" and section.attrs.get("data-tier") == "pets"
+        for n in section.walk()
+        if n.has_class("itemcolumn")
+    }
     for column in (n for n in nodes if n.has_class("itemcolumn")):
         descendants = list(column.walk())
         head = one([n for n in descendants if n.has_class("itemhead")], "item name").text()
@@ -118,6 +135,14 @@ def parse_page(text, page):
         expanded_head = "Chroma " + head[3:] if page == "chroma" and head.startswith("C. ") else head
         if expanded_head.casefold() != name.casefold():
             raise ValueError(f"name/header disagreement: {head!r}, {name!r}")
+        is_pet = id(column) in pet_columns
+        is_hidden = bool(re.search(r"display\s*:\s*none", column.attrs.get("style", ""), re.I))
+        if is_pet or is_hidden:
+            if is_pet and not is_hidden and name in KNOWN_NONWEAPON_PETS.get(page, set()):
+                continue
+            if is_hidden and not is_pet and name in KNOWN_HIDDEN_PLACEHOLDERS.get(page, set()):
+                continue
+            raise ValueError(f"unreviewed excluded source row {page}:{name} pet={is_pet} hidden={is_hidden}")
         if name.casefold() in identities:
             raise ValueError(f"duplicate source identity {page}:{name}")
         identities.add(name.casefold())
@@ -245,6 +270,8 @@ def main():
         if f"MM2 {page.title()} Values" not in text:
             raise ValueError(f"missing verified category title in {url}")
         pages[page], published = parse_page(text, page)
+        if len(pages[page]) != EXPECTED[page]:
+            raise ValueError(f"unexpected visible eligible source rows for {page}: {len(pages[page])} != {EXPECTED[page]}")
         if epoch(published) > observed or observed > int(time.time()):
             raise ValueError(f"source timestamp in the future: {url}")
         sources[page] = {"url": url, "observedAt": iso(observed), "publishedAt": published,

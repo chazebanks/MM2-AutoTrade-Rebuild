@@ -1,0 +1,36 @@
+{
+  "schema": "gingerscope-supreme-browser-import-v1",
+  "acquisition": "Firecrawl rawHtml live fetch of official Supreme category page; not a direct GitHub Actions fetch",
+  "sourcePublishedAt": "2026-11-04T17:27:12Z",
+  "observedAt": "2026-11-06T00:47:22Z",
+  "contentAgePolicy": "original Python min(24h after observation,72h after source publication)",
+  "sources": {
+    "ancient": {
+      "slug": "ancients",
+      "url": "https://supremevalues.com/mm2/ancients",
+      "blobSha": "6a3831410b56e37d035031decb4eb0e965005bec",
+      "observedAt": "2026-11-06T00:47:22Z",
+      "publishedAt": "2026-11-04T17:27:12Z",
+      "scrapeId": "01a1ae53-0b81-76ec-ae4a-b39b0d5513ee",
+      "statusCode": 200
+    },
+    "chroma": {
+      "slug": "chromas",
+      "url": "https://supremevalues.com/mm2/chromas",
+      "blobSha": "ac91d93ec38757912da971f414d2206b1c1dca54",
+      "observedAt": "2026-11-06T00:47:22Z",
+      "publishedAt": "2026-11-04T17:27:12Z",
+      "scrapeId": "01a1ae53-0e81-73fa-8a32-e3f629be02f8",
+      "statusCode": 200
+    },
+    "godly": {
+      "slug": "godlies",
+      "url": "https://supremevalues.com/mm2/godlies",
+      "blobSha": "57b2d83c330d3dcf3dbb95a96a974bb1aea9dca6",
+      "observedAt": "2026-11-06T00:47:22Z",
+      "publishedAt": "2026-11-04T17:27:12Z",
+      "scrapeId": "01a1ae53-0aeb-722c-807e-45f2ed0643df",
+      "statusCode": 200
+    }
+  }
+}

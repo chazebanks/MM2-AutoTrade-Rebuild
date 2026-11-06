@@ -63,6 +63,32 @@ class ParserTests(unittest.TestCase):
         rows, _ = R.parse_page(page(text), "chroma")
         self.assertEqual(rows[0]["name"], "Chroma Traveler's Gun")
 
+    def test_known_chroma_pet_section_is_not_mispriced_as_weapon(self):
+        html = page(row("Chroma Laser") +
+                    '<section class="grid" data-tier="pets">' +
+                    row("Chroma Fire Bat") + '</section>')
+        rows, _ = R.parse_page(html, "chroma")
+        self.assertEqual([x["name"] for x in rows], ["Chroma Laser"])
+
+    def test_unfamiliar_pet_cannot_be_silently_excluded(self):
+        html = page(row("Chroma Laser") +
+                    '<section class="grid" data-tier="pets">' +
+                    row("Chroma Fire Dragon") + '</section>')
+        with self.assertRaisesRegex(ValueError, "unreviewed excluded"):
+            R.parse_page(html, "chroma")
+
+    def test_known_hidden_test_rows_are_excluded_not_market_authority(self):
+        hidden = row("Black Luger").replace(
+            'class="itemcolumn"', 'class="itemcolumn" style="display:none"')
+        rows, _ = R.parse_page(page(row("Laser") + hidden), "godly")
+        self.assertEqual([x["name"] for x in rows], ["Laser"])
+
+    def test_unknown_hidden_item_does_not_become_price_proof(self):
+        hidden = row("Gingerscope 2").replace(
+            'class="itemcolumn"', 'class="itemcolumn" style="display: none"')
+        with self.assertRaisesRegex(ValueError, "unreviewed excluded"):
+            R.parse_page(page(hidden), "godly")
+
     def test_duplicate_casefolded_source_identity_fails(self):
         with self.assertRaisesRegex(ValueError, "duplicate"):
             R.parse_page(page(row("Alice") + row("ALICE")), "ancient")
