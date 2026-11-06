@@ -7,7 +7,7 @@ local M={}
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local PIN="1971b93d324f0275e6a9affb472ac3e804439ed8"
 local PLACEMENT_PIN="8b51d5f631a92b3e376fb6cf94d8048bb8e777a1"
-local STRATEGY_PIN="67be6413abc03efff1f1661b07d642881460f87b"
+local STRATEGY_PIN="4032f96a3359d744bf3258b8c3cb15de9042b39b"
 local REVIEW_PIN="b8618226a983088d00bc52afa8b666a87aba67b9"
 local function readModule(name,dependency)
     local pin=(name=="p4_strategy_permit") and STRATEGY_PIN
@@ -75,10 +75,11 @@ function M.run(scanner,profile,placement)
     local offerCore,offerNative,strategyModule,strategyReview
     local recoveryModules
     if placementEnabled then
-        assert(type(placement.validatePermit)=="function"
-            and type(placement.nextProposal)=="function"
-            and type(placement.sendOnce)=="function",
-            "verified placement callbacks missing")
+        assert(type(placement.sendOnce)=="function"
+            and (type(placement.strategy)=="table"
+             or (type(placement.validatePermit)=="function"
+              and type(placement.nextProposal)=="function")),
+            "verified strategy or injected lab callbacks missing")
         offerCore=readModule("p4_offer_executor")
         offerNative=readModule("p4_native_offer")
         if type(placement.strategy)=="table" then
@@ -299,7 +300,8 @@ function M.run(scanner,profile,placement)
                                             clickOnce=placement.recovery.clickOnce})
                                         return r.coordinator.new({
                                             session=handle.config.session,
-                                            clock=os.clock,observer=native,
+                                            clock=placement.recovery.clock or os.clock,
+                                            observer=native,
                                             obsHandle=handle,safety=r.safety,
                                             executor=r.executor,native=r.native,
                                             stability=r.stability,
