@@ -48,7 +48,8 @@ jobs:
             test_stage28_accept_timeline \
             test_stage28_native_accept_integration \
             test_stage29_postclose_ledger \
-            test_stage30_client_signal_census; do
+            test_stage30_client_signal_census \
+            test_stage32_result_correlation; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12

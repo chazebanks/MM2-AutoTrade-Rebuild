@@ -165,4 +165,46 @@ test("source pricing independent: inventory evidence not a quote",function()
  local r=L.summary(s)
  assert(r.mayReportProfit==false and r.reviewOnly)
 end)
+test("eligible gain plus untracked weapon loss reports zero eligible losses",function()
+ -- Hypothetical successful exchange: give one noneligible/common weapon,
+ -- receive one eligible weapon. Stage29 only counts the eligible rows.
+ local s,scope=fixture()
+ local original=inventory(2,1)
+ original.rawOwned=4 -- three eligible copies plus one excluded weapon
+ original.fingerprint="eligible:2,1|excluded:1"
+ local exchanged=inventory(2,2)
+ exchanged.rawOwned=4 -- four eligible copies, excluded weapon gone
+ exchanged.fingerprint="eligible:2,2|excluded:0"
+ assert(before(s,scope,original)=="OBSERVED")
+ assert(close(s,scope)=="OBSERVED")
+ assert(after(s,scope,exchanged,16,2)=="OBSERVED")
+ assert(after(s,scope,exchanged,17,3)=="ELIGIBLE_DELTA_UNATTRIBUTED")
+ local r=L.summary(s)
+ assert(r.gainedEligibleCopies==1 and r.lostEligibleCopies==0)
+ assert(r.changedEligibleTypes==1 and r.rawWeaponInventoryChanged==true)
+ -- Zero *eligible* losses must not be misread as zero total weapons given.
+ assert(r.tradeOutcome=="UNKNOWN" and r.mayRecordCompletedTrade==false)
+ assert(r.serverCompletionProven==false and r.authorizesAccept==false)
+end)
+test("one-sided eligible gift increases raw inventory with no outgoing offer",function()
+ -- Synthetic ledger fixture matching the native Stage32 user's corrected
+ -- one-sided Iceblaster receipt (+1 eligible, no item offered by receiver).
+ -- The fixture uses generic checker IDs; it does NOT assert Iceblaster's ID.
+ local s,scope=fixture()
+ local baseline=inventory(2,1)
+ local received=inventory(2,2) -- one additional eligible copy
+ assert(baseline.rawOwned==3 and received.rawOwned==4)
+ assert(before(s,scope,baseline)=="OBSERVED")
+ assert(close(s,scope)=="OBSERVED")
+ assert(after(s,scope,received,16,2)=="OBSERVED")
+ assert(after(s,scope,received,17,3)=="ELIGIBLE_DELTA_UNATTRIBUTED")
+ local r=L.summary(s)
+ assert(r.gainedEligibleCopies==1 and r.lostEligibleCopies==0)
+ assert(r.changedEligibleTypes==1 and r.rawWeaponInventoryChanged==true)
+ assert(r.postReadbacksObserved==2)
+ -- Manual user account is separate from client-only settlement authority.
+ assert(r.tradeOutcome=="UNKNOWN")
+ assert(r.serverCompletionProven==false and r.mayRecordCompletedTrade==false)
+ assert(r.mayReportProfit==false and r.authorizesAccept==false)
+end)
 print("PASS",cases,"Stage29 pure post-close own inventory ledger evidence")
