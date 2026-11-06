@@ -33,7 +33,8 @@ local function compact(rows,kind)
   local path=r.path
   if pathSafe(path) and not seen[path] and #out<20 then
    if kind=="attrs" then
-    if candidate(path) and (r.valueType=="string" or
+    local last=path:match("([^%.]+)$")
+    if candidate(last) and (r.valueType=="string" or
       r.valueType=="number" or r.valueType=="boolean") and
       type(r.nonempty)=="boolean" then
      out[#out+1]={path=path,valueType=r.valueType,
@@ -86,6 +87,9 @@ function M.report(raw)
  if raw.slotVisible~=true then
   base.reason="offer-slot-not-visible";return base
  end
+ if raw.metadataTruncated==true then
+  base.reason="native-slot-metadata-truncated";return base
+ end
  if raw.itemNameLabelPresent~=true and
     raw.itemNameLabelPresent~=false then
   base.reason="display-label-presence-unverified";return base
@@ -104,8 +108,9 @@ function M.report(raw)
  base.candidateValueNodes=values
  base.imageNodes=images
  for _,r in ipairs(attrs) do
-  if r.nonempty and (r.path:lower():find("id",1,true) or
-      r.path:lower():find("key",1,true)) then
+  local last=r.path:match("([^%.]+)$"):lower()
+  if r.nonempty and (last=="id" or last:find("itemid",1,true) or
+      last:find("weaponid",1,true) or last:find("key",1,true)) then
     base.candidateIdFieldPresent=true
   end
  end
