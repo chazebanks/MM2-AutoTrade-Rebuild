@@ -117,6 +117,16 @@ class NativeControlledLabTests(unittest.TestCase):
         self.assertNotIn('jobId=',core)
 
     @unittest.skipUnless(shutil.which("lua5.4"),"Lua5.4 available in GitHub CI")
+    def test_complete_native_delta_ui_launcher_compiles_without_running(self):
+        proc=subprocess.run(
+            ["lua5.4","-e",
+             "assert(loadfile('pdiddler/new_part4/STAGE27_CONTROLLED_DELTA_LAB.lua'))"],
+            cwd=str(ROOT.parent),capture_output=True,text=True,
+            timeout=10,check=False)
+        self.assertEqual(proc.returncode,0,
+                         proc.stdout+"\\n"+proc.stderr)
+
+    @unittest.skipUnless(shutil.which("lua5.4"),"Lua5.4 available in GitHub CI")
     def test_actual_lua_state_machine_and_native_mock(self):
         for filename,expected in (
             ("test_stage27_lab_transaction.lua",
