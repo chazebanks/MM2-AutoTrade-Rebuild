@@ -142,10 +142,10 @@ class Stage32Tests(unittest.TestCase):
              str(P4)],
             cwd=str(ROOT.parent), text=True, capture_output=True, timeout=12,
         )
-        self.assertEqual(p.returncode, 0, p.stdout+"\\n"+p.stderr)
+        self.assertEqual(p.returncode, 0, p.stdout+"\n"+p.stderr)
         self.assertRegex(
             p.stdout,
-            r"PASS\\s+\\d+\\s+Stage29 pure post-close own inventory ledger evidence",
+            r"PASS\s+\d+\s+Stage29 pure post-close own inventory ledger evidence",
         )
 
     @unittest.skipUnless(shutil.which("lua5.4"),"Lua5.4 in CI")
