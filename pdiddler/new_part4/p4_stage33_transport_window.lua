@@ -93,7 +93,7 @@ function M.summary(s)
  for i,v in ipairs(s.tail) do
   tail[i]={name=v.name,phase=v.phase,elapsed=v.elapsed}
  end
- local counts={},pre={}
+ local counts,pre={},{}
  for n,q in pairs(s.scopedNames) do counts[n]=q end
  for n,q in pairs(s.preOpenNames) do pre[n]=q end
  return {schema="gingerscope-stage33-trade-transport-census-v1",
