@@ -1,0 +1,88 @@
+# Gingerscope — Active ChatGPT Continuity Handoff
+**Updated:** 2026-11-05 (America/New_York)  
+**Status:** Stage 32 built + offline/CI verified; **FIRST NATIVE STAGE32 iPad RESULT PENDING**.  
+**Repository:** https://github.com/chazebanks/MM2-AutoTrade-Rebuild  
+**Active development branch:** `feature/gingerscope-stage32-result-signal-inventory-correlation`  
+**Stage 32 draft PR:** https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/71  
+**Canonical continuity note for new conversations.** This file supersedes older or contradictory historical notes under `pdiddler/CHATGPT_HANDOFF.md`. Do not reconstruct the current strategy from that 2026-11-02 legacy handoff. Read the staged sources and latest user-supplied evidence before changing anything.
+
+## Start here in a new ChatGPT conversation
+
+**User's goal:** Continue building and validating **Gingerscope**, a modular, reliable Roblox Murder Mystery 2 auto-trade system on an **iPad with Delta**. Proceed **one stage / one failure boundary at a time**. User likes the current rigorous workflow: inspect GitHub source first, distinguish offline mock tests from verified iPad behavior, run real GitHub CI, isolate failure causes and regressions, test with one short pinned Lua loader, read anonymized JSON outputs, and save every confirmed checkpoint to GitHub. Avoid speculation, empty affirmations, blind patch-stacking, redundant modules or repeats of previously proven tests.
+
+**NEXT ACTION**: The user is currently testing **Stage 32** on iPad. When they return with `GINGERSCOPE STAGE32 ANONYMIZED` JSON (possibly with their account of what happened on screen), **analyze that specific output first**, call out failures as well as successes, compare native evidence with expected code paths, and record the actual result in Stage32 PR #71. Do not automatically start Stage33 or edit unrelated code. If output is missing or ambiguous, use the source and log evidence and work on the relevant single failure. Never report a trade completed merely from a GUI close, `CompleteTrade` event name, accepted indicators, or inventory delta. If the user instead asks to continue without returning a Stage32 result, distinguish the pending native checkpoint from further offline work.
+
+### The exact Stage 32 Delta test script (pinned, confirmed in GitHub)
+
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/e1da79f9d55697cc5c636e019f3ef8bdef3bd0ca/pdiddler/new_part4/STAGE32_READONLY_RESULT_DELTA_PROBE.lua"))()
+```
+
+This probe is **read-only**: it cannot press Accept/Decline, initiate requests, insert/remove an item or send Discord messages. User must rejoin a fresh MM2 server to clear old listener ownership, select Tablet, run loader before a manual trade, let scanner finish, and wait for `[GINGERSCOPE STAGE32] BASELINE + CLIENT SIGNALS BOUND`. An actual successful-exchange result needs a **voluntary, personally inspected manual transaction** with a trusted partner and only genuinely expendable low-value weapon, with both players choosing their own confirmations. If user does not want to risk an item, do not push them. When trade closes, probe takes two post-close own-inventory reads, copies/prints `[GINGERSCOPE STAGE32 ANONYMIZED]` JSON. Ask user to say whether they visibly saw the manual exchange finish, and **treat that as reported observation rather than server attestation**.
+
+**Latest confirmed Stage32 CI:** GitHub Actions run `42160694122` **SUCCESS**, full Python **280/280 tests** and new Stage32 pure Lua **17/17 tests**, plus all inherited Lua suites. The launcher compiled in CI and was fetched/verified at pinned commit `e1da79f9d55697cc5c636e019f3ef8bdef3bd0ca`. **Not yet live-tested in Delta as of this handoff.**
+
+## Architecture / staged development
+
+The new/current staged work is in `pdiddler/new_part4/` plus `pdiddler/intelligence_lab/`. Multiple draft PRs build on previous stages; they are **not equivalent to merged production**. Do not change production loader or claim autonomous trading is active. Stage32 intentionally composes prior read-only/pure modules:
+- Stage25 scanner-only: exact verified player inventories / own-inventory `GetProfileData` reader; no trading authority.
+- Stage9 native `p4_native_observer.lua`: reads real `TradeGUI` / `TradeGUI_Phone` current trade root, bound partner, item offers and visible Accept indicators.
+- Stage28 `p4_stage28_accept_timeline.lua`: one session's client Accept, mutations, GUI close.
+- Stage29 `p4_stage29_postclose_ledger.lua`: one pre-close own-inventory read, exactly two post-close reads, same job/account/partner/session.
+- Stage30 `p4_stage30_client_signal_census.lua`: named client inbound RemoteEvent receipts/timing, zero payload arguments.
+- Stage32 `p4_stage32_result_correlation.lua`: passive result-named receipts + inventory readbacks + Stage28 GUI state; always no completed-trade authority.
+
+`STAGE32_READONLY_RESULT_DELTA_PROBE.lua` watches **only three incoming names** `CompleteTrade`, `EndTrade`, `DeclineTrade` via `ReplicatedStorage.Trade` RemoteEvent `OnClientEvent` callbacks with **no arguments**; it watches partner departure and checks close/session scope. The names were discovered but **`CompleteTrade` and `EndTrade` have never been observed firing in a real native test yet**. The existence of a RemoteEvent is not evidence of its behavior.
+
+### Actual native Delta evidence — DO NOT REPEAT SUCCESSFUL TESTS WITHOUT A NEW ISSUE
+
+**Stage25 scanner** (draft PR #64): one live report from 7 players: 7 recent, 0 stale, 0 unverified; four eligible and three with zero eligible types; client scanner publication only, not server authorization.
+
+**Stage26 value profile** (draft PR #65): dated Supreme snapshot, 190 canonical items, originally sourced Nov 4/6. Price data has an expiry (prior checkpoint: 2026-11-07 00:47:22 UTC / Nov 6 7:47 p.m. Eastern). **Never assume it remains fresh** when trading or evaluating value. Stage32 does not price items or require market freshness.
+
+**Stage27 controlled native add/remove** (draft PR #66): On real iPad/Delta, user returned `status=DONE`, `addAttempted=true`, `addVerified=true`, `removeAttempted=true`, `removeVerified=true`, `nativePlaceValidated=true`, `nativeRemoveValidated=true`, item value 3, independent GUI polls. **Proves one controlled client GUI offer insertion and removal, not final trade completion.** Its own final Accept is disabled.
+
+**Stage28 partner-only Accept** (draft PR #67): MM2 allows Accept when **at least one weapon is inside the trade across either player**; the other side can be empty. Original strict two-sided eligibility falsely marked valid offers as `UNRESOLVED` and `offerMutationAfterAccept=true`. Corrected rule passes tests and was **verified in a second actual iPad run**: `observations=134`, `theirAcceptIndicatorEverVisible=true`, `ourAcceptIndicatorEverVisible=false`, repeated `THEIRS_ONLY`, `offerMutationAfterAccept=false`, `acceptedWithUnresolvedOffer=false`, ending `CLOSED_UNKNOWN`. Corrected false-positive **done**.
+
+**Stage29 post-close client inventory** (draft PR #68): actual live report `beforeObserved=true`, `readbackCalls=3`, `postReadbacksObserved=2`, `status=NO_ELIGIBLE_DELTA_OBSERVED`, `changedEligibleTypes=0`, `rawWeaponInventoryChanged=false`, closure `closed_unknown`, `tradeOutcome=UNKNOWN`. Two after-close reads agreed. This **does not prove declined, server completion, or lack of other activity**. Native read-only sequence succeeded. **Done**.
+
+**Stage30 native inbound client signals** (draft PR #69): actual live manual local-decline test found **16** named `ReplicatedStorage.Trade` RemoteEvents: `AcceptRequest, AcceptTrade, CancelAccept, CancelRequest, CompleteTrade, DeclineRequest, DeclineTrade, EndTrade, GetRequest, OfferItem, RemoveOffer, RequestSent, SetRequestsEnabled, StartTrade, UpdateOffers, UpdateTrade`. Only **one inbound receipt actually occurred**: `DeclineTrade` `WHILE_OPEN` at elapsed **12.575 s**; window subsequently `CLOSED_UNKNOWN`, no Accept, partner did not leave, 0 post-close receipts. `CompleteTrade` and `EndTrade` are **catalog entries only** in that test, not observed events. No completed-trade proof.
+
+**Stage31 local vs partner manual decline** (draft PR #70): actual partner-decline test (per user-declared initiating actor) also received exactly one inbound `DeclineTrade` `WHILE_OPEN`, at elapsed **6.031 s**, then `CLOSED_UNKNOWN`, no Accept and no partner departure. Comparison status: `SHARED_DECLINE_NAMED_RECEIPT_NO_ACTOR_PROOF`. **The same event name cannot distinguish who initiated the close in these two test conditions.** Not server-authenticated actor or outcome. Native stage complete, regression tests saved in Python; latest prior CI 273/273.
+
+**Stage32** (draft PR #71): passively correlate Stage28 Accept and GUI close, Stage30 **actually received** named result events, and Stage29 before/after own-inventory reads. Stages 27–31 evidence remains unchanged. Offline code/test **done**; first live manual completed-trade observation **pending**.
+
+### Crucial boundaries / what is NOT proven
+
+- The complete trading strategy, rotation, pricing, final Accept and Discord completed-trade webhook are **not being wired in during Stages25–32**. Don't accidentally enable old conflicting controllers.
+- No event name, inbound `OnClientEvent`, user-visible Accept indicators, or closing GUI can by itself assert an authenticated successful exchange or identify a decline initiator.
+- Even `CompleteTrade` + matching own inventory changes could be from other client activity or unmatched session; without a separately verified server/session/partner attestation this remains **client-only, unattributed evidence**. All these probes must preserve `serverCompletionProven=false`, `authorizesAccept=false`, `mayRecordCompletedTrade=false`, `mayReportProfit=false`.
+- The older `stage20_outcome_audit.py` separately refuses to promote `closed_unknown` to success; it also has a historical both-sides-nonempty assumption incompatible with MM2's proven one-sided offer rule. Do not silently rely on it for real one-sided completion.
+- Avoid capturing event payloads containing users or item IDs unless separately justified; anonymize diagnostics.
+- Client scanner `GetProfileData` is a server response observed on a client, **not cryptographic server attestation for this transaction**.
+- Screen recordings/logs are evidence, not assumptions. Analyze failures, timing, session reuse, stale state, wrong UI root, source TTL, invalid signatures, races and duplicates. Never confuse synthetic mocks, CI green, or code presence with real iPad success.
+
+## How to work in exactly the same style
+
+1. **Start with the user's actual latest result/request**, then fetch this handoff, Stage32 PR #71 and relevant actual GitHub files via GitHub connector. Don't ask them to repeat facts already present.
+2. **One precise problem/stage at a time.** Tell them what we know, what we don't, root-cause hypotheses and what could break. Do not propose an unrelated backlog while a current boundary is unresolved.
+3. Reuse proven modules. Avoid second scanner, duplicate callbacks, patch stacking, long code dumped into chat, executor paste overload, unsolicited two-script tests.
+4. Make tangible repo changes and *actually inspect exact contents*; pin loader to immutable commit SHA, test Lua syntax, unit/integration regression, full Python + Lua GitHub Actions. If CI fails, read failing logs and fix the **root cause** before sharing launcher.
+5. For device tests give **one** short `loadstring(game:HttpGet(...))()` code block, exact expected console/report marker, steps and safety conditions. User runs on iPad Delta. Never claim to operate their device.
+6. Compare native JSON with previous expected vs actual. Track errors/negative cases as carefully as successes. Do not overstate actor/completion; categorize `UNKNOWN` and `INCOMPLETE` correctly.
+7. Save every live confirmed checkpoint and failure/repair note as a comment to the current stage draft GitHub PR and update this file after material progress. Preserve prior PRs as immutable/pinned evidence; do not merge/enable production unasked.
+8. Keep answers direct and reasonably compact, independent judgment, anticipate what can go wrong, and only ask a targeted question when a genuinely missing experimental detail prevents interpretation.
+9. If user opens a new chat, direct them to **this exact file on main**; the saved repo handoff is reliable, whereas automatic cross-chat conversational memory is not guaranteed.
+
+## Staged PR index
+
+- #64 Stage25: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/64
+- #65 Stage26: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/65
+- #66 Stage27: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/66
+- #67 Stage28: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/67
+- #68 Stage29: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/68
+- #69 Stage30: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/69
+- #70 Stage31: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/70
+- #71 Stage32: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/71
+
+**Next stage must be determined from Stage32's actual native result, not guessed.**
