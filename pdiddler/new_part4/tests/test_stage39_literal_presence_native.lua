@@ -169,7 +169,7 @@ local function fixture(opts)
    return presence
   end
   if name=="p4_stage40_trade_schema_hypothesis"then
-   eq(pin,"6507cb29276a1405276f7b950b6883adfa3742be","schema candidate pin")
+   eq(pin,"9003ba057f23aa44460dbb2f9895e8ade3d73a3b","schema candidate pin")
    return schemaSource
   end
   error("unexpected remote code module "..tostring(name))
