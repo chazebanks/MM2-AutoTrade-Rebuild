@@ -138,6 +138,10 @@ class Stage32Tests(unittest.TestCase):
             "one-sided eligible gift increases raw inventory with no outgoing offer",
             source,
         )
+        self.assertIn(
+            "postclose owned weapon delta observed before optional claim dismissal",
+            source,
+        )
         # Retain the distinct excluded-item hypothetical as an edge case,
         # but never present that fixture as the user's real transaction.
         self.assertIn(
