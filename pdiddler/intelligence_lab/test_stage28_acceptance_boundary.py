@@ -43,7 +43,7 @@ class Stage28Tests(unittest.TestCase):
         for evidence in ('import(STAGE26,"p4_native_observer")',
                          'import(STAGE26,"p4_observer_contract")',
                          'import(STAGE28,"p4_stage28_accept_timeline")',
-                         'local STAGE28="18fba22b036fbb5dd52584746ccaad5a779fe761"',
+                         'local STAGE28="800ec9aa5f38b7d06e3af1bbf492dfd79ade3951"',
                          'scanner.getRecord',
                          'scanner.getOwnInventory',
                          'modules.native.capture',
