@@ -15,7 +15,7 @@ end
 local repo="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local S26="a2a2e601be864f970da0a69c436ab3b12efd8112"
 local S28="800ec9aa5f38b7d06e3af1bbf492dfd79ade3951"
-local S30="b18ea4ff12bc68798ccc61dd2cd14edfc337d056"
+local S30="3ccf9219580726e2b122e1b9d4bdb6039eff96b0"
 local players=game:GetService("Players")
 local me=assert(players.LocalPlayer,"local player not ready")
 local job=game.JobId
