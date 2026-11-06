@@ -29,6 +29,12 @@
 
 
 
+### One-sided Accept enablement — clarified user-observed UI mechanic
+
+- **User clarification:** On the trusted/sending account, the Accept button is disabled while **nobody offers any weapon**; that account must add a weapon (Iceblaster in Stage32) before the trade can be accepted. The receiving account offers **zero weapons** and can still press Accept after the sender puts Iceblaster in. This is a **one-sided trade**, not a requirement that both accounts offer a weapon.
+- Checked actual Stage28 `p4_stage28_accept_timeline.lua`: `o.ourSlots+o.theirSlots==0` treats **both sides empty** as unresolved; **one-sided nonempty** offers remain observable. Stage28 Lua regression tests already cover local empty/opponent nonempty, opposite direction, and both empty. **No code change or repeated Delta test is needed for this known behavior**.
+- Keep distinct: **Accept-button enabled** is a native UI condition; **both manually pressing Accept** is an operator report; **settled transaction** is still not independently established by the Stage32 client event receipts. Do not treat a one-sided offer as invalid merely because the receiving account contributes nothing.
+
 ### The exact Stage 32 Delta test script (pinned, confirmed in GitHub)
 
 ```lua
