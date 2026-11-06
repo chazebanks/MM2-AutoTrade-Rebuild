@@ -163,7 +163,8 @@ check("first native Stage33 StartTrade then UpdateTrade and two AcceptTrade stay
  -- StartTrade receipt arrived before GUI window was bound; no attribution.
  -- The exact inbound times are local elapsed client clocks, not server IDs.
  local s=new()
- assert(M.received(s,"StartTrade",10.4)=="PRE_OPEN_UNBOUND")
+ local ok,phase=M.received(s,"StartTrade",10.4)
+ assert(ok and phase=="PRE_OPEN_UNBOUND")
  assert(M.open(s,11))
  assert(M.received(s,"UpdateTrade",20.039))
  assert(M.received(s,"AcceptTrade",27.736))
