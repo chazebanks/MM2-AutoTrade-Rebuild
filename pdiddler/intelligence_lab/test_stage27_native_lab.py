@@ -15,6 +15,23 @@ CORE=P4/"p4_stage27_lab_core.lua"
 TRANSPORT=P4/"p4_stage27_native_transport.lua"
 
 class NativeControlledLabTests(unittest.TestCase):
+    def test_panel_stays_above_mm2_trade_overlay_for_touch(self):
+        text=LAB.read_text()
+        self.assertIn('ui.DisplayOrder=10',text)
+        self.assertIn('local function keepPanelAboveTrade()',text)
+        self.assertIn('other:IsA("ScreenGui")',text)
+        self.assertIn('other.DisplayOrder>=highest',text)
+        self.assertIn('ui.DisplayOrder=math.max(10,highest+1)',text)
+        self.assertIn('if ui.DisplayOrder<=highest',text)
+        self.assertIn('ui.Parent=nil',text)
+        self.assertIn('ui.Parent=pg',text)
+        self.assertIn('keepPanelAboveTrade()\\n  if S.bound',text)
+        self.assertIn('frame.ZIndex=10',text)
+        self.assertIn('v.ZIndex=11',text)
+        self.assertIn('b.ZIndex=12',text)
+        self.assertNotRegex(text,r'other\\.DisplayOrder\\s*=(?!=)')
+        self.assertNotIn('TradeGUI_Phone:Destroy()',text)
+
     def test_operator_controls_are_only_dispatch_triggers(self):
         text=LAB.read_text()
         for call in (
