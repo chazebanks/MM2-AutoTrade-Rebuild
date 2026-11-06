@@ -34,7 +34,9 @@ function M.new(config)
  local s={session=config.session,observer=config.observer,
     handle=config.handle,clock=config.clock,item=config.item,
     offerCore=config.offerCore,offerNative=config.offerNative,
+    offerState=config.offerState,offerHandle=config.offerHandle,
     removeCore=config.removeCore,removeNative=config.removeNative,
+    removeState=config.removeState,removeHandle=config.removeHandle,
     phase="READY_ADD",reason="manual-one-item-test",
     addAttempted=false,addVerified=false,
     removeAttempted=false,removeVerified=false,
@@ -64,6 +66,7 @@ function M.add(s)
  s.addAttempted=true -- reserved before observing, never retry a lost attempt
  local o,why=capture(s)
  if not o then return fail(s,"add-"+why) end
+ s.marketFresh=(o.marketFresh==true)
  if o.ourSlots~=0 or o.theirSlots<1 or o.theirResolved~=true
    or o.marketFresh~=true then
   return fail(s,"add-source-or-offer-not-ready") end
