@@ -149,7 +149,8 @@ test("client job change closes observer but doesn't verify completion",function(
  local f=setup()
  poll(f,1.1)
  f.game.JobId="other-job"
- assert(poll(f,1.2)=="CLOSED_UNKNOWN")
+ assert(poll(f,1.2)=="INVALID")
+ assert(Timeline.summary(f.s).status=="INVALID")
  assert(not Timeline.summary(f.s).serverCompletionProven)
 end)
 print("PASS",tests,"Stage28 actual Stage9 native acceptance and closure mock integration")
