@@ -77,7 +77,7 @@ function M.assess(input)
     not allowCount(#input.entries,5000) or #input.entries==0 then
   r.reason="catalogue-unavailable-or-unbounded";return r
  end
- local seen={},0
+ local seen={}
  local matches=0
  local withArt,missing,refCount=0,0,0
  for i,entry in ipairs(input.entries) do
