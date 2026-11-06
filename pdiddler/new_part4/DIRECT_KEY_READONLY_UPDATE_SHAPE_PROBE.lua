@@ -29,8 +29,8 @@ local S={phase="LOADING_READ_ONLY",finished=false,readOnly=true,
 E[KEY]=S
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local BASE="35ec2d9a47048910a464a2ef6eb9b9f52ae306b1"
--- Replaced with the reviewed pure-core commit before this launcher is published.
-local CORE_PIN="CORE_PIN_REVIEW_COMMIT"
+-- Immutable reviewed shape-only module; pinning does not request execution.
+local CORE_PIN="b32ed071faf9d7cb390e7d87b70ca57abda151e4"
 local function source(pin,name)
  local txt=game:HttpGet(ROOT..pin.."/pdiddler/new_part4/"..name..".lua",true)
  assert(type(txt)=="string" and #txt>100,"source unavailable")
