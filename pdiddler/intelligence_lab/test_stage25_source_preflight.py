@@ -14,6 +14,10 @@ SPEC=importlib.util.spec_from_file_location(
     "supreme_stage25",ROOT/"refresh_supreme_snapshot.py")
 S=importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(S)
+IMPORT_SPEC=importlib.util.spec_from_file_location(
+    "supreme_stage25_import",ROOT/"stage25_import_source_blobs.py")
+Importer=importlib.util.module_from_spec(IMPORT_SPEC)
+IMPORT_SPEC.loader.exec_module(Importer)
 LUA=ROOT/"new_part4"
 
 def row(name,style=""):
@@ -79,6 +83,66 @@ class Stage25Tests(unittest.TestCase):
         self.assertIn("authorizesTrade=false",src)
         self.assertIn("authorizesAccept=false",src)
         self.assertIn('row.label="P"..i',src)
+
+    def test_browser_captured_source_is_sha_verified_and_retrieval_dated(self):
+        from datetime import datetime, timezone
+        import tempfile
+        raw = {
+            page: (f'<title>MM2 {page.title()} Values</title>'
+                   '<div data-updated-iso="2026-11-04T12:27:12-05:00"></div>').encode()
+            for page in Importer.PAGES
+        }
+        manifest={"schema":"gingerscope-supreme-browser-import-v1","sources":{
+            page:{"slug":slug,"url":f"https://supremevalues.com/mm2/{slug}",
+                  "blobSha":Importer.git_oid(raw[page]),
+                  "observedAt":"2026-11-06T00:47:22Z",
+                  "publishedAt":"2026-11-04T17:27:12Z",
+                  "scrapeId":"01a1ae53-0b81-76ec-ae4a-b39b0d5513ee",
+                  "statusCode":200}
+            for page,slug in Importer.PAGES.items()
+        }}
+        with tempfile.TemporaryDirectory() as tmp:
+            result=Importer.import_sources(
+                manifest,Path(tmp),
+                fetch=lambda digest: next(
+                    data for data in raw.values()
+                    if Importer.git_oid(data)==digest),
+                now=datetime(2026,11,6,1,tzinfo=timezone.utc))
+            self.assertEqual(set(result),set(Importer.PAGES))
+            for page,slug in Importer.PAGES.items():
+                p=Path(tmp)/f"pdiddler-supreme-{slug}.html"
+                self.assertEqual(p.read_bytes(),raw[page])
+                self.assertEqual(int(p.stat().st_mtime),
+                                 int(Importer.moment("2026-11-06T00:47:22Z").timestamp()))
+
+    def test_false_browser_source_blob_is_rejected(self):
+        from datetime import datetime, timezone
+        import tempfile
+        raw=b'<title>MM2 Ancient Values</title><div data-updated-iso="2026-11-04T12:27:12-05:00"></div>'
+        base={"schema":"gingerscope-supreme-browser-import-v1","sources":{
+            page:{"slug":slug,"url":f"https://supremevalues.com/mm2/{slug}",
+                  "blobSha":Importer.git_oid(raw),
+                  "observedAt":"2026-11-06T00:47:22Z",
+                  "publishedAt":"2026-11-04T17:27:12Z",
+                  "scrapeId":"01a1ae53-0b81-76ec-ae4a-b39b0d5513ee",
+                  "statusCode":200}
+            for page,slug in Importer.PAGES.items()
+        }}
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError,"immutable source"):
+                Importer.import_sources(base,Path(tmp),
+                    fetch=lambda sha: raw+b"tampered",
+                    now=datetime(2026,11,6,1,tzinfo=timezone.utc))
+
+    def test_old_browser_retrieval_is_not_relabelled_today(self):
+        from datetime import datetime,timezone
+        import json,tempfile
+        manifest=json.loads((ROOT/"source_evidence"/
+            "stage25_supreme_browser_import_manifest.json").read_text())
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(ValueError,"expired"):
+                Importer.import_sources(manifest,Path(tmp),fetch=lambda sha:b"",
+                    now=datetime(2026,11,7,3,tzinfo=timezone.utc))
 
     @unittest.skipUnless(shutil.which("lua5.4"),"Lua 5.4 installed in CI")
     def test_actual_read_only_lua_diagnostic(self):
