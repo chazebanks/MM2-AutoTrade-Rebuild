@@ -184,7 +184,8 @@ task.spawn(function()
     frames=1
    end
    if frames>=3 then
-    local entries,why=readFullSyncCatalog()
+    local readOK,entries,why=pcall(readFullSyncCatalog)
+    if not readOK then finish("SYNC_READ_EXCEPTION") return end
     if E[KEY]~=S or game.JobId~=job or
        players.LocalPlayer~=me or tradeRoot()~=root or
        not visible(icon,root) or icon.Image~=reference then
