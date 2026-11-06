@@ -10,17 +10,12 @@ local function name(v)
  return type(v)=="string" and #v>0 and #v<=48
   and v:match("^[%w_%-]+$")~=nil
 end
-local function countRows(t)
- local n=0
- for _ in pairs(t) do n=n+1 end
- return n
-end
 function M.new(scope,t)
  assert(type(scope)=="table" and type(scope.session)=="string"
    and scope.session~="" and finite(t),"bound trade scope needed")
  return {session=scope.session,started=t,closedAt=nil,
   final=false,closure="NOT_OBSERVED",partnerLeft=false,
-  errors={},events={},names={},listeners=0,
+  invalidEventTimes=0,events={},names={},listeners=0,
   namesRejected=0,samples=0,postCloseSignals=0,
   status="OBSERVING_CLIENT_SIGNALS",
   authorizesAccept=false,serverCompletionProven=false}
@@ -46,7 +41,7 @@ function M.received(s,n,t)
   return false,"not-a-bound-trade-event"
  end
  if not finite(t) or t<s.started then
-  s.errors[#s.errors+1]="invalid-event-time"
+  s.invalidEventTimes=s.invalidEventTimes+1
   return false,"invalid-event-time"
  end
  s.samples=s.samples+1
@@ -102,6 +97,7 @@ function M.summary(s)
   signalReceipts=s.samples,retainedReceipts=#records,
   postCloseSignalReceipts=s.postCloseSignals,
   ignoredUnboundSignals=s.namesRejected,
+  invalidEventTimes=s.invalidEventTimes,
   partnerDepartureObserved=s.partnerLeft,
   signals=records,
   clientSignalsDoNotEstablishTradeOutcome=true,
