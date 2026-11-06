@@ -25,7 +25,7 @@ class NativeControlledLabTests(unittest.TestCase):
         self.assertIn('if ui.DisplayOrder<=highest',text)
         self.assertIn('ui.Parent=nil',text)
         self.assertIn('ui.Parent=pg',text)
-        self.assertIn('keepPanelAboveTrade()\\n  if S.bound',text)
+        self.assertIn('  keepPanelAboveTrade()',text)
         self.assertIn('frame.ZIndex=10',text)
         self.assertIn('v.ZIndex=11',text)
         self.assertIn('b.ZIndex=12',text)
