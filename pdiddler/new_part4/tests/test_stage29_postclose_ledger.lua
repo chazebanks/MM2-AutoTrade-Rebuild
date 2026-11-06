@@ -207,4 +207,27 @@ test("one-sided eligible gift increases raw inventory with no outgoing offer",fu
  assert(r.serverCompletionProven==false and r.mayRecordCompletedTrade==false)
  assert(r.mayReportProfit==false and r.authorizesAccept==false)
 end)
+test("postclose owned weapon delta observed before optional claim dismissal",function()
+ -- Synthetic model of operator-reported MM2 UX: server-delivered item is
+ -- visible in receiving inventory after trade window closes, while a
+ -- "Claim Weapon" summary popup is still awaiting manual dismissal.
+ -- Stage29 deliberately has NO Claim-click prerequisite or UI authority.
+ local s,scope=fixture()
+ local original=inventory(2,1)
+ local credited=inventory(2,2)
+ assert(before(s,scope,original)=="OBSERVED")
+ assert(close(s,scope,15)=="OBSERVED")
+ -- Both client reads occur before any claim-button action in the fixture.
+ assert(after(s,scope,credited,15.25,2)=="OBSERVED")
+ assert(L.summary(s).status=="AWAIT_AFTER2")
+ assert(after(s,scope,credited,16.15,3)=="ELIGIBLE_DELTA_UNATTRIBUTED")
+ local r=L.summary(s)
+ assert(r.postReadbacksObserved==2 and r.gainedEligibleCopies==1)
+ assert(r.lostEligibleCopies==0 and r.changedEligibleTypes==1)
+ -- Credited quantity is client-observed; the same-trade server causality
+ -- and completion are NOT established by the popup or local reads.
+ assert(r.tradeOutcome=="UNKNOWN" and r.serverCompletionProven==false)
+ assert(r.mayRecordCompletedTrade==false and r.mayReportProfit==false)
+ assert(r.authorizesAccept==false)
+end)
 print("PASS",cases,"Stage29 pure post-close own inventory ledger evidence")
