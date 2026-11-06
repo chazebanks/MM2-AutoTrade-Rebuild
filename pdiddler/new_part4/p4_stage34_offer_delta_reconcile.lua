@@ -24,23 +24,25 @@ local function offerMap(rows,slots)
   return nil,"offer-slot-count-unverified"
  end
  local map,seen={},{}
- local copies=0
+ local copies,nameOnly=0,0
  for _,r in ipairs(rows) do
   if type(r)~="table" or not integer(r.slot,1,4)
       or seen[r.slot] or type(r.id)~="string" or r.id==""
       or not (r.page=="ancient" or r.page=="godly" or r.page=="chroma")
       or type(r.checkerId)~="string" or
        not r.checkerId:match("^%d+$") or #r.checkerId>8
-      or not integer(r.qty,1,4) then
+      or not integer(r.qty,1,4) or
+      not (r.origin=="raw-id" or r.origin=="unique-scanner-name") then
     return nil,"offer-identity-or-quantity-unverified"
   end
   seen[r.slot]=true
+  if r.origin=="unique-scanner-name" then nameOnly=nameOnly+1 end
   copies=copies+r.qty
   if copies>4 then return nil,"over-four-physical-copies-unverified" end
   local key=r.page..":"..r.checkerId..":checker-id"
   map[key]=(map[key] or 0)+r.qty
  end
- return map,nil,copies
+ return map,nil,copies,nameOnly
 end
 local function offerSample(o,diag)
  if type(o)~="table" or o.tradeOpen~=true or o.contextOK~=true
@@ -53,15 +55,16 @@ local function offerSample(o,diag)
        type(o.theirAccepted)~="boolean" then
   return nil,"native-context-or-accept-unverified"
  end
- local ours,why,oursCount=offerMap(diag.ourItems,o.ourSlots)
+ local ours,why,oursCount,ownNameOnly=offerMap(diag.ourItems,o.ourSlots)
  if not ours then return nil,"own-"..why end
- local theirs,why2,theirsCount=offerMap(diag.theirItems,o.theirSlots)
+ local theirs,why2,theirsCount,theirNameOnly=offerMap(diag.theirItems,o.theirSlots)
  if not theirs then return nil,"partner-"..why2 end
  if oursCount+theirsCount==0 then
   return nil,"both-offers-empty"
  end
  return {signature=o.ourSig.."\0"..o.theirSig,
   ours=ours,theirs=theirs,ourCopies=oursCount,theirCopies=theirsCount,
+  nameOnlySlots=ownNameOnly+theirNameOnly,
   oursAccepted=o.ourAccepted,theirsAccepted=o.theirAccepted},nil
 end
 local function makeResult(s,status,reason,details)
@@ -72,6 +75,9 @@ local function makeResult(s,status,reason,details)
   stableOfferObserved=s.stable==true,
   offerMutationAfterAccept=s.tainted==true,
   offerWindowClosed=s.closedAt~=nil,
+  nameOnlyOfferSlots=s.snapshot and s.snapshot.nameOnlySlots or nil,
+  exactRawIdResolutionForEveryOffer=s.snapshot and
+     s.snapshot.nameOnlySlots==0 or false,
   ourAcceptIndicatorObserved=s.ourAcceptSeen==true,
   theirAcceptIndicatorObserved=s.theirAcceptSeen==true,
   expectedIncomingEligibleCopies=details.expectedIn,
@@ -134,7 +140,8 @@ function M.observe(s,o,diag,t,scope)
   -- canonical scanner resolutions of every actual physical offer slot.
   if not s.snapshot or
     not identical(s.snapshot.ours,sample.ours) or
-    not identical(s.snapshot.theirs,sample.theirs) then
+    not identical(s.snapshot.theirs,sample.theirs) or
+    s.snapshot.nameOnlySlots~=sample.nameOnlySlots then
     return invalidate(s,"signature-and-resolved-identity-disagree")
   end
   s.stableFrames=s.stableFrames+1
@@ -245,6 +252,13 @@ function M.evaluate(s,l,scope)
    (expectedIn+expectedOut>0 and l.pre.fp==l.post2.fp) then
   return makeResult(s,"OFFER_AND_OWN_DELTA_MISMATCH_CLIENT_ONLY",
    "owned-eligible-change-does-not-match-stable-offers",details)
+ end
+ -- Stage9 unique-scanner-name fallback checks only mapped eligible rows.
+ -- A display-name coincidence with an excluded tier may remain unresolved.
+ -- Exact identity agreement requires RAW item IDs from the native GUI.
+ if snap.nameOnlySlots>0 then
+  return makeResult(s,"AMBIGUOUS_NAME_ONLY_OFFER_IDENTITY",
+   "display-name-mapping-not-proven-exact",details)
  end
  return makeResult(s,"OFFER_AND_OWN_DELTA_AGREE_CLIENT_ONLY",
    "exact-eligible-identities-and-quantities-agree-not-settlement",details)
