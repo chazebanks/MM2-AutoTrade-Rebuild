@@ -48,12 +48,11 @@ class Stage36IconCatalogTests(unittest.TestCase):
             'PDIDDLER_STAGE36_ICON_CATALOG_AUDIT',
             'PDIDDLER_STAGE35_SLOT_METADATA_CENSUS',
             'p4_stage36_icon_catalog_audit.lua',
-            'local PIN36="30eb8498f82fd6a79f2f0fbbfc282e59b97c7bdd"',
             'db:FindFirstChild("Sync")',
             'pcall(require,syncModule)',
-            'gather(sync.Weapons)',
-            'gather(sync.Item)',
-            'for _,field in ipairs({"Image","Icon","Texture"})',
+            'return core.collectExact(sync)',
+            'pcall(core.assessExact,input)',
+            'catalogueVerified=true,catalogue=catalogue',
             'iconContainer:FindFirstChild("Icon")',
             'not visible(icon,root)',
             'icon.Image~=reference',
@@ -69,6 +68,7 @@ class Stage36IconCatalogTests(unittest.TestCase):
         ):
             self.assertIn(phrase,src)
         self.assertNotIn("root and filledSlot(root)",src)
+        self.assertRegex(src, r'local PIN36="[0-9a-f]{40}"')
         for forbidden in (
             ':FireServer(', ':InvokeServer(', 'SendMouseButtonEvent(',
             'TeleportToPlaceInstance(', 'queue_on_teleport(',

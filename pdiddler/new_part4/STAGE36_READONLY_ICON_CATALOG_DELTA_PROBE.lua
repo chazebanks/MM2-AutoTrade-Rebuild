@@ -42,7 +42,8 @@ local loaded,core=pcall(function()
  local fun,msg=loadstring(txt,"=p4_stage36_icon_catalog_audit")
  assert(fun,msg)
  local mod=fun()
- assert(type(mod)=="table" and type(mod.assess)=="function")
+ assert(type(mod)=="table" and type(mod.assessExact)=="function" and
+  type(mod.collectExact)=="function")
  return mod
 end)
 if not loaded then
@@ -53,8 +54,8 @@ end
 local function finish(reason,input)
  if S.finished then return end
  S.finished=true
- local okay,res=pcall(core.assess,input)
- local r=okay and res or core.assess(nil)
+ local okay,res=pcall(core.assessExact,input)
+ local r=okay and res or core.assessExact(nil)
  r.stopReason=reason
  r.anonymizedCountsOnly=true
  r.tradeOutcome="UNKNOWN";r.rawItemIdConfirmed=false
@@ -121,45 +122,15 @@ local function readFullSyncCatalog()
  -- This game's own scanner already requires Database.Sync. We only read
  -- the returned table and do not invoke inventory or trade remotes.
  local got,sync=pcall(require,syncModule)
- if not got or type(sync)~="table" or
-    type(sync.Weapons)~="table" or next(sync.Weapons)==nil then
+ if not got or type(sync)~="table" then
   return nil,"SYNC_CATALOGUE_UNAVAILABLE"
  end
- local byKey,count={},0
- local function gather(t)
-  if type(t)~="table" then return true end
-  for key,d in pairs(t) do
-   if type(d)=="table" then
-    local id=tostring(key)
-    if id=="" or #id>150 then return false end
-    local row=byKey[id]
-    if not row then
-     count=count+1
-     if count>5000 then return false end
-     row={key=id,refs={}}
-     byKey[id]=row
-    end
-    for _,field in ipairs({"Image","Icon","Texture"}) do
-     local v=d[field]
-     if type(v)=="string" and v~="" then
-      if #v>512 or #row.refs>=6 then return false end
-      row.refs[#row.refs+1]=v
-     end
-    end
-   end
-  end
-  return true
- end
- if not gather(sync.Weapons) then return nil,"SYNC_TOO_LARGE_OR_INVALID" end
- if sync.Item~=sync.Weapons and
-   not gather(sync.Item) then return nil,"SYNC_TOO_LARGE_OR_INVALID" end
- local arr={}
- for _,row in pairs(byKey) do arr[#arr+1]=row end
- if #arr==0 then return nil,"SYNC_CATALOGUE_EMPTY" end
- return arr,"SYNC_READ_ONLY"
+ -- Pure collection preserves source, typed key and original art field bytes.
+ -- No source/key merge, rarity filter, URI parsing or art URL request.
+ return core.collectExact(sync)
 end
 S.state="WAIT_FOR_POPULATED_MANUAL_SLOT"
-print("[GINGERSCOPE STAGE36] READ-ONLY: Open a manual trade; place ONE weapon in either visible offer. No Accept needed. Report compares icon references to every available Sync weapon tier; then manually DECLINE.")
+print("[GINGERSCOPE STAGE36] READ-ONLY: Open a manual trade; place ONE weapon in either visible offer. No Accept needed. Report compares original icon strings byte-for-byte across all available Sync rows; then manually DECLINE.")
 task.spawn(function()
  local started=os.clock()
  local lastRoot,lastSlot,lastSide,lastIndex,lastIcon,lastRef=nil,nil,nil,nil,nil,nil
@@ -184,7 +155,7 @@ task.spawn(function()
     frames=1
    end
    if frames>=3 then
-    local readOK,entries,why=pcall(readFullSyncCatalog)
+    local readOK,catalogue,why=pcall(readFullSyncCatalog)
     if not readOK then finish("SYNC_READ_EXCEPTION") return end
     if E[KEY]~=S or game.JobId~=job or
        players.LocalPlayer~=me or tradeRoot()~=root or
@@ -192,7 +163,7 @@ task.spawn(function()
       finish("SLOT_CHANGED_DURING_CATALOGUE_READ")
       return
     end
-    if not entries then
+    if not catalogue then
       finish(why)
       return
     end
@@ -200,7 +171,7 @@ task.spawn(function()
     local data={side=side,index=index,slotVisible=true,
       imageVisible=true,icon=reference,
       usesSpriteSheet=rect.X~=0 or rect.Y~=0,
-      catalogueVerified=true,entries=entries}
+      catalogueVerified=true,catalogue=catalogue}
     finish("ICON_REFERENCE_CATALOGUE_AUDIT_FINISHED",data)
     return
    end
