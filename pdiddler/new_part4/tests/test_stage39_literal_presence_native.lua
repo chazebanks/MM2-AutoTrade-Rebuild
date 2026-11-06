@@ -8,6 +8,7 @@ local native=read(dir.."/STAGE39_READONLY_BATWING_KEY_PRESENCE_PROBE.lua")
 local core=read(dir.."/p4_trade_update_shape.lua")
 local presence=read(dir.."/p4_stage39_literal_key_presence.lua")
 local schemaSource=read(dir.."/p4_stage40_trade_schema_hypothesis.lua")
+local typeSource=read(dir.."/p4_stage41_key_type_first_failure.lua")
 local reader=assert(read(dir.."/p4_native_observer.lua"))
 local contract=assert(read(dir.."/p4_observer_contract.lua"))
 local BASE="35ec2d9a47048910a464a2ef6eb9b9f52ae306b1"
@@ -40,6 +41,7 @@ local function fixture(opts)
  assert(core,"new real shape core is missing")
  assert(presence,"stage39 key comparator module is missing")
  assert(schemaSource,"stage40 trade schema candidate module missing")
+ assert(typeSource,"stage41 first failure module missing")
  local calls={http={},forbidden={},allConnections={},json=0,inspect=0,prints={},warns={},waits=0,remoteConnects=0}
  local f={calls=calls,now=0,globals={}}
  local function forbidden(name)return function()calls.forbidden[#calls.forbidden+1]=name;error("forbidden boundary "..name,0)end end
@@ -172,10 +174,14 @@ local function fixture(opts)
    eq(pin,"9003ba057f23aa44460dbb2f9895e8ade3d73a3b","schema candidate pin")
    return schemaSource
   end
+  if name=="p4_stage41_key_type_first_failure"then
+   eq(pin,"9dbd727a0b563aff11be2434bd679be55f911a53","stage41 first failure pin")
+   return typeSource
+  end
   error("unexpected remote code module "..tostring(name))
  end
  env.loadstring=function(src,name)
-  assert(src==core or src==reader or src==contract or src==presence or src==schemaSource,"unreviewed execution")
+  assert(src==core or src==reader or src==contract or src==presence or src==schemaSource or src==typeSource,"unreviewed execution")
   local chunk,why=load(src,name,"t",env);if not chunk then return nil,why end
   return function()
    local m=chunk()
@@ -443,6 +449,68 @@ test("invalid count or wrong item type cannot establish candidate layout",functi
  t.Player1.Offer[1][2]=2
  f:emit(t);f:finishLoop();safe(f,"ONE_UPDATE_NEAR_SINGLE_OFFER_ADD")
  eq(f.state.result.tradeTableHypothesis.hypothesisMatched,false,"invalid quantity")
+end)
+
+test("numeric Batwing Sync key is classified despite legacy Stage40 rejecting it",function()
+ local key=87421
+ local cat={Weapons={[key]={ItemName="Batwing",Rarity="Ancient"}}}
+ local f=fixture({sync=cat});f:untilPhase("LISTENING_UPDATE_TRADE")
+ addBatwing(f);f:emit(anonTrade(f.me,f.partner,key))
+ f:finishLoop();safe(f,"ONE_UPDATE_NEAR_SINGLE_OFFER_ADD")
+ local result=f.state.result;local t=assert(result.keyTypeFirstFailure)
+ eq(t.candidateKeyType,"NUMBER","source Sync numeric")
+ eq(t.legacyStage40RejectedNumericKey,true,"old type gate rejects")
+ eq(t.candidateKeyEqualsVisibleLabel,"FALSE","real comparison")
+ eq(t.argumentPackValid,"TRUE","one arg")
+ eq(t.firstFailedStage,"NONE","numeric accepted in corrected hypothesis")
+ eq(t.tripletKeyIndex,1,"literal row index")
+ eq(t.hypothesisMatched,true,"client untrusted shape")
+ eq(result.tradeTableHypothesis.hypothesisMatched,false,"old parser still fails")
+ eq(t.rawItemIdConfirmed,false,"no item ID authority")
+end)
+test("legacy Stage40 root mismatch is isolated from player and offer comparisons",function()
+ local f=fixture();f:untilPhase("LISTENING_UPDATE_TRADE")
+ local t=anonTrade(f.me,f.partner,PRIVATE_KEY)
+ t.Locked=nil;t.SomeOtherField=false
+ addBatwing(f);f:emit(t)
+ f:finishLoop();safe(f,"ONE_UPDATE_NEAR_SINGLE_OFFER_ADD")
+ local d=f.state.result.keyTypeFirstFailure
+ eq(d.candidateKeyType,"STRING","tested key type")
+ eq(d.candidateKeyEqualsVisibleLabel,"FALSE","tested")
+ eq(d.rootFieldSetMatches,"FALSE","actual first failed predicate")
+ eq(d.firstFailedStage,"ROOT_FIELDSET_MISMATCH","no fake owner negatives")
+ eq(d.player1ObjectEqualsLocal,"UNTESTED","did not inspect owner")
+ eq(d.tripletQuantityIsOne,"UNTESTED","did not inspect row")
+end)
+test("numeric raw key in third triplet position is detected without key coercion",function()
+ local key=87421
+ local f=fixture({sync={Weapons={[key]={ItemName="Batwing"}}}})
+ f:untilPhase("LISTENING_UPDATE_TRADE")
+ local t=anonTrade(f.me,f.partner,key)
+ t.Player1.Offer[1]={"someOtherItem",1,key}
+ addBatwing(f);f:emit(t)
+ f:finishLoop();safe(f,"ONE_UPDATE_NEAR_SINGLE_OFFER_ADD")
+ local d=f.state.result.keyTypeFirstFailure
+ eq(d.firstFailedStage,"ROW_LITERAL_MISMATCH","key position contrary to old guess")
+ eq(d.tripletKeyIndex,3,"numeric key in third position")
+ eq(d.hypothesisMatched,false,"not authenticated")
+end)
+test("ambiguous multiple updates cannot leak an arbitrary key-type result",function()
+ local f=fixture();f:untilPhase("LISTENING_UPDATE_TRADE")
+ addBatwing(f);f:emit(anonTrade(f.me,f.partner,PRIVATE_KEY));f:emit(anonTrade(f.me,f.partner,PRIVATE_KEY))
+ f:finishLoop();safe(f,"MULTIPLE_UPDATES_NEAR_SINGLE_OFFER_ADD")
+ eq(f.state.result.keyTypeFirstFailure,nil,"never select arbitrary receipt")
+end)
+test("manual stop after one receipt never exports a speculative report",function()
+ local f=fixture();f:untilPhase("LISTENING_UPDATE_TRADE")
+ f:emit(anonTrade(f.me,f.partner,PRIVATE_KEY))
+ f.state.stop();safe(f,"MANUAL_STOP")
+ eq(f.state.result.keyTypeFirstFailure,nil,"no stable add observed")
+end)
+test("read-only no-event timeout has no key type claimed",function()
+ local f=fixture();f:untilPhase("LISTENING_UPDATE_TRADE")
+ addBatwing(f);f:finishLoop();safe(f,"NO_UPDATE_NEAR_SINGLE_OFFER_ADD")
+ eq(f.state.result.keyTypeFirstFailure,nil,"no event near offer")
 end)
 print("Stage39 literal presence native: "..passed.." passed, "..#failures.." failed")
 if #failures>0 then error(table.concat(failures,"\\n"),0)end
