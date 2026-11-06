@@ -436,6 +436,7 @@ local function observe()
      targetKey,knownKeys,candidateCatalogueRows=key,keys,count
      if not bindContextSignals(pg)then return end
      local current,invalid=checkedFrame();if not current then finish(invalid);return end
+     if current.ourSlots~=0 or current.theirSlots~=0 or current.ourSig~=baseline.ourSig or current.theirSig~=baseline.theirSig then finish("OFFER_CHANGED_DURING_SYNC_READ");return end
      local remote,missing=exactRemote();if not remote then finish(missing);return end
      boundRemote=remote
      S.phase="LISTENING_UPDATE_TRADE"
