@@ -136,7 +136,7 @@ def parse_page(text, page):
         if expanded_head.casefold() != name.casefold():
             raise ValueError(f"name/header disagreement: {head!r}, {name!r}")
         is_pet = id(column) in pet_columns
-        is_hidden = bool(re.search(r"display\\s*:\\s*none", column.attrs.get("style", ""), re.I))
+        is_hidden = bool(re.search(r"display\s*:\s*none", column.attrs.get("style", ""), re.I))
         if is_pet or is_hidden:
             if is_pet and not is_hidden and name in KNOWN_NONWEAPON_PETS.get(page, set()):
                 continue
