@@ -12,6 +12,14 @@ Verify one actual MM2 weapon ADD using the existing Stage22 one-shot ledger, the
 - p4_stage27_native_transport.lua: explicit one-shot known MM2 OfferItem remote and one physical removal-slot button click via VirtualInputManager. No redundant firesignal and no automatic fallback or retry. A click blocked by the test UI is rejected.
 - STAGE27_CONTROLLED_DELTA_LAB.lua: single Delta test launcher using the existing Stage25 scanner-only boot, Stage26 dated market, and Stage9 observer. Displays a movable BIND/NEXT/ADD ONCE/REMOVE/STOP panel.
 
+## Touch overlay fix (Nov 5, 2026)
+
+The initial Stage27 test panel was created under PlayerGui without an explicit `ScreenGui.DisplayOrder`. When MM2's full-screen `TradeGUI` or `TradeGUI_Phone` appears, its ScreenGui can take the higher draw/input layer even while our panel is visibly present.
+
+The corrected Stage27 launcher sets the test ScreenGui's DisplayOrder above MM2's trade GUI (or uses a one-time reparent after the trade GUI if the Roblox client caps DisplayOrder). The existing polling loop checks this when a trade opens; panel children have explicit ZIndex values. **It never modifies MM2's native trade GUI, remote, Accept, or item-trading logic.** The panel is still draggable and can be moved away from the offered-slot remove button; the prior click-occlusion guard is unchanged.
+
+UI-layer contract and full Python/Lua regression passed 236/236 Python tests, plus the inherited Lua Stage27 add/remove tests, at commit `250899c11a2968b2c6943157023d431bbeed6efd`. This proves source/logic integrity, **not** a live iPad touch result. Rejoin before using the updated immutable loader: the first launcher intentionally refuses to initialize twice in one job.
+
 ## Native test sequence
 
 1. Rejoin MM2, select Tablet, and execute the Stage27 launcher BEFORE opening a trade.
