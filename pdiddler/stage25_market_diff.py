@@ -81,6 +81,7 @@ def compare(before: dict, candidate: dict, *, now_epoch: int | None = None) -> d
     if not isinstance(sources, dict) or set(sources) != set(KEYS):
         raise ValueError("source provenance is incomplete")
     expected_expiry = []
+    source_observations, source_publications = [], []
     for page, record in sources.items():
         if record.get("url") != "https://supremevalues.com/mm2/" + {"ancient": "ancients", "chroma": "chromas", "godly": "godlies"}[page]:
             raise ValueError("unexpected source URL")
@@ -89,9 +90,13 @@ def compare(before: dict, candidate: dict, *, now_epoch: int | None = None) -> d
             raise ValueError("invalid source SHA256")
         o = utc_epoch(record["observedAt"])
         p = utc_epoch(record["publishedAt"])
-        if p > o or o > observed:
+        if p > o or o < observed:
             raise ValueError("source observations inconsistent with snapshot")
+        source_observations.append(o)
+        source_publications.append(p)
         expected_expiry.append(min(o + 86400, p + 72*3600))
+    if observed != min(source_observations) or published != min(source_publications):
+        raise ValueError("snapshot timestamp differs from oldest source observation/publication")
     if expires != min(expected_expiry):
         raise ValueError("candidate expiry is not tied to source observation and publication")
     if now_epoch is not None and not observed <= now_epoch < expires:
