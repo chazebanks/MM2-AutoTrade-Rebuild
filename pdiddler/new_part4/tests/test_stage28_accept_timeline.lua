@@ -140,43 +140,84 @@ test("missing current own identity blocks evidence",function()
  assert(feed(s,o,d,100.1)=="HOLD")
  assert(not s.anyBothAccepted)
 end)
-test("empty opponent offer is not an accepted exchange",function()
+test("opponent empty, own item offered: both accepted indicators are valid observations",function()
  local s,o,d=fixture()
  o.theirSlots=0;d.theirItems={}
  o.ourAccepted=true;o.theirAccepted=true
  assert(feed(s,o,d,100.1)=="HOLD")
- assert(not s.anyBothAccepted)
+ assert(feed(s,o,d,100.32)=="OBSERVED")
+ local result=Timeline.summary(s)
+ assert(result.bothAcceptedStableObserved)
+ assert(not result.offerMutationAfterAccept)
+ assert(not result.serverCompletionProven)
 end)
-test("empty our offer is not an accepted exchange",function()
+test("local side empty, opponent offers item: both GUI indicators can stabilize",function()
  local s,o,d=fixture()
  o.ourSlots=0;d.ourItems={}
  o.ourAccepted=true;o.theirAccepted=true
  assert(feed(s,o,d,100.1)=="HOLD")
- assert(not s.anyBothAccepted)
+ assert(feed(s,o,d,100.32)=="OBSERVED")
+ local result=Timeline.summary(s)
+ assert(result.bothAcceptedStableObserved)
+ assert(not result.acceptedWithUnresolvedOffer)
+ assert(not result.serverCompletionProven)
 end)
-test("partner Accept with our side empty is visible but never bilateral",function()
+test("partner Accept with our side empty is valid one-sided evidence",function()
  local s,o,d=fixture()
  o.ourSlots=0;d.ourItems={}
  o.theirAccepted=true
- assert(feed(s,o,d,100.1)=="HOLD")
+ assert(feed(s,o,d,100.1)=="OBSERVED")
  local report=Timeline.summary(s)
  assert(report.theirAcceptIndicatorEverVisible)
- assert(report.offerMutationAfterAccept)
+ assert(report.status=="THEIRS_ONLY")
+ assert(not report.offerMutationAfterAccept)
+ assert(not report.acceptedWithUnresolvedOffer)
  assert(not report.bothAcceptedStableObserved)
- assert(report.reason=="accepted-indicator-on-unresolved-or-empty-offer")
 end)
-test("unresolved early Accept taints later apparently valid bilateral offer",function()
+test("adding our weapon after partner Accepted counts as an offer mutation",function()
  local s,o,d=fixture()
  o.ourSlots=0;d.ourItems={};o.theirAccepted=true
- feed(s,o,d,100.1)
+ assert(feed(s,o,d,100.1)=="OBSERVED")
  o.ourSlots=1;d.ourItems={{
    slot=1,id="KnifeA",page="godly",checkerId="11",qty=1}}
+ o.ourSig="newly-added-local-item"
  o.ourAccepted=true
  assert(feed(s,o,d,100.3)=="HOLD")
  assert(feed(s,o,d,100.6)=="HOLD")
  local report=Timeline.summary(s)
+ assert(report.offerMutationAfterAccept)
  assert(not report.bothAcceptedStableObserved)
  assert(not report.mayRecordCompletedTrade)
+end)
+test("both sides empty is unresolved even when accepted indicators appear",function()
+ local s,o,d=fixture()
+ o.ourSlots=0;d.ourItems={}
+ o.theirSlots=0;d.theirItems={}
+ o.theirAccepted=true
+ assert(feed(s,o,d,100.1)=="HOLD")
+ local r=Timeline.summary(s)
+ assert(r.status=="UNRESOLVED")
+ assert(r.acceptedWithUnresolvedOffer)
+ assert(r.theirAcceptIndicatorEverVisible)
+ assert(not r.offerMutationAfterAccept)
+ assert(not r.bothAcceptedStableObserved)
+end)
+test("unresolved acceptance history cannot later become a stable bilateral read",function()
+ local s,o,d=fixture()
+ o.ourSlots=0;d.ourItems={}
+ o.theirSlots=0;d.theirItems={}
+ o.theirAccepted=true
+ feed(s,o,d,100.1)
+ o.theirSlots=1;d.theirItems={{
+    id="KnifeB",page="chroma",checkerId="12",qty=1,slot=1}}
+ o.theirSig="now-one-counterparty-item"
+ o.ourAccepted=true
+ assert(feed(s,o,d,100.3)=="HOLD")
+ assert(feed(s,o,d,100.6)=="HOLD")
+ local r=Timeline.summary(s)
+ assert(r.acceptedWithUnresolvedOffer)
+ assert(not r.bothAcceptedStableObserved)
+ assert(not r.offerMutationAfterAccept)
 end)
 test("unknown tier in observed offer blocks evidence",function()
  local s,o,d=fixture()
