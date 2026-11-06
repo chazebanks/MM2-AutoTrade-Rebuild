@@ -2,7 +2,7 @@
 **Updated:** November 5, 2026 (America/New_York)
 **Role:** Long-lived strategy/research handoff for new ChatGPT chats.
 **Read alongside:** [Active Gingerscope Handoff](./GINGERSCOPE_ACTIVE_HANDOFF.md).
-**Current checkpoint:** Stage32's FIRST NATIVE output is in [PR #71](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/71); client reported +1 eligible copy, no received result-named events, and tradeOutcome UNKNOWN. Still need user's on-screen account before classifying any exchange.
+**Current checkpoint (corrected user report):** Stage32's FIRST NATIVE output is in [PR #71](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/71). Trusted account offered one standard Iceblaster; receiving account offered zero items; both manually accepted; the exchange visibly completed and the receiver retained Iceblaster. Client independently showed +1 eligible copy, 0 eligible lost, zero result-named event receipts, and `tradeOutcome=UNKNOWN`. The **earlier claim that the receiver had to offer a weapon was explicitly retracted**. Next technical issue is observing a transaction-specific successful settlement; do not request the completed on-screen detail again.
 
 ## 1. Actual goal and strategy identity
 
@@ -159,9 +159,12 @@ The user has NOW sent the first native Stage32 JSON. It reports:
 - **zero** CompleteTrade / EndTrade / DeclineTrade client receipts
 - trade closure closed_unknown and all server/completion/profit/auto-accept authority false.
 
-**Required next detail:** whether the user personally witnessed a completed manual trade and whether the gained copy corresponds to the manually offered weapon. This is not included in the JSON and MUST NOT be fabricated. Even if the answer is yes, the current remote/event evidence did not independently authenticate a completed transaction.
+**Corrected operator observation (2026-11-05 Eastern / 2026-11-06 UTC):** successful one-sided Iceblaster transfer from trusted account to receiver, neither item nor copy offered on the receiving side; both manual Accept; Iceblaster remained in receiving inventory. Earlier user statement implying their own weapon was offered was corrected. The Stage29 and Stage32 live client data are **consistent** with this exchange but are not an authenticated server transaction receipt. Partner's unseen Accept indicator in a ~90ms poll does **not** disprove the reported second player's manual confirmation.
 
-DO NOT start Stage33, wire live Accept or change portfolio profit accounting solely on this result. Interpret the single evidence gap first.
+**Regression and Python verification:** The Stage29 one-sided-gain Lua fixture matches +1 eligible / 0 eligible lost / raw weapon change, while Stage32 pure correlation remains `UNKNOWN` with zero result receipts. A Python `unittest` invokes the **actual Lua suite**. [GitHub Actions run 42164723294](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42164723294) on commit `6637a25ec69e96f6cc4215b86a97cecba56cd0e8` succeeded: 20 Stage29 Lua tests, 18 Stage32 Lua tests and 281 Python tests. The separate synthetic scenario of **spending an excluded-tier weapon** is **NOT** what happened in Stage32 and must not be used as an explanation.
+
+**Next question is technical:** Which MM2 client/native protocol can identify successful settlement for the exact transaction without trusting only GUI closure, Accept icons, a generic named event or two post-close inventory reads? No repeated Stage32 transfer test, no automatic Accept, completed-trade/profit webhook, production merge, or inherited fixed +15 profit policy on the present evidence.
+
 
 ## 6. Exact new-chat starter
 
