@@ -36,7 +36,9 @@ jobs:
             test_p4_replacement_cutover \
             test_p4_replacement_native_lifecycle \
             test_p4_offer_placement \
-            test_p4_replacement_offer_integration; do
+            test_p4_replacement_offer_integration \
+            test_p4_strategy_permit \
+            test_p4_strategy_recovery_integration; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
