@@ -286,4 +286,24 @@ test("function never records completed trade even with accepted closure",functio
  assert(report.mayReportProfit==false)
  assert(report.closureProvesCompletion==false)
 end)
+test("actual 174-poll one-sided partner acceptance must not report offer mutation",function()
+ local s,o,d=fixture()
+ o.ourSlots=0;d.ourItems={}
+ for i=1,174 do
+  if i>=32 then o.theirAccepted=true end
+  if i==174 then o.tradeOpen=false end
+  local outcome=feed(s,o,d,100+i*.1)
+  if i==174 then assert(outcome=="CLOSED_UNKNOWN") end
+ end
+ local r=Timeline.summary(s)
+ assert(r.status=="CLOSED_UNKNOWN")
+ assert(r.observations==174)
+ assert(r.theirAcceptIndicatorEverVisible)
+ assert(not r.ourAcceptIndicatorEverVisible)
+ assert(not r.offerMutationAfterAccept)
+ assert(not r.acceptedWithUnresolvedOffer)
+ assert(not r.bothAcceptedStableObserved)
+ assert(r.mayRecordCompletedTrade==false)
+ assert(#r.events==32)
+end)
 print("PASS",passed,"Stage28 pure acceptance/closure read-only timeline regression")
