@@ -12,6 +12,13 @@
 
 **NEXT ACTION**: The user has supplied the FIRST Stage32 native JSON; it is saved in PR #71. One eligible weapon copy appeared in client's own inventory, no copies were lost, local Accept indicator was seen, partner Accept indicator was not observed, and no `CompleteTrade`, `EndTrade`, or `DeclineTrade` inbound receipt was observed. **Ask whether the user personally saw the manual exchange complete and whether the gained copy was the partner's offered weapon.** This is the one missing native experimental condition; the JSON cannot answer it. Do not automatically start Stage33, claim server completion, change unrelated code or issue a completed-trade/profit webhook. Distinguish an unseen partner Accept indicator from proof that the partner never accepted. If the user instead asks to continue without returning a Stage32 result, distinguish the pending native checkpoint from further offline work.
 
+### Follow-on checkpoint — 2026-11-05 Eastern / 2026-11-06 UTC
+
+- Stage32 **test-only** commit `9c8667e2899c7d700687e6993474443b85bf55bd` on PR #71 adds a regression matching the **first native +1 eligible copy / zero result-named receipts / our Accept observed / partner Accept unseen** evidence. It preserves `tradeOutcome=UNKNOWN` and all non-authority gates. The Stage32 correlation implementation and already-tested pinned Delta loader **were not changed**.
+- GitHub Actions `Staged Part 4 Lua regression tests` run [42163278068](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42163278068) on that exact commit: **SUCCESS**, **18/18 Stage32 Lua tests**, **280/280 Python tests** (confirmed in actual job logs). This is an offline regression only, not new native evidence.
+- Independently reviewed [Roblox RemoteEvent API](https://create.roblox.com/docs/scripting/events/remote) and an [MM2 community trading description](https://mm2wiki.org/wiki/trading/). The first documents server-to-client event delivery APIs but **not** whether MM2 emits `CompleteTrade`/`EndTrade` on successful settlement. The second is a community account, not authenticated transaction evidence. A historical [Roblox developer discussion](https://devforum.roblox.com/t/remoteevent-fires-before-connect-returns/60164) suggests listener-registration edge cases but cannot explain this native run conclusively. Detailed evidence/provenance and rejected hypotheses are recorded in PR #71.
+- **Unchanged, blocking native question:** Did the user personally see the manual trade finish successfully, and did the +1 copy match the partner's offered weapon? Until answered, do not launch another redundant Delta test or implement Stage33, and do not assert a settled transaction, profit, or permission for automatic Accept.
+
 ### The exact Stage 32 Delta test script (pinned, confirmed in GitHub)
 
 ```lua
@@ -20,7 +27,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTr
 
 This probe is **read-only**: it cannot press Accept/Decline, initiate requests, insert/remove an item or send Discord messages. User must rejoin a fresh MM2 server to clear old listener ownership, select Tablet, run loader before a manual trade, let scanner finish, and wait for `[GINGERSCOPE STAGE32] BASELINE + CLIENT SIGNALS BOUND`. An actual successful-exchange result needs a **voluntary, personally inspected manual transaction** with a trusted partner and only genuinely expendable low-value weapon, with both players choosing their own confirmations. If user does not want to risk an item, do not push them. When trade closes, probe takes two post-close own-inventory reads, copies/prints `[GINGERSCOPE STAGE32 ANONYMIZED]` JSON. Ask user to say whether they visibly saw the manual exchange finish, and **treat that as reported observation rather than server attestation**.
 
-**Latest confirmed Stage32 CI:** GitHub Actions run `42160694122` **SUCCESS**, full Python **280/280 tests** and new Stage32 pure Lua **17/17 tests**, plus all inherited Lua suites. The launcher compiled in CI and was fetched/verified at pinned commit `e1da79f9d55697cc5c636e019f3ef8bdef3bd0ca`. **Not yet live-tested in Delta as of this handoff.**
+**Initial Stage32 CI (before native-result regression):** GitHub Actions run `42160694122` **SUCCESS**, full Python **280/280 tests** and new Stage32 pure Lua **17/17 tests**, plus all inherited Lua suites. The launcher compiled in CI and was fetched/verified at pinned commit `e1da79f9d55697cc5c636e019f3ef8bdef3bd0ca`. **Not yet live-tested in Delta as of this handoff.**
 
 ## Architecture / staged development
 
