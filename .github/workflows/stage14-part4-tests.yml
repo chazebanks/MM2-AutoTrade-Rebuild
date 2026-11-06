@@ -61,7 +61,9 @@ jobs:
             test_stage36_image_relation_native \
             test_trade_update_shape \
             test_trade_update_shape_native \
-            test_direct_key_offer_event_correlation_native; do
+            test_direct_key_offer_event_correlation_native \
+            test_stage39_literal_presence \
+            test_stage39_literal_presence_native; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
