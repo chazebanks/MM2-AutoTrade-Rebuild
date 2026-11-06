@@ -189,8 +189,8 @@ function M.run(scanner,profile,placement)
                                 end
                                 local validator=placement.validatePermit
                                 if strategyState then
-                                    validator=function(p,o,t)
-                                        return strategyModule.validate(strategyState,p,o,t)
+                                    validator=function(p,o,t,diagnostics)
+                                        return strategyModule.validate(strategyState,p,o,t,diagnostics)
                                     end
                                 end
                                 local okCore,core=pcall(offerCore.new,result.config.session,{
@@ -263,7 +263,7 @@ function M.run(scanner,profile,placement)
                                         obs,diagnostics)
                                 end
                                 if okPlan and type(proposal)=="table" then
-                                    local kind,intent=offerCore.prepare(offerState,proposal,obs,now)
+                                    local kind,intent=offerCore.prepare(offerState,proposal,obs,now,diagnostics)
                                     if kind=="DISPATCH" then
                                         local receipt=offerNative.execute(offerHandle,intent)
                                         local status,why=offerCore.dispatched(
