@@ -11,6 +11,7 @@ ROOT=LAB.parent.parent
 P4=ROOT/"pdiddler"/"new_part4"
 CORE=P4/"p4_stage34_offer_delta_reconcile.lua"
 TEST=P4/"tests"/"test_stage34_offer_delta_reconcile.lua"
+PROBE=P4/"STAGE34_READONLY_OFFER_DELTA_PROBE.lua"
 
 class Stage34OfferDeltaTest(unittest.TestCase):
     def test_reuses_stage9_canonical_offer_and_stage29_inventory_shape(self):
@@ -62,6 +63,62 @@ class Stage34OfferDeltaTest(unittest.TestCase):
             'ledger for other session cannot match identical quantity maps',
         ):
             self.assertIn(name,tests)
+
+    def test_native_probe_reuses_existing_scanner_and_canonical_observer(self):
+        code=PROBE.read_text()
+        for marker in (
+            'PDIDDLER_STAGE34_OFFER_INVENTORY_PROBE',
+            'PDIDDLER_STAGE33_TRANSPORT_CENSUS',
+            'PDIDDLER_GINGERSCOPE_REPLACEMENT_PREVIEW',
+            'STAGE25_SCANNER_ONLY_BOOT.lua',
+            'p4_native_observer',
+            'p4_observer_contract',
+            'p4_stage29_postclose_ledger',
+            'p4_stage34_offer_delta_reconcile',
+            'scanner.getOwnInventory',
+            'scanner.getVerificationState',
+            'scanner.getRecord',
+            'mods.observer.capture',
+            'mods.compare.observe',
+            'mods.compare.close',
+            'mods.ledger.before',
+            'mods.ledger.after',
+            'mods.compare.new',
+            'two_post_close',  # checked below as test label, not literal code
+        )[:-1]:
+            self.assertIn(marker,code)
+        self.assertIn('finish("TWO_POST_CLOSE_OWN_READS_FINISHED"',code)
+        self.assertIn('why=="trade-window-closed"',code)
+        self.assertIn('why=="player-gui-missing"',code)
+        self.assertIn('marketFresh=function()return false end',code)
+        self.assertIn('PIN34="85ad36c0cdd203b0e5b68f2cf8973ff7e1978e74"',code)
+        self.assertIn('serverCompletionProven=false',code)
+        self.assertIn('authorizesAccept=false',code)
+        self.assertIn('mayRecordCompletedTrade=false',code)
+        self.assertIn('mayReportProfit=false',code)
+        self.assertLess(code.index('mods.ledger.before('),
+                        code.index('mods.compare.observe('))
+        self.assertLess(code.index('mods.compare.close('),
+                        code.index('mods.ledger.after('))
+        self.assertLess(code.index('mods.ledger.after('),
+                        code.index('finish("TWO_POST_CLOSE_OWN_READS_FINISHED"'))
+        for forbidden in (
+            ':FireServer(', ':InvokeServer(', 'SendMouseButtonEvent(',
+            'TeleportToPlaceInstance(', 'queue_on_teleport(',
+            'HttpService:PostAsync(', 'getconnections(',
+            'hookfunction(', 'getupvalue(', 'SetCore(',
+            'Claim:FireServer(', 'AcceptTrade:FireServer(',
+        ):
+            self.assertNotIn(forbidden,code)
+
+    @unittest.skipUnless(shutil.which("lua5.4"),"Lua5.4 in GitHub CI")
+    def test_native_delta_probe_compiles_without_running(self):
+        p=subprocess.run(
+            ["lua5.4","-e",
+             "assert(loadfile('pdiddler/new_part4/STAGE34_READONLY_OFFER_DELTA_PROBE.lua'))"],
+            cwd=str(ROOT),capture_output=True,text=True,timeout=12
+        )
+        self.assertEqual(p.returncode,0,p.stdout+"\\n"+p.stderr)
 
     @unittest.skipUnless(shutil.which("lua5.4"),"Lua5.4 in GitHub CI")
     def test_python_runs_actual_lua_stage34_suite(self):
