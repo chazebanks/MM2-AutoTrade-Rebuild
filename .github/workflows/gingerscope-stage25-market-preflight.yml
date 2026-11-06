@@ -4,6 +4,8 @@ on:
     paths:
       - 'pdiddler/refresh_supreme_snapshot.py'
       - 'pdiddler/tests/test_refresh_supreme_snapshot.py'
+      - 'pdiddler/stage25_market_diff.py'
+      - 'pdiddler/tests/test_stage25_market_diff.py'
       - '.github/workflows/gingerscope-stage25-market-preflight.yml'
       - 'pdiddler/new_part4/STAGE25_READONLY_DIAGNOSTIC.lua'
   workflow_dispatch:
@@ -23,6 +25,8 @@ jobs:
           sudo apt-get install -y lua5.4
       - name: Run existing Python source identity and fixed-expiry tests
         run: python3 -m unittest -v pdiddler.tests.test_refresh_supreme_snapshot
+      - name: Test Python market-diff and provenance accounting
+        run: python3 -m unittest -v pdiddler.tests.test_stage25_market_diff
       - name: Try DIRECT Supreme fetch with existing Python parser
         id: direct-source
         continue-on-error: true
@@ -110,6 +114,16 @@ jobs:
           assert(not S.isFresh(S.observedAtEpoch-1))
           print("PASS: actual Lua profile, 190 items, canonical Gingerscope and fixed source expiry")
           LUA
+      - name: Compare reviewed candidate to previous 190-item source
+        shell: bash
+        run: |
+          set -euo pipefail
+          file="$(find /tmp/gingerscope-market-preflight -maxdepth 1 -name 'supreme_snapshot_*.json' -type f)"
+          test -n "$file"
+          python3 pdiddler/stage25_market_diff.py \
+            --previous pdiddler/snapshots/supreme_snapshot_2026_11_04.json \
+            --candidate "$file" \
+            --output /tmp/gingerscope-market-preflight/stage25_price_diff.json
       - name: Upload review-only candidate snapshot (never deploy)
         uses: actions/upload-artifact@v4
         with:
