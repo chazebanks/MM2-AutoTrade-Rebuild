@@ -136,7 +136,7 @@ function M.next(s,o,diag,now)
    candidate=candidate,diagnostics=diag}
  return proposal
 end
-function M.validate(s,proposal,o,now)
+function M.validate(s,proposal,o,now,diagnostics)
  local p=s.issued
  if s.closed or s.used or not p or proposal~=p.proposal
   or type(now)~="number" or now<p.at or now-p.at>.25
@@ -144,7 +144,11 @@ function M.validate(s,proposal,o,now)
   or proposal.theirSig~=o.theirSig then return false end
  local ok,ctx=pcall(s.context)
  if not ok then return false end
- local good,proof=pcall(inspect,s,o,p.diagnostics,ctx,p.candidate)
+ -- Do not substitute the previous poll's resolved opponent items.
+ -- A new raw GUI/observer decode must accompany current signatures.
+ if type(diagnostics)~="table" or type(diagnostics.theirItems)~="table" then
+  return false end
+ local good,proof=pcall(inspect,s,o,diagnostics,ctx,p.candidate)
  if not good or not proof or proof.digest~=p.proof.digest then return false end
  s.used=true
  return true

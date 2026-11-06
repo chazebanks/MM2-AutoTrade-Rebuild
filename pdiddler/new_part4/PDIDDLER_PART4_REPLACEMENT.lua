@@ -6,11 +6,13 @@
 local M={}
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local PIN="1971b93d324f0275e6a9affb472ac3e804439ed8"
-local PLACEMENT_PIN="8b51d5f631a92b3e376fb6cf94d8048bb8e777a1"
-local STRATEGY_PIN="4032f96a3359d744bf3258b8c3cb15de9042b39b"
+local PLACEMENT_PIN="6385f040fb798206880dbbe03be85ee8a4a5883d"
+local EVIDENCE_PIN="aff334bdd473244e84bf7f1f8f620da749fe5411"
+local STRATEGY_PIN="961e20644f9866e5fc0f62a12459b91c945d7615"
 local REVIEW_PIN="b8618226a983088d00bc52afa8b666a87aba67b9"
 local function readModule(name,dependency)
-    local pin=(name=="p4_strategy_permit") and STRATEGY_PIN
+    local pin=(name=="p4_live_context") and EVIDENCE_PIN
+        or (name=="p4_strategy_permit") and STRATEGY_PIN
         or (name=="p4_dual_perspective") and REVIEW_PIN
         or (name=="p4_offer_executor" or name=="p4_native_offer")
         and PLACEMENT_PIN or PIN
@@ -178,19 +180,47 @@ function M.run(scanner,profile,placement)
                                 local strategyOK=true
                                 if strategyModule then
                                     local config=placement.strategy
-                                    local ok,instance=pcall(strategyModule.new,{
-                                        session=result.config.session,
-                                        reviewer=strategyReview,
-                                        context=config.context,source=config.source,
-                                        wall=config.wall,choose=config.choose,
-                                        approve=config.approve})
-                                    if ok then strategyState=instance
-                                    else strategyOK=false end
+                                    local contextFn,sourceFn,wallFn=
+                                        config.context,config.source,config.wall
+                                    if config.nativeEvidence==true then
+                                        -- Reuse the existing scanner, never a
+                                        -- second target-inventory RPC.
+                                        local okE,moduleE=pcall(readModule,"p4_live_context")
+                                        if okE then
+                                            local okNew,stateE=pcall(moduleE.new,{
+                                                scanner=scanner,profile=profile,
+                                                player=partner,game=game,
+                                                jobId=game.JobId,
+                                                session=result.config.session,
+                                                clock=os.clock,wall=os.time,
+                                                maxAgeSeconds=config.maxAgeSeconds})
+                                            if okNew then
+                                                local okRead,fresh=pcall(moduleE.refreshOwn,stateE)
+                                                if okRead and fresh==true then
+                                                    contextFn=function()
+                                                        return moduleE.build(stateE)
+                                                    end
+                                                    sourceFn=function() return profile.version end
+                                                    wallFn=os.time
+                                                else strategyOK=false end
+                                            else strategyOK=false end
+                                        else strategyOK=false end
+                                    end
+                                    if strategyOK then
+                                        local ok,instance=pcall(strategyModule.new,{
+                                            session=result.config.session,
+                                            reviewer=strategyReview,
+                                            context=contextFn,source=sourceFn,
+                                            wall=wallFn,choose=config.choose,
+                                            approve=config.approve})
+                                        if ok then strategyState=instance
+                                        else strategyOK=false end
+                                    end
                                 end
                                 local validator=placement.validatePermit
                                 if strategyState then
-                                    validator=function(p,o,t)
-                                        return strategyModule.validate(strategyState,p,o,t)
+                                    validator=function(p,o,t,diagnostics)
+                                        return strategyModule.validate(strategyState,p,o,t,diagnostics)
                                     end
                                 end
                                 local okCore,core=pcall(offerCore.new,result.config.session,{
@@ -263,7 +293,7 @@ function M.run(scanner,profile,placement)
                                         obs,diagnostics)
                                 end
                                 if okPlan and type(proposal)=="table" then
-                                    local kind,intent=offerCore.prepare(offerState,proposal,obs,now)
+                                    local kind,intent=offerCore.prepare(offerState,proposal,obs,now,diagnostics)
                                     if kind=="DISPATCH" then
                                         local receipt=offerNative.execute(offerHandle,intent)
                                         local status,why=offerCore.dispatched(

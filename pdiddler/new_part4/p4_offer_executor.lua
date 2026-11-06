@@ -58,7 +58,7 @@ function M.new(session,opts)
    verifySeconds=timeout,dispatchSeconds=dispatch,serial=0,
    mode="IDLE",pending=nil,reason="ready"}
 end
-function M.prepare(s,proposal,o,now)
+function M.prepare(s,proposal,o,now,diagnostics)
  assert(type(s)=="table" and s.session,"executor required")
  if s.mode=="STOPPED" then return "STOP","already-stopped" end
  if s.mode=="ESCALATE" then return "ESCALATE",s.reason end
@@ -82,7 +82,7 @@ function M.prepare(s,proposal,o,now)
  -- In particular: simply handing in a Stage16/17 REVIEW output never
  -- creates authorization; absence of this independently supplied callback
  -- or a false result prevents all sends.
- local ok,authorized=pcall(s.validatePermit,proposal,o,now)
+ local ok,authorized=pcall(s.validatePermit,proposal,o,now,diagnostics)
  if not ok or authorized~=true then return "HOLD","independent-permit-unverified" end
  s.serial=s.serial+1
  local intent={kind="ADD_ONE",token=s.serial,session=s.session,
