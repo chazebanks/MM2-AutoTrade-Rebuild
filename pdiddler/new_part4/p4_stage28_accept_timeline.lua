@@ -76,6 +76,18 @@ function M.ingest(s,o,diag,t)
   if o.tradeOpen~=false then
    return invalidate(s,"trade-open-unknown",t)
   end
+  -- Stage9 also returns tradeOpen=false when job/player/root changes.
+  -- Those are NOT evidence that the same trade window genuinely closed.
+  local invalidReasons={["place-or-job-changed"]=true,
+      ["local-player-changed"]=true,["trade-root-changed"]=true,
+      ["player-gui-missing"]=true}
+  if type(diag)=="table" and type(diag.errors)=="table" then
+   for _,reason in ipairs(diag.errors) do
+    if invalidReasons[reason] then
+      return invalidate(s,"observer-scope-invalid:"..reason,t)
+    end
+   end
+  end
   s.closed=true;s.terminal=true;s.phase="CLOSED_UNKNOWN"
   s.closureStatus="closed_unknown"
   s.reason="trade-window-closed-not-server-completion"
