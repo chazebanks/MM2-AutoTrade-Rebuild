@@ -35,17 +35,19 @@ local BASE="35ec2d9a47048910a464a2ef6eb9b9f52ae306b1"
 local CORE_PIN="b32ed071faf9d7cb390e7d87b70ca57abda151e4"
 local PRESENCE_PIN="bc6eb1394b70b84e20f18f6bcbbadd076e9bf962"
 local SCHEMA_PIN="9003ba057f23aa44460dbb2f9895e8ade3d73a3b"
+local TYPE_PIN="9dbd727a0b563aff11be2434bd679be55f911a53"
 local function source(pin,name)
  local txt=game:HttpGet(ROOT..pin.."/pdiddler/new_part4/"..name..".lua",true)
  assert(type(txt)=="string" and #txt>100,"source unavailable")
  local fn=assert(loadstring(txt,"="..name))
  local mod=fn();assert(type(mod)=="table","invalid module");return mod
 end
-local core,reader,contract,presence,schemaHypothesis
+local core,reader,contract,presence,schemaHypothesis,typeFirstFail
 local loaded=pcall(function()
  core=source(CORE_PIN,"p4_trade_update_shape");assert(type(core.inspect)=="function")
  presence=source(PRESENCE_PIN,"p4_stage39_literal_key_presence");assert(type(presence.inspect)=="function")
  schemaHypothesis=source(SCHEMA_PIN,"p4_stage40_trade_schema_hypothesis");assert(type(schemaHypothesis.inspect)=="function")
+ typeFirstFail=source(TYPE_PIN,"p4_stage41_key_type_first_failure");assert(type(typeFirstFail.inspect)=="function")
  contract=source(BASE,"p4_observer_contract");assert(type(contract.normalize)=="function")
  reader=source(BASE,"p4_native_observer");assert(type(reader.new)=="function" and type(reader.capture)=="function")
 end)
@@ -61,7 +63,7 @@ local events,eventCount={},0
 local targetKey,knownKeys=nil,nil
 local candidateCatalogueRows,displayedLabelVerified=0,false
 local candidateCount,mutationSide,sequence=0,"NONE","NONE"
-local selectedPresence,selectedHypothesis=nil,nil
+local selectedPresence,selectedHypothesis,selectedTypeFailure=nil,nil,nil
 local temporalCandidate=false
 local pendingAt,pendingOur,pendingTheir=nil,nil,nil
 local stableChange,changeAt=false,nil
@@ -98,6 +100,7 @@ local function publish()
  r.literalEqualityOnly=true
  r.literalPresence=temporalCandidate and shape and selectedPresence or nil
  r.tradeTableHypothesis=temporalCandidate and shape and selectedHypothesis or nil
+ r.keyTypeFirstFailure=temporalCandidate and shape and selectedTypeFailure or nil
  r.cleanupComplete=cleanupComplete;r.listenersAttached=listenerCount
  r.listenersDisconnected=disconnectCount
  r.anonymizedCountsOnly=true;r.readOnly=true
@@ -114,7 +117,7 @@ local function publish()
  local ok,json=pcall(function()return game:GetService("HttpService"):JSONEncode(r)end)
  if ok then
   if type(setclipboard)=="function"then pcall(setclipboard,json)end
-  print("[GINGERSCOPE STAGE40 TRADE HYPOTHESIS] "..json)
+  print("[GINGERSCOPE STAGE41 KEY TYPE FIRST FAILURE] "..json)
  else warn("[UPDATE SHAPE] JSON unavailable; observation stopped")end
 end
 local function finish(why,report)
@@ -301,6 +304,7 @@ local function resolveNearby(now)
  shape=found.report
  selectedPresence=found.presence
  selectedHypothesis=found.hypothesis
+ selectedTypeFailure=found.typeFailure
  stableContext=true
  finish("ONE_UPDATE_NEAR_SINGLE_OFFER_ADD",found.report)
 end
@@ -399,21 +403,22 @@ local function captureUpdate(...)
  local ok,report=pcall(core.inspect,packed)
  local matched,presenceResult=pcall(presence.inspect,packed,targetKey,knownKeys)
  local schemaOk,schemaResult=pcall(schemaHypothesis.inspect,packed,targetKey,"Batwing",me,boundPartner)
+ local typeOk,typeResult=pcall(typeFirstFail.inspect,packed,targetKey,"Batwing",me,boundPartner)
  packed=nil
  if S.finished then return end
  local after,failed=checkedFrame()
  if not after then finish(failed);return end
  if clock()-boundAt>=30 then finish("NO_CORRELATED_UPDATE_IN_WINDOW");return end
  if not ok or type(report)~="table" or not matched or type(presenceResult)~="table"
-  or not schemaOk or type(schemaResult)~="table" then finish("PAYLOAD_INSPECTION_FAILED");return end
- events[#events+1]={at=receivedAt,report=report,presence=presenceResult,hypothesis=schemaResult}
+  or not schemaOk or type(schemaResult)~="table" or not typeOk or type(typeResult)~="table" then finish("PAYLOAD_INSPECTION_FAILED");return end
+ events[#events+1]={at=receivedAt,report=report,presence=presenceResult,hypothesis=schemaResult,typeFailure=typeResult}
  -- Never publish the first receipt merely because it arrived. Only a stable,
  -- independently visible, one-side, single-slot addition can be a candidate.
  resolveNearby(clock())
 end
 local function onUpdate(...)guarded(captureUpdate,...)end
 S.phase="WAIT_MANUAL_WINDOW"
-print("[STAGE40] READ-ONLY candidate trade-layout hypothesis; open EMPTY trade then manually add ONE Batwing to YOUR offer; never Accept.")
+print("[STAGE41] READ-ONLY: determine catalogue key TYPE and FIRST failed candidate-schema check. Manual one Batwing in own empty trade, never Accept.")
 local function observe()
  local began=clock()
  local candidateRoot,candidatePartner,candidateLabel,candidateHandle,candidateFrame,candidateAt
@@ -447,7 +452,7 @@ local function observe()
      boundRemote=remote
      S.phase="LISTENING_UPDATE_TRADE"
      if not connect(remote.OnClientEvent,onUpdate)then return end
-     print("[STAGE40] LISTENING_UPDATE_TRADE: add exactly ONE Batwing to YOUR offer, no Accept; record screen and console.")
+     print("[STAGE41] LISTENING_UPDATE_TRADE: manually add ONE Batwing to YOUR offer; never Accept. Record console.")
      break
     end
     candidateFrame=o;candidateAt=clock()
