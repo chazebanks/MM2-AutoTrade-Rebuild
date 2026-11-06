@@ -156,4 +156,28 @@ test("output does not leak transaction IDs or item identities",function()
  end
  boundary(r)
 end)
+test("first native Stage32 gain without result receipt remains unproven",function()
+ -- Regression fixture grounded in the first actual Delta Stage32 JSON.
+ -- No partner Accept observed != proof that partner never accepted.
+ local t,c,l=fixture()
+ t.ourAcceptIndicatorEverVisible=true
+ t.theirAcceptIndicatorEverVisible=false
+ t.stableEver=false
+ l.status="ELIGIBLE_DELTA_UNATTRIBUTED"
+ l.changedTypes=1
+ l.gainedCount=1
+ l.lostCount=0
+ local r=J.evaluate(t,c,l)
+ assert(r.status=="ELIGIBLE_DELTA_WITHOUT_RESULT_NAMED_RECEIPT")
+ assert(r.reason=="own-inventory-change-cause-unverified")
+ assert(r.gainedEligibleCopies==1 and r.lostEligibleCopies==0)
+ assert(r.changedEligibleTypes==1)
+ assert(r.ourAcceptIndicatorEverVisible==true)
+ assert(r.theirAcceptIndicatorEverVisible==false)
+ assert(r.bothAcceptedStableObserved==false)
+ assert(r.observedResultNamedReceipts==0)
+ assert(not r.completeTradeSignalSeen and not r.endTradeSignalSeen)
+ assert(not r.declineTradeSignalSeen and not r.resultNamedSignalsTruncated)
+ boundary(r)
+end)
 print("PASS",passed,"Stage32 client-only result-signal inventory correlation")
