@@ -23,13 +23,30 @@ jobs:
           sudo apt-get install -y lua5.4
       - name: Run existing Python source identity and fixed-expiry tests
         run: python3 -m unittest -v pdiddler.tests.test_refresh_supreme_snapshot
-      - name: Fetch and validate LIVE Supreme HTML with existing Python parser
+      - name: Try DIRECT Supreme fetch with existing Python parser
+        id: direct-source
+        continue-on-error: true
         run: |
           set -euo pipefail
           mkdir -p /tmp/gingerscope-market-preflight
           python3 pdiddler/refresh_supreme_snapshot.py \
             --mapping pdiddler/snapshots/supreme_snapshot_2026_11_04.json \
             --output-dir /tmp/gingerscope-market-preflight
+          echo "SOURCE_ACQUISITION=direct-official-fetch" >> "$GITHUB_ENV"
+      - name: Import immutable browser-retrieved source if direct fetch was blocked
+        if: steps.direct-source.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 pdiddler/stage25_import_source_blobs.py \
+            --manifest pdiddler/source_evidence/stage25_supreme_browser_import_manifest.json \
+            --output-dir /tmp/gingerscope-browser-html
+          python3 pdiddler/refresh_supreme_snapshot.py \
+            --mapping pdiddler/snapshots/supreme_snapshot_2026_11_04.json \
+            --input-dir /tmp/gingerscope-browser-html \
+            --output-dir /tmp/gingerscope-market-preflight
+          echo "SOURCE_ACQUISITION=third-party-browser-capture-verified-from-immutable-source" >> "$GITHUB_ENV"
       - name: Validate generated exact canonical records and real publish/retrieval bounds
         run: |
           python3 - <<'PY'
@@ -44,6 +61,20 @@ jobs:
           assert p['coverage']['finite']==189
           assert p['coverage']['unpriced']==1
           assert len(p['sources'])==3
+          import os
+          acquisition=os.environ.get('SOURCE_ACQUISITION')
+          assert acquisition in ('direct-official-fetch',
+              'third-party-browser-capture-verified-from-immutable-source')
+          if acquisition.startswith('third-party'):
+              manifest=json.loads(Path(
+                  'pdiddler/source_evidence/stage25_supreme_browser_import_manifest.json'
+                  ).read_text())
+              for page,entry in manifest['sources'].items():
+                  source=p['sources'][page]
+                  assert source['observedAt']==entry['observedAt']
+                  assert source['publishedAt']==entry['publishedAt']
+                  assert source['url']==entry['url']
+          print('SOURCE_ACQUISITION:',acquisition)
           names={(r['page'],r['id']) for r in p['rows']}
           assert len(names)==190
           assert ('ancient','771') in names
@@ -66,5 +97,6 @@ jobs:
           path: |
             /tmp/gingerscope-market-preflight/*.json
             /tmp/gingerscope-market-preflight/*.lua
+            pdiddler/source_evidence/stage25_supreme_browser_import_manifest.json
           if-no-files-found: error
           retention-days: 7
