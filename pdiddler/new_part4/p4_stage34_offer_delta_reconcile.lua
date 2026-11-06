@@ -183,7 +183,15 @@ function M.evaluate(s,l,scope)
     not finite(l.closedAt) or math.abs(l.closedAt-s.closedAt)>.25 or
     type(l.pre)~="table" or type(l.post1)~="table" or
     type(l.post2)~="table" or
-    not identical(l.post1.items or {},l.post2.items or {}) or
+    type(l.pre.items)~="table" or type(l.post1.items)~="table" or
+    type(l.post2.items)~="table" or
+    type(l.pre.fp)~="string" or l.pre.fp=="" or
+    type(l.post1.fp)~="string" or l.post1.fp=="" or
+    type(l.post2.fp)~="string" or l.post2.fp=="" or
+    not integer(l.pre.rawOwned,1,1000000) or
+    not integer(l.post1.rawOwned,1,1000000) or
+    not integer(l.post2.rawOwned,1,1000000) or
+    not identical(l.post1.items,l.post2.items) or
     l.post1.fp~=l.post2.fp or l.post1.rawOwned~=l.post2.rawOwned or
     not finite(l.after1At) or not finite(l.after2At) or
     l.after1At<=s.closedAt or l.after2At<=l.after1At then
