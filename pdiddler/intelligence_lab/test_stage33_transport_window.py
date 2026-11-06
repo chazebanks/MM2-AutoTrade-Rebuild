@@ -54,6 +54,8 @@ class Stage33TransportTests(unittest.TestCase):
             'mayRecordCompletedTrade=false',
             'mayReportProfit=false',
             'S.connections={}',
+            'PDIDDLER_GINGERSCOPE_REPLACEMENT_PREVIEW',
+            'PDIDDLER_STAGE32_RESULT_CORRELATION_PROBE',
         ):
             self.assertIn(marker,code)
         self.assertLess(code.index('node.OnClientEvent:Connect(function()'),
