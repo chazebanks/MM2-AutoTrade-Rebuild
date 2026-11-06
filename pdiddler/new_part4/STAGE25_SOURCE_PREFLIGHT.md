@@ -29,13 +29,37 @@ The new `.github/workflows/gingerscope-stage25-market-preflight.yml` first attem
 
 This browser-import path **is not a direct GitHub-runner fetch and not a new Supreme publication**. The provenance difference remains labeled. The candidate is uploaded as a **review-only ZIP artifact**; it is not committed to the active snapshot path or loaded into Delta. If either direct source or the immutable browser-import fallback fails, the job fails.
 
+## Source comparison — verified result
+
+GitHub Actions run `42140758571` used the immutable browser-retrieved official Supreme HTML to generate a dated source-checked candidate. It then ran the **actual Lua profile consumer** and the Python `stage25_market_diff.py` comparison.
+
+- All **190/190** canonical item values, demand scores and stability categories **matched** the November 4 baseline: zero changes.
+- Official page publication stayed `2026-11-04T17:27:12Z`. The newer `2026-11-06T00:47:22Z` timestamp describes the browser retrieval, **not a new Supreme publication**.
+- The review-only candidate expires at `2026-11-07T00:47:22Z`, anchored to retrieval+24 hours and publication+72 hours. It is not automatically installed in Delta.
+- Direct GitHub Actions fetch remains HTTP 403. The browser-acquisition fallback is identified separately, checked against immutable Git blobs and SHA256 evidence, and never presented as a direct site fetch.
+
+The comparison report is included with the snapshot in the CI artifact. This is a finite, expiring source record; repeating its import later does NOT refresh its observation time.
+
+## Isolated scanner-only Delta test entrypoint
+
+To test Stage 24 scan timestamps while the ordinary preview still refuses the expired market profile, Stage 25 also has `new_part4/STAGE25_SCANNER_ONLY_BOOT.lua`:
+
+- Loads the **same existing scanner** with the existing dated profile, repricer and GUI. It does **not** load outgoing request rotation, Part 4, hopping, Discord, offer placement or Accept.
+- Explicit opt-in is required via `PDIDDLER_ALLOW_SCANNER_ONLY_TEST=true` and it refuses a parallel legacy/replacement session.
+- It does **not** treat stale profile values as usable trade prices. `marketFresh=false` is reported truthfully. This test is for scan completion evidence only.
+- Scanner inventory reads do occur, and its existing GUI/console may display player names. **Only the Stage25 diagnostic JSON is anonymized**; do not share raw scanner console logs if identities must remain private.
+- The existing scanner has persistent listeners and no externally verified teardown. **Rejoin** after the diagnostic; never load a second copy in the same server.
+- Run the existing `STAGE25_READONLY_DIAGNOSTIC.lua` against `PDIDDLER_STAGE25_SCANNER_ONLY.rawScanner` after the scanner has populated. It uses no inventory RPCs of its own, and every result has `authorizesTrade=false` and `serverAttestation=false`.
+
+This is a controlled test preparation, not proof of native Delta behavior and not a new trading entrypoint.
+
 ## Delta probe
 
 `new_part4/STAGE25_READONLY_DIAGNOSTIC.lua` reads **only** the replacement preview's existing `rawScanner.getRecord` and `rawScanner.getVerificationState` cache. It does not invoke inventory remotes, click, accept, decline, teleport, or make requests.
 
 The diagnostic checks each currently present player's stable-scan proof for server-job match, player reference, monotonic scan age, fingerprint, verified final state, valid item category/quantity and absence of in-progress retries. It reports **P1/P2 anonymized rows**; no real names, UserIds, job IDs, or webhook tokens are printed. Source freshness and client scan recency are separate fields; neither represents authenticated server proof.
 
-The diagnostic can return `REPLACEMENT_PREVIEW_NOT_RUNNING` because the loader intentionally blocks expired market snapshots. This does **not** justify starting the old V15.8 trading system.
+The diagnostic can return `SCANNER_CACHE_NOT_RUNNING` if neither the isolated scanner-only session nor the replacement preview is present. This does **not** justify starting the old V15.8 trading system.
 
 ## Tests
 
