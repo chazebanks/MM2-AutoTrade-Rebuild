@@ -47,9 +47,10 @@ To test Stage 24 scan timestamps while the ordinary preview still refuses the ex
 - Loads the **same existing scanner** with the existing dated profile, repricer and GUI. It does **not** load outgoing request rotation, Part 4, hopping, Discord, offer placement or Accept.
 - Explicit opt-in is required via `PDIDDLER_ALLOW_SCANNER_ONLY_TEST=true` and it refuses a parallel legacy/replacement session.
 - It does **not** treat stale profile values as usable trade prices. `marketFresh=false` is reported truthfully. This test is for scan completion evidence only.
+- This is a local test that requires manually selecting the appropriate MM2 device UI. The bootstrap intentionally does not press startup buttons; it only starts the existing scanner on the correct game.
 - Scanner inventory reads do occur, and its existing GUI/console may display player names. **Only the Stage25 diagnostic JSON is anonymized**; do not share raw scanner console logs if identities must remain private.
 - The existing scanner has persistent listeners and no externally verified teardown. **Rejoin** after the diagnostic; never load a second copy in the same server.
-- Run the existing `STAGE25_READONLY_DIAGNOSTIC.lua` against `PDIDDLER_STAGE25_SCANNER_ONLY.rawScanner` after the scanner has populated. It uses no inventory RPCs of its own, and every result has `authorizesTrade=false` and `serverAttestation=false`.
+- **One-paste test:** the scanner-only bootstrap loads the existing diagnostic automatically **once** when the initial scanner cache settles, or after its bounded observation window. It prints and optionally copies a single anonymized JSON report. No second script is required. The diagnostic uses no inventory RPCs of its own, and every result has `authorizesTrade=false` and `serverAttestation=false`.
 
 This is a controlled test preparation, not proof of native Delta behavior and not a new trading entrypoint.
 
