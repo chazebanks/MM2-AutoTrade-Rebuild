@@ -126,6 +126,29 @@ class Stage32Tests(unittest.TestCase):
         self.assertIn("Stage32 client-only result-signal inventory correlation",p.stdout)
 
     @unittest.skipUnless(shutil.which("lua5.4"),"Lua5.4 in CI")
+    def test_actual_stage29_lua_regression_through_python(self):
+        """Execute the real Stage29 Lua ledger test, including excluded-weapon exchange.
+
+        This is an offline fixture (not proof of the user's outgoing item tier
+        or of MM2's successful-trade server transport).
+        """
+        source=(P4/"tests"/"test_stage29_postclose_ledger.lua").read_text()
+        self.assertIn(
+            "eligible gain plus untracked weapon loss reports zero eligible losses",
+            source,
+        )
+        p=subprocess.run(
+            ["lua5.4", str(P4/"tests"/"test_stage29_postclose_ledger.lua"),
+             str(P4)],
+            cwd=str(ROOT.parent), text=True, capture_output=True, timeout=12,
+        )
+        self.assertEqual(p.returncode, 0, p.stdout+"\\n"+p.stderr)
+        self.assertRegex(
+            p.stdout,
+            r"PASS\\s+\\d+\\s+Stage29 pure post-close own inventory ledger evidence",
+        )
+
+    @unittest.skipUnless(shutil.which("lua5.4"),"Lua5.4 in CI")
     def test_delta_launcher_compiles_without_running(self):
         p=subprocess.run(["lua5.4","-e",
              "assert(loadfile('pdiddler/new_part4/STAGE32_READONLY_RESULT_DELTA_PROBE.lua'))"],
