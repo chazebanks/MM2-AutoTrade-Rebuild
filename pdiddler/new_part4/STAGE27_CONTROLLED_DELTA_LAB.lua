@@ -6,7 +6,7 @@
 local E=(getgenv and getgenv()) or _G
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local STAGE26="a2a2e601be864f970da0a69c436ab3b12efd8112"
-local CORE27="57fed50b79c4028bf834424bbe21b7fc7bc7f1a1"
+local CORE27="cfcb0d729ff38ebd0ceedc018a689ce474137aca"
 local TRANSPORT27="dd36c309bdb0d921cf008b65b5948b3ff23b2fc9"
 local PLACE_ID=142823291
 local MAX_ITEM_VALUE=200
