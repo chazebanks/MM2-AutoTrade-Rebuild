@@ -56,6 +56,8 @@ function M.new(session,firstTime,config)
   terminal=false,events={},frames=0,
   lastSignature=nil,lastAccept=nil,hadAnyAccept=false,
   anyBothAccepted=false,bothAcceptedStable=false,
+  ourAcceptIndicatorEverVisible=false,theirAcceptIndicatorEverVisible=false,
+  anyAcceptIndicatorUnknown=false,
   stableEver=false,pendingSince=nil,
   tainted=false,everResolved=false,closed=false,closureStatus=nil}
 end
@@ -79,6 +81,19 @@ function M.ingest(s,o,diag,t)
   s.reason="trade-window-closed-not-server-completion"
   event(s,"CLOSED_UNKNOWN",t)
   return "CLOSED_UNKNOWN",s.reason
+ end
+ -- Observe native icons independently of whether an actual bilateral
+ -- exchange is resolved. This is GUI presence ONLY, never quote authority.
+ if o.contextOK==true then
+  if o.ourAccepted==true then s.ourAcceptIndicatorEverVisible=true end
+  if o.theirAccepted==true then s.theirAcceptIndicatorEverVisible=true end
+  if type(o.ourAccepted)~="boolean"
+    or type(o.theirAccepted)~="boolean" then
+   s.anyAcceptIndicatorUnknown=true
+  end
+ end
+ if s.everResolved and o.contextOK~=true then
+  return invalidate(s,"bound-trade-context-lost",t)
  end
  if o.contextOK~=true or type(o.ourSig)~="string"
     or type(o.theirSig)~="string" or o.ourSig==""
@@ -152,6 +167,9 @@ function M.summary(s)
    status=s.phase,reason=s.reason,observations=s.frames,
    bothAcceptedEverObserved=s.anyBothAccepted,
    bothAcceptedStableObserved=s.stableEver,
+   ourAcceptIndicatorEverVisible=s.ourAcceptIndicatorEverVisible,
+   theirAcceptIndicatorEverVisible=s.theirAcceptIndicatorEverVisible,
+   anyAcceptIndicatorUnknown=s.anyAcceptIndicatorUnknown,
    currentBothAcceptedStable=s.bothAcceptedStable,
    offerMutationAfterAccept=s.tainted,
    closureStatus=s.closureStatus or "not-closed",
