@@ -111,12 +111,17 @@ function M.capture(context)
 end
 function M.fromActive()
  local E=(getgenv and getgenv()) or _G
- local B=E.PDIDDLER_GINGERSCOPE_REPLACEMENT_PREVIEW
+ -- Prefer the isolated scanner-only diagnostic session. It never
+ -- initializes Part3 outgoing, the trading controller or the hopper.
+ local B=E.PDIDDLER_STAGE25_SCANNER_ONLY
+ if type(B)~="table" then
+  B=E.PDIDDLER_GINGERSCOPE_REPLACEMENT_PREVIEW
+ end
  if type(B)~="table" or type(B.rawScanner)~="table"
   or type(B.rawScanner.getRecord)~="function"
   or type(B.rawScanner.getVerificationState)~="function" then
   return {schema="gingerscope-stage25-scanner-evidence-v1",
-   status="REPLACEMENT_PREVIEW_NOT_RUNNING",serverAttestation=false,
+   status="SCANNER_CACHE_NOT_RUNNING",serverAttestation=false,
    authorizesTrade=false,authorizesAccept=false}
  end
  local Players=game:GetService("Players")
