@@ -249,6 +249,23 @@ local function bind()
  end
  if not profile.isFresh() or root~=tradeRoot() then
   show("Trade/source changed during inventory read.");return end
+ -- Do not place even a low-value item unless we can at least
+ -- resolve both native input interfaces. A later GUI proof remains required.
+ local interfacesOK=pcall(function()
+  local trade=game:GetService("ReplicatedStorage"):FindFirstChild("Trade")
+  local add=trade and trade:FindFirstChild("OfferItem")
+  assert(add and add:IsA("RemoteEvent"),"OfferItem missing")
+  local vim=game:GetService("VirtualInputManager")
+  assert(vim and type(vim.SendMouseButtonEvent)=="function",
+      "physical remove-input API missing")
+  local gs=game:GetService("GuiService")
+  assert(gs and type(gs.GetGuiInset)=="function",
+      "GUI inset API missing")
+ end)
+ if not interfacesOK then
+  show("Native add or physical removal input unavailable; no items touched.")
+  return
+ end
  local choices={}
  for _,it in ipairs(own.items) do
   if type(it)=="table" and type(it.id)=="string"
