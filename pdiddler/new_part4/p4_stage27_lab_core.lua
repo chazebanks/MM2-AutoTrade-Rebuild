@@ -65,7 +65,7 @@ function M.add(s)
   return "HOLD","add-not-operator-ready" end
  s.addAttempted=true -- reserved before observing, never retry a lost attempt
  local o,why=capture(s)
- if not o then return fail(s,"add-"+why) end
+ if not o then return fail(s,"add-"..why) end
  s.marketFresh=(o.marketFresh==true)
  if o.ourSlots~=0 or o.theirSlots<1 or o.theirResolved~=true
    or o.marketFresh~=true then
@@ -94,7 +94,7 @@ function M.remove(s)
   return "HOLD","removal-not-operator-ready" end
  s.removeAttempted=true -- never click twice on uncertain UI action
  local o,why=capture(s)
- if not o then return fail(s,"remove-"+why) end
+ if not o then return fail(s,"remove-"..why) end
  if o.ourSlots~=1 or type(o.ownItems)~="table"
   or #o.ownItems~=1 or o.ownItems[1].id~=s.item.id
   or o.ownItems[1].qty~=1 then
@@ -118,7 +118,7 @@ function M.poll(s)
  if s.phase~="VERIFY_ADD" and s.phase~="VERIFY_REMOVE" then
    return "HOLD",s.reason end
  local o,why=capture(s)
- if not o then return fail(s,"verify-"+why) end
+ if not o then return fail(s,"verify-"..why) end
  local now=s.clock()
  if s.phase=="VERIFY_ADD" then
   local action,reason=s.offerCore.observe(s.offerState,o,now)
@@ -131,7 +131,7 @@ function M.poll(s)
     return "VERIFIED",s.reason
   end
   if action=="STOP" or action=="ESCALATE" then
-    return fail(s,"add-"+tostring(reason)) end
+    return fail(s,"add-"..tostring(reason)) end
   return "HOLD",reason
  end
  local action,reason=s.removeCore.observe(s.removeState,o,now)
@@ -143,7 +143,7 @@ function M.poll(s)
   return "VERIFIED",s.reason
  end
  if action=="STOP" or action=="ESCALATE" then
-  return fail(s,"remove-"+tostring(reason)) end
+  return fail(s,"remove-"..tostring(reason)) end
  return "HOLD",reason
 end
 function M.stop(s)
