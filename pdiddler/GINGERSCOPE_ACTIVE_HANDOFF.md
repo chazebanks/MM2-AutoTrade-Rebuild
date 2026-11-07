@@ -1,5 +1,5 @@
 # Gingerscope — Active ChatGPT Continuity Handoff
-**Updated:** 2026-11-06 (America/New_York)  
+> **READ FIRST IN ANY NEW CHAT (2026-11-07):** [GINGERSCOPE_READ_FIRST_NEXT_CONVERSATION.md](./GINGERSCOPE_READ_FIRST_NEXT_CONVERSATION.md) is the primary, complete next-conversation protocol. Read that document in full **before** this active handoff, then read this full handoff and [the strategy/research playbook](./GINGERSCOPE_STRATEGY_AND_RESEARCH_PLAYBOOK.md). **This link and the top Stage42 status supersede any historical “next action” inside older stage sections.** Do not claim these were read unless they were actually fetched. No native Stage42 result has been received yet.\n\n**Updated:** 2026-11-07 (America/New_York)  
 **Status:** REAL Stage41 Batwing diagnostic finished on iPad: raw Sync Batwing key is STRING, tested not equal to displayed Batwing label, root and both player-side named structures match; first failure PLAYER_OBJECT_MISMATCH: Player1.Player != our LocalPlayer and Player2.Player != bound trade partner. Opposite (reversed) comparisons UNTESTED; Offer fields, row positions and acceptance UNTESTED. Stage39 raw-key literal match at depth4 remains; no authenticated slot/session proof. Stage42 passive both-orientation comparison implemented in draft PR81; offline CI 22 pure/34 native/312 Python PASS; NO Stage42 real iPad result yet. All automatic trade/Accept/transfer/completion/profit authority FALSE.
 **Repository:** https://github.com/chazebanks/MM2-AutoTrade-Rebuild  
 **Active development branch:** `feature/gingerscope-stage42-player-orientation` (draft PR #81, stacked on unchanged Stage41 PR80; earlier PRs remain draft)
@@ -331,19 +331,29 @@ The new/current staged work is in `pdiddler/new_part4/` plus `pdiddler/intellige
 
 Do not confuse the historical v2.6 fixed-profit strategy with the newer Gingerscope intelligence lab: the current offline lab specifically did **not** inherit that +15 rule. Any future actual economic rules require deliberate validation and explicit user approval before production use.
 
-## Staged PR index
+## Staged PR index — verified reference, not a merge claim
 
-- #64 Stage25: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/64
-- #65 Stage26: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/65
-- #66 Stage27: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/66
-- #67 Stage28: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/67
-- #68 Stage29: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/68
-- #69 Stage30: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/69
-- #70 Stage31: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/70
-- #71 Stage32: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/71
-- #72 Stage33: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/72
-- #73 Stage34: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/73
-- #74 Stage35: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/74
-- #75 Stage36: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/75
+**This is the CURRENT index.** Draft PRs are historical staged work, not automatically production or merged. Verify status through GitHub before changing code.
 
-**Current next step: one separately approved passive UpdateTrade payload-shape observation or actual source/schema evidence. No binding resolver, no image fallback, no completed transfer. See PR76/current checkpoint above.**
+| PR | Verified area | Status of evidence |
+|---|---|---|
+| [#64](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/64) | Stage25 player scanner | Real iPad client scan |
+| [#65](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/65) | Stage26 market snapshot | Time-limited; values expire |
+| [#66](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/66) | Stage27 add/remove | Native UI offer mutation |
+| [#67](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/67) | Stage28 partner Accept observation | Native one-sided Accept indicator |
+| [#68](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/68) | Stage29 before/after inventory | Native reads; closed outcome unknown |
+| [#69](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/69) | Stage30 incoming remotes | Native DeclineTrade only |
+| [#70](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/70) | Stage31 local vs partner decline | Shared event name, actor unknown |
+| [#71](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/71) | Stage32 client result correlation | Native +1 client inventory, not server settlement |
+| [#72](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/72) | Stage33 inbound UpdateTrade discovery | Native receipt, payload not captured |
+| [#73](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/73) | Stage34 raw inventory reconciliation | Name-only ambiguous identity |
+| [#74](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/74) | Stage35 GUI metadata | No authenticated raw slot ID |
+| [#75](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/75) | Stage36 image identity investigation | Abandoned / archive |
+| [#76](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/76) | Stage37 UpdateTrade shape | Native one TABLE/6 tables/14 entries |
+| [#77](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/77) | Stage38 offer/event timing | Native one temporally near own Batwing add |
+| [#78](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/78) | Stage39 exact key primitive match | Native one key match depth4, video |
+| [#79](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/79) | Stage40 exact guessed schema | Native HYPOTHESIS_NOT_MATCHED, video |
+| [#80](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/80) | Stage41 first failed schema check | Native PLAYER_OBJECT_MISMATCH, key STRING |
+| [#81](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/81) | **Stage42 both player object orders** | **Only offline CI 22 pure, 34 native mocks, 312 Python; real iPad Stage42 result PENDING** |
+
+**Current only next action:** Obtain/analyze the ONE **read-only, no-Accept Stage42** manual Batwing test from pinned commit `35e972349dd69c126dfc112fd86eccf27e194510`. [Instructions, loader, safety gates and exact handoff rules](./GINGERSCOPE_READ_FIRST_NEXT_CONVERSATION.md). No other previous stage needs repeating and no automatic trade or completion reporting is authorized.
