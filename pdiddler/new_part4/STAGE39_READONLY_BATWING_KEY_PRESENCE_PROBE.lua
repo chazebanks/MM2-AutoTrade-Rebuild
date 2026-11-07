@@ -37,19 +37,21 @@ local PRESENCE_PIN="bc6eb1394b70b84e20f18f6bcbbadd076e9bf962"
 local SCHEMA_PIN="9003ba057f23aa44460dbb2f9895e8ade3d73a3b"
 local TYPE_PIN="9dbd727a0b563aff11be2434bd679be55f911a53"
 local ORIENTATION_PIN="9fcd2ae45d8ae3ee2c5292d794097703df24206d"
+local DYNAMIC_PIN="26b51a41ffd65e1c422054358e353360871e1428"
 local function source(pin,name)
  local txt=game:HttpGet(ROOT..pin.."/pdiddler/new_part4/"..name..".lua",true)
  assert(type(txt)=="string" and #txt>100,"source unavailable")
  local fn=assert(loadstring(txt,"="..name))
  local mod=fn();assert(type(mod)=="table","invalid module");return mod
 end
-local core,reader,contract,presence,schemaHypothesis,typeFirstFail,orientationInspector
+local core,reader,contract,presence,schemaHypothesis,typeFirstFail,orientationInspector,dynamicOwnOffer
 local loaded=pcall(function()
  core=source(CORE_PIN,"p4_trade_update_shape");assert(type(core.inspect)=="function")
  presence=source(PRESENCE_PIN,"p4_stage39_literal_key_presence");assert(type(presence.inspect)=="function")
  schemaHypothesis=source(SCHEMA_PIN,"p4_stage40_trade_schema_hypothesis");assert(type(schemaHypothesis.inspect)=="function")
  typeFirstFail=source(TYPE_PIN,"p4_stage41_key_type_first_failure");assert(type(typeFirstFail.inspect)=="function")
  orientationInspector=source(ORIENTATION_PIN,"p4_stage42_player_orientation");assert(type(orientationInspector.inspect)=="function")
+ dynamicOwnOffer=source(DYNAMIC_PIN,"p4_stage43_dynamic_own_offer");assert(type(dynamicOwnOffer.inspect)=="function")
  contract=source(BASE,"p4_observer_contract");assert(type(contract.normalize)=="function")
  reader=source(BASE,"p4_native_observer");assert(type(reader.new)=="function" and type(reader.capture)=="function")
 end)
@@ -65,7 +67,7 @@ local events,eventCount={},0
 local targetKey,knownKeys=nil,nil
 local candidateCatalogueRows,displayedLabelVerified=0,false
 local candidateCount,mutationSide,sequence=0,"NONE","NONE"
-local selectedPresence,selectedHypothesis,selectedTypeFailure,selectedOrientation=nil,nil,nil,nil
+local selectedPresence,selectedHypothesis,selectedTypeFailure,selectedOrientation,selectedDynamic=nil,nil,nil,nil,nil
 local temporalCandidate=false
 local pendingAt,pendingOur,pendingTheir=nil,nil,nil
 local stableChange,changeAt=false,nil
@@ -104,6 +106,7 @@ local function publish()
  r.tradeTableHypothesis=temporalCandidate and shape and selectedHypothesis or nil
  r.keyTypeFirstFailure=temporalCandidate and shape and selectedTypeFailure or nil
  r.playerOrientation=temporalCandidate and shape and selectedOrientation or nil
+ r.dynamicOwnOffer=temporalCandidate and shape and selectedDynamic or nil
  r.cleanupComplete=cleanupComplete;r.listenersAttached=listenerCount
  r.listenersDisconnected=disconnectCount
  r.anonymizedCountsOnly=true;r.readOnly=true
@@ -120,7 +123,7 @@ local function publish()
  local ok,json=pcall(function()return game:GetService("HttpService"):JSONEncode(r)end)
  if ok then
   if type(setclipboard)=="function"then pcall(setclipboard,json)end
-  print("[GINGERSCOPE STAGE42 PLAYER ORIENTATION] "..json)
+  print("[GINGERSCOPE STAGE43 DYNAMIC OWN OFFER] "..json)
  else warn("[UPDATE SHAPE] JSON unavailable; observation stopped")end
 end
 local function finish(why,report)
@@ -309,6 +312,7 @@ local function resolveNearby(now)
  selectedHypothesis=found.hypothesis
  selectedTypeFailure=found.typeFailure
  selectedOrientation=found.orientation
+ selectedDynamic=found.dynamic
  stableContext=true
  finish("ONE_UPDATE_NEAR_SINGLE_OFFER_ADD",found.report)
 end
@@ -409,6 +413,7 @@ local function captureUpdate(...)
  local schemaOk,schemaResult=pcall(schemaHypothesis.inspect,packed,targetKey,"Batwing",me,boundPartner)
  local typeOk,typeResult=pcall(typeFirstFail.inspect,packed,targetKey,"Batwing",me,boundPartner)
  local orientationOk,orientationResult=pcall(orientationInspector.inspect,packed,me,boundPartner)
+ local dynamicOk,dynamicResult=pcall(dynamicOwnOffer.inspect,packed,targetKey,me,boundPartner)
  packed=nil
  if S.finished then return end
  local after,failed=checkedFrame()
@@ -416,15 +421,16 @@ local function captureUpdate(...)
  if clock()-boundAt>=30 then finish("NO_CORRELATED_UPDATE_IN_WINDOW");return end
  if not ok or type(report)~="table" or not matched or type(presenceResult)~="table"
   or not schemaOk or type(schemaResult)~="table" or not typeOk or type(typeResult)~="table"
-  or not orientationOk or type(orientationResult)~="table" then finish("PAYLOAD_INSPECTION_FAILED");return end
- events[#events+1]={at=receivedAt,report=report,presence=presenceResult,hypothesis=schemaResult,typeFailure=typeResult,orientation=orientationResult}
+  or not orientationOk or type(orientationResult)~="table"
+   or not dynamicOk or type(dynamicResult)~="table" then finish("PAYLOAD_INSPECTION_FAILED");return end
+ events[#events+1]={at=receivedAt,report=report,presence=presenceResult,hypothesis=schemaResult,typeFailure=typeResult,orientation=orientationResult,dynamic=dynamicResult}
  -- Never publish the first receipt merely because it arrived. Only a stable,
  -- independently visible, one-side, single-slot addition can be a candidate.
  resolveNearby(clock())
 end
 local function onUpdate(...)guarded(captureUpdate,...)end
 S.phase="WAIT_MANUAL_WINDOW"
-print("[STAGE42] READ-ONLY: check both player reference orders in UpdateTrade. Manually offer one Batwing on YOUR side, never Accept.")
+print("[STAGE43] READ-ONLY: check whether own Batwing key/quantity/category is in actual actor-mapped P1/P2 offer. No Accept.")
 local function observe()
  local began=clock()
  local candidateRoot,candidatePartner,candidateLabel,candidateHandle,candidateFrame,candidateAt
@@ -458,7 +464,7 @@ local function observe()
      boundRemote=remote
      S.phase="LISTENING_UPDATE_TRADE"
      if not connect(remote.OnClientEvent,onUpdate)then return end
-     print("[STAGE42] LISTENING_UPDATE_TRADE: add ONE Batwing to YOUR offer; never Accept. Record console.")
+     print("[STAGE43] LISTENING_UPDATE_TRADE: add ONE Batwing to YOUR offer; never Accept. Record console.")
      break
     end
     candidateFrame=o;candidateAt=clock()
