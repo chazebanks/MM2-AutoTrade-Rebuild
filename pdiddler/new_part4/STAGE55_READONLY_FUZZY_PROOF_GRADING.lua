@@ -13,7 +13,11 @@ local R={schema="gingerscope-stage55-fuzzy-proof-grading-v1",readOnly=true,clien
  explicitInternal=0,displayAlias=0,fuzzy=0,ambiguous=0,unresolved=0,
  otherResolverFail=0,invalidCatalogRows=0,printableKeyCollisions=0,
  duplicateTargetGroups=0,duplicateTargetEntries=0,yearHintConflicts=0,
- yearHintsComparable=0,placeholderArtworkMatches=0,filteredChroma=0}
+ yearHintsComparable=0,placeholderArtworkMatches=0,filteredChroma=0,
+ fuzzyScoreBelow300=0,fuzzyScore300to399=0,fuzzyScore400to499=0,
+ fuzzyScore500Plus=0,fuzzyDirectRaw=0,fuzzyDirectName=0,fuzzyBothDirect=0,
+ fuzzyTransformedOnly=0,fuzzyNonUniqueBestScore=0,fuzzyRunnerGap1to20=0,
+ fuzzyRunnerGap21to99=0,fuzzyRunnerGap100Plus=0,fuzzyScoreReproductionErrors=0}
 -- Best-effort local clipboard convenience. Only the anonymized aggregate report
 -- may leave the observer; no raw catalogue data or inventory is ever copied.
 local function tryClipboard(fn,line)
