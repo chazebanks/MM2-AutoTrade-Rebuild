@@ -87,6 +87,13 @@ case("same table",function()
  local s=call(t,t,{sameTable=true})
  check(s,"SAME_TABLE_CLIENT_ONLY")
 end)
+case("same table still rejects invalid rows",function()
+ local t={TestRawKey=123}
+ check(call(t,t,{sameTable=true}),"INVALID_CATALOG_SHAPE")
+end)
+case("optional Sync.Item absent no overwrite",function()
+ check(call({TestRawKey=row(true,"2024")},nil),"ITEM_SOURCE_ABSENT_NO_OVERWRITE")
+end)
 case("complete identical entries",function()
  local s=call({TestRawKey=row(true,"2024")},{TestRawKey=row(true,"2024")})
  check(s,"CLIENT_OVERLAP_CONSISTENT_UNAUTHENTICATED")
@@ -158,7 +165,7 @@ for i=1,400 do
  else check(s,"CATALOG_METADATA_PARTIAL") end
 end
 case("400 seeded source mutations",function() end)
-realPrint("STAGE53_ACTUAL_NATIVE_LUA_416_CASES_PASS")
+realPrint("STAGE53_ACTUAL_NATIVE_LUA_419_CASES_PASS")
 '''
 
 class Stage53CatalogCensusTests(unittest.TestCase):
