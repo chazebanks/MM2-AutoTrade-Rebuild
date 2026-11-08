@@ -76,9 +76,10 @@ function M.inspect(sync,profileOwned,scanner,key,offeredCount)
  if name==nil then name=rawget(meta,"Name") end
  local rarity=rawget(meta,"Rarity")
  local chroma=rawget(meta,"Chroma")==true
- local shown=chroma and
-  (string.lower(name):sub(1,7)=="chroma " and name or "Chroma "..name)
-  or name
+ local shown=name
+ if chroma and typ(name)=="string" then
+  shown=string.lower(name):sub(1,7)=="chroma " and name or "Chroma "..name
+ end
  local page=chroma and "chroma" or
   ((rarity=="Ancient" or rarity=="Godly") and string.lower(rarity) or nil)
  if (t~="Knife" and t~="Gun") or typ(name)~="string" or name==""
