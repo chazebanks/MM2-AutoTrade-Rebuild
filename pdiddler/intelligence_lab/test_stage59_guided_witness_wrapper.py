@@ -69,12 +69,25 @@ local function call(role,opt)
   GenerateGUID=function()return "0a0a0a0a-1111-2222-3333-abcdefabcdef"end,
   JSONEncode=function(_,v)return json(v)end
  }
- local job="FAKE_SECRET_JOB_ID"
+ local function newSignal()
+ return {
+  Connect=function(self,callback)
+   self.callback=callback
+   return {Disconnect=function()end}
+  end,
+  Fire=function(self,input)
+   if self.callback then self.callback(input) end
+  end
+ }
+end
+local userInput={InputChanged=newSignal(),InputEnded=newSignal()}
+local job="FAKE_SECRET_JOB_ID"
  game={
   PlaceId=opt.wrongGame and 4 or 142823291,JobId=job,
   GetService=function(_,name)
    if name=="Players" then return players end
    if name=="HttpService" then return http end
+   if name=="UserInputService" then return userInput end
   end,
   HttpGet=function(_,url)
    remoteCalls[#remoteCalls+1]=url
@@ -102,7 +115,7 @@ local function call(role,opt)
    return source
   end,
  }
- local globalValues={Instance,UDim2,UDim,Color3,Enum}
+ local globalValues={Instance,UDim2,UDim,Color3,Enum,workspace}
  if opt.noGui or opt.guiBroken then
   if opt.guiBroken then
    Instance={new=function()error("SECRET_FAKE_UI_CRASH")end}
@@ -115,17 +128,32 @@ local function call(role,opt)
    if kind=="TextButton" then
     o.Activated={Connect=function(_,fn)o.onActivate=fn end}
    end
+   if kind=="TextLabel" then o.InputBegan=newSignal() end
+   if kind=="Frame" then
+    o.AbsolutePosition={X=12,Y=586}
+    o.AbsoluteSize={X=320,Y=182}
+   end
    created[#created+1]=o
    return o
   end}
  end
- local shape=function()return {value=true}end
- UDim2={fromOffset=shape,new=shape}
+ local function fromOffset(x,y)
+ return {X={Scale=0,Offset=x},Y={Scale=0,Offset=y}}
+end
+local function scaled(xScale,xOffset,yScale,yOffset)
+ return {X={Scale=xScale,Offset=xOffset},
+  Y={Scale=yScale,Offset=yOffset}}
+end
+local shape=function()return {value=true}end
+ UDim2={fromOffset=fromOffset,new=scaled}
  UDim={new=shape}
  Color3={fromRGB=shape}
  Enum={Font={GothamBold="B",Gotham="G"},
   TextXAlignment={Left="L"},
-  TextYAlignment={Top="T"}}
+  TextYAlignment={Top="T"},
+  UserInputType={MouseButton1="MouseButton1",MouseMovement="MouseMovement",
+   Touch="Touch"}}
+ workspace={CurrentCamera={ViewportSize={X=1024,Y=768}}}
  task={spawn=function(fn)queue[#queue+1]=fn end,
        wait=function()end}
  local realClip=setclipboard
@@ -135,7 +163,46 @@ local function call(role,opt)
  loadstring=load
  local ok,res=pcall(function()return assert(loadfile(path))(opt.direct and role or nil)end)
  assert(ok,res)
- if not opt.direct and not opt.noGui and not opt.guiBroken then
+ if (opt.touchDrag or opt.mouseDrag or opt.clampedDrag) and
+   not opt.noGui and not opt.guiBroken then
+  local title,frame
+  for _,x in ipairs(created) do
+   if x.kind=="TextLabel" and x.Active==true then title=x end
+   if x.kind=="Frame" then frame=x end
+  end
+  assert(title and frame and title.InputBegan.callback,
+    "Title must respond to touch/mouse drag")
+  assert(frame.Position.X.Scale==0 and frame.Position.X.Offset==12,
+    "Panel default must be LEFT, not over top-right leaderboard")
+  assert(frame.Position.Y.Scale==1 and frame.Position.Y.Offset==-200,
+    "Panel default must be near bottom-left")
+  local isMouse=opt.mouseDrag
+  local down={UserInputType=isMouse and "MouseButton1" or "Touch",
+    Position={X=35,Y=700}}
+  title.InputBegan:Fire(down)
+  local move=isMouse and
+    {UserInputType="MouseMovement",Position={X=120,Y=600}} or down
+  if not isMouse then down.Position={X=120,Y=600} end
+  if opt.clampedDrag then
+   move.Position={X=8000,Y=-5000}
+  end
+  userInput.InputChanged:Fire(move)
+  if opt.clampedDrag then
+   assert(frame.Position.X.Offset==704 and frame.Position.Y.Offset==0,
+    "Dragging must clamp panel inside screen bounds")
+  else
+   assert(frame.Position.X.Offset==97 and frame.Position.Y.Offset==486,
+    "Touch or mouse drag did not update panel position")
+  end
+  local lastX,lastY=frame.Position.X.Offset,frame.Position.Y.Offset
+  userInput.InputEnded:Fire(down)
+  if isMouse then move.Position={X=150,Y=500}
+  else down.Position={X=150,Y=500} end
+  userInput.InputChanged:Fire(move)
+  assert(frame.Position.X.Offset==lastX and frame.Position.Y.Offset==lastY,
+   "Drag must STOP after input release")
+ end
+if not opt.direct and not opt.noGui and not opt.guiBroken then
   for _,x in ipairs(created)do
    if x.Name==role and type(x.onActivate)=="function" then
     x.onActivate()
@@ -258,6 +325,18 @@ case("actual native-shaped timeout stays INCOMPLETE",function()
  assert(s:find('"windowClosureObserved":false',1,true))
  assert(s:find('"postReadbacksObserved":0',1,true))
 end)
+case("in-game title dragging on iPad touch",function()
+ local s=call("SENDER",{touchDrag=true})
+ assert(s and s:find('"operatorDeclaredRole":"SENDER"',1,true))
+end)
+case("in-game title dragging on desktop mouse",function()
+ local s=call("RECEIVER",{mouseDrag=true})
+ assert(s and s:find('"operatorDeclaredRole":"RECEIVER"',1,true))
+end)
+case("drag panel stays within screen after huge touch gesture",function()
+ local s=call("SENDER",{clampedDrag=true})
+ assert(s)
+end)
 case("clipboard blocked console still has usable receipt",function()
  local s=call("RECEIVER",{direct=true,clipboardMissing=true})
  assert(s:find('"operatorDeclaredRole":"RECEIVER"',1,true))
@@ -270,13 +349,21 @@ for i=1,100 do
  assert(s and s:find('"tradeOutcome":"UNKNOWN"',1,true))
 end
 case("100 seeded role/GUI/clipboard variations",function()end)
-oldPrint("STAGE59_REAL_LUA_GUIDED_WRAPPER_13_NAMED_100_VARIATIONS_PASS")
+oldPrint("STAGE59_REAL_LUA_GUIDED_WRAPPER_16_NAMED_100_VARIATIONS_PASS")
 '''
 class Stage59GuidedWrapperTests(unittest.TestCase):
     def test_safe_source_pinning_and_no_trade_mutators(self):
         source=LUA.read_text(encoding="utf-8")
         self.assertIn("f74cb081590dfcdf100bd41f818e07d34856dff4",source)
         self.assertIn("GINGERSCOPE_STAGE59_GUIDE",source)
+        self.assertIn('heading.Text="STAGE 59  |  DRAG HERE  |  READ-ONLY"',source)
+        self.assertIn('frame.Position=UDim2.new(0,12,1,-200)',source)
+        self.assertIn('local UIS=game:GetService("UserInputService")',source)
+        self.assertIn('heading.InputBegan:Connect(function(input)',source)
+        self.assertIn('UIS.InputChanged:Connect(function(input)',source)
+        self.assertIn('UIS.InputEnded:Connect(function(input)',source)
+        self.assertIn('x=math.max(0,math.min(x,math.max(0,size.X-width)))',source)
+
         self.assertIn("CHOOSE SENDER or RECEIVER",source)
         self.assertIn("BASELINE BOUND",source)
         self.assertIn("POST_CLOSE_READS",source)
@@ -302,7 +389,7 @@ class Stage59GuidedWrapperTests(unittest.TestCase):
             p=subprocess.run(["lua5.4",str(path),str(LUA)],
                 cwd=ROOT,capture_output=True,text=True,timeout=40)
         self.assertEqual(p.returncode,0,p.stdout+"\n"+p.stderr)
-        self.assertIn("STAGE59_REAL_LUA_GUIDED_WRAPPER_13_NAMED_100_VARIATIONS_PASS",
+        self.assertIn("STAGE59_REAL_LUA_GUIDED_WRAPPER_16_NAMED_100_VARIATIONS_PASS",
                       p.stdout)
 
 if __name__=="__main__":
