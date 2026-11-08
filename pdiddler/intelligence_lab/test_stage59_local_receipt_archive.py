@@ -97,7 +97,7 @@ mayRecordCompletedTrade=false,mayReportProfit=false
    remoteCalls[#remoteCalls+1]=url
    if url:find("STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua",1,true) then
     return sharedText
-   elseif url:find("STAGE59_RESULT_DELTA_120S_PROBE.lua",1,true) then
+   elseif url:find("STAGE59_RESULT_DELTA_ROLE_NEUTRAL_BASELINE.lua",1,true) then
     calledAfterClose=calledAfterClose+1
     return sourceStage32:gsub("RROLE",string.format("%q",role))
    end
