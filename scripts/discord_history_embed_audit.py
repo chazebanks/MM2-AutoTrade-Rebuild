@@ -126,7 +126,6 @@ def classify_message(message: object) -> str:
     if listed is None or profit is None:
         return "UNPARSEABLE_VALUE_CLAIM"
     give_total, receive_total = decimal(listed.group(1)), decimal(listed.group(2))
-    reported_gain = decimal(profit.group(1).lstrip("+")) if not profit.group(1).startswith("-") else None
     if give_total is None or receive_total is None:
         return "UNPARSEABLE_VALUE_CLAIM"
     gain_text = profit.group(1)
@@ -167,6 +166,11 @@ def audit_pages(page_fetch, *, max_pages: int = MAX_PAGES) -> Counter:
             counts["messages_seen"] += 1
             if isinstance(message.get("webhook_id"), str) and SNOWFLAKE.fullmatch(message["webhook_id"]):
                 webhook_ids.add(message["webhook_id"])
+            if isinstance(message.get("embeds"), list):
+                for e in message["embeds"]:
+                    if isinstance(e, dict) and e.get("title") == "MM2 Trade Completed":
+                        counts["trade_embeds_with_fields"] += bool(isinstance(e.get("fields"), list) and e["fields"])
+                        counts["trade_embeds_with_description"] += bool(isinstance(e.get("description"), str) and e["description"])
             result = classify_message(message)
             counts[result] += 1
             # Discard in-memory response reference at page end. Never print source data.
@@ -256,6 +260,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     print("HISTORY_AUDIT=OK")
     for key in ("pages_read", "messages_seen", "duplicate_messages", "distinct_webhook_ids",
+                "trade_embeds_with_fields", "trade_embeds_with_description",
                 "NOT_WEBHOOK", "NOT_TRADE_EMBED", "MALFORMED_MESSAGE",
                 "AMBIGUOUS_TRADE_EMBEDS", "UNKNOWN_EMBED_STRUCTURE",
                 "TEST_ACCOUNT_EXCLUDED", "UNKNOWN_TRADER_EXCLUDED",
