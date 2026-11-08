@@ -21,7 +21,7 @@ MAIN=SRC/"STAGE59_MAIN_RECEIVER.lua"
 ALT=SRC/"STAGE59_ALT_SENDER.lua"
 PIN="ce07d8ffa406e233e686dbf51c7ea7ffb18d023a"
 BLOB="ee08cb9ae917a7f6d94533d976a8fa3bcc0c9a30"
-S2="f74cb081590dfcdf100bd41f818e07d34856dff4"
+S2="fe27ae43b5b52e142041d6ec930e3a1e89f33363"
 EXISTING=ROOT/"pdiddler/intelligence_lab/test_stage59_guided_witness_wrapper.py"
 
 def git_blob(source:str)->str:
