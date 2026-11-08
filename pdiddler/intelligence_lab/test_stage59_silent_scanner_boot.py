@@ -74,7 +74,9 @@ local function run(script,isSilent)
  local ok,owner=pcall(function()return assert(loadfile(script))()end)
  assert(ok,owner)
  assert(type(owner)=="table")
- assert(owner.status=="SCANNER_ONLY_NO_TRADE_AUTHORITY")
+ assert(owner.status=="SCANNER_ONLY_NO_TRADE_AUTHORITY",
+  "scanner status="..tostring(owner.status).." failure="..tostring(owner.failure)..
+  " calls="..tostring(#calls))
  assert(owner.marketFresh==false and owner.noOutgoing==true)
  assert(owner.authorizesTrade==false and owner.authorizesAccept==false)
  assert(#calls>=4 and #calls<=5)
