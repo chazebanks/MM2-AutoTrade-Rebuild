@@ -1,0 +1,46 @@
+name: Gingerscope pinned offline cross-module compatibility
+on:
+  push:
+    branches:
+      - feature/gingerscope-offline-crossmodule-contract
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/test_future_offline_crossmodule_contract.py'
+      - '.github/workflows/gingerscope-offline-crossmodule.yml'
+permissions:
+  contents: read
+jobs:
+  verify-pinned-offline-chain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout tested PR105 offer guard (read-only, pinned)
+        uses: actions/checkout@v4
+        with:
+          ref: 44375d272826aadc6f22fcb180275c87cf5bf5c3
+          path: .offline_sources/pr105
+          persist-credentials: false
+      - name: Checkout tested PR106 portfolio planner (read-only, pinned)
+        uses: actions/checkout@v4
+        with:
+          ref: 85bd69065ebf4b942d809c41a7c27959bf50f273
+          path: .offline_sources/pr106
+          persist-credentials: false
+      - name: Checkout tested PR109 Discord preview (read-only, pinned)
+        uses: actions/checkout@v4
+        with:
+          ref: 9b831a1e9c2d09ac864e91e3fb7855e7943c2dad
+          path: .offline_sources/pr109
+          persist-credentials: false
+      - name: Checkout tested PR110 full-inventory selector (read-only, pinned)
+        uses: actions/checkout@v4
+        with:
+          ref: c02d5b7c17350cdb95dd6cb43ed7cd8ecb9e7dfc
+          path: .offline_sources/pr110
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test exact pinned sources as one research chain (no device)
+        run: python -m unittest pdiddler.intelligence_lab.test_future_offline_crossmodule_contract -v
