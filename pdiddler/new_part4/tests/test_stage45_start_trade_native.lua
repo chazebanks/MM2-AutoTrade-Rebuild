@@ -34,6 +34,7 @@ local function run(opts)
    end
    self.connections[#self.connections+1]=c
    f.allConns[#f.allConns+1]=c
+   if opts.callbackInsideConnect and name=="StartTrade" then fn(partner)end
    return c
   end
   function s:Fire(...)
@@ -175,6 +176,25 @@ local function run(opts)
   f.time=f.time+(dt or .1)
   if opts.changeJob and f.time>=1.45 then app.JobId="new-job" end
   if opts.dropPartner and f.time>=1.5 then partner.Parent=nil end
+  if opts.guiAfterArm and not f.guiOpened and f.time>=1 then
+   f.guiOpened=true;screen.Enabled=true
+  end
+  if opts.guiSameStep and not f.guiOpened and f.time>=1.2 then
+   f.guiOpened=true;screen.Enabled=true
+  end
+  if opts.rootClosedDuringGrace and f.time>=2.0 then screen.Enabled=false end
+  if opts.offerDuringGrace and f.time>=2.0 then
+   sides.YourOffer:FindFirstChild("Container"):FindFirstChild("NewItem1").Visible=true
+  end
+  if opts.remoteChangedDuringGrace and f.time>=2.0 then remote.Name="FormerStartTrade" end
+  if opts.localSwappedDuringGrace and f.time>=2.0 then players.LocalPlayer=partner end
+  if opts.ownerConflictDuringGrace and f.time>=2.0 then
+   f.globals.PDIDDLER_PART4_CONTROLLER={}
+  end
+  if opts.manualStopDuringGrace and f.time>=2.0 and
+   f.globals.PDIDDLER_STAGE45_STARTTRADE_TYPES then
+   f.globals.PDIDDLER_STAGE45_STARTTRADE_TYPES.stop()
+  end
   if opts.prearm and not f.fired and f.time>=.25 then
    f.fired=true;fire()
   end
@@ -288,6 +308,37 @@ test("wrong Roblox place cannot execute",function()
 end)
 test("listener bind failure does not permit false success",function()
  okReport(run({bindFail=true}),"LISTENER_CLEANUP_INCOMPLETE")
+end)
+test("unbound visible GUI before StartTrade is rejected",function()
+ okReport(run({badLabel=true,guiAfterArm=true}),"GUI_WITHOUT_START_TRADE")
+end)
+test("same-tick visible GUI prevents false event-before-GUI claim",function()
+ local r=okReport(run({guiSameStep=true}),"GUI_VISIBLE_BEFORE_START_TRADE_RECEIPT")
+ eq(r.eventBeforeVisibleGui,false)
+end)
+test("trade GUI disappearance during grace rejects",function()
+ okReport(run({rootClosedDuringGrace=true}),"WINDOW_CONTEXT_CHANGED")
+end)
+test("offer mutation during observation grace rejects",function()
+ okReport(run({offerDuringGrace=true}),"WINDOW_CONTEXT_CHANGED")
+end)
+test("remote identity change during grace rejects",function()
+ okReport(run({remoteChangedDuringGrace=true}),"START_TRADE_REMOTE_CHANGED")
+end)
+test("local player swap during grace rejects",function()
+ okReport(run({localSwappedDuringGrace=true}),"SESSION_CHANGED")
+end)
+test("competing owner during grace rejects",function()
+ okReport(run({ownerConflictDuringGrace=true}),"COMPETING_OWNER")
+end)
+test("manual stop cleans listener without releasing payload",function()
+ local r=okReport(run({manualStopDuringGrace=true}),"MANUAL_STOP")
+ eq(r.cleanupComplete,true)
+end)
+test("synchronous callback inside listener attach tears down correctly",function()
+ local r=okReport(run({callbackInsideConnect=true}),"UNARMED_START_TRADE_RECEIPT")
+ eq(r.listenerCount,r.listenersDisconnected)
+ eq(r.cleanupComplete,true)
 end)
 test("listener disconnection failure reports incomplete",function()
  local f=run({disconnectFail=true,payload="partner"})
