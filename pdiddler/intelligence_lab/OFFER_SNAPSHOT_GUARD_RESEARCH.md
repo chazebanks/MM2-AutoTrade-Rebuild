@@ -39,3 +39,11 @@ Supreme Values publishes listed value, demand, stability and rarity with a publi
 ## Integration boundary
 
 This branch is a guard only, not a Gingerscope trade planner. It does not optimize upgrade/downgrade portfolios, choose openers, learn private Discord claims, execute an offer or decide whether a trade settled. Those remain separate questions after Stage53 identity and Stage59 provenance work.
+
+## Additional offline worst-case public-source sensitivity (2026-11-08)
+
+The pure `dual_source_sensitivity.py` module evaluates small candidate offers using the **ten dated, display-name-only Supreme vs MM2Values records**. It intentionally grants no game item identity, publisher clock, actual trade profit, Accept or autonomous trading authority. For each item, *received* value is bounded below by the **lowest** listed source value, while *given* value is bounded above by the **highest**; the worst-case displayed gain is the difference. The optimistic end uses highest received minus lowest given. These are mathematical source-disagreement bounds, **not executable market prices, real offers, or probabilistic forecasts**.
+
+Real reviewed example **Emberbow for Emberscythe**: Supreme-only displayed difference is **−25**, MM2Values-only difference is **0**; combining cross-source upper/lower uncertainty yields worst **−75** and best **+50**. A naive best-case +50 label is not robust. **Chroma Emberscythe for Gingerscope**: Supreme-only difference **0**, MM2Values-only **+3,500**; the worst cross-source listed difference is **0**, not a guaranteed gain. **Harvester for Icepiercer plus three Batwings**: both public source-only gains and conservative bound remain positive (**+36** worst, **+50** best), but the result STILL does not know liquidity, demand sufficiency, MM2 item identity, actual offer feasibility or server settlement. None are trading recommendations.
+
+Tests: `test_dual_source_sensitivity.py` includes 600 source tampering cases, 500 randomized bound containment checks and named examples. It runs in GitHub Actions with all existing Python/Lua research tests. Any result that appears favorable remains `CROSS_SOURCE_DISPLAY_MARGIN_POSITIVE_ONLY` with all authority flags false and `tradeOutcome=UNKNOWN`. No live device or user action is needed.
