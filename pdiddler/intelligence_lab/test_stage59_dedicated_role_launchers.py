@@ -19,9 +19,9 @@ SRC=ROOT/"pdiddler/new_part4"
 SHARED=SRC/"STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua"
 MAIN=SRC/"STAGE59_MAIN_RECEIVER.lua"
 ALT=SRC/"STAGE59_ALT_SENDER.lua"
-PIN="1833de1817d801e2c976feb414d98da2b0801cd3"
-BLOB="dc05f5f2f9bedd0663afdf8ec8ba021be4010f43"
-S2="fe27ae43b5b52e142041d6ec930e3a1e89f33363"
+PIN="c9c9fe64bce6563f8580321f7a58073ed27ef0b7"
+BLOB="882fe34c3a694a4beb50e0e763defd86f3797b02"
+S2="54b97f65290ce038910436e27600be6a2c4a005e"
 EXISTING=ROOT/"pdiddler/intelligence_lab/test_stage59_guided_witness_wrapper.py"
 
 def git_blob(source:str)->str:
