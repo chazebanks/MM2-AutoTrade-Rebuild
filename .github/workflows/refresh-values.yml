@@ -26,6 +26,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mm2values-unreviewed-source-audit
-          path: ${{ runner.temp }}/mm2_market_refresh/*.json
+          path: ${{ runner.temp }}/mm2_market_refresh/*
           if-no-files-found: error
           retention-days: 14
