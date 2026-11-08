@@ -166,7 +166,15 @@ local function saveLocal(line,role,nonce)
  return archived and "HISTORY_ONLY" or "UNAVAILABLE"
 end
 local function showAndCopyLocal()
- local line=M.reportLine or readSaved(M.role)
+ -- No fallback to an earlier _LAST report during a NEW observation.
+ -- Copying an old result from an active READY screen caused ambiguous
+ -- report provenance. Only explicit RECOVER_LAST may load prior receipts.
+ local mode=M.state
+ if mode~="FINISHED" and mode~="RECOVERY_ONLY" then
+  say("COPY LOCKED. Current session is not FINISHED. To copy a previous report, use the separate RECOVER LAST script.")
+  return false
+ end
+ local line=(mode=="RECOVERY_ONLY") and readSaved(M.role) or M.reportLine
  local receipt=line and validateLocalLine(line,M.role)
  if not receipt then
   say("NO RECOVERABLE "..tostring(M.role).." REPORT. Save file support may be unavailable; check Delta console.")
@@ -278,7 +286,8 @@ local function panel()
   reportButton.BackgroundColor3=Color3.fromRGB(112,69,168)
   reportButton.TextColor3=Color3.fromRGB(255,255,255)
   reportButton.Text="COPY "..(specifiedRole=="SENDER" and "ALT" or "MAIN").." REPORT"
-  reportButton.Visible=readSaved(specifiedRole)~=nil
+  -- Active sessions never expose a prior saved report's COPY control.
+  reportButton.Visible=false
   reportButton.Parent=frame
   reportButton.Activated:Connect(function()showAndCopyLocal()end)
   if phoneMode then
@@ -298,7 +307,8 @@ local function panel()
     label.Visible=not folded
     if reportButton then
      reportButton.Visible=not folded and
-      (M.reportLine~=nil or readSaved(M.role)~=nil)
+      ((M.state=="FINISHED" and M.reportLine~=nil) or
+       (M.state=="RECOVERY_ONLY" and readSaved(M.role)~=nil))
     end
     frame.Size=UDim2.fromOffset(frame.Size.X.Offset,folded and 36 or 146)
     minimise.Text=folded and "+" or "-"
@@ -457,7 +467,11 @@ local function finish(reason,core)
  M.reportLine=line
  local localStorage=saveLocal(line,M.role,nonce)
  M.localArchiveStatus=localStorage
- if reportButton then pcall(function()reportButton.Visible=true end) end
+ if reportButton then pcall(function()
+  reportButton.Text="COPY "..(M.role=="SENDER" and "ALT" or "MAIN")..
+    " REPORT ("..tostring(nonce and nonce:sub(1,8) or "NO-ID")..")"
+  reportButton.Visible=true
+ end) end
  -- NEVER push the receipt into the OS clipboard automatically here.
  -- iPad+iPhone may share the Universal Clipboard: the later client's
  -- auto-copy can overwrite the earlier client's result, making ONE receiver
@@ -563,7 +577,12 @@ if recoveryOnly then
  local old=readSaved(M.role)
  if old then
   M.reportLine=old
-  if reportButton then pcall(function()reportButton.Visible=true end)end
+  if reportButton then pcall(function()
+   local savedReceipt=validateLocalLine(old,M.role)
+   reportButton.Text="COPY "..(M.role=="SENDER" and "ALT" or "MAIN")..
+     " REPORT ("..tostring(savedReceipt and savedReceipt.receiptNonce:sub(1,8) or "NO-ID")..")"
+   reportButton.Visible=true
+  end)end
   local receipt=validateLocalLine(old,M.role)
   say("SAVED "..M.role.." REPORT FOUND (ID "..
    tostring(receipt and receipt.receiptNonce:sub(1,8) or "UNKNOWN")..
