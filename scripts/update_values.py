@@ -80,8 +80,8 @@ def collect(kind: str) -> dict[str, Any]:
     )
     response.raise_for_status()
     raw = response.content
-    if not isinstance(raw, bytes) or not raw:
-        raise RuntimeError("source-page-empty")
+    if not isinstance(raw, bytes) or not 0 < len(raw) <= 4_000_000:
+        raise RuntimeError("source-page-empty-or-oversize")
     observed = now_iso()
     soup = BeautifulSoup(raw, "html.parser")
     lines = [text.strip() for text in soup.stripped_strings if text.strip()]
@@ -113,6 +113,8 @@ def collect(kind: str) -> dict[str, Any]:
     return {
         "kind": kind, "url": url, "retrievedAtUtc": observed,
         "sha256": hashlib.sha256(raw).hexdigest(),
+        # Held privately until output; never confused with a market quote.
+        "sourceHtml": raw,
         "rowCount": len(rows), "rows": rows,
         # Not inferable from the page's HTTP retrieval clock:
         "publisherUpdatedAtUtc": None,
@@ -130,6 +132,11 @@ def normalize_page_results(groups: dict[str, dict[str, Any]]) -> dict[str, tuple
             raise RuntimeError("source-tier-url-mismatch")
         if not re.fullmatch(r"[0-9a-f]{64}", str(page.get("sha256", ""))):
             raise RuntimeError("source-page-hash-unverified")
+        original_html = page.get("sourceHtml")
+        if not isinstance(original_html, bytes) or not 0 < len(original_html) <= 4_000_000:
+            raise RuntimeError("source-html-unavailable-or-oversize")
+        if hashlib.sha256(original_html).hexdigest() != page["sha256"]:
+            raise RuntimeError("source-page-hash-mismatch")
         if page.get("publisherUpdatedAtUtc") is not None:
             raise RuntimeError("unsupported-unverified-publisher-date")
         rows = page.get("rows")
@@ -187,9 +194,12 @@ def build_report(
         "baselineGeneratedDateUnverified": baseline_file_date,
         "source": "https://mm2values.com/",
         "sourcePages": {
-            kind: {key: groups[kind][key]
+            kind: {
+                **{key: groups[kind][key]
                    for key in ("url", "retrievedAtUtc", "sha256", "rowCount",
-                               "publisherUpdatedAtUtc")}
+                               "publisherUpdatedAtUtc")},
+                "archivedHtml": "source_" + kind.lower() + ".html",
+            }
             for kind in KIND_ORDER
         },
         "minimumCountChecksPassed": True,
@@ -245,6 +255,11 @@ def main(argv: list[str] | None = None) -> int:
         json.dumps(candidate, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+    # Preserve the exact three original HTTP response bodies that each SHA
+    # describes. Neither a URL nor a digest alone is a reproducible capture.
+    for kind in KIND_ORDER:
+        source_file = report["sourcePages"][kind]["archivedHtml"]
+        (args.output_dir / source_file).write_bytes(groups[kind]["sourceHtml"])
     print("AUDIT_ONLY",
           "rows", candidate["rowCount"],
           "changed", len(report["diff"]["changed"]),
