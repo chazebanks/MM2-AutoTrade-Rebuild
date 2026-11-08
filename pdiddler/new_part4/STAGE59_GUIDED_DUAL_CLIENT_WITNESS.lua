@@ -12,7 +12,7 @@ local recoveryOnly=(deviceProfile=="PHONE_RECOVER" or deviceProfile=="TABLET_REC
 local MARKER="[GINGERSCOPE STAGE59 PAIRED WITNESS]"
 local PAIR_ID="STAGE59-NOV08-MANUAL-A"
 local SOURCE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
- "fda34ed897f0e7efc1ac515517d8134ad586b649/"..
+ "fe27ae43b5b52e142041d6ec930e3a1e89f33363/"..
  "pdiddler/new_part4/STAGE59_RESULT_DELTA_ROLE_NEUTRAL_BASELINE.lua"
 local E=(type(getgenv)=="function" and getgenv()) or _G
 local KEY="PDIDDLER_STAGE59_PAIRED_MANUAL_OBSERVER"
