@@ -1,0 +1,38 @@
+name: Stage58 review-only client/market display evidence regression
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/STAGE58_CROSSWALK_REVIEW_ONLY_LEDGER.json'
+      - 'pdiddler/intelligence_lab/test_stage58_crosswalk_review_ledger.py'
+      - 'scripts/validate_crosswalk_review.py'
+      - '.github/workflows/mm2-stage58-review-ledger-tests.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage58-reviewed-display-metadata-ledger
+    paths:
+      - 'pdiddler/intelligence_lab/STAGE58_CROSSWALK_REVIEW_ONLY_LEDGER.json'
+      - 'pdiddler/intelligence_lab/test_stage58_crosswalk_review_ledger.py'
+      - 'scripts/validate_crosswalk_review.py'
+      - '.github/workflows/mm2-stage58-review-ledger-tests.yml'
+permissions:
+  contents: read
+jobs:
+  public-display-evidence-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check exact native receipt against bounded public-source ledger
+        run: |
+          set -euo pipefail
+          python3 scripts/validate_crosswalk_review.py
+      - name: Run full Stage58 fail-closed property and regression tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage58_crosswalk_review_ledger.py'
+      - name: Run inherited currently merged intelligence tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
