@@ -67,7 +67,7 @@ local function exercise(path,shared,role,opts)
   "wrong automatic role selected")
  local autoset=false
  local panel=false
- local title=false
+ local title=nil
  local frame=nil
  local notice=nil
  local fold=nil
@@ -82,7 +82,7 @@ local function exercise(path,shared,role,opts)
    panel=true
   end
   if node.kind=="TextLabel" and node.Active==true
-   and node.Text:find("DRAG HERE",1,true) then title=true end
+   and node.Text:find("DRAG HERE",1,true) then title=node end
   assert(node.Name~="SENDER" and node.Name~="RECEIVER",
    "role buttons should NEVER appear for fixed-role entrypoints")
  end
