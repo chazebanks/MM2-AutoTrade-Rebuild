@@ -48,6 +48,7 @@ class Stage50ProfileTests(unittest.TestCase):
             'clientState.clientStateMatched~=true',
             'LISTENER_CLEANUP_INCOMPLETE',
             'stage50NotAnAuthenticatedSession=true',
+            'TRANSIENT_OFFER_MUTATION_DURING_PROFILE_READ',
         ):
             with self.subTest(clause=clause):
                 self.assertIn(clause,s)
@@ -86,6 +87,8 @@ class Stage50ProfileTests(unittest.TestCase):
             'Stage50 native late RPC result cannot republish',
             'Stage50 native job change during profile read fails',
             'Stage50 native manual offer before profile bound rejected',
+            'Stage50 native transient add then remove during profile RPC invalidates',
+            'Stage50 native transient slot insertion during profile RPC invalidates',
             'Stage50 native missing Batwing raw key refuses before listener',
             'Stage50 native numeric string collision in Owned refuses',
         ):
@@ -103,7 +106,7 @@ class Stage50ProfileTests(unittest.TestCase):
         p=subprocess.run(['lua5.4',str(NATIVE_TEST),str(P4)],
             cwd=ROOT,capture_output=True,text=True,timeout=25)
         self.assertEqual(p.returncode,0,p.stdout+'\n'+p.stderr)
-        self.assertIn('Stage50 preprofile add/remove native: 31 passed, 0 failed',p.stdout)
+        self.assertIn('Stage50 preprofile add/remove native: 34 passed, 0 failed',p.stdout)
 
     @unittest.skipUnless(shutil.which('lua5.4'),'GitHub Actions installs Lua 5.4')
     def test_python_randomizes_350_actual_lua_profile_maps(self):
