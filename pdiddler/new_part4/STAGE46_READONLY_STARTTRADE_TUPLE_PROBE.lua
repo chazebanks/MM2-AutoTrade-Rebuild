@@ -73,7 +73,8 @@ local function safeStatus()
   sessionIdProven=false,eventSessionAssociationProven=false,
   causalAttributionProven=false,serverAttestation=false,
   serverCompletionProven=false,ownerSideSlotBound=false,
-  rawItemIdConfirmed=false,authorizesTrade=false,
+  rawItemIdConfirmed=false,exactWeaponIdentityConfirmed=false,
+  rawKeyPresentConfirmed=false,authorizesTrade=false,
   authorizesAccept=false,mayRecordCompletedTrade=false,mayReportProfit=false}
 end
 local reason,report="NOT_STARTED",nil
@@ -99,6 +100,7 @@ local function publish()
  for _,flag in ipairs({"hasAuthenticatedSessionIdentifier","sessionIdProven",
   "eventSessionAssociationProven","causalAttributionProven","serverAttestation",
   "serverCompletionProven","ownerSideSlotBound","rawItemIdConfirmed",
+  "exactWeaponIdentityConfirmed","rawKeyPresentConfirmed",
   "authorizesTrade","authorizesAccept","mayRecordCompletedTrade","mayReportProfit"})do
    r[flag]=false
  end
