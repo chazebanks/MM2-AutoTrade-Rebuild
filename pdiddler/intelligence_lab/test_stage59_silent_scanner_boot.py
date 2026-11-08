@@ -36,11 +36,11 @@ local function run(script,isSilent)
     coverage=function()return {total=190}end}]==],
   repricer=[==[return {reprice=function()end}]==],
   view=[==[return {inventory=function()end}]==],
-  scanner=[==[return function(profile,reprice,view)
+  scanner=[==[local profile,reprice,view=...
     return {getRecord=function()return {}end,
       getVerificationState=function()return {scanning=false}end,
       getOwnInventory=function()return {items={}}end}
-    end]==],
+    ]==],
   probe=[==[
    if type(setclipboard)=="function"then
     setclipboard("UNSOLICITED_OLD_STAGE25_CLIPBOARD_MUTATION")
