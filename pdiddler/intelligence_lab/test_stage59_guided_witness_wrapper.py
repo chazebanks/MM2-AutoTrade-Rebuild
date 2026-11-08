@@ -115,7 +115,8 @@ local function call(role,opt)
  task={spawn=function(fn)queue[#queue+1]=fn end,
        wait=function()end}
  local realClip=setclipboard
- setclipboard=opt.clipboardMissing and nil or function(v)clip[#clip+1]=v end
+ if opt.clipboardMissing then setclipboard=nil
+ else setclipboard=function(v)clip[#clip+1]=v end end
  toclipboard=nil
  loadstring=load
  local ok,res=pcall(function()return assert(loadfile(path))(opt.direct and role or nil)end)
