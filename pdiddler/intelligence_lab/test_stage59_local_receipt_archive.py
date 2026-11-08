@@ -150,6 +150,7 @@ mayRecordCompletedTrade=false,mayReportProfit=false
  local ok,instance=pcall(function()return assert(loadfile(path))()end)
  assert(ok,instance)
  for _,fn in ipairs(queue)do fn() end
+ assert(#copies==0,"automatic clipboard mutation even before user click")
  if opts.manualCopy then
   local button=nil
   for _,v in ipairs(created)do
@@ -235,8 +236,16 @@ end)
 check("Unsupported executor file functions fail open to console/current copy",function()
  local r=present(alt,"SENDER",{disk="none",manualCopy=true})
  assert(r.storageStatus=="UNAVAILABLE")
- assert(#r.emitted==1 and #r.clipboard==2)
- assert(r.clipboard[2]==r.emitted[1])
+ assert(#r.emitted==1 and #r.clipboard==1)
+ assert(r.clipboard[1]==r.emitted[1])
+end)
+check("automatic clipboard remains untouched in BOTH devices",function()
+ local a=present(alt,"SENDER",{})
+ local b=present(main,"RECEIVER",{})
+ assert(#a.clipboard==0 and #b.clipboard==0)
+ assert(#a.emitted==1 and #b.emitted==1)
+ assert(a.storageStatus=="VERIFIED_LOCAL_ARCHIVE")
+ assert(b.storageStatus=="VERIFIED_LOCAL_ARCHIVE")
 end)
 check("writefile failure does not claim saved",function()
  local r=present(alt,"SENDER",{disk="write-fail"})
@@ -255,7 +264,7 @@ check("role-specified source never sends a trade request",function()
   assert(not body:find(":InvokeServer(",1,true))
  end
 end)
-originalPrint("STAGE59_LOCAL_DURABLE_REPORT_AND_RECOVERY_10_CASES_PASS")
+originalPrint("STAGE59_LOCAL_DURABLE_REPORT_AND_RECOVERY_11_CASES_PASS")
 '''
 class Stage59LocalArchiveTests(unittest.TestCase):
     @unittest.skipUnless(shutil.which("lua5.4"),"CI installs Lua5.4")
