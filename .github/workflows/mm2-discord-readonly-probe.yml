@@ -1,0 +1,30 @@
+name: MM2 Discord read-only connectivity test
+
+# Manual only. Never runs on pull requests or on a schedule with the bot secret.
+on:
+  workflow_dispatch:
+    inputs:
+      channel_id:
+        description: 'The Discord channel ID to verify (not a bot token)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify-read-only-access:
+    if: github.repository == 'chazebanks/MM2-AutoTrade-Rebuild' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check out reviewed main-branch code only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify Discord bot and channel permissions without exporting messages
+        env:
+          MM2_RESEARCH_DISCORD_BOT_TOKEN: ${{ secrets.MM2_RESEARCH_DISCORD_BOT_TOKEN }}
+          CHANNEL_ID: ${{ inputs.channel_id }}
+        run: |
+          python3 scripts/discord_readonly_probe.py --channel-id "$CHANNEL_ID"
