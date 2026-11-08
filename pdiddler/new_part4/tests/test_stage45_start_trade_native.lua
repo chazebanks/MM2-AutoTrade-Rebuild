@@ -154,6 +154,9 @@ local function run(opts)
   if name=="HttpService"then return http end
   return nope("unexpected service "..name)()
  end
+ if opts.olderOwnerAtLaunch then
+  f.globals.PDIDDLER_DIRECT_KEY_OFFER_CORRELATION={}
+ end
  local env=setmetatable({}, {__index=_G})
  env._G=env
  env.game=app
@@ -302,6 +305,10 @@ test("session job change fails closed",function()
 end)
 test("partner departure fails closed",function()
  okReport(run({dropPartner=true}),"TRADE_GUI_NOT_STABLE_AFTER_START")
+end)
+test("older Stage38 owner blocks launch before listeners are attached",function()
+ local f=run({olderOwnerAtLaunch=true,noEvent=true})
+ eq(f.session,nil);eq(#f.allConns,0);eq(#f.forbidden,0)
 end)
 test("wrong Roblox place cannot execute",function()
  local f=run({badPlace=true,noEvent=true})
