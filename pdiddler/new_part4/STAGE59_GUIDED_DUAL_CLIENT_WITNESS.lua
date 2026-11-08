@@ -18,6 +18,9 @@ local M={state="NOT_STARTED",role="UNASSIGNED",readOnly=true,
  mayRecordCompletedTrade=false,serverCompletionProven=false,
  tradeOutcome="UNKNOWN"}
 local label,gui,roleButtons=nil,nil,{}
+local function fixedRole()
+ return specifiedRole=="SENDER" or specifiedRole=="RECEIVER"
+end
 local function say(s)
  if label and gui and gui.Parent then pcall(function() label.Text=s end) end
  print("[STAGE59 GUIDE] "..s)
@@ -78,7 +81,13 @@ local function panel()
   label.TextXAlignment=Enum.TextXAlignment.Left
   label.TextYAlignment=Enum.TextYAlignment.Top
   label.TextColor3=Color3.fromRGB(247,243,253)
-  label.Text="CHOOSE ROLE: SENDER gives an item; RECEIVER gets it. Hold and drag title to move this panel."
+  if fixedRole() then
+   label.Text=specifiedRole=="RECEIVER"
+     and "MAIN ACCOUNT / RECEIVER. Your alt sends the expendable weapon. Drag the title to move this guide."
+     or "ALT ACCOUNT / SENDER. Your main receives the expendable weapon. Drag the title to move this guide."
+  else
+   label.Text="CHOOSE ROLE: SENDER gives an item; RECEIVER gets it. Hold and drag title to move this panel."
+  end
   label.Parent=frame
   local close=Instance.new("TextButton")
   close.Size=UDim2.fromOffset(29,25)
@@ -88,15 +97,17 @@ local function panel()
   close.TextColor3=Color3.fromRGB(245,232,255)
   close.Text="X";close.Parent=frame
   close.Activated:Connect(function()screen:Destroy()end)
-  for index,role in ipairs({"SENDER","RECEIVER"}) do
-   local b=Instance.new("TextButton")
+  if not fixedRole() then
+   for index,role in ipairs({"SENDER","RECEIVER"}) do
+    local b=Instance.new("TextButton")
    b.Name=role;b.Size=UDim2.fromOffset(143,36)
    b.Position=UDim2.fromOffset(10+(index-1)*160,137)
    b.BackgroundColor3=Color3.fromRGB(112,69,168)
    b.TextColor3=Color3.fromRGB(255,255,255)
    b.TextSize=14;b.Font=Enum.Font.GothamBold
    b.Text=role;b.Parent=frame
-   roleButtons[role]=b
+    roleButtons[role]=b
+   end
   end
   gui=screen
   screen.Parent=pg
@@ -319,7 +330,14 @@ startRole=function(role)
  end)
 end
 panel()
-say("CHOOSE SENDER or RECEIVER for THIS device. The test only watches manual trading and reads client inventory.")
+if fixedRole() then
+ say("ROLE AUTO-SELECTED: "..specifiedRole..". "..(specifiedRole=="SENDER"
+  and "This ALT account DONATES the test weapon."
+  or "This MAIN account RECEIVES the test weapon.")..
+  " Your panel is draggable. No purple role button needed.")
+else
+ say("CHOOSE SENDER or RECEIVER for THIS device. The test only watches manual trading and reads client inventory.")
+end
 for role,b in pairs(roleButtons) do
  b.Activated:Connect(function()startRole(role)end)
 end
