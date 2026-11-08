@@ -1,0 +1,32 @@
+name: MM2 private Discord ledger offline tests
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/discord_private_history_import.py'
+      - 'pdiddler/intelligence_lab/test_discord_private_history_import.py'
+      - '.github/workflows/mm2-discord-private-ledger-tests.yml'
+      - 'pdiddler/research/DISCORD_PRIVATE_LEDGER_PLAN.md'
+  push:
+    branches:
+      - feature/discord-private-evidence-ledger-foundation
+
+permissions:
+  contents: read
+
+jobs:
+  private-ledger-offline-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python syntax and isolated private-ledger tests; no tokens or Discord calls
+        run: |
+          python3 -m py_compile scripts/discord_private_history_import.py
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_discord_private_history_import.py'
+      - name: Full current main-based Python lab regression; no secrets
+        run: |
+          cd pdiddler/intelligence_lab
+          python3 -m unittest discover -q
