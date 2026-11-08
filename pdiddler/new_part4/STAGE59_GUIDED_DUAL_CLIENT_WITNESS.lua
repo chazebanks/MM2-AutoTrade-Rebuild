@@ -12,7 +12,7 @@ local recoveryOnly=(deviceProfile=="PHONE_RECOVER" or deviceProfile=="TABLET_REC
 local MARKER="[GINGERSCOPE STAGE59 PAIRED WITNESS]"
 local PAIR_ID="STAGE59-NOV08-MANUAL-A"
 local SOURCE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
- "fe27ae43b5b52e142041d6ec930e3a1e89f33363/"..
+ "54b97f65290ce038910436e27600be6a2c4a005e/"..
  "pdiddler/new_part4/STAGE59_RESULT_DELTA_ROLE_NEUTRAL_BASELINE.lua"
 local E=(type(getgenv)=="function" and getgenv()) or _G
 local KEY="PDIDDLER_STAGE59_PAIRED_MANUAL_OBSERVER"
@@ -248,8 +248,9 @@ local function panel()
   heading.Font=Enum.Font.GothamBold;heading.TextSize=phoneMode and 12 or 16
   heading.TextColor3=Color3.fromRGB(245,232,255)
   heading.TextXAlignment=Enum.TextXAlignment.Left
-  heading.Text=phoneMode
-   and "ALT SENDER  |  DRAG HERE" or "STAGE 59  |  DRAG HERE  |  READ-ONLY"
+  heading.Text=phoneMode and "ALT SENDER  |  DRAG HERE"
+   or ((specifiedRole=="RECEIVER") and "MAIN RECEIVER  |  DRAG HERE"
+    or "STAGE 59  |  DRAG HERE  |  READ-ONLY")
   heading.Active=true
   heading.Parent=frame
   label=Instance.new("TextLabel")
