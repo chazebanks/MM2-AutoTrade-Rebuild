@@ -98,7 +98,7 @@ local job="FAKE_SECRET_JOB_ID"
   end,
   HttpGet=function(_,url)
    remoteCalls[#remoteCalls+1]=url
-   assert(url:find("fe27ae43b5b52e142041d6ec930e3a1e89f33363",1,true),
+   assert(url:find("54b97f65290ce038910436e27600be6a2c4a005e",1,true),
     "old source not immutably pinned")
    if opt.noSource then return "N/A" end
    local source=stage32Info:gsub("RROLE",string.format("%q",role or "RECEIVER"))
@@ -391,10 +391,10 @@ oldPrint("STAGE59_REAL_LUA_GUIDED_WRAPPER_16_NAMED_100_VARIATIONS_PASS")
 class Stage59GuidedWrapperTests(unittest.TestCase):
     def test_safe_source_pinning_and_no_trade_mutators(self):
         source=LUA.read_text(encoding="utf-8")
-        self.assertIn("fe27ae43b5b52e142041d6ec930e3a1e89f33363",source)
+        self.assertIn("54b97f65290ce038910436e27600be6a2c4a005e",source)
         self.assertIn("GINGERSCOPE_STAGE59_GUIDE",source)
         self.assertIn('heading.Text=phoneMode',source)
-        self.assertIn('and "ALT SENDER  |  DRAG HERE" or "STAGE 59  |  DRAG HERE  |  READ-ONLY"',source)
+        self.assertIn('or ((specifiedRole=="RECEIVER") and "MAIN RECEIVER  |  DRAG HERE"',source)
         self.assertIn('frame.Position=UDim2.new(0,12,1,-200)',source)
         self.assertIn('local UIS=game:GetService("UserInputService")',source)
         self.assertIn('heading.InputBegan:Connect(function(input)',source)
