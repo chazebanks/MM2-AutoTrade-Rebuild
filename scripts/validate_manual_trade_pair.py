@@ -45,6 +45,8 @@ def _receipt_check(r: object, expected_role: str) -> str | None:
         return "WRONG_ROLE_OR_PAIR_SCHEMA"
     if r.get("readOnly") is not True or r.get("authorizesAccept") is not False:
         return "UNSAFE_PAIR_WRAPPER"
+    if r.get("collectorStatus") != "CLIENT_STAGE32_TERMINAL_OBSERVATION":
+        return "STAGE32_COLLECTOR_NONTERMINAL"
     for flag in ("serverCompletionProven","serverAttestation",
                  "mayRecordCompletedTrade","mayReportProfit","authorizesTrade"):
         if r.get(flag) is not False:
