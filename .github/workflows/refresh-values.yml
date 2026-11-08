@@ -1,23 +1,46 @@
-name: Refresh MM2Values
+name: Validate and observe MM2Values (research-only prices)
 on:
   workflow_dispatch:
   schedule:
     - cron: "15 18 * * *"
 permissions:
-  contents: write
+  contents: read
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: write  # only needed for gated, research-only source observations
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install requests beautifulsoup4
-      - run: python scripts/update_values.py
-      - name: Commit refreshed values
+      - name: Install source parsers
+        run: python -m pip install "requests>=2.32,<3" "beautifulsoup4>=4.12,<5"
+      - name: Audit three sources, gate changes, conditionally update research-only values
+        shell: bash
         run: |
+          set -euo pipefail
+          python scripts/update_values.py --publish-research-only \
+            --output-dir "$RUNNER_TEMP/mm2_market_refresh"
+      - name: Preserve source HTML, digest, and candidate even on review-required result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mm2values-source-audit-research-only
+          path: ${{ runner.temp }}/mm2_market_refresh/*
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Commit only gated research observations (no trade authority)
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add values/mm2values.lua
-          git diff --cached --quiet || (git commit -m "Refresh complete MM2Values snapshot" && git push)
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh research-only observed MM2Values (publisher date unknown)"
+            git push
+          fi

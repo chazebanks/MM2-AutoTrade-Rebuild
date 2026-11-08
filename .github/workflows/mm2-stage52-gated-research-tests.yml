@@ -1,0 +1,52 @@
+name: Stage52 gated MM2Values source regression (offline)
+
+# Stage52 is a research-only feed, not live trade price authority.
+# All tests use synthetic HTTP source fixtures; no Discord or private data.
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/refresh-values.yml'
+      - '.github/workflows/mm2-stage52-gated-research-tests.yml'
+      - 'scripts/update_values.py'
+      - 'values/mm2values.lua'
+      - 'pdiddler/intelligence_lab/test_stage52_market_refresh_quarantine.py'
+      - 'pdiddler/intelligence_lab/STAGE52_MARKET_REFRESH_QUARANTINE.md'
+  push:
+    branches:
+      - main
+      - feature/gingerscope-stage52-mainline-gated-feed
+    paths:
+      - '.github/workflows/refresh-values.yml'
+      - '.github/workflows/mm2-stage52-gated-research-tests.yml'
+      - 'scripts/update_values.py'
+      - 'values/mm2values.lua'
+      - 'pdiddler/intelligence_lab/test_stage52_market_refresh_quarantine.py'
+
+permissions:
+  contents: read
+
+jobs:
+  stage52-offline-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua5.4 to execute the emitted research Lua
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lua5.4
+          lua5.4 -v
+      - name: Compile Python updater and test all Stage52 gates (no network)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/update_values.py
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage52_market_refresh_quarantine.py'
+      - name: Full currently merged intelligence-lab Python regression (no secrets)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab
