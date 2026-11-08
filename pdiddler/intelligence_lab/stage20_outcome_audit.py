@@ -169,6 +169,14 @@ def review_outcome(offer: OfferObservation, close: ClosureObservation,
         return _result('INCOMPLETE', 'complete-native-readback-unverified', expected, observed)
     if post1 != post2:
         return _result('INCONSISTENT', 'two-post-readbacks-disagree', expected, observed)
+    # NET inventory reconciliation alone can hide impossible outgoing offers.
+    # Example: owned A x1, offered A x3, received A x4 -> observed A +1;
+    # matching net totals do not establish physical ownership of 3 copies.
+    # Check each outgoing type against the independently captured PRE inventory,
+    # not the post-trade count and not any incoming copies from the partner.
+    if any(qty > initial.get(item, 0) for item, qty in ours.items()):
+        return _result('INCONSISTENT', 'outgoing-copies-exceed-pretrade-ownership',
+                       expected, observed)
     if expected != observed:
         return _result('INCONSISTENT', 'offer-does-not-match-inventory-delta', expected, observed)
     return _result('CLIENT_CORROBORATED', 'server-completion-still-unverified',
