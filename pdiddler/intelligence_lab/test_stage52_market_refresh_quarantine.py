@@ -318,7 +318,7 @@ class Stage52QuarantinedRefreshTests(unittest.TestCase):
             if shutil.which("lua5.4"):
                 run=subprocess.run(
                     ["lua5.4","-e",(
-                        'local v=assert(dofile(arg[1]));'
+                        'local v=assert(dofile(' + json.dumps(str(f)) + '));'
                         'assert(v.complete==false and v.liveReady==false);'
                         'assert(v.authorizesTrade==false and v.authorizesAccept==false);'
                         'assert(v.publisherUpdatedAtUtc==nil);'
