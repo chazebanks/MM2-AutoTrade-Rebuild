@@ -65,6 +65,8 @@ class HistoryEmbedAuditTests(unittest.TestCase):
         self.assertEqual(audit.classify_message(msg()), "PARSED_UNVERIFIED_WEBHOOK_CLAIM")
         counters = audit.audit_pages(lambda _cursor: [msg()])
         self.assertEqual(counters["PARSED_UNVERIFIED_WEBHOOK_CLAIM"], 1)
+        self.assertEqual(counters["trade_embeds_with_fields"], 1)
+        self.assertEqual(counters["trade_embeds_with_description"], 0)
         for key in ("learning_eligible", "source_identity_pinned",
                     "server_verified_settlements", "records_stored"):
             self.assertEqual(counters[key], 0)
@@ -112,6 +114,13 @@ class HistoryEmbedAuditTests(unittest.TestCase):
                          "MALFORMED_MESSAGE")
         self.assertEqual(audit.classify_message({"webhook_id": WEBHOOK, "embeds": []}),
                          "NOT_TRADE_EMBED")
+
+    def test_embedded_description_shape_is_counted_without_contents(self):
+        row = msg(embed_override={"title": "MM2 Trade Completed", "description": "PRIVATE SAMPLE CONTENT"})
+        counts = audit.audit_pages(lambda _cursor: [row])
+        self.assertEqual(counts["UNKNOWN_EMBED_STRUCTURE"], 1)
+        self.assertEqual(counts["trade_embeds_with_fields"], 0)
+        self.assertEqual(counts["trade_embeds_with_description"], 1)
 
     def test_nontrade_embed_never_parsed(self):
         e = embed()
