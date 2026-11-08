@@ -56,9 +56,7 @@ local function shape(d)
  }
 end
 local function collect(src)
- local out,n,eligible,invalid,collision={},{},{},{},{}
- -- Locals above intentionally initialized below; no external state is retained.
- out={}; n=0; eligible=0; invalid=0; collision=0
+ local out,n,eligible,invalid,collision={},0,0,0,0
  for raw,d in pairs(src) do
   if (type(raw)~="string" and type(raw)~="number") or type(d)~="table" then
    invalid=invalid+1
@@ -103,8 +101,14 @@ if (not success or type(sync)~="table") and setthreadidentity then
 end
 if not success or type(sync)~="table" then return emit("SYNC_UNAVAILABLE") end
 if tostring(game.JobId or "")~=initialJob then return emit("SERVER_CHANGED") end
-if type(sync.Weapons)~="table" or type(sync.Item)~="table" then
- return emit("SYNC_SOURCE_MISSING")
+if type(sync.Weapons)~="table" then return emit("SYNC_WEAPONS_MISSING") end
+if sync.Item~=nil and type(sync.Item)~="table" then return emit("INVALID_ITEM_SOURCE") end
+if sync.Item==nil then
+ local _,n,e,invalid,collision=collect(sync.Weapons)
+ report.weaponsRows=n;report.weaponsEligible=e
+ report.invalidRows=invalid;report.printableKeyCollisions=collision
+ if invalid>0 or collision>0 then return emit("INVALID_CATALOG_SHAPE") end
+ return emit("ITEM_SOURCE_ABSENT_NO_OVERWRITE")
 end
 local wa,wn,we,wi,wc=collect(sync.Weapons)
 local ia,an,ae,ai,ac=collect(sync.Item)
@@ -116,7 +120,8 @@ report.invalidRows=wi+ai
 report.printableKeyCollisions=wc+ac
 report.sameTable=(sync.Weapons==sync.Item)
 if report.sameTable then
- return emit(report.printableKeyCollisions>0 and "AMBIGUOUS_PRINTABLE_KEYS" or "SAME_TABLE_CLIENT_ONLY")
+ if report.invalidRows>0 or report.printableKeyCollisions>0 then return emit("INVALID_CATALOG_SHAPE") end
+ return emit("SAME_TABLE_CLIENT_ONLY")
 end
 for key,left in pairs(wa) do
  local right=ia[key]
