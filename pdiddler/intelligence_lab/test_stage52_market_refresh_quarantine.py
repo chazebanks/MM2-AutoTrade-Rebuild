@@ -206,6 +206,16 @@ class Stage52QuarantinedRefreshTests(unittest.TestCase):
         now["Gingerscope"]=(100000,"Ancient")
         self.assertEqual(audit.publish_eligibility({"diff":audit.calculate_diff(original,now)}),
                          (False,"price-jump-requires-independent-review"))
+        now=dict(original);now["Godly_000"]=(2,"Godly")
+        self.assertEqual(audit.publish_eligibility({"diff":audit.calculate_diff(original,now)}),
+                         (False,"price-jump-requires-independent-review"))
+        now=dict(original)
+        for i in range(20):
+            key=f"Godly_{i:03d}"
+            value,cat=now[key]
+            now[key]=(value+1,cat)
+        self.assertEqual(audit.publish_eligibility({"diff":audit.calculate_diff(original,now)}),
+                         (False,"bulk-price-movement-review-required"))
         now=dict(original);now["Gingerscope"]=(100,"Godly")
         self.assertEqual(audit.publish_eligibility({"diff":audit.calculate_diff(original,now)}),
                          (False,"item-category-or-variant-changed"))
@@ -230,6 +240,10 @@ class Stage52QuarantinedRefreshTests(unittest.TestCase):
                 status=audit.main(["--publish-research-only","--baseline",str(baseline),
                                    "--output-dir",str(out)])
             self.assertEqual(status,0)
+            first_report=json.loads((out/"source_audit.json").read_text())
+            self.assertEqual(first_report["status"],"RESEARCH_OBSERVATION_PUBLISHED_NOT_TRADE_AUTHORITY")
+            self.assertTrue(first_report["researchObservationPublished"])
+            self.assertFalse(first_report["authorizesTrade"])
             current=baseline.read_text()
             self.assertIn('updated = "PUBLISHER_DATE_UNKNOWN"',current)
             for field in ('complete = false','liveReady = false','authorizesTrade = false',
@@ -251,6 +265,9 @@ class Stage52QuarantinedRefreshTests(unittest.TestCase):
                 again=audit.main(["--publish-research-only","--baseline",str(baseline),
                                   "--output-dir",str(out)])
             self.assertEqual(again,0)
+            no_change_report=json.loads((out/"source_audit.json").read_text())
+            self.assertEqual(no_change_report["status"],"RESEARCH_OBSERVATION_UNCHANGED")
+            self.assertFalse(no_change_report["researchObservationPublished"])
             self.assertEqual(baseline.read_bytes(),first)
             # A real bounded value change MAY be observed, but never creates
             # authenticated prices or a false publisher timestamp.
@@ -259,6 +276,9 @@ class Stage52QuarantinedRefreshTests(unittest.TestCase):
                 later=audit.main(["--publish-research-only","--baseline",str(baseline),
                                   "--output-dir",str(out)])
             self.assertEqual(later,0)
+            later_report=json.loads((out/"source_audit.json").read_text())
+            self.assertEqual(later_report["status"],"RESEARCH_OBSERVATION_PUBLISHED_NOT_TRADE_AUTHORITY")
+            self.assertTrue(later_report["researchObservationPublished"])
             changed,stamp=audit.read_baseline(baseline)
             self.assertEqual(changed["Gingerscope"],(source["Gingerscope"][0]+15,"Ancient"))
             self.assertEqual(stamp,"PUBLISHER_DATE_UNKNOWN")
@@ -281,6 +301,10 @@ class Stage52QuarantinedRefreshTests(unittest.TestCase):
             self.assertEqual(len(list(output.iterdir())),5)
             audit_result=json.loads((output/"source_audit.json").read_text())
             self.assertTrue(audit_result["diff"]["added"])
+            self.assertEqual(audit_result["status"],"REVIEW_REQUIRED_NO_PUBLICATION")
+            self.assertFalse(audit_result["researchObservationPublished"])
+            self.assertEqual(audit_result["researchObservationPublishReason"],
+                             "catalogue-added-or-removed-items-review-required")
             self.assertFalse(audit_result["canPublishPrices"])
 
     def test_unusual_large_price_spike_preserves_last_research_source(self):
