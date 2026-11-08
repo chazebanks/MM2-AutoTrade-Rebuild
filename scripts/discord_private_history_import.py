@@ -250,7 +250,8 @@ def load_existing(path: Path) -> dict[str, dict]:
                     value.get("completed_trade_verified") is not False or
                     value.get("server_settlement") != "UNKNOWN" or
                     value.get("authorizes_trade") is not False or
-                    value.get("authorizes_accept") is not False):
+                    value.get("authorizes_accept") is not False or
+                    value.get("may_report_profit") is not False):
                 raise LedgerError("UNSAFE_ARCHIVE_AUTHORITY")
             existing[msg_id] = value
     return existing
@@ -268,7 +269,12 @@ def stage_records(workspace: Path, new_records: list[dict]) -> tuple[int, int]:
             raise LedgerError("INVALID_CANDIDATE_ID")
         if rec.get("schema") != SCHEMA or rec.get("channel_id") != APPROVED_CHANNEL:
             raise LedgerError("INVALID_CANDIDATE_SCHEMA")
-        if rec.get("learning_eligible") is not False or rec.get("completed_trade_verified") is not False:
+        if (rec.get("learning_eligible") is not False or
+                rec.get("completed_trade_verified") is not False or
+                rec.get("server_settlement") != "UNKNOWN" or
+                rec.get("authorizes_trade") is not False or
+                rec.get("authorizes_accept") is not False or
+                rec.get("may_report_profit") is not False):
             raise LedgerError("UNSAFE_CANDIDATE_AUTHORITY")
         if msg_id in combined:
             if combined[msg_id] != rec:
