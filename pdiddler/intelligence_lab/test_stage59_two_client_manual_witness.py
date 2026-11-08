@@ -95,7 +95,8 @@ class Stage59ReciprocalWitnessTests(unittest.TestCase):
 
     def test_no_externally_unconfirmed_weapon_identity_promoted(self):
         a,b=samples()
-        x=mod.evaluate(a,b,True,False)
+        x=mod.evaluate(a,b,operator_claims_same_manual_trade=True,
+                       operator_reports_visible_completion=False)
         self.assertFalse(x["exactWeaponInstanceIdentityProven"])
         self.assertFalse(x["causalTradeAttributionProven"])
         check_immutable(x)
@@ -116,7 +117,7 @@ class Stage59ReciprocalWitnessTests(unittest.TestCase):
             ("receiver profile unchanged",lambda a,b:b["stage32"].__setitem__("rawWeaponInventoryChanged",False)),
             ("sender missing slot",lambda a,b:a["stage32"].__setitem__("changedEligibleTypes",0)),
             ("server claim",lambda a,b:a["stage32"].__setitem__("serverCompletionProven",True)),
-            ("profit claim",lambda a,b:b["mayReportProfit"].__class__ and b.__setitem__("mayReportProfit",True)),
+            ("profit claim",lambda a,b:b.__setitem__("mayReportProfit",True)),
             ("complete receipt observed",lambda a,b:b["stage32"].__setitem__("completeTradeSignalSeen",True)),
             ("departed",lambda a,b:a["stage32"].__setitem__("partnerDepartureObserved",True)),
             ("wrong schema",lambda a,b:b["stage32"].__setitem__("schema","unrecognized")),
