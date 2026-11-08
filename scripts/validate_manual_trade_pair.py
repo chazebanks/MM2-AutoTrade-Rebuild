@@ -96,6 +96,11 @@ def evaluate(sender: object, receiver: object, *,
              operator_reports_visible_completion: bool = False) -> dict:
     """Join client aggregates only; no success or server attestation is possible."""
     answer=_unsafe("INSUFFICIENT_TWO_SIDED_EVIDENCE",sender,receiver)
+    # Distinguish the exact observed copy/paste failure from generic wrong role.
+    # These are still ONE measurement, never a reciprocal two-client sample.
+    if isinstance(sender,dict) and isinstance(receiver,dict) and sender==receiver:
+        answer["reason"]="IDENTICAL_REPORT_PASTED_TWICE"
+        return answer
     first=_receipt_check(sender,"SENDER")
     second=_receipt_check(receiver,"RECEIVER")
     if first or second:
