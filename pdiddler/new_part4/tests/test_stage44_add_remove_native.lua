@@ -241,7 +241,7 @@ local function fixture(opts)
    if self.state and self.state.finished then error("finished before "..phase..": "..tostring(self.state.result and self.state.result.stopReason))end
    self:step()
   end
-  error("poll did not reach "..phase)
+  error("poll did not reach "..phase.." current="..tostring(self.state and self.state.phase).." finished="..tostring(self.state and self.state.finished).." now="..tostring(self.now).." coroutine="..tostring(self.thread and coroutine.status(self.thread)).." lastMarker="..tostring(self.calls.prints[#self.calls.prints]))
  end
  function f:finishLoop()for _=1,1000 do if not self.state or self.state.finished then return end;self:step()end;error("loop did not terminate")end
  function f:emit(...)self.remote.OnClientEvent:Fire(...)end
