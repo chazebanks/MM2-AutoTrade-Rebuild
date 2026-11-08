@@ -7,7 +7,8 @@
 local specifiedRole,deviceProfile=...
 -- Explicit role/profile passed by the two dedicated entrypoints.
 -- PHONE is used only by ALT; TABLET keeps the previous main GUI unchanged.
-local phoneMode=(specifiedRole=="SENDER" and deviceProfile=="PHONE")
+local phoneMode=(specifiedRole=="SENDER" and (deviceProfile=="PHONE" or deviceProfile=="PHONE_RECOVER"))
+local recoveryOnly=(deviceProfile=="PHONE_RECOVER" or deviceProfile=="TABLET_RECOVER")
 local MARKER="[GINGERSCOPE STAGE59 PAIRED WITNESS]"
 local PAIR_ID="STAGE59-NOV08-MANUAL-A"
 local SOURCE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
@@ -40,7 +41,7 @@ local function compactPhoneGuide(s)
  elseif s:find("^TRADE WINDOW CLOSED") then
   return "CLOSED. Do NOT rejoin or trade again. Reading this client's inventory twice. Wait for FINISHED."
  elseif s:find("^FINISHED") then
-  return "FINISHED. Copy the full ALT result into ChatGPT; send MAIN's copied report too."
+  return s:sub(1,170)
  elseif s:find("^CHOOSE") then
   return "ALT / SENDER is automatically selected. You do not need purple SENDER/RECEIVER buttons."
  elseif s:find("^STAGE32") then
@@ -526,6 +527,23 @@ startRole=function(role)
  end)
 end
 panel()
+if recoveryOnly then
+ -- Recovery is READ-ONLY and never loads the Stage32 observation module.
+ M.role=specifiedRole;M.state="RECOVERY_ONLY"
+ local old=readSaved(M.role)
+ if old then
+  M.reportLine=old
+  if reportButton then pcall(function()reportButton.Visible=true end)end
+  local receipt=validateLocalLine(old,M.role)
+  say("SAVED "..M.role.." REPORT FOUND (ID "..
+   tostring(receipt and receipt.receiptNonce:sub(1,8) or "UNKNOWN")..
+   "). Tap COPY "..(M.role=="SENDER" and "ALT" or "MAIN")..
+   " REPORT to copy it independently. Do NOT trade.")
+ else
+  say("NO SAVED "..M.role.." REPORT. This executor may not support file storage, or no prior archive was created. Do NOT trade.")
+ end
+ return M
+end
 if fixedRole() then
  say("ROLE AUTO-SELECTED: "..specifiedRole..". "..(specifiedRole=="SENDER"
   and "This ALT account DONATES the test weapon."
