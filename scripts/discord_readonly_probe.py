@@ -33,7 +33,7 @@ class ProbeError(Exception):
 
 def fetch_json(path: str, token: str, *, opener=urlopen, sleep=time.sleep):
     if not (path == "/users/@me" or
-            re.fullmatch(r"/channels/[0-9]{17,20}(?:/messages\\?limit=25)?", path)):
+            re.fullmatch(r"/channels/[0-9]{17,20}(?:/messages\?limit=25)?", path)):
         raise ProbeError("UNSUPPORTED_REQUEST")
     request = Request(
         API_ROOT + path,
