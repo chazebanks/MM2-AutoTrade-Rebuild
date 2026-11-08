@@ -115,7 +115,9 @@ local function finish(reason,ledger,timeline)
    return game:GetService("HttpService"):JSONEncode(data)
  end)
  if ok then
-  if type(setclipboard)=="function" then pcall(setclipboard,json) end
+  -- The outer Stage59 UI owns deliberate per-device receipt copying.
+  -- An automatic nested clipboard write would overwrite the OTHER
+  -- client's receipt (e.g. iPhone/iPad shared clipboard).
   print("[GINGERSCOPE STAGE32 ANONYMIZED] "..json)
  else
   warn("[STAGE32] JSON output unavailable; no trade actions")
