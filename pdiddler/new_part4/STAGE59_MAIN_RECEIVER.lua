@@ -5,7 +5,7 @@
 -- Both accounts must be in SAME MM2 server with Delta running on each.
 local ROLE="RECEIVER"
 local SOURCE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
- "bb70922e06c76233a3e962d4d97a9783bb70f39b/pdiddler/new_part4/STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua"
+ "ca25864f4d6f358e3fc99dc78ee70852bee4918f/pdiddler/new_part4/STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua"
 if game.PlaceId~=142823291 then
  warn("[STAGE59 MAIN] Wrong game: join original MM2 before executing")
  return
