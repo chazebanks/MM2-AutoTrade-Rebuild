@@ -34,7 +34,7 @@ local function run(opts)
    end
    self.connections[#self.connections+1]=c
    f.allConns[#f.allConns+1]=c
-   if opts.callbackInsideConnect and name=="StartTrade" then fn(partner)end
+   if opts.callbackInsideConnect and name=="StartTrade" then fn(f.partner)end
    return c
   end
   function s:Fire(...)
@@ -80,6 +80,7 @@ local function run(opts)
  local players=node("Players","Players")
  local me=players:Add(node("Player","LocalUser",{UserId=101}))
  local partner=players:Add(node("Player","SecretPartner",{UserId=202}))
+ f.partner=partner
  players.LocalPlayer=me
  function players:GetPlayers()return self.Children end
  function players:GetPlayerByUserId(id)
