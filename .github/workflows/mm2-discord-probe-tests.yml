@@ -1,0 +1,28 @@
+name: MM2 Discord read-only probe unit tests
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/discord_readonly_probe.py'
+      - 'pdiddler/intelligence_lab/test_discord_readonly_probe.py'
+      - '.github/workflows/mm2-discord-readonly-probe.yml'
+      - '.github/workflows/mm2-discord-probe-tests.yml'
+  push:
+    branches:
+      - feature/mm2-discord-readonly-connection-probe
+
+permissions:
+  contents: read
+
+jobs:
+  offline-probe-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python syntax and isolated regression tests (no Discord secret)
+        run: |
+          python3 -m py_compile scripts/discord_readonly_probe.py
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_discord_readonly_probe.py'
