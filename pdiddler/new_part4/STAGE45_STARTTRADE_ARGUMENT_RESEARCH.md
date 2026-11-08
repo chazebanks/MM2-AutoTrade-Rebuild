@@ -11,7 +11,7 @@
 - A source-independent impossibility: if two trade sessions have the same player pair and same offer snapshot, and no fresh session identifier or authenticated server result is supplied, a delayed event from session A is observationally indistinguishable from an identical current event from session B. More GUI polls do NOT solve this.
 
 ## One falsifiable Stage45 question
-Does **native StartTrade.OnClientEvent** supply structured callback arguments containing player references or any scalar candidate that might later help discriminate sessions? Stage33 did not record argument payloads, so this is genuinely new evidence rather than repetition.
+A player reference or a scalar field is **not a session identifier** without evidence of uniqueness, freshness and server-provided association. Does **native StartTrade.OnClientEvent** supply structured callback arguments containing player references or any scalar candidate that might later help discriminate sessions? Stage33 did not record argument payloads, so this is genuinely new evidence rather than repetition.
 
 NEW purely functional module `p4_stage45_start_trade_payload.lua` records ONLY a bounded list of primitive TYPE enums (up to six arguments), count of exact local/partner player object references and counts of unclassified string/number primitives. It does not inspect nested table contents, disclose raw names, keys, numbers, userdata, account IDs, session values, or declare any scalar a session token. Every authority field remains FALSE.
 
