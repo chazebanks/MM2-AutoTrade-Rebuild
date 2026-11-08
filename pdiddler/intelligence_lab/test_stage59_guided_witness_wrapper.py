@@ -210,6 +210,22 @@ if not opt.direct and not opt.noGui and not opt.guiBroken then
   end
  end
  for _,f in ipairs(queue) do f() end
+ -- A finished receipt MUST NEVER auto-mutate the system clipboard.
+ assert(#clip==0,"automatic clipboard export would corrupt paired devices")
+ if opt.manualCopy and not opt.noGui and not opt.guiBroken then
+  local copyButton
+  for _,node in ipairs(created)do
+   if node.Name=="COPY_OWN_STAGE59_REPORT" then copyButton=node end
+  end
+  assert(copyButton and copyButton.Visible==true and
+    type(copyButton.onActivate)=="function","manual COPY action missing")
+  copyButton.onActivate()
+  if not opt.clipboardMissing then
+   copyButton.onActivate()
+   assert(#clip==2 and clip[1]==clip[2],
+    "re-copy must preserve EXACT same nonce and receipt")
+  end
+ end
  setclipboard=realClip
  local report={}
  local guide={}
@@ -254,12 +270,15 @@ if not opt.direct and not opt.noGui and not opt.guiBroken then
  assert(not s:find("userName",1,true))
  assert(not s:find("FAKE_SECRET_JOB_ID",1,true))
  assert(#remoteCalls==1,"one READ-ONLY source loader required")
- if opt.clipboardMissing then
-  assert(#clip==0)
-  assert(guide[#guide]:find("Clipboard unavailable",1,true))
+ if opt.clipboardMissing or not opt.manualCopy or opt.noGui or opt.guiBroken then
+  assert(#clip==0,"only user click can modify clipboard")
  else
-  assert(#clip==1 and clip[1]==s,"only complete sanitized receipt may be copied")
-  assert(guide[#guide]:find("Tap COPY",1,true))
+  assert(#clip==2 and clip[1]==s and clip[2]==s,
+   "manual re-copy should yield original sanitized receipt, not new witness")
+ end
+ if not opt.manualCopy then
+  assert(guide[#guide]:find("TAP COPY",1,true),
+   "user must be told to deliberately export their own report")
  end
  return s,guide,created,remoteCalls,clip
 end
@@ -273,7 +292,7 @@ case("sender direct role guidance + safe receipt",function()
  local s,guide=call("SENDER",{direct=true})
  assert(s:find('"lostEligibleCopies":1',1,true))
  assert(s:find('"gainedEligibleCopies":0',1,true))
- assert(guide[#guide]:find("Tap COPY",1,true))
+ assert(guide[#guide]:find("TAP COPY",1,true))
 end)
 case("receiver direct role guidance + safe receipt",function()
  local s=call("RECEIVER",{direct=true})
@@ -288,6 +307,17 @@ case("on-screen sender role button",function()
   if obj.kind=="ScreenGui" and obj.Name=="GINGERSCOPE_STAGE59_GUIDE" then found=true end
  end
  assert(found,"no Stage59 in-game panel")
+end)
+case("manual COPY is exclusively opt-in, two taps preserve same nonce",function()
+ local s,guide,created,remotes,clips=call("SENDER",{direct=true,manualCopy=true})
+ assert(s and #clips==2 and clips[1]==s and clips[2]==s)
+ assert(guide[#guide]:find("COPY SENDER OK",1,true))
+end)
+case("manual COPY unavailable does not affect report",function()
+ local s,guide,created,remotes,clips=call("RECEIVER",{
+  direct=true,manualCopy=true,clipboardMissing=true})
+ assert(s and #clips==0)
+ assert(guide[#guide]:find("COPY BLOCKED",1,true))
 end)
 case("on-screen receiver role button",function()
  local s=call("RECEIVER",{})
