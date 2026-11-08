@@ -1,0 +1,36 @@
+name: Stage54 read-only MM2 mapping coverage regression
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE54_READONLY_MAPPING_COVERAGE.lua'
+      - 'pdiddler/intelligence_lab/test_stage54_mapping_coverage.py'
+      - '.github/workflows/mm2-stage54-mapping-tests.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage54-readonly-mapping-coverage
+    paths:
+      - 'pdiddler/new_part4/STAGE54_READONLY_MAPPING_COVERAGE.lua'
+      - 'pdiddler/intelligence_lab/test_stage54_mapping_coverage.py'
+      - '.github/workflows/mm2-stage54-mapping-tests.yml'
+permissions:
+  contents: read
+jobs:
+  offline-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Execute actual Stage54 Lua against adversarial fake MM2
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage54_mapping_coverage.py'
+      - name: Run complete currently merged Python regression suite
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
