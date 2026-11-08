@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 P4 = ROOT / "new_part4"
 MODULE = P4 / "p4_stage45_start_trade_payload.lua"
 FIXTURE = P4 / "tests" / "test_stage45_start_trade_payload.lua"
+NATIVE = P4 / "STAGE45_READONLY_STARTTRADE_TYPES_PROBE.lua"
+NATIVE_FIXTURE = P4 / "tests" / "test_stage45_start_trade_native.lua"
 RESEARCH = P4 / "STAGE45_STARTTRADE_ARGUMENT_RESEARCH.md"
 
 
@@ -72,6 +74,63 @@ class Stage45PythonIntegration(unittest.TestCase):
         self.assertIn('LastOffer', note)
         self.assertIn('before any manual invitation', note)
         self.assertIn('Do NOT ship an iPad loader', note)
+
+    def test_native_probe_has_exact_one_remote_and_no_outbound_actions(self):
+        code = NATIVE.read_text()
+        for marker in (
+            'CORE_PIN="3635e6322cdcccc3d5bc9c1ea8a74bcf00a4333c"',
+            'source(CORE_PIN,"p4_stage45_start_trade_payload")',
+            'source(BASE,"p4_native_observer")',
+            'node.Name=="StartTrade" and node:IsA("RemoteEvent")',
+            'remote.OnClientEvent', 'table.pack(...)',
+            'privatePack=nil', 'seen>1',
+            'ARGUMENT_LIMIT_EXCEEDED', 'GUI_VISIBLE_BEFORE_START_TRADE_RECEIPT',
+            'UNARMED_START_TRADE_RECEIPT', 'TRADE_GUI_NOT_STABLE_AFTER_START',
+            'LISTENER_CLEANUP_INCOMPLETE', 'WINDOW_CONTEXT_CHANGED',
+            'START_TRADE_REMOTE_CHANGED', 'ACCEPT_INDICATOR_OBSERVED',
+            'ONE_START_TRADE_TYPE_CENSUS_MATCHED',
+            'r[flag]=false', 'r.tradeOutcome="UNKNOWN"',
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, code)
+        for forbidden in (
+            ':FireServer(', ':InvokeServer(', ':FireClient(', ':FireAllClients(',
+            'SendMouseButtonEvent(', 'PostAsync(', 'GetProfileData(',
+            'OfferItem:FireServer', 'AcceptTrade:FireServer',
+            'TeleportToPlaceInstance(', 'queue_on_teleport(',
+            'hookfunction(', 'getconnections(', 'getupvalue(', 'Instance.new(',
+        ):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, code)
+
+    @unittest.skipUnless(shutil.which("lua5.4"), "Lua5.4 required for actual Lua execution")
+    def test_native_lua_launcher_parses_but_does_not_execute(self):
+        p = subprocess.run(
+            ["lua5.4", "-e", "assert(loadfile('pdiddler/new_part4/STAGE45_READONLY_STARTTRADE_TYPES_PROBE.lua'))"],
+            cwd=ROOT.parent, text=True, capture_output=True, timeout=15,
+        )
+        self.assertEqual(p.returncode, 0, p.stdout + "\\n" + p.stderr)
+
+    @unittest.skipUnless(shutil.which("lua5.4"), "Lua5.4 required for actual Lua execution")
+    def test_python_executes_whole_native_launcher_mock(self):
+        source = NATIVE_FIXTURE.read_text()
+        for name in (
+            "second callback is ambiguous",
+            "no StartTrade receipt times out",
+            "pre-arm callback from queued/stale event fails",
+            "event more than six arguments rejects",
+            "observed acceptance fails closed",
+            "session job change fails closed",
+            "listener disconnection failure reports incomplete",
+            "unknown scalar types do not leak or prove session ID",
+        ):
+            self.assertIn(name, source)
+        p = subprocess.run(
+            ["lua5.4", str(NATIVE_FIXTURE), str(P4)],
+            cwd=ROOT.parent, text=True, capture_output=True, timeout=20,
+        )
+        self.assertEqual(p.returncode, 0, p.stdout + "\\n" + p.stderr)
+        self.assertIn("Stage45 StartTrade whole launcher native: 20 passed, 0 failed", p.stdout)
 
     @unittest.skipUnless(shutil.which("lua5.4"), "Lua5.4 required for actual Lua execution")
     def test_python_executes_checked_in_lua_fixture(self):
