@@ -335,7 +335,7 @@ class Stage55FuzzyProofTests(unittest.TestCase):
             p=subprocess.run(["lua5.4",str(path),str(PROBE)],
                              cwd=ROOT,capture_output=True,text=True,timeout=40)
         self.assertEqual(p.returncode,0,p.stdout+"\n"+p.stderr)
-        self.assertIn("STAGE55_ACTUAL_LUA_18_NAMED_400_SEEDED_PASS",p.stdout)
+        self.assertIn("STAGE55_ACTUAL_LUA_20_NAMED_400_SEEDED_PASS",p.stdout)
 
 if __name__=="__main__":
     unittest.main()
