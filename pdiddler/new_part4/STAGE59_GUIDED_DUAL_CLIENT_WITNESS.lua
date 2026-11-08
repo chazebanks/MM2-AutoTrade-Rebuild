@@ -8,8 +8,8 @@ local specifiedRole=...
 local MARKER="[GINGERSCOPE STAGE59 PAIRED WITNESS]"
 local PAIR_ID="STAGE59-NOV08-MANUAL-A"
 local SOURCE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
- "6637a25ec69e96f6cc4215b86a97cecba56cd0e8/"..
- "pdiddler/new_part4/STAGE32_READONLY_RESULT_DELTA_PROBE.lua"
+ "f74cb081590dfcdf100bd41f818e07d34856dff4/"..
+ "pdiddler/new_part4/STAGE59_RESULT_DELTA_120S_PROBE.lua"
 local E=(type(getgenv)=="function" and getgenv()) or _G
 local KEY="PDIDDLER_STAGE59_PAIRED_MANUAL_OBSERVER"
 local OLD="PDIDDLER_STAGE32_RESULT_CORRELATION_PROBE"
@@ -153,6 +153,15 @@ local function finish(reason,core)
  end
  local source=core and core.result or nil
  local evidence=safe32(source)
+ -- Wrapper status must reflect whether the nested client observer completed
+ -- BOTH independent post-close inventory reads, not merely that it returned.
+ local terminal=evidence
+   and evidence.status~="INCOMPLETE"
+   and evidence.windowClosureObserved==true
+   and evidence.postReadbacksObserved==2
+   and evidence.stopReason=="TWO_POST_CLOSE_READS_FINISHED"
+   and evidence.closureStatus=="closed_unknown"
+   and evidence.beforeObserved==true
  local report={
   schema="gingerscope-stage59-two-client-aggregate-witness-v1",
   operatorDeclaredRole=M.role,pairId=PAIR_ID,
@@ -161,9 +170,11 @@ local function finish(reason,core)
   authorizesTrade=false,authorizesAccept=false,
   mayRecordCompletedTrade=false,mayReportProfit=false,
   tradeOutcome="UNKNOWN",
-  collectorStatus=evidence and "CLIENT_STAGE32_READBACK_CAPTURED"
-    or "INCOMPLETE_UNVERIFIABLE_STAGE32",
-  collectorReason=reason or "NO_REASON",
+  collectorStatus=terminal and "CLIENT_STAGE32_TERMINAL_OBSERVATION"
+    or "INCOMPLETE_STAGE32_NO_POST_CLOSE_EVIDENCE",
+  collectorReason=(not terminal and reason=="STAGE32_FINISHED")
+    and "STAGE32_FINISHED_WITHOUT_TERMINAL_READBACKS"
+    or (reason or "NO_REASON"),
   stage32=evidence
  }
  if not nonce then
@@ -185,6 +196,8 @@ local function finish(reason,core)
  M.report=report
 end
 local lastState=nil
+local boundAt=nil
+local lastCountdownBucket=nil
 local running=false
 local startRole
 startRole=function(role)
@@ -233,11 +246,22 @@ startRole=function(role)
     if state=="AWAIT_MANUAL_TRADE" then
      say("READY. On BOTH devices wait for READY. Open a manual low-value trade. Don't Accept until BOTH say BASELINE BOUND.")
     elseif state=="OBSERVING_CLOSE" then
-     say("BASELINE BOUND. SENDER may offer ONE expendable eligible weapon, RECEIVER offers none. BOTH MANUALLY Accept only if willing.")
+     say("BASELINE BOUND. Both devices ready? Sender offers ONE expendable eligible item, receiver none. BOTH MANUALLY Accept only if willing. ~120s timebox.")
     elseif state=="POST_CLOSE_READS" then
      say("TRADE WINDOW CLOSED. Do NOT rejoin yet; reading local inventory twice. Wait for FINISHED.")
     else
      say("STAGE32 "..state..". No trade automation. Wait for the next on-screen step.")
+    end
+   end
+   -- Approximate operator clock. The Stage59-only Stage32 fork owns the
+   -- authoritative 120-second monotonic observation deadline.
+   if state=="OBSERVING_CLOSE" then
+    if not boundAt then boundAt=os.clock() end
+    local remaining=math.max(0,120-math.floor(os.clock()-boundAt))
+    local bucket=math.floor(remaining/15)
+    if bucket~=lastCountdownBucket then
+     lastCountdownBucket=bucket
+     say("BASELINE BOUND: approx "..remaining.."s left. Both clients bound? Complete ONLY manual actions now, or decline; no automatic Accept.")
     end
    end
    task.wait(.2)
