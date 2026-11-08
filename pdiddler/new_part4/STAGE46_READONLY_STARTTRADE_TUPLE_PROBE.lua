@@ -372,7 +372,7 @@ local function observe()
  end
  if S.finished then return end
  if seen~=1 then finish("MULTIPLE_START_TRADE_RECEIPTS");return end
- finish("ONE_START_TRADE_TYPE_CENSUS_MATCHED",r)
+ finish("ONE_START_TRADE_TUPLE_CLASSIFIED_CLIENT_ONLY",r)
 end
 task.spawn(function()
  local ok=pcall(observe)
