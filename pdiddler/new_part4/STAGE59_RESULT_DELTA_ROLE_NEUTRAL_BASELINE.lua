@@ -25,6 +25,7 @@ for _,id in ipairs({KEY,"PDIDDLER_STAGE29_POSTCLOSE_PROBE",
 end
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local STAGE26="a2a2e601be864f970da0a69c436ab3b12efd8112"
+local SILENT_SCANNER="8d7e9e9315c29ac4c9f4004d4c9620699639fb04"
 local STAGE28="800ec9aa5f38b7d06e3af1bbf492dfd79ade3951"
 local STAGE29="562fb0c453c1711a3fbd6ca294a44797ac359c42"
 local STAGE30="3ccf9219580726e2b122e1b9d4bdb6039eff96b0"
@@ -138,12 +139,19 @@ if not loaded then
  return S
 end
 local scannerOwner=E.PDIDDLER_STAGE25_SCANNER_ONLY
+if scannerOwner~=nil then
+ -- Preexisting Stage25 diagnostics can still have an asynchronous scanner
+ -- clipboard overwrite scheduled. Rejoin for a guaranteed silent sandbox.
+ S.state="UNISOLATED_SCANNER"
+ finish("REJOIN_REQUIRED_PREEXISTING_SCANNER")
+ return S
+end
 if not scannerOwner then
  E.PDIDDLER_ALLOW_SCANNER_ONLY_TEST=true
  local ok,owner=pcall(function()
-  local src=game:HttpGet(ROOT..STAGE26..
-    "/pdiddler/new_part4/STAGE25_SCANNER_ONLY_BOOT.lua",true)
-  return assert(loadstring(src,"=stage25-scanner-only"))()
+  local src=game:HttpGet(ROOT..SILENT_SCANNER..
+    "/pdiddler/new_part4/STAGE59_SCANNER_SILENT_BOOT.lua",true)
+  return assert(loadstring(src,"=stage59-silent-scanner-only"))()
  end)
  if not ok then
   S.state="SCANNER_UNAVAILABLE";finish("SCANNER_START_FAILED")
