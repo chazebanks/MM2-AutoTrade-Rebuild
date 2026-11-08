@@ -84,7 +84,7 @@ class Stage45PythonIntegration(unittest.TestCase):
             'node.Name=="StartTrade" and node:IsA("RemoteEvent")',
             'knownRemote.OnClientEvent', 'table.pack(...)',
             'privatePack=nil', 'seen>1',
-            'ARGUMENT_LIMIT_EXCEEDED', 'GUI_VISIBLE_BEFORE_START_TRADE_RECEIPT',
+            'ARGUMENT_LIMIT_EXCEEDED', 'GUI_VISIBLE_BUT_PARTNER_UNBOUND_AT_START',
             'UNARMED_START_TRADE_RECEIPT', 'TRADE_GUI_NOT_STABLE_AFTER_START',
             'LISTENER_CLEANUP_INCOMPLETE', 'WINDOW_CONTEXT_CHANGED',
             'START_TRADE_REMOTE_CHANGED', 'ACCEPT_INDICATOR_OBSERVED',
@@ -123,9 +123,13 @@ class Stage45PythonIntegration(unittest.TestCase):
             "session job change fails closed",
             "listener disconnection failure reports incomplete",
             "unknown scalar types do not leak or prove session ID",
-            "same-tick visible GUI prevents false event-before-GUI claim",
+            "same-tick visible GUI still permits TYPE-ONLY census",
             "synchronous callback inside listener attach tears down correctly",
             "offer mutation during observation grace rejects",
+            "GUI visible at callback with wrong partner cannot inspect payload",
+            "multiple visible GUI roots at callback is rejected",
+            "visible-at-callback root lost before stable frame is rejected",
+            "visible-at-callback partner label drift is rejected",
             "older Stage38 owner blocks launch before listeners are attached",
         ):
             self.assertIn(name, source)
@@ -134,7 +138,7 @@ class Stage45PythonIntegration(unittest.TestCase):
             cwd=ROOT.parent, text=True, capture_output=True, timeout=20,
         )
         self.assertEqual(p.returncode, 0, p.stdout + "\\n" + p.stderr)
-        self.assertIn("Stage45 StartTrade whole launcher native: 31 passed, 0 failed", p.stdout)
+        self.assertIn("Stage45 StartTrade whole launcher native: 37 passed, 0 failed", p.stdout)
 
     @unittest.skipUnless(shutil.which("lua5.4"), "Lua5.4 required for actual Lua execution")
     def test_python_executes_checked_in_lua_fixture(self):
