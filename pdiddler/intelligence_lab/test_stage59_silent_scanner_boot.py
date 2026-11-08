@@ -21,7 +21,7 @@ local original,silent=arg[1],arg[2]
 local realPrint=print
 local function run(script,isSilent)
  local calls,clips,queues={},{},0
- local env={}
+ local env={PDIDDLER_ALLOW_SCANNER_ONLY_TEST=true}
  getgenv=function()return env end
  loadstring=load
  setclipboard=function(x)clips[#clips+1]=x end
