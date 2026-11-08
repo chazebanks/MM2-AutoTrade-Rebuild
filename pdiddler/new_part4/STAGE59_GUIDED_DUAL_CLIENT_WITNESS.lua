@@ -4,7 +4,10 @@
 -- GitHub commit. Sender and receiver each run ONE copy in the same MM2 server.
 -- Only anonymized aggregate client readback counts are printed/copied.
 -- Read full trade instructions on-screen DURING execution.
-local specifiedRole=...
+local specifiedRole,deviceProfile=...
+-- Explicit role/profile passed by the two dedicated entrypoints.
+-- PHONE is used only by ALT; TABLET keeps the previous main GUI unchanged.
+local phoneMode=(specifiedRole=="SENDER" and deviceProfile=="PHONE")
 local MARKER="[GINGERSCOPE STAGE59 PAIRED WITNESS]"
 local PAIR_ID="STAGE59-NOV08-MANUAL-A"
 local SOURCE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
@@ -21,8 +24,34 @@ local label,gui,roleButtons=nil,nil,{}
 local function fixedRole()
  return specifiedRole=="SENDER" or specifiedRole=="RECEIVER"
 end
+local function compactPhoneGuide(s)
+ if s:find("^ROLE AUTO%-SELECTED") then
+  return "ALT / SENDER readying. You GIVE one expendable weapon. Your main RECEIVES. Watch the status here."
+ elseif s:find("^READ%-ONLY") then
+  return "ALT / SENDER starting. Both accounts must join the SAME MM2 server. No automatic trades or Accept."
+ elseif s:find("^READY") then
+  return "READY. Wait for MAIN to say READY too. Then manually open ONE test trade. Do not Accept yet."
+ elseif s:find("^BASELINE BOUND") then
+  if s:find("left") then
+   local secs=s:match("approx%s+(%d+)s")
+   return "BASELINE BOUND. Approx "..tostring(secs or "?").."s left. Offer ONE expendable eligible duplicate; both MANUALLY Accept only if willing."
+  end
+  return "BASELINE BOUND. Wait for MAIN too. ALT offers ONE expendable duplicate; MAIN offers nothing. Accept manually if willing."
+ elseif s:find("^TRADE WINDOW CLOSED") then
+  return "CLOSED. Do NOT rejoin or trade again. Reading this client's inventory twice. Wait for FINISHED."
+ elseif s:find("^FINISHED") then
+  return "FINISHED. Copy the full ALT result into ChatGPT; send MAIN's copied report too."
+ elseif s:find("^CHOOSE") then
+  return "ALT / SENDER is automatically selected. You do not need purple SENDER/RECEIVER buttons."
+ elseif s:find("^STAGE32") then
+  return "ALT observer: "..s:sub(1,110)..". Check console if status remains unchanged."
+ end
+ return s
+end
 local function say(s)
- if label and gui and gui.Parent then pcall(function() label.Text=s end) end
+ if label and gui and gui.Parent then
+  pcall(function() label.Text=phoneMode and compactPhoneGuide(s) or s end)
+ end
  print("[STAGE59 GUIDE] "..s)
 end
 local function copyOutput(value)
@@ -58,26 +87,51 @@ local function panel()
   -- Drag the title bar to move the panel without hitting SENDER/RECEIVER.
   frame.Size=UDim2.fromOffset(320,182)
   frame.Position=UDim2.new(0,12,1,-200)
+  if phoneMode then
+   -- Compact landscape iPhone layout, away from leaderboard and joystick.
+   -- Camera viewport is in Roblox UI units (not physical iPhone pixels).
+   local width,height=270,146
+   local screenWidth,screenHeight=0,0
+   pcall(function()
+    local camera=workspace and workspace.CurrentCamera
+    local v=camera and camera.ViewportSize
+    screenWidth=tonumber(v and v.X) or 0
+    screenHeight=tonumber(v and v.Y) or 0
+   end)
+   if screenWidth>0 then
+    width=math.max(180,math.min(270,screenWidth-24))
+   end
+   local y=72
+   if screenHeight>0 then
+    y=math.min(math.max(52,math.floor(screenHeight*0.23)),
+      math.max(0,screenHeight-height))
+   end
+   frame.Size=UDim2.fromOffset(width,height)
+   frame.Position=UDim2.fromOffset(12,y)
+  end
   frame.BackgroundColor3=Color3.fromRGB(36,25,58)
   frame.BorderSizePixel=0
   frame.Parent=screen
   local corner=Instance.new("UICorner")
   corner.CornerRadius=UDim.new(0,10);corner.Parent=frame
   local heading=Instance.new("TextLabel")
-  heading.Size=UDim2.new(1,-44,0,26)
+  heading.Size=phoneMode
+   and UDim2.new(1,-81,0,26) or UDim2.new(1,-44,0,26)
   heading.Position=UDim2.fromOffset(10,8)
   heading.BackgroundTransparency=1
-  heading.Font=Enum.Font.GothamBold;heading.TextSize=16
+  heading.Font=Enum.Font.GothamBold;heading.TextSize=phoneMode and 12 or 16
   heading.TextColor3=Color3.fromRGB(245,232,255)
   heading.TextXAlignment=Enum.TextXAlignment.Left
-  heading.Text="STAGE 59  |  DRAG HERE  |  READ-ONLY"
+  heading.Text=phoneMode
+   and "ALT SENDER  |  DRAG HERE" or "STAGE 59  |  DRAG HERE  |  READ-ONLY"
   heading.Active=true
   heading.Parent=frame
   label=Instance.new("TextLabel")
-  label.Size=UDim2.new(1,-20,0,86)
+  label.Size=phoneMode
+   and UDim2.new(1,-18,1,-46) or UDim2.new(1,-20,0,86)
   label.Position=UDim2.fromOffset(10,41)
   label.BackgroundTransparency=1;label.Font=Enum.Font.Gotham
-  label.TextSize=14;label.TextWrapped=true
+  label.TextSize=phoneMode and 12 or 14;label.TextWrapped=true
   label.TextXAlignment=Enum.TextXAlignment.Left
   label.TextYAlignment=Enum.TextYAlignment.Top
   label.TextColor3=Color3.fromRGB(247,243,253)
@@ -97,6 +151,25 @@ local function panel()
   close.TextColor3=Color3.fromRGB(245,232,255)
   close.Text="X";close.Parent=frame
   close.Activated:Connect(function()screen:Destroy()end)
+  if phoneMode then
+   -- Explicit minimise/restore button: no hidden dependence on hover,
+   -- scrolling, touch gestures, or the ALT role picker.
+   local minimise=Instance.new("TextButton")
+   minimise.Name="MINIMISE_PHONE_GUIDE"
+   minimise.Size=UDim2.fromOffset(27,26)
+   minimise.Position=UDim2.new(1,-64,0,7)
+   minimise.BackgroundTransparency=1
+   minimise.Font=Enum.Font.GothamBold;minimise.TextSize=18
+   minimise.TextColor3=Color3.fromRGB(245,232,255)
+   minimise.Text="-";minimise.Parent=frame
+   local folded=false
+   minimise.Activated:Connect(function()
+    folded=not folded
+    label.Visible=not folded
+    frame.Size=UDim2.fromOffset(frame.AbsoluteSize.X,folded and 36 or 146)
+    minimise.Text=folded and "+" or "-"
+   end)
+  end
   if not fixedRole() then
    for index,role in ipairs({"SENDER","RECEIVER"}) do
     local b=Instance.new("TextButton")
