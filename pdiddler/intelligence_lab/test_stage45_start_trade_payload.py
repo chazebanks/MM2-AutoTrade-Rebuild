@@ -72,8 +72,8 @@ class Stage45PythonIntegration(unittest.TestCase):
         note = RESEARCH.read_text()
         self.assertIn('not a session identifier', note.lower())
         self.assertIn('LastOffer', note)
-        self.assertIn('before any manual invitation', note)
-        self.assertIn('Do NOT ship an iPad loader', note)
+        self.assertIn('before either account opens any trade', note)
+        self.assertIn('NO real Stage45 result yet', note)
 
     def test_native_probe_has_exact_one_remote_and_no_outbound_actions(self):
         code = NATIVE.read_text()
