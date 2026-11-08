@@ -76,6 +76,22 @@ class Stage52QuarantinedRefreshTests(unittest.TestCase):
     # This mainline updater regression deliberately tests only Stage52 logic;
     # original Stage26 provenance tests remain intact on PR91.
 
+    def test_checked_in_default_branch_market_flags_are_explicitly_not_authoritative(self):
+        saved = LIVE.read_text(encoding="utf-8")
+        header = saved.split("items = {", 1)[0]
+        self.assertIn("complete = false", header)
+        self.assertIn("liveReady = false", header)
+        self.assertIn("authorizesTrade = false", header)
+        self.assertIn("authorizesAccept = false", header)
+        self.assertIn("mayReportProfit = false", header)
+        self.assertIn("publisherUpdatedAtUtc = nil", header)
+        self.assertNotIn("complete = true", header)
+        items, date = audit.read_baseline(LIVE)
+        self.assertGreater(len(items), 150)
+        self.assertIn("Gingerscope", items)
+        self.assertGreater(items["Gingerscope"][0], 0)
+        self.assertIsNotNone(date)
+
     def test_scheduled_workflow_only_pushes_after_research_source_validation(self):
         s = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("contents: read", s)
