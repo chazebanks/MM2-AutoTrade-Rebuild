@@ -13,7 +13,7 @@ import unittest
 
 ROOT=Path(__file__).resolve().parents[2]
 P=ROOT/"pdiddler/new_part4"
-ORIG=P/"STAGE25_SCANNER_ONLY_BOOT.lua"
+ORIG=ROOT/"pdiddler/intelligence_lab/fixtures/STAGE25_SCANNER_ONLY_BOOT_ORIGINAL.lua"
 SILENT=P/"STAGE59_SCANNER_SILENT_BOOT.lua"
 EXPECTED_ORIGINAL_GIT_BLOB="92cd0cb482524d7c6ca6de0962ec57b6a69522ca"
 DRIVER=r'''
