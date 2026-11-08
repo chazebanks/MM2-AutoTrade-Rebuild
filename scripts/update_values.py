@@ -123,12 +123,15 @@ def normalize_page_results(groups: dict[str, dict[str, Any]]) -> dict[str, tuple
     if set(groups) != set(KIND_ORDER):
         raise RuntimeError("tier-pages-incomplete")
     items: dict[str, tuple[int, str]] = {}
+    casefolded: set[str] = set()
     for kind in KIND_ORDER:
         page = groups[kind]
         if page.get("kind") != kind or page.get("url") != ROOT + kind.lower():
             raise RuntimeError("source-tier-url-mismatch")
         if not re.fullmatch(r"[0-9a-f]{64}", str(page.get("sha256", ""))):
             raise RuntimeError("source-page-hash-unverified")
+        if page.get("publisherUpdatedAtUtc") is not None:
+            raise RuntimeError("unsupported-unverified-publisher-date")
         rows = page.get("rows")
         if not isinstance(rows, dict) or len(rows) < MIN_COUNTS[kind]:
             raise RuntimeError("source-tier-coverage-incomplete")
@@ -139,8 +142,9 @@ def normalize_page_results(groups: dict[str, dict[str, Any]]) -> dict[str, tuple
                 raise RuntimeError("source-row-invalid")
             if kind == "Chroma" and not name.startswith("Chroma "):
                 raise RuntimeError("source-variant-missing")
-            if name in items:
-                raise RuntimeError("source-item-appears-across-tiers")
+            if name in items or name.casefold() in casefolded:
+                raise RuntimeError("source-item-appears-across-tiers-or-case-alias")
+            casefolded.add(name.casefold())
             category = ("Chroma Ancient" if name in ANCIENT_CHROMAS
                         else "Chroma Godly") if kind == "Chroma" else kind
             items[name] = (value, category)
