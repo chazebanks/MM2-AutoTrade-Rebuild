@@ -14,6 +14,8 @@ FAKE_GAME=r'''
 local probe=arg[1]
 local realPrint,realRequire,realSetclipboard,realToclipboard,realGetgenv=
  print,require,setclipboard,toclipboard,getgenv
+local realInstance,realUDim2,realUDim,realVector2,realColor3,realEnum=
+ Instance,UDim2,UDim,Vector2,Color3,Enum
 local written={}
 local function sample(name,rarity,typ,chroma,year)
  return {ItemName=name,Rarity=rarity or "Godly",ItemType=typ or "Knife",
@@ -38,6 +40,34 @@ local function call(weapons,opts)
  getgenv=opts.envClipboard and function()
   return {setclipboard=function(report) copied[#copied+1]=report end}
  end or nil
+ local created={}
+ local players=nil
+ if opts.uiMock or opts.uiMockThrow then
+  local gui={FindFirstChild=function()return nil end}
+  players={LocalPlayer={FindFirstChildOfClass=function(_,class)
+   if class=="PlayerGui" then return gui end
+  end}}
+  Instance={new=function(kind)
+   if opts.uiMockThrow then error("SECRET_GUI_ERROR") end
+   local o={Kind=kind}
+   function o:IsA(x)return self.Kind==x end
+   function o:Destroy()self.Parent=nil end
+   if kind=="TextButton" then
+    o.Activated={Connect=function(_,callback)o.onClose=callback end}
+   end
+   created[#created+1]=o
+   return o
+  end}
+  local function shape(...)
+   return {mockGeometry=true}
+  end
+  UDim2={new=shape,fromOffset=shape}
+  UDim={new=shape}
+  Vector2={new=shape}
+  Color3={fromRGB=shape}
+  Enum={Font={Gotham="Gotham",GothamBold="GothamBold"},
+        TextXAlignment={Left="Left"},TextYAlignment={Top="Top"}}
+ else Instance=nil;UDim2=nil;UDim=nil;Vector2=nil;Color3=nil;Enum=nil end
  local module={payload=sync}
  local db={FindFirstChild=function(_,key)
   if key=="Sync" and not opts.noSync then return module end
@@ -60,6 +90,7 @@ local function call(weapons,opts)
  end}
  game={PlaceId=opts.place or 142823291,JobId="SECRET_JOB_ID",
   GetService=function(_,key)
+   if key=="Players" then return players end
    if key=="ReplicatedStorage" then return rs end
    if key=="HttpService" then return http end
   end}
@@ -76,25 +107,51 @@ local function call(weapons,opts)
  setclipboard=realSetclipboard
  toclipboard=realToclipboard
  getgenv=realGetgenv
+ Instance=realInstance;UDim2=realUDim2;UDim=realUDim
+ Vector2=realVector2;Color3=realColor3;Enum=realEnum
  assert(ok,err)
- local s=written[1]
- assert(type(s)=="string" and
-  s:find("[GINGERSCOPE STAGE56 NORMALIZATION RISK BUCKETS]",1,true),"marker missing")
+ local reportLines,guideLines,clipboardLines={},{},{}
+ for _,ln in ipairs(written) do
+  if ln:find("[GINGERSCOPE STAGE56 NORMALIZATION RISK BUCKETS]",1,true)==1 then
+   reportLines[#reportLines+1]=ln
+  elseif ln:find("[STAGE56 GUIDE]",1,true)==1 then
+   guideLines[#guideLines+1]=ln
+  elseif ln:find("[STAGE56] CLIPBOARD_",1,true)==1 then
+   clipboardLines[#clipboardLines+1]=ln end
+ end
+ assert(#reportLines==1,"one anonymous report expected")
+ assert(#guideLines>=2,"runtime steps and completion/failure instruction missing")
+ assert(guideLines[1]:find("STEP 1/2",1,true),"runtime step1 missing")
+ if opts.uiMock then
+  local screen,body=nil,nil
+  for _,v in ipairs(created) do
+   if v.Kind=="ScreenGui" then screen=v end
+   if v.Kind=="TextLabel" and v.Text~="STAGE 56  |  READ-ONLY TEST" then body=v end
+  end
+  assert(screen and screen.Parent~=nil,"persistent in-game instruction screen missing")
+  assert(body and body.Text:find("PASTE",1,true),"on-screen final action missing")
+ end
+ local s=reportLines[1]
  if opts.encoderThrows then
-  assert(#written==1,"JSON failure must not print a fabricated report")
+  assert(#clipboardLines==0,"failed JSON may not print a copy success")
+  assert(guideLines[#guideLines]:find("could not encode",1,true),
+    "failed encode must instruct user on next action")
   assert(s:find("REPORT_ENCODING_FAILED",1,true),"missing JSON failure")
   assert(#copied==0,"unencoded data must never reach clipboard")
   return s
  end
- assert(#written==2,"one JSON report + one clipboard status required")
+ assert(#clipboardLines==1,"one copied/unavailable status line required")
+ assert(guideLines[#guideLines]:find("PASTE",1,true),
+  "the operator must receive an explicit in-session paste instruction")
  local expectCopy=(primaryAvailable and not opts.primaryThrows and not opts.primaryReturnsFalse)
   or opts.clipboardFallback==true or opts.envClipboard==true
  if expectCopy then
   assert(#copied==1 and copied[1]==s,"clipboard must equal only anonymized report")
-  assert(written[2]=="[STAGE56] CLIPBOARD_COPIED","missing successful clipboard status")
+  assert(clipboardLines[1]=="[STAGE56] CLIPBOARD_COPIED",
+   "missing successful clipboard status")
  else
   assert(#copied==0,"clipboard unexpectedly modified")
-  assert(written[2]=="[STAGE56] CLIPBOARD_UNAVAILABLE_COPY_REPORT_FROM_CONSOLE",
+  assert(clipboardLines[1]=="[STAGE56] CLIPBOARD_UNAVAILABLE_COPY_REPORT_FROM_CONSOLE",
    "console fallback status missing")
  end
  for _,bad in ipairs({"SECRET","Bioblade","Amerilaser","Batwing",
@@ -120,6 +177,14 @@ end
 local function status(s,k)
  assert(s:find('"status":"'..k..'"',1,true),"status "..k.." not in "..s)
 end
+case("in-game persistent instruction panel shows next action",function()
+ local s=call({Bioblade=sample("Bioblade","Godly","Knife",false)},{uiMock=true})
+ assert(getNumber(s,"eligible")==1)
+end)
+case("UI unavailable fails safely to readable console instructions",function()
+ local s=call({Bioblade=sample("Bioblade","Godly","Knife",false)},{uiMockThrow=true})
+ assert(getNumber(s,"eligible")==1)
+end)
 case("clipboard primary supported",function()
  local s=call({Bioblade=sample("Bioblade","Godly","Knife",false)})
  assert(getNumber(s,"explicitInternal")==1)
@@ -355,6 +420,16 @@ class Stage56NormalizationTests(unittest.TestCase):
             self.assertIn(name,s.split("-- Best-effort local clipboard convenience")[0])
         self.assertIn("local function gradeTransformation(meta,rec,gap)",s)
         self.assertIn("TRANSFORM_CLASSIFICATION_INCONSISTENT",s)
+        for term in ("local function buildInstructionPanel()",
+                     'screen.Name="GINGERSCOPE_STAGE56_INSTRUCTIONS"',
+                     "local function tellOperator(message)",
+                     'tellOperator("STEP 1/2:',
+                     'tellOperator("STEP 2/2:',
+                     "TEST FINISHED. Result copied!",
+                     "Clipboard unavailable. Open Delta console",
+                     'local copied=copySummary(line)'):
+            with self.subTest(term=term):
+                self.assertIn(term,s)
 
         self.assertIn("if s~=announced then",s)
 
