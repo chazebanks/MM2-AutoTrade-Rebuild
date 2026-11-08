@@ -195,6 +195,9 @@ local function scenario(path,cached,guiShown,partnerKnown,oldSourceCase)
      return code.."\n--"..string.rep("f",100)
     end
    end
+   if url:find("/STAGE25_SCANNER_ONLY_BOOT.lua",1,true) then
+    return modules.STAGE59_SCANNER_SILENT_BOOT
+   end
    error("unexpected source: "..tostring(url))
   end
  }
