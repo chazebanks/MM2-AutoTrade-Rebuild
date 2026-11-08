@@ -40,6 +40,7 @@ def witness(role,gained,lost,nonce,when=1794101234):
         "pairId":"STAGE59-NOV08-MANUAL-A",
         "receiptNonce":nonce,
         "observedAtUnix":when,"readOnly":True,
+        "collectorStatus":"CLIENT_STAGE32_TERMINAL_OBSERVATION",
         "authorizesTrade":False,"authorizesAccept":False,
         "serverCompletionProven":False,"serverAttestation":False,
         "mayRecordCompletedTrade":False,"mayReportProfit":False,
@@ -103,6 +104,8 @@ class Stage59ReciprocalWitnessTests(unittest.TestCase):
 
     def test_failure_mutations_must_not_record_success(self):
         cases=[
+            ("nested stage32 timed out",lambda a,b:b.__setitem__(
+                "collectorStatus","INCOMPLETE_STAGE32_NO_POST_CLOSE_EVIDENCE")),
             ("wrong account role",lambda a,b:b.__setitem__("operatorDeclaredRole","SENDER")),
             ("no sender",lambda a,b:a.pop("stage32")),
             ("missing own baseline",lambda a,b:a["stage32"].__setitem__("beforeObserved",False)),
@@ -154,7 +157,7 @@ class Stage59ReciprocalWitnessTests(unittest.TestCase):
             elif choice==8:a["stage32"]["authorizesAccept"]=True
             elif choice==9:b["pairId"]+=str(i)
             elif choice==10:b["observedAtUnix"]+=r.randint(91,3600)
-            elif choice==11:b["operatorDeclaredRole"]="SENDER"
+            elif choice==11:b["collectorStatus"]="INCOMPLETE_STAGE32_NO_POST_CLOSE_EVIDENCE"
             x=mod.evaluate(a,b,operator_claims_same_manual_trade=True,
                            operator_reports_visible_completion=True)
             self.assertEqual(x["status"],"INCOMPLETE",(i,choice,x))
