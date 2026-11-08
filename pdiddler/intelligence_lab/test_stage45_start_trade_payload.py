@@ -126,6 +126,7 @@ class Stage45PythonIntegration(unittest.TestCase):
             "same-tick visible GUI prevents false event-before-GUI claim",
             "synchronous callback inside listener attach tears down correctly",
             "offer mutation during observation grace rejects",
+            "older Stage38 owner blocks launch before listeners are attached",
         ):
             self.assertIn(name, source)
         p = subprocess.run(
@@ -133,7 +134,7 @@ class Stage45PythonIntegration(unittest.TestCase):
             cwd=ROOT.parent, text=True, capture_output=True, timeout=20,
         )
         self.assertEqual(p.returncode, 0, p.stdout + "\\n" + p.stderr)
-        self.assertIn("Stage45 StartTrade whole launcher native: 30 passed, 0 failed", p.stdout)
+        self.assertIn("Stage45 StartTrade whole launcher native: 31 passed, 0 failed", p.stdout)
 
     @unittest.skipUnless(shutil.which("lua5.4"), "Lua5.4 required for actual Lua execution")
     def test_python_executes_checked_in_lua_fixture(self):
