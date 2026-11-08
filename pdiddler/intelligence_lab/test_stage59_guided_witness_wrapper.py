@@ -78,12 +78,26 @@ local function call(role,opt)
   end,
   HttpGet=function(_,url)
    remoteCalls[#remoteCalls+1]=url
-   assert(url:find("6637a25ec69e96f6cc4215b86a97cecba56cd0e8",1,true),
+   assert(url:find("f74cb081590dfcdf100bd41f818e07d34856dff4",1,true),
     "old source not immutably pinned")
    if opt.noSource then return "N/A" end
    local source=stage32Info:gsub("RROLE",string.format("%q",role or "RECEIVER"))
    if opt.badStage32 then
     source=source:gsub('serverCompletionProven=false','serverCompletionProven=true')
+   end
+   if opt.stage32TimedOut then
+    source=source:gsub('status="ELIGIBLE_DELTA_WITHOUT_RESULT_NAMED_RECEIPT"',
+      'status="INCOMPLETE"')
+    source=source:gsub('stopReason="TWO_POST_CLOSE_READS_FINISHED"',
+      'stopReason="TRADE_WINDOW_NOT_CLOSED_WITHIN_120S"')
+    source=source:gsub('inventoryStatus="ELIGIBLE_DELTA_UNATTRIBUTED"',
+      'inventoryStatus="AWAIT_CLOSE"')
+    source=source:gsub('windowClosureObserved=true',
+      'windowClosureObserved=false')
+    source=source:gsub('postReadbacksObserved=2',
+      'postReadbacksObserved=0')
+    source=source:gsub('closureStatus="closed_unknown"',
+      'closureStatus="not-closed"')
    end
    return source
   end,
@@ -152,6 +166,17 @@ local function call(role,opt)
  assert(#report==1,"one bounded receipt expected")
  local s=report[1]
  assert(s:find('"tradeOutcome":"UNKNOWN"',1,true))
+ if opt.stage32TimedOut then
+  assert(s:find('"collectorStatus":"INCOMPLETE_STAGE32_NO_POST_CLOSE_EVIDENCE"',1,true),
+   "nested Stage32 nonterminal must not be advertised as readback captured")
+  assert(s:find('"postReadbacksObserved":0',1,true))
+  assert(s:find('"collectorReason":"STAGE32_FINISHED_WITHOUT_TERMINAL_READBACKS"',1,true))
+ elseif opt.badStage32 or opt.noSource then
+  assert(s:find('"collectorStatus":"INCOMPLETE_STAGE32_NO_POST_CLOSE_EVIDENCE"',1,true))
+ else
+  assert(s:find('"collectorStatus":"CLIENT_STAGE32_TERMINAL_OBSERVATION"',1,true),
+    "valid terminal Stage32 should be labeled client-only terminal")
+ end
  assert(s:find('"serverCompletionProven":false',1,true))
  assert(s:find('"authorizesAccept":false',1,true))
  assert(s:find('"mayReportProfit":false',1,true))
@@ -219,13 +244,19 @@ case("wrong game blocked",function()
 end)
 case("no source result is UNKNOWN incomplete only",function()
  local s=call("SENDER",{direct=true,noSource=true})
- assert(s:find('"collectorStatus":"INCOMPLETE_UNVERIFIABLE_STAGE32"',1,true))
+ assert(s:find('"collectorStatus":"INCOMPLETE_STAGE32_NO_POST_CLOSE_EVIDENCE"',1,true))
  assert(not s:find('"stage32"',1,true))
 end)
 case("untrusted source claiming server proof not exported",function()
  local s=call("RECEIVER",{direct=true,badStage32=true})
- assert(s:find('"collectorStatus":"INCOMPLETE_UNVERIFIABLE_STAGE32"',1,true))
+ assert(s:find('"collectorStatus":"INCOMPLETE_STAGE32_NO_POST_CLOSE_EVIDENCE"',1,true))
  assert(not s:find('"stage32"',1,true))
+end)
+case("actual native-shaped timeout stays INCOMPLETE",function()
+ local s,guide=call("RECEIVER",{direct=true,stage32TimedOut=true})
+ assert(s:find('"collectorStatus":"INCOMPLETE_STAGE32_NO_POST_CLOSE_EVIDENCE"',1,true))
+ assert(s:find('"windowClosureObserved":false',1,true))
+ assert(s:find('"postReadbacksObserved":0',1,true))
 end)
 case("clipboard blocked console still has usable receipt",function()
  local s=call("RECEIVER",{direct=true,clipboardMissing=true})
@@ -239,16 +270,21 @@ for i=1,100 do
  assert(s and s:find('"tradeOutcome":"UNKNOWN"',1,true))
 end
 case("100 seeded role/GUI/clipboard variations",function()end)
-oldPrint("STAGE59_REAL_LUA_GUIDED_WRAPPER_12_NAMED_100_VARIATIONS_PASS")
+oldPrint("STAGE59_REAL_LUA_GUIDED_WRAPPER_13_NAMED_100_VARIATIONS_PASS")
 '''
 class Stage59GuidedWrapperTests(unittest.TestCase):
     def test_safe_source_pinning_and_no_trade_mutators(self):
         source=LUA.read_text(encoding="utf-8")
-        self.assertIn("6637a25ec69e96f6cc4215b86a97cecba56cd0e8",source)
+        self.assertIn("f74cb081590dfcdf100bd41f818e07d34856dff4",source)
         self.assertIn("GINGERSCOPE_STAGE59_GUIDE",source)
         self.assertIn("CHOOSE SENDER or RECEIVER",source)
         self.assertIn("BASELINE BOUND",source)
         self.assertIn("POST_CLOSE_READS",source)
+        self.assertIn("CLIENT_STAGE32_TERMINAL_OBSERVATION",source)
+        self.assertIn("INCOMPLETE_STAGE32_NO_POST_CLOSE_EVIDENCE",source)
+        self.assertIn("remaining=math.max(0,120-",source)
+        self.assertIn("STAGE59_RESULT_DELTA_120S_PROBE.lua",source)
+
         self.assertIn("safe32(src)",source)
         self.assertIn("local suppliedRole",source.replace("specifiedRole","suppliedRole"))  # role selection source
         self.assertIn('mayRecordCompletedTrade=false',source)
@@ -266,7 +302,7 @@ class Stage59GuidedWrapperTests(unittest.TestCase):
             p=subprocess.run(["lua5.4",str(path),str(LUA)],
                 cwd=ROOT,capture_output=True,text=True,timeout=40)
         self.assertEqual(p.returncode,0,p.stdout+"\n"+p.stderr)
-        self.assertIn("STAGE59_REAL_LUA_GUIDED_WRAPPER_12_NAMED_100_VARIATIONS_PASS",
+        self.assertIn("STAGE59_REAL_LUA_GUIDED_WRAPPER_13_NAMED_100_VARIATIONS_PASS",
                       p.stdout)
 
 if __name__=="__main__":
