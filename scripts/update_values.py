@@ -264,7 +264,9 @@ def publish_eligibility(report: dict[str, Any]) -> tuple[bool, str]:
             return False, "invalid-positive-price-assumption"
         # Research publisher anomaly gate, not a trade profit/loss threshold:
         # block large moves (e.g. a parser shifted a value onto another item).
-        if abs(new_value - old_value) > max(30, old_value * 0.30):
+        # Compare exactly in integers: any move exceeding 30% needs human
+        # review, including low-value weapons (1 -> 2 is a 100% move).
+        if 10 * abs(new_value - old_value) > 3 * old_value:
             return False, "price-jump-requires-independent-review"
     return True, "STABLE_IDENTITIES_AND_BOUNDED_CHANGES"
 
