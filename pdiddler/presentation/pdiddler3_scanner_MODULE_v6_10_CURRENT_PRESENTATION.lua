@@ -1032,7 +1032,12 @@ local function checkerResolve(name,opts)
  if meta and meta.chroma then chroma=true end
  if pageHint~="" and not allowedPage(pageHint) then return nil,"tier excluded" end
  local ck=table.concat({norm(shown),pageHint,norm(typ),norm(iid),chroma and "1" or "0"},"|")
- if checkerCache[ck] then return checkerCache[ck],"cache" end
+ local cached=checkerCache[ck]
+ if cached then
+  -- Never degrade a previously determined source method into "cache".
+  -- A hit is only a performance detail, not new item-ID evidence.
+  return cached.rec,cached.mappingMethod
+ end
  if pageHint~="" then
   local internalId=checkerInternalAlias(pageHint,meta)
   local internalRec=internalId
@@ -1040,14 +1045,14 @@ local function checkerResolve(name,opts)
    and Checker.byId[pageHint][internalId]
 
   if internalRec then
-   checkerCache[ck]=internalRec
+   checkerCache[ck]={rec=internalRec,mappingMethod="internal-key"}
    return internalRec,"internal-key"
   end
 
   local aid=checkerAlias(pageHint,shown,typ)
   local rec=aid and Checker.byId[pageHint] and Checker.byId[pageHint][aid]
   if rec then
-   checkerCache[ck]=rec
+   checkerCache[ck]={rec=rec,mappingMethod="alias"}
    return rec,"alias"
   end
  end
@@ -1083,8 +1088,9 @@ local function checkerResolve(name,opts)
   end
  end
  if best and bestScore>=200 and not tied then
-  checkerCache[ck]=best
-  return best,"match:"..bestScore
+  local origin="match:"..bestScore
+  checkerCache[ck]={rec=best,mappingMethod=origin}
+  return best,origin
  end
  if tied then return nil,"ambiguous" end
  return nil,"unresolved"
@@ -1095,7 +1101,14 @@ local function checkerMarket(meta)
  if not allowedPage(page) then return nil end
  local rec,why=checkerResolve(identityName(meta),{page=page,type=meta.type,id=meta.id,chroma=meta.chroma,meta=meta})
  if not rec then return nil,why end
- return {v=rec.v,id=rec.id,page=rec.page,img=rec.img,source="verified-snapshot-2026-11-01"},nil
+ -- The snapshot labels the value source; it does NOT authenticate the
+ -- raw MM2 item-key -> external checker ID mapping. Keep both separate.
+ return {v=rec.v,id=rec.id,page=rec.page,img=rec.img,
+   source="verified-snapshot-2026-11-01",
+   mappingMethod=why,
+   mappingAuthenticated=false,
+   uniqueWeaponInstanceProven=false,
+   provenanceScope="CLIENT_MAPPING_UNATTESTED"},nil
 end
 
 checkerBuild()
@@ -1273,10 +1286,15 @@ local function inventoryFromProfile(prof)
       type=tostring(meta.type or ""),
       page=page,
       checkerId=market and market.id or "UNPRICED",
+      checkerMappingMethod=market and market.mappingMethod or "UNRESOLVED",
+      checkerMappingAuthenticated=false,
+      uniqueWeaponInstanceProven=false,
       identity=metaIdentity(meta),
       year=tostring((meta.data or {}).Year or ""),
       event=tostring((meta.data or {}).Event or ""),
-      valueSource=market and market.source or tostring(why or "UNPRICED")
+      valueSource=market and
+       (market.source.."|mapping:"..tostring(market.mappingMethod or "UNKNOWN")..
+         "|CLIENT_UNVERIFIED") or tostring(why or "UNPRICED")
      }
 
      if market and tonumber(market.v) then
