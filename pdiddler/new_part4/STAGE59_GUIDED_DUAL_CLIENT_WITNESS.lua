@@ -166,7 +166,7 @@ local function panel()
    minimise.Activated:Connect(function()
     folded=not folded
     label.Visible=not folded
-    frame.Size=UDim2.fromOffset(frame.AbsoluteSize.X,folded and 36 or 146)
+    frame.Size=UDim2.fromOffset(frame.Size.X.Offset,folded and 36 or 146)
     minimise.Text=folded and "+" or "-"
    end)
   end
