@@ -82,6 +82,18 @@ class Stage59ReciprocalWitnessTests(unittest.TestCase):
         self.assertIn("not-operator-confirmed",x["reason"])
         check_immutable(x)
 
+    def test_actual_incident_same_receiver_receipt_pasted_as_alt_and_main(self):
+        original=witness("RECEIVER",1,0,"d7ea4c21-12be-4c6d-aa16-b69f679178a6",
+                         1794152772)
+        copied=copy.deepcopy(original)
+        result=mod.evaluate(original,copied,
+                            operator_claims_same_manual_trade=True,
+                            operator_reports_visible_completion=True)
+        self.assertEqual(result["status"],"INCOMPLETE")
+        self.assertEqual(result["reason"],"IDENTICAL_REPORT_PASTED_TWICE")
+        self.assertFalse(result["clientReciprocalEligibleDeltaObserved"])
+        check_immutable(result)
+
     def test_replay_and_unbound_clocks_block(self):
         a,b=samples()
         b["receiptNonce"]=a["receiptNonce"]
