@@ -51,8 +51,10 @@ local function panel()
   screen.ResetOnSpawn=false;screen.DisplayOrder=175
   screen.IgnoreGuiInset=false
   local frame=Instance.new("Frame")
-  frame.Size=UDim2.fromOffset(365,182)
-  frame.Position=UDim2.new(1,-379,0,40)
+  -- Lower-left start avoids Roblox's upper-right leaderboard.
+  -- Drag the title bar to move the panel without hitting SENDER/RECEIVER.
+  frame.Size=UDim2.fromOffset(320,182)
+  frame.Position=UDim2.new(0,12,1,-200)
   frame.BackgroundColor3=Color3.fromRGB(36,25,58)
   frame.BorderSizePixel=0
   frame.Parent=screen
@@ -65,7 +67,8 @@ local function panel()
   heading.Font=Enum.Font.GothamBold;heading.TextSize=16
   heading.TextColor3=Color3.fromRGB(245,232,255)
   heading.TextXAlignment=Enum.TextXAlignment.Left
-  heading.Text="STAGE 59  |  PASSIVE DUAL RECEIPT"
+  heading.Text="STAGE 59  |  DRAG HERE  |  READ-ONLY"
+  heading.Active=true
   heading.Parent=frame
   label=Instance.new("TextLabel")
   label.Size=UDim2.new(1,-20,0,86)
@@ -75,7 +78,7 @@ local function panel()
   label.TextXAlignment=Enum.TextXAlignment.Left
   label.TextYAlignment=Enum.TextYAlignment.Top
   label.TextColor3=Color3.fromRGB(247,243,253)
-  label.Text="CHOOSE ROLE: On this device are you SENDING or RECEIVING the low-value test weapon?"
+  label.Text="CHOOSE ROLE: SENDER gives an item; RECEIVER gets it. Hold and drag title to move this panel."
   label.Parent=frame
   local close=Instance.new("TextButton")
   close.Size=UDim2.fromOffset(29,25)
@@ -87,8 +90,8 @@ local function panel()
   close.Activated:Connect(function()screen:Destroy()end)
   for index,role in ipairs({"SENDER","RECEIVER"}) do
    local b=Instance.new("TextButton")
-   b.Name=role;b.Size=UDim2.fromOffset(157,36)
-   b.Position=UDim2.fromOffset(10+(index-1)*174,137)
+   b.Name=role;b.Size=UDim2.fromOffset(143,36)
+   b.Position=UDim2.fromOffset(10+(index-1)*160,137)
    b.BackgroundColor3=Color3.fromRGB(112,69,168)
    b.TextColor3=Color3.fromRGB(255,255,255)
    b.TextSize=14;b.Font=Enum.Font.GothamBold
@@ -97,6 +100,52 @@ local function panel()
   end
   gui=screen
   screen.Parent=pg
+
+  -- Optional drag controller. A broken/missing InputService must NOT stop
+  -- the role selection buttons or the passive read-only observation.
+  pcall(function()
+   local UIS=game:GetService("UserInputService")
+   if not UIS or not UIS.InputChanged or not UIS.InputEnded
+      or not heading.InputBegan then return end
+   local dragging=false
+   local pointer=nil
+   local originX,originY,fromX,fromY=0,0,0,0
+   local mouse=Enum.UserInputType.MouseButton1
+   local movement=Enum.UserInputType.MouseMovement
+   local touch=Enum.UserInputType.Touch
+   heading.InputBegan:Connect(function(input)
+    if input.UserInputType~=mouse and input.UserInputType~=touch then return end
+    if dragging then return end
+    dragging=true;pointer=input
+    originX=frame.AbsolutePosition.X
+    originY=frame.AbsolutePosition.Y
+    fromX=input.Position.X;fromY=input.Position.Y
+   end)
+   UIS.InputChanged:Connect(function(input)
+    if not dragging or not pointer or not gui or not gui.Parent then return end
+    if not ((pointer.UserInputType==touch and input==pointer)
+       or (pointer.UserInputType==mouse and input.UserInputType==movement)) then
+     return
+    end
+    local camera=workspace and workspace.CurrentCamera
+    if not camera then return end
+    local size=camera.ViewportSize
+    local width,height=frame.AbsoluteSize.X,frame.AbsoluteSize.Y
+    if type(size.X)~="number" or type(size.Y)~="number" then return end
+    local x=originX+(input.Position.X-fromX)
+    local y=originY+(input.Position.Y-fromY)
+    -- Keep the panel reachable after dragging, even on small iPad screens.
+    x=math.max(0,math.min(x,math.max(0,size.X-width)))
+    y=math.max(0,math.min(y,math.max(0,size.Y-height)))
+    frame.Position=UDim2.fromOffset(x,y)
+   end)
+   UIS.InputEnded:Connect(function(input)
+    if pointer and (input==pointer or
+      (pointer.UserInputType==mouse and input.UserInputType==mouse)) then
+     dragging=false;pointer=nil
+    end
+   end)
+  end)
  end)
 end
 local function roleControlsHide()
