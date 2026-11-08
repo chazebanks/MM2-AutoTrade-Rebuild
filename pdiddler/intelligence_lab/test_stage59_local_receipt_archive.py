@@ -149,6 +149,18 @@ mayRecordCompletedTrade=false,mayReportProfit=false
  loadstring=load
  local ok,instance=pcall(function()return assert(loadfile(path))()end)
  assert(ok,instance)
+ local earlyButton
+ for _,v in ipairs(created) do
+  if v.Name=="COPY_OWN_STAGE59_REPORT" then earlyButton=v end
+ end
+ if path==main or path==alt then
+  assert(earlyButton==nil or earlyButton.Visible==false,
+   "ACTIVE session exposed previous archived report button at READY")
+  if opts.preFinishCopyTap and earlyButton then
+   earlyButton.Activated:Fire()
+   assert(#copies==0,"early user tap must NEVER export old archived report")
+  end
+ end
  for _,fn in ipairs(queue)do fn() end
  assert(#copies==0,"automatic clipboard mutation even before user click")
  if opts.manualCopy then
@@ -199,6 +211,24 @@ check("MAIN stores separate receiver report without overwriting ALT",function()
  assert(files["GINGERSCOPE_STAGE59_ALT_LAST.txt"]==altFirst.emitted[1])
  assert(altFirst.emitted[1]~=mainFirst.emitted[1])
  assert(mainFirst.clipboard[#mainFirst.clipboard]==mainFirst.emitted[1])
+end)
+check("active ALT cannot export prior _LAST at READY",function()
+ local old=files["GINGERSCOPE_STAGE59_ALT_LAST.txt"]
+ local r=present(alt,"SENDER",{preFinishCopyTap=true,manualCopy=true})
+ assert(#r.clipboard==1 and #r.emitted==1)
+ assert(r.clipboard[1]==r.emitted[1] and r.clipboard[1]~=old,
+  "fresh ALT report must replace old ALT _LAST only AFTER FINISHED")
+ assert(r.model.role=="SENDER")
+ files["GINGERSCOPE_STAGE59_ALT_LAST.txt"]=old
+end)
+check("active MAIN cannot export prior _LAST at READY",function()
+ local old=files["GINGERSCOPE_STAGE59_MAIN_LAST.txt"]
+ local r=present(main,"RECEIVER",{preFinishCopyTap=true,manualCopy=true})
+ assert(#r.clipboard==1 and #r.emitted==1)
+ assert(r.clipboard[1]==r.emitted[1] and r.clipboard[1]~=old,
+  "fresh MAIN report must replace old MAIN _LAST only AFTER FINISHED")
+ assert(r.model.role=="RECEIVER")
+ files["GINGERSCOPE_STAGE59_MAIN_LAST.txt"]=old
 end)
 check("RECOVERY ALT in fresh env: no Stage32 watcher or new witness",function()
  local r=present(restoreAlt,"SENDER",{manualCopy=true})
@@ -264,7 +294,7 @@ check("role-specified source never sends a trade request",function()
   assert(not body:find(":InvokeServer(",1,true))
  end
 end)
-originalPrint("STAGE59_LOCAL_DURABLE_REPORT_AND_RECOVERY_11_CASES_PASS")
+originalPrint("STAGE59_LOCAL_DURABLE_REPORT_AND_RECOVERY_13_CASES_PASS")
 '''
 class Stage59LocalArchiveTests(unittest.TestCase):
     @unittest.skipUnless(shutil.which("lua5.4"),"CI installs Lua5.4")
@@ -278,7 +308,7 @@ class Stage59LocalArchiveTests(unittest.TestCase):
                   str(BASE/"STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua")]
             result=subprocess.run(args,cwd=ROOT,capture_output=True,text=True,timeout=55)
         self.assertEqual(result.returncode,0,result.stdout+"\n"+result.stderr)
-        self.assertIn("STAGE59_LOCAL_DURABLE_REPORT_AND_RECOVERY_11_CASES_PASS",
+        self.assertIn("STAGE59_LOCAL_DURABLE_REPORT_AND_RECOVERY_13_CASES_PASS",
                       result.stdout)
 
     def test_source_authority_and_separate_relative_sandbox_paths(self):
