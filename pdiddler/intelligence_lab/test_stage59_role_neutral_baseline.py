@@ -91,7 +91,7 @@ return {evaluate=function()
   }
  end}
 ]==],
- STAGE25_SCANNER_ONLY_BOOT=[==[
+ STAGE59_SCANNER_SILENT_BOOT=[==[
 return {status="SCANNER_ONLY_NO_TRADE_AUTHORITY",
  rawScanner={
   getRecord=function()
@@ -285,6 +285,10 @@ class Stage59RoleNeutralBaselineTests(unittest.TestCase):
         self.assertIn('S.awaitReason="PARTNER_LABEL_UNRESOLVED"',source)
         self.assertIn('data.partnerCacheAtBaseline=S.partnerCacheAtBaseline',source)
         self.assertNotIn('pcall(setclipboard,json)',source)
+        self.assertIn('SILENT_SCANNER="8d7e9e9315c29ac4c9f4004d4c9620699639fb04"',source)
+        self.assertIn('STAGE59_SCANNER_SILENT_BOOT.lua',source)
+        self.assertIn('REJOIN_REQUIRED_PREEXISTING_SCANNER',source)
+        self.assertNotIn('STAGE25_SCANNER_ONLY_BOOT.lua',source)
         for token in ("serverCompletionProven=false","authorizesTrade=false",
                       "authorizesAccept=false","mayReportProfit=false"):
             self.assertIn(token,source)
