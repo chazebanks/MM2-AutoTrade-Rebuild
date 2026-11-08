@@ -299,6 +299,18 @@ class Stage55FuzzyProofTests(unittest.TestCase):
                       "fuzzyNonUniqueBestScore","fuzzyScoreReproductionErrors",
                       "FUZZY_SCORE_REPRODUCTION_OR_TIE_ANOMALY"):
             self.assertIn(label,s)
+        # Regression: aggregate counters MUST be initialized before any client
+        # observations or fail-closed terminal status checks access them.
+        header=s.split("-- Best-effort local clipboard convenience",1)[0]
+        for initialized in (
+            "fuzzyScoreBelow300=0","fuzzyScore300to399=0",
+            "fuzzyScore400to499=0","fuzzyScore500Plus=0",
+            "fuzzyDirectRaw=0","fuzzyDirectName=0","fuzzyBothDirect=0",
+            "fuzzyTransformedOnly=0","fuzzyNonUniqueBestScore=0",
+            "fuzzyRunnerGap1to20=0","fuzzyRunnerGap21to99=0",
+            "fuzzyRunnerGap100Plus=0","fuzzyScoreReproductionErrors=0"
+        ):
+            self.assertIn(initialized,header)
         self.assertIn("local function auditScore(meta,rec)",s)
         self.assertIn("local function gradeFuzzy(meta,rec,why)",s)
         self.assertIn("if s~=announced then",s)
