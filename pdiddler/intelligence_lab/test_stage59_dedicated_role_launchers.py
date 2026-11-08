@@ -58,10 +58,17 @@ def driver()->str:
     old_view="workspace={CurrentCamera={ViewportSize={X=1024,Y=768}}}"
     new_view='workspace={CurrentCamera={ViewportSize=role=="SENDER" and {X=844,Y=390} or {X=1024,Y=768}}}'
     assert mock.count(old_view)==1
-    mock=mock.replace(old_view,new_view)
+    mock=mock.replace(old_view,
+        'workspace={CurrentCamera={ViewportSize=opt.phoneViewport or (role=="SENDER" and {X=844,Y=390} or {X=1024,Y=768})}}')
+    mock=mock.replace('o.AbsolutePosition={X=12,Y=586}',
+        'o.AbsolutePosition={X=12,Y=role=="SENDER" and 89 or 586}')
+    mock=mock.replace('o.AbsoluteSize={X=320,Y=182}',
+        'o.AbsoluteSize={X=role=="SENDER" and 270 or 320,Y=role=="SENDER" and 146 or 182}')
+    mock=mock.replace('return s,guide,created,remoteCalls,clip',
+        'return s,guide,created,remoteCalls,clip,userInput')
     mock+=r'''
 local function exercise(path,shared,role,opts)
- local report,guide,created,remotes,clipboard=call(role,opts)
+ local report,guide,created,remotes,clipboard,userInput=call(role,opts)
  assert(report and #remotes==2)
  assert(report:find('"operatorDeclaredRole":"'..role..'"',1,true),
   "wrong automatic role selected")
@@ -90,10 +97,18 @@ local function exercise(path,shared,role,opts)
  if not opts.noGui and not opts.guiBroken then
   assert(panel and title and frame and notice,"persistent guide missing")
   if role=="SENDER" then
-   assert(frame.Size.X.Offset==270 and frame.Size.Y.Offset==146,
-     "ALT iPhone landscape guide must be compact")
-   assert(frame.Position.X.Offset==12 and frame.Position.Y.Offset==89,
+   local v=workspace.CurrentCamera.ViewportSize
+   local expectedWidth=math.max(180,math.min(270,v.X-24))
+   local expectedY=math.min(math.max(52,math.floor(v.Y*0.23)),
+       math.max(0,v.Y-146))
+   assert(frame.Size.X.Offset==expectedWidth and frame.Size.Y.Offset==146,
+     "ALT iPhone guide must fit viewport")
+   assert(frame.Position.X.Offset==12 and frame.Position.Y.Offset==expectedY,
      "ALT phone guide starts left/above joystick and outside leaderboard")
+   assert(frame.Position.X.Offset+frame.Size.X.Offset<=v.X,
+     "phone GUI leaked past right edge")
+   assert(frame.Position.Y.Offset+frame.Size.Y.Offset<=v.Y,
+     "phone GUI leaked past bottom edge")
    assert(title.Text:find("ALT SENDER",1,true),
      "ALT role must be visible in phone header")
    assert(title.TextSize==12 and notice.TextSize==12,
@@ -102,11 +117,25 @@ local function exercise(path,shared,role,opts)
      "phone still needs visible completed instructions")
    assert(fold and fold.onActivate,"iPhone minimize control must be interactive")
    fold.onActivate()
-   assert(frame.Size.X.Offset==270 and frame.Size.Y.Offset==36 and notice.Visible==false,
+   assert(frame.Size.X.Offset==expectedWidth and frame.Size.Y.Offset==36 and notice.Visible==false,
      "phone must minimise without falling off screen")
    fold.onActivate()
-   assert(frame.Size.X.Offset==270 and frame.Size.Y.Offset==146 and notice.Visible==true,
+   assert(frame.Size.X.Offset==expectedWidth and frame.Size.Y.Offset==146 and notice.Visible==true,
      "phone must restore its visible live instructions")
+   if opts.phoneTouchDrag then
+    local press={UserInputType="Touch",Position={X=30,Y=expectedY+15}}
+    title.InputBegan:Fire(press)
+    press.Position={X=155,Y=expectedY+28}
+    userInput.InputChanged:Fire(press)
+    assert(frame.Position.X.Offset==137 and frame.Position.Y.Offset==expectedY+13,
+      "phone iPhone touch must move title-dragged guide")
+    userInput.InputEnded:Fire(press)
+    local oldX=frame.Position.X.Offset
+    press.Position={X=260,Y=expectedY+70}
+    userInput.InputChanged:Fire(press)
+    assert(frame.Position.X.Offset==oldX,
+      "ALT iPhone drag must release when finger lifts")
+   end
   else
    assert(frame.Size.X.Offset==320 and frame.Size.Y.Offset==182,
     "MAIN iPad layout changed unexpectedly")
@@ -121,7 +150,11 @@ local function exercise(path,shared,role,opts)
  assert(report:find('"mayReportProfit":false',1,true))
 end
 local role=arg[3]
-exercise(path,shared,role,{direct=false})
+exercise(path,shared,role,{direct=false,phoneTouchDrag=role=="SENDER"})
+if role=="SENDER" then
+ exercise(path,shared,role,{direct=false,phoneViewport={X=568,Y=320}})
+ exercise(path,shared,role,{direct=false,phoneViewport={X=390,Y=844}})
+end
 exercise(path,shared,role,{direct=false,noGui=true})
 exercise(path,shared,role,{direct=false,guiBroken=true})
 exercise(path,shared,role,{direct=false,clipboardMissing=true})
