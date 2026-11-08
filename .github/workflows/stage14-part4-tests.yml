@@ -69,7 +69,8 @@ jobs:
             test_stage42_player_orientation \
             test_stage43_dynamic_own_offer \
             test_stage44_client_offer_state \
-            test_stage44_add_remove_native; do
+            test_stage44_add_remove_native \
+            test_stage45_start_trade_payload; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
