@@ -56,6 +56,9 @@ local finishedReport=false
 local seen,receiptAt,privatePack=0,nil,nil
 local activeRoot,activePartner,activeLabel,activeRemote=nil,nil,nil,nil
 local eventBeforeVisibleGui=nil
+local callbackGuiMode="NOT_OBSERVED"
+-- Private references and label text never leave this diagnostic closure.
+local receiptRoot,receiptPartner,receiptLabel,receiptLabelText=nil,nil,nil,nil
 local clockLast=nil
 local function clock()
  local t=os.clock()
@@ -88,6 +91,7 @@ local function publish()
  r.listenerCount=attached;r.listenersDisconnected=disconnected
  r.cleanupComplete=cleanupComplete
  r.eventBeforeVisibleGui=eventBeforeVisibleGui
+ r.callbackGuiMode=callbackGuiMode
  r.clientWindowContextStable=(reason=="ONE_START_TRADE_TYPE_CENSUS_MATCHED")
  r.clientOnly=true
  -- Both the core and the fallback report have zero authority. Explicitly pin
@@ -110,6 +114,7 @@ local function finish(why,result)
  if S.finished then return end
  S.finished=true;reason=why;report=result
  privatePack=nil
+ receiptRoot=nil;receiptPartner=nil;receiptLabel=nil;receiptLabelText=nil
  if connection then disconnect(connection);connection=nil end
  for _,c in ipairs(connections)do disconnect(c)end
  connections={}
@@ -241,11 +246,24 @@ local function onStart(...)
   receiptAt=now
   privatePack=args
   args=nil
-  -- A visible GUI with an unknown label/partner is STILL a visible GUI.
-  -- Do not mistake failed actor binding for an event preceding all windows.
-  local _,visibleCount=visibleTradeRoots()
+  -- GUI visibility can precede this callback under real native timing.
+  -- A callback while GUI is visible is eligible for TYPES ONLY when there is
+  -- exactly one visible, uniquely bound partner GUI, preserved until reading.
+  -- This does NOT authenticate event-to-session association or freshness.
+  local visibleRoot,visibleCount=visibleTradeRoots()
   eventBeforeVisibleGui=visibleCount==0
-  if visibleCount~=0 then finish("GUI_VISIBLE_BEFORE_START_TRADE_RECEIPT");return end
+  if visibleCount>1 then finish("AMBIGUOUS_GUI_AT_START_CALLBACK");return end
+  if visibleCount==1 then
+   local root,partner,label=discover()
+   if not root or root~=visibleRoot or not partner or not label then
+    finish("GUI_VISIBLE_BUT_PARTNER_UNBOUND_AT_START");return
+   end
+   receiptRoot=root;receiptPartner=partner;receiptLabel=label
+   receiptLabelText=tostring(label.Text or "")
+   callbackGuiMode="GUI_VISIBLE_AT_CALLBACK_CLIENT_ONLY"
+  else
+   callbackGuiMode="EVENT_BEFORE_VISIBLE_GUI_CLIENT_ONLY"
+  end
   S.phase="WAIT_TRADE_WINDOW"
  end)
  if not ok then finish("START_EVENT_INSPECTION_FAILED")end
@@ -290,6 +308,16 @@ local function observe()
   if ownerProblem()then finish("SESSION_CHANGED");return end
   if currentRemote()~=activeRemote then finish("START_TRADE_REMOTE_CHANGED");return end
   local root,partner,label=discover()
+  if receiptRoot then
+   local actualRoot,actualCount=visibleTradeRoots()
+   if actualCount~=1 or actualRoot~=receiptRoot then
+    finish("CALLBACK_GUI_ROOT_CHANGED");return
+   end
+   if root~=receiptRoot or partner~=receiptPartner
+    or label~=receiptLabel or tostring((label and label.Text)or "")~=receiptLabelText then
+    finish("CALLBACK_GUI_PARTNER_CHANGED");return
+   end
+  end
   if root and partner then
    if root~=stableRoot or partner~=stablePartner or label~=stableLabel then
     stableRoot=root;stablePartner=partner;stableLabel=label
