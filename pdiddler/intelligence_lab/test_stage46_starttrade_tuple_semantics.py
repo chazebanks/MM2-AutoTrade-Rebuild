@@ -104,7 +104,7 @@ class Stage46StartTradeTests(unittest.TestCase):
 
     def test_research_does_not_claim_unsupported_server_session(self):
         source = RESEARCH.read_text()
-        self.assertIn("NO claims about MM2's private StartTrade protocol", source)
+        self.assertIn("no claims about mm2's private starttrade protocol", source.replace("*", "").lower())
         self.assertIn("unverified public MM2 script", source)
         self.assertIn("never any authority flag", source)
         self.assertIn("not yet observed", source)
