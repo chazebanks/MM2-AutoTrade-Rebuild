@@ -1,0 +1,28 @@
+name: MM2 Discord history embed audit unit tests
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/discord_history_embed_audit.py'
+      - 'pdiddler/intelligence_lab/test_discord_history_embed_audit.py'
+      - '.github/workflows/mm2-discord-embed-audit.yml'
+      - '.github/workflows/mm2-discord-embed-audit-tests.yml'
+  push:
+    branches:
+      - feature/mm2-discord-history-embed-audit
+
+permissions:
+  contents: read
+
+jobs:
+  offline-embed-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python compile and privacy/reconciliation tests (no Discord secret)
+        run: |
+          python3 -m py_compile scripts/discord_history_embed_audit.py
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_discord_history_embed_audit.py'
