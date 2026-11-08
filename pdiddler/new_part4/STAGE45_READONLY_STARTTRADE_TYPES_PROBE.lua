@@ -209,6 +209,9 @@ local function currentRemote()
 end
 local function onStart(...)
  if S.finished then return end
+ -- Capture the variable argument pack before entering protected closure;
+ -- nested Lua closures cannot directly reference an outer vararg list.
+ local args=table.pack(...)
  local ok=pcall(function()
   local why=ownerProblem()
   if why then finish(why);return end
@@ -218,9 +221,10 @@ local function onStart(...)
    finish("UNARMED_START_TRADE_RECEIPT");return end
   seen=seen+1
   if seen>1 then finish("MULTIPLE_START_TRADE_RECEIPTS");return end
-  if select("#",...)>6 then finish("ARGUMENT_LIMIT_EXCEEDED");return end
+  if args.n>6 then finish("ARGUMENT_LIMIT_EXCEEDED");return end
   receiptAt=now
-  privatePack=table.pack(...)
+  privatePack=args
+  args=nil
   local visibleRoot=discover()
   eventBeforeVisibleGui=visibleRoot==nil
   if visibleRoot then finish("GUI_VISIBLE_BEFORE_START_TRADE_RECEIPT");return end
