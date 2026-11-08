@@ -205,7 +205,9 @@ local function currentRemote()
    remote=node;count=count+1
   end
  end
- return count==1 and remote or nil
+ if count>1 then return nil,"START_TRADE_REMOTE_AMBIGUOUS"end
+ if count==0 then return nil,"START_TRADE_REMOTE_UNAVAILABLE"end
+ return remote,nil
 end
 local function onStart(...)
  if S.finished then return end
@@ -232,8 +234,9 @@ local function onStart(...)
  end)
  if not ok then finish("START_EVENT_INSPECTION_FAILED")end
 end
-if not connect((currentRemote() or {}).OnClientEvent or
- {Connect=function()error("remote missing")end},onStart,true)then return S end
+local knownRemote,remoteProblem=currentRemote()
+if not knownRemote then finish(remoteProblem);return S end
+if not connect(knownRemote.OnClientEvent,onStart,true)then return S end
 local function checked(r,p,l)
  if ownerProblem()then return nil,"SESSION_CHANGED"end
  if currentRemote()~=activeRemote then return nil,"START_TRADE_REMOTE_CHANGED"end
