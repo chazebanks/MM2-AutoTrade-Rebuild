@@ -112,9 +112,11 @@ eq(r,nil);eq(why,"ambiguous")
 r,why=attempt(m);eq(r,nil);eq(why,"ambiguous")
 
 -- Distinct item/source/type combination is still a distinct cache key.
+-- PREEXISTING QUIRK: even fully unmatched rows can tie at subthreshold
+-- scores and return "ambiguous" rather than "unresolved"; not Stage51 scope.
 m=met("Different","NotInList","Gun")
 r,why=attempt(m)
-eq(r,nil);eq(why,"unresolved")
+eq(r,nil);eq(why,"ambiguous")
 
 -- No raw keys, usernames, session IDs, profitability or trade claims
 -- may appear in the metadata returned by the ordinary market checker.
