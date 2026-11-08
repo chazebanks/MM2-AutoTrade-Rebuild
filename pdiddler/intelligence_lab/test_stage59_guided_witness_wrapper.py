@@ -256,10 +256,10 @@ if not opt.direct and not opt.noGui and not opt.guiBroken then
  assert(#remoteCalls==1,"one READ-ONLY source loader required")
  if opt.clipboardMissing then
   assert(#clip==0)
-  assert(guide[#guide]:find("Clipboard blocked",1,true))
+  assert(guide[#guide]:find("Clipboard unavailable",1,true))
  else
   assert(#clip==1 and clip[1]==s,"only complete sanitized receipt may be copied")
-  assert(guide[#guide]:find("PASTE",1,true))
+  assert(guide[#guide]:find("Tap COPY",1,true))
  end
  return s,guide,created,remoteCalls,clip
 end
@@ -273,7 +273,7 @@ case("sender direct role guidance + safe receipt",function()
  local s,guide=call("SENDER",{direct=true})
  assert(s:find('"lostEligibleCopies":1',1,true))
  assert(s:find('"gainedEligibleCopies":0',1,true))
- assert(guide[#guide]:find("PASTE",1,true))
+ assert(guide[#guide]:find("Tap COPY",1,true))
 end)
 case("receiver direct role guidance + safe receipt",function()
  local s=call("RECEIVER",{direct=true})
@@ -370,6 +370,11 @@ class Stage59GuidedWrapperTests(unittest.TestCase):
         self.assertIn("POST_CLOSE_READS",source)
         self.assertIn("CLIENT_STAGE32_TERMINAL_OBSERVATION",source)
         self.assertIn("INCOMPLETE_STAGE32_NO_POST_CLOSE_EVIDENCE",source)
+        self.assertIn("COPY_OWN_STAGE59_REPORT",source)
+        self.assertIn("validateLocalLine(line,expectedRole)",source)
+        self.assertIn("saveLocal(line,role,nonce)",source)
+        self.assertIn("local recoveryOnly=",source)
+        self.assertIn('if recoveryOnly then',source)
         self.assertIn("remaining=math.max(0,120-",source)
         self.assertIn("STAGE59_RESULT_DELTA_120S_PROBE.lua",source)
 
