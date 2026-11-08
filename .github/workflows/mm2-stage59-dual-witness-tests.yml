@@ -1,0 +1,40 @@
+name: Stage59 passive sender and receiver witness evidence tests
+on:
+  pull_request:
+    paths:
+      - 'scripts/validate_manual_trade_pair.py'
+      - 'pdiddler/new_part4/STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua'
+      - 'pdiddler/intelligence_lab/test_stage59_two_client_manual_witness.py'
+      - 'pdiddler/intelligence_lab/test_stage59_guided_witness_wrapper.py'
+      - '.github/workflows/mm2-stage59-dual-witness-tests.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage59-dual-client-outcome-corroboration
+    paths:
+      - 'scripts/validate_manual_trade_pair.py'
+      - 'pdiddler/new_part4/STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua'
+      - 'pdiddler/intelligence_lab/test_stage59_two_client_manual_witness.py'
+      - 'pdiddler/intelligence_lab/test_stage59_guided_witness_wrapper.py'
+      - '.github/workflows/mm2-stage59-dual-witness-tests.yml'
+permissions:
+  contents: read
+jobs:
+  offline-paired-client-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua5.4 for actual Stage59 wrapper test
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Validate two independent client aggregates and guided wrapper
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage59*.py'
+      - name: Run all inherited mainline intelligence regressions
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
