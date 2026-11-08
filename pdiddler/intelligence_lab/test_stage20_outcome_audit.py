@@ -398,10 +398,11 @@ class AuditTests(unittest.TestCase):
         for n in range(750):
             pre_count=rng.randint(1,10)
             ours=rng.randint(0,10)
-            theirs=rng.randint(0,10)
+            # Keep post-count representable without hiding over-offer cases:
+            # a partner's incoming copies can mask insufficient PRE holdings.
+            theirs=rng.randint(max(0, ours-pre_count),10)
             post_count=pre_count+theirs-ours
-            if post_count < 0:
-                continue  # No representable negative owned-inventory snapshot.
+            self.assertGreaterEqual(post_count,0)
             o,c,pre,post,p2=make()
             o=replace(o,our_offer={A:ours} if ours else {},
                       their_offer={A:theirs} if theirs else {})
@@ -429,7 +430,8 @@ class AuditTests(unittest.TestCase):
                 self.assertFalse(r.authorizes_accept)
                 self.assertFalse(r.may_record_completed_trade)
                 self.assertFalse(r.may_report_profit)
-        self.assertGreater(counts['impossible'],50)
+        self.assertEqual(sum(counts.values()),750)
+        self.assertGreater(counts['impossible'],200)
         self.assertGreater(counts['corroborated'],250)
         self.assertGreater(counts['incomplete'],10)
 
