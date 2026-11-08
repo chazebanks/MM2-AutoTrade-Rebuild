@@ -55,15 +55,15 @@ local function run(script,isSilent)
   HttpGet=function(_,url)
    calls[#calls+1]=url
    if url:find("snapshots/pdiddler_supreme_snapshot",1,true) then
-    return modules.snapshots
+    return modules.snapshots.."\n--"..string.rep("a",90)
    elseif url:find("new_part4/P4_REPRICE_ONLY",1,true)then
-    return modules.repricer
+    return modules.repricer.."\n--"..string.rep("a",90)
    elseif url:find("presentation/pdiddler3_scanner_view_v1",1,true)then
-    return modules.view
+    return modules.view.."\n--"..string.rep("a",90)
    elseif url:find("presentation/pdiddler3_scanner_MODULE_",1,true)then
-    return modules.scanner
+    return modules.scanner.."\n--"..string.rep("a",90)
    elseif url:find("STAGE25_READONLY_DIAGNOSTIC",1,true)then
-    return modules.probe
+    return modules.probe.."\n--"..string.rep("a",90)
    end
    error("unexpected source fetch "..tostring(url))
   end}
