@@ -101,9 +101,9 @@ class FuturePortfolioPlannerTests(unittest.TestCase):
              lambda a,b,m:m.__setitem__("publisherUpdatedAtUnix",NOW-200000)),
             ("UNKNOWN_MARKET_VALUE_OR_DESIRABILITY",
              lambda a,b,m:m["items"]["theirs"].__setitem__("value",True)),
-            ("NO_CANDIDATES",
+            ("NO_NONNEGATIVE_SAFE_RESEARCH_PROPOSAL",
              lambda a,b,m:m["items"]["theirs"].__setitem__("liquidity",1)),
-            ("NO_CANDIDATES",
+            ("NO_NONNEGATIVE_SAFE_RESEARCH_PROPOSAL",
              lambda a,b,m:m["items"]["theirs"].__setitem__("stability","Declining")),
         ]
         for reason,change in changes:
