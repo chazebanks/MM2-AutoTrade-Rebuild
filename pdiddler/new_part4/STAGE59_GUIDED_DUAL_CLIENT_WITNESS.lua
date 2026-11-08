@@ -12,8 +12,8 @@ local recoveryOnly=(deviceProfile=="PHONE_RECOVER" or deviceProfile=="TABLET_REC
 local MARKER="[GINGERSCOPE STAGE59 PAIRED WITNESS]"
 local PAIR_ID="STAGE59-NOV08-MANUAL-A"
 local SOURCE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
- "f74cb081590dfcdf100bd41f818e07d34856dff4/"..
- "pdiddler/new_part4/STAGE59_RESULT_DELTA_120S_PROBE.lua"
+ "fda34ed897f0e7efc1ac515517d8134ad586b649/"..
+ "pdiddler/new_part4/STAGE59_RESULT_DELTA_ROLE_NEUTRAL_BASELINE.lua"
 local E=(type(getgenv)=="function" and getgenv()) or _G
 local KEY="PDIDDLER_STAGE59_PAIRED_MANUAL_OBSERVER"
 local OLD="PDIDDLER_STAGE32_RESULT_CORRELATION_PROBE"
@@ -375,7 +375,7 @@ local SAFE_FIELDS={
  "schema","status","reason","stopReason","inventoryStatus",
  "beforeObserved","windowClosureObserved","postReadbacksObserved",
  "changedEligibleTypes","gainedEligibleCopies","lostEligibleCopies",
- "rawWeaponInventoryChanged","closureStatus",
+ "rawWeaponInventoryChanged","closureStatus","partnerCacheAtBaseline",
  "signalReceipts","completeTradeSignalSeen",
  "endTradeSignalSeen","declineTradeSignalSeen",
  "partnerDepartureObserved","observedOurAccept","observedTheirAccept",
@@ -475,6 +475,7 @@ local function finish(reason,core)
  say(message)
 end
 local lastState=nil
+local lastAwaitReason=nil
 local boundAt=nil
 local lastCountdownBucket=nil
 local running=false
@@ -520,10 +521,17 @@ startRole=function(role)
     return
    end
    local state=tostring(core.state or "UNKNOWN")
-   if state~=lastState then
+   local gate=(state=="AWAIT_MANUAL_TRADE") and
+    tostring(core.awaitReason or "NO_VISIBLE_TRADE") or ""
+   if state~=lastState or gate~=lastAwaitReason then
     lastState=state
+    lastAwaitReason=gate
     if state=="AWAIT_MANUAL_TRADE" then
-     say("READY. On BOTH devices wait for READY. Open a manual low-value trade. Don't Accept until BOTH say BASELINE BOUND.")
+     if gate=="PARTNER_LABEL_UNRESOLVED" then
+      say("TRADE WINDOW FOUND; PARTNER LABEL UNRESOLVED. Check you are trading the correct account. Do NOT press Accept.")
+     else
+      say("READY. On BOTH devices wait for READY. Open a manual low-value trade. Don't Accept until BOTH say BASELINE BOUND.")
+     end
     elseif state=="OBSERVING_CLOSE" then
      say("BASELINE BOUND. Both devices ready? Sender offers ONE expendable eligible item, receiver none. BOTH MANUALLY Accept only if willing. ~120s timebox.")
     elseif state=="POST_CLOSE_READS" then
