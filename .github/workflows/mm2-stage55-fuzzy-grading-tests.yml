@@ -1,0 +1,36 @@
+name: Stage55 fuzzy mapping evidence regression (read-only)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE55_READONLY_FUZZY_PROOF_GRADING.lua'
+      - 'pdiddler/intelligence_lab/test_stage55_fuzzy_proof_grading.py'
+      - '.github/workflows/mm2-stage55-fuzzy-grading-tests.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage55-fuzzy-proof-grading
+    paths:
+      - 'pdiddler/new_part4/STAGE55_READONLY_FUZZY_PROOF_GRADING.lua'
+      - 'pdiddler/intelligence_lab/test_stage55_fuzzy_proof_grading.py'
+      - '.github/workflows/mm2-stage55-fuzzy-grading-tests.yml'
+permissions:
+  contents: read
+jobs:
+  native-fuzzy-grading:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Exercise actual Stage55 Lua and clipboard under Python
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage55_fuzzy_proof_grading.py'
+      - name: Run all inherited intelligence tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
