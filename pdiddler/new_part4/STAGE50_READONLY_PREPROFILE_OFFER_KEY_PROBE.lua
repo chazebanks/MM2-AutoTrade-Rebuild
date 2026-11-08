@@ -73,6 +73,8 @@ local privateProfileResult=nil
 local profileReadAttempts=0
 local profileReadReady=false
 local profileReadTimedOut=false
+local profileReadInFlight=false
+local profileOfferMutationObserved=false
 local candidateCatalogueRows,displayedLabelVerified=0,false
 local candidateCount,mutationSide,sequence=0,"NONE","NONE"
 local selectedPresence,selectedHypothesis,selectedTypeFailure,selectedOrientation,selectedDynamic=nil,nil,nil,nil,nil
@@ -138,6 +140,7 @@ local function publish()
  r.stage50ProfileReadAttempts=profileReadAttempts
  r.stage50ProfileReadReady=profileReadReady
  r.stage50ProfileReadTimedOut=profileReadTimedOut
+ r.stage50TransientMutationDuringProfileRead=profileOfferMutationObserved
  r.stage50ClientRawOfferOwnedMatch=reason=="TWO_PHASE_CLIENT_PREPROFILE_RAW_KEY_MATCHED"
   and privateProfileResult~=nil and privateProfileResult.profileCandidateClientMatched==true
  r.stage50NotAnAuthenticatedSession=true
@@ -166,6 +169,7 @@ end
 local function finish(why,report)
  if S.finished then return end
  S.finished=true;reason=why;shape=report
+ profileReadInFlight=false
  -- Disconnect every successfully returned listener, even if a sibling fails.
  for _,c in ipairs(connections)do disconnect(c)end
  connections={}
@@ -466,11 +470,49 @@ local function ownProfileRemote()
   return nil,"OWN_PROFILE_REMOTE_MISSING" end
  return rf
 end
+-- Catch a brief add/remove even if polling sees EMPTY before and after.
+-- Only active during the single pre-offer profile read. After READY, Stage44's
+-- normal manual add/remove workflow controls the subsequent offer transitions.
+local function preprofileOfferMutation()
+ if S.finished or not profileReadInFlight then return end
+ profileOfferMutationObserved=true
+ finish("TRANSIENT_OFFER_MUTATION_DURING_PROFILE_READ")
+end
+local function bindPreprofileChangeSignals()
+ local root=boundRoot
+ if not root then finish("PREPROFILE_GUI_ROOT_MISSING");return false end
+ for _,name in ipairs({"YourOffer","TheirOffer"}) do
+  local side=root:FindFirstChild(name)
+  local container=side and side:FindFirstChild("Container")
+  if not container then finish("PREPROFILE_OFFER_CONTAINER_MISSING");return false end
+  if container.ChildAdded and not connect(container.ChildAdded,preprofileOfferMutation) then return false end
+  if container.ChildRemoved and not connect(container.ChildRemoved,preprofileOfferMutation) then return false end
+  for i=1,4 do
+   local slot=container:FindFirstChild("NewItem"..i)
+   if slot then
+    if not connect(slot:GetPropertyChangedSignal("Visible"),preprofileOfferMutation) then return false end
+    if not connect(slot.AncestryChanged,preprofileOfferMutation) then return false end
+    local item=slot:FindFirstChild("ItemName")
+    local label=item and item:FindFirstChild("Label")
+    if label then
+     if not connect(label:GetPropertyChangedSignal("Text"),preprofileOfferMutation) then return false end
+    end
+    local details=slot:FindFirstChild("Container")
+    local amount=details and details:FindFirstChild("Amount")
+    if amount then
+     if not connect(amount:GetPropertyChangedSignal("Text"),preprofileOfferMutation) then return false end
+    end
+   end
+  end
+ end
+ return true
+end
 local function preOfferProfileRead()
  if profileReadAttempts~=0 then finish("DUPLICATE_OWN_PROFILE_READ");return false end
  local rf,missing=ownProfileRemote()
  if not rf then finish(missing);return false end
  profileReadAttempts=1
+ profileReadInFlight=true
  local done,success,response=false,false,nil
  -- Late response is ignored after timeout/cleanup, never used as a new read.
  task.spawn(function()
@@ -508,6 +550,7 @@ local function preOfferProfileRead()
  if result.profileCandidateClientMatched~=true then
   finish("PREPROFILE_RAW_KEY_NOT_MATCHED");return false end
  profileReadReady=true
+ profileReadInFlight=false
  return true
 end
 local function examineOfferFrame(o,now)
@@ -612,6 +655,7 @@ local function observe()
      if not bindContextSignals(pg)then return end
      local current,invalid=checkedFrame();if not current then finish(invalid);return end
      if current.ourSlots~=0 or current.theirSlots~=0 or current.ourSig~=baseline.ourSig or current.theirSig~=baseline.theirSig then finish("OFFER_CHANGED_DURING_SYNC_READ");return end
+     if not bindPreprofileChangeSignals() then return end
      if not preOfferProfileRead() then return end
      local remote,missing=exactRemote();if not remote then finish(missing);return end
      boundRemote=remote
