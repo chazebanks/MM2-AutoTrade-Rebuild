@@ -126,13 +126,160 @@ class AuditTests(unittest.TestCase):
         with self.assertRaisesRegex(EvidenceError,'outcome-timestamp-invalid'):
             review_outcome(replace(o,captured_at=T.replace(tzinfo=None)),c,*s)
 
-    def test_missing_offer_fails(self):
-        o,c,*s=make()
-        self.assertEqual(review_outcome(replace(o,our_offer={}),c,*s).status,'INCOMPLETE')
+    def test_one_sided_receiver_gain_matches_complete_client_readbacks(self):
+        # Mirrors the operator's confirmed Iceblaster gift STRUCTURE, with
+        # synthetic checker IDs and a synthetic full two-Accept UI record.
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={},their_offer={B:1})
+        pre=replace(pre,items={A:3,C:1})
+        post=replace(post,items={A:3,B:1,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'CLIENT_CORROBORATED')
+        self.assertEqual(dict(r.expected_delta),{B:1})
+        self.assertEqual(dict(r.observed_delta),{B:1})
+        self.assertFalse(r.server_completion_proven)
+        self.assertFalse(r.may_record_completed_trade)
+        self.assertFalse(r.may_report_profit)
+        self.assertFalse(r.authorizes_accept)
 
-    def test_same_asset_on_both_sides_fails(self):
-        o,c,*s=make()
-        self.assertEqual(review_outcome(replace(o,their_offer={A:1}),c,*s).status,'INCOMPLETE')
+    def test_one_sided_sender_loss_matches_client_readbacks(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={A:2},their_offer={})
+        post=replace(post,items={A:1,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'CLIENT_CORROBORATED')
+        self.assertEqual(dict(r.expected_delta),{A:-2})
+        self.assertEqual(dict(r.observed_delta),{A:-2})
+        self.assertFalse(r.server_completion_proven)
+
+    def test_shared_type_both_sides_net_negative_one_is_reconcilable(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={A:2},their_offer={A:1})
+        post=replace(post,items={A:2,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'CLIENT_CORROBORATED')
+        self.assertEqual(dict(r.expected_delta),{A:-1})
+        self.assertEqual(dict(r.observed_delta),{A:-1})
+        self.assertFalse(r.may_record_completed_trade)
+
+    def test_shared_type_both_sides_net_positive_one_is_reconcilable(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={A:1},their_offer={A:2})
+        post=replace(post,items={A:4,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'CLIENT_CORROBORATED')
+        self.assertEqual(dict(r.expected_delta),{A:1})
+        self.assertEqual(dict(r.observed_delta),{A:1})
+
+    def test_zero_net_shared_type_is_not_inventory_verifiable(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={A:1},their_offer={A:1})
+        post=replace(post,items=pre.items)
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'INCOMPLETE')
+        self.assertEqual(r.reason,'zero-net-offer-not-inventory-verifiable')
+        self.assertFalse(r.client_evidence_consistent)
+        self.assertFalse(r.server_completion_proven)
+
+    def test_both_empty_is_not_a_trade(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={},their_offer={})
+        post=replace(post,items=pre.items)
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'INCOMPLETE')
+        self.assertEqual(r.reason,'offer-unresolved-or-empty')
+
+    def test_one_sided_gain_wrong_inventory_delta_is_rejected(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={},their_offer={B:1})
+        post=replace(post,items={A:3,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'INCONSISTENT')
+        self.assertEqual(r.reason,'offer-does-not-match-inventory-delta')
+
+    def test_one_sided_unrelated_inventory_change_is_rejected(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={},their_offer={B:1})
+        post=replace(post,items={A:2,B:1,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'INCONSISTENT')
+        self.assertEqual(r.reason,'offer-does-not-match-inventory-delta')
+
+    def test_one_sided_unknown_partner_accept_remains_incomplete(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={},their_offer={B:1},their_accepted=None)
+        post=replace(post,items={A:3,B:1,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'INCOMPLETE')
+        self.assertEqual(r.reason,'both-accepted-not-observed')
+
+    def test_one_sided_closed_unknown_remains_incomplete(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={},their_offer={B:1})
+        c=replace(c,status='closed_unknown')
+        post=replace(post,items={A:3,B:1,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'INCOMPLETE')
+        self.assertEqual(r.reason,'closure-not-proof-of-completion')
+
+    def test_one_sided_nonindependent_post_scans_rejected(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={},their_offer={B:1})
+        post=replace(post,items={A:3,B:1,C:1})
+        p2=replace(p2,items=post.items,read_sequence=post.read_sequence)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'INCOMPLETE')
+        self.assertEqual(r.reason,'distinct-scan-sequences-unverified')
+
+    def test_one_sided_native_incomplete_coverage_rejected(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={},their_offer={B:1})
+        post=replace(post,items={A:3,B:1,C:1})
+        p2=replace(p2,items=post.items,complete_eligible=False)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'INCOMPLETE')
+        self.assertEqual(r.reason,'complete-native-readback-unverified')
+
+    def test_500_seeded_one_type_net_delta_scenarios(self):
+        import random
+        rng=random.Random(471107)
+        for n in range(500):
+            ours=rng.randint(0,4)
+            theirs=rng.randint(0,4)
+            o,c,pre,post,p2=make()
+            o=replace(o,our_offer={A:ours} if ours else {},
+                      their_offer={A:theirs} if theirs else {})
+            pre=replace(pre,items={A:8,C:1})
+            post_count=8+theirs-ours
+            post_items={A:post_count,C:1}
+            post=replace(post,items=post_items)
+            p2=replace(p2,items=post_items)
+            with self.subTest(case=n,ours=ours,theirs=theirs):
+                r=review_outcome(o,c,pre,post,p2)
+                if ours==0 and theirs==0:
+                    self.assertEqual(r.status,'INCOMPLETE')
+                elif ours==theirs:
+                    self.assertEqual(r.status,'INCOMPLETE')
+                    self.assertEqual(r.reason,'zero-net-offer-not-inventory-verifiable')
+                else:
+                    self.assertEqual(r.status,'CLIENT_CORROBORATED')
+                    self.assertEqual(dict(r.expected_delta),{A:theirs-ours})
+                    self.assertEqual(dict(r.observed_delta),{A:theirs-ours})
+                self.assertFalse(r.server_completion_proven)
+                self.assertFalse(r.may_record_completed_trade)
+                self.assertFalse(r.may_report_profit)
+                self.assertFalse(r.authorizes_trade)
+                self.assertFalse(r.authorizes_accept)
 
     def test_fake_client_success_cannot_mint_completion(self):
         o,c,*s=make()
