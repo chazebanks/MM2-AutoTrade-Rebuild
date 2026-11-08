@@ -20,7 +20,7 @@ SHARED=SRC/"STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua"
 MAIN=SRC/"STAGE59_MAIN_RECEIVER.lua"
 ALT=SRC/"STAGE59_ALT_SENDER.lua"
 PIN="ce07d8ffa406e233e686dbf51c7ea7ffb18d023a"
-BLOB="ee08cb9ae917a7f6d94533d976a8fa3bcc0c9a30"
+BLOB="dc05f5f2f9bedd0663afdf8ec8ba021be4010f43"
 S2="fe27ae43b5b52e142041d6ec930e3a1e89f33363"
 EXISTING=ROOT/"pdiddler/intelligence_lab/test_stage59_guided_witness_wrapper.py"
 
