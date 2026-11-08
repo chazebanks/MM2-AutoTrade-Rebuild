@@ -201,6 +201,8 @@ def build_report(
     evidence = {
         "schema": "gingerscope-stage52-market-source-audit-v1",
         "status": "CANDIDATE_ONLY_NOT_PUBLISHED",
+        "researchObservationPublished": False,
+        "researchObservationPublishReason": None,
         "auditedAtUtc": audited_at_utc,
         "publisherUpdatedAtUtc": None,   # Unknown; never infer from crawl time.
         "baselineGeneratedDateUnverified": baseline_file_date,
@@ -249,6 +251,10 @@ def publish_eligibility(report: dict[str, Any]) -> tuple[bool, str]:
     changes = report["diff"]
     if changes["added"] or changes["removed"]:
         return False, "catalogue-added-or-removed-items-review-required"
+    # A large fraction of the price table moving at once is more likely to
+    # need independent source review than blind mass re-pricing.
+    if len(changes["changed"]) > max(12, changes["previousRows"] // 10):
+        return False, "bulk-price-movement-review-required"
     for change in changes["changed"]:
         old_value, old_category = change["previous"]
         new_value, new_category = change["candidate"]
@@ -353,6 +359,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.publish_research_only:
         permitted,why=publish_eligibility(report)
         if not permitted:
+            report["status"]="REVIEW_REQUIRED_NO_PUBLICATION"
+            report["researchObservationPublishReason"]=why
+            (args.output_dir / "source_audit.json").write_text(
+                json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
             print("REVIEW_REQUIRED:",why,"candidate saved but source values unchanged")
             return 2
         fresh=research_lua_source(normalize_page_results(groups),report)
@@ -361,12 +373,23 @@ def main(argv: list[str] | None = None) -> int:
         # metadata. An old legacy file is migrated once to explicit unknown.
         if report["diff"]["hasDisagreement"] or "PUBLISHER_DATE_UNKNOWN" not in current_text:
             atomic_replace_text(args.baseline,fresh)
+            report["status"]="RESEARCH_OBSERVATION_PUBLISHED_NOT_TRADE_AUTHORITY"
+            report["researchObservationPublished"]=True
+            report["researchObservationPublishReason"]=why
             print("RESEARCH_SOURCE_UPDATED",
                   "rows",candidate["rowCount"],
                   "changes",len(report["diff"]["changed"]),
                   "publisher-date UNKNOWN; trade authority FALSE")
         else:
+            report["status"]="RESEARCH_OBSERVATION_UNCHANGED"
+            report["researchObservationPublishReason"]="NO_ITEM_VALUE_CHANGE"
             print("RESEARCH_SOURCE_UNCHANGED: no price movement; date NOT advanced")
+        # The archived report must describe what ACTUALLY happened, not claim
+        # CANDIDATE_ONLY_NOT_PUBLISHED after we replaced a research source.
+        (args.output_dir / "source_audit.json").write_text(
+            json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
     else:
         print("AUDIT_ONLY",
               "rows", candidate["rowCount"],
