@@ -231,6 +231,24 @@ class PrivateHistoryImportTests(unittest.TestCase):
             with self.assertRaisesRegex(ledger.LedgerError, "UNSAFE_ARCHIVE_AUTHORITY"):
                 ledger.load_existing(dest)
 
+
+    def test_rejects_profit_authority_on_old_or_new_receipts(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            original = ledger.build_record(message())
+            for elevated in ({"may_report_profit": True},
+                             {"authorizes_trade": True},
+                             {"authorizes_accept": True},
+                             {"completed_trade_verified": True},
+                             {"learning_eligible": True},
+                             {"server_settlement": "CONFIRMED"}):
+                with self.subTest(elevated=elevated):
+                    rec = dict(original)
+                    rec.update(elevated)
+                    with self.assertRaisesRegex(ledger.LedgerError, "UNSAFE_CANDIDATE_AUTHORITY"):
+                        ledger.stage_records(root, [rec])
+            self.assertFalse((root / ledger.RELATIVE_LEDGER_PATH).exists())
+
     def test_rejects_corrupt_json_and_duplicate_archive_receipts(self):
         with tempfile.TemporaryDirectory() as td:
             dest = Path(td) / ledger.RELATIVE_LEDGER_PATH
