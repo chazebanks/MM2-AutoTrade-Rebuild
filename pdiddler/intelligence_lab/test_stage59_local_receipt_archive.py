@@ -278,7 +278,7 @@ class Stage59LocalArchiveTests(unittest.TestCase):
                   str(BASE/"STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua")]
             result=subprocess.run(args,cwd=ROOT,capture_output=True,text=True,timeout=55)
         self.assertEqual(result.returncode,0,result.stdout+"\n"+result.stderr)
-        self.assertIn("STAGE59_LOCAL_DURABLE_REPORT_AND_RECOVERY_10_CASES_PASS",
+        self.assertIn("STAGE59_LOCAL_DURABLE_REPORT_AND_RECOVERY_11_CASES_PASS",
                       result.stdout)
 
     def test_source_authority_and_separate_relative_sandbox_paths(self):
