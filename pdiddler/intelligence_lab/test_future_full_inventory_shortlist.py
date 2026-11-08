@@ -127,7 +127,7 @@ class ShortlistTests(unittest.TestCase):
             elif v==5:m["publisherUpdatedAtUnix"]=NOW+1
             elif v==6:m["source"]="UNKNOWN"
             elif v==7:m["items"]=None
-            elif v==8:a[0]["key"]=rng.choice(["","a000"]*2)
+            elif v==8:a[0]["key"]=rng.choice(["","a001"])
             elif v==9:b.append(copy.deepcopy(b[0]))
             out=self.check((a,b,m))
             self.assertEqual(out["status"],"BLOCKED",(i,out))
