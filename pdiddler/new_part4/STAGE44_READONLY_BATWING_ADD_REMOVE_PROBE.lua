@@ -536,7 +536,7 @@ local function observe()
   local now=clock()
   examineOfferFrame(o,now)
   if not S.finished then resolvePhases(now) end
-  if not S.finished then task.wait(math.min(.16,math.max(0,30-(clock()-boundAt)))) end
+  if not S.finished then task.wait(math.min(.16,math.max(0,60-(clock()-boundAt)))) end
  end
  if not S.finished then finish("NO_COMPLETE_ADD_REMOVE_SEQUENCE_IN_WINDOW")end
 end
