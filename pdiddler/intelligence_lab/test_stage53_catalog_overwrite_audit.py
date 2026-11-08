@@ -201,7 +201,7 @@ class Stage53CatalogCensusTests(unittest.TestCase):
                 check=False
             )
         self.assertEqual(run.returncode,0,run.stdout+"\n"+run.stderr)
-        self.assertIn("STAGE53_ACTUAL_NATIVE_LUA_416_CASES_PASS",run.stdout)
+        self.assertIn("STAGE53_ACTUAL_NATIVE_LUA_419_CASES_PASS",run.stdout)
 
 if __name__=="__main__":
     unittest.main()
