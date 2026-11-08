@@ -65,9 +65,16 @@ local function call(role,opt)
   if which=="PlayerGui" then return pg end
  end}
  local players={LocalPlayer=player}
+ local knownJson={}
  local http={
   GenerateGUID=function()return "0a0a0a0a-1111-2222-3333-abcdefabcdef"end,
-  JSONEncode=function(_,v)return json(v)end
+  JSONEncode=function(_,v)
+   local encoded=json(v);knownJson[encoded]=v;return encoded
+  end,
+  JSONDecode=function(_,encoded)
+   assert(knownJson[encoded],"untrusted or altered JSON")
+   return knownJson[encoded]
+  end
  }
  local function newSignal()
  return {
