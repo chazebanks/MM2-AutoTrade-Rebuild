@@ -53,7 +53,7 @@ def sample_baseline(path: Path):
         'local M = {source = "https://mm2values.com/", updated = "2026-11-02", complete = true, items = {\n'
         '  ["Gingerscope"] = {value = 15250, category = "Ancient"},\n'
         '  ["OldName"] = {value = 23, category = "Godly"},\n'
-        '  ["Godly_003"] = {value = 9, category = "Godly"},\n'
+        '  ["Godly_003"] = {value = 4, category = "Godly"},\n'
         '}}\nfunction M.get(name) return M.items[name] end\nreturn M\n',
         encoding="utf-8",
     )
@@ -140,7 +140,7 @@ class Stage52QuarantinedRefreshTests(unittest.TestCase):
             self.assertIsNone(result["publisherUpdatedAtUtc"])
             self.assertFalse(proposed["canPublishPrices"])
             self.assertEqual(result["baselineGeneratedDateUnverified"], "2026-11-02")
-            self.assertEqual(proposed["rowCount"], 157)
+            self.assertEqual(proposed["rowCount"], 156)
             self.assertEqual(result["diff"]["changed"][0]["name"], "Gingerscope")
 
     def test_failed_page_fetch_creates_no_candidate_files_or_live_update(self):
