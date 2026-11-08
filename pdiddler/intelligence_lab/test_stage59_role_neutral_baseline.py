@@ -224,7 +224,9 @@ local function scenario(path,cached,guiShown,partnerKnown,oldSourceCase)
  else
   assert(state.reportReady==true and
    state.result.stopReason=="TWO_POST_CLOSE_READS_FINISHED",
-    "visible exact trade must collect terminal own before/after")
+    "visible exact trade must collect terminal own before/after. stop="..
+     tostring(state.result and state.result.stopReason).." status="..
+     tostring(state.result and state.result.status))
   assert(state.partnerCacheAtBaseline==cached,
     "cache presence must be reflected, not invented")
   assert(state.result.partnerCacheAtBaseline==cached)
