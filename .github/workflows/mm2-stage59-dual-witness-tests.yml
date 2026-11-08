@@ -4,6 +4,9 @@ on:
     paths:
       - 'scripts/validate_manual_trade_pair.py'
       - 'pdiddler/new_part4/STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua'
+      - 'pdiddler/new_part4/STAGE59_POSTCLOSE_LEDGER_120S.lua'
+      - 'pdiddler/new_part4/STAGE59_RESULT_DELTA_120S_PROBE.lua'
+      - 'pdiddler/intelligence_lab/test_stage59_bounded_timeout_fidelity.py'
       - 'pdiddler/intelligence_lab/test_stage59_two_client_manual_witness.py'
       - 'pdiddler/intelligence_lab/test_stage59_guided_witness_wrapper.py'
       - '.github/workflows/mm2-stage59-dual-witness-tests.yml'
@@ -13,6 +16,9 @@ on:
     paths:
       - 'scripts/validate_manual_trade_pair.py'
       - 'pdiddler/new_part4/STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua'
+      - 'pdiddler/new_part4/STAGE59_POSTCLOSE_LEDGER_120S.lua'
+      - 'pdiddler/new_part4/STAGE59_RESULT_DELTA_120S_PROBE.lua'
+      - 'pdiddler/intelligence_lab/test_stage59_bounded_timeout_fidelity.py'
       - 'pdiddler/intelligence_lab/test_stage59_two_client_manual_witness.py'
       - 'pdiddler/intelligence_lab/test_stage59_guided_witness_wrapper.py'
       - '.github/workflows/mm2-stage59-dual-witness-tests.yml'
