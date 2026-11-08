@@ -81,9 +81,11 @@ local function fixture(opts)
  local function node(kind,name,props)
   local n=setmetatable({ClassName=kind,Name=name,Children={},attrs={},Visible=true,Enabled=true,signals={}},N)
   n.AncestryChanged=signal("ancestry")
+ n.ChildAdded=signal("childadded")
+ n.ChildRemoved=signal("childremoved")
   for k,v in pairs(props or {})do n[k]=v end;return n
  end
- function N:Add(c)c.Parent=self;self.Children[#self.Children+1]=c;return c end
+ function N:Add(c)c.Parent=self;self.Children[#self.Children+1]=c;self.ChildAdded:Fire(c);return c end
  function N:IsA(k)return self.ClassName==k or (k=="GuiObject" and
   (self.ClassName=="Frame" or self.ClassName=="TextLabel" or self.ClassName=="TextButton" or self.ClassName=="ImageLabel"))end
  function N:FindFirstChild(name,recurse)
@@ -313,7 +315,7 @@ local function addBatwing(f)
  assert(slot and slot.Visible==false,"must start empty")
  local name=slot:FindFirstChild("ItemName"):FindFirstChild("Label")
  name.Text="Batwing"
- slot.Visible=true
+ slot:Change("Visible",true)
  f:step()
  f:step()
 end
@@ -341,7 +343,7 @@ end
 local function removeBatwing(f)
  local slot=f.sides.YourOffer:FindFirstChild("Container"):FindFirstChild("NewItem1")
  assert(slot and slot.Visible==true,"must have manual Batwing in offer before removal")
- slot.Visible=false
+ slot:Change("Visible",false)
  f:step()
  f:step()
 end
@@ -438,6 +440,32 @@ end)
 test("Stage50 native job change during profile read fails",function()
  local f=fixture({duringProfile=function(f)f.game.JobId="different-job"end})
  f:finishLoop();safe(f,"SESSION_CHANGED")
+end)
+test("Stage50 native transient add then remove during profile RPC invalidates",function()
+ local f=fixture({duringProfile=function(f)
+  local slot=f.sides.YourOffer:FindFirstChild("Container"):FindFirstChild("NewItem1")
+  slot:Change("Visible",true)
+  slot:Change("Visible",false)
+ end})
+ f:finishLoop();safe(f,"TRANSIENT_OFFER_MUTATION_DURING_PROFILE_READ")
+ eq(f.state.result.stage50TransientMutationDuringProfileRead,true)
+ eq(f.state.result.stage50ClientRawOfferOwnedMatch,false)
+ eq(f.calls.profileCalls,1)
+end)
+test("Stage50 native transient slot insertion during profile RPC invalidates",function()
+ local f=fixture({duringProfile=function(f)
+  local c=f.sides.TheirOffer:FindFirstChild("Container")
+  c:Add(f.node("Frame","NewItem2",{Visible=false}))
+ end})
+ f:finishLoop();safe(f,"TRANSIENT_OFFER_MUTATION_DURING_PROFILE_READ")
+ eq(f.state.result.stage50TransientMutationDuringProfileRead,true)
+end)
+test("Stage50 native after profile ready normal manual add remove stays permitted",function()
+ local f=fixture();f:untilPhase("LISTENING_UPDATE_TRADE")
+ completeAdd(f,"LOCAL_SECOND")
+ removeBatwing(f);f:emit(tradeState(f,"LOCAL_SECOND",false))
+ f:finishLoop();safe(f,"TWO_PHASE_CLIENT_PREPROFILE_RAW_KEY_MATCHED")
+ eq(f.state.result.stage50TransientMutationDuringProfileRead,false)
 end)
 test("Stage50 native manual offer before profile bound rejected",function()
  local f=fixture({duringProfile=function(f)
