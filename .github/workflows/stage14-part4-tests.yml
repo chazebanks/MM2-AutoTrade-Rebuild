@@ -67,7 +67,9 @@ jobs:
             test_stage40_trade_schema_hypothesis \
             test_stage41_key_type_first_failure \
             test_stage42_player_orientation \
-            test_stage43_dynamic_own_offer; do
+            test_stage43_dynamic_own_offer \
+            test_stage44_client_offer_state \
+            test_stage44_add_remove_native; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
