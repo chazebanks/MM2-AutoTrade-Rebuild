@@ -144,9 +144,9 @@ local function visible(node,top)
  end
  return false
 end
-local function discover()
+local function visibleTradeRoots()
  local pg=me:FindFirstChildOfClass("PlayerGui")
- if not pg then return nil end
+ if not pg then return nil,0,nil end
  local root,n=nil,0
  for _,screen in ipairs(pg:GetChildren())do
   if screen.Name=="TradeGUI" or screen.Name=="TradeGUI_Phone"then
@@ -161,6 +161,10 @@ local function discover()
    end
   end
  end
+ return root,n,pg
+end
+local function discover()
+ local root,n,pg=visibleTradeRoots()
  if n~=1 then return nil end
  local their=root:FindFirstChild("TheirOffer")
  local label=their and their:FindFirstChild("Username")
@@ -227,9 +231,11 @@ local function onStart(...)
   receiptAt=now
   privatePack=args
   args=nil
-  local visibleRoot=discover()
-  eventBeforeVisibleGui=visibleRoot==nil
-  if visibleRoot then finish("GUI_VISIBLE_BEFORE_START_TRADE_RECEIPT");return end
+  -- A visible GUI with an unknown label/partner is STILL a visible GUI.
+  -- Do not mistake failed actor binding for an event preceding all windows.
+  local _,visibleCount=visibleTradeRoots()
+  eventBeforeVisibleGui=visibleCount==0
+  if visibleCount~=0 then finish("GUI_VISIBLE_BEFORE_START_TRADE_RECEIPT");return end
   S.phase="WAIT_TRADE_WINDOW"
  end)
  if not ok then finish("START_EVENT_INSPECTION_FAILED")end
@@ -250,7 +256,8 @@ local function observe()
  local quietAt=clock()
  while not S.finished and clock()-quietAt<.6 do
   if ownerProblem()then finish("SESSION_CHANGED");return end
-  if discover() then finish("WINDOW_OPEN_BEFORE_ARM");return end
+  local _,visibleCount=visibleTradeRoots()
+  if visibleCount~=0 then finish("WINDOW_OPEN_BEFORE_ARM");return end
   task.wait(.1)
  end
  if S.finished then return end
@@ -261,7 +268,8 @@ local function observe()
  while not S.finished and not receiptAt and clock()-startAt<60 do
   if ownerProblem()then finish("SESSION_CHANGED");return end
   if currentRemote()~=activeRemote then finish("START_TRADE_REMOTE_CHANGED");return end
-  if discover()then finish("GUI_WITHOUT_START_TRADE");return end
+  local _,visibleCount=visibleTradeRoots()
+  if visibleCount~=0 then finish("GUI_WITHOUT_START_TRADE");return end
   task.wait(.12)
  end
  if S.finished then return end
