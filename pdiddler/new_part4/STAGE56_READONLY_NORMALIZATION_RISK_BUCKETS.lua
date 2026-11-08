@@ -23,6 +23,81 @@ local R={schema="gingerscope-stage56-normalization-risk-buckets-v1",readOnly=tru
  transformedChromaPrefixHint=0,transformedUpdatedHint=0,transformedUpV2Hint=0,
  transformedTypeSuffixHint=0,transformedNoObviousTokenHint=0,
  fuzzyRunnerGap21to99=0,fuzzyRunnerGap100Plus=0,fuzzyScoreReproductionErrors=0}
+-- Persistent, LOCAL-only instructions during execution; strictly optional.
+-- This panel never reads inventory or manipulates MM2 controls. If Roblox UI
+-- primitives are blocked by an executor, console instructions still work.
+local instructionText=nil
+local instructionScreen=nil
+local function buildInstructionPanel()
+ local ok=pcall(function()
+  if type(Instance)~="table" or type(Instance.new)~="function" then return end
+  local players=game:GetService("Players")
+  local lp=players and players.LocalPlayer
+  local pg=lp and lp:FindFirstChildOfClass("PlayerGui")
+  if not pg then return end
+  local old=pg:FindFirstChild("GINGERSCOPE_STAGE56_INSTRUCTIONS")
+  if old and old:IsA("ScreenGui") then old:Destroy() end
+  local screen=Instance.new("ScreenGui")
+  screen.Name="GINGERSCOPE_STAGE56_INSTRUCTIONS"
+  screen.ResetOnSpawn=false
+  screen.IgnoreGuiInset=false
+  screen.DisplayOrder=150
+  local frame=Instance.new("Frame")
+  frame.Size=UDim2.fromOffset(380,132)
+  frame.Position=UDim2.new(0.5,0,0,42)
+  frame.AnchorPoint=Vector2.new(0.5,0)
+  frame.BackgroundColor3=Color3.fromRGB(34,24,56)
+  frame.BorderSizePixel=0
+  frame.Parent=screen
+  local corner=Instance.new("UICorner")
+  corner.CornerRadius=UDim.new(0,10)
+  corner.Parent=frame
+  local heading=Instance.new("TextLabel")
+  heading.Size=UDim2.new(1,-52,0,30)
+  heading.Position=UDim2.fromOffset(12,8)
+  heading.BackgroundTransparency=1
+  heading.Font=Enum.Font.GothamBold
+  heading.TextSize=16
+  heading.TextColor3=Color3.fromRGB(237,227,255)
+  heading.TextXAlignment=Enum.TextXAlignment.Left
+  heading.Text="STAGE 56  |  READ-ONLY TEST"
+  heading.Parent=frame
+  local body=Instance.new("TextLabel")
+  body.Size=UDim2.new(1,-24,0,75)
+  body.Position=UDim2.fromOffset(12,45)
+  body.BackgroundTransparency=1
+  body.Font=Enum.Font.Gotham
+  body.TextSize=15
+  body.TextWrapped=true
+  body.TextColor3=Color3.fromRGB(246,244,250)
+  body.TextXAlignment=Enum.TextXAlignment.Left
+  body.TextYAlignment=Enum.TextYAlignment.Top
+  body.Text="Preparing test instructions..."
+  body.Parent=frame
+  local close=Instance.new("TextButton")
+  close.Name="Close"
+  close.Size=UDim2.fromOffset(32,28)
+  close.Position=UDim2.new(1,-39,0,8)
+  close.BackgroundTransparency=1
+  close.Font=Enum.Font.GothamBold
+  close.TextSize=20
+  close.TextColor3=Color3.fromRGB(237,227,255)
+  close.Text="X"
+  close.Parent=frame
+  close.Activated:Connect(function() screen:Destroy() end)
+  screen.Parent=pg
+  instructionScreen=screen
+  instructionText=body
+ end)
+ return ok and instructionText~=nil
+end
+local function tellOperator(message)
+ if instructionText and instructionScreen and instructionScreen.Parent then
+  pcall(function()instructionText.Text=message end)
+ end
+ print("[STAGE56 GUIDE] "..message)
+end
+
 -- Best-effort local clipboard convenience. Only the anonymized aggregate report
 -- may leave the observer; no raw catalogue data or inventory is ever copied.
 local function tryClipboard(fn,line)
@@ -47,14 +122,25 @@ local function emit(status)
  local ok,result=pcall(function()return game:GetService("HttpService"):JSONEncode(R)end)
  if not ok or type(result)~="string" then
   print(marker.." REPORT_ENCODING_FAILED")
+  tellOperator("Test could not encode its result. Send the error shown in Delta console.")
   return R
  end
  local line=marker.." "..result
  -- Clipboard failure cannot suppress the diagnostic; the console remains usable.
  local copied=copySummary(line)
  print(line)
- if copied then print("[STAGE56] CLIPBOARD_COPIED")
- else print("[STAGE56] CLIPBOARD_UNAVAILABLE_COPY_REPORT_FROM_CONSOLE") end
+ if copied then
+  print("[STAGE56] CLIPBOARD_COPIED")
+  if status=="CLIENT_MAPPING_RISK_COUNTS_UNVERIFIED"
+   or status=="CLIENT_MAPPING_COVERAGE_UNVERIFIED" then
+   tellOperator("TEST FINISHED. Result copied! Open ChatGPT and PASTE it here. No further game actions.")
+  else
+   tellOperator("CHECK FINISHED with "..tostring(status)..". PASTE copied result into ChatGPT for review.")
+  end
+ else
+  print("[STAGE56] CLIPBOARD_UNAVAILABLE_COPY_REPORT_FROM_CONSOLE")
+  tellOperator("Clipboard unavailable. Open Delta console, COPY full STAGE56 JSON line, PASTE into ChatGPT.")
+ end
  return R
 end
 local function norm(x)
@@ -630,6 +716,8 @@ local function gradeTransformation(meta,rec,gap)
 end
 
 -- END VERBATIM RESOLVER FROM REVIEWED STAGE51 SCANNER
+buildInstructionPanel()
+tellOperator("STEP 1/2: Do NOT trade, click Accept, or change your inventory. This reads the local catalogue only.")
 if type(game)~="table" and type(game)~="userdata" then return emit("GAME_UNAVAILABLE") end
 if game.PlaceId~=142823291 then return emit("WRONG_GAME") end
 local originalJob=tostring(game.JobId or "")
@@ -649,6 +737,7 @@ end
 if not success or type(sync)~="table" then return emit("SYNC_UNAVAILABLE") end
 if tostring(game.JobId or "")~=originalJob then return emit("SERVER_CHANGED") end
 if type(sync.Weapons)~="table" then return emit("WEAPONS_CATALOG_MISSING") end
+tellOperator("STEP 2/2: Checking mapping rules automatically. No taps or trade actions needed.")
 local seenKeys,targets={},{}
 for raw,data in pairs(sync.Weapons) do
  if (type(raw)~="string" and type(raw)~="number") or type(data)~="table" then
