@@ -4,6 +4,9 @@ on:
     paths:
       - 'scripts/validate_manual_trade_pair.py'
       - 'pdiddler/new_part4/STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua'
+      - 'pdiddler/new_part4/STAGE59_MAIN_RECEIVER.lua'
+      - 'pdiddler/new_part4/STAGE59_ALT_SENDER.lua'
+      - 'pdiddler/intelligence_lab/test_stage59_dedicated_role_launchers.py'
       - 'pdiddler/new_part4/STAGE59_POSTCLOSE_LEDGER_120S.lua'
       - 'pdiddler/new_part4/STAGE59_RESULT_DELTA_120S_PROBE.lua'
       - 'pdiddler/intelligence_lab/test_stage59_bounded_timeout_fidelity.py'
@@ -17,6 +20,9 @@ on:
     paths:
       - 'scripts/validate_manual_trade_pair.py'
       - 'pdiddler/new_part4/STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua'
+      - 'pdiddler/new_part4/STAGE59_MAIN_RECEIVER.lua'
+      - 'pdiddler/new_part4/STAGE59_ALT_SENDER.lua'
+      - 'pdiddler/intelligence_lab/test_stage59_dedicated_role_launchers.py'
       - 'pdiddler/new_part4/STAGE59_POSTCLOSE_LEDGER_120S.lua'
       - 'pdiddler/new_part4/STAGE59_RESULT_DELTA_120S_PROBE.lua'
       - 'pdiddler/intelligence_lab/test_stage59_bounded_timeout_fidelity.py'
