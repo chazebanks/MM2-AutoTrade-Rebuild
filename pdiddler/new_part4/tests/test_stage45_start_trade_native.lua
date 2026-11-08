@@ -185,6 +185,15 @@ local function run(opts)
   end
   if opts.guiSameStep and not f.guiOpened and f.time>=1.2 then
    f.guiOpened=true;screen.Enabled=true
+   if opts.extraVisibleTradeRootAtCallback then
+    screen:Add(node("Frame","Container")):Add(node("Frame","Trade"))
+   end
+  end
+  if opts.labelChangesAfterCallback and f.time>=1.32 then
+   label.Text="(UnknownAfterCallback)"
+  end
+  if opts.rootHidesAfterCallback and f.time>=1.32 then
+   screen.Enabled=false
   end
   if opts.rootClosedDuringGrace and f.time>=2.0 then screen.Enabled=false end
   if opts.offerDuringGrace and f.time>=2.0 then
@@ -242,6 +251,7 @@ test("one partner argument typed; no session authority",function()
  local r=okReport(f,"ONE_START_TRADE_TYPE_CENSUS_MATCHED")
  eq(r.argumentCount,1);eq(r.argumentTypes[1],"PARTNER_PLAYER_REF")
  eq(r.partnerPlayerReferenceCount,1);eq(r.eventBeforeVisibleGui,true)
+ eq(r.callbackGuiMode,"EVENT_BEFORE_VISIBLE_GUI_CLIENT_ONLY")
  eq(r.receiptCount,1);eq(r.cleanupComplete,true)
  eq(r.listenerCount,r.listenersDisconnected)
 end)
@@ -320,9 +330,33 @@ end)
 test("unbound visible GUI before StartTrade is rejected",function()
  okReport(run({badLabel=true,guiAfterArm=true}),"GUI_WITHOUT_START_TRADE")
 end)
-test("same-tick visible GUI prevents false event-before-GUI claim",function()
- local r=okReport(run({guiSameStep=true}),"GUI_VISIBLE_BEFORE_START_TRADE_RECEIPT")
+test("same-tick visible GUI still permits TYPE-ONLY census",function()
+ local r=okReport(run({guiSameStep=true,payload="partner"}),"ONE_START_TRADE_TYPE_CENSUS_MATCHED")
  eq(r.eventBeforeVisibleGui,false)
+ eq(r.callbackGuiMode,"GUI_VISIBLE_AT_CALLBACK_CLIENT_ONLY")
+ eq(r.argumentTypes[1],"PARTNER_PLAYER_REF")
+ eq(r.sessionIdProven,false)
+end)
+test("GUI visible at callback with wrong partner cannot inspect payload",function()
+ local r=okReport(run({guiSameStep=true,badLabel=true}),"GUI_VISIBLE_BUT_PARTNER_UNBOUND_AT_START")
+ eq(r.argumentCount,nil)
+ eq(r.eventBeforeVisibleGui,false)
+end)
+test("multiple visible GUI roots at callback is rejected",function()
+ okReport(run({guiSameStep=true,extraVisibleTradeRootAtCallback=true}),
+  "AMBIGUOUS_GUI_AT_START_CALLBACK")
+end)
+test("visible-at-callback root lost before stable frame is rejected",function()
+ okReport(run({guiSameStep=true,rootHidesAfterCallback=true}),"CALLBACK_GUI_ROOT_CHANGED")
+end)
+test("visible-at-callback partner label drift is rejected",function()
+ okReport(run({guiSameStep=true,labelChangesAfterCallback=true}),"CALLBACK_GUI_PARTNER_CHANGED")
+end)
+test("visible-at-callback still requires empty offers",function()
+ okReport(run({guiSameStep=true,offerDuringGrace=true}),"WINDOW_CONTEXT_CHANGED")
+end)
+test("visible-at-callback still refuses premature acceptance",function()
+ okReport(run({guiSameStep=true,accepted="TheirOffer"}),"ACCEPT_INDICATOR_OBSERVED")
 end)
 test("trade GUI disappearance during grace rejects",function()
  okReport(run({rootClosedDuringGrace=true}),"WINDOW_CONTEXT_CHANGED")
