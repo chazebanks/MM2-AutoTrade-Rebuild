@@ -19,8 +19,8 @@ SRC=ROOT/"pdiddler/new_part4"
 SHARED=SRC/"STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua"
 MAIN=SRC/"STAGE59_MAIN_RECEIVER.lua"
 ALT=SRC/"STAGE59_ALT_SENDER.lua"
-PIN="d21af6e479cc1c34ef0d2d4a6a5f5916b5c512a2"
-BLOB="eed720db5e738e4a05cf9d43237036c78cd2d5a3"
+PIN="2df50ba19889e880eae1ac313b8b4ed9f36a0c01"
+BLOB="0ae80c5c5471009e8f562360eec76a3ba391d551"
 S2="f74cb081590dfcdf100bd41f818e07d34856dff4"
 EXISTING=ROOT/"pdiddler/intelligence_lab/test_stage59_guided_witness_wrapper.py"
 
@@ -54,6 +54,11 @@ def driver()->str:
     for old,new in markers:
         assert mock.count(old)==1, f"cannot safely adapt mock marker: {old[:70]}"
         mock=mock.replace(old,new)
+    # Phone-specific viewport mock: landscape iPhone on ALT, iPad on MAIN.
+    old_view="workspace={CurrentCamera={ViewportSize={X=1024,Y=768}}}"
+    new_view='workspace={CurrentCamera={ViewportSize=role=="SENDER" and {X=844,Y=390} or {X=1024,Y=768}}}'
+    assert mock.count(old_view)==1
+    mock=mock.replace(old_view,new_view)
     mock+=r'''
 local function exercise(path,shared,role,opts)
  local report,guide,created,remotes,clipboard=call(role,opts)
@@ -63,10 +68,16 @@ local function exercise(path,shared,role,opts)
  local autoset=false
  local panel=false
  local title=false
+ local frame=nil
+ local notice=nil
+ local fold=nil
  for _,line in ipairs(guide) do
   if line:find("ROLE AUTO-SELECTED: "..role,1,true) then autoset=true end
  end
  for _,node in ipairs(created) do
+  if node.kind=="Frame" then frame=node end
+  if node.kind=="TextLabel" and node.Active~=true then notice=node end
+  if node.kind=="TextButton" and node.Name=="MINIMISE_PHONE_GUIDE" then fold=node end
   if node.kind=="ScreenGui" and node.Name=="GINGERSCOPE_STAGE59_GUIDE" then
    panel=true
   end
@@ -77,7 +88,32 @@ local function exercise(path,shared,role,opts)
  end
  assert(autoset,"user must see selected role during execution")
  if not opts.noGui and not opts.guiBroken then
-  assert(panel and title,"persistent draggable guide was not created")
+  assert(panel and title and frame and notice,"persistent guide missing")
+  if role=="SENDER" then
+   assert(frame.Size.X.Offset==270 and frame.Size.Y.Offset==146,
+     "ALT iPhone landscape guide must be compact")
+   assert(frame.Position.X.Offset==12 and frame.Position.Y.Offset==89,
+     "ALT phone guide starts left/above joystick and outside leaderboard")
+   assert(title.Text:find("ALT SENDER",1,true),
+     "ALT role must be visible in phone header")
+   assert(title.TextSize==12 and notice.TextSize==12,
+     "phone text not responsive")
+   assert(notice.Text:find("FINISHED",1,true),
+     "phone still needs visible completed instructions")
+   assert(fold and fold.onActivate,"iPhone minimize control must be interactive")
+   fold.onActivate()
+   assert(frame.Size.X.Offset==270 and frame.Size.Y.Offset==36 and notice.Visible==false,
+     "phone must minimise without falling off screen")
+   fold.onActivate()
+   assert(frame.Size.X.Offset==270 and frame.Size.Y.Offset==146 and notice.Visible==true,
+     "phone must restore its visible live instructions")
+  else
+   assert(frame.Size.X.Offset==320 and frame.Size.Y.Offset==182,
+    "MAIN iPad layout changed unexpectedly")
+   assert(frame.Position.Y.Scale==1 and frame.Position.Y.Offset==-200,
+    "MAIN bottom-left position must be preserved")
+   assert(fold==nil,"iPad should not gain phone-only minimise button")
+  end
  end
  assert(report:find('"tradeOutcome":"UNKNOWN"',1,true))
  assert(report:find('"serverCompletionProven":false',1,true))
@@ -106,12 +142,20 @@ class Stage59DedicatedLauncherTests(unittest.TestCase):
         self.assertIn('if not fixedRole() then',shared)
         self.assertIn('say("ROLE AUTO-SELECTED: "..specifiedRole',shared)
         self.assertIn('frame.Position=UDim2.new(0,12,1,-200)',shared)
+        self.assertIn('local phoneMode=(specifiedRole=="SENDER" and deviceProfile=="PHONE")',shared)
+        self.assertIn('local width,height=270,146',shared)
+        self.assertIn('local minimise=Instance.new("TextButton")',shared)
+        self.assertIn('return "BASELINE BOUND. Wait for MAIN too.',shared)
+        self.assertIn('frame.Size=UDim2.fromOffset(frame.Size.X.Offset,folded and 36 or 146)',shared)
         for path,role in ((MAIN,"RECEIVER"),(ALT,"SENDER")):
             with self.subTest(path=path.name):
                 src=path.read_text(encoding="utf-8")
                 self.assertIn(f'local ROLE="{role}"',src)
                 self.assertIn(PIN,src)
-                self.assertIn('return fn(ROLE)',src)
+                self.assertIn(
+                    f'return fn(ROLE,"{"PHONE" if role=="SENDER" else "TABLET"}")',
+                    src
+                )
                 self.assertIn('STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua',src)
                 self.assertIn('game.PlaceId~=142823291',src)
                 for unsafe in (":FireServer(",":InvokeServer(",":PostAsync(",
