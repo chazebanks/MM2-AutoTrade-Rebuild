@@ -19,8 +19,9 @@
 | [#108](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/108) | Server/bot-signal intelligence | Cautious 10-second multi-signal behavior classifier; ignored voice chat; 11/12 then 10/12 observed population preference, full/visited/bot-like filters, no hop in combat/trade/loading; 1,000 malformed samples | [42508894936](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42508894936) |
 | [#109](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/109) | Discord report preview | Hypothetical item names, stack counts, value/demand/liquidity, listed difference and inventory-total forecast; refuses tokens, usernames, mentions, and completed-trade claims; 1,000 adverse cases, **no sending** | [42509304817](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42509304817) |
 | [#110](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/110) | Full-inventory preselector | 500-type input max, synthetic 112-type scale, explicit identity/risk/budget exclusions, stratified five-type shortlist without silent truncation; 1,000 malformed cases | [42509795411](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42509795411) |
+| [#111](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/111) | Offline cross-PR integration contracts | Immutable pinned PR105–110 source checkouts; synthetic inventory → planner → fresh-offer guard → unsent preview, plus actual Lua supervisor → Python safe-server suggestions. 1,000 stale offer mutations and 900 unsafe-hop context mutations; no device, no accepting or sending | [42513500968](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42513500968) |
 
-**All six PRs remain DRAFT and unmerged.** Successful CI means the tested offline behavior passed, **not** that any module works in Delta or may perform live trades. The source identity and result attestation gaps are deliberate blockers.
+**All seven PRs (#105–#111) remain DRAFT and unmerged.** Successful CI means the tested offline behavior passed, **not** that any module works in Delta or may perform live trades. The source identity and result attestation gaps are deliberate blockers.
 
 ## Future integration dependency graph
 
@@ -35,6 +36,10 @@
 9. **Live UI adapters:** tablet startup, Join-a-friend Play, physical request-button clicks, world/character loading gates and actual offer placement require separate Roblox/Delta device evidence. Do not claim these are solved offline.
 
 ## Next work that can still be done offline, without contacting user
+
+**Cross-PR dependency smoke tests COMPLETE (pinned, synthetic, no device):** [PR111](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/111) has exact-head Actions [42513500968](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42513500968) SUCCESS. Confirms per-candidate quantities/listed differences through PR110 → PR106 → PR105 → PR109 and checks live-unsafe hop gates through actual PR107 Lua state samples → PR108 Python recommendations. These are *tested offline interfaces*, not proof of available trade/identity/server completion.
+
+
 
 - Lua ports + parity tests for Python prototypes PR106, PR108, PR109 and PR110, ideally with a cross-module deterministic simulator and seeded adversarial replay.
 - A bounded integration contract that asserts Stage58 unverified IDs **cannot** flow through the planner/snapshot guard as independently exact by self-declared booleans.
