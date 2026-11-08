@@ -36,10 +36,13 @@ def groups():
     out = {}
     for kind in audit.KIND_ORDER:
         rows = mapping[kind]
+        raw_html=("<html><body><h1>" + kind +
+                  "</h1><p>synthetic offline fixture only</p></body></html>").encode()
         out[kind] = {
             "kind": kind, "url": audit.ROOT+kind.lower(),
             "retrievedAtUtc": "2026-11-07T22:00:00Z",
-            "sha256": hashlib.sha256(kind.encode()).hexdigest(),
+            "sourceHtml": raw_html,
+            "sha256": hashlib.sha256(raw_html).hexdigest(),
             "rowCount": len(rows), "rows": dict(rows),
             "publisherUpdatedAtUtc": None,
         }
@@ -84,6 +87,7 @@ class Stage52QuarantinedRefreshTests(unittest.TestCase):
         self.assertNotIn("git add values/mm2values.lua", s)
         self.assertIn("python scripts/update_values.py --audit-only", s)
         self.assertIn("actions/upload-artifact@v4", s)
+        self.assertIn("mm2_market_refresh/*", s)
         self.assertIn("candidate", s.lower())
 
     def test_updater_has_no_publish_mode_or_write_to_value_file(self):
@@ -93,6 +97,8 @@ class Stage52QuarantinedRefreshTests(unittest.TestCase):
         self.assertNotIn("strftime(\"%Y-%m-%d\")", s)
         self.assertNotIn("complete = true", s)
         self.assertIn('"publisherUpdatedAtUtc": None', s)
+        self.assertIn('"sourceHtml": raw', s)
+        self.assertIn('"source-page-hash-mismatch"', s)
         self.assertIn('"canPublishPrices": False', s)
         self.assertIn('"liveReady": False', s)
         self.assertIn('source-tier-count-disagrees', s)
@@ -133,12 +139,19 @@ class Stage52QuarantinedRefreshTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256(baseline.read_bytes()).hexdigest(), before)
             self.assertEqual(
                 {p.name for p in output.iterdir()},
-                {"source_audit.json", "candidate_NOT_FOR_TRADING.json"},
+                {"source_audit.json", "candidate_NOT_FOR_TRADING.json",
+                 "source_godly.html", "source_ancient.html", "source_chroma.html"},
             )
             result = json.loads((output / "source_audit.json").read_text())
             proposed = json.loads((output / "candidate_NOT_FOR_TRADING.json").read_text())
             self.assertIsNone(result["publisherUpdatedAtUtc"])
             self.assertFalse(proposed["canPublishPrices"])
+            for kind in audit.KIND_ORDER:
+                captured = output / result["sourcePages"][kind]["archivedHtml"]
+                self.assertEqual(
+                    hashlib.sha256(captured.read_bytes()).hexdigest(),
+                    result["sourcePages"][kind]["sha256"],
+                )
             self.assertEqual(result["baselineGeneratedDateUnverified"], "2026-11-02")
             self.assertEqual(proposed["rowCount"], 156)
             self.assertEqual(result["diff"]["changed"][0]["name"], "Gingerscope")
@@ -167,6 +180,14 @@ class Stage52QuarantinedRefreshTests(unittest.TestCase):
             audit.normalize_page_results(g)
         g=groups();g["Chroma"]["sha256"]="not-a-real-sha"
         with self.assertRaisesRegex(RuntimeError, "source-page-hash-unverified"):
+            audit.normalize_page_results(g)
+
+    def test_valid_looking_but_false_original_source_digest_rejected(self):
+        g=groups();g["Godly"]["sha256"]="0"*64
+        with self.assertRaisesRegex(RuntimeError, "source-page-hash-mismatch"):
+            audit.normalize_page_results(g)
+        g=groups();del g["Godly"]["sourceHtml"]
+        with self.assertRaisesRegex(RuntimeError, "source-html-unavailable-or-oversize"):
             audit.normalize_page_results(g)
 
     def test_rejects_fabricated_publisher_dates_and_wrong_url(self):
