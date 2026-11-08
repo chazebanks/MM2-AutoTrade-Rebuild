@@ -1,0 +1,30 @@
+name: MM2 Discord private embed history audit
+
+# Manually dispatched only after this workflow is reviewed and merged onto main.
+# Does not store, log, or export Discord message contents.
+on:
+  workflow_dispatch:
+    inputs:
+      channel_id:
+        description: 'Authorized MM2 notification channel ID (not a token)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  aggregate-no-storage:
+    if: github.repository == 'chazebanks/MM2-AutoTrade-Rebuild' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Aggregate historical embed claims without storing any messages
+        env:
+          MM2_RESEARCH_DISCORD_BOT_TOKEN: ${{ secrets.MM2_RESEARCH_DISCORD_BOT_TOKEN }}
+          CHANNEL_ID: ${{ inputs.channel_id }}
+        run: |
+          python3 scripts/discord_history_embed_audit.py --channel-id "$CHANNEL_ID" --max-pages 3
