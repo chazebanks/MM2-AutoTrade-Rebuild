@@ -122,6 +122,28 @@ class Stage52QuarantinedRefreshTests(unittest.TestCase):
         self.assertEqual(len(changed), 1)
         self.assertEqual(changed[0]["name"], "Gingerscope")
 
+    def test_new_retrieval_day_cannot_claim_new_publisher_update(self):
+        original_pages = groups()
+        identical_values = audit.normalize_page_results(original_pages)
+        first, _ = audit.build_report(
+            original_pages, identical_values, "2026-11-06",
+            "2026-11-06T18:53:21Z",
+        )
+        second_pages = groups()
+        for page in second_pages.values():
+            page["retrievedAtUtc"] = "2026-11-07T18:53:21Z"
+        second, _ = audit.build_report(
+            second_pages, identical_values, "2026-11-07",
+            "2026-11-07T18:53:21Z",
+        )
+        self.assertNotEqual(first["auditedAtUtc"], second["auditedAtUtc"])
+        self.assertIsNone(first["publisherUpdatedAtUtc"])
+        self.assertIsNone(second["publisherUpdatedAtUtc"])
+        self.assertFalse(first["diff"]["hasDisagreement"])
+        self.assertFalse(second["diff"]["hasDisagreement"])
+        self.assertFalse(first["canPublishPrices"])
+        self.assertFalse(second["canPublishPrices"])
+
     def test_main_audit_writes_only_quarantine_and_leaves_live_file_identical(self):
         with tempfile.TemporaryDirectory(prefix="stage52_") as tmp:
             target = Path(tmp)
