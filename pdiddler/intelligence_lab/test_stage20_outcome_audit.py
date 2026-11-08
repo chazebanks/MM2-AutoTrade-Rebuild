@@ -281,6 +281,158 @@ class AuditTests(unittest.TestCase):
                 self.assertFalse(r.authorizes_trade)
                 self.assertFalse(r.authorizes_accept)
 
+    def test_overlap_impossible_outgoing_masked_by_net_gain_is_rejected(self):
+        o,c,pre,post,p2=make()
+        # Previously CLIENT_CORROBORATED: owns A x1, offers A x3,
+        # receives A x4, so the net counts still look like +1.
+        o=replace(o,our_offer={A:3},their_offer={A:4})
+        pre=replace(pre,items={A:1,C:1})
+        post=replace(post,items={A:2,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'INCONSISTENT')
+        self.assertEqual(r.reason,'outgoing-copies-exceed-pretrade-ownership')
+        self.assertEqual(dict(r.expected_delta),{A:1})
+        self.assertEqual(dict(r.observed_delta),{A:1})
+        self.assertFalse(r.client_evidence_consistent)
+        self.assertFalse(r.server_completion_proven)
+        self.assertFalse(r.authorizes_accept)
+
+    def test_offer_of_unowned_type_with_matching_net_delta_is_rejected(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={A:1},their_offer={A:2})
+        pre=replace(pre,items={C:1})
+        post=replace(post,items={A:1,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'INCONSISTENT')
+        self.assertEqual(r.reason,'outgoing-copies-exceed-pretrade-ownership')
+
+    def test_one_sided_sender_cannot_offer_more_copies_than_owned(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={A:2},their_offer={})
+        pre=replace(pre,items={A:1,C:1})
+        # The expected A -2 cannot be represented by a valid nonnegative
+        # post-inventory readback. Should still fail closed.
+        post=replace(post,items={C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.reason,'outgoing-copies-exceed-pretrade-ownership')
+        self.assertFalse(r.may_record_completed_trade)
+
+    def test_exact_outgoing_copy_count_matches_before_stock(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={A:3},their_offer={B:1})
+        pre=replace(pre,items={A:3,C:1})
+        post=replace(post,items={B:1,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'CLIENT_CORROBORATED')
+        self.assertFalse(r.server_completion_proven)
+        self.assertFalse(r.may_report_profit)
+
+    def test_legitimate_one_sided_receiver_never_requires_owned_incoming(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={},their_offer={B:1})
+        pre=replace(pre,items={A:3,C:1})
+        post=replace(post,items={A:3,B:1,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.status,'CLIENT_CORROBORATED')
+        self.assertFalse(r.authorizes_trade)
+
+    def test_impossible_outgoing_and_changed_partner_still_fail_scope_first(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={A:3},their_offer={A:4})
+        pre=replace(pre,items={A:1,C:1})
+        post=replace(post,items={A:2,C:1})
+        p2=replace(p2,items=post.items)
+        c=replace(c,partner='unrelated')
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.reason,'session-or-account-mismatch')
+
+    def test_impossible_outgoing_with_untrusted_inventory_cannot_correlate(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={A:3},their_offer={A:4})
+        pre=replace(pre,items={A:1,C:1},complete_eligible=False)
+        post=replace(post,items={A:2,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.reason,'complete-native-readback-unverified')
+
+    def test_impossible_outgoing_with_conflicting_post_scans_stays_inconsistent(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={A:3},their_offer={A:4})
+        pre=replace(pre,items={A:1,C:1})
+        post=replace(post,items={A:3,C:1})
+        p2=replace(p2,items={A:2,C:1})
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.reason,'two-post-readbacks-disagree')
+
+    def test_two_outgoing_types_only_one_missing_stock_rejects(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={A:1,B:3},their_offer={B:4})
+        pre=replace(pre,items={A:1,B:1,C:1})
+        post=replace(post,items={B:2,C:1})
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.reason,'outgoing-copies-exceed-pretrade-ownership')
+        self.assertEqual(dict(r.expected_delta),{A:-1,B:1})
+        self.assertEqual(dict(r.observed_delta),{A:-1,B:1})
+
+    def test_net_zero_remains_incomplete_regardless_of_impossible_stock(self):
+        o,c,pre,post,p2=make()
+        o=replace(o,our_offer={A:5},their_offer={A:5})
+        pre=replace(pre,items={A:1,C:1})
+        post=replace(post,items=pre.items)
+        p2=replace(p2,items=post.items)
+        r=review_outcome(o,c,pre,post,p2)
+        self.assertEqual(r.reason,'zero-net-offer-not-inventory-verifiable')
+        self.assertEqual(r.status,'INCOMPLETE')
+        self.assertFalse(r.server_completion_proven)
+
+    def test_750_seeded_outgoing_stock_feasibility_cases(self):
+        import random
+        rng=random.Random(481107)
+        counts={'corroborated':0,'impossible':0,'incomplete':0}
+        for n in range(750):
+            pre_count=rng.randint(1,10)
+            ours=rng.randint(0,10)
+            theirs=rng.randint(0,10)
+            post_count=pre_count+theirs-ours
+            if post_count < 0:
+                continue  # No representable negative owned-inventory snapshot.
+            o,c,pre,post,p2=make()
+            o=replace(o,our_offer={A:ours} if ours else {},
+                      their_offer={A:theirs} if theirs else {})
+            pre=replace(pre,items={A:pre_count,C:1})
+            after={C:1}
+            if post_count: after[A]=post_count
+            post=replace(post,items=after)
+            p2=replace(p2,items=after)
+            with self.subTest(seed_case=n,pre=pre_count,ours=ours,theirs=theirs):
+                r=review_outcome(o,c,pre,post,p2)
+                if ours==theirs:
+                    counts['incomplete']+=1
+                    self.assertEqual(r.status,'INCOMPLETE')
+                elif ours>pre_count:
+                    counts['impossible']+=1
+                    self.assertEqual(r.status,'INCONSISTENT')
+                    self.assertEqual(r.reason,'outgoing-copies-exceed-pretrade-ownership')
+                else:
+                    counts['corroborated']+=1
+                    self.assertEqual(r.status,'CLIENT_CORROBORATED')
+                    self.assertEqual(dict(r.expected_delta),{A:theirs-ours})
+                    self.assertEqual(dict(r.observed_delta),{A:theirs-ours})
+                self.assertFalse(r.server_completion_proven)
+                self.assertFalse(r.authorizes_trade)
+                self.assertFalse(r.authorizes_accept)
+                self.assertFalse(r.may_record_completed_trade)
+                self.assertFalse(r.may_report_profit)
+        self.assertGreater(counts['impossible'],50)
+        self.assertGreater(counts['corroborated'],250)
+        self.assertGreater(counts['incomplete'],10)
+
     def test_fake_client_success_cannot_mint_completion(self):
         o,c,*s=make()
         result=review_outcome(o,c,*s)
