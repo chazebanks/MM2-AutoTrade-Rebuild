@@ -769,7 +769,11 @@ local function appendEvidence(meta,rec,method,reason)
  local year=cleanText(d.Year or d.EventYear,10,true)
  local ev=cleanText(d.Event or d.Season,30,true)
  local itemId=cleanText(d.ItemID,70,true)
- local methodName=cleanText(method,35,false)
+ local methodName=tostring(method or "")
+ -- Mapping methods are generated only by the local resolver, not game metadata.
+ -- The colon in match:<score> must be accepted without weakening game-field checks.
+ if methodName~="alias" and methodName~="internal-key"
+  and not methodName:match("^match:%d%d?%d?%d?$") then methodName=nil end
  if not (raw and shown and check and filename and typeName and pageName and rarity
    and year and ev and itemId and methodName) then
   R.evidenceUnsafeFields=R.evidenceUnsafeFields+1
