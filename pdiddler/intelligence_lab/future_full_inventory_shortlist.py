@@ -6,7 +6,6 @@ are returned. Synthetic source evidence only for offline test fixtures.
 """
 from __future__ import annotations
 
-from collections import Counter
 from typing import Any
 
 SCHEMA="gingerscope-future-inventory-shortlist-v1"
@@ -22,7 +21,7 @@ def _base(status,reason):
         "counts":{"ourInput":0,"theirInput":0,
                   "ourExcludedIdentityOrProfile":0,
                   "theirExcludedIdentityOrProfile":0,
-                  "theirUnaffordable":0,
+                  "theirExcludedMarketOrBudget":0,
                   "ourQuantityCapped":0,"theirQuantityCapped":0,
                   "ourNotSelected":0,"theirNotSelected":0},
         "theoreticalMaxListedOffer":0,
@@ -135,7 +134,7 @@ def shortlist(ours:object,theirs:object,catalog:object,*,now:int,
                 if market[k]["value"]<=allowed_value and
                    market[k]["demand"]>=4 and market[k]["liquidity"]>=4 and
                    market[k]["stability"] in {"Stable","Overpaid For"}}
-    out["counts"]["theirUnaffordable"]=len(their_good)-len(affordable)
+    out["counts"]["theirExcludedMarketOrBudget"]=len(their_good)-len(affordable)
     if not affordable:
         out["status"]="NO_AFFORDABLE_PARTNER_ITEMS"
         out["reason"]="NONE_PASS_VALUE_OR_DEMAND_LIQUIDITY"
