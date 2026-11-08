@@ -54,6 +54,7 @@ class DiscordReadOnlyProbeTests(unittest.TestCase):
         text = "\n".join(result)
         self.assertIn("BOT_AUTH=OK", text)
         self.assertIn("HISTORY_SAMPLE_COUNT=2", text)
+        self.assertIn("HISTORY_READ=VISIBLE_MESSAGES", text)
         self.assertIn("SAMPLE_WEBHOOK_MESSAGES=1", text)
         self.assertIn("SAMPLE_MESSAGES_WITH_EMBEDS=1", text)
         self.assertIn("SAMPLE_MESSAGES_WITH_TEXT=1", text)
@@ -104,6 +105,7 @@ class DiscordReadOnlyProbeTests(unittest.TestCase):
             return fake_fetch(path, token)
         result = "\n".join(probe.probe(CID, TOKEN, fetch=no_history))
         self.assertIn("NO_MESSAGES_RETURNED_CHECK_READ_HISTORY_PERMISSION_OR_EMPTY_CHANNEL", result)
+        self.assertIn("HISTORY_READ=INCONCLUSIVE_NO_MESSAGES", result)
         self.assertNotIn("SAMPLE_VISIBLE_NOT_COMPLETION_PROOF", result)
 
     def test_history_shape_rejection(self):
