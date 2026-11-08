@@ -432,6 +432,84 @@ local function catalogueKeyCensus()
  if candidates~=1 then return nil,nil,candidates,"BATWING_NAME_AMBIGUOUS" end
  return target,keys,candidates,nil
 end
+-- One pre-offer own profile read; RemoteFunction:InvokeServer yields.
+-- Never publish the raw profile, item key, username, or remote error string.
+local function unwrapProfile(raw)
+ if type(raw)~="table" or getmetatable(raw)~=nil then return nil end
+ local candidate=raw
+ for depth=0,4 do
+  if type(candidate)~="table" or getmetatable(candidate)~=nil then return nil end
+  local w=rawget(candidate,"Weapons")
+  if type(w)=="table" and getmetatable(w)==nil then
+   local own=rawget(w,"Owned")
+   if type(own)=="table" and getmetatable(own)==nil then return own end
+  end
+  local nextCandidate=nil
+  for _,k in ipairs({"ProfileData","Profile","PlayerData","Data","Inventory","FullInventory"})do
+   local nested=rawget(candidate,k)
+   if type(nested)=="table" then
+    if nextCandidate then return nil end
+    nextCandidate=nested
+   end
+  end
+  if not nextCandidate then return nil end
+  candidate=nextCandidate
+ end
+ return nil
+end
+local function ownProfileRemote()
+ local rs=game:GetService("ReplicatedStorage")
+ local remotes=rs:FindFirstChild("Remotes")
+ local inv=remotes and remotes:FindFirstChild("Inventory")
+ local rf=inv and inv:FindFirstChild("GetProfileData")
+ if not rf or not rf:IsA("RemoteFunction") then
+  return nil,"OWN_PROFILE_REMOTE_MISSING" end
+ return rf
+end
+local function preOfferProfileRead()
+ if profileReadAttempts~=0 then finish("DUPLICATE_OWN_PROFILE_READ");return false end
+ local rf,missing=ownProfileRemote()
+ if not rf then finish(missing);return false end
+ profileReadAttempts=1
+ local done,success,response=false,false,nil
+ -- Late response is ignored after timeout/cleanup, never used as a new read.
+ task.spawn(function()
+  local ok,v=pcall(function()return rf:InvokeServer()end)
+  if S.finished or profileReadTimedOut then return end
+  success=ok;response=ok and v or nil;done=true
+ end)
+ local start=clock()
+ while not done and not S.finished and clock()-start<6 do
+  local o,why=checkedFrame()
+  if not o then finish(why);return false end
+  if o.ourSlots~=0 or o.theirSlots~=0 or o.ourSig~=baseline.ourSig
+   or o.theirSig~=baseline.theirSig then
+   finish("OFFER_CHANGED_DURING_PROFILE_READ");return false end
+  task.wait(math.min(.10,math.max(.01,6-(clock()-start))))
+ end
+ if S.finished then return false end
+ if not done then
+  profileReadTimedOut=true;finish("OWN_PROFILE_READ_TIMEOUT");return false end
+ if not success or type(response)~="table" then
+  response=nil;finish("OWN_PROFILE_READ_FAILED");return false end
+ local owned=unwrapProfile(response)
+ response=nil
+ if not owned then finish("OWN_PROFILE_SHAPE_UNRECOGNIZED");return false end
+ local ok,result=pcall(profileInspector.inspect,owned,targetKey)
+ owned=nil
+ if not ok or type(result)~="table" then
+  finish("OWN_PROFILE_INSPECT_FAILED");return false end
+ privateProfileResult=result
+ local o,why=checkedFrame()
+ if not o then finish(why);return false end
+ if o.ourSlots~=0 or o.theirSlots~=0 or o.ourSig~=baseline.ourSig
+  or o.theirSig~=baseline.theirSig then
+  finish("OFFER_CHANGED_DURING_PROFILE_READ");return false end
+ if result.profileCandidateClientMatched~=true then
+  finish("PREPROFILE_RAW_KEY_NOT_MATCHED");return false end
+ profileReadReady=true
+ return true
+end
 local function examineOfferFrame(o,now)
  if phaseName=="WAIT_ADD" then
   if o.ourSlots~=1 or o.theirSlots~=0 then
@@ -534,6 +612,7 @@ local function observe()
      if not bindContextSignals(pg)then return end
      local current,invalid=checkedFrame();if not current then finish(invalid);return end
      if current.ourSlots~=0 or current.theirSlots~=0 or current.ourSig~=baseline.ourSig or current.theirSig~=baseline.theirSig then finish("OFFER_CHANGED_DURING_SYNC_READ");return end
+     if not preOfferProfileRead() then return end
      local remote,missing=exactRemote();if not remote then finish(missing);return end
      boundRemote=remote
      S.phase="LISTENING_UPDATE_TRADE"
