@@ -82,7 +82,7 @@ class Stage45PythonIntegration(unittest.TestCase):
             'source(CORE_PIN,"p4_stage45_start_trade_payload")',
             'source(BASE,"p4_native_observer")',
             'node.Name=="StartTrade" and node:IsA("RemoteEvent")',
-            'remote.OnClientEvent', 'table.pack(...)',
+            'knownRemote.OnClientEvent', 'table.pack(...)',
             'privatePack=nil', 'seen>1',
             'ARGUMENT_LIMIT_EXCEEDED', 'GUI_VISIBLE_BEFORE_START_TRADE_RECEIPT',
             'UNARMED_START_TRADE_RECEIPT', 'TRADE_GUI_NOT_STABLE_AFTER_START',
@@ -130,7 +130,7 @@ class Stage45PythonIntegration(unittest.TestCase):
             cwd=ROOT.parent, text=True, capture_output=True, timeout=20,
         )
         self.assertEqual(p.returncode, 0, p.stdout + "\\n" + p.stderr)
-        self.assertIn("Stage45 StartTrade whole launcher native: 20 passed, 0 failed", p.stdout)
+        self.assertIn("Stage45 StartTrade whole launcher native: 21 passed, 0 failed", p.stdout)
 
     @unittest.skipUnless(shutil.which("lua5.4"), "Lua5.4 required for actual Lua execution")
     def test_python_executes_checked_in_lua_fixture(self):
