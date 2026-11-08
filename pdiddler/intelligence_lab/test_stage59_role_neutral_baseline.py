@@ -26,6 +26,7 @@ return {new=function(cfg)
  _G.lastOpponentCachePresent=(cfg.opponentInventory~=nil)
  return cfg
 end,capture=function(cfg)
+ _G.forceTradeClosed=true
  return {tradeOpen=false,session=cfg.session},{}
 end}
 ]==],
@@ -125,6 +126,7 @@ local function scenario(path,cached,guiShown,partnerKnown,oldSourceCase)
  local env={}
  getgenv=function()return env end
  _G.partnerCacheOK=cached
+ _G.forceTradeClosed=false
  _G.lastOpponentCachePresent=nil
  local calls=0
  setclipboard=function()clipboardCopies=clipboardCopies+1 end
@@ -156,7 +158,7 @@ local function scenario(path,cached,guiShown,partnerKnown,oldSourceCase)
   if name=="TheirOffer"then return side end
  end
  function container:FindFirstChild(name)
-  if name=="Trade"and guiShown then return root end
+  if name=="Trade"and guiShown and not _G.forceTradeClosed then return root end
  end
  function screen:FindFirstChild(name)
   if name=="Container"then return container end
