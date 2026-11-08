@@ -21,6 +21,9 @@ import re
 import sys
 import tempfile
 
+# Direct module loading in offline tests/private Actions must still resolve the sibling
+# audit module from this immutable reviewed source tree.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import discord_history_embed_audit as audit
 
 SCHEMA = "mm2-discord-private-evidence-ledger-v1"
