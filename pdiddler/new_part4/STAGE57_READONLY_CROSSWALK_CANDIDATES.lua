@@ -38,10 +38,10 @@ local function buildInstructionPanel()
   local lp=players and players.LocalPlayer
   local pg=lp and lp:FindFirstChildOfClass("PlayerGui")
   if not pg then return end
-  local old=pg:FindFirstChild("GINGERSCOPE_STAGE56_INSTRUCTIONS")
+  local old=pg:FindFirstChild("GINGERSCOPE_STAGE57_INSTRUCTIONS")
   if old and old:IsA("ScreenGui") then old:Destroy() end
   local screen=Instance.new("ScreenGui")
-  screen.Name="GINGERSCOPE_STAGE56_INSTRUCTIONS"
+  screen.Name="GINGERSCOPE_STAGE57_INSTRUCTIONS"
   screen.ResetOnSpawn=false
   screen.IgnoreGuiInset=false
   screen.DisplayOrder=150
