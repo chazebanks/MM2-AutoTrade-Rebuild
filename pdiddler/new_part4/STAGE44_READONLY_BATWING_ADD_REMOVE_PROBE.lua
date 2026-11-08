@@ -456,7 +456,7 @@ local function captureUpdate(...)
  local before,why=checkedFrame()
  if not before then finish(why);return end
  local receivedAt=clock()
- if receivedAt-boundAt>=30 then finish("NO_COMPLETE_ADD_REMOVE_SEQUENCE_IN_WINDOW");return end
+ if receivedAt-boundAt>=60 then finish("NO_COMPLETE_ADD_REMOVE_SEQUENCE_IN_WINDOW");return end
  eventCount=eventCount+1
  if eventCount>MAX_EVENTS then finish("UPDATE_RECEIPT_LIMIT");return end
  -- This argument pack exists only in this stack frame, not global state.
