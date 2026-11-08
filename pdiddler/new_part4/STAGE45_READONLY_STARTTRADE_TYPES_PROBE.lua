@@ -244,7 +244,7 @@ local knownRemote,remoteProblem=currentRemote()
 if not knownRemote then finish(remoteProblem);return S end
 if not connect(knownRemote.OnClientEvent,onStart,true)then return S end
 local function checked(r,p,l)
- if ownerProblem()then return nil,"SESSION_CHANGED"end
+ local problem=ownerProblem();if problem then return nil,problem end
  if currentRemote()~=activeRemote then return nil,"START_TRADE_REMOTE_CHANGED"end
  local root,partner,label=discover()
  if root~=r or partner~=p or label~=l then return nil,"WINDOW_CONTEXT_CHANGED"end
