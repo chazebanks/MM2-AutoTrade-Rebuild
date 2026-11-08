@@ -180,9 +180,10 @@ local function showAndCopyLocal()
   say("COPY "..M.role.." OK (ID "..receipt.receiptNonce:sub(1,8)..
    "). Paste THIS device's report immediately; other device must have DIFFERENT ID.")
  else
-  print(line)
+  -- The ORIGINAL full receipt was already printed at completion.
+  -- Never print a second full marker line: that looks like another witness.
   say("COPY BLOCKED (ID "..receipt.receiptNonce:sub(1,8)..
-   "). Copy exact STAGE59 PAIRED WITNESS line from Delta console.")
+   "). Copy the ORIGINAL STAGE59 PAIRED WITNESS line from Delta console.")
  end
  return ok
 end
