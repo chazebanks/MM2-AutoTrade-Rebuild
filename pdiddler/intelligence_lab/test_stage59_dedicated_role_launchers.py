@@ -92,7 +92,7 @@ exercise(path,shared,role,{direct=false,clipboardMissing=true})
 local report,guide=call(role,{direct=false,stage32TimedOut=true})
 assert(report:find('"collectorStatus":"INCOMPLETE_STAGE32_NO_POST_CLOSE_EVIDENCE"',1,true))
 assert(report:find('"postReadbacksObserved":0',1,true))
-print("[STAGE59_TWO_ROLE_LAUNCHERS_TESTS_OK] "..role)
+oldPrint("[STAGE59_TWO_ROLE_LAUNCHERS_TESTS_OK] "..role)
 '''
     # In this mock, broken GUI/no-GUI cases still correctly launch the
     # unconditionally selected role, instead of awaiting manual role buttons.
