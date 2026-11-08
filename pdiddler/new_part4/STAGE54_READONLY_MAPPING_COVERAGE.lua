@@ -14,10 +14,38 @@ local R={schema="gingerscope-stage54-mapping-coverage-v1",readOnly=true,clientOn
  otherResolverFail=0,invalidCatalogRows=0,printableKeyCollisions=0,
  duplicateTargetGroups=0,duplicateTargetEntries=0,yearHintConflicts=0,
  yearHintsComparable=0,placeholderArtworkMatches=0,filteredChroma=0}
+-- Best-effort local clipboard convenience. Only the anonymized aggregate report
+-- may leave the observer; no raw catalogue data or inventory is ever copied.
+local function tryClipboard(fn,line)
+ if type(fn)~="function" then return false end
+ local ok,accepted=pcall(fn,line)
+ return ok and accepted~=false
+end
+local function copySummary(line)
+ if tryClipboard(setclipboard,line) then return true end
+ if tryClipboard(toclipboard,line) then return true end
+ if type(getgenv)=="function" then
+  local ok,env=pcall(getgenv)
+  if ok and type(env)=="table" then
+   if tryClipboard(env.setclipboard,line) then return true end
+   if tryClipboard(env.toclipboard,line) then return true end
+  end
+ end
+ return false
+end
 local function emit(status)
  R.status=status
  local ok,result=pcall(function()return game:GetService("HttpService"):JSONEncode(R)end)
- if ok then print(marker.." "..result) else print(marker.." REPORT_ENCODING_FAILED") end
+ if not ok or type(result)~="string" then
+  print(marker.." REPORT_ENCODING_FAILED")
+  return R
+ end
+ local line=marker.." "..result
+ -- Clipboard failure cannot suppress the diagnostic; the console remains usable.
+ local copied=copySummary(line)
+ print(line)
+ if copied then print("[STAGE54] CLIPBOARD_COPIED")
+ else print("[STAGE54] CLIPBOARD_UNAVAILABLE_COPY_REPORT_FROM_CONSOLE") end
  return R
 end
 local function norm(x)
