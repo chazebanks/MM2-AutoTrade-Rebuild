@@ -21,7 +21,7 @@ The separate `STAGE45_READONLY_STARTTRADE_TYPES_PROBE.lua` launcher connects to 
 
 The independent code pins are `p4_stage45_start_trade_payload.lua` at commit `3635e6322cdcccc3d5bc9c1ea8a74bcf00a4333c`, and unchanged Stage9 `p4_native_observer.lua` / `p4_observer_contract.lua` at `35ec2d9a47048910a464a2ef6eb9b9f52ae306b1`. No existing active Stage44 or earlier Lua scripts are changed.
 
-**Offline verification:** 17 pure Lua fixtures; 30 whole-launcher native fake-Roblox scenarios; Python integration that invokes those ACTUAL Lua tests, checks source/permissions and drives 320 randomized Lua payload-type cases. The tests cover both successes and specifically falsifying errors. All reported session, settlement, acceptance, trading and profit authority flags are always false, even when a scalar string, number or both player references are observed. Green mock CI cannot prove live MM2 behavior.
+**Offline verification:** 17 pure Lua fixtures; 31 whole-launcher native fake-Roblox scenarios; Python integration that invokes those ACTUAL Lua tests, checks source/permissions and drives 320 randomized Lua payload-type cases. The tests cover both successes and specifically falsifying errors. All reported session, settlement, acceptance, trading and profit authority flags are always false, even when a scalar string, number or both player references are observed. Green mock CI cannot prove live MM2 behavior.
 
 | Scenario | Expected safe result | Why it matters |
 |---|---|---|
