@@ -76,6 +76,9 @@ function M.inspect(sync,profileOwned,scanner,key,offeredCount)
  if name==nil then name=rawget(meta,"Name") end
  local rarity=rawget(meta,"Rarity")
  local chroma=rawget(meta,"Chroma")==true
+ local shown=chroma and
+  (string.lower(name):sub(1,7)=="chroma " and name or "Chroma "..name)
+  or name
  local page=chroma and "chroma" or
   ((rarity=="Ancient" or rarity=="Godly") and string.lower(rarity) or nil)
  if (t~="Knife" and t~="Gun") or typ(name)~="string" or name==""
@@ -85,8 +88,28 @@ function M.inspect(sync,profileOwned,scanner,key,offeredCount)
   or rawget(meta,"EvoBaseID")~=nil or rawget(meta,"EvoIndex")~=nil then
   return fail(r,"SYNC_ITEM_NOT_VERIFIED_ELIGIBLE")
  end
+ -- Audit the entire raw Owned key space without coercing type identity.
+ -- Scanner.rawOwned totals valid nonzero Owned copies, including low tiers.
+ local ownedTotal,ownedSpellings=0,{}
+ for k,v in next,profileOwned do
+  if not validKey(k) or (typ(v)~="number" and typ(v)~="string") then
+   return fail(r,"RAW_OWNED_MAP_UNTRUSTED") end
+  local count=typ(v)=="string" and tonumber(v) or v
+  if typ(count)~="number" or count~=count or count==math.huge
+   or count~=math.floor(count) or count<0 or count>1000000 then
+   return fail(r,"RAW_OWNED_COUNT_UNTRUSTED") end
+  local spelled=tostring(k)
+  if ownedSpellings[spelled]~=nil and not rawequal(ownedSpellings[spelled],k) then
+   return fail(r,"RAW_OWNED_KEY_TYPE_COLLISION")end
+  ownedSpellings[spelled]=k
+  ownedTotal=ownedTotal+count
+  if ownedTotal>1000000 then return fail(r,"RAW_OWNED_COUNT_OVERFLOW")end
+ end
+ if rawget(scanner,"rawOwned")~=ownedTotal then
+  return fail(r,"SCANNER_PROFILE_TOTAL_DISAGREES")end
  local owned=rawget(profileOwned,key)
  if owned==nil then return fail(r,"RAW_KEY_NOT_OWNED") end
+ if typ(owned)=="string" then owned=tonumber(owned) end
  if not qty(owned) or owned<offeredCount then
   return fail(r,"INSUFFICIENT_RAW_OWNED_COPIES") end
  r.exactRawKeyInOwned=true
@@ -116,7 +139,7 @@ function M.inspect(sync,profileOwned,scanner,key,offeredCount)
   if id==key then
    matches=matches+1
    if rawget(row,"cat")~="Weapons" or rawget(row,"page")~=page
-    or rawget(row,"type")~=t or rawget(row,"name")~=name then
+    or rawget(row,"type")~=t or rawget(row,"name")~=shown then
     return fail(r,"SCANNER_ROW_METADATA_MISMATCH")end
    r.scannerRowRawKeyMatched=true
    if rawget(row,"qty")~=owned then
