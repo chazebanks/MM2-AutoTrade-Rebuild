@@ -457,15 +457,19 @@ local function finish(reason,core)
  local localStorage=saveLocal(line,M.role,nonce)
  M.localArchiveStatus=localStorage
  if reportButton then pcall(function()reportButton.Visible=true end) end
- local copied=copyOutput(line)
+ -- NEVER push the receipt into the OS clipboard automatically here.
+ -- iPad+iPhone may share the Universal Clipboard: the later client's
+ -- auto-copy can overwrite the earlier client's result, making ONE receiver
+ -- receipt appear to have come from both clients. Only a deliberate tap on
+ -- COPY MAIN/ALT REPORT may invoke copyOutput.
  print(line)
  local shortId=nonce and nonce:sub(1,8) or "NO-ID"
  local mode=(M.role=="SENDER" and "ALT" or "MAIN")
  local message="FINISHED "..mode.." ID "..shortId..
-  " | local backup: "..localStorage..". Tap COPY "..mode..
-  " REPORT on THIS DEVICE before pasting. The other report MUST have a different ID."
- if not copied then
-  message=message.." Clipboard unavailable: use console or local backup."
+  " | local backup: "..localStorage..". TAP COPY "..mode..
+  " REPORT on THIS DEVICE, then paste it. No automatic clipboard copy."
+ if not reportButton then
+  message=message.." UI unavailable: copy own console line manually."
  end
  say(message)
 end
