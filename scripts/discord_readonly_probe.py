@@ -103,7 +103,7 @@ def probe(channel_id: str, token: str, *, fetch=fetch_json) -> tuple[str, ...]:
     return (
         "BOT_AUTH=OK",
         "CHANNEL_ACCESS=OK",
-        "HISTORY_READ=OK",
+        "HISTORY_READ=" + ("INCONCLUSIVE_NO_MESSAGES" if total == 0 else "VISIBLE_MESSAGES"),
         "HISTORY_SAMPLE_COUNT=" + str(total),
         "SAMPLE_WEBHOOK_MESSAGES=" + str(webhooks),
         "SAMPLE_MESSAGES_WITH_EMBEDS=" + str(embeds),
