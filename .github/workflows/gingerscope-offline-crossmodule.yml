@@ -6,6 +6,8 @@ on:
   pull_request:
     paths:
       - 'pdiddler/intelligence_lab/test_future_offline_crossmodule_contract.py'
+      - 'pdiddler/intelligence_lab/test_future_runtime_server_crossmodule.py'
+      - 'pdiddler/intelligence_lab/test_future_hop_runtime_contract.lua'
       - '.github/workflows/gingerscope-offline-crossmodule.yml'
 permissions:
   contents: read
@@ -39,8 +41,24 @@ jobs:
           ref: c02d5b7c17350cdb95dd6cb43ed7cd8ecb9e7dfc
           path: .offline_sources/pr110
           persist-credentials: false
+      - name: Checkout tested PR107 runtime supervisor (read-only, pinned)
+        uses: actions/checkout@v4
+        with:
+          ref: ff2f2750234ad91d4bed87f3d7e05f370373cbb0
+          path: .offline_sources/pr107
+          persist-credentials: false
+      - name: Checkout tested PR108 server intelligence (read-only, pinned)
+        uses: actions/checkout@v4
+        with:
+          ref: 4799138c580b36e891d892182e98427525af8a46
+          path: .offline_sources/pr108
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Test exact pinned sources as one research chain (no device)
-        run: python -m unittest pdiddler.intelligence_lab.test_future_offline_crossmodule_contract -v
+      - name: Install actual Lua 5.4 for runtime state tests
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lua5.4
+      - name: Verify pinned strategy + reporting chain and runtime + navigation gate
+        run: |
+          python -m unittest pdiddler.intelligence_lab.test_future_offline_crossmodule_contract -v
+          python -m unittest pdiddler.intelligence_lab.test_future_runtime_server_crossmodule -v
