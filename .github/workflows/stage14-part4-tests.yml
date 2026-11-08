@@ -74,7 +74,9 @@ jobs:
             test_stage45_start_trade_native \
             test_stage46_starttrade_tuple_semantics \
             test_stage46_starttrade_tuple_native \
-            test_stage49_raw_key_ownership_bridge; do
+            test_stage49_raw_key_ownership_bridge \
+            test_stage50_preprofile_raw_key \
+            test_stage50_preprofile_offer_native; do
             lua5.4 "pdiddler/new_part4/tests/${name}.lua" pdiddler/new_part4
           done
           lua5.4 pdiddler/new_part4/stage12/tests/test_stage12_probe.lua pdiddler/new_part4/stage12
