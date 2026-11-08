@@ -53,13 +53,16 @@ function M.step(previous,event,now)
  local s=copy(previous)
  s.lastAt=now
  local kind=event.kind
- if kind=="WORLD_LOADING" or kind=="SERVER_CHANGED" then
-  return reset(s,kind.."_INVALIDATES_PRIOR_SESSIONS")
+ if s.phase=="STOPPED" then
+  return result(s,"STOPPED_REQUIRES_FRESH_BOOT")
  end
  -- All asynchronous event callbacks must be stamped with the current epoch.
  -- A late callback from a previous Roblox server/character cannot open trade.
  if not uint(event.epoch,2147483647) or event.epoch~=s.epoch then
   return result(s,"STALE_OR_MISSING_EVENT_EPOCH")
+ end
+ if kind=="WORLD_LOADING" or kind=="SERVER_CHANGED" then
+  return reset(s,kind.."_INVALIDATES_PRIOR_SESSIONS")
  end
  if kind=="STOP" then
   s.phase="STOPPED"
@@ -67,13 +70,15 @@ function M.step(previous,event,now)
   s.hopSince=nil
   return result(s,"USER_STOPPED")
  end
- if s.phase=="STOPPED" then return result(s,"STOPPED_REQUIRES_FRESH_BOOT")end
  if kind=="COMBAT_STATE" then
   if type(event.inCombat)~="boolean" then
    return result(s,"COMBAT_STATUS_UNVERIFIED")
   end
   s.inCombat=event.inCombat
-  if s.phase=="HOP_ELIGIBLE" and s.inCombat then s.phase="HOP_WAIT" end
+  if s.inCombat and (s.phase=="HOP_ELIGIBLE" or s.phase=="HOP_WAIT") then
+   s.phase="HOP_WAIT"
+   s.hopSince=now -- full cooldown after combat interrupts hopping
+  end
   return result(s,"COMBAT_FLAG_UPDATED")
  end
  if kind=="WORLD_READY" then
@@ -105,6 +110,9 @@ function M.step(previous,event,now)
   return result(s,"UI_STABLE_ENABLE_READONLY_SCAN")
  end
  if kind=="UI_LOST" then
+  if not nonempty(s.jobId) then
+   return result(s,"UI_LOSS_IGNORED_BEFORE_WORLD_READY")
+  end
   s.phase="WAIT_UI_STABLE"
   s.uiFirstAt=nil
   s.uiFingerprint=nil
