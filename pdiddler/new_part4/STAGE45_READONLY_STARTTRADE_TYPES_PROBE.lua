@@ -282,12 +282,15 @@ local function observe()
    if fail then finish(fail);return end
    if o then
     if lastFrame and o.ourSig==lastFrame.ourSig
-      and o.theirSig==lastFrame.theirSig and clock()-frameAt>=.15 then
-     selectedRoot=root;selectedPartner=partner;selectedLabel=label
-     selectedFrame=o
-     break
-    end
-    lastFrame=o;frameAt=clock()
+      and o.theirSig==lastFrame.theirSig then
+     -- Preserve the first matching snapshot's clock. Resetting on EVERY
+     -- .12s poll makes a .15s stability gate mathematically unreachable.
+     if clock()-frameAt>=.15 then
+      selectedRoot=root;selectedPartner=partner;selectedLabel=label
+      selectedFrame=o
+      break
+     end
+    else lastFrame=o;frameAt=clock() end
    else lastFrame=nil;frameAt=nil end
   else
    stableRoot=nil;stablePartner=nil;stableLabel=nil
