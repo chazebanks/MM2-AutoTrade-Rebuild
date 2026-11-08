@@ -20,7 +20,7 @@ local M={state="NOT_STARTED",role="UNASSIGNED",readOnly=true,
  authorizesTrade=false,authorizesAccept=false,mayReportProfit=false,
  mayRecordCompletedTrade=false,serverCompletionProven=false,
  tradeOutcome="UNKNOWN"}
-local label,gui,roleButtons=nil,nil,{}
+local label,gui,roleButtons,reportButton=nil,nil,{},nil
 local function fixedRole()
  return specifiedRole=="SENDER" or specifiedRole=="RECEIVER"
 end
@@ -68,6 +68,105 @@ local function copyOutput(value)
   end
  end
  return false
+end
+-- File storage is OPTIONAL; executor files live in that device's own
+-- sandbox. We never assume iOS Delta has these functions or that a write
+-- survived app termination until a readback verified it.
+local function fileFn(kind)
+ if kind=="write" and type(writefile)=="function" then return writefile end
+ if kind=="read" and type(readfile)=="function" then return readfile end
+ if type(getgenv)=="function" then
+  local ok,env=pcall(getgenv)
+  if ok and type(env)=="table" then
+   local f=env[kind=="write" and "writefile" or "readfile"]
+   if type(f)=="function" then return f end
+  end
+ end
+ return nil
+end
+local function archivePrefix(role)
+ if role=="SENDER" then return "GINGERSCOPE_STAGE59_ALT" end
+ if role=="RECEIVER" then return "GINGERSCOPE_STAGE59_MAIN" end
+ return nil
+end
+local function nonceIsSafe(v)
+ return type(v)=="string" and #v>=16 and #v<=64
+  and v:match("^[%x%-]+$")~=nil
+end
+local function validateLocalLine(line,expectedRole)
+ if type(line)~="string" or #line<120 or #line>6000 or
+  line:sub(1,#MARKER+1)~=MARKER.." " then return nil end
+ local body=line:sub(#MARKER+2)
+ local ok,receipt=pcall(function()
+  return game:GetService("HttpService"):JSONDecode(body)
+ end)
+ if not ok or type(receipt)~="table" or
+  receipt.schema~="gingerscope-stage59-two-client-aggregate-witness-v1" or
+  receipt.operatorDeclaredRole~=expectedRole or receipt.pairId~=PAIR_ID or
+  not nonceIsSafe(receipt.receiptNonce) or
+  receipt.readOnly~=true or receipt.serverCompletionProven~=false or
+  receipt.serverAttestation~=false or
+  receipt.mayReportProfit~=false or
+  receipt.mayRecordCompletedTrade~=false or
+  receipt.authorizesTrade~=false or receipt.authorizesAccept~=false or
+  receipt.tradeOutcome~="UNKNOWN" then return nil end
+ return receipt
+end
+local function readSaved(role)
+ local prefix=archivePrefix(role)
+ local read=fileFn("read")
+ if not prefix or not read then return nil end
+ local ok,line=pcall(read,prefix.."_LAST.txt")
+ if not ok or not validateLocalLine(line,role) then return nil end
+ return line
+end
+local function saveLocal(line,role,nonce)
+ local prefix=archivePrefix(role)
+ local write,read=fileFn("write"),fileFn("read")
+ if not prefix or not nonceIsSafe(nonce) or not write or not read then
+  return "UNAVAILABLE"
+ end
+ local history=prefix.."_R_"..nonce:gsub("-","")..".txt"
+ local latest=prefix.."_LAST.txt"
+ local function verified(path,neverOverwrite)
+  if neverOverwrite then
+   local existing,old=pcall(read,path)
+   if existing then return old==line end
+  end
+  local wrote=pcall(write,path,line)
+  if not wrote then return false end
+  local ok,value=pcall(read,path)
+  return ok and value==line
+ end
+ -- Never overwrite a previous immutable receipt even on GUID collision.
+ local archived=verified(history,true)
+ local indexed=archived and verified(latest,false)
+ if archived and indexed then
+  M.localArchiveName=history
+  return "VERIFIED_LOCAL_ARCHIVE"
+ end
+ return archived and "HISTORY_ONLY" or "UNAVAILABLE"
+end
+local function showAndCopyLocal()
+ local line=M.reportLine or readSaved(M.role)
+ local receipt=line and validateLocalLine(line,M.role)
+ if not receipt then
+  say("NO RECOVERABLE "..tostring(M.role).." REPORT. Save file support may be unavailable; check Delta console.")
+  return false
+ end
+ local ok=copyOutput(line)
+ print("[STAGE59 "..M.role.." LOCAL RECEIPT RETRIEVAL] id="..
+  receipt.receiptNonce:sub(1,8).." copied="..tostring(ok))
+ -- Do not change a report's nonce or timestamp: a re-copy is NOT a new witness.
+ if ok then
+  say("COPY "..M.role.." OK (ID "..receipt.receiptNonce:sub(1,8)..
+   "). Paste THIS device's report immediately; other device must have DIFFERENT ID.")
+ else
+  print(line)
+  say("COPY BLOCKED (ID "..receipt.receiptNonce:sub(1,8)..
+   "). Copy exact STAGE59 PAIRED WITNESS line from Delta console.")
+ end
+ return ok
 end
 local function panel()
  pcall(function()
@@ -128,7 +227,7 @@ local function panel()
   heading.Parent=frame
   label=Instance.new("TextLabel")
   label.Size=phoneMode
-   and UDim2.new(1,-18,1,-46) or UDim2.new(1,-20,0,86)
+   and UDim2.new(1,-18,1,-80) or UDim2.new(1,-20,0,86)
   label.Position=UDim2.fromOffset(10,41)
   label.BackgroundTransparency=1;label.Font=Enum.Font.Gotham
   label.TextSize=phoneMode and 12 or 14;label.TextWrapped=true
@@ -151,6 +250,18 @@ local function panel()
   close.TextColor3=Color3.fromRGB(245,232,255)
   close.Text="X";close.Parent=frame
   close.Activated:Connect(function()screen:Destroy()end)
+  reportButton=Instance.new("TextButton")
+  reportButton.Name="COPY_OWN_STAGE59_REPORT"
+  reportButton.Size=UDim2.new(1,-20,0,29)
+  reportButton.Position=UDim2.new(0,10,1,-33)
+  reportButton.Font=Enum.Font.GothamBold
+  reportButton.TextSize=phoneMode and 12 or 13
+  reportButton.BackgroundColor3=Color3.fromRGB(112,69,168)
+  reportButton.TextColor3=Color3.fromRGB(255,255,255)
+  reportButton.Text="COPY "..(specifiedRole=="SENDER" and "ALT" or "MAIN").." REPORT"
+  reportButton.Visible=readSaved(specifiedRole)~=nil
+  reportButton.Parent=frame
+  reportButton.Activated:Connect(function()showAndCopyLocal()end)
   if phoneMode then
    -- Explicit minimise/restore button: no hidden dependence on hover,
    -- scrolling, touch gestures, or the ALT role picker.
@@ -166,6 +277,10 @@ local function panel()
    minimise.Activated:Connect(function()
     folded=not folded
     label.Visible=not folded
+    if reportButton then
+     reportButton.Visible=not folded and
+      (M.reportLine~=nil or readSaved(M.role)~=nil)
+    end
     frame.Size=UDim2.fromOffset(frame.Size.X.Offset,folded and 36 or 146)
     minimise.Text=folded and "+" or "-"
    end)
@@ -319,14 +434,22 @@ local function finish(reason,core)
   return
  end
  local line=MARKER.." "..encoded
+ M.report=report
+ M.reportLine=line
+ local localStorage=saveLocal(line,M.role,nonce)
+ M.localArchiveStatus=localStorage
+ if reportButton then pcall(function()reportButton.Visible=true end) end
  local copied=copyOutput(line)
  print(line)
- if copied then
-  say("FINISHED. Anonymous result copied. PASTE it in ChatGPT. Then paste the OTHER DEVICE report too. Never claim profit.")
- else
-  say("FINISHED. Clipboard blocked: copy full STAGE59 PAIRED WITNESS console line into ChatGPT. Then other device.")
+ local shortId=nonce and nonce:sub(1,8) or "NO-ID"
+ local mode=(M.role=="SENDER" and "ALT" or "MAIN")
+ local message="FINISHED "..mode.." ID "..shortId..
+  " | local backup: "..localStorage..". Tap COPY "..mode..
+  " REPORT on THIS DEVICE before pasting. The other report MUST have a different ID."
+ if not copied then
+  message=message.." Clipboard unavailable: use console or local backup."
  end
- M.report=report
+ say(message)
 end
 local lastState=nil
 local boundAt=nil
