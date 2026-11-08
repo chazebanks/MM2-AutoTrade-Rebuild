@@ -4,7 +4,7 @@
 -- Rejoining cannot recreate a past missing file. No account/game mutations.
 local ROLE="SENDER"
 local SOURCE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
- "1833de1817d801e2c976feb414d98da2b0801cd3/pdiddler/new_part4/STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua"
+ "c9c9fe64bce6563f8580321f7a58073ed27ef0b7/pdiddler/new_part4/STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua"
 local got,src=pcall(function()return game:HttpGet(SOURCE,true)end)
 if not got or type(src)~="string" or #src<100 then
  warn("[STAGE59 RECOVERY] Source unavailable; no observer or file actions")
