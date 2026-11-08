@@ -14,6 +14,8 @@ In the scanner module **only**, preserve cache entries as `{rec=<matched row>,ma
 - `alias` — normalized hand-written nickname-to-checker-ID association, also **unverified**
 - `match:<score>` — heuristic filename/name score. **Never an authenticated exact item ID** even if only one row won.
 - `ambiguous` and `unresolved` remain fail-closed. Neither becomes `cache`.
+- **Not fixed in Stage51:** existing tie scoring can label a completely unmatched set `ambiguous` rather than `unresolved` when several candidates tie below the threshold. Both fail closed; a new exact classification bug is now documented by test and should be handled separately, without reinterpreting ambiguous as verified.
+
 
 `checkerMarket` returns separate `mappingMethod`, `mappingAuthenticated=false`, `uniqueWeaponInstanceProven=false` and `provenanceScope="CLIENT_MAPPING_UNATTESTED"`, preserving the existing `source` snapshot date **only as economic value provenance**. Scanner row adds `checkerMappingMethod` and `checkerMappingAuthenticated=false`; its `valueSource` now visibly annotates `|mapping:<method>|CLIENT_UNVERIFIED` so no one mistakes a verified value **snapshot** for authenticated **weapon identity**. No change to which item is matched, selected numeric market value, or caching key. No live final-accept/rebalance/profit ledger logic changed or authorized.
 
