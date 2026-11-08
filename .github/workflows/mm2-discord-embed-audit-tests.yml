@@ -26,3 +26,7 @@ jobs:
         run: |
           python3 -m py_compile scripts/discord_history_embed_audit.py
           python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_discord_history_embed_audit.py'
+      - name: Full Python intelligence lab regression (no Discord secret)
+        run: |
+          cd pdiddler/intelligence_lab
+          python3 -m unittest discover -q
