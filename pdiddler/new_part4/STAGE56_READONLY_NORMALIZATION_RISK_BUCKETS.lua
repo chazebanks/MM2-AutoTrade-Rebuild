@@ -562,21 +562,21 @@ local function hasYear(str)
  return tostring(str or ""):match("20%d%d")~=nil
 end
 local function hasChromaShortPrefix(str)
- local raw=norm(str)
+ local raw=norm(tostring(str or ""):gsub("%.[^%.]+$",""))
  return raw:sub(1,6)=="chroma"
   or (raw:sub(1,1)=="c" and #raw>4)
 end
 local function isUpdated(str)
- local raw=norm(str)
+ local raw=norm(tostring(str or ""):gsub("%.[^%.]+$",""))
  return raw:find("updated",1,true)~=nil
   or raw:find("update",1,true)~=nil
 end
 local function hasUpOrV2(str)
- local raw=norm(str)
+ local raw=norm(tostring(str or ""):gsub("%.[^%.]+$",""))
  return (#raw>4 and (raw:sub(-2)=="up" or raw:sub(-2)=="v2"))
 end
 local function hasTypeSuffix(str,typ)
- local raw=norm(str)
+ local raw=norm(tostring(str or ""):gsub("%.[^%.]+$",""))
  local t=norm(typ)
  if #raw<=#t+2 then return false end
  if (t=="knife" or t=="gun") and raw:sub(-#t)==t then return true end
