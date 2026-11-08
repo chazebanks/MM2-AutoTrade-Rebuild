@@ -121,7 +121,7 @@ local function signal()
   return {Disconnect=function()end}
  end}
 end
-local function scenario(path,cached,guiShown,partnerKnown)
+local function scenario(path,cached,guiShown,partnerKnown,oldSourceCase)
  local env={}
  getgenv=function()return env end
  _G.partnerCacheOK=cached
@@ -131,6 +131,11 @@ local function scenario(path,cached,guiShown,partnerKnown)
  local players={PlayerRemoving=signal()}
  local me={Name="main-account",UserId=101,Parent=players}
  local partner={Name="venossgaming90190",UserId=202,Parent=players}
+ _G.partnerRecord={player=partner,inv={fingerprint="anon"},scanProof={
+  jobId="ANON_LOCAL_JOB",playerUserId=202,fingerprint="anon",
+  completedAtMono=currentTime}}
+ _G.partnerVerification={player=partner,record=_G.partnerRecord,
+  scanning=false,retryScheduled=false}
  players.LocalPlayer=me
  function players:GetPlayers()return {me,partner}end
  function players:GetPlayerByUserId(n)if n==202 then return partner end end
@@ -184,7 +189,9 @@ local function scenario(path,cached,guiShown,partnerKnown)
   end,
   HttpGet=function(_,url)
    for name,code in pairs(modules)do
-    if url:find("/"..name..".lua",1,true) then return code end
+    if url:find("/"..name..".lua",1,true) then
+     return code.."\n--"..string.rep("f",100)
+    end
    end
    error("unexpected source: "..tostring(url))
   end
@@ -196,7 +203,13 @@ local function scenario(path,cached,guiShown,partnerKnown)
  local ok,state=pcall(function()return assert(loadfile(path))()end)
  assert(ok,state)
  assert(type(state)=="table")
- if not guiShown then
+ if oldSourceCase then
+  assert(state.reportReady==true and
+   state.result.stopReason=="NO_SCANNED_TRADE_WINDOW_OR_JOB_CHANGED",
+   "original 120s source should stay READY when opponent cache is stale")
+  assert(clipboardCopies==1,"old source had an unsafe nested auto-copy")
+  return state
+ elseif not guiShown then
   assert(state.reportReady==true and
    state.result.stopReason=="NO_SCANNED_TRADE_WINDOW_OR_JOB_CHANGED",
     "without trade GUI must never start a false baseline")
@@ -245,8 +258,7 @@ end)
 -- The old Stage59-only observer must reproduce the root cause: it never
 -- binds without the other player's current scanner record.
 test("old source exact root cause control",function()
- local x=scenario(oldSource,false,true,true)
- assert(x.reportReady) -- THIS ASSERTION SHOULD BE REMOVED IN OLD CONTROL
+ scenario(oldSource,false,true,true,true)
 end)
 oldPrint("STAGE59_ROLE_NEUTRAL_BASELINE_REAL_LUA_5_CASES_PASS")
 '''
