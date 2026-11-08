@@ -1,0 +1,36 @@
+name: Stage56 read-only normalization bucket regression
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE56_READONLY_NORMALIZATION_RISK_BUCKETS.lua'
+      - 'pdiddler/intelligence_lab/test_stage56_normalization_risk_buckets.py'
+      - '.github/workflows/mm2-stage56-normalization-tests.yml'
+  push:
+    branches: 
+      - feature/gingerscope-stage56-normalization-risk-buckets
+    paths:
+      - 'pdiddler/new_part4/STAGE56_READONLY_NORMALIZATION_RISK_BUCKETS.lua'
+      - 'pdiddler/intelligence_lab/test_stage56_normalization_risk_buckets.py'
+      - '.github/workflows/mm2-stage56-normalization-tests.yml'
+permissions:
+  contents: read
+jobs:
+  native-normalization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Run actual Stage56 Lua in Python mock
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage56_normalization_risk_buckets.py'
+      - name: Run complete inherited intelligence tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
