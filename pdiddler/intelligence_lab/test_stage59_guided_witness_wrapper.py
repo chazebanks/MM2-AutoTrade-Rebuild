@@ -98,7 +98,7 @@ local job="FAKE_SECRET_JOB_ID"
   end,
   HttpGet=function(_,url)
    remoteCalls[#remoteCalls+1]=url
-   assert(url:find("f74cb081590dfcdf100bd41f818e07d34856dff4",1,true),
+   assert(url:find("fe27ae43b5b52e142041d6ec930e3a1e89f33363",1,true),
     "old source not immutably pinned")
    if opt.noSource then return "N/A" end
    local source=stage32Info:gsub("RROLE",string.format("%q",role or "RECEIVER"))
@@ -391,7 +391,7 @@ oldPrint("STAGE59_REAL_LUA_GUIDED_WRAPPER_16_NAMED_100_VARIATIONS_PASS")
 class Stage59GuidedWrapperTests(unittest.TestCase):
     def test_safe_source_pinning_and_no_trade_mutators(self):
         source=LUA.read_text(encoding="utf-8")
-        self.assertIn("f74cb081590dfcdf100bd41f818e07d34856dff4",source)
+        self.assertIn("fe27ae43b5b52e142041d6ec930e3a1e89f33363",source)
         self.assertIn("GINGERSCOPE_STAGE59_GUIDE",source)
         self.assertIn('heading.Text=phoneMode',source)
         self.assertIn('and "ALT SENDER  |  DRAG HERE" or "STAGE 59  |  DRAG HERE  |  READ-ONLY"',source)
@@ -413,7 +413,7 @@ class Stage59GuidedWrapperTests(unittest.TestCase):
         self.assertIn("local recoveryOnly=",source)
         self.assertIn('if recoveryOnly then',source)
         self.assertIn("remaining=math.max(0,120-",source)
-        self.assertIn("STAGE59_RESULT_DELTA_120S_PROBE.lua",source)
+        self.assertIn("STAGE59_RESULT_DELTA_ROLE_NEUTRAL_BASELINE.lua",source)
 
         self.assertIn("safe32(src)",source)
         self.assertIn("local suppliedRole",source.replace("specifiedRole","suppliedRole"))  # role selection source
