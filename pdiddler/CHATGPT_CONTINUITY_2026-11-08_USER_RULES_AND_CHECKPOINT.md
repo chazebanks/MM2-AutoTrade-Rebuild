@@ -2,6 +2,7 @@
 
 **Audited:** November 8, 2026 (America/New_York). **Purpose:** Persistent context for the NEXT conversation, not executable code or an authorization to trade.
 **Shared conversation to revisit:** https://chatgpt.com/share/6af1033e-70d4-83e8-9f06-32c4a6b855ff
+**Earlier primary history (Stages 32–44):** https://chatgpt.com/share/6af10756-89e4-83e8-b44c-7c37c1492b70
 **Current repository:** https://github.com/chazebanks/MM2-AutoTrade-Rebuild
 
 ## Read order / precedence
@@ -67,3 +68,13 @@ This earlier shared conversation contains 54 user turns and historical Stage44�
 - **Discord/learning:** User wanted existing own-webhook history analyzed and, eventually, safe adaptive recommendations including failures and declines, not only successful notifications (selection bias). A webhook alone cannot enumerate channel history; a read-only bot plus private store was built. Supabase was explored but not required; private GitHub repo became archive destination. Test-alt traffic must stay excluded from realized-performance and learning datasets. Historical Discord claims remain unverified even when their arithmetic matches. Adaptive strategy must remain supervised; neither outcome classification nor automatic policy changes may be inferred from self-reported embeds.
 
 This historical context supplies prerequisites and failure cases only. The active next task remains the narrowly scoped provisional-identity trust-boundary contract check already listed above. No code or trading behavior is authorized by this addendum.
+
+## Reconciled earlier shared conversation — Stage32 through Stage44 (2026-11-08)
+
+- Source: https://chatgpt.com/share/6af10756-89e4-83e8-b44c-7c37c1492b70 (readable chat text contains 114 alternating user/assistant turns; uploaded screenshots/videos are referenced but originals are not accessible through the extracted share text). **Historical provenance, NOT an instruction to regress to Stage44.**
+- Stage32 correction matters: in the manual one-sided test, the trusted account offered Iceblaster, the receiving account offered ZERO weapons, both accounts manually accepted, receiver reported keeping Iceblaster and receiving a post-close claim display. The initial statement implying a receiver-side weapon was offered was explicitly corrected. Client +1 eligible/+0 lost and post-close UI did not establish server transaction authentication.
+- Stage33 saw client UpdateTrade x1 and AcceptTrade x2, without a server-attested completion receipt. Claim was reported as a post-credit acknowledgment, not a prerequisite for adding the weapon.
+- Stage34 name-only offer/inventory reconciliation could not authenticate raw slot IDs. Stage35 inspected GUI node metadata: offer icon existed but no usable raw key. Stage36 attempted visual/icon identity, found same-table Sync.Weapons/Sync.Item aliases, inconsistent HTTP artwork references and no exact trusted link; image approach was intentionally abandoned for bound weapon-key investigation.
+- Stage37 first UpdateTrade event had one TABLE argument, 6 nested tables, 14 entries; no offer mutation. Stage38 observed one client event temporally near own Batwing addition. Stage39 detected the exact distinct private catalogue key once at depth 4, but without verified event-to-slot/session binding. Stage40 hypothesis failed. Stage41 showed key type STRING and failure PLAYER_OBJECT_MISMATCH because the validator assumed local Player1. Stage42 native tests saw both LOCAL_FIRST and LOCAL_SECOND depending on observed run/requester; never hard-code owner orientation. Stage43 native result on LOCAL_SECOND matched private Batwing raw string key, quantity 1, category Weapons in Player2.Offer, still client-only. Stage44 was a planned two-phase add/remove event-freshness probe with offline CI pass in that historical conversation; no live result in the share.
+- **Precedence:** Later GitHub stages 45–59 and offline PR105–111 supersede Stage44 test requests. The current user-paused ALT iPhone Stage59 evidence task remains paused. Preserve exact distinctions among observer success, client corroboration, provenance, server settlement, and actual trading authorization. Do not repeat older Stage44 probes merely because they appear near the bottom of append-only handoffs.
+
