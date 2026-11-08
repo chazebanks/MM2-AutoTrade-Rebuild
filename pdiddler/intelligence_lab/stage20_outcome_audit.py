@@ -143,9 +143,15 @@ def review_outcome(offer: OfferObservation, close: ClosureObservation,
         raise EvidenceError('outcome-offer-indicator-malformed')
     if close.status not in ('closed_unknown', 'declined', 'success_ui_claimed'):
         raise EvidenceError('outcome-close-status-invalid')
-    if (not offer.trade_open or not offer.resolved or not ours or not theirs
-        or set(ours) & set(theirs)):
+    # A native trade can legitimately be one-sided (e.g. receiving one weapon
+    # with nothing offered in return). Shared item types on both sides are
+    # also allowed: compare the NET copy delta, not disjoint name sets.
+    # However, an empty/zero-net exchange has no independently detectable
+    # owned-inventory change; never corroborate it from unchanged counts.
+    if not offer.trade_open or not offer.resolved or (not ours and not theirs):
         return _result('INCOMPLETE', 'offer-unresolved-or-empty', expected, observed)
+    if not expected:
+        return _result('INCOMPLETE', 'zero-net-offer-not-inventory-verifiable', expected, observed)
     if offer.our_accepted is not True or offer.their_accepted is not True:
         return _result('INCOMPLETE', 'both-accepted-not-observed', expected, observed)
     if close.status != 'success_ui_claimed':
