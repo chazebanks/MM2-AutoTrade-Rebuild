@@ -12,7 +12,8 @@ PROBE=ROOT/"pdiddler/new_part4/STAGE54_READONLY_MAPPING_COVERAGE.lua"
 
 FAKE_GAME=r'''
 local probe=arg[1]
-local realPrint,realRequire=print,require
+local realPrint,realRequire,realSetclipboard,realToclipboard,realGetgenv=
+ print,require,setclipboard,toclipboard,getgenv
 local written={}
 local function sample(name,rarity,typ,chroma,year)
  return {ItemName=name,Rarity=rarity or "Godly",ItemType=typ or "Knife",
@@ -24,6 +25,19 @@ end
 local function call(weapons,opts)
  opts=opts or {}
  local sync={Weapons=weapons}
+ local copied={}
+ local primaryAvailable=opts.clipboardPrimary~=false
+ setclipboard=primaryAvailable and function(report)
+  if opts.primaryThrows then error("SECRET_CLIPBOARD_ERROR") end
+  if opts.primaryReturnsFalse then return false end
+  copied[#copied+1]=report
+ end or nil
+ toclipboard=opts.clipboardFallback and function(report)
+  copied[#copied+1]=report
+ end or nil
+ getgenv=opts.envClipboard and function()
+  return {setclipboard=function(report) copied[#copied+1]=report end}
+ end or nil
  local module={payload=sync}
  local db={FindFirstChild=function(_,key)
   if key=="Sync" and not opts.noSync then return module end
@@ -32,6 +46,7 @@ local function call(weapons,opts)
   if key=="Database" then return db end
  end}
  local http={JSONEncode=function(_,v)
+  if opts.encoderThrows then error("SECRET_JSON_ERROR") end
   local out={}
   for k,x in pairs(v)do
    local enc
@@ -58,10 +73,30 @@ local function call(weapons,opts)
  local ok,err=pcall(dofile,probe)
  print=realPrint
  require=realRequire
+ setclipboard=realSetclipboard
+ toclipboard=realToclipboard
+ getgenv=realGetgenv
  assert(ok,err)
- assert(#written==1,"single anonymous audit output")
  local s=written[1]
- assert(s:find("[GINGERSCOPE STAGE54 MAPPING COVERAGE]",1,true),"marker missing")
+ assert(type(s)=="string" and
+  s:find("[GINGERSCOPE STAGE54 MAPPING COVERAGE]",1,true),"marker missing")
+ if opts.encoderThrows then
+  assert(#written==1,"JSON failure must not print a fabricated report")
+  assert(s:find("REPORT_ENCODING_FAILED",1,true),"missing JSON failure")
+  assert(#copied==0,"unencoded data must never reach clipboard")
+  return s
+ end
+ assert(#written==2,"one JSON report + one clipboard status required")
+ local expectCopy=(primaryAvailable and not opts.primaryThrows and not opts.primaryReturnsFalse)
+  or opts.clipboardFallback==true or opts.envClipboard==true
+ if expectCopy then
+  assert(#copied==1 and copied[1]==s,"clipboard must equal only anonymized report")
+  assert(written[2]=="[STAGE54] CLIPBOARD_COPIED","missing successful clipboard status")
+ else
+  assert(#copied==0,"clipboard unexpectedly modified")
+  assert(written[2]=="[STAGE54] CLIPBOARD_UNAVAILABLE_COPY_REPORT_FROM_CONSOLE",
+   "console fallback status missing")
+ end
  for _,bad in ipairs({"SECRET","Bioblade","Amerilaser","Batwing",
                       "Constellation","Mortal","http://","https://"})do
   assert(not s:find(bad,1,true),"sensitive game field leaked: "..bad)
@@ -85,6 +120,39 @@ end
 local function status(s,k)
  assert(s:find('"status":"'..k..'"',1,true),"status "..k.." not in "..s)
 end
+case("clipboard primary supported",function()
+ local s=call({Bioblade=sample("Bioblade","Godly","Knife",false)})
+ assert(getNumber(s,"explicitInternal")==1)
+end)
+case("clipboard missing still emits console JSON",function()
+ local s=call({Bioblade=sample("Bioblade","Godly","Knife",false)},
+  {clipboardPrimary=false})
+ assert(getNumber(s,"explicitInternal")==1)
+end)
+case("fallback to toclipboard when primary throws",function()
+ local s=call({Bioblade=sample("Bioblade","Godly","Knife",false)},
+  {primaryThrows=true,clipboardFallback=true})
+ assert(getNumber(s,"explicitInternal")==1)
+end)
+case("false-returning primary uses toclipboard",function()
+ local s=call({Bioblade=sample("Bioblade","Godly","Knife",false)},
+  {primaryReturnsFalse=true,clipboardFallback=true})
+ assert(getNumber(s,"explicitInternal")==1)
+end)
+case("getgenv-only clipboard supported",function()
+ local s=call({Bioblade=sample("Bioblade","Godly","Knife",false)},
+  {clipboardPrimary=false,envClipboard=true})
+ assert(getNumber(s,"explicitInternal")==1)
+end)
+case("all clipboard methods unavailable still prints",function()
+ local s=call({Bioblade=sample("Bioblade","Godly","Knife",false)},
+  {clipboardPrimary=false,clipboardFallback=false})
+ assert(getNumber(s,"explicitInternal")==1)
+end)
+case("failed JSON encode copies nothing",function()
+ local s=call({}, {encoderThrows=true})
+ assert(s:find("REPORT_ENCODING_FAILED",1,true))
+end)
 case("empty source",function()
  local s=call({})
  status(s,"CLIENT_MAPPING_COVERAGE_UNVERIFIED")
@@ -204,6 +272,14 @@ class Stage54CoverageTests(unittest.TestCase):
         self.assertIn("local function checkerAlias(page,name,typ)",s)
         self.assertIn("local function qualifyingMeta(meta)",s)
         self.assertNotIn("mappingAuthenticated=true",s)
+        for clip in ("local function tryClipboard", "local function copySummary",
+                     "tryClipboard(setclipboard,line)",
+                     "tryClipboard(toclipboard,line)",
+                     'print("[STAGE54] CLIPBOARD_COPIED")',
+                     'print("[STAGE54] CLIPBOARD_UNAVAILABLE_COPY_REPORT_FROM_CONSOLE")'):
+            self.assertIn(clip,s)
+        self.assertIn('local line=marker.." "..result',s)
+        self.assertIn('local copied=copySummary(line)',s)
         for forbidden in (':FireServer(', ':InvokeServer(', 'TeleportToPlaceInstance(',
                           'mouse1click(', ':HttpGet(', 'loadstring(', ':PostAsync('):
             self.assertNotIn(forbidden,s)
