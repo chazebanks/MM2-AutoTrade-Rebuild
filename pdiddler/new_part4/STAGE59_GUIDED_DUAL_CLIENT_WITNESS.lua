@@ -110,7 +110,24 @@ local function validateLocalLine(line,expectedRole)
   receipt.mayReportProfit~=false or
   receipt.mayRecordCompletedTrade~=false or
   receipt.authorizesTrade~=false or receipt.authorizesAccept~=false or
-  receipt.tradeOutcome~="UNKNOWN" then return nil end
+  receipt.tradeOutcome~="UNKNOWN" or
+  type(receipt.observedAtUnix)~="number" or
+  receipt.observedAtUnix<1700000000 or
+  receipt.observedAtUnix>2100000000 or
+  (receipt.collectorStatus~="CLIENT_STAGE32_TERMINAL_OBSERVATION" and
+   receipt.collectorStatus~="INCOMPLETE_STAGE32_NO_POST_CLOSE_EVIDENCE" and
+   receipt.collectorStatus~="INCOMPLETE_NO_NONCE") then return nil end
+ if receipt.stage32~=nil then
+  local d=receipt.stage32
+  if type(d)~="table" or
+   d.schema~="gingerscope-stage32-readonly-result-correlation-v1" or
+   d.readOnly~=true or d.tradeOutcome~="UNKNOWN" or
+   d.serverCompletionProven~=false or
+   d.serverAttestation~=false or
+   d.authorizesAccept~=false or
+   d.mayRecordCompletedTrade~=false or
+   d.mayReportProfit~=false then return nil end
+ end
  return receipt
 end
 local function readSaved(role)
