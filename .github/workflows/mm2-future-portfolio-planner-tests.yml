@@ -1,0 +1,38 @@
+name: Future Gingerscope portfolio planner (offline)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/future_portfolio_planner.py'
+      - 'pdiddler/intelligence_lab/future_portfolio_planner.lua'
+      - 'pdiddler/intelligence_lab/test_future_portfolio_planner.py'
+      - 'pdiddler/intelligence_lab/test_future_portfolio_planner.lua'
+      - 'pdiddler/intelligence_lab/FUTURE_PORTFOLIO_PLANNER_RESEARCH.md'
+      - '.github/workflows/mm2-future-portfolio-planner-tests.yml'
+  push:
+    branches:
+      - feature/gingerscope-future-portfolio-planner-offline
+    paths:
+      - 'pdiddler/intelligence_lab/future_portfolio_planner.py'
+      - 'pdiddler/intelligence_lab/future_portfolio_planner.lua'
+      - 'pdiddler/intelligence_lab/test_future_portfolio_planner.py'
+      - 'pdiddler/intelligence_lab/test_future_portfolio_planner.lua'
+      - 'pdiddler/intelligence_lab/FUTURE_PORTFOLIO_PLANNER_RESEARCH.md'
+      - '.github/workflows/mm2-future-portfolio-planner-tests.yml'
+permissions:
+  contents: read
+jobs:
+  future-planner-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run all inherited offline intelligence Python tests
+        run: python -m unittest discover -s pdiddler/intelligence_lab -p 'test_*.py' -v
+      - name: Verify the planner is pure and cannot initiate trades
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -E '(FireServer|InvokeServer|HttpGet|setclipboard|AcceptTrade|PostAsync|TeleportToPlaceInstance|requests\.get\()' pdiddler/intelligence_lab/future_portfolio_planner.py
