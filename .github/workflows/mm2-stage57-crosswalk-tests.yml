@@ -1,0 +1,36 @@
+name: Stage57 bounded game-catalog crosswalk candidate evidence
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE57_READONLY_CROSSWALK_CANDIDATES.lua'
+      - 'pdiddler/intelligence_lab/test_stage57_crosswalk_candidates.py'
+      - '.github/workflows/mm2-stage57-crosswalk-tests.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage57-bounded-crosswalk-evidence
+    paths:
+      - 'pdiddler/new_part4/STAGE57_READONLY_CROSSWALK_CANDIDATES.lua'
+      - 'pdiddler/intelligence_lab/test_stage57_crosswalk_candidates.py'
+      - '.github/workflows/mm2-stage57-crosswalk-tests.yml'
+permissions:
+  contents: read
+jobs:
+  native-bounded-crosswalk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Run actual Stage57 Lua in fake MM2 and verify clipboard is bounded
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage57_crosswalk_candidates.py'
+      - name: Run full inherited intelligence tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
