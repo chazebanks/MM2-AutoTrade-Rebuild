@@ -9,6 +9,8 @@ on:
       - 'pdiddler/intelligence_lab/OFFER_SNAPSHOT_GUARD_RESEARCH.md'
       - 'pdiddler/intelligence_lab/PUBLIC_MARKET_DISAGREEMENT_2026_11_08.json'
       - 'pdiddler/intelligence_lab/test_public_market_disagreement.py'
+      - 'pdiddler/intelligence_lab/dual_source_sensitivity.py'
+      - 'pdiddler/intelligence_lab/test_dual_source_sensitivity.py'
       - '.github/workflows/mm2-offer-snapshot-guard-tests.yml'
   push:
     branches:
@@ -21,6 +23,8 @@ on:
       - 'pdiddler/intelligence_lab/OFFER_SNAPSHOT_GUARD_RESEARCH.md'
       - 'pdiddler/intelligence_lab/PUBLIC_MARKET_DISAGREEMENT_2026_11_08.json'
       - 'pdiddler/intelligence_lab/test_public_market_disagreement.py'
+      - 'pdiddler/intelligence_lab/dual_source_sensitivity.py'
+      - 'pdiddler/intelligence_lab/test_dual_source_sensitivity.py'
       - '.github/workflows/mm2-offer-snapshot-guard-tests.yml'
 permissions:
   contents: read
