@@ -182,11 +182,11 @@ class Stage69SupremeAuditTests(unittest.TestCase):
             elif n==2:
                 raw=raw.replace(PUBLISH.encode(),b"2030-11-06T10:56:07-05:00")
             elif n==3:
-                raw=raw.replace(b'data-name=',b'data-missing-name=',1)
+                raw=raw.replace(b'class="itemhead"',b'class="BROKEN_ITEM_HEADER"',1)
             elif n==4:
                 raw=raw.replace(b'class="itemcolumn"',b'class="hiddencolumn"',1)
             elif n==5:
-                raw=raw.replace(b'<title>',b'<title>Completely Different ',1)
+                raw=raw.replace(b'<title>',b'<title>UNRELATED',1).replace(f"MM2 {kind.title()} Values".encode(),b"NOT_AN_MM2_LIST",1)
             elif n==6:
                 raw=raw.replace(b"</body></html>",one_row("UNKNOWN COPY").encode()+b"</body></html>")
             else:
