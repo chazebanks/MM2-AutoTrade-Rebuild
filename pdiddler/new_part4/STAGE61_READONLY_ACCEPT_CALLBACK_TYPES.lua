@@ -110,13 +110,24 @@ local function result(status,reason)
  if M.status~="INITIALIZING" then return M end
  M.status=status;M.reason=reason
  if conn then
-  pcall(function()conn:Disconnect()end)
-  M.listenersDisconnected=M.listenersDisconnected+1
+  local disconnected=pcall(function()conn:Disconnect()end)
+  if disconnected then M.listenersDisconnected=M.listenersDisconnected+1 end
   conn=nil
  end
+ -- Order matters: archived client displayed partner Accepted on a FALSE
+ -- callback, then closed the trade on a later TRUE callback. No server proof.
+ local falseBeforeTrue=false
+ local seenFalse=false
+ for _,sample in ipairs(M.events) do
+  local scoped=sample.phase=="DURING_GUI_CLIENT_ONLY" or
+      sample.phase=="AFTER_CLOSE_UNATTRIBUTED"
+  if scoped and sample.firstArg=="BOOLEAN_FALSE" then seenFalse=true end
+  if scoped and sample.firstArg=="BOOLEAN_TRUE" and seenFalse then
+   falseBeforeTrue=true
+  end
+ end
  M.historicalClientFlagHypothesisCompatible=
-  M.guiStableBound and M.guiClosedObserved and
-  M.hadTypeTrue and M.hadTypeFalse and
+  M.guiStableBound and M.guiClosedObserved and falseBeforeTrue and
   M.discardedReceipts==0
  -- A historical client compatibility hint has ZERO settlement authority.
  local ok,encoded=pcall(function()
