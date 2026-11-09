@@ -3,6 +3,7 @@
 -- Even a "RESEARCH_CANDIDATE_ONLY" output NEVER authorizes a real trade.
 local M={}
 local MAX_SLOTS=4
+local MAX_COPIES_PER_SIDE=4
 local MAX_QUANTITY=20
 local MAX_VALUE=1000000
 local MAX_OBSERVATION_AGE=2
@@ -113,6 +114,11 @@ function M.evaluate(proposal,observation,catalog,now,minimumGain,minimumReceived
  end
  if not equalSlots(ours,currentOurs) or not equalSlots(theirs,currentTheirs) then
   return reject("OFFER_SLOTS_CHANGED")
+ end
+ for _,rows in ipairs({ours,theirs}) do
+  local copies=0
+  for _,row in ipairs(rows) do copies=copies+row[3] end
+  if copies>MAX_COPIES_PER_SIDE then return reject("OFFER_COPY_LIMIT_EXCEEDED") end
  end
  if type(catalog.items)~="table" then return reject("MARKET_ITEMS_MISSING") end
  local totalOurs,totalTheirs=0,0

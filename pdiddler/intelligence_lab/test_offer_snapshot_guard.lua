@@ -75,6 +75,19 @@ s.theirs={{index=1,key="receive",quantity=1},{index=2,key="stack",quantity=1}}
 ss.theirs=deepcopy(s.theirs)
 local stacked=guard.evaluate(s,ss,sc,NOW)
 assert(stacked.projectedListedGain==45 and stacked.status=="RESEARCH_CANDIDATE_ONLY")
+local four,observedFour,marketFour=fixture()
+for _,side in ipairs({"ours","theirs"}) do
+ four[side][1].quantity=4
+ observedFour[side]=deepcopy(four[side])
+end
+assert(guard.evaluate(four,observedFour,marketFour,NOW).projectedListedGain==20)
+for _,side in ipairs({"ours","theirs"}) do
+ expected("OFFER_COPY_LIMIT_EXCEEDED",function(p,o)
+  p[side][1].quantity=3
+  p[side][2]={index=2,key="stack",quantity=2}
+  o[side]=deepcopy(p[side])
+ end)
+end
 math.randomseed(6033)
 for i=1,1600 do
  local a,b,m=fixture()

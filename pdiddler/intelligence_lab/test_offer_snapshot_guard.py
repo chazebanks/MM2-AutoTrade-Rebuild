@@ -65,6 +65,21 @@ class OfferSnapshotGuardTests(unittest.TestCase):
         self.assertEqual(MOD.evaluate(p,o,c,now=NOW)['reason'],'RECEIVED_ITEM_LOW_DEMAND')
         p['theirs'][0]['key']='falling';o['theirs'][0]['key']='falling'
         self.assertEqual(MOD.evaluate(p,o,c,now=NOW)['reason'],'RECEIVED_ITEM_UNSTABLE')
+    def test_four_physical_copies_are_allowed_but_five_are_rejected(self):
+        p,o,c=fixture()
+        for side in ('ours','theirs'):
+            p[side][0]['quantity']=4
+            o[side]=copy.deepcopy(p[side])
+        self.assertEqual(MOD.evaluate(p,o,c,now=NOW)['projectedListedGain'],20)
+        for side in ('ours','theirs'):
+            with self.subTest(side=side):
+                p,o,c=fixture()
+                p[side][0]['quantity']=3
+                p[side].append({'index':2,'key':'stack','quantity':2})
+                o[side]=copy.deepcopy(p[side])
+                result=MOD.evaluate(p,o,c,now=NOW)
+                self.assertEqual(result['reason'],'OFFER_COPY_LIMIT_EXCEEDED')
+                must_never_authorize(result)
     def test_catalog_freshness_source_identity(self):
         p,o,c=fixture();c['publisherUpdatedAtUnix']=None
         self.assertEqual(MOD.evaluate(p,o,c,now=NOW)['reason'],'PUBLISHER_TIMESTAMP_MISSING_OR_EXPIRED')

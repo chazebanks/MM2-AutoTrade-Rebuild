@@ -10,6 +10,7 @@ from typing import Any
 
 SCHEMA = "gingerscope-offer-snapshot-guard-v1"
 MAX_SLOTS = 4
+MAX_COPIES_PER_SIDE = 4
 MAX_QUANTITY = 20
 MAX_VALUE = 1_000_000
 MAX_OBSERVATION_AGE = 2  # seconds, synthetic / clock assertion only
@@ -111,6 +112,9 @@ def evaluate(proposal: object, observation: object, catalog: object, *, now: int
         return _reject("OFFER_SLOTS_UNREADABLE_OR_EMPTY")
     if ours != current_ours or theirs != current_theirs:
         return _reject("OFFER_SLOTS_CHANGED")
+    if any(sum(qty for _, _, qty in rows) > MAX_COPIES_PER_SIDE
+           for rows in (ours, theirs)):
+        return _reject("OFFER_COPY_LIMIT_EXCEEDED")
     items = catalog.get("items")
     if not isinstance(items, dict):
         return _reject("MARKET_ITEMS_MISSING")
