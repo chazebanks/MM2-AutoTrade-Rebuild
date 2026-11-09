@@ -181,6 +181,15 @@ function M.evaluate(inv,profile)
      }
      out.priceRowsVerified=out.priceRowsVerified+1
      subtotal=subtotal+amount
+     if not finite(subtotal) then
+      out.items={}
+      out.priceRowsVerified=0
+      out.verifiedSubtotal=nil
+      out.unverifiedItemRows=rows
+      out.status="UNVERIFIED_SOURCE_OR_IDENTITY"
+      out.reason="AGGREGATE_VALUE_OVERFLOW"
+      return out
+     end
     else valid=false end
    else valid=false end
   else
