@@ -55,8 +55,7 @@ function M.new(o)
   -- P3 contact readiness does not import priced market or checker ID claims.
   -- True transaction/world/ownership holds still apply, including to physical
   -- request authorization. An expired price alone is not an eligibility veto.
-  if true then
-   if not c.allowed then a.globalHold=true;a.globalReason=c.reason or 'global-hold' end
+  if not c.allowed then a.globalHold=true;a.globalReason=c.reason or 'global-hold' end
    local v=o.scanner.getVerificationState(p.UserId)
    local rec=v and v.record
    if not v or v.player~=p or (rec and rec.player~=p) then a.reason='player-or-record-unavailable'
@@ -68,6 +67,7 @@ function M.new(o)
     local contact,why=o.feasibility.validateContactInventory(rec.inv)
     if not contact then a.reason=why or 'inventory-unverified'
     elseif rec.state=='blacklist' and contact.eligibleTypes>0 then a.reason='inventory-state-inconsistent'
+    elseif rec.state=='whitelist' and contact.eligibleTypes==0 then a.reason='inventory-state-inconsistent'
     elseif rec.state=='blacklist' and contact.eligibleTypes==0 then
      -- A fully scanned zero-eligible opponent is not a request target.
      -- This classification is NOT a market-value or profit conclusion.
@@ -79,7 +79,6 @@ function M.new(o)
      a.theirFingerprint=rec.inv.fingerprint;a.ownFingerprint=self.own.fingerprint
     end
    end
-  end
   if a.state=='unknown' then
    if not a.globalHold then
     h.unknownSince=h.unknownSince or now()
@@ -127,7 +126,7 @@ function M.new(o)
    version=o.profile.version,context=context()}
  end
  function self:validate(p,token)
-  if not token or token.contactOnly~=true or token.authorizesTrade~=false
+  if type(token)~='table' or token.contactOnly~=true or token.authorizesTrade~=false
    or token.authorizesAccept~=false or p~=token.player or p.UserId~=token.userId
    or o.profile.version~=token.version or not same(token.context,context()) then
    return false,'authorization-context-changed'
