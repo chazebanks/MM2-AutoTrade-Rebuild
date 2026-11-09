@@ -1,3 +1,19 @@
+## Exact-head offline verification — SUCCESS on 2026-11-09
+
+**Actual code+docs head `6ec5de775527bfabb927bb42b308810dcab53dc3`** was verified by six exact-commit triggered workflows. Focused [Stage79 GitHub Actions run 42687613075](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42687613075) **SUCCESS:** downloaded scanner and Stage66 source originals with exact Git blob checks; actual Lua5.4 compiler and **15 named pure-analyzer tests +400 deterministic adversarial mutations** passed; actual Stage79 native wrapper executed with mocked Roblox services **8/8** test groups (one-call only, numeric+string collision, wrong game, another owner, missing Sync/remote, failed RPC, malformed profile, clipboard fallback, same-job dedup); **3/3 Python** pinned-source/boundary tests passed. Official Luau, Lune, Selene/StyLua, sanitized event replay and Hypothesis workflows also SUCCESS on the same SHA. This is tested OFFLINE only; it is **NOT** proof the native game will return a particular key type or that its profile is server-attested. Source `getProfileData` wrapper may time out, and an in-flight RemoteFunction is not cancellable. All authorization and market-learning flags remain false.
+
+**NEXT AND ONLY USER DEVICE TEST (now eligible):** On MAIN iPad, fresh original MM2 lobby with Tablet selected, no other pdiddler/controller/scanner probes running, run exactly one SHA-pinned read-only loader:
+
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/6ec5de775527bfabb927bb42b308810dcab53dc3/pdiddler/new_part4/STAGE79_READONLY_OWNED_TYPED_CENSUS.lua"))()
+```
+
+Do **not** trade or use ALT. The script reads only own `GetProfileData` once (4.5-second local deadline); it should auto-copy the aggregate `[GINGERSCOPE STAGE79 OWNED TYPE]` JSON, or output one console line if clipboard absent. User pastes **only that ONE aggregate marker line** or shows one screenshot if console/clipboard unavailable. Do not ask for raw owned IDs, names, profile dumps, Roblox usernames, transaction tokens or videos. After the native report, judge what it demonstrates, including unusual legitimate zero/count or key types, and whether a separate source identity issue remains. This remains client consistency only.
+
+**Do not repeat** Stage63/66 manual transfers, Stage73 GUI scans, or Stage75 targeted catalogue test. PR149 stays DRAFT/UNMERGED. Source Nov6 Supreme publication remains stale beyond the active 72h policy; no repricing, outgoing, Accept or Discord learner.
+
+---
+
 # Stage79 — One original `Weapons.Owned` key-type census, no trade
 
 **Date:** November 9, 2026. **Issue:** #122. **Status:** READ-ONLY proposed native diagnostic; production scanner, pricing, P4, Accept, Discord unchanged.
