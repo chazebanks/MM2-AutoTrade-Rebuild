@@ -44,7 +44,7 @@ local PINS={
     historical={"intelligence_lab/stage72_historical_reference_preview.lua",
         "a10d80a086b644085a9cffd87c1f5ce0489597bc"},
     scannerView={"presentation/pdiddler3_scanner_view_stage73_history_v1.lua",
-        "aaf45c6e0de5073596f34b7744205adfb6a40886"},
+        "a7aa6e38f803e9935223daeeb1353f8699e5ede5"},
     scanner={"presentation/pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION.lua",
         "001d228a407076d3cc411a5a7132b0076ec4c027"},
     probe={"new_part4/STAGE25_READONLY_DIAGNOSTIC.lua",
