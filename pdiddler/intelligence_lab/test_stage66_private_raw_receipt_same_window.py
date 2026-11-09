@@ -14,7 +14,7 @@ ROOT=Path(__file__).resolve().parents[2]
 LUA=ROOT/"pdiddler/new_part4/STAGE66_READONLY_ACCEPT_PRIVATE_RAW_EQUALITY.lua"
 CORE=ROOT/"pdiddler/new_part4/STAGE66_ROLE_NEUTRAL_PRIVATE_RAW_SNAPSHOTS.lua"
 HELPER=Path(os.environ.get("STAGE66_HELPER_PATH","/tmp/stage66_pinned_helper.lua"))
-CORE_PIN="1e2a54cb7bf89ed9cadd6489b95f899f4020138b"
+CORE_PIN="79919f199e616e7d03cec1e8bbcfbb99ae60c099"
 HELPER_PIN="27263d7e2fe44a0da842b7062eff7c91c6ea3b65"
 
 HARNESS=r"""
@@ -128,7 +128,7 @@ game={
    return text
   end
   assert(url:find("STAGE66_ROLE_NEUTRAL_PRIVATE_RAW_SNAPSHOTS.lua",1,true))
-  assert(url:find("1e2a54cb7bf89ed9cadd6489b95f899f4020138b",1,true))
+  assert(url:find("79919f199e616e7d03cec1e8bbcfbb99ae60c099",1,true))
   coreLoads=coreLoads+1
   if mode=="no-core" then return nil end
   return [[
