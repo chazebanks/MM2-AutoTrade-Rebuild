@@ -143,24 +143,24 @@ else
   assert(reportCount==1,"expected exactly one console receipt")
   assert(#statuses==1,"in-game status was not presented")
   local gui=statuses[1]
-  assert(gui:find("Total value UNVERIFIED",1,true)
-     and gui:find("Outgoing paused",1,true),"safety state hidden")
+  assert(gui:find("UNVERIFIED",1,true)
+     and gui:find("OUTGOING PAUSED",1,true),"safety state hidden")
   if mode=="success" or mode=="timeout" or mode=="fallback" then
     assert(state.clipboardStatus=="COPY_REQUEST_SUCCEEDED")
     assert(#clipboardCalls==1 and clipboardCalls[1]=="SYNTHETIC_ANON_REPORT")
-    assert(gui:find("paste to confirm",1,true),"clipboard was overclaimed")
+    assert(gui:find("PASTE CHECK",1,true),"clipboard was overclaimed")
   else
     local stateExpected=mode=="unavailable" and "COPY_API_UNAVAILABLE"
        or "COPY_API_FAILED"
     assert(state.clipboardStatus==stateExpected,
       "unexpected clipboard status "..tostring(state.clipboardStatus))
     assert(#clipboardCalls==0)
-    assert(gui:find("use Delta console",1,true),"fallback status hidden")
+    assert(gui:find("USE CONSOLE",1,true),"fallback status hidden")
   end
   if mode=="timeout" then
     assert(state.scanWindowStatus=="TIMEOUT_POSSIBLY_INCOMPLETE")
     assert(elapsed>=45)
-    assert(gui:find("some records may be unverified",1,true))
+    assert(gui:find("ST73 SCAN TIMEOUT",1,true))
   else
     assert(state.scanWindowStatus=="CACHE_SETTLED")
   end
