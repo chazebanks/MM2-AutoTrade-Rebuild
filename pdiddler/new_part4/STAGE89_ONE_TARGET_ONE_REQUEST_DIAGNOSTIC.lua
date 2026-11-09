@@ -288,13 +288,23 @@ local function run()
  -- One request may be sent. No cancel/decline/accept/offer. Only observe.
  local endAt=os.clock()+8
  while live() and os.clock()<endAt do
-  local _,_,board,frame=blockedUI()
-  if frame and visible(frame) then
-   local sending=frame:FindFirstChild("SendingRequest")
-   local name=sending and sending:FindFirstChild("Username")
-   if sending and name and visible(sending) and
-      trimName(name.Text):lower()==target.Name:lower() then
-    R.clientPendingExactTargetObserved=true
+  -- Do not use blockedUI here: it correctly blocks *before* the tap when
+  -- sending is visible, but after the tap we must observe that very UI.
+  for _,gui in ipairs(PG:GetChildren()) do
+   if gui:IsA("ScreenGui") and visible(gui) then
+    for _,branchName in ipairs({"Game","Lobby"}) do
+     local branch=gui:FindFirstChild(branchName)
+     local board=branch and branch:FindFirstChild("Leaderboard")
+     local cont=board and board:FindFirstChild("Container")
+     local holder=branchName=="Lobby" and cont and cont:FindFirstChild("OverlayMenu") or cont
+     local frame=holder and holder:FindFirstChild("TradeRequest")
+     local sending=frame and frame:FindFirstChild("SendingRequest")
+     local name=sending and sending:FindFirstChild("Username")
+     if sending and name and visible(sending) and
+        trimName(name.Text):lower()==target.Name:lower() then
+      R.clientPendingExactTargetObserved=true
+     end
+    end
    end
   end
   for _,n in ipairs({"TradeGUI","TradeGUI_Phone"}) do
