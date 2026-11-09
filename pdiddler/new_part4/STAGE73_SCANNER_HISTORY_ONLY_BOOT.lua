@@ -28,6 +28,9 @@ for _,name in ipairs({
     "PDIDDLER_OUTGOING_SESSION",
     "PDIDDLER_PART4_SESSION",
     "PDIDDLER_HOPPING_SESSION",
+    "PDIDDLER_STAGE63_SAME_WINDOW_CLIENT_ONLY",
+    "PDIDDLER_STAGE66_SAME_WINDOW_CLIENT_ONLY",
+    "PDIDDLER_STAGE68_CLIENT_RUN_ONLY",
 }) do
     if E[name]~=nil then
         warn("[GINGERSCOPE STAGE73] another stack/session exists; rejoin to test in isolation")
@@ -72,6 +75,8 @@ local ok,why=pcall(function()
     -- The dated profile's OWN SOURCE clock is authoritative: never
     -- override isFresh or change its original expiresAtEpoch.
     local current=profile.isFresh()
+    assert(current~=true,
+        "Stage73 historical preview must not replace a fresh-price renderer")
     S.profile=profile
     S.marketFresh=(current==true)
     local reprice=fetchAndRun("strict")
