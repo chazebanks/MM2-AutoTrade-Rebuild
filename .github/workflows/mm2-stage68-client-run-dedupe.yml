@@ -1,0 +1,58 @@
+name: Stage68 client run nonce and offline shadow replay quarantine
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE68_READONLY_CLIENT_NONCE_OBSERVER.lua'
+      - 'scripts/stage68_shadow_client_run_ledger.py'
+      - 'pdiddler/intelligence_lab/test_stage68*.py'
+      - 'pdiddler/intelligence_lab/STAGE68_CLIENT_NONCE_SHADOW_LEDGER.md'
+      - '.github/workflows/mm2-stage68-client-run-dedupe.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage68-client-run-id-shadow-dedupe
+    paths:
+      - 'pdiddler/new_part4/STAGE68_READONLY_CLIENT_NONCE_OBSERVER.lua'
+      - 'scripts/stage68_shadow_client_run_ledger.py'
+      - 'pdiddler/intelligence_lab/test_stage68*.py'
+      - 'pdiddler/intelligence_lab/STAGE68_CLIENT_NONCE_SHADOW_LEDGER.md'
+      - '.github/workflows/mm2-stage68-client-run-dedupe.yml'
+permissions:
+  contents: read
+jobs:
+  client-id-no-market-authority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Verify immutable pinned private core and helper source bytes
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 2 --max-time 30 \
+            "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/d8af380dfb951609ad52cba138c7856914baabd9/pdiddler/new_part4/STAGE66_ROLE_NEUTRAL_PRIVATE_RAW_SNAPSHOTS.lua" \
+            -o /tmp/stage68_pinned_core.lua
+          test "$(git hash-object /tmp/stage68_pinned_core.lua)" = "1579a2a70047783e8579f91540ff03037e13ba59"
+          curl -fsSL --retry 2 --max-time 30 \
+            "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/27263d7e2fe44a0da842b7062eff7c91c6ea3b65/pdiddler/intelligence_lab/p4_stage65_private_raw_receipt_equality.lua" \
+            -o /tmp/stage66_pinned_helper.lua
+          test "$(git hash-object /tmp/stage66_pinned_helper.lua)" = "31cb7b1e1dce90c5360cddf2d5a65317d1ab01d0"
+          luac5.4 -p /tmp/stage68_pinned_core.lua
+          luac5.4 -p /tmp/stage66_pinned_helper.lua
+          luac5.4 -p pdiddler/new_part4/STAGE68_READONLY_CLIENT_NONCE_OBSERVER.lua
+      - name: Execute real Lua producer mock and offline shadow ledger tests
+        env:
+          STAGE66_HELPER_PATH: /tmp/stage66_pinned_helper.lua
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage68*.py'
+      - name: Entire inherited intelligence regression suite
+        env:
+          STAGE66_HELPER_PATH: /tmp/stage66_pinned_helper.lua
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
