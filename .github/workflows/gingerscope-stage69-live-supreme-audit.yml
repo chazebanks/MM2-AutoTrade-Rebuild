@@ -1,0 +1,62 @@
+name: Stage69 live Supreme source review - research only
+on:
+  push:
+    branches:
+      - research/gingerscope-stage69-supreme-live-source-audit
+    paths:
+      - '.github/workflows/gingerscope-stage69-live-supreme-audit.yml'
+      - 'pdiddler/stage69_live_supreme_audit.md'
+      - 'pdiddler/refresh_supreme_snapshot.py'
+      - 'pdiddler/stage25_market_diff.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  first-party-source-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify existing structured scraper and provenance tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_refresh_supreme_snapshot pdiddler.tests.test_stage25_market_diff
+      - name: Fetch all three current publisher pages and create REVIEW-ONLY candidate
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/stage69
+          python3 pdiddler/refresh_supreme_snapshot.py \
+            --mapping pdiddler/snapshots/supreme_snapshot_2026_11_04.json \
+            --date "$(date -u +%F)" \
+            --output-dir /tmp/stage69 \
+            | tee /tmp/stage69/publisher_fetch_status.json
+      - name: Compare 190 canonical weapons and print ALL changed values
+        run: |
+          set -euo pipefail
+          python3 pdiddler/stage25_market_diff.py \
+            --previous pdiddler/snapshots/supreme_snapshot_2026_11_04.json \
+            --candidate "/tmp/stage69/supreme_snapshot_$(date -u +%Y_%m_%d).json" \
+            --output /tmp/stage69/supreme_diff_REVIEW_ONLY.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("/tmp/stage69/supreme_diff_REVIEW_ONLY.json").read_text())
+          assert d["canonicalCount"] == 190
+          assert d["autoDeploy"] is False
+          assert d["authorizesTrade"] is False and d["authorizesAccept"] is False
+          print("STATUS",d["status"],"changed",d["changedItems"],
+                "publication",d["candidatePublication"],"expires",d["candidateExpiresAt"])
+          for r in d["changed"]:
+              print("REVIEW_CHANGE",r["page"],r["checkerId"],r["name"],
+                    r["before"],"=>",r["after"])
+          PY
+      - name: Preserve research-only source reports even if parsing or freshness fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage69-supreme-review-candidate-NOT-FOR-TRADING
+          path: /tmp/stage69/
+          if-no-files-found: warn
+          retention-days: 7
