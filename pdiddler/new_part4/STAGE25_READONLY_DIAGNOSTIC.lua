@@ -137,7 +137,12 @@ function M.fromActive()
    maxAgeSeconds=30
  })
 end
-if type(game)=="userdata" or type(game)=="table" then
+-- Optional Stage73 caller-only capture mode: return the original diagnostic API
+-- without a second implicit clipboard write or console receipt. Default Stage25
+-- execution is unchanged; the Stage73 owner reports the actual copy result.
+local options=...
+local captureOnly=type(options)=="table" and options.stage73CaptureOnly==true
+if not captureOnly and (type(game)=="userdata" or type(game)=="table") then
  if type(getgenv)=="function" then
   local ok,result=pcall(M.fromActive)
   if ok then
