@@ -14,7 +14,7 @@ local R={
  mayUseForStrategyLearning=false,maySendDiscordWebhook=false,tradeOutcome="UNKNOWN",
  targetCount=12,catalogueRowsObserved=0,catalogueAccessible=false,
  targetMatches=0,targetMissing=0,targetMismatched=0,artIdReusedVariantPairs=0,
- targetChecks={},reportGenerated=false,clipboardRequestSucceeded=false
+ targetChecks={},reportGenerated=false,clipboardPasteVerified=false
 }
 -- Public immutable external SOURCE label expectations, not player item keys.
 -- Case-sensitive: BattleAxe differs from Supreme's spelling Battleaxe.
@@ -137,9 +137,9 @@ local function emit(status)
   return R
  end
  local line=MARK.." "..report
- R.clipboardRequestSucceeded=copyReport(line)
+ local copied=copyReport(line)
  print(line) -- exactly one complete console fallback
- if R.clipboardRequestSucceeded then
+ if copied then
   guide("DONE: "..status..". Copy sent (PASTE to confirm). Open ChatGPT and paste the report; no trade needed.")
  else
   guide("DONE: "..status..". Clipboard unavailable. Copy the STAGE75 report line from Delta console.")
@@ -199,7 +199,7 @@ end
 if tostring(game.JobId or "")~=job then return emit("SERVER_CHANGED") end
 R.catalogueAccessible=true
 local count=0
-for _,_ in pairs(sync.Weapons) do
+for _ in pairs(sync.Weapons) do
  count=count+1
  if count>3000 then return emit("UNEXPECTED_CATALOGUE_SIZE") end
 end
