@@ -18,7 +18,7 @@ local R={
  schema="gingerscope-stage80-owned-catalogue-field-reasons-v1",
  status="INITIALIZING",reason="NOT_OBSERVED",
  readOnly=true,clientOnly=true,tradeOutcome="UNKNOWN",
- originalOwnedKeyTypesObserved=false,directCatalogueJoinObserved=false,
+ originalOwnedTypesObserved=false,metadataReasonsObserved=false,
  authenticatedOwnedInventory=false,serverAttestation=false,
  serverCompletionProven=false,rawToSupremeCheckerVerified=false,
  sourcePublisherFresh=false,currentPricesVerified=false,
