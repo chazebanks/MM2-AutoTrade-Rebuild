@@ -166,6 +166,100 @@ def evaluate(catalog_bytes: bytes, supreme_bytes: bytes) -> dict:
         ],
     )
 
+
+# Independent untrusted THIRD-PARTY October18 public copy of MM2 Item metadata.
+# It is useful corroboration of source labels, NOT original Roblox publisher
+# data, a server attestation or independent price authority.
+NEWER_PUBLIC_BLOB = "2be54c3f5c6b715844728c01a65cc2f24a55c02d"
+NEWER_PUBLIC_COMMIT = "0f2715187e7eae36eea4bd97afee809478fc877d"
+NEWER_ENTRIES = 1040
+RECENT_ENTRY = re.compile(
+    r'(?m)^  \["([^"\n]+)"\]\s*=\s*\{\s*\n([\s\S]*?)^  \},?'
+)
+RECENT_FIELD = re.compile(
+    r'(?m)^    \["(ItemName|ItemType|Rarity|Chroma|ItemID)"\]'
+    r'\s*=\s*("[^"\n]*"|\d+|true|false)\s*,?\s*    p = argparse.ArgumentParser()
+    p.add_argument("--game-archive", type=Path, required=True)
+    p.add_argument("--supreme-archive", type=Path, required=True)
+    p.add_argument("--newer-public-catalog", type=Path, required=False)
+    a = p.parse_args()
+    out = evaluate(a.game_archive.read_bytes(), a.supreme_archive.read_bytes())
+    print(json.dumps(out, sort_keys=True))
+    if out["status"] != "ARCHIVED_PUBLIC_NAME_COVERAGE_ONLY":
+        raise SystemExit(2)
+    if a.newer_public_catalog is not None:
+        newer=evaluate_newer_public(a.newer_public_catalog.read_bytes(),
+                                    a.supreme_archive.read_bytes())
+        print(json.dumps(newer,sort_keys=True))
+        if newer["status"] != "THIRD_PARTY_PUBLIC_NAME_CORROBORATION_ONLY":
+            raise SystemExit(2)
+
+if __name__ == "__main__":
+    main()
+
+)
+
+def parse_newer_public_entries(source: str) -> dict:
+    # Text parsing only; NEVER eval, loadstring or require untrusted code.
+    table = {}
+    for match in RECENT_ENTRY.finditer(source):
+        key=match.group(1)
+        if key in table:
+            raise ValueError("duplicate third-party game metadata key")
+        fields={}
+        for direct in RECENT_FIELD.finditer(match.group(2)):
+            fld=direct.group(1)
+            if fld in fields:
+                raise ValueError("duplicate third-party direct game field")
+            fields[fld]=_parse_field_value(direct.group(2))
+        table[key]=fields
+    if len(table)!=NEWER_ENTRIES:
+        raise ValueError("unreviewed third-party catalogue row count")
+    return table
+
+def evaluate_newer_public(game_bytes: bytes, supreme_bytes: bytes) -> dict:
+    """All source-match reports remain explicitly non-authoritative."""
+    if not isinstance(game_bytes,bytes) or not isinstance(supreme_bytes,bytes):
+        return result("INCONCLUSIVE","MISSING_PINNED_SOURCE_BYTES")
+    if blob_sha(game_bytes)!=NEWER_PUBLIC_BLOB:
+        return result("INCONCLUSIVE","THIRD_PARTY_PUBLIC_BLOB_MISMATCH")
+    if blob_sha(supreme_bytes)!=SUPREME_BLOB:
+        return result("INCONCLUSIVE","HISTORICAL_SUPREME_BLOB_MISMATCH")
+    try:
+        source=parse_newer_public_entries(game_bytes.decode("utf-8"))
+        canonical=parse_market_rows(supreme_bytes)
+        names={}
+        for record in source.values():
+            pair=game_page_name(record)
+            if pair:
+                names[pair]=names.get(pair,0)+1
+        matched=sorted(k for k in canonical if names.get(k,0)==1)
+        collision=sorted(k for k in canonical if names.get(k,0)>1)
+        absent=sorted(k for k in canonical if k not in names)
+        if len(matched)+len(collision)+len(absent)!=len(canonical):
+            raise ValueError("coverage partition lost records")
+    except (ValueError, KeyError, TypeError, UnicodeDecodeError, json.JSONDecodeError):
+        return result("INCONCLUSIVE","THIRD_PARTY_SOURCE_FORMAT_UNREVIEWED")
+    return result(
+        "THIRD_PARTY_PUBLIC_NAME_CORROBORATION_ONLY",
+        "NOT_AUTHENTICATED_CURRENT_GAME_OR_ROBLOX_SERVER",
+        newerSource="mm2scripthub/mm2 db commit "+NEWER_PUBLIC_COMMIT,
+        newerSourcePublisher="THIRD_PARTY_UNVERIFIED",
+        newerSourceMirroredToDb2SameGitBlob=True,
+        newerPublicEntries=len(source),
+        newerPublicEligibleRows=sum(names.values()),
+        snapshotCanonicalRows=len(canonical),
+        uniquePublicNameAndCategoryMatches=len(matched),
+        ambiguousPublicNameMatches=len(collision),
+        sourceNamesAbsentFromArchive=len(absent),
+        matchedByCategory={
+            page: sum(1 for p,_ in matched if p==page) for page in CATEGORIES
+        },
+        absentPublicSourceNames=[
+            {"page":page,"name":name} for page,name in absent
+        ],
+    )
+
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--game-archive", type=Path, required=True)
