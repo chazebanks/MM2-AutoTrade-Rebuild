@@ -95,8 +95,11 @@ def game_page_name(attrs: dict):
     if type(chroma) is not bool:
         raise ValueError("unexpected chroma variant flag")
     if chroma:
-        if rarity != "Godly" or name.casefold().startswith("chroma "):
+        if rarity not in ("Godly", "Ancient") or name.casefold().startswith("chroma "):
             raise ValueError("chroma variant/category mismatch")
+        # 2026 public metadata includes Chroma Ancients (Emberbow/Emberscythe).
+        # The Chroma flag and source category establish a name candidate ONLY;
+        # do not use raw key or reused ItemID as a unique game↔market ID.
         return ("chroma", "Chroma " + name)
     return ("ancient" if rarity == "Ancient" else "godly", name)
 
