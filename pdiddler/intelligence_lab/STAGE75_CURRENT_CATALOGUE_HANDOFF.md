@@ -1,3 +1,17 @@
+## Verified Stage75 offline checkpoint — actual pinned source & Lua5.4; manual MAIN iPad report NEXT (2026-11-09)
+
+**Exact code/test SHA** `74cecca70988f809e81e7dedb3b60a41cef5b973`. [GitHub Actions Stage75 run 42671136986](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42671136986) **SUCCESS** (11 named Python tests executing real Lua5.4 mock + exact Oct18 third-party source Git-blob verification). [Stage75 code-only push run 42671128439](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42671128439) also **SUCCESS**. Current live controller NOT touched.
+
+Tests: 12 exact third-party public metadata expectations checked against pinned Oct18 `db` without executing its Lua source; Lua syntax, public game categories including Chroma Ancients and reused base/Chroma ItemIDs, 12/12 matching simulated game catalogue, missing/invalid 12th key, wrong name/type/Chroma/rarity, changed or missing item ID, wrong game, missing ReplicatedStorage or Sync, server change, clipboard API failure/unavailability, JSON failure and optional GUI disappearance; clipboard sends exactly one bounded report/console copy; all trade, price, settlement/profit and learner flags remain FALSE. Terminal in-game panel guide text was shortened to three lines to avoid the earlier Stage73 clipping mistake; tests enforce this bounded status.
+
+**NEXT operator action ONLY, no ALT or trade:** on MAIN iPad in original MM2, fresh game server, Tablet chosen, no other pdiddler scripts, execute exactly this immutable one-line loader in Delta:
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/74cecca70988f809e81e7dedb3b60a41cef5b973/pdiddler/new_part4/STAGE75_READONLY_CATALOG_TWELVE.lua"))()
+```
+Follow the purple in-game guide until DONE. Paste ONE auto-copied `[GINGERSCOPE STAGE75 CATALOGUE EQUALITY] {...}` into ChatGPT. If clipboard fails, use the same single console line. Screenshot is NOT requested unless GUI visibly fails. No need to repeat Stage73, Stage57 or other catalogue census; this is the first bounded 12-key current-client equality test. **Source-only evidence, even if 12/12, NEVER verifies current Supreme prices or authorizes final Accept/Discord learning.** PR144 draft/unmerged.
+
+---
+
 # Stage75 — scoped MAIN-iPad live catalogue equality check (read-only)
 
 Date: 2026-11-09. Status: **OFFLINE CI AND NATIVE CHECK PENDING** (do not call this a pass until exact-head checks).
