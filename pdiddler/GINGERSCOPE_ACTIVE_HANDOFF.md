@@ -1,3 +1,10 @@
+## TestEZ adoption evaluation (2026-11-09 UTC; RESEARCH-ONLY, NO TEST RUN)
+
+- Independent DRAFT [PR136](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/136) documents first-party archived `Roblox/testez` (Sept 14 2024) + installation requirements (Rojo or Lemur/Lua5.1). The current Gingerscope `main` has standalone Lua/Delta scripts, **no** Rojo project, pinned TestEZ dependency, owned Roblox Studio test place, or verified DataModel test harness. A TestEZ dependency now would only duplicate existing health/Lune tests and risk a misleading CI badge.
+- Accordingly **DEFER integration**, no TestEZ code or CI executed, no production modifications. See `pdiddler/research/TESTEZ_ADOPTION_REVIEW_2026_11_09.md`. Reconsider only for a specific extracted game-owned ModuleScript, a working reproducible CI runner and a failing negative control; never conflate mocks with actual native Delta/Roblox outcomes.
+- PR131/132/133 official Luau, Lune, Selene/StyLua gates and PR134/135 replay/Hypothesis remain separate DRAFT/unmerged, with independent evidence. No change to automatic trading/Accept/completed or rejected Discord learner and profit authority.
+- Next task: read-only GitHub branch protection, required check names/effects; do not introduce merge restrictions without consent. Verify existing Copilot assignment on issue #122 and avoid creating overlapping pricing tasks.
+
 ## Current checkpoint after the project audit · November 9, 2026
 
 - **Stage 73 scanner** — Draft [PR #129](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/129). The tested loader is `837fc4f9e5b792cabfb18b524656f2d1b3ef5c0a`. Its history-only renderer has no repricer, and the copied diagnostic stays `sourceFresh=false` after clock rollback. Eight focused and 28 inherited tests passed. [Exact loader CI](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42573177588)
