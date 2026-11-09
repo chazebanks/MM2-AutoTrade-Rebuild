@@ -1,3 +1,13 @@
+## Stage86 exact-head CI passed — 2026-11-09
+
+**Verified exact code/test SHA `9aa7f54b25bb33af19891b2aa8d36f1ae122d34f`:** [dedicated GitHub Actions 42715946242](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42715946242) **SUCCESS 14/14 real Python integration test groups + 500 seeded offer mutations**. GitHub downloaded actual original **PR106 planner Git blob `78948cdacd2a760db5b888fce242d598fc6f14b6`** and actual **PR105 four-slot offer guard Git blob `c5b87f159de5224d231b111da2541b8b23ac6284`** at fixed reviewed commits and verified exact hashes before importing their actual functions. It demonstrated +5 sidegrade, two→one upgrade, one→two liquid downgrade and failure of stale copied UI gain after item removal, offer revision/stack/slot mutation, swapped partner/job/session, already accepted/pending trade, stale publisher, unproven item link, illiquid/declining received assets. The first CI run caught **one test-harness fixture name shadowing a method**; this was corrected by a test-only rename, not by suppressing tests or altering planner/guard. The second exact-head dedicated run **SUCCESS**, and all five other repo actions (sanitized replay incl. Hypothesis, official Luau, Lune, Selene/StyLua) **SUCCESS** on same SHA. No real MM2 inventory, name, event or network involved.
+
+**What is NOT yet done:** actual native Delta/Roblox Part3 scanner/rotation → Part4 offer placement/withdrawal wiring remains untested and unmodified. This stage proves only **original two Python research modules interoperate with correctly frozen synthetic inputs**. The existing PRs #105/#106 and Stage85 PR155 are separately DRAFT/UNMERGED; avoid stacking blindly. A live manual-final-accept preview must have a clearly reviewed Lua source branch, player/session identity binding, no automatic final Accept and an explicit visible stop condition. No user device test is warranted solely by these Python results.
+
+**Next SINGLE practical issue:** inspect actual current Part3-to-Part4 callback/offer paths and identify the first native safe handoff without resurrecting obsolete +15 rules. Prefer testing one no-trade transition before moving to real item placement; record exact native expectations, fail closed, and only then request one purposeful MAIN/ALT manual test. Keep server completion/profit reporting UNKNOWN and Discord learning OFF.
+
+---
+
 # Stage86 — First actual planner → offer-snapshot-guard integrated DRY-RUN
 
 **Date:** 2026-11-09. **Goal:** Begin practical trading-strategy integration after Stage85 without inventing another standalone planner or re-running redundant inventory probes.
