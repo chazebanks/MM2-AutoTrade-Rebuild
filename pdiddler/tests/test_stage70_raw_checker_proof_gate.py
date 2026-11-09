@@ -263,6 +263,91 @@ class Stage70LuaPolicyTests(unittest.TestCase):
             out=self.run_lua(mode,approved=True)
             self.assertIn("priceRows=0",out)
 
+    def test_static_reviewed_checker_target_collision_fails_closed(self):
+        source=SOURCE.read_text(encoding="utf-8")
+        anchor="local REVIEWED_RAW_TO_CHECKER={\n"
+        second=r''' ["RAW_DIFFERENT"]={
+          rawKey="RAW_DIFFERENT",page="godly",checkerId="42",
+          name="Different Gun",type="Gun",
+          reviewedEvidenceId="INDEPENDENT-REVIEW-2",
+          provenanceVersion="synthetic-test-only"
+        },'''
+        candidate=Path(self.temp.name)/"duplicate-reviewed.lua"
+        candidate.write_text(source.replace(
+            anchor,anchor+APPROVED_FIXTURE+"\n"+second+"\n"
+        ),encoding="utf-8")
+        probe=Path(self.temp.name)/"duplicate-probe.lua"
+        probe.write_text(
+            'local M=dofile(arg[1])\n'
+            'local o=M.evaluate({items={}},nil)\n'
+            'assert(o.reason=="DUPLICATE_REVIEWED_CHECKER_TARGET")\n'
+            'assert(o.priceRowsVerified==0 and o.completeValue==nil)\n'
+            'assert(o.authorizesTrade==false)\n'
+            'print("DUPLICATE_TARGET_REJECTED")\n',
+            encoding="utf-8")
+        p=subprocess.run([self.lua,str(probe),str(candidate)],
+                         capture_output=True,text=True,timeout=5)
+        self.assertEqual(p.returncode,0,p.stderr)
+        self.assertIn("DUPLICATE_TARGET_REJECTED",p.stdout)
+
+    def test_multiple_finite_quotes_cannot_overflow_aggregate(self):
+        source=SOURCE.read_text(encoding="utf-8")
+        anchor="local REVIEWED_RAW_TO_CHECKER={\n"
+        both=r''' ["RAW_HUGE_A"]={
+          rawKey="RAW_HUGE_A",page="godly",checkerId="42",
+          name="One Gun",type="Gun",
+          reviewedEvidenceId="INDEPENDENT-REVIEW-1",
+          provenanceVersion="synthetic-test-only"
+        },
+        ["RAW_HUGE_B"]={
+          rawKey="RAW_HUGE_B",page="godly",checkerId="43",
+          name="Two Gun",type="Gun",
+          reviewedEvidenceId="INDEPENDENT-REVIEW-2",
+          provenanceVersion="synthetic-test-only"
+        },'''
+        candidate=Path(self.temp.name)/"overflow-reviewed.lua"
+        candidate.write_text(source.replace(anchor,anchor+both+"\n"),
+                             encoding="utf-8")
+        probe=Path(self.temp.name)/"overflow-probe.lua"
+        probe.write_text(r'''
+local M=dofile(arg[1])
+local t=1794000000
+os.time=function()return t end
+local function src(slug)
+ return {url="https://supremevalues.com/mm2/"..slug,
+ sha256=string.rep("a",64),publishedAt="2026-11-09T00:00:00Z",
+ observedAt="2026-11-09T00:01:00Z"}
+end
+local p={
+ liveReady=true,observedAtEpoch=t-120,publishedAtEpoch=t-3600,
+ expiresAtEpoch=t+1000,
+ sources={ancient=src("ancients"),chroma=src("chromas"),godly=src("godlies")},
+ isFresh=function()return true end,
+ get=function(page,id)
+  return {page=page,id=id,
+    name=id=="42" and "One Gun" or "Two Gun",
+    supremeValue=1e308,demand=5,stability="Stable",verified=true}
+ end
+}
+local inv={unmapped=0,unpriced=0,badQty=0,items={
+ {id="RAW_HUGE_A",checkerId="42",page="godly",type="Gun",
+  cat="Weapons",qty=1,name="One Gun"},
+ {id="RAW_HUGE_B",checkerId="43",page="godly",type="Gun",
+  cat="Weapons",qty=1,name="Two Gun"}
+}}
+local out=M.evaluate(inv,p)
+assert(out.reason=="AGGREGATE_VALUE_OVERFLOW")
+assert(out.priceRowsVerified==0)
+assert(out.completeValue==nil and out.verifiedSubtotal==nil)
+assert(#out.items==0)
+assert(out.authorizesTrade==false)
+print("AGGREGATE_OVERFLOW_REJECTED")
+''',encoding="utf-8")
+        p=subprocess.run([self.lua,str(probe),str(candidate)],
+                         capture_output=True,text=True,timeout=5)
+        self.assertEqual(p.returncode,0,p.stderr)
+        self.assertIn("AGGREGATE_OVERFLOW_REJECTED",p.stdout)
+
     def test_400_seeded_changes_never_promote_unreviewed_client_rows(self):
         rng=random.Random(707070)
         for i in range(400):
