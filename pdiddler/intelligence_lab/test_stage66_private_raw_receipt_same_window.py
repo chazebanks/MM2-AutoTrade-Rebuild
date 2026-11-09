@@ -364,5 +364,102 @@ class Stage66NativeWrapperTests(unittest.TestCase):
             self.assertNotIn("serverCompletionProven=true",out)
             self.assertNotIn("mayUseForStrategyLearning=true",out)
 
+
+PARSER_HARNESS=r"""
+local mode=arg[1]
+local old={seen={"PRIVATE_WEAPONx1","Anotherx3","Ax12x4"},
+ rawOwned=8,unmapped=0,badQty=0}
+old.fingerprint=table.concat(old.seen,"|")
+if mode=="empty" then old.seen={};old.rawOwned=0
+elseif mode=="sparse" then old.seen={[1]="PRIVATE_WEAPONx1",[3]="Anotherx3"}
+elseif mode=="nonnumeric" then old.seen.X="PRIVATE_WEAPONx1"
+elseif mode=="bad-entry" then old.seen[2]="Anotherx?"
+elseif mode=="duplicate" then old.seen[2]="PRIVATE_WEAPONx1"
+elseif mode=="extra-entry" then old.seen[4]="EXTRAx1"
+elseif mode=="bad-total" then old.rawOwned=7
+elseif mode=="unmapped" then old.unmapped=1
+elseif mode=="bad-qty" then old.badQty=1
+elseif mode=="unsafe-raw" then old.seen[2]="\nSECRETx3"
+elseif mode=="huge-raw" then old.seen[2]=string.rep("L",129).."x3"
+elseif mode=="zero-count" then old.seen[2]="Anotherx0"
+elseif mode=="negative-count" then old.seen[2]="Anotherx-1"
+elseif mode=="string-syntax" then old.seen[2]="AnotherxONE"
+elseif mode=="wrong-fingerprint" then old.fingerprint="not-real"
+elseif mode=="bad-metatable" then setmetatable(old.seen,{__index=function()return "x" end})
+elseif mode=="fuzz" then
+ local n=tonumber(arg[2]) or 0
+ local k=n%14
+ if k==0 then old.seen[2]=false
+ elseif k==1 then old.seen[2]=""
+ elseif k==2 then old.seen[2]="Anotherx"
+ elseif k==3 then old.seen[2]="Anotherx0"
+ elseif k==4 then old.seen[2]="Anotherx-3"
+ elseif k==5 then old.seen[4]="ExtraRawx1"
+ elseif k==6 then old.unmapped=1
+ elseif k==7 then old.badQty=1
+ elseif k==8 then old.seen[2]="PRIVATE_WEAPONx1"
+ elseif k==9 then old.rawOwned=n%4
+ elseif k==10 then old.fingerprint="WRONG"
+ elseif k==11 then old.seen[2]=nil
+ elseif k==12 then old.seen[2]="Anotherx99999999"
+ else old.seen.SECRET="KEY" end
+end
+-- For invalid mode, update legitimate fingerprint only when testing the
+-- raw-token format itself. Otherwise the fingerprint mismatch is sufficient.
+if mode~="wrong-fingerprint" and mode~="sparse" and mode~="nonnumeric"
+   and mode~="fuzz" and mode~="bad-metatable" then
+ local ok,joined=pcall(function()return table.concat(old.seen,"|")end)
+ if ok then old.fingerprint=joined end
+end
+local parsed,why=stage66PrivateRawOwned(old)
+if mode=="valid" then
+ assert(type(parsed)=="table" and why==nil)
+ assert(parsed.PRIVATE_WEAPON==1 and parsed.Another==3 and parsed.Ax12==4)
+else
+ assert(parsed==nil,"malformed raw profile must not pass "..mode)
+ assert(type(why)=="string")
+end
+print("STAGE66_PARSER mode="..mode.." accepted="..tostring(parsed~=nil))
+"""
+class Stage66PrivateScannerRawTokenTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.lua=shutil.which("lua5.4")
+        source=CORE.read_text(encoding="utf-8")
+        start=source.index("local function stage66PrivateRawOwned(inv)")
+        end=source.index("local function readOwn(phase)",start)
+        func=source[start:end]
+        assert "return result,nil" in func
+        cls.temp=tempfile.TemporaryDirectory(prefix="stage66_core_raw_")
+        cls.file=Path(cls.temp.name)/"parser.lua"
+        cls.file.write_text(func+"\n"+PARSER_HARNESS,encoding="utf-8")
+    @classmethod
+    def tearDownClass(cls):
+        cls.temp.cleanup()
+    def run_parser(self,mode,seed=None):
+        command=[self.lua,str(self.file),mode]
+        if seed is not None:
+            command.append(str(seed))
+        result=subprocess.run(command,capture_output=True,text=True,timeout=4)
+        self.assertEqual(result.returncode,0,(mode,seed,result.stderr))
+        self.assertIn("STAGE66_PARSER mode=",result.stdout)
+        self.assertNotIn("PRIVATE_WEAPON",result.stdout)
+        return result.stdout
+    def test_actual_extracted_raw_parser_valid_and_malformed_variants(self):
+        self.assertIn("accepted=true",self.run_parser("valid"))
+        for mode in ("empty","sparse","nonnumeric","bad-entry",
+                     "duplicate","extra-entry","bad-total","unmapped",
+                     "bad-qty","unsafe-raw","huge-raw","zero-count",
+                     "negative-count","string-syntax","wrong-fingerprint",
+                     "bad-metatable"):
+            with self.subTest(mode=mode):
+                self.assertIn("accepted=false",self.run_parser(mode))
+    def test_120_seeded_raw_parser_invalidity_cases(self):
+        rng=random.Random(66066)
+        for i in range(120):
+            seed=rng.randrange(0,100000000)
+            with self.subTest(i=i,seed=seed):
+                self.assertIn("accepted=false",self.run_parser("fuzz",seed))
+
 if __name__=="__main__":
     unittest.main()
