@@ -100,6 +100,14 @@ class Stage76Tests(unittest.TestCase):
             pp[3]['url']=evil
             self.assertEqual(m.audit(self.client,pp)['status'],'INCONCLUSIVE')
 
+    def test_malformed_ipv6_url_does_not_crash(self):
+        for bad in ("https://[broken", "http://[::1"):
+            page = copy.deepcopy(self.market)
+            page[3]["url"] = bad
+            out = m.audit(self.client, page)
+            self.assertEqual(out["status"], "INCONCLUSIVE")
+            self.check_closed(out)
+
     def test_shuffle_order_irrelevant(self):
         rng=random.Random(76)
         for _ in range(100):
