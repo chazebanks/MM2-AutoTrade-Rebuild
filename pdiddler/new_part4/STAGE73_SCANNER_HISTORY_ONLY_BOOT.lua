@@ -48,7 +48,7 @@ local PINS={
     scanner={"presentation/pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION.lua",
         "001d228a407076d3cc411a5a7132b0076ec4c027"},
     probe={"new_part4/STAGE25_READONLY_DIAGNOSTIC.lua",
-        "cd8ed9ca5cdc73d98af93059df6b189dcd0a93bc"},
+        "0fdabefdd612afddc0e37f05896d5265d192daf2"},
 }
 local S={jobId=JOB,status="LOADING_SCANNER_ONLY",dirty=true,
     authorizesTrade=false,authorizesAccept=false,
@@ -106,9 +106,62 @@ end
 -- records settle or the bounded evidence window closes. No second scanner,
 -- additional MM2 inventory read, outgoing request, or server hop is started.
 S.probeStatus="AWAITING_STABLE_SCANNER_CACHE"
+S.reportStatus="PENDING"
+S.clipboardStatus="NOT_ATTEMPTED"
+S.scanWindowStatus="PENDING"
+
+-- The existing T4.4 scanner owns this same purple panel; there is no
+-- duplicate diagnostic GUI. Claim the status area only at the final result so
+-- the scanner's own in-progress status can be shown while it scans.
+local function showFinalStatus(msg)
+    if E[KEY]~=S or game.JobId~=JOB then return end
+    local scan=S.rawScanner
+    if type(scan)=="table" and type(scan.claimStatusOwner)=="function"
+       and type(scan.setStatus)=="function" then
+        local claimed,owned=pcall(scan.claimStatusOwner,"STAGE73")
+        if claimed and owned==true then
+            pcall(scan.setStatus,msg,"STAGE73")
+        end
+    end
+end
+
+local function reportFailed()
+    S.probeStatus="REPORT_UNAVAILABLE"
+    S.reportStatus="UNAVAILABLE"
+    S.clipboardStatus="NOT_ATTEMPTED"
+    showFinalStatus("STAGE73 REPORT UNAVAILABLE; check Delta console. "
+        .."Total value UNVERIFIED | Outgoing paused | NO TRADING")
+    warn("[GINGERSCOPE STAGE73] read-only report unavailable; no trade actions")
+end
+
+-- Clipboard APIs are executor-dependent. A successful pcall proves only that
+-- a copy API returned without error, not that iPadOS paste/readback succeeded.
+local function copyOnce(payload)
+    local attempts={}
+    local function add(fn)
+        if type(fn)~="function" then return end
+        for _,prior in ipairs(attempts) do
+            if prior==fn then return end
+        end
+        attempts[#attempts+1]=fn
+    end
+    add(setclipboard)
+    add(toclipboard)
+    add(E.setclipboard)
+    add(E.toclipboard)
+    for _,fn in ipairs(attempts) do
+        local success,returned=pcall(fn,payload)
+        if success and returned~=false then
+            return "COPY_REQUEST_SUCCEEDED"
+        end
+    end
+    if #attempts==0 then return "COPY_API_UNAVAILABLE" end
+    return "COPY_API_FAILED"
+end
 task.spawn(function()
     local start=os.clock()
     local duration=45
+    local settled=false
     while E[KEY]==S and game.JobId==JOB and os.clock()-start<duration do
         local ready=true
         local players=game:GetService("Players")
@@ -123,8 +176,35 @@ task.spawn(function()
                 end
             end
         end
-        if ready and os.clock()-start>=1.5 then break end
+        if ready and os.clock()-start>=1.5 then settled=true break end
         task.wait(0.3)
+    end
+    S.scanWindowStatus=settled and "CACHE_SETTLED" or "TIMEOUT_POSSIBLY_INCOMPLETE"
+    if E[KEY]~=S or game.JobId~=JOB
+       or E.PDIDDLER_OUTGOING_SESSION~=nil
+       or E.PDIDDLER_PART4_SESSION~=nil then
+        S.probeStatus="ABORTED_SESSION_CHANGED"
+        return
+    end
+    -- Suppress the old Stage25 auto-export. This caller is the sole owner of
+    -- capture/JSON encoding/clipboard/console for one Stage73 session.
+    local loaded,probe=pcall(fetchAndRun,"probe",{stage73CaptureOnly=true})
+    if not loaded or type(probe)~="table"
+       or type(probe.fromActive)~="function" then
+        reportFailed()
+        return
+    end
+    local captured,result=pcall(probe.fromActive)
+    if not captured or type(result)~="table"
+       or result.schema~="gingerscope-stage25-scanner-evidence-v1"
+       or result.status~="READ_ONLY_NO_TRADE_AUTHORITY"
+       or result.sourceFresh~=false
+       or result.serverAttestation~=false
+       or result.authorizesTrade~=false
+       or result.authorizesAccept~=false
+       or type(result.records)~="table" then
+        reportFailed()
+        return
     end
     if E[KEY]~=S or game.JobId~=JOB
        or E.PDIDDLER_OUTGOING_SESSION~=nil
@@ -132,13 +212,31 @@ task.spawn(function()
         S.probeStatus="ABORTED_SESSION_CHANGED"
         return
     end
-    local reportOK=pcall(fetchAndRun,"probe")
-    S.probeStatus=reportOK and "ONE_REPORT_CAPTURED" or "REPORT_UNAVAILABLE"
-    if not reportOK then
-        warn("[GINGERSCOPE STAGE73] read-only report unavailable; no trade actions")
+    local encoded,payload=pcall(function()
+        return game:GetService("HttpService"):JSONEncode(result)
+    end)
+    if not encoded or type(payload)~="string"
+       or #payload==0 or #payload>18000 then
+        reportFailed()
+        return
     end
+    S.reportStatus="GENERATED_READ_ONLY"
+    S.probeStatus="ONE_REPORT_CAPTURED"
+    S.clipboardStatus=copyOnce(payload)
+    -- One complete console fallback, irrespective of clipboard outcome.
+    print("[GINGERSCOPE STAGE73 READ-ONLY REPORT] "..payload)
+    local copyText=S.clipboardStatus=="COPY_REQUEST_SUCCEEDED"
+       and "Copy request sent; paste to confirm"
+       or "Clipboard unavailable/failed; use Delta console"
+    local scanText=settled and "Scan window settled"
+       or "Scan timeout; some records may be unverified"
+    showFinalStatus("STAGE73 REPORT READY | "..copyText
+        .." | "..scanText
+        .." | Total value UNVERIFIED | Outgoing paused")
+    print("[GINGERSCOPE STAGE73] "..S.clipboardStatus
+        .." | "..S.scanWindowStatus.." | NO TRADING")
 end)
 print("[GINGERSCOPE STAGE73] Existing scanner running READ-ONLY with historical UNVERIFIED annotations; marketFresh="
     ..tostring(S.marketFresh)
-    .." | One anonymized report will be copied after scan | NO TRADING")
+    .." | One anonymized report after scan; clipboard result shown IN GAME | NO TRADING")
 return S
