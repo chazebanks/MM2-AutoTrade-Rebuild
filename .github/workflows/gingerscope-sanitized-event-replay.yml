@@ -29,4 +29,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Full discovery includes Hypothesis property tests introduced in PR135.
+          # Keep the dependency pinned and run all tests rather than silently skipping them.
+          python -m pip install "hypothesis==6.170.15"
           python -m unittest discover -q -s pdiddler/intelligence_lab
