@@ -1,0 +1,32 @@
+name: Gingerscope sanitized deterministic event replay (offline)
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - research/gingerscope-sanitized-event-replay-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sanitized-event-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile actual replay module and execute deterministic regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/replay_trade_events.py
+          python -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_trade_event_replay.py'
+      - name: Existing merged offline intelligence tests remain compatible
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m unittest discover -q -s pdiddler/intelligence_lab
