@@ -1,0 +1,7 @@
+# First migration stage checks only the health module; no repository reformat.
+syntax = "Luau"
+column_width = 100
+indent_type = "Spaces"
+indent_width = 4
+line_endings = "Unix"
+quote_style = "AutoPreferDouble"
