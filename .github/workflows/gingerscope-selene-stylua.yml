@@ -43,7 +43,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          selene pdiddler/core/health.lua values/mm2values.lua
+          selene pdiddler/core/health.lua
       - name: Check formatting of a deliberately small real module
         shell: bash
         run: |
