@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 """Build a dated Supreme-only snapshot using Python's standard library.
 
-Refresh from public sources, keeping canonical checker IDs from an existing snapshot:
-  python3 pdiddler/refresh_supreme_snapshot.py --mapping pdiddler/supreme_snapshot_2026_11_03.json
+Direct source mode uses original page metadata and acquisition time:
+  python3 pdiddler/refresh_supreme_snapshot.py --mapping old.json
 
-Import previously downloaded pages without resetting their retrieval timestamps:
-  python3 pdiddler/refresh_supreme_snapshot.py --mapping old.lua --input-dir /tmp
+RESEARCH-ONLY external import mode is necessary when GitHub runners get HTTP
+403 from Supreme. Requires committed HTML, a strict Git-blob-pinned manifest
+and source acquisition time; never substitutes Git checkout mtime:
+  python3 pdiddler/refresh_supreme_snapshot.py --mapping old.json \
+      --input-dir pdiddler/research_source_html/stage69_2026_11_09 \
+      --source-manifest pdiddler/research_source_html/stage69_2026_11_09/source_manifest.json \
+      --research-only
 
-Local files must be pdiddler-supreme-{ancients,chromas,godlies}.html. Their preserved
-mtime is the observation time. Only structured rows and provenance are written;
-the downloaded HTML is never included in the generated artifacts.
+Externally acquired data can NEVER generate a liveReady Lua module here.
+The research-only JSON carries FALSE trade, Accept and deployment authority.
 """
 import argparse
 from collections import Counter
@@ -245,20 +249,31 @@ def lua_snapshot(snapshot):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--mapping", type=Path, required=True, help="previous generated JSON or canonical old-profile Lua")
-    parser.add_argument("--input-dir", type=Path, help="import local downloads preserving file mtime as observation timestamp")
+    parser.add_argument("--input-dir", type=Path, help="research-only imported HTML directory; requires pinned source manifest")
+    parser.add_argument("--source-manifest", type=Path, help="strict external source receipt with exact Git blob and observedAt timestamps")
+    parser.add_argument("--research-only", action="store_true", help="emit JSON review candidate ONLY; never generate liveReady Lua")
     parser.add_argument("--date", default=datetime.now(timezone.utc).date().isoformat(), help="output date YYYY-MM-DD")
     parser.add_argument("--output-dir", type=Path, default=Path(__file__).resolve().parent)
     args = parser.parse_args()
     datetime.strptime(args.date, "%Y-%m-%d")
+    if bool(args.input_dir) != bool(args.source_manifest):
+        raise ValueError("input directory and source manifest must be supplied together")
+    if args.input_dir and not args.research_only:
+        raise ValueError("externally retrieved sources must stay research-only")
+    imported = None
+    if args.input_dir:
+        from pdiddler.stage69_manifest_provenance import read_manifest
+        imported = read_manifest(args.source_manifest, args.input_dir)
     mapping = load_mapping(args.mapping)
     if dict(Counter(row["page"] for row in mapping)) != EXPECTED:
         raise ValueError("canonical checker coverage must be exactly ancient=16/chroma=46/godly=128")
     pages, sources = {}, {}
     for page, slug in PAGES.items():
         url = f"https://supremevalues.com/mm2/{slug}"
-        if args.input_dir:
-            path = args.input_dir / f"pdiddler-supreme-{slug}.html"
-            content, observed = path.read_bytes(), int(path.stat().st_mtime)
+        if imported is not None:
+            content = imported[page]["content"]
+            # Never substitute Git checkout mtime for the source acquisition time.
+            observed = imported[page]["observedAtEpoch"]
         else:
             request = Request(url, headers={"User-Agent": "pdiddler-snapshot-refresh/1.0", "Cache-Control": "no-cache"})
             with urlopen(request, timeout=30) as response:
@@ -270,6 +285,8 @@ def main():
         if f"MM2 {page.title()} Values" not in text:
             raise ValueError(f"missing verified category title in {url}")
         pages[page], published = parse_page(text, page)
+        if imported is not None and epoch(published) != epoch(imported[page]["publisher"]):
+            raise ValueError(f"external source publisher clock mismatch for {page}")
         if len(pages[page]) != EXPECTED[page]:
             raise ValueError(f"unexpected visible eligible source rows for {page}: {len(pages[page])} != {EXPECTED[page]}")
         if epoch(published) > observed or observed > int(time.time()):
@@ -293,10 +310,22 @@ def main():
     suffix = args.date.replace("-", "_")
     json_path = args.output_dir / f"supreme_snapshot_{suffix}.json"
     lua_path = args.output_dir / f"pdiddler_supreme_snapshot_{suffix}.lua"
+    if args.research_only:
+        snapshot.update({
+            "researchOnly": True, "authorizesTrade": False,
+            "authorizesAccept": False, "autoDeploy": False,
+            "sourceAcquisition": "EXTERNAL_SCRAPE_REVIEW_ONLY",
+        })
     json_path.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2) + "\n")
-    lua_path.write_text(lua_snapshot(snapshot))
-    print(json.dumps({"files": [str(lua_path), str(json_path)], "coverage": coverage,
-                      "observedAt": snapshot["observedAt"], "publishedAt": snapshot["publishedAt"], "expiresAt": snapshot["expiresAt"]}, indent=2))
+    output_files = [str(json_path)]
+    if not args.research_only:
+        lua_path.write_text(lua_snapshot(snapshot))
+        output_files.insert(0, str(lua_path))
+    print(json.dumps({"files": output_files, "coverage": coverage,
+                      "researchOnly": bool(args.research_only),
+                      "observedAt": snapshot["observedAt"],
+                      "publishedAt": snapshot["publishedAt"],
+                      "expiresAt": snapshot["expiresAt"]}, indent=2))
 
 
 if __name__ == "__main__":
