@@ -12,7 +12,7 @@ SCHEMA="gingerscope-future-inventory-shortlist-v1"
 MAX_INPUT_TYPES=500
 MAX_SELECTED_TYPES=5
 MAX_PLANNER_COPIES=2
-MAX_SLOTS=4
+MAX_COPIES_PER_OFFER=4
 
 def _base(status,reason):
     return {
@@ -123,11 +123,11 @@ def shortlist(ours:object,theirs:object,catalog:object,*,now:int,
     if not our_good:
         out["status"]="NO_USABLE_OWN_PROFILE";out["reason"]="ALL_OWN_MAPPINGS_UNVERIFIED"
         return out
-    # Theoretical upper bound assumes four distinct item-type slots, with up
-    # to two copies per type. Not a feasible offer or a confirmed item mapping.
+    # Bound the budget by physical copies available to the planner, which
+    # considers up to two of each type and four total in a proposal.
     max_offer=sum(sorted(
-        (market[k]["value"]*min(v,MAX_PLANNER_COPIES)
-         for k,v in our_good.items()),reverse=True)[:MAX_SLOTS])
+        (market[k]["value"] for k,v in our_good.items()
+         for _ in range(min(v,MAX_PLANNER_COPIES))),reverse=True)[:MAX_COPIES_PER_OFFER])
     out["theoreticalMaxListedOffer"]=max_offer
     allowed_value=max_offer*(100+max_overpay_pct)//100
     affordable={k:v for k,v in their_good.items()

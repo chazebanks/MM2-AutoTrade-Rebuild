@@ -91,6 +91,17 @@ class ShortlistTests(unittest.TestCase):
         self.assertEqual(len(x["ourShortlist"]),5)
         self.assertEqual(set(z["key"] for z in x["ourShortlist"]),{z["key"] for z in a})
 
+    def test_affordability_upper_bound_counts_four_physical_copies(self):
+        a,b,m=fixture(4,2)
+        for row in a:
+            row["quantity"]=2
+            m["items"][row["key"]]=entry(100)
+        m["items"][b[0]["key"]]=entry(600)
+        m["items"][b[1]["key"]]=entry(601)
+        x=self.check((a,b,m))
+        self.assertEqual(x["theoreticalMaxListedOffer"],400)
+        self.assertEqual([row["key"] for row in x["theirShortlist"]],[b[0]["key"]])
+
     def test_invalid_source_and_malformed_pool_never_emit_shortlist(self):
         a,b,m=fixture()
         a.append(copy.deepcopy(a[0]))
