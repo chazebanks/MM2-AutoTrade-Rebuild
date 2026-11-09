@@ -181,7 +181,7 @@ end
 if clockRollback then
   assert(not result.detail:find("Snapshot expired: false",1,true))
   local _,idleRow=render.row({state="whitelist",inv=inv},nil,nil,profile,strict)
-  assert(idleRow:find("Paused: Supreme prices expired or unavailable",1,true))
+  assert(idleRow:find("Outgoing: paused | prices UNVERIFIED",1,true))
 end
 print("STAGE73_VIEW mode="..mode..
  " shown="..result.historicalReferencesShown..
