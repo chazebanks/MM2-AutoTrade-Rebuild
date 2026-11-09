@@ -25,16 +25,12 @@ class Stage81(unittest.TestCase):
             cls.fixture=None
             return
         cls.fixture=(
-            Path(env[keys[0]]).read_bytes(),
-            {p:Path(env["STAGE81_"+p.upper()+"S" if p=="ancient" else
-                       "STAGE81_"+p.upper()+"IES" if p=="godly" else
-                       "STAGE81_CHROMAS"]).read_bytes() for p in ()},
-            Path(env[keys[1]]).read_bytes())
-        # Spell out three file names: avoid any dynamic path alias inference.
-        cls.fixture=(cls.fixture[0],
-              {"ancient":Path(env["STAGE81_ANCIENTS"]).read_bytes(),
-               "godly":Path(env["STAGE81_GODLIES"]).read_bytes(),
-               "chroma":Path(env["STAGE81_CHROMAS"]).read_bytes()},cls.fixture[2])
+            Path(env["STAGE81_HISTORICAL_ROSTER"]).read_bytes(),
+            {"ancient":Path(env["STAGE81_ANCIENTS"]).read_bytes(),
+             "godly":Path(env["STAGE81_GODLIES"]).read_bytes(),
+             "chroma":Path(env["STAGE81_CHROMAS"]).read_bytes()},
+            Path(env["STAGE81_REVIEWED_STAGE77"]).read_bytes(),
+        )
 
     def source(self):
         if self.fixture is None: self.skipTest("actual inputs provided to focused CI only")
