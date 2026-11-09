@@ -1,0 +1,38 @@
+name: Stage60 read-only MM2 trade remote surface tests
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE60_READONLY_TRADE_REMOTE_SURFACE.lua'
+      - 'pdiddler/intelligence_lab/test_stage60_remote_surface.py'
+      - 'pdiddler/intelligence_lab/STAGE60_SETTLEMENT_SURFACE_RESEARCH.md'
+      - '.github/workflows/mm2-stage60-remote-surface-tests.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage60-settlement-authority-firewall
+    paths:
+      - 'pdiddler/new_part4/STAGE60_READONLY_TRADE_REMOTE_SURFACE.lua'
+      - 'pdiddler/intelligence_lab/test_stage60_remote_surface.py'
+      - 'pdiddler/intelligence_lab/STAGE60_SETTLEMENT_SURFACE_RESEARCH.md'
+      - '.github/workflows/mm2-stage60-remote-surface-tests.yml'
+permissions:
+  contents: read
+jobs:
+  read-only-surface-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Execute actual Stage60 Lua and source regression tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage60*.py'
+      - name: All inherited intelligence tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
