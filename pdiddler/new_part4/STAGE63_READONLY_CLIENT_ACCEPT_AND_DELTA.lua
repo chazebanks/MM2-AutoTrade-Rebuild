@@ -247,7 +247,8 @@ local function onAccept(...)
   phase="WITHIN_BOUND_GUI_CLIENT_ONLY"
   lastVisible=os.clock()
  elseif not root and lastVisible and
-   os.clock()-lastVisible<=.75 and core.state=="POST_CLOSE_READS" then
+   os.clock()-lastVisible<=.75 and
+   (core.state=="OBSERVING_CLOSE" or core.state=="POST_CLOSE_READS") then
   phase="IMMEDIATE_GUI_CLOSE_CLIENT_ONLY"
  else
   M.discardedReceipts=M.discardedReceipts+1
@@ -334,7 +335,9 @@ task.spawn(function()
    end
   end
   previousCoreState=st
-  if core.reportReady then
+  -- The core sets reportReady immediately before constructing its summary.
+  -- Wait for the actual immutable result table to avoid cross-task torn reads.
+  if core.reportReady and type(core.result)=="table" then
    finish("CLIENT_OBSERVER_FINISHED",
       boundReady and "ONE_BOUND_WINDOW_FINISHED" or "NO_BOUND_WINDOW")
    return
