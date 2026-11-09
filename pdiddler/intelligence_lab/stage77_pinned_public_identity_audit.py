@@ -162,7 +162,12 @@ def website_records(raw: bytes, page: str):
             raise ValueError('market URL not exact first-party canonical slug')
         buttons = [n.attrs['data-name'] for n in descendants if n.tag == 'button' and 'data-name' in n.attrs]
         name = one(buttons, 'source data-name')
-        if link.text() != name:
+        # Four actual Chroma links visually abbreviate "Chroma " to "C. ".
+        # Expand only that *exact* first-party display convention, never fuzzy
+        # aliases or arbitrary canonical-name substitutions.
+        visible = link.text()
+        expanded = 'Chroma ' + visible[3:] if page == 'chromas' and visible.startswith('C. ') else visible
+        if expanded != name:
             raise ValueError('source item link and data-name differ')
         if id(col) in pet_columns:
             if page != 'chromas' or name not in KNOWN_CHROMA_PETS:
