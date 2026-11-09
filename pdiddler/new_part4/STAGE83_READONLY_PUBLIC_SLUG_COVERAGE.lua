@@ -5,7 +5,7 @@ local MARK="[GINGERSCOPE STAGE83 PUBLIC COVERAGE] "
 local KEY="GINGERSCOPE_STAGE83_READONLY_AGGREGATE_COVERAGE"
 -- Helper + static public-only registry are from the SAME immutable Git commit.
 -- This commit predates the wrapper, so the loader never fetches mutable main.
-local PIN="42ab03b81fe1ab69613ec8b5797dad95252ee4d8"
+local PIN="67c19a10f4dde23a005206e5b0c261d7e43c82a5"
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..PIN..
  "/pdiddler/intelligence_lab/"
 local E=(type(getgenv)=="function" and getgenv()) or _G
