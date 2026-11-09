@@ -1,6 +1,6 @@
--- Stage80 SINGLE one-shot, read-only own raw type census, on MAIN iPad/Delta.
--- Answers a NEW question: what are ORIGINAL Weapons.Owned Lua key types, and
--- do string keys directly match SAME-CLIENT Sync.Weapons entries?
+-- Stage80 SINGLE one-shot, read-only Owned metadata reason probe on MAIN iPad.
+-- Answers ONE question: was the Stage79 rejected entry a valid Misc item,
+-- incomplete source metadata or an unsafe category (aggregate counts only)?
 -- NEVER enter a trade, offer, accept, decline, hop, price or run P4/Discord.
 -- No weapon names/raw keys/profile/JobId/username are printed or copied.
 local MARK="[GINGERSCOPE STAGE80 METADATA REASON] "
@@ -61,7 +61,7 @@ local function gui()
   message.TextColor3=Color3.fromRGB(245,238,255)
   message.TextWrapped=true
   message.TextSize=15
-  message.Text="STAGE80 | ONE READ-ONLY OWNED-TYPE OBSERVATION"
+  message.Text="STAGE80 | READ-ONLY METADATA REASON"
   message.Parent=panel
   g.Parent=pg
  end)
@@ -100,7 +100,7 @@ local function done(status,reason)
  if copied then
   say("DONE: copied STAGE80 aggregate report. Paste in ChatGPT. NO TRADE.")
  else
-  say("DONE: use one [GINGERSCOPE STAGE80 OWNED TYPE] Delta console line.")
+  say("DONE: use one [GINGERSCOPE STAGE80 METADATA REASON] Delta console line.")
  end
  return R
 end
@@ -115,6 +115,7 @@ for _,other in ipairs({
  "PDIDDLER_PART5_CONTROLLER","PDIDDLER_HOPPING_SESSION",
  "PDIDDLER_GINGERSCOPE_REPLACEMENT_PREVIEW",
  "PDIDDLER_STAGE66_SAME_WINDOW_CLIENT_ONLY",
+ "GINGERSCOPE_STAGE79_SINGLE_OWNED_TYPE_PROBE",
  "GINGERSCOPE_STAGE75_READONLY_13_TARGETS"
 }) do
  if E[other]~=nil then
