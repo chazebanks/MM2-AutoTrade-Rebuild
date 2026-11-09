@@ -1,0 +1,2 @@
+# Initial strict portability scope; do not glob all archived Roblox scripts.
+std = "lua51"
