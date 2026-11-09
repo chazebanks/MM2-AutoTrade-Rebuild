@@ -142,8 +142,11 @@ class FuturePortfolioPlannerTests(unittest.TestCase):
             m["items"][f"b{i}"]=entry(55+i*5)
         x=self.run_plan((a,b,m))
         self.assertEqual(x["status"],"CANDIDATES_PREPARED")
-        self.assertLessEqual(x["candidatePairsConsidered"],44100)
+        self.assertLessEqual(x["candidatePairsConsidered"],9025)
         self.assertEqual(len(x["candidates"]),5)
+        for candidate in x["candidates"]:
+            for side in ("offer","receive"):
+                self.assertLessEqual(sum(row["quantity"] for row in candidate[side]),4)
 
     def test_600_adversarial_inputs_never_authorize(self):
         rng=random.Random(6084)

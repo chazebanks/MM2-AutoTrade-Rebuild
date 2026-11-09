@@ -12,7 +12,7 @@ from typing import Any
 SCHEMA = "gingerscope-offline-portfolio-candidate-v1"
 MAX_TYPES_PER_SIDE = 5
 MAX_COPIES_PER_TYPE = 2
-MAX_SLOTS = 4
+MAX_COPIES_PER_SIDE = 4
 MAX_VALUE = 1_000_000
 MAX_TOTAL_VALUE = 100_000_000
 
@@ -55,9 +55,8 @@ def _inventory(rows: object) -> dict[str, int] | None:
 def _offers(inv: dict[str, int]):
     keys = list(inv)
     for quantities in itertools.product(*(range(inv[key] + 1) for key in keys)):
-        components = [(key, qty) for key, qty in zip(keys, quantities) if qty]
-        if 1 <= len(components) <= MAX_SLOTS:
-            yield components
+        if 1 <= sum(quantities) <= MAX_COPIES_PER_SIDE:
+            yield [(key, qty) for key, qty in zip(keys, quantities) if qty]
 
 
 def _metric_sum(offer, items, name):
@@ -136,8 +135,8 @@ def plan(
                and items[key]["stability"] in {"Stable", "Overpaid For"}
                for key, _ in offer)
     ]
-    # Maximum enumeration is <= 5^? For counts <=2: at most 210 offers
-    # per side and 44,100 candidate pair comparisons. Bounded offline.
+    # Five types with at most two of each yield at most 95 nonempty
+    # four-copy bundles per side, or 9,025 candidate pair comparisons.
     for giving in own:
         our_value = _metric_sum(giving, items, "value")
         our_keys = {key for key, _ in giving}
@@ -191,5 +190,6 @@ def plan(
     result["candidatePairsConsidered"] = len(prepared)
     result["searchCap"] = {"maxDistinctTypesPerSide": MAX_TYPES_PER_SIDE,
                            "maxCopiesPerType": MAX_COPIES_PER_TYPE,
-                           "maxSlotsPerSide": MAX_SLOTS}
+                           "maxSlotsPerSide": MAX_COPIES_PER_SIDE,
+                           "maxCopiesPerSide": MAX_COPIES_PER_SIDE}
     return result
