@@ -36,6 +36,29 @@ local other={Enabled=false,Parent=true,
   if name=="Container" then return container end
   return nil
  end}
+local capturedButton=nil
+local clipboardCalls=0
+if mode=="gui-copy" or mode=="gui-no-clipboard" then
+  UDim2={fromOffset=function(...)return {...} end,new=function(...)return {...} end}
+  Color3={fromRGB=function(...)return {...} end}
+  Enum={Font={Gotham="Gotham"}}
+  Instance={new=function(class)
+    local obj={}
+    if class=="TextButton" then
+      obj.Activated={Connect=function(_,handler)obj._copyAction=handler end}
+      capturedButton=obj
+    end
+    return obj
+  end}
+  if mode=="gui-copy" then
+    setclipboard=function(text)
+      clipboardCalls=clipboardCalls+1
+      assert(type(text)=="string")
+      assert(text:find("[GINGERSCOPE STAGE61 ACCEPT CALLBACK]",1,true))
+      return true
+    end
+  end
+end
 local pg={FindFirstChild=function(_,name)
  if name=="TradeGUI" then return gui end
  if name=="TradeGUI_Phone" then return other end
@@ -129,6 +152,36 @@ task={
 -- Use no fake Instance service: the real Lua observer must retain console
 -- fallback if a GUI construction API isn't available.
 local report=dofile(src)
+if mode=="gui-copy" then
+ assert(capturedButton~=nil)
+ assert(capturedButton.Visible==true)
+ assert(clipboardCalls==0,"clipboard must NOT be automatically written")
+ assert(type(capturedButton._copyAction)=="function")
+ capturedButton._copyAction()
+ assert(clipboardCalls==1,"only deliberate COPY tap may write")
+elseif mode=="gui-no-clipboard" then
+ assert(capturedButton~=nil)
+ assert(capturedButton.Visible==true)
+ assert(clipboardCalls==0)
+ capturedButton._copyAction()
+ assert(clipboardCalls==0,"clipboard must remain untouched when unavailable")
+end
+if mode=="success-like" then
+ assert(#report.events==2)
+ assert(report.events[1].firstArg=="BOOLEAN_FALSE")
+ assert(report.events[1].argCount==1)
+ assert(report.events[2].firstArg=="BOOLEAN_TRUE")
+ assert(report.events[2].argCount==2)
+ assert(report.events[2].secondArg=="TABLE")
+ assert(report.events[2].secondTableShape=="BOUNDED_SEQUENCE_1")
+ assert(report.events[2].phase=="DURING_GUI_CLIENT_ONLY")
+elseif mode=="nil" then
+ assert(report.events[1].firstArg=="NO_ARGS")
+ assert(report.events[1].argCount==0)
+elseif mode=="injection" then
+ assert(report.events[1].firstArg=="BOOLEAN_TRUE")
+ assert(report.events[1].secondArg=="TABLE")
+end
 assert(type(report)=="table")
 assert(disconnected<=1)
 assert(report.serverCompletionProven==false)
@@ -244,6 +297,23 @@ class Stage61TypeOnlyTests(unittest.TestCase):
         out=self.run_mock("overflow")
         self.assertIn("reason=EVENT_OVERFLOW",out)
         self.assertIn("status=INCOMPLETE",out)
+
+    def test_real_lua_optional_gui_never_autocopies_and_explicit_copy_works(self):
+        out=self.run_mock("gui-copy")
+        self.assertIn("status=CLIENT_CALLBACK_SHAPES_CAPTURED_UNATTRIBUTED",out)
+        self.assertIn("COPIED current Stage61 report",out)
+        out=self.run_mock("gui-no-clipboard")
+        self.assertIn("Clipboard unavailable",out)
+        self.assertNotIn("PRIVATE_WEAPON",out)
+
+    def test_nil_and_untrusted_item_bundles_never_export_values(self):
+        out=self.run_mock("nil")
+        self.assertIn("status=CLIENT_CALLBACK_SHAPES_CAPTURED_UNATTRIBUTED",out)
+        self.assertIn("compatible=false",out)
+        out=self.run_mock("injection")
+        self.assertIn("status=CLIENT_CALLBACK_SHAPES_CAPTURED_UNATTRIBUTED",out)
+        self.assertNotIn("SECRET_DO_NOT_LOG",out)
+        self.assertIn("compatible=false",out)
 
     def test_200_seeded_current_client_payloads_are_never_exported(self):
         rng=random.Random(61061)
