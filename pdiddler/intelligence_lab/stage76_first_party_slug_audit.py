@@ -51,7 +51,10 @@ def _site_url(page: str, slug: str) -> str:
 def _valid_first_party_url(url: object, page: str, slug: str) -> bool:
     if not isinstance(url, str):
         return False
-    parts = urlsplit(url)
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return False
     # Exact canonical hostname/path/query, never www, redirects, fragments,
     # duplicate item parameters, userinfo, additional query keys or HTTP.
     if (parts.scheme != "https" or parts.netloc != "supremevalues.com"
