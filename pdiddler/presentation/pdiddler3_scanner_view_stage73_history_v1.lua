@@ -41,14 +41,18 @@ function V.inventory(inv,profile)
   local qtyKnown=quantity(qty)
   if qtyKnown then count=count+qty else countKnown=false end
   local name=tostring(it.name or it.id or 'Unidentified item')
+  -- Do not repeat the same long unverified-price warning after every
+  -- weapon. A single prominent row-level label conveys price uncertainty
+  -- while preserving every item name and physical-copy quantity.
   parts[#parts+1]=name..' x'..(qtyKnown and copyCount(qty) or '?')
-   ..' (UNVERIFIED: price expired or unavailable)'
  end
  local itemsText=#parts>0 and table.concat(parts,', ') or available and 'No eligible items in verified rows' or 'Inventory UNVERIFIED'
  local countText=countKnown and integer(count) and copyCount(count) or 'UNVERIFIED'
- local detail='Eligible copies: '..countText..' | Total value: UNVERIFIED\nItems: '..itemsText
-  ..'\nSource: Supreme | '..version..' | prices expired or unavailable'
-  ..'\nVerification: '..table.concat(counters,' | ')
+ -- Keep the evidence banner above long inventory lists. A player with
+ -- dozens of weapons should not have to scroll to the bottom to discover
+ -- that any listed historical references are NOT current trading prices.
+ local detail='Eligible copies: '..countText..' | Total value: UNVERIFIED'
+   ..'\nPrices: UNVERIFIED (expired Supreme snapshot)'
  local shown=0
  if available then
   local ok,h=pcall(HISTORICAL_PREVIEW.preview,inv,profile)
@@ -76,6 +80,9 @@ function V.inventory(inv,profile)
    end
   end
  end
+ detail=detail..'\nItems (prices UNVERIFIED): '..itemsText
+    ..'\nSource: Supreme | '..version..' | prices expired or unavailable'
+    ..'\nVerification: '..table.concat(counters,' | ')
  return {countText=countText,totalText='UNVERIFIED',itemsText=itemsText,
    detail=detail,priceState='expired',historicalReferencesShown=shown}
 end
@@ -85,7 +92,7 @@ function V.row(rec,_,request,profile)
  local rarity=type(rec)=='table' and tostring(rec.state or 'unknown') or 'unknown'
  local state=rarity
  local detail='Inventory rarity: '..rarity:upper()..'\n'..V.inventory(type(rec)=='table' and rec.inv or nil,profile).detail
-  ..'\nOutgoing: UNKNOWN | Paused: Supreme prices expired or unavailable'
+  ..'\nOutgoing: paused | prices UNVERIFIED'
  if type(request)=='table' and requests[request.state] then
   state=request.state
   if type(request.extra)=='string' and request.extra~='' then detail=request.extra..'\n'..detail end
@@ -94,6 +101,8 @@ function V.row(rec,_,request,profile)
 end
 function V.summary(white,black,unknown)
  local text='Inventory rarity: Whitelist '..copyCount(white)..' | Blacklist '..copyCount(black)..' | Unknown '..copyCount(unknown)
- return text..'\nOutgoing: paused - Supreme prices expired or unavailable'
+ -- The original 50px-high summary label has room for two text lines.
+ -- Keep the second line short enough for the existing 470px T4.4 panel.
+ return text..'\nOutgoing: paused | prices UNVERIFIED'
 end
 return V
