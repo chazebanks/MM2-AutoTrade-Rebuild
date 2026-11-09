@@ -40,9 +40,12 @@ def indexed(snap: dict, label: str) -> dict:
             snap.get("authorizesTrade") is False and
             snap.get("authorizesAccept") is False and
             snap.get("autoDeploy") is False and
+            snap.get("liveReady", False) is False and
             snap.get("sourceRowsMatched") is True and
             snap.get("rawGameMappingsVerified") is False and
-            snap.get("sourceAcquisition") == "EXTERNAL_SCRAPE_REVIEW_ONLY"
+            snap.get("sourceAcquisition") in (
+                "EXTERNAL_SCRAPE_REVIEW_ONLY", "DIRECT_SUPREME_FETCH_REVIEW_ONLY"
+            )
         ):
             raise ValueError(f"{label}: research candidate cannot promote trade or raw identity authority")
     elif snap.get("researchOnly") not in (None, False):

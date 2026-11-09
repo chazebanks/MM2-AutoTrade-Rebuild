@@ -1,5 +1,10 @@
 # Stage69 — audit CURRENT Supreme value sources, no live repricing or trading
 
+The direct-fetch and manifest-import entry points both emit research JSON.
+A matched publisher row leaves the raw game identity and trade-price flags
+false. The preflight validates JSON and exercises the archived Lua profile
+in its existing consumer regression.
+
 **Priority**: screenshot of T4.4 GUI clearly shows recognized eligible items yet item prices and totals `UNVERIFIED`. The presentation deliberately invokes `profile.isFresh()`; the pinned Nov6 Supreme snapshot expired Nov7 00:47:22 UTC. The Stage52 merged MM2Values feed is a distinct, research-only data source and must not be substituted for Supreme. [Issue #122](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/issues/122).
 
 ## First-party audit, Nov 8 2026 Eastern

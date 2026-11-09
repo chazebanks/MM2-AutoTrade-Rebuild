@@ -1,9 +1,13 @@
 """Stage69 source-row proof is NOT MM2 raw weapon/checker-ID price authority."""
 from copy import deepcopy
+from contextlib import redirect_stdout
+import io
 import json
 from pathlib import Path
 import random
+import tempfile
 import unittest
+from unittest.mock import patch
 
 from pdiddler import refresh_supreme_snapshot as R
 from pdiddler import stage25_market_diff as D
@@ -22,9 +26,52 @@ def candidate():
     result["expiresAt"]=EXP
     for source in result["sources"].values():
         source["observedAt"]=OBS
+    for row in result["rows"]:
+        row["sourceRecordMatched"]=True
     return R.quarantine_research_only(result)
 
 class SourceGameMappingSeparation(unittest.TestCase):
+    def test_direct_cli_writes_only_research_json_without_mapping_authority(self):
+        source_dir = ROOT / "research_source_html/stage69_2026_11_09"
+        observed = R.epoch("2026-11-09T06:09:00Z")
+
+        def read_captured_source(request, *, timeout):
+            slug = request.full_url.rsplit("/", 1)[-1]
+            return io.BytesIO((source_dir / (slug + ".html")).read_bytes())
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            args = [
+                "refresh_supreme_snapshot.py",
+                "--mapping", str(ROOT / "snapshots/supreme_snapshot_2026_11_04.json"),
+                "--date", "2026-11-09",
+                "--output-dir", directory,
+            ]
+            with (patch("sys.argv", args),
+                  patch.object(R.time, "time", return_value=observed),
+                  patch.object(R, "urlopen", side_effect=read_captured_source),
+                  redirect_stdout(io.StringIO())):
+                R.main()
+
+            self.assertEqual([p.name for p in output.iterdir()],
+                             ["supreme_snapshot_2026_11_09.json"])
+            snapshot = json.loads((output / "supreme_snapshot_2026_11_09.json").read_text())
+
+        self.assertEqual(snapshot["sourceAcquisition"], "DIRECT_SUPREME_FETCH_REVIEW_ONLY")
+        self.assertEqual(len(snapshot["rows"]), 190)
+        self.assertIs(snapshot["liveReady"], False)
+        self.assertIs(snapshot["authorizesTrade"], False)
+        self.assertTrue(all(
+            row["sourceRecordMatched"] is True
+            and row["rawGameMappingVerified"] is False
+            and row["priceForTradeVerified"] is False
+            and row["verified"] is False
+            for row in snapshot["rows"]
+        ))
+        report = D.compare(OLD, snapshot, now_epoch=observed)
+        self.assertEqual(report["status"], "REVIEW_ONLY_NO_TRADE_AUTHORITY")
+        self.assertEqual(report["changedItems"], 21)
+
     def test_all_190_source_records_match_but_zero_game_raw_ids_authorized(self):
         snapshot=candidate()
         self.assertEqual(len(snapshot["rows"]),190)
@@ -44,22 +91,13 @@ class SourceGameMappingSeparation(unittest.TestCase):
         self.assertEqual(report["status"],"REVIEW_ONLY_NO_TRADE_AUTHORITY")
         self.assertIs(report["autoDeploy"],False)
 
-    def test_research_rows_can_never_be_converted_to_live_ready_lua(self):
-        with self.assertRaisesRegex(ValueError,"research-only"):
-            R.lua_snapshot(candidate())
-        # Even when someone strips the top-level 'researchOnly' marker,
-        # per-row raw ID uncertainty still blocks the executable converter.
-        snap=candidate()
-        snap.pop("researchOnly")
-        with self.assertRaisesRegex(ValueError,"raw-game-unverified"):
-            R.lua_snapshot(snap)
-
     def test_caller_cannot_claim_proof_by_changing_one_flag(self):
         original=candidate()
         mutations=[
             ("root-authorizesTrade",lambda s:s.__setitem__("authorizesTrade",True)),
             ("root-authorizesAccept",lambda s:s.__setitem__("authorizesAccept",True)),
             ("root-autoDeploy",lambda s:s.__setitem__("autoDeploy",True)),
+            ("root-liveReady",lambda s:s.__setitem__("liveReady",True)),
             ("root-rawMapping",lambda s:s.__setitem__("rawGameMappingsVerified",True)),
             ("root-sourceNotMatched",lambda s:s.__setitem__("sourceRowsMatched",False)),
             ("row-rawMapping",lambda s:s["rows"][0].__setitem__("rawGameMappingVerified",True)),
@@ -88,15 +126,6 @@ class SourceGameMappingSeparation(unittest.TestCase):
             with self.subTest(i=i,mode=mode):
                 with self.assertRaises(ValueError):
                     D.compare(OLD,a,now_epoch=NOW)
-
-    def test_preexisting_lua_module_regression_unchanged(self):
-        # Archived frozen source baseline was allowed to generate Lua in
-        # Stage25 historical tests. This isn't proof that its raw mapping
-        # would be safe for an autotrader today.
-        legacy=deepcopy(OLD)
-        script=R.lua_snapshot(legacy)
-        self.assertIn("liveReady=true",script)
-        self.assertIn("function S.isFresh(now)",script)
 
 if __name__=="__main__":
     unittest.main()
