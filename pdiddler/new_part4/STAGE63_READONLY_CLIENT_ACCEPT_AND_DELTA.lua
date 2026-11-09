@@ -188,7 +188,8 @@ local function finish(status,reason)
  if positive then
   M.status="CLIENT_ACCEPT_FLAG_PLUS_OWN_GAIN_SAME_WINDOW_UNATTRIBUTED"
   M.reason="client-accept-flag-and-own-inventory-delta-do-not-authenticate-settlement"
- elseif M.status=="INITIALIZING" or M.status=="OBSERVING" then
+ elseif M.status=="CLIENT_OBSERVER_FINISHED" or
+        M.status=="INITIALIZING" or M.status=="OBSERVING" then
   M.status="INCONCLUSIVE"
  end
  M.sameBoundWindowClientOnly=M.guiBound and M.coreTerminal and
@@ -325,7 +326,9 @@ task.spawn(function()
    end
   elseif boundReady and (st=="OBSERVING_CLOSE" or st=="POST_CLOSE_READS") then
    local r,n,count=rootAndLabel()
-   if r and (r~=boundRoot or n~=boundLabel or count~=1) then
+   -- Any visible trade whose root/partner is unavailable, changed or
+   -- ambiguous invalidates this locally bound window; silent loss is unsafe.
+   if count>0 and (r~=boundRoot or n~=boundLabel or count~=1) then
     M.stablePartnerLabel=false
     finish("INCOMPLETE","TRADE_GUI_OR_PARTNER_CHANGED");return
    end
