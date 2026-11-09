@@ -10,7 +10,8 @@
       "observedAt": "2026-11-09T22:26:48.761Z",
       "sourcePublisherIso": "2026-11-09T13:58:33-05:00",
       "scrapeId": "01a1c26b-d5ae-74b6-a75a-3c8381c3e9ef",
-      "bytesUtf8": 76908
+      "bytesUtf8": 76908,
+      "sourceGitBlobSha": "ce8178ab9579e8782d8f72a6dac051756a728506"
     },
     {
       "page": "godly",
@@ -19,7 +20,8 @@
       "observedAt": "2026-11-09T22:26:48.761Z",
       "sourcePublisherIso": "2026-11-09T13:58:33-05:00",
       "scrapeId": "01a1c26b-d5d9-707e-8576-cd1cbc30d53c",
-      "bytesUtf8": 329339
+      "bytesUtf8": 329339,
+      "sourceGitBlobSha": "d3cf222a8e10cff3a9fb051b16188192389c4b2d"
     },
     {
       "page": "chroma",
@@ -28,7 +30,8 @@
       "observedAt": "2026-11-09T22:26:48.761Z",
       "sourcePublisherIso": "2026-11-09T13:58:33-05:00",
       "scrapeId": "01a1c26b-d789-712f-a98e-169045595f6e",
-      "bytesUtf8": 159614
+      "bytesUtf8": 159614,
+      "sourceGitBlobSha": "6c77624cac3df96168b008e9bc8eca68a2d78cf9"
     }
   ]
 }
