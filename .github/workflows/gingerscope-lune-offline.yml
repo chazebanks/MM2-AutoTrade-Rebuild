@@ -1,0 +1,48 @@
+name: Gingerscope Lune pure runtime tests (offline)
+# Distinct from official Luau compiler/analyzer CI; never simulates live MM2.
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - ci/gingerscope-lune-0111-pure-runtime
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lune-pure-runtime:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install pinned official Lune v0.11.1 (SHA-256 verified)
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/lune-v0.11.1-linux-x86_64.zip"
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 20 \
+            "https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip" \
+            --output "$archive"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/lune-dist"
+          found="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
+          test -n "$found" || { echo "Official Lune zip has no lune executable" >&2; exit 1; }
+          install -m 0755 "$found" "$RUNNER_TEMP/lune"
+      - name: Execute existing pure modules under the actual Lune runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" --version
+          "$RUNNER_TEMP/lune" run pdiddler/ci/lune_pure_runtime_tests.luau
+      - name: Assert that a failing Luau runtime assertion fails CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' 'error("intentional failing fixture")' > "$RUNNER_TEMP/lune_negative.luau"
+          if "$RUNNER_TEMP/lune" run "$RUNNER_TEMP/lune_negative.luau" >"$RUNNER_TEMP/lune_negative.log" 2>&1; then
+            echo "Lune returned success after an intentional error" >&2
+            exit 1
+          fi
+          echo "[PASS] Lune nonzero exit on deliberate failure"
