@@ -1,0 +1,59 @@
+name: Gingerscope Stage82 public game-key to website slug (research)
+on:
+  push:
+    branches:
+      - research/gingerscope-stage82-source-joined-public-slug-registry
+    paths:
+      - 'pdiddler/intelligence_lab/stage82_public_source_slug_resolver.py'
+      - 'pdiddler/tests/test_stage82_public_source_slug_resolver.py'
+      - 'pdiddler/intelligence_lab/STAGE82_PUBLIC_SOURCE_SLUG_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage82-public-source-slug.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage82_public_source_slug_resolver.py'
+      - 'pdiddler/tests/test_stage82_public_source_slug_resolver.py'
+      - 'pdiddler/intelligence_lab/STAGE82_PUBLIC_SOURCE_SLUG_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage82-public-source-slug.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  immutable-public-source-join:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download six immutable original source files
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope82
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/mm2scripthub/mm2/0f2715187e7eae36eea4bd97afee809478fc877d/db' -o /tmp/gingerscope82/game.lua
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/snapshots/supreme_snapshot_2026_11_06.json' -o /tmp/gingerscope82/roster.json
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/6775e10a8266da43b8b316cddaa3a8042c0f3dda/pdiddler/intelligence_lab/stage77_pinned_public_identity_audit.py' -o /tmp/gingerscope82/stage77.py
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/252a3336c7d3e10b01df1bf0aad10a25755b3477/pdiddler/intelligence_lab/stage81_pinned_website_slug_coverage.py' -o /tmp/gingerscope82/stage81.py
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/research_source_html/stage69_2026_11_09/ancients.html' -o /tmp/gingerscope82/ancients.html
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/research_source_html/stage69_2026_11_09/godlies.html' -o /tmp/gingerscope82/godlies.html
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/research_source_html/stage69_2026_11_09/chromas.html' -o /tmp/gingerscope82/chromas.html
+          test "$(git hash-object /tmp/gingerscope82/game.lua)" = 2be54c3f5c6b715844728c01a65cc2f24a55c02d
+          test "$(git hash-object /tmp/gingerscope82/roster.json)" = a85af4f6137278540e1fed0c27e7e801553e4111
+          test "$(git hash-object /tmp/gingerscope82/stage77.py)" = 754fbe3189d5108272c32a27fc52bf3834011d38
+          test "$(git hash-object /tmp/gingerscope82/stage81.py)" = bff17e1c164d7075a975b0a5e1da27ac2d20a2ba
+          test "$(git hash-object /tmp/gingerscope82/ancients.html)" = 7e11a2d835eadbb522d351bdabe393a7c9688f4b
+          test "$(git hash-object /tmp/gingerscope82/godlies.html)" = 2e4a0c1b8df894f9037e737ba80919b9b2d0c9ae
+          test "$(git hash-object /tmp/gingerscope82/chromas.html)" = 0d2d156d9d9c499ef0e1213376796c1a916e6ce1
+      - name: Test exact public-source variants, 189 website links and 400 corruptions
+        env:
+          STAGE82_REQUIRE_PINNED: '1'
+          STAGE82_GAME: /tmp/gingerscope82/game.lua
+          STAGE82_ROSTER: /tmp/gingerscope82/roster.json
+          STAGE82_STAGE77: /tmp/gingerscope82/stage77.py
+          STAGE82_STAGE81: /tmp/gingerscope82/stage81.py
+          STAGE82_ANCIENTS: /tmp/gingerscope82/ancients.html
+          STAGE82_GODLIES: /tmp/gingerscope82/godlies.html
+          STAGE82_CHROMAS: /tmp/gingerscope82/chromas.html
+        run: |
+          set -euo pipefail
+          python3 -m py_compile pdiddler/intelligence_lab/stage82_public_source_slug_resolver.py pdiddler/tests/test_stage82_public_source_slug_resolver.py
+          python3 -m unittest -v pdiddler.tests.test_stage82_public_source_slug_resolver
