@@ -1,3 +1,9 @@
+## Current verified CI consolidation — Luau merged, Lune PR #132 resolved (2026-11-09 UTC)
+
+- **Official Luau CI [PR #131](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/131) was independently reviewed and MERGED into main**, squash commit `20d2cb2e97220cba9be535fcc62bac722a6c238d`. Main-branch [Actions run #42599440461](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42599440461) PASSED: 6 syntax and 2 static-analysis real-file checks with negative controls. This supersedes earlier draft/unmerged wording further below.
+- **Lune [PR #132](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/132) remains a separate change**: real Luau 0.11.1 runtime tests execute `pdiddler/core/health.lua` and research-only `values/mm2values.lua` with strict no-trade flags and deliberate failure negative control. Earlier exact-head [Actions #42577206853](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42577206853) PASSED. This branch reconciles the old handoff conflict by retaining all Luau checkpoint notes while adding Lune; rerun exact merge-resolution head CI before considering merge.
+- Neither offline gate proves MM2/Delta runtime compatibility, authenticated weapon identity, server settlement or profit; keep outgoing, final Accept, completed/rejected Discord learning and webhook authority disabled. No existing stacked trading PRs merged.
+
 ## Verified tooling milestone — official Luau CLI CI (2026-11-09 UTC)
 
 - New isolated **DRAFT [PR #131](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/131)** from `main`, branch `ci/gingerscope-luau-cli-0746-gate`. Adds `.github/workflows/gingerscope-official-luau-cli.yml` and `pdiddler/ci/official_luau_gate.sh` only; NO production/autotrader/Accept/Discord changes.
