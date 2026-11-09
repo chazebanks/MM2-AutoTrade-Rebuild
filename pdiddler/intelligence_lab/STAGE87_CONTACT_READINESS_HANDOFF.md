@@ -1,3 +1,11 @@
+## VERIFIED exact-code Stage87 Lua and provenance CI — 2026-11-09
+
+**PASS:** Actual P3 + outgoing controller code/tests commit `411c711caf371fb9a914adeb00e63fade6f61731`, focused [GitHub Actions run 42718502191](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42718502191) ran **17/17 actual Lua5.4 behavioral test groups, 400 malformed source/inventory cases**. It verified old priced P3 validator byte-for-byte unchanged vs original Git blob `b781beb27743788c8d3f522d47dd8116199add54` and existing Part4 numeric permit original Git blob `9316e344b9d81c2eb5c7514181ca1c80ea9155f9` unchanged. Baseline official Luau, Lune, Selene/StyLua, sanitized replay and Hypothesis Actions all PASSED at the exact code SHA (six successful workflows total). First CI attempt caught a **test-only malformed-array example** which actually formed a valid shorter array; corrected that case to a genuinely sparse array, added descriptive per-case failure reporting, reran the whole suite without skipping tests. No actual MM2/Delta game interaction was performed.
+
+**Native deployment remains BLOCKED:** Existing Stage51 `REPLACEMENT_INTEGRATION_PREVIEW.lua` fetches old P3/outgoing source SHAs, separately requires a fresh Supreme profile during bootstrap/monitor, and reprices scanner outgoing inventory. Stage87 is the **first actual two-module request-contact interface fix**, not a working end-to-end native rotator. Do not tell user to run a loader, or claim price-expired requests will now send in MM2, until those separate preview source/code paths have been repaired and tested. Part4 offer/Accept remains entirely unchanged and disabled.
+
+---
+
 # Stage87 — Separate P3 request-contact eligibility from untrusted prices
 
 **Scope:** Only the real Stage51 P3 feasibility module and its real outgoing evidence controller. No Part4 permit, offer placement, final Accept, server hop, scanner source, or Discord modification.
