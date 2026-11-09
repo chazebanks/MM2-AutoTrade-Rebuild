@@ -1,3 +1,11 @@
+## Stage78 exact-head verified offline CI (2026-11-09)
+
+**VERIFIED:** DRAFT [PR148](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/148) at **tested code + doc SHA `8bb041af86c2fe30b177aa743d6747090ca2d08c`**. [Dedicated Actions run 42684869579](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42684869579) SUCCESS: immutable original scanner Git-blob pin matched exactly; real Lua5.4 installed; Python unittest **3/3** passed, including the actual extracted original `inventoryFromProfile` runtime reproduction of numeric+string key `tostring` collision; Lua research guard **12 named groups + 400 seeded corruptions** passed. On the same commit, official Luau, Lune, Selene/StyLua, deterministic replay and Hypothesis workflows also SUCCESS. This proves the *old source has a hypothetical typed-key collision* and the *new pure research guard rejects it offline* — **NOT** that MM2 generated a numeric-owned weapon key or a current account was misclassified.
+
+No real client inventory or Supreme external-price ID was newly bound; no automatic trade, Accept, profit, Discord learning, production scanner change or iPad test. Test ALT transfers from Stage63/66 must not be repeated for this source-only issue. Leave draft unmerged. Next: inspect whether already available read-only source data establish type provenance before proposing any deployment. Stage77 archived public name links remain separate evidence.
+
+---
+
 # Stage78 — strict owned raw-key ↔ current catalogue exact lookup research
 
 **November 9, 2026. Issue #122. Isolated DRAFT research; no production scanner, P4, bot avoider, pricing, Discord or offer changes.**
