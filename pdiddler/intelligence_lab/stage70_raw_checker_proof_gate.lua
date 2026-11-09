@@ -94,6 +94,7 @@ function M.evaluate(inv,profile)
  -- The checker roster is immutable within this module and cannot be supplied
  -- or filled by caller-controlled items, GUI flags or source page metadata.
  local reviewed=0
+ local checkerTargetSeen={}
  for key,proof in pairs(REVIEWED_RAW_TO_CHECKER) do
   reviewed=reviewed+1
   if type(key)~="string" or key=="" or type(proof)~="table"
@@ -109,6 +110,12 @@ function M.evaluate(inv,profile)
    out.reason="INVALID_STATIC_REVIEWED_CROSSWALK"
    return out
   end
+  local checkerTarget=proof.page..":"..proof.checkerId
+  if checkerTargetSeen[checkerTarget] then
+   out.reason="DUPLICATE_REVIEWED_CHECKER_TARGET"
+   return out
+  end
+  checkerTargetSeen[checkerTarget]=true
  end
  out.reviewedMappingCount=reviewed
  out.sourceFresh=sourceFresh(profile)
@@ -191,6 +198,7 @@ function M.evaluate(inv,profile)
  -- publisher's "verified" row flag is not crosswalk identity proof.
  if out.sourceFresh and out.unverifiedItemRows==0
    and out.priceRowsVerified==rows and rows>0
+   and finite(subtotal) -- finite unit prices can sum to infinity
    and inv.unmapped==0 and inv.unpriced==0 and inv.badQty==0 then
   out.completeValue=subtotal
   out.status="SOURCE_CURRENT_AND_REVIEWED_CROSSWALK_ONLY"
