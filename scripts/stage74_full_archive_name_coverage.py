@@ -166,7 +166,6 @@ def evaluate(catalog_bytes: bytes, supreme_bytes: bytes) -> dict:
         ],
     )
 
-
 # Independent untrusted THIRD-PARTY October18 public copy of MM2 Item metadata.
 # It is useful corroboration of source labels, NOT original Roblox publisher
 # data, a server attestation or independent price authority.
@@ -178,25 +177,7 @@ RECENT_ENTRY = re.compile(
 )
 RECENT_FIELD = re.compile(
     r'(?m)^    \["(ItemName|ItemType|Rarity|Chroma|ItemID)"\]'
-    r'\s*=\s*("[^"\n]*"|\d+|true|false)\s*,?\s*    p = argparse.ArgumentParser()
-    p.add_argument("--game-archive", type=Path, required=True)
-    p.add_argument("--supreme-archive", type=Path, required=True)
-    p.add_argument("--newer-public-catalog", type=Path, required=False)
-    a = p.parse_args()
-    out = evaluate(a.game_archive.read_bytes(), a.supreme_archive.read_bytes())
-    print(json.dumps(out, sort_keys=True))
-    if out["status"] != "ARCHIVED_PUBLIC_NAME_COVERAGE_ONLY":
-        raise SystemExit(2)
-    if a.newer_public_catalog is not None:
-        newer=evaluate_newer_public(a.newer_public_catalog.read_bytes(),
-                                    a.supreme_archive.read_bytes())
-        print(json.dumps(newer,sort_keys=True))
-        if newer["status"] != "THIRD_PARTY_PUBLIC_NAME_CORROBORATION_ONLY":
-            raise SystemExit(2)
-
-if __name__ == "__main__":
-    main()
-
+    r'\s*=\s*("[^"\n]*"|\d+|true|false)\s*,?\s*$'
 )
 
 def parse_newer_public_entries(source: str) -> dict:
@@ -264,11 +245,18 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--game-archive", type=Path, required=True)
     p.add_argument("--supreme-archive", type=Path, required=True)
+    p.add_argument("--newer-public-catalog", type=Path, required=False)
     a = p.parse_args()
     out = evaluate(a.game_archive.read_bytes(), a.supreme_archive.read_bytes())
     print(json.dumps(out, sort_keys=True))
     if out["status"] != "ARCHIVED_PUBLIC_NAME_COVERAGE_ONLY":
         raise SystemExit(2)
+    if a.newer_public_catalog is not None:
+        newer=evaluate_newer_public(a.newer_public_catalog.read_bytes(),
+                                    a.supreme_archive.read_bytes())
+        print(json.dumps(newer,sort_keys=True))
+        if newer["status"] != "THIRD_PARTY_PUBLIC_NAME_CORROBORATION_ONLY":
+            raise SystemExit(2)
 
 if __name__ == "__main__":
     main()
