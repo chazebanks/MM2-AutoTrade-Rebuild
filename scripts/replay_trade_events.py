@@ -86,7 +86,8 @@ def _validate(source: object) -> str | None:
         "schema", "sourceKind", "clientRunNonce", "events"
     }:
         return "SOURCE_FIELDS_UNTRUSTED"
-    if source["schema"] != SOURCE_SCHEMA or source["sourceKind"] not in SOURCES:
+    if (source["schema"] != SOURCE_SCHEMA or type(source["sourceKind"]) is not str
+            or source["sourceKind"] not in SOURCES):
         return "SOURCE_SCHEMA_OR_KIND_UNTRUSTED"
     if type(source["clientRunNonce"]) is not str or not NONCE.fullmatch(
         source["clientRunNonce"]
@@ -97,7 +98,8 @@ def _validate(source: object) -> str | None:
         return "EVENT_LIST_OUT_OF_BOUNDS"
     previous = -1
     for event in events:
-        if type(event) is not dict or event.get("kind") not in KINDS:
+        if (type(event) is not dict or type(event.get("kind")) is not str
+                or event["kind"] not in KINDS):
             return "EVENT_KIND_OR_SHAPE_UNTRUSTED"
         kind = event["kind"]
         if set(event) != KIND_FIELDS[kind]:
@@ -109,13 +111,14 @@ def _validate(source: object) -> str | None:
             return "ARRIVAL_CLOCK_UNTRUSTED"
         previous = t
         if kind in {"ACCEPT", "OFFER"}:
-            if event["side"] not in SIDES or not _nonnegative(
+            if type(event["side"]) is not str or event["side"] not in SIDES or not _nonnegative(
                 event["revision"], 1_000_000
             ):
                 return "SIDE_OR_REVISION_UNTRUSTED"
             if kind == "OFFER" and not _token(event["signature"]):
                 return "OFFER_SIGNATURE_UNTRUSTED"
-        elif kind == "CALLBACK" and event["signal"] not in CALLBACKS:
+        elif kind == "CALLBACK" and (type(event["signal"]) is not str
+                                    or event["signal"] not in CALLBACKS):
             return "CALLBACK_SIGNAL_UNTRUSTED"
         elif kind == "INVENTORY_DELTA" and (
             not _nonnegative(event["gained"], 1_000)
