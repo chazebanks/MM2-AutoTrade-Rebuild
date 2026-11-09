@@ -14,7 +14,7 @@ ROOT=Path(__file__).resolve().parents[2]
 LUA=ROOT/"pdiddler/new_part4/STAGE66_READONLY_ACCEPT_PRIVATE_RAW_EQUALITY.lua"
 CORE=ROOT/"pdiddler/new_part4/STAGE66_ROLE_NEUTRAL_PRIVATE_RAW_SNAPSHOTS.lua"
 HELPER=Path(os.environ.get("STAGE66_HELPER_PATH","/tmp/stage66_pinned_helper.lua"))
-CORE_PIN="79919f199e616e7d03cec1e8bbcfbb99ae60c099"
+CORE_PIN="d8af380dfb951609ad52cba138c7856914baabd9"
 HELPER_PIN="27263d7e2fe44a0da842b7062eff7c91c6ea3b65"
 
 HARNESS=r"""
@@ -128,7 +128,7 @@ game={
    return text
   end
   assert(url:find("STAGE66_ROLE_NEUTRAL_PRIVATE_RAW_SNAPSHOTS.lua",1,true))
-  assert(url:find("79919f199e616e7d03cec1e8bbcfbb99ae60c099",1,true))
+  assert(url:find("d8af380dfb951609ad52cba138c7856914baabd9",1,true))
   coreLoads=coreLoads+1
   if mode=="no-core" then return nil end
   return [[
@@ -140,6 +140,10 @@ game={
        post2={[private]=2,Other=3,Another=8}
       }
     }
+    function S.releasePrivateRawSnapshots()
+      S.privateRawSnapshots={}
+      return true
+    end
     task.spawn(function()
      task.wait(.33)
      S.state="OBSERVING_CLOSE"
@@ -255,6 +259,7 @@ assert(output.mayReportProfit==false)
 assert(output.authorizesAccept==false)
 assert(output.authorizesTrade==false)
 assert(output.tradeOutcome=="UNKNOWN")
+assert(output.privateRawDataReleased==true)
 assert(helperLoads<=1 and coreLoads<=1)
 local leaks={"PRIVATE_RAW_WEAPON_KEY","PRIVATE_WRONG","SECRET_VALUE"}
 for k,v in pairs(output) do
