@@ -198,7 +198,10 @@ task.spawn(function()
    observed=true
    task.wait(0.5)
   end
-  if OUT.status=="OBSERVING" then
+  if not live() then
+   OUT.status="HELD"
+   OUT.reason="job-player-or-gui-changed"
+  elseif OUT.status=="OBSERVING" then
    OUT.status=observed and "CLIENT_CONTACT_READINESS_OBSERVED" or "INCONCLUSIVE"
    OUT.reason=observed and "NO_REQUESTS_PRICES_UNVERIFIED" or "NO_COMPLETE_SCAN"
   end
