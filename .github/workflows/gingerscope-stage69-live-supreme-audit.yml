@@ -7,6 +7,10 @@ on:
       - '.github/workflows/gingerscope-stage69-live-supreme-audit.yml'
       - 'pdiddler/stage69_live_supreme_audit.md'
       - 'pdiddler/tests/test_stage69_source_boundaries.py'
+      - 'pdiddler/tests/test_stage69_manifest_provenance.py'
+      - 'pdiddler/stage69_manifest_provenance.py'
+      - 'pdiddler/research_source_html/stage69_2026_11_09/**'
+      - 'pdiddler/refresh_supreme_snapshot.py'
       - 'pdiddler/refresh_supreme_snapshot.py'
       - 'pdiddler/stage25_market_diff.py'
   workflow_dispatch:
@@ -28,16 +32,20 @@ jobs:
       - name: Verify existing structured scraper and provenance tests
         run: |
           set -euo pipefail
-          python3 -m unittest -v pdiddler.tests.test_refresh_supreme_snapshot pdiddler.tests.test_stage25_market_diff pdiddler.tests.test_stage69_source_boundaries
-      - name: Fetch all three current publisher pages and create REVIEW-ONLY candidate
+          python3 -m unittest -v pdiddler.tests.test_refresh_supreme_snapshot pdiddler.tests.test_stage25_market_diff pdiddler.tests.test_stage69_source_boundaries pdiddler.tests.test_stage69_manifest_provenance
+      - name: Parse all three EXTERNALLY ACQUIRED pinned pages into review-only JSON (runner direct HTTP 403)
         run: |
           set -euo pipefail
           mkdir -p /tmp/stage69
           python3 pdiddler/refresh_supreme_snapshot.py \
             --mapping pdiddler/snapshots/supreme_snapshot_2026_11_04.json \
+            --input-dir pdiddler/research_source_html/stage69_2026_11_09 \
+            --source-manifest pdiddler/research_source_html/stage69_2026_11_09/source_manifest.json \
+            --research-only \
             --date "$(date -u +%F)" \
             --output-dir /tmp/stage69 \
-            | tee /tmp/stage69/publisher_fetch_status.json
+            | tee /tmp/stage69/publisher_import_status.json
+          test ! -f "/tmp/stage69/pdiddler_supreme_snapshot_$(date -u +%Y_%m_%d).lua"
       - name: Compare 190 canonical weapons and print ALL changed values
         run: |
           set -euo pipefail
@@ -51,6 +59,10 @@ jobs:
           d=json.loads(Path("/tmp/stage69/supreme_diff_REVIEW_ONLY.json").read_text())
           assert d["canonicalCount"] == 190
           assert d["autoDeploy"] is False
+          candidate=json.loads(Path("/tmp/stage69/supreme_snapshot_" + __import__("datetime").datetime.now(__import__("datetime").timezone.utc).strftime("%Y_%m_%d") + ".json").read_text())
+          assert candidate["researchOnly"] is True
+          assert candidate["autoDeploy"] is False
+          assert candidate["authorizesTrade"] is False and candidate["authorizesAccept"] is False
           assert d["authorizesTrade"] is False and d["authorizesAccept"] is False
           print("STATUS",d["status"],"changed",d["changedItems"],
                 "publication",d["candidatePublication"],"expires",d["candidateExpiresAt"])
