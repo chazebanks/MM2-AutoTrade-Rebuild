@@ -31,6 +31,7 @@ GAME_FIELD = re.compile(r'(?m)^    \["(ItemName|ItemType|Rarity|Chroma)"\]\s*=\s
 VOID = frozenset('area base br col embed hr img input link meta param source track wbr sep'.split())
 # Independent Stage69 source parser excludes these seven pets as non-weapons.
 # No blanket exclusion is permitted for future unknown pet/row structures.
+KNOWN_HIDDEN_GODLIES = frozenset({'Batwing', 'Black Luger'})
 KNOWN_CHROMA_PETS = frozenset({
     'Chroma Fire Bat', 'Chroma Fire Bear', 'Chroma Fire Bunny',
     'Chroma Fire Cat', 'Chroma Fire Dog', 'Chroma Fire Fox', 'Chroma Fire Pig',
@@ -176,6 +177,12 @@ def website_records(raw: bytes, page: str):
             continue
         if page == 'chromas' and name in KNOWN_CHROMA_PETS:
             raise ValueError('known pet moved into weapon section')
+        hidden = bool(re.search(r'display\s*:\s*none', col.attrs.get('style', ''), re.I))
+        if hidden:
+            if page != 'godlies' or name not in KNOWN_HIDDEN_GODLIES:
+                raise ValueError('unreviewed hidden market row')
+            # Stage69 explicitly quarantined these two hidden test placeholders.
+            continue
         body = one([n for n in descendants if n.has_class('itembody')], 'source item body').text()
         if page == 'chromas':
             m = re.search(r'\bClass\s*-\s*(Ancient|Godly)\b', body)
