@@ -23,7 +23,8 @@ local mode=arg[1]
 local history=assert(dofile(arg[2]))
 local profile=assert(dofile(arg[3]))
 local strict=assert(dofile(arg[4]))
-os.time=function()return 1794201000 end
+local now=1794201000
+os.time=function() return now end
 local render=assert(loadfile(arg[5]))(history)
 local items={
   {id="PRIVATE_RAW_KEY_1",name="Gingerscope",page="ancient",
@@ -63,9 +64,15 @@ elseif mode=="fuzz" then
   else items[1].qty=2 end
 end
 local inv=items and {items=items,unmapped=0,unpriced=0,badQty=0} or nil
+if mode=="clock-rollback" then
+  assert(not profile.isFresh())
+  assert(render.inventory(inv,profile,strict).totalText=="UNVERIFIED")
+  now=profile.observedAtEpoch+300
+  assert(profile.isFresh(), "test clock must make the old profile appear fresh")
+end
 local result=render.inventory(inv,profile,strict)
 assert(type(result)=="table")
-assert(result.totalText=="UNVERIFIED")
+assert(result.totalText=="UNVERIFIED", "history total became "..result.totalText)
 assert(result.priceState=="expired")
 assert(type(result.detail)=="string")
 assert(result.detail:find("prices expired or unavailable",1,true))
@@ -81,7 +88,7 @@ local summary=render.summary(7,1,0,{state="ready",reachable=1000},profile)
 assert(summary:find("Outgoing: paused - Supreme prices expired or unavailable",1,true))
 assert(not summary:find("Outgoing (unprocessed): Reachable 1000",1,true))
 if mode=="base" or mode=="fake-valued-row"
-   or mode=="expired-but-claimed-current" then
+   or mode=="expired-but-claimed-current" or mode=="clock-rollback" then
  assert(result.historicalReferencesShown==3)
  assert(result.detail:find("HISTORICAL REFERENCES ONLY (UNVERIFIED; NO TRADING)",1,true))
  assert(result.detail:find("Historical Supreme ref: 16000 each",1,true))
@@ -91,6 +98,11 @@ elseif mode=="bad-chroma" or mode=="fuzzy-alias" then
 elseif mode=="missing-profile" or mode=="invalid-qty" or
    mode=="duplicate-key" or mode=="no-inventory" then
  assert(result.historicalReferencesShown==0)
+end
+if mode=="clock-rollback" then
+  assert(not result.detail:find("Snapshot expired: false",1,true))
+  local _,idleRow=render.row({state="whitelist",inv=inv},nil,nil,profile,strict)
+  assert(idleRow:find("Paused: Supreme prices expired or unavailable",1,true))
 end
 print("STAGE73_VIEW mode="..mode..
  " shown="..result.historicalReferencesShown..
@@ -143,6 +155,8 @@ class Stage73ActualViewTests(unittest.TestCase):
 
     def test_expired_supreme_old_values_only_historical_annotation(self):
         self.assertIn("shown=3",self.invoke("base"))
+    def test_clock_rollback_cannot_promote_history_view_to_current_prices(self):
+        self.assertIn("shown=3",self.invoke("clock-rollback"))
     def test_forged_client_price_and_fake_outgoing_ready_never_promote(self):
         for mode in ("fake-valued-row","expired-but-claimed-current"):
             with self.subTest(mode=mode):
