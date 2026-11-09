@@ -40,7 +40,7 @@ function M.evaluate(sync,source)
   out.reason="PINNED_NAME_INDEX_INVALID"
   return out
  end
- local wanted={},sourceCounts={ancient=0,godly=0,chroma=0}
+ local wanted,sourceCounts={},{ancient=0,godly=0,chroma=0}
  for k,v in pairs(source.rows) do
   if type(k)~="number" or k~=math.floor(k) or k<1 or k>190
    or type(v)~="table" or not safe(v.name)
@@ -65,7 +65,7 @@ function M.evaluate(sync,source)
  if type(sync)~="table" or type(sync.Weapons)~="table" then
   out.reason="SYNC_WEAPONS_NOT_AVAILABLE" return out
  end
- local matches={},rows=0,invalid=0,eligible=0
+ local matches,rows,invalid,eligible={},0,0,0
  for raw,d in pairs(sync.Weapons) do
   rows=rows+1
   if rows>2500 then
