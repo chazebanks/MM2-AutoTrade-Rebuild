@@ -133,7 +133,7 @@ if mode=="encode_error" then
   assert(state.clipboardStatus=="NOT_ATTEMPTED")
   assert(reportCount==0 and copyAttempts==0)
   assert(#warnings==1,"missing sanitized failure warning")
-  assert(#statuses==1 and statuses[1]:find("REPORT UNAVAILABLE",1,true))
+  assert(#statuses==1 and statuses[1]:find("REPORT FAILED",1,true))
 elseif mode=="stale_session" then
   assert(state.probeStatus=="ABORTED_SESSION_CHANGED")
   assert(reportCount==0 and #statuses==0 and copyAttempts==0)
