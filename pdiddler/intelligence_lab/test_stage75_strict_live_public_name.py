@@ -60,9 +60,15 @@ elseif mode=="dup_entry" then
 elseif mode=="invalid_item" then
   assert(v.status=="CLIENT_CATALOG_SHAPE_OR_AMBIGUITY_REVIEW_ONLY")
   assert(v.invalidCatalogEntries==1)
-elseif mode=="missing_name" or mode=="chroma_as_base" then
+elseif mode=="missing_name" then
   assert(v.status=="CLIENT_CATALOG_PUBLIC_NAME_ONLY")
   assert(v.strictMatches==187 and v.sourceNamesMissing==3)
+elseif mode=="chroma_as_base" then
+  -- Reclassifying one Chroma as base creates a duplicate *base* source label
+  -- AND removes the Chroma label; this is an ambiguity, not a safe success.
+  assert(v.status=="CLIENT_CATALOG_SHAPE_OR_AMBIGUITY_REVIEW_ONLY")
+  assert(v.strictMatches==186 and v.ambiguousMatches==1)
+  assert(v.sourceNamesMissing==3)
 else
   assert(v.status=="CLIENT_CATALOG_PUBLIC_NAME_ONLY",v.status)
   assert(v.catalogRows==1040 and v.catalogEligibleRows==200)
