@@ -1,0 +1,80 @@
+name: Gingerscope Stage83 private aggregate public-reference coverage
+on:
+  push:
+    branches:
+      - research/gingerscope-stage83-private-aggregate-slug-coverage
+    paths:
+      - 'pdiddler/intelligence_lab/stage83_*'
+      - 'pdiddler/new_part4/STAGE83_READONLY_PUBLIC_SLUG_COVERAGE.lua'
+      - 'pdiddler/tests/test_stage83_*'
+      - '.github/workflows/gingerscope-stage83-aggregate-coverage.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage83_*'
+      - 'pdiddler/new_part4/STAGE83_READONLY_PUBLIC_SLUG_COVERAGE.lua'
+      - 'pdiddler/tests/test_stage83_*'
+      - '.github/workflows/gingerscope-stage83-aggregate-coverage.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  privacy-preserving-evidence-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install real Lua5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Download ALL EIGHT original immutable source blobs
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope83
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/mm2scripthub/mm2/0f2715187e7eae36eea4bd97afee809478fc877d/db' -o /tmp/gingerscope83/game.lua
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/snapshots/supreme_snapshot_2026_11_06.json' -o /tmp/gingerscope83/roster.json
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/research_source_html/stage69_2026_11_09/ancients.html' -o /tmp/gingerscope83/ancients.html
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/research_source_html/stage69_2026_11_09/godlies.html' -o /tmp/gingerscope83/godlies.html
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/research_source_html/stage69_2026_11_09/chromas.html' -o /tmp/gingerscope83/chromas.html
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/6775e10a8266da43b8b316cddaa3a8042c0f3dda/pdiddler/intelligence_lab/stage77_pinned_public_identity_audit.py' -o /tmp/gingerscope83/stage77.py
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/252a3336c7d3e10b01df1bf0aad10a25755b3477/pdiddler/intelligence_lab/stage81_pinned_website_slug_coverage.py' -o /tmp/gingerscope83/stage81.py
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/e96944c715bddcebc5cf133de1e0ff7d1b2054f4/pdiddler/intelligence_lab/stage82_public_source_slug_resolver.py' -o /tmp/gingerscope83/stage82.py
+          test "$(git hash-object /tmp/gingerscope83/game.lua)" = '2be54c3f5c6b715844728c01a65cc2f24a55c02d'
+          test "$(git hash-object /tmp/gingerscope83/roster.json)" = 'a85af4f6137278540e1fed0c27e7e801553e4111'
+          test "$(git hash-object /tmp/gingerscope83/ancients.html)" = '7e11a2d835eadbb522d351bdabe393a7c9688f4b'
+          test "$(git hash-object /tmp/gingerscope83/godlies.html)" = '2e4a0c1b8df894f9037e737ba80919b9b2d0c9ae'
+          test "$(git hash-object /tmp/gingerscope83/chromas.html)" = '0d2d156d9d9c499ef0e1213376796c1a916e6ce1'
+          test "$(git hash-object /tmp/gingerscope83/stage77.py)" = '754fbe3189d5108272c32a27fc52bf3834011d38'
+          test "$(git hash-object /tmp/gingerscope83/stage81.py)" = 'bff17e1c164d7075a975b0a5e1da27ac2d20a2ba'
+          test "$(git hash-object /tmp/gingerscope83/stage82.py)" = '91362b647a8cc630e4fabcf7aa5d65eb44adb399'
+      - name: Rebuild public registry byte-for-byte from original pins
+        run: |
+          set -euo pipefail
+          python3 pdiddler/intelligence_lab/stage83_export_public_slug_registry.py --game /tmp/gingerscope83/game.lua --roster /tmp/gingerscope83/roster.json --ancients /tmp/gingerscope83/ancients.html --godlies /tmp/gingerscope83/godlies.html --chromas /tmp/gingerscope83/chromas.html --stage77 /tmp/gingerscope83/stage77.py --stage81 /tmp/gingerscope83/stage81.py --stage82 /tmp/gingerscope83/stage82.py --output /tmp/gingerscope83/registry.lua
+          cmp pdiddler/intelligence_lab/stage83_public_slug_registry.lua /tmp/gingerscope83/registry.lua
+      - name: Run real Lua helper and native probe mock with 400 adversarial cases
+        run: |
+          set -euo pipefail
+          lua5.4 -e 'assert(loadfile("pdiddler/intelligence_lab/stage83_private_aggregate_coverage.lua"))'
+          lua5.4 -e 'assert(loadfile("pdiddler/intelligence_lab/stage83_public_slug_registry.lua"))'
+          lua5.4 -e 'assert(loadfile("pdiddler/new_part4/STAGE83_READONLY_PUBLIC_SLUG_COVERAGE.lua"))'
+          lua5.4 pdiddler/tests/test_stage83_private_aggregate_coverage.lua
+          lua5.4 pdiddler/tests/test_stage83_native_coverage_mock.lua
+      - name: Run Python source + privacy tests against original eight blobs
+        env:
+          STAGE83_REQUIRE_PINNED: '1'
+          STAGE83_GAME: /tmp/gingerscope83/game.lua
+          STAGE83_ROSTER: /tmp/gingerscope83/roster.json
+          STAGE83_ANCIENTS: /tmp/gingerscope83/ancients.html
+          STAGE83_GODLIES: /tmp/gingerscope83/godlies.html
+          STAGE83_CHROMAS: /tmp/gingerscope83/chromas.html
+          STAGE83_STAGE77: /tmp/gingerscope83/stage77.py
+          STAGE83_STAGE81: /tmp/gingerscope83/stage81.py
+          STAGE83_STAGE82: /tmp/gingerscope83/stage82.py
+        run: |
+          set -euo pipefail
+          python3 -m py_compile pdiddler/intelligence_lab/stage83_export_public_slug_registry.py pdiddler/tests/test_stage83_public_export_and_safety.py
+          python3 -m unittest -v pdiddler.tests.test_stage83_public_export_and_safety
