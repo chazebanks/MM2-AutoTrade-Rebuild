@@ -129,8 +129,8 @@ local function reportFailed()
     S.probeStatus="REPORT_UNAVAILABLE"
     S.reportStatus="UNAVAILABLE"
     S.clipboardStatus="NOT_ATTEMPTED"
-    showFinalStatus("STAGE73 REPORT UNAVAILABLE; check Delta console. "
-        .."Total value UNVERIFIED | Outgoing paused | NO TRADING")
+    showFinalStatus("ST73 REPORT FAILED | SEE DELTA CONSOLE\\n"
+        .."UNVERIFIED | OUTGOING PAUSED")
     warn("[GINGERSCOPE STAGE73] read-only report unavailable; no trade actions")
 end
 
@@ -226,13 +226,12 @@ task.spawn(function()
     -- One complete console fallback, irrespective of clipboard outcome.
     print("[GINGERSCOPE STAGE73 READ-ONLY REPORT] "..payload)
     local copyText=S.clipboardStatus=="COPY_REQUEST_SUCCEEDED"
-       and "Copy request sent; paste to confirm"
-       or "Clipboard unavailable/failed; use Delta console"
-    local scanText=settled and "Scan window settled"
-       or "Scan timeout; some records may be unverified"
-    showFinalStatus("STAGE73 REPORT READY | "..copyText
-        .." | "..scanText
-        .." | Total value UNVERIFIED | Outgoing paused")
+       and "COPY SENT (PASTE CHECK)"
+       or "COPY FAILED (USE CONSOLE)"
+    local scanText=settled and "ST73 REPORT READY"
+       or "ST73 SCAN TIMEOUT"
+    showFinalStatus(scanText.." | "..copyText
+        .."\\nUNVERIFIED | OUTGOING PAUSED")
     print("[GINGERSCOPE STAGE73] "..S.clipboardStatus
         .." | "..S.scanWindowStatus.." | NO TRADING")
 end)
