@@ -97,6 +97,16 @@ class Stage74NewerPublicTests(unittest.TestCase):
                          ("chroma","Chroma Immortal"))
         self.assertEqual(m.game_page_name(d["Immortal"]),
                          ("godly","Immortal"))
+        self.assertEqual(m.game_page_name(d["EmberbowChroma"]),
+                         ("chroma","Chroma Emberbow"))
+        self.assertEqual(m.game_page_name(d["EmberscytheChroma"]),
+                         ("chroma","Chroma Emberscythe"))
+        self.assertEqual(d["EmberscytheChroma"]["Rarity"],"Ancient")
+        self.assertEqual(d["EmberbowChroma"]["Rarity"],"Ancient")
+        # Public game art/item asset IDs may be reused by related variants.
+        # Never treat asset IDs as unique raw owned keys or Supreme checker IDs.
+        self.assertEqual(d["EmberscytheChroma"]["ItemID"],
+                         d["Emberscythe"]["ItemID"])
 
     def test_three_corruption_classes_fail_closed(self):
         for which in ("source","market","missing"):
