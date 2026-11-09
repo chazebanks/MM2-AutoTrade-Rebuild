@@ -147,6 +147,16 @@ class Stage77(unittest.TestCase):
             self.skipTest('focused pinned public archives supplied only to dedicated CI')
         g=Path(env['STAGE77_PINNED_GAME']).read_bytes()
         w={k:Path(env[f'STAGE77_PINNED_{k.upper()}']).read_bytes() for k in ('ancients','godlies','chromas')}
+        # Diagnostic only on public pinned bytes: isolate strict parser failure
+        # without printing the large source text, credentials, or account data.
+        game_rows = m.game_rows(g)
+        self.assertEqual(len(game_rows), 1040)
+        for page in ('ancients','godlies','chromas'):
+            try:
+                market_rows = m.website_records(w[page], page)
+            except (ValueError, TypeError) as exc:
+                self.fail(f'Pinned {page} actual HTML structure: {type(exc).__name__}: {exc}')
+            self.assertGreater(len(market_rows), 0)
         result=m.run(g,w)
         self.assertEqual(result['status'],'PINNED_PUBLIC_SOURCES_CORRESPOND_ONLY',result)
         self.assertEqual(result['independentlyPinnedSourceCount'],4)
