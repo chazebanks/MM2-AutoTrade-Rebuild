@@ -8,7 +8,7 @@
 local MARK="[GINGERSCOPE STAGE66 SAME WINDOW]"
 local KEY="PDIDDLER_STAGE66_SAME_WINDOW_CLIENT_ONLY"
 local CORE_KEY="PDIDDLER_STAGE32_RESULT_CORRELATION_PROBE"
-local CORE_PIN="79919f199e616e7d03cec1e8bbcfbb99ae60c099"
+local CORE_PIN="d8af380dfb951609ad52cba138c7856914baabd9"
 local URL="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
  CORE_PIN.."/pdiddler/new_part4/STAGE66_ROLE_NEUTRAL_PRIVATE_RAW_SNAPSHOTS.lua"
 local HELPER_PIN="27263d7e2fe44a0da842b7062eff7c91c6ea3b65"
@@ -28,6 +28,7 @@ local M={
  mayReportProfit=false,mayUseForStrategyLearning=false,
  clientCompatibleFlagPattern=false,clientReciprocalTransferProven=false,
  privateRawKeyEqualityObserved=false,
+ privateRawDataReleased=false,
  privateRawEqualityStatus="NOT_TESTED",
  privateRawEqualityReason="NOT_EVALUATED",
  callbackRowFieldTypes={"NOT_OBSERVED","NOT_OBSERVED","NOT_OBSERVED"},
@@ -253,6 +254,22 @@ local function finish(status,reason)
    M.stablePartnerLabel and M.listenerDisconnected
  -- Source verified locally; this is NOT reciprocal proof on a second client.
  M.clientReciprocalTransferProven=false
+ -- Privacy invariant: the shared Stage32 owner otherwise retains all 3
+ -- raw Weapons.Owned maps in getgenv() after this collector finishes.
+ -- Scrub them on ALL terminal paths, not only the positive one.
+ local released=core==nil
+ if core~=nil and type(core.releasePrivateRawSnapshots)=="function" then
+  local called,scrubbed=pcall(core.releasePrivateRawSnapshots)
+  released=called and scrubbed==true
+ end
+ privateRows=nil
+ privateHelper=nil
+ M.privateRawDataReleased=released
+ if not released then
+  M.status="INCOMPLETE"
+  M.reason="PRIVATE_RAW_SNAPSHOT_SCRUB_FAILED"
+  M.privateRawKeyEqualityObserved=false
+ end
  local ok,encoded=pcall(function()
   return game:GetService("HttpService"):JSONEncode(M)
  end)
@@ -417,6 +434,9 @@ if not loaded or type(other)~="table" then
  return finish("INCOMPLETE","PINNED_READONLY_CORE_UNAVAILABLE")
 end
 core=other
+if type(core.releasePrivateRawSnapshots)~="function" then
+ return finish("INCOMPLETE","CORE_MISSING_PRIVACY_SCRUB")
+end
 M.status="OBSERVING"
 task.spawn(function()
  local boundReady=false
