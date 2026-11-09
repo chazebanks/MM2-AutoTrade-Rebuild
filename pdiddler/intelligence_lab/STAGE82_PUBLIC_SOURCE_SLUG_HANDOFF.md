@@ -1,3 +1,13 @@
+## Verified Stage82 exact-code GitHub CI (2026-11-09)
+
+**PASS** on exact Stage82 code head `52d0cd912ef3b7ab24497b261d92f82296cb72f8`. Dedicated [Actions run 42698812606](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42698812606) verified **all SEVEN immutable source Git blobs** (Oct18 1,040-record game, 190-row old Supreme roster, three original Nov9 HTML captures, reviewed Stage77 and Stage81 Python source) and executed **10/10 real Python unittest groups**, including actual **189 unique public raw-key→first-party website slug candidates**, 1 priceless Nik's Scythe lacking a normal slug, 10 public game-only eligible keys, four representative high-risk variants, old numeric `checkerId` lookups rejected, 400 byte-corrupted source cases refused, forged URL/variant/registry changes rejected, all execution/price/learner authority FALSE. On this same tested code head the five baseline Luau/Lune/Selene/replay/Hypothesis workflows were also **SUCCESS**. [DRAFT PR152](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/152) remains **UNMERGED**. All actual data represent historical public sources; none of 189 is an authenticated item in the user's current 182-weapon Owned client table.
+
+**Important security caveat:** the SHA-256 registry digest detects accidental or unsanctioned mutation **within a supplied built object**; it does NOT prove a caller's identity, cryptographically authenticate Supreme's server, or prevent a malicious caller from forging a new object/digest. Thus `lookup_public_candidate` output stays a **non-authoritative historical link** in every case; no live production code uses it. Original `sourcePublisherFresh=false` because last publisher update Nov6 is past 72h. Do not use this to change current market price verification or skip Stage70 identity proof.
+
+**Next scoped engineering issue:** decide on a read-only native **aggregate** coverage check of current same-client raw keys against a separately reviewed versioned public slug registry (if warranted), ensuring no actual item names/Owned keys/ID are sent to ChatGPT, and preserving unknown/stale statuses. Price publisher freshness/expiry is separate. Avoid repeating Stage79/80 tests or old ALT trades; no device action required for Stage82.
+
+---
+
 # Stage82 — Pinned public MM2 game-key → official Supreme URL slug candidate registry
 
 **Date:** 2026-11-09. **Priority:** Source/identity Issue #122. **Status:** Research-only draft. No production scanner/P4/price modules are loaded or modified.
