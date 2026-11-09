@@ -21,7 +21,8 @@ SPEC.loader.exec_module(m)
 class Stage84(unittest.TestCase):
  @classmethod
  def setUpClass(cls):
-  cls.sources=ROOT/"pdiddler/research_source_html/stage84_2026_11_09"
+  # Stage69 receipt binds the *relative checkout path*, not a resolved absolute.
+  cls.sources=Path("pdiddler/research_source_html/stage84_2026_11_09")
   cls.manifest=cls.sources/"source_manifest.json"
   must=("STAGE84_REVIEWED_PARSER","STAGE84_MANIFEST_READER","STAGE84_ROSTER")
   if any(not os.environ.get(k) for k in must):
@@ -121,11 +122,16 @@ class Stage84(unittest.TestCase):
     (source/origin.name).write_bytes(origin.read_bytes())
    dest=source/"source_manifest.json"
    forged=json.loads(self.manifest.read_text())
+   # The strict reader binds page receipt paths to this intentional test folder.
+   for item in forged["items"]:
+    item["path"]=str(source/Path(item["path"]).name)
    forged["items"][0]["sourcePublisherIso"]="2026-11-10T13:58:33-05:00"
    dest.write_text(json.dumps(forged))
    with self.assertRaises(ValueError):
     m.load_inputs(source,dest,parser,reader,roster,now_epoch=self.observed_epoch+60)
    forged=json.loads(self.manifest.read_text())
+   for item in forged["items"]:
+    item["path"]=str(source/Path(item["path"]).name)
    forged["items"][0]["bytesUtf8"]+=1
    dest.write_text(json.dumps(forged))
    with self.assertRaises(ValueError):
