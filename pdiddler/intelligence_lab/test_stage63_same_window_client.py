@@ -132,7 +132,7 @@ game={
      gainedEligibleCopies=1,lostEligibleCopies=0,
      changedEligibleTypes=1,rawWeaponInventoryChanged=true,
      partnerCacheAtBaseline=false,
-     tradeOutcome="UNKNOWN",serverCompletionProven=false,
+     tradeOutcome="UNKNOWN",readOnly=true,serverCompletionProven=false,
      mayRecordCompletedTrade=false,authorizesAccept=false
     }
     if _G.STAGE63_TEST_MODE=="no-gain" then
@@ -142,6 +142,12 @@ game={
      S.result.gainedEligibleCopies=2
     elseif _G.STAGE63_TEST_MODE=="bad-post-close" then
      S.result.postReadbacksObserved=1
+    elseif _G.STAGE63_TEST_MODE=="unsafe-core-flag" then
+     S.result.serverCompletionProven=true
+    elseif _G.STAGE63_TEST_MODE=="wrong-core-state" then
+     S.result.status="INCOMPLETE"
+    elseif _G.STAGE63_TEST_MODE=="wrong-core-stop" then
+     S.result.stopReason="TIMEOUT"
     end
     S.reportReady=true
     S.state="FINISHED_READ_ONLY"
@@ -327,7 +333,8 @@ class Stage63OneWindowTests(unittest.TestCase):
         self.assertIn("CLIENT_ACCEPT_FLAG_PLUS_OWN_GAIN_SAME_WINDOW_UNATTRIBUTED",out)
 
     def test_no_delta_and_bad_terminal_readbacks_cannot_promote(self):
-        for mode in ("no-gain","two-gains","bad-post-close"):
+        for mode in ("no-gain","two-gains","bad-post-close",
+                     "unsafe-core-flag","wrong-core-state","wrong-core-stop"):
             with self.subTest(mode=mode):
                 out=self.run_case(mode)
                 self.assertIn("STAGE63_TEST state=INCONCLUSIVE",out)
@@ -361,7 +368,8 @@ class Stage63OneWindowTests(unittest.TestCase):
     def test_150_seeded_native_simulations_never_gain_authority(self):
         rng=random.Random(6363)
         modes=["success","race-close","no-gain","two-gains",
-               "bad-post-close","no-events","false-only","true-only",
+               "bad-post-close","unsafe-core-flag","wrong-core-state",
+               "wrong-core-stop","no-events","false-only","true-only",
                "reverse","nil-second","late-true","changed-partner",
                "ambiguous-gui","no-label","job-change",
                "pre-accept","overflow"]
