@@ -239,16 +239,30 @@ local function stage66PrivateRawOwned(inv)
     or inv.badQty~=0 or inv.unmapped~=0 then
   return nil,"INVALID_RAW_SCANNER_INVENTORY"
  end
- if #inv.seen==0 or #inv.seen>10000
-    or inv.fingerprint~=table.concat(inv.seen,"|") then
+ -- Do NOT call table.concat before validating an untrusted sparse array.
+ local denseCount=0
+ if getmetatable(inv.seen)~=nil then
+  return nil,"UNTRUSTED_RAW_SEEN_METATABLE"
+ end
+ for i,token in pairs(inv.seen) do
+  if type(i)~="number" or i~=math.floor(i) or i<1 or
+     i>10000 or type(token)~="string" then
+    return nil,"NON_DENSE_RAW_SEEN"
+  end
+  denseCount=denseCount+1
+  if denseCount>10000 then return nil,"TOO_MANY_RAW_ENTRIES" end
+ end
+ if denseCount==0 then return nil,"EMPTY_RAW_WEAPON_ARRAY" end
+ for i=1,denseCount do
+  if type(inv.seen[i])~="string" then
+    return nil,"NON_DENSE_RAW_SEEN"
+  end
+ end
+ if inv.fingerprint~=table.concat(inv.seen,"|") then
   return nil,"RAW_ARRAY_OR_FINGERPRINT_INVALID"
  end
  local result,rows,total={},0,0
- for i,token in pairs(inv.seen) do
-  if type(i)~="number" or i~=math.floor(i)
-     or i<1 or i>#inv.seen or type(token)~="string" then
-    return nil,"NON_DENSE_RAW_SEEN"
-  end
+ for i,token in ipairs(inv.seen) do
   local raw,number=token:match("^(.*)x(%d+)$")
   local quantity=tonumber(number)
   if type(raw)~="string" or #raw==0 or #raw>128 or raw:find("[%c]")
