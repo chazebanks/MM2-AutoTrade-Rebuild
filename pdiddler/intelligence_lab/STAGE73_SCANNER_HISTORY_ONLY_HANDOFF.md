@@ -1,3 +1,19 @@
+## LATEST Stage73 in-game clipboard/report feedback — exact Lua CI GREEN (2026-11-09 UTC)
+
+- **One-issue fix only, still draft/unmerged:** Stage73 now uses pinned Stage25 capture-only API, so the existing Stage25 module does NOT independently auto-copy or duplicate the console report. It reads the already-published T4.4 scanner cache, validates the read-only Stage25 schema and that `sourceFresh=false` / no trade or Accept authority, encodes ONE anonymized JSON, attempts one successful clipboard delivery (`setclipboard`, fallback `toclipboard`), prints ONE full console receipt, and updates the **existing purple in-game T4.4 Status field**. It only says `COPY SENT (PASTE CHECK)`, not "paste verified". If copy API absent/fails, status says `COPY FAILED (USE CONSOLE)`. Encoding/report capture failure is separate and never claims clipboard success. A stalled scanner is labeled `ST73 SCAN TIMEOUT`, not completed proof. A new trade session aborts old report delivery.
+- Exactly **17/17** focused real Lua5.4 tests passed, including eight original Stage73 historical/clock rollback tests and nine report tests (API success, unavailable, throws, explicit false, secondary API, encoder failure, delayed scan timeout, stale session, syntax); **28/28** inherited source/identity tests passed on exact source commit **`5ebe0d25d1e12be4fc3a7319af7ce25d66ae970c`**. [GitHub Actions #42657438222](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42657438222) SUCCESS. Earlier [CI #42657246590](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42657246590) failed one **test-text** mismatch (`REPORT UNAVAILABLE` versus mobile-shortened `REPORT FAILED`); corrected, no assertions suppressed.
+- Original Stage59 manual-copy protection was for simultaneous MAIN/ALT Universal Clipboard collisions. Stage73 is a DIFFERENT single-MAIN-device read-only scan: one controlled automatic copy request, no paired client competition, and console fallback. `STAGE25_READONLY_DIAGNOSTIC.lua` legacy default behavior is unchanged without the explicit new `stage73CaptureOnly=true` caller argument. Stage73 boot pins its revised capture-only module at independent immutable commit `0fdabefdd612afddc0e37f05896d5265d192daf2`. Other scanner/profile/history/view pins remain frozen.
+- **NEXT ONLY device action once this offline checkpoint is reviewed:** fresh original MM2 lobby on MAIN iPad/Delta, select Tablet, no other scripts, trade window closed. Run EXACTLY ONE loader:
+
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/5ebe0d25d1e12be4fc3a7319af7ce25d66ae970c/pdiddler/new_part4/STAGE73_SCANNER_HISTORY_ONLY_BOOT.lua"))()
+```
+
+- In-game expect `ST73 REPORT READY | COPY SENT (PASTE CHECK)` (or `ST73 SCAN TIMEOUT` / `COPY FAILED (USE CONSOLE)`); the separate scanner summary remains **Total value: UNVERIFIED**, **Outgoing: paused**. After report, paste the ONE copied JSON and supply ONE purple-panel screenshot; if paste fails, copy exactly the ONE `[GINGERSCOPE STAGE73 READ-ONLY REPORT]` line from Delta console. We do NOT need another ALT manual trade, Stage59 witness, Stage66 receipt or prior identical report. A successful copy *request* is not iPadOS clipboard/paste attestation. Actual iPad rendering/copy behavior remains **UNTESTED** until this native check.
+- Do not merge the stacked PR129 blindly; older same-file device snippet below (`837fc4f9`) is **superseded** by the exact tested Stage73 loader above. Do not enable P4, outgoing, Accept, user-value totals, Discord learner or profit reporting. Price/source identity issue #122 remains unresolved. Legacy Stage59/66 tests are not repeated.
+
+---
+
 # Stage73 — isolated T4.4 scanner-only historical reference UI smoke test
 
 ## Why the user's screenshot looked wrong
