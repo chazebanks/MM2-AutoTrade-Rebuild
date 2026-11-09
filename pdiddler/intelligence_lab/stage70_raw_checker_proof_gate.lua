@@ -30,12 +30,12 @@ local function norm(x)
  if type(x)~="string" then return "" end
  return x:gsub("’","'"):lower():gsub("^%s+",""):gsub("%s+$",""):gsub("%s+"," ")
 end
-local function sourceFresh(profile,now)
+local function sourceFresh(profile)
  if type(profile)~="table" or profile.liveReady~=true
    or type(profile.get)~="function"
    or type(profile.isFresh)~="function"
    or type(profile.sources)~="table" then return false end
- local at=now or os.time()
+ local at=os.time() -- caller cannot rewind source freshness with injected clock
  if not finite(at) or at~=math.floor(at) then return false end
  local obs=profile.observedAtEpoch
  local pub=profile.publishedAtEpoch
@@ -84,7 +84,7 @@ local function result(status,reason)
  }
 end
 
-function M.evaluate(inv,profile,now)
+function M.evaluate(inv,profile)
  local out=result("UNVERIFIED_SOURCE_OR_IDENTITY","NOT_EVALUATED")
  if type(inv)~="table" or type(inv.items)~="table" then
   out.reason="INVENTORY_UNAVAILABLE"
@@ -111,7 +111,7 @@ function M.evaluate(inv,profile,now)
   end
  end
  out.reviewedMappingCount=reviewed
- out.sourceFresh=sourceFresh(profile,now)
+ out.sourceFresh=sourceFresh(profile)
 
  local seen={}
  local rows=0
@@ -167,8 +167,8 @@ function M.evaluate(inv,profile,now)
     local amount=r.supremeValue*it.qty
     if finite(amount) then
      out.items[#out.items+1]={
-      rawKey=raw,checkerId=proof.checkerId,page=proof.page,
-      name=proof.name,qty=it.qty,unitValue=r.supremeValue,
+      -- No player's raw key, weapon name, or inventory fingerprint exported.
+      page=proof.page,qty=it.qty,unitValue=r.supremeValue,
       evidenceId=proof.reviewedEvidenceId,
       evidenceVersion=proof.provenanceVersion,
      }
