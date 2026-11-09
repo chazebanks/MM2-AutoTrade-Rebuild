@@ -1,0 +1,38 @@
+name: Stage65 private raw receipt key equality firewall
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/p4_stage65_private_raw_receipt_equality.lua'
+      - 'pdiddler/intelligence_lab/test_stage65_private_raw_receipt_equality.py'
+      - 'pdiddler/intelligence_lab/STAGE65_PRIVATE_RAW_KEY_CONTRACT.md'
+      - '.github/workflows/mm2-stage65-private-raw-receipt-equality.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage65-private-raw-receipt-key-equality
+    paths:
+      - 'pdiddler/intelligence_lab/p4_stage65_private_raw_receipt_equality.lua'
+      - 'pdiddler/intelligence_lab/test_stage65_private_raw_receipt_equality.py'
+      - 'pdiddler/intelligence_lab/STAGE65_PRIVATE_RAW_KEY_CONTRACT.md'
+      - '.github/workflows/mm2-stage65-private-raw-receipt-equality.yml'
+permissions:
+  contents: read
+jobs:
+  raw-private-equality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Execute actual Stage65 pure Lua and 400 negative variants
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage65*.py'
+      - name: Execute inherited mainline intelligence unit tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
