@@ -1,0 +1,44 @@
+name: Stage70 raw MM2 key to Supreme checker ID proof gate (research only)
+on:
+  push:
+    branches:
+      - research/gingerscope-stage70-raw-checker-proof-gate
+    paths:
+      - '.github/workflows/gingerscope-stage70-raw-checker-proof-gate.yml'
+      - 'pdiddler/intelligence_lab/stage70_raw_checker_proof_gate.lua'
+      - 'pdiddler/tests/test_stage70_raw_checker_proof_gate.py'
+      - 'pdiddler/intelligence_lab/STAGE70_RAW_CHECKER_SOURCE_TRUST_BOUNDARY.md'
+  pull_request:
+    paths:
+      - '.github/workflows/gingerscope-stage70-raw-checker-proof-gate.yml'
+      - 'pdiddler/intelligence_lab/stage70_raw_checker_proof_gate.lua'
+      - 'pdiddler/tests/test_stage70_raw_checker_proof_gate.py'
+      - 'pdiddler/intelligence_lab/STAGE70_RAW_CHECKER_SOURCE_TRUST_BOUNDARY.md'
+permissions:
+  contents: read
+jobs:
+  code-reviewed-identity-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4 for actual runtime regression
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Execute actual Lua proof gate and 400 seeded malicious-client cases
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_stage70_raw_checker_proof_gate
+      - name: Regression against Stage69 source and expiry tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest -q \
+            pdiddler.tests.test_refresh_supreme_snapshot \
+            pdiddler.tests.test_stage25_market_diff \
+            pdiddler.tests.test_stage69_source_boundaries \
+            pdiddler.tests.test_stage69_manifest_provenance
