@@ -20,9 +20,9 @@ Supreme's primary Gingerscope public page displays 16,000 as of a Nov 6 global u
 ## Implementation
 
 - `pdiddler/intelligence_lab/stage76_first_party_slug_audit.py` is a pure Python fail-closed four-case *PUBLIC source consistency contract*, not a live source fetcher. Inputs are caller-supplied public catalogue metadata and first-party webpage observations; its success is **not authentication**. All four must uniquely match reviewed URL, exact headline, market category, game ItemName/ItemType/Rarity/Chroma and Chroma Ancient class. No normalization, fuzzy matching or marketplace slug = game raw ID.
-- `pdiddler/tests/test_stage76_first_party_slug_audit.py`: nine offline `unittest` groups plus 400 seeded adversarial cases, including wrong/duplicated URL parameters, hostile hostnames, case/alias drift, subtype drift, Chroma Ancient misclassification, duplicate/missing records, and order permutations.
+- `pdiddler/tests/test_stage76_first_party_slug_audit.py`: ten offline `unittest` groups plus 400 seeded adversarial cases, including malformed IPv6 URL exceptions (must fail closed), wrong/duplicated URL parameters, hostile hostnames, case/alias drift, subtype drift, Chroma Ancient misclassification, duplicate/missing records, and order permutations.
 - Workflow `.github/workflows/gingerscope-stage76-first-party-slug.yml` executes actual Python tests in a focused CI job.
-- Local Python: **9 test groups PASS, 400 injected cases rejected**. Exact GitHub CI must also be reviewed; no claim that a separate website crawl is included in CI.
+- Local Python: **10 test groups PASS locally, 400 injected cases rejected**. Exact GitHub CI must also be reviewed; no claim that a separate website crawl is included in CI.
 
 All outputs explicitly retain `sourcePublisherFresh=false`, `currentPricesVerified=false`, `numericSupremeCheckerIdVerified=false`, `authenticatedOwnedInventory=false`, `serverAttestation=false`, `authorizesTrade=false`, `authorizesAccept=false`, `mayReportProfit=false`, `mayRecordCompletedTrade=false`, `maySendDiscordWebhook=false`, `mayUseForStrategyLearning=false`.
 
@@ -33,3 +33,7 @@ All outputs explicitly retain `sourcePublisherFresh=false`, `currentPricesVerifi
 3. Keep PR75/74/70 and this Stage76 research branch DRAFT/UNMERGED until reviewed. Do not connect this Python research function to live scanner, P4, outgoing, automatic final Accept, profit tracking or Discord learner.
 
 **This work answers a narrow design question: whether the first-party website has separately verifiable stable public slug/name/category labels. It does, for these four examples. This does NOT solve the broader price, inventory or settlement blockers.**
+
+## Post-CI negative-case correction
+
+The first exact-head focused GitHub job 42680081997 PASSED 9/9 real Python test groups on the PR merge ref (as did Luau, Lune, Selene/StyLua, replay and Hypothesis workflows). Subsequent manual adversarial probing discovered `urllib.parse.urlsplit` raises `ValueError` on bracket-malformed IPv6 URLs such as `https://[broken`. Fixed the production-independent audit to return `INCONCLUSIVE` instead and added a tenth focused regression. Retest local **10/10 PASS**, 400 seeded corruptions still fail closed. **This new post-fix code head requires its OWN exact-head CI confirmation**; do not copy the old success label to a newer head.
