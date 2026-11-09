@@ -72,7 +72,7 @@ function M.describe(inv,profile,proofGate)
    observedCount=observedCount+it.qty
    if observedCount>1000000 then shape=false;break end
    if #records<40 then
-    local name=clean(it.name or it.id,60)
+    local name=clean(it.name,60) -- never fall back to raw Weapons.Owned key
     records[#records+1]=name.." x"..tostring(it.qty).." [price UNVERIFIED]"
    end
   end
