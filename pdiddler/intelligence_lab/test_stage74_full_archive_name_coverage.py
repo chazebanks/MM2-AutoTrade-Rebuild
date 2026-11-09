@@ -92,13 +92,21 @@ class Stage74ArchiveCoverageTests(unittest.TestCase):
                 "ItemType":"Gun", "ItemID":123}),
             ("ancient","Gingerscope")
         )
+        # New public 2026 game metadata has Chroma Ancient weapons.
+        self.assertEqual(
+            m.game_page_name({
+                "ItemName":"Emberscythe", "Rarity":"Ancient",
+                "ItemType":"Knife", "ItemID":123,
+                "Chroma":True}),
+            ("chroma","Chroma Emberscythe")
+        )
         self.assertIsNone(m.game_page_name({
             "ItemName":"Cat","Rarity":"Common","ItemType":"Pet","ItemID":1,
         }))
         for broken in [
             {"ItemName":"Chroma Evergun","Rarity":"Godly","ItemType":"Gun",
              "Chroma":True,"ItemID":123},
-            {"ItemName":"Evergun","Rarity":"Ancient","ItemType":"Gun",
+            {"ItemName":"Chroma Evergun","Rarity":"Ancient","ItemType":"Gun",
              "Chroma":True,"ItemID":123},
             {"ItemName":"Evergun","Rarity":"Godly","ItemType":"Gun",
              "Chroma":"true","ItemID":123},
