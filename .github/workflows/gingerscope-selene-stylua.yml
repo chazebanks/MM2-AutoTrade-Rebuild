@@ -1,0 +1,73 @@
+name: Gingerscope Selene + StyLua scoped quality gate
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - ci/gingerscope-selene-stylua-scoped
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lint-format-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download pinned official Selene 0.32.0 and StyLua 2.6.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          selene_zip="$RUNNER_TEMP/selene-0.32.0-linux.zip"
+          stylua_zip="$RUNNER_TEMP/stylua-2.6.0-linux-x86_64.zip"
+          curl -fLsS --retry 3 --connect-timeout 20 \
+            https://github.com/Kampfkarren/selene/releases/download/0.32.0/selene-0.32.0-linux.zip -o "$selene_zip"
+          echo "d3773393578580074386e69337d35b7acddfbaa9fc38964c07fa3e28436ade9b  $selene_zip" | sha256sum -c
+          curl -fLsS --retry 3 --connect-timeout 20 \
+            https://github.com/JohnnyMorganz/StyLua/releases/download/v2.6.0/stylua-linux-x86_64.zip -o "$stylua_zip"
+          echo "a485f72bbfa22e4642e77a84b5edc2611a5cab7477b34e2e709dd8f78e919895  $stylua_zip" | sha256sum -c
+          unzip -q "$selene_zip" -d "$RUNNER_TEMP/selene_dist"
+          unzip -q "$stylua_zip" -d "$RUNNER_TEMP/stylua_dist"
+          mkdir -p "$RUNNER_TEMP/quality-bin"
+          for row in "selene:$RUNNER_TEMP/selene_dist" "stylua:$RUNNER_TEMP/stylua_dist"; do
+            executable="${row%%:*}"
+            root="${row#*:}"
+            found="$(find "$root" -type f -name "$executable" -print -quit)"
+            test -n "$found" || { echo "Missing $executable in verified ZIP" >&2; exit 1; }
+            install -m 0755 "$found" "$RUNNER_TEMP/quality-bin/$executable"
+          done
+          echo "$RUNNER_TEMP/quality-bin" >> "$GITHUB_PATH"
+      - name: Lint portable actual modules (warnings fail)
+        shell: bash
+        run: |
+          set -euo pipefail
+          selene pdiddler/core/health.lua
+      - name: Check formatting of a deliberately small real module
+        shell: bash
+        run: |
+          set -euo pipefail
+          stylua --check pdiddler/core/health.lua
+      - name: Check invalid linter/formatter fixtures cannot pass
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'local result = totally_undefined_global\nreturn result\n' > "$RUNNER_TEMP/selene_bad.lua"
+          if selene "$RUNNER_TEMP/selene_bad.lua" >"$RUNNER_TEMP/selene_bad.log" 2>&1; then
+            echo "Selene accepted an undefined global" >&2
+            exit 1
+          fi
+          printf 'local x={ a=1 }\nreturn x\n' > "$RUNNER_TEMP/stylua_bad.lua"
+          if stylua --check "$RUNNER_TEMP/stylua_bad.lua" >"$RUNNER_TEMP/stylua_bad.log" 2>&1; then
+            echo "StyLua accepted a deliberately unformatted fixture" >&2
+            exit 1
+          fi
+          echo "[PASS] Both lint/format negative controls failed as expected"
+      - name: Confirm actual health module remains executable after whitespace-only formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lua5.4
+          lua5.4 -e 'local m=dofile("pdiddler/core/health.lua"); assert(m.run({}).ok); local ok=pcall(m.run,nil); assert(not ok); print("[PASS] health module unchanged behavior")'

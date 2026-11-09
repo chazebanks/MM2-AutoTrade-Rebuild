@@ -1,9 +1,10 @@
 name: Gingerscope Hypothesis replay properties (offline)
-# Stacked deliberately on draft sanitized replay PR134. NOT mergeable alone.
+# Originally stacked on PR134; replay is now merged into main. No live MM2 test.
 on:
   pull_request:
   push:
     branches:
+      - main
       - research/gingerscope-hypothesis-replay-properties
   workflow_dispatch:
 permissions:
