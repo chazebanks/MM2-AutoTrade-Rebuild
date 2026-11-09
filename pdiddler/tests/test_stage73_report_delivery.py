@@ -162,7 +162,8 @@ else
     assert(#clipboardCalls==1 and clipboardCalls[1]=="SYNTHETIC_ANON_REPORT")
     assert(gui:find("PASTE CHECK",1,true),"clipboard was overclaimed")
   else
-    local stateExpected=mode=="unavailable" and "COPY_API_UNAVAILABLE"
+    local stateExpected=(mode=="unavailable" or mode=="repaint_throws")
+       and "COPY_API_UNAVAILABLE"
        or "COPY_API_FAILED"
     assert(state.clipboardStatus==stateExpected,
       "unexpected clipboard status "..tostring(state.clipboardStatus))
