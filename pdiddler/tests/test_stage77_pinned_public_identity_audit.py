@@ -167,6 +167,22 @@ class Stage77(unittest.TestCase):
         w['chromas']=w['chromas'].replace(b'</body>',pet+b'</body>')
         self.assertEqual(self.synthetic_result(w=w)['status'],'INCONCLUSIVE')
 
+    def test_only_known_hidden_godly_placeholders_excluded(self):
+        w=dict(self.web)
+        known=(b'<div class="itemcolumn" style="display:none"><div class="itemcell" id="Batwing">'
+               b'<button data-name="Batwing"></button><div class="itemhead">'
+               b'<a class="itemlink" href="https://supremevalues.com/mm2/godlies?item=Batwing">Batwing</a>'
+               b'</div><div class="itembody">Value - <b>1000000</b></div></div></div>')
+        w['godlies']=w['godlies'].replace(b'</body>',known+b'</body>')
+        result=self.synthetic_result(w=w)
+        self.assertEqual(result['status'],'PINNED_PUBLIC_SOURCES_CORRESPOND_ONLY',result)
+        self.assertEqual(result['sourcePageRows']['godlies'],2)
+        self.strict(result)
+        # Unknown hidden row with the same source structure is NOT ignored.
+        unreviewed=known.replace(b'Batwing',b'Unknown')
+        w['godlies']=w['godlies'].replace(known,unreviewed)
+        self.assertEqual(self.synthetic_result(w=w)['status'],'INCONCLUSIVE')
+
     def test_400_mutated_archive_inputs_never_authorize(self):
         rng=random.Random(77)
         for i in range(400):
