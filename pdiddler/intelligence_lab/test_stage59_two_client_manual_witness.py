@@ -94,6 +94,49 @@ class Stage59ReciprocalWitnessTests(unittest.TestCase):
         self.assertFalse(result["clientReciprocalEligibleDeltaObserved"])
         check_immutable(result)
 
+    def test_native_recovered_sender_plus_later_receiver_operator_confirmed(self):
+        """Nov 8 manual ALT -> MAIN: real observed structure, anonymized nonces.
+
+        The two client reports have reciprocal eligible-copy deltas and the
+        operator explicitly confirms one visible manually finished transfer.
+        The sender missed their partner's Accept indicator, although the
+        receiver observed both; missing polls are not negative proof.
+        This is client corroboration only, never server settlement.
+        """
+        sender=witness("SENDER",0,1,
+                       "12345678-1234-1234-1234-123456789abc",1794157258)
+        receiver=witness("RECEIVER",1,0,
+                         "abcdefab-1234-1234-1234-123456789abc",1794157258)
+        sender["stage32"]["observedTheirAccept"]=False
+        sender["stage32"]["bothAcceptedStableObserved"]=False
+        receiver["stage32"]["observedTheirAccept"]=True
+        receiver["stage32"]["bothAcceptedStableObserved"]=True
+        receiver["stage32"]["partnerCacheAtBaseline"]=True
+
+        result=mod.evaluate(sender,receiver,
+                            operator_claims_same_manual_trade=True,
+                            operator_reports_visible_completion=True)
+        self.assertEqual(result["status"],
+                         "CLIENT_RECIPROCAL_ELIGIBLE_DELTAS_UNATTRIBUTED")
+        self.assertTrue(result["clientReciprocalEligibleDeltaObserved"])
+        self.assertTrue(result["manualSameTradeClaimObserved"])
+        self.assertEqual(result["reason"],
+                         "operator-reported-completion-plus-reciprocal-client-deltas-unattributed")
+        check_immutable(result)
+
+        # Counterfactual: a copy/paste duplicate is not independent evidence.
+        duplicated=copy.deepcopy(receiver)
+        self.assertEqual(mod.evaluate(duplicated,receiver)["reason"],
+                         "IDENTICAL_REPORT_PASTED_TWICE")
+        # If either inventory delta changes, no reciprocal corroboration.
+        broken=copy.deepcopy(sender)
+        broken["stage32"]["lostEligibleCopies"]=0
+        failed=mod.evaluate(broken,receiver,
+                            operator_claims_same_manual_trade=True,
+                            operator_reports_visible_completion=True)
+        self.assertEqual(failed["status"],"INCOMPLETE")
+        check_immutable(failed)
+
     def test_replay_and_unbound_clocks_block(self):
         a,b=samples()
         b["receiptNonce"]=a["receiptNonce"]
