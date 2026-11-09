@@ -54,18 +54,19 @@ The earliest of observation +24 hours and publication +72 hours applies. Reloadi
 does not renew it. Source estimates are not guaranteed resale values. The build
 halts new trading after expiry; it does not fetch or change prices mid-trade.
 
-To prepare a new dated snapshot outside active trades:
+To compare newer publisher records for research:
 
 ```sh
 python3 pdiddler/refresh_supreme_snapshot.py \
-  --mapping pdiddler/supreme_snapshot_2026_11_03.json
+  --mapping pdiddler/snapshots/supreme_snapshot_2026_11_04.json \
+  --output-dir /tmp/supreme-review
 ```
 
-The generator validates exact category/name mapping, numeric/display consistency,
-demand, stability and publication provenance. It stores structured facts and
-source hashes, not third-party page copies. Commit the new snapshot, then create
-a new versioned loader whose profile pin points to that commit. Do not replace a
-snapshot file underneath an existing immutable loader.
+The Stage 69 generator validates category and name matching, displayed values,
+demand, stability and publication provenance. It emits research JSON with source
+hashes and trade authority disabled. Existing dated Lua modules are archived
+fixtures. A new runtime profile requires separately reviewed game-item identity
+and freshness evidence.
 
 ## Verification and remaining work
 

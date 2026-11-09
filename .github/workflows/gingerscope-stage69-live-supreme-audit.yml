@@ -1,0 +1,91 @@
+name: Stage69 live Supreme source review - research only
+on:
+  push:
+    branches:
+      - research/gingerscope-stage69-supreme-live-source-audit
+    paths:
+      - '.github/workflows/gingerscope-stage69-live-supreme-audit.yml'
+      - 'pdiddler/stage69_live_supreme_audit.md'
+      - 'pdiddler/tests/test_stage69_source_boundaries.py'
+      - 'pdiddler/tests/test_stage69_manifest_provenance.py'
+      - 'pdiddler/tests/test_stage69_authority_separation.py'
+      - 'pdiddler/stage69_manifest_provenance.py'
+      - 'pdiddler/research_source_html/stage69_2026_11_09/**'
+      - 'pdiddler/refresh_supreme_snapshot.py'
+      - 'pdiddler/stage25_market_diff.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  first-party-source-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install required Lua 5.4 for the existing snapshot consumer regression
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Verify scraper, provenance and recorded-clock replay
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_refresh_supreme_snapshot pdiddler.tests.test_stage25_market_diff pdiddler.tests.test_stage69_source_boundaries pdiddler.tests.test_stage69_manifest_provenance pdiddler.tests.test_stage69_authority_separation
+      - name: Parse all three EXTERNALLY ACQUIRED pinned pages into review-only JSON (runner direct HTTP 403)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/stage69
+          python3 pdiddler/refresh_supreme_snapshot.py \
+            --mapping pdiddler/snapshots/supreme_snapshot_2026_11_04.json \
+            --input-dir pdiddler/research_source_html/stage69_2026_11_09 \
+            --source-manifest pdiddler/research_source_html/stage69_2026_11_09/source_manifest.json \
+            --research-only \
+            --date "$(date -u +%F)" \
+            --output-dir /tmp/stage69 \
+            | tee /tmp/stage69/publisher_import_status.json
+          test ! -f "/tmp/stage69/pdiddler_supreme_snapshot_$(date -u +%Y_%m_%d).lua"
+      - name: Compare 190 canonical weapons and print ALL changed values
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          set -euo pipefail
+          python3 pdiddler/stage25_market_diff.py \
+            --previous pdiddler/snapshots/supreme_snapshot_2026_11_04.json \
+            --candidate "/tmp/stage69/supreme_snapshot_$(date -u +%Y_%m_%d).json" \
+            --output /tmp/stage69/supreme_diff_REVIEW_ONLY.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("/tmp/stage69/supreme_diff_REVIEW_ONLY.json").read_text())
+          assert d["canonicalCount"] == 190
+          assert d["autoDeploy"] is False
+          candidate=json.loads(Path("/tmp/stage69/supreme_snapshot_" + __import__("datetime").datetime.now(__import__("datetime").timezone.utc).strftime("%Y_%m_%d") + ".json").read_text())
+          assert candidate["researchOnly"] is True
+          assert candidate["sourceRowsMatched"] is True
+          assert candidate["rawGameMappingsVerified"] is False
+          assert candidate["autoDeploy"] is False
+          assert candidate["authorizesTrade"] is False and candidate["authorizesAccept"] is False
+          assert all(
+              row["sourceRecordMatched"] is True
+              and row["rawGameMappingVerified"] is False
+              and row["priceForTradeVerified"] is False
+              and row["verified"] is False
+              for row in candidate["rows"]
+          )
+          assert d["authorizesTrade"] is False and d["authorizesAccept"] is False
+          print("STATUS",d["status"],"changed",d["changedItems"],
+                "publication",d["candidatePublication"],"expires",d["candidateExpiresAt"])
+          for r in d["changed"]:
+              print("REVIEW_CHANGE",r["page"],r["checkerId"],r["name"],
+                    r["before"],"=>",r["after"])
+          PY
+      - name: Preserve research-only source reports even if parsing or freshness fails
+        if: always() && github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage69-supreme-review-candidate-NOT-FOR-TRADING
+          path: /tmp/stage69/
+          if-no-files-found: warn
+          retention-days: 7
