@@ -1,0 +1,52 @@
+name: Stage71 archived MM2 public catalog to Supreme source-name evidence
+on:
+  push:
+    branches:
+      - research/gingerscope-stage71-archived-game-to-supreme-name-evidence
+    paths:
+      - '.github/workflows/gingerscope-stage71-public-catalog-name-evidence.yml'
+      - 'scripts/stage71_archived_catalog_source_name_bridge.py'
+      - 'pdiddler/tests/test_stage71_archived_catalog_source_name_bridge.py'
+      - 'pdiddler/intelligence_lab/STAGE71_ARCHIVED_CATALOG_NAME_ONLY_EVIDENCE.md'
+  pull_request:
+    paths:
+      - '.github/workflows/gingerscope-stage71-public-catalog-name-evidence.yml'
+      - 'scripts/stage71_archived_catalog_source_name_bridge.py'
+      - 'pdiddler/tests/test_stage71_archived_catalog_source_name_bridge.py'
+      - 'pdiddler/intelligence_lab/STAGE71_ARCHIVED_CATALOG_NAME_ONLY_EVIDENCE.md'
+permissions:
+  contents: read
+jobs:
+  archive-vs-publisher-name-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download immutable archival MM2 Sync.Item.lua and verify exact Git blob
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 2 --max-time 45 \
+            "https://raw.githubusercontent.com/tlredz/decompiledGames/0552a0f3502217a1cf89df66be9bd0f153e47fa4/murder-mystery-2/v1456/ReplicatedStorage/Database/Sync/Item.lua" \
+            -o /tmp/stage71_pinned_sync_item.lua
+          test "$(git hash-object /tmp/stage71_pinned_sync_item.lua)" = "b0661d54893f681777ebd3eae50d0a4ebe9a46e3"
+          test "$(git hash-object pdiddler/snapshots/supreme_snapshot_2026_11_04.json)" = "955e3fb7cd25999fc4f0aad4a77378b9a7bb9ba3"
+      - name: Six pinned archival game-to-public-name examples, 250 corruption tests
+        env:
+          STAGE71_ARCHIVED_GAME_CATALOG: /tmp/stage71_pinned_sync_item.lua
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_stage71_archived_catalog_source_name_bridge
+          python3 scripts/stage71_archived_catalog_source_name_bridge.py \
+            --archived-catalog /tmp/stage71_pinned_sync_item.lua \
+            --supreme-snapshot pdiddler/snapshots/supreme_snapshot_2026_11_04.json
+      - name: Inherited Stage70 raw-key prohibition and Stage69 provenance regressions
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          python3 -m unittest -q \
+            pdiddler.tests.test_stage70_raw_checker_proof_gate \
+            pdiddler.tests.test_stage69_source_boundaries \
+            pdiddler.tests.test_stage69_manifest_provenance
