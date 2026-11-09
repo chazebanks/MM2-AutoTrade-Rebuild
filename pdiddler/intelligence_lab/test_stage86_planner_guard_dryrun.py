@@ -47,14 +47,14 @@ class Stage86(unittest.TestCase):
         if os.environ.get("STAGE86_REQUIRE_PINNED")=="1":
             assert cls.p.is_file() and cls.g.is_file(),"Missing original source dependencies"
         if not (cls.p.is_file() and cls.g.is_file()):
-            cls.sources=False
+            cls.sources_ready=False
         else:
             assert S.git_blob(cls.p.read_bytes())==S.PLANNER_BLOB
             assert S.git_blob(cls.g.read_bytes())==S.GUARD_BLOB
-            cls.sources=True
+            cls.sources_ready=True
 
-    def sources(self):
-        if not self.sources:
+    def require_sources(self):
+        if not self.sources_ready:
             self.skipTest("Only focused CI provides BOTH original immutable modules")
 
     def safe(self,r):
@@ -66,7 +66,7 @@ class Stage86(unittest.TestCase):
             if k not in ("proposal",)}))
 
     def propose(self,ours=None,theirs=None,m=None,b=None,now=NOW):
-        self.sources()
+        self.require_sources()
         r=S.propose(
             ours if ours is not None else [row("test_ours")],
             theirs if theirs is not None else [row("test_theirs")],
@@ -77,13 +77,13 @@ class Stage86(unittest.TestCase):
         return r
 
     def verify(self,p,obs=None,m=None,now=NOW):
-        self.sources()
+        self.require_sources()
         r=S.verify(p,obs,m if m is not None else market(),now=now,guard_path=self.g)
         self.safe(r)
         return r
 
     def test_pinned_source_files_are_real_and_distinct(self):
-        self.sources()
+        self.require_sources()
         self.assertEqual(S.git_blob(self.p.read_bytes()),S.PLANNER_BLOB)
         self.assertEqual(S.git_blob(self.g.read_bytes()),S.GUARD_BLOB)
         self.assertNotEqual(S.PLANNER_BLOB,S.GUARD_BLOB)
@@ -191,7 +191,7 @@ class Stage86(unittest.TestCase):
         self.assertEqual(self.propose(b=b)["status"],"BLOCKED")
 
     def test_both_original_modules_reject_tampered_git_bytes(self):
-        self.sources()
+        self.require_sources()
         with __import__("tempfile").TemporaryDirectory() as folder:
             alt=Path(folder)/"planner.py"
             alt.write_bytes(self.p.read_bytes()+b"\n# modified")
