@@ -1,3 +1,22 @@
+## Stage80 ACTUAL MAIN iPad result — 2026-11-09 (supersedes pending-test directions)
+
+User supplied one original `[GINGERSCOPE STAGE80 METADATA REASON]` JSON response from the exact SHA-pinned Stage80 native read-only probe:
+
+- `status=CLIENT_MISC_EXCLUDED_FROM_WEAPON_CATEGORY_ONLY`, `reason=EXACT_MATCHED_MISC_IS_NOT_A_WEAPON_CLIENT_ONLY`, `originalOwnedTypesObserved=true`, `metadataReasonsObserved=true`.
+- `ownedKeys=183`, `ownedCopies=457`; all 183 raw Owned keys original **strings**, `numericKeyCount=0`, `otherKeyCount=0`, `invalidQuantityKeys=0`.
+- `weaponKeys=182`, `weaponCopies=456`; **`miscKeys=1`, `miscCopies=1`**. Exact arithmetic: 182 + 1 = 183 keys and 456 + 1 = 457 copies.
+- `eligibleWeaponKeys=69`, `eligibleWeaponCopies=76`, `chromaEligibleCopies=4` (client-catalogue Ancient/Godly categories, **not** verified tradability).
+- All error counts are exactly 0: `missingCatalogueKeys`, `untrustedMetadataKeys`, `missingNameKeys`, `missingTypeKeys`, `missingRarityKeys`, `unknownItemTypeKeys`, `invalidChromaTypeKeys`, `chromaRarityConflictKeys`, `invalidQuantityKeys`.
+- `serverAttestation=false`, `authenticatedOwnedInventory=false`, `currentPricesVerified=false`, `numericSupremeCheckerIdVerified=false`, `authorizesTrade=false`, `authorizesAccept=false`, `mayReportProfit=false`, `mayRecordCompletedTrade=false`, `maySendDiscordWebhook=false`, `mayUseForStrategyLearning=false`, `tradeOutcome=UNKNOWN`.
+
+**Concluded ONE root cause:** Stage79's blanket `ItemType must equal Knife or Gun` predicate treated a *well-formed game-client Misc catalogue entry* under the broad `Weapons.Owned` profile table as `malformedCatalogueEntryCount=1`. This was an **overly restrictive observer interpretation**, not evidence of a corrupt game item or damaged inventory. Do NOT assume or log the actual item's raw key/name from this aggregate-only result; the public list containing 13 historical Misc candidates does not identify the user's item.
+
+**Production scanner reviewed with no edit needed for this issue.** Current pinned `pdiddler/presentation/pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION.lua` (original blob `5395de38d88c76d049a51d801f2a01412defb8ee`): `indexItems` can store a Misc `Sync.Weapons` metadata entry and `inventoryFromProfile` counts it in `rawOwned`/`seen`; `qualifyingMeta(meta)` rejects it via `if t~="knife" and t~="gun" then return false end`. Thus it is not added to `out.items`, and the special case should not whitelist a player as having a Godly/Ancient weapon. The validator error was **Stage79 observational semantics**, not evidence of production scanner bug. Stage80's `CLIENT_MISC_EXCLUDED_FROM_WEAPON_CATEGORY_ONLY` correctly expresses client-only category distinction.
+
+**Stop here for this root cause.** Do NOT rerun Stage79 or Stage80, Stage66 ALT tests, Stage73 GUI or Stage75 catalogue. Do NOT modify live scanner, stage80 probe, Part4, settlement, Discord or repricer because of this `Misc` item. Keep [Stage80 DRAFT PR150](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/150) unmerged until an explicit scoped review. Separate unresolved blockers remain: current Supreme first-party pricing publisher freshness (Nov6 source vs the pinned 72h age policy), independent raw-to-Supreme website-local numeric checker mapping, and server-authenticated completed trade evidence. One subsequent root cause at a time.
+
+---
+
 ## Stage80 exact-head offline CI result — 2026-11-09
 
 **PASS:** Clean [DRAFT PR #150](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/150) code SHA `08c9becf03cf38039c1bcde5da12c4421e434342`, [focused GitHub Actions 42690244778](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42690244778) SUCCESS. Verified TWO immutable original source Git blobs (actual Oct18 third-party 1,040-row game catalogue and exact Stage79 original classifier); executed **14/14 pure Lua5.4 test groups plus 400 seeded malformed cases**, **8/8 actual native wrapper mocked execution tests**, **3/3 Python tests**, including the real 13 `Misc` and 3 incomplete public records check. All five additional project Luau/Lune/Selene/replay/Hypothesis workflows also SUCCESS on the exact SHA. Two CI issues were caught and corrected before this green result: a stale Stage79 marker in the mock assertion, and missing Stage79 isolation-key check in the native wrapper; tests now verify the final code. No production scanner/P4/value/Discord changes. This is OFFLINE verification only, **not an observed native Stage80 result**.
