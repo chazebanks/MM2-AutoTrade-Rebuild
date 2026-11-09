@@ -1,3 +1,19 @@
+## LATEST STAGE74: Oct18 third-party 1040-catalogue source and Chroma Ancient correction — CI VERIFIED (2026-11-09)
+
+After Oct5 995-row archive (178/190 exact names, 12 absent) offline success, GitHub code search discovered independently posted `mm2scripthub/mm2` `db` at commit `0f2715187e7eae36eea4bd97afee809478fc877d` (2026-10-18), Git blob `2be54c3f5c6b715844728c01a65cc2f24a55c02d`. Its public `db2` is **THE SAME blob SHA, NOT a second independent source**. It contains **1,040 game-source table entries**, coincidentally matching the **1,040 client-catalogue rows already actually observed at native Stage54–57**. This is source-count corroboration, NOT verified producer identity.
+
+**Reproducible exact Git-blob-pinned comparison:** 200 eligible catalogue weapon records, **188/190 strict unique Supreme (page, exact public name, Chroma marker) correspondences**, **0 duplicate-target names**; categories **Ancient 16, Godly 126, Chroma 46**. Ten of Stage74's twelve older-archive gaps are accounted for with explicit newer public names: Emberbow, Emberscythe, Mortal, Immortal, Embersickle and their five corresponding Chroma variants. **The only two missing exact names** are `Battleaxe` and `Battleaxe II`: newer public game metadata has `BattleAxe` and `BattleAxe II`. Do NOT silently alias/case-fold them into approved price records.
+
+**Actual parser bug found and corrected by CI:** newer source marks `EmberbowChroma` and `EmberscytheChroma` as `Rarity='Ancient'` and `Chroma=true`. Prior Stage71 six-item archived check assumed all Chromas are Godly; this assumption cannot be generalized to Halloween 2026 Chroma Ancients. New parser accepts a Chroma flag on **Ancient OR Godly**, with separate page/variant, never treating a Chroma as its base item. The third-party source also reuses `Emberscythe`'s `ItemID` for `EmberscytheChroma`; item-art/native `ItemID` is NOT a unique weapon identity or independent Supreme checker number. Tests explicitly assert these cases.
+
+**EXACT CODE HEAD:** `ec836274b56b1995bbf1f0d972b54f52051dd7fd`, [Stage74 Actions #42668864449](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42668864449) **SUCCESS**, also [#42668858094](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42668858094) **SUCCESS**. Real Python **14/14 unit tests, total 440 seeded corrupt original bytes** across older+newer files; CLI executed BOTH source comparisons and printed expected 178 and 188, all authority flags FALSE. Earlier CI found a genuine malformed parser insertion from JavaScript replacement and an overly restrictive old Chroma Godly-only assumption; both fixed and regression-tested. The GitHub PR remains **DRAFT/UNMERGED**, no production code touched.
+
+**Trust boundaries:** newer Oct18 public `db` is THIRD-PARTY, not official live Roblox server provenance. No per-user inventory was read, no raw item key/asset ID/site-local checker ID surfaced in report, no current prices, no net value or strategy-learning/Discord; current game raw keys ↔ canonical game metadata and source freshness still require independent verification. Supreme public issuer clock Nov6 10:56 AM is beyond existing 72h limit. Stage73 native UI already passed and must not be rerun.
+
+**NEXT distinct question:** obtain **one** read-only strict equality observation on the present live `ReplicatedStorage.Database.Sync.Weapons` in MAIN iPad against a **verified provenance-only 190-name historical list**; do not repeat Stage54–58 fuzzy/census scripts. Until that is tested, the 188 public third-party row similarities do NOT establish live-game identity. Use in-game guided UI and automatic clipboard as required by owner, without inventory/trading reads. If CI proves a new targeted probe is necessary, ask only ONE new native test. No price authority.
+
+---
+
 # Stage74 — comprehensive historical public name coverage (NOT trading authority)
 
 Date: 2026-11-09, after Stage73 native MAIN-iPad display pass.
