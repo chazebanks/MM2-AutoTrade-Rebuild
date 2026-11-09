@@ -1,3 +1,9 @@
+## Verified GitHub branch protection review (2026-11-09 UTC; READ ONLY)
+
+- Independent draft [PR137](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/137) documents read-only observations in `pdiddler/research/BRANCH_PROTECTION_AUDIT_2026_11_09.md`. GitHub branch metadata reports `main.protected=false`, `required_status_checks=[]`, and repository rulesets list `[]`; detailed protection GET returned **403 Resource not accessible by integration**, so full privileged administration cannot be verified via current connector. **NO branch protection changed**.
+- PR131–PR135 new offline CI jobs remain DRAFT/unmerged, and older CI jobs have known historical failures. Requiring all jobs now, or requiring a check not yet in `main`, would risk blocking the user's direct work, Copilot, and scheduled research-only market refresh. After reviewed merges and stable PR runs, consider minimal named required checks only with explicit separate user approval and an authorized GitHub admin. No merges or ruleset writes from this audit.
+- TestEZ PR136 remains evaluation only, no TestEZ runtime. Next separate action: verify Copilot issue #122 assignment/current PR and delegate only nonoverlapping, tightly bounded CI work if warranted. No live trading, automatic Accept, settlement/verified profit or Discord learning enabled.
+
 ## Current checkpoint after the project audit · November 9, 2026
 
 - **Stage 73 scanner** — Draft [PR #129](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/129). The tested loader is `837fc4f9e5b792cabfb18b524656f2d1b3ef5c0a`. Its history-only renderer has no repricer, and the copied diagnostic stays `sourceFresh=false` after clock rollback. Eight focused and 28 inherited tests passed. [Exact loader CI](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42573177588)
