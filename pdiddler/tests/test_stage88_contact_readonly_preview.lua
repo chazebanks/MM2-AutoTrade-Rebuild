@@ -39,7 +39,7 @@ local function runCase(mode)
  local other={UserId=99,Name="test_other"}
  local players={LocalPlayer=lp}
  lp.Parent=players;other.Parent=players
- function players:GetPlayers()return {lp,other} end
+ function players:GetPlayers()return mode.noTargets and {lp} or {lp,other} end
  local gui={Enabled=true}
  function gui:FindFirstChild()return nil end
  function lp:FindFirstChildOfClass(n)assert(n=="PlayerGui");return gui end
@@ -104,6 +104,7 @@ local function runCase(mode)
   sent.http=sent.http+1
   assert(url:find("raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/",1,true))
   if mode.badSource then error("fake unavailable source") end
+  if mode.flipDuringFetch then gameObj.JobId="other_job" end
   if url:find("scanner_MODULE",1,true) then
    assert(url:find("7a289d62ef3f0be0a299506eb451c57435493be3",1,true))
    return fakeScannerCode
@@ -190,11 +191,23 @@ group("real stage87 stale-market contact path reaches and displays eligible play
  assert(s.http==4)
  assert(clip:find("[GINGERSCOPE STAGE88 CONTACT PREVIEW]",1,true))
 end)
-group("malformed target remains unknown and cannot be promoted to contact",function()
+group("malformed target remains unknown and final result inconclusive",function()
  local r,s,states=runCase({malformed=true})
- assert(r.report.status=="CLIENT_CONTACT_READINESS_OBSERVED")
+ assert(r.report.status=="INCONCLUSIVE")
+ assert(r.report.reason=="OWN_EVIDENCE_OR_CONCLUSIVE_TARGET_MISSING")
  assert(r.report.reachable==0 and r.report.unknown==1)
  assert(#states>0 and states[1].state=="unknown")
+end)
+group("zero target population cannot be reported as conclusive",function()
+ local r=runCase({noTargets=true})
+ assert(r.report.status=="INCONCLUSIVE")
+ assert(r.report.reachable==0 and r.report.unprofitable==0)
+end)
+group("session change during immutable fetch refuses source execution",function()
+ local r,s=runCase({flipDuringFetch=true})
+ assert(r.report.status=="INCONCLUSIVE")
+ assert(s.http==1)
+ assert(r.report.reachable==0 and r.report.actualSendRequests==0)
 end)
 group("failed immutable source bootstrap cannot send request",function()
  local r,s=runCase({badSource=true})
