@@ -1,0 +1,50 @@
+name: Stage72 isolated read-only MM2 inventory scanner confidence display
+on:
+  push:
+    branches:
+      - research/gingerscope-stage72-readonly-scanner-confidence-boot
+    paths:
+      - '.github/workflows/gingerscope-stage72-scanner-confidence-boot.yml'
+      - 'pdiddler/new_part4/STAGE72_SCANNER_CONFIDENCE_ONLY_BOOT.lua'
+      - 'pdiddler/presentation/stage72_scanner_confidence_adapter.lua'
+      - 'pdiddler/tests/test_stage72_confidence_scanner_boot.py'
+      - 'pdiddler/presentation/STAGE72_SCANNER_CONFIDENCE_INTEGRATION_HANDOFF.md'
+  pull_request:
+    paths:
+      - '.github/workflows/gingerscope-stage72-scanner-confidence-boot.yml'
+      - 'pdiddler/new_part4/STAGE72_SCANNER_CONFIDENCE_ONLY_BOOT.lua'
+      - 'pdiddler/presentation/stage72_scanner_confidence_adapter.lua'
+      - 'pdiddler/tests/test_stage72_confidence_scanner_boot.py'
+      - 'pdiddler/presentation/STAGE72_SCANNER_CONFIDENCE_INTEGRATION_HANDOFF.md'
+permissions:
+  contents: read
+jobs:
+  isolated-client-display:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Test actual isolated Lua boot and old scanner API compatibility
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_stage72_confidence_scanner_boot
+      - name: Test standalone confidence and identity source gates
+        run: |
+          set -euo pipefail
+          python3 -m unittest -q \
+            pdiddler.tests.test_stage71_inventory_price_confidence_view \
+            pdiddler.tests.test_stage70_raw_checker_proof_gate
+      - name: Preserve immutable Stage69 Supreme source parser and 190-row contract
+        run: |
+          set -euo pipefail
+          python3 -m unittest -q \
+            pdiddler.tests.test_refresh_supreme_snapshot \
+            pdiddler.tests.test_stage25_market_diff \
+            pdiddler.tests.test_stage69_source_boundaries \
+            pdiddler.tests.test_stage69_manifest_provenance
