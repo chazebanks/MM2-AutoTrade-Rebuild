@@ -259,7 +259,7 @@ class Stage75Tests(unittest.TestCase):
                              capture_output=True,text=True)
             self.assertEqual(x.returncode,0,(str(f),x.stderr))
         boot=BOOT.read_text(encoding="utf-8")
-        self.assertIn("f651b9dc381671b58608cafa06eafd6ab4908a4d",boot)
+        self.assertIn("26581f34ad2992d82e3fb6f0bd391efffd96c7f4",boot)
         self.assertIn("4b8a66d1432446bf6e11b9c9183b0a3232797d73",boot)
         for bad in (":FireServer(",":InvokeServer(","AcceptTrade(",
                     "SendRequest(","OfferItem(","DiscordWebhook("):
