@@ -8,9 +8,9 @@ on:
       - 'pdiddler/stage69_live_supreme_audit.md'
       - 'pdiddler/tests/test_stage69_source_boundaries.py'
       - 'pdiddler/tests/test_stage69_manifest_provenance.py'
+      - 'pdiddler/tests/test_stage69_authority_separation.py'
       - 'pdiddler/stage69_manifest_provenance.py'
       - 'pdiddler/research_source_html/stage69_2026_11_09/**'
-      - 'pdiddler/refresh_supreme_snapshot.py'
       - 'pdiddler/refresh_supreme_snapshot.py'
       - 'pdiddler/stage25_market_diff.py'
   workflow_dispatch:
@@ -32,7 +32,7 @@ jobs:
       - name: Verify existing structured scraper and provenance tests
         run: |
           set -euo pipefail
-          python3 -m unittest -v pdiddler.tests.test_refresh_supreme_snapshot pdiddler.tests.test_stage25_market_diff pdiddler.tests.test_stage69_source_boundaries pdiddler.tests.test_stage69_manifest_provenance
+          python3 -m unittest -v pdiddler.tests.test_refresh_supreme_snapshot pdiddler.tests.test_stage25_market_diff pdiddler.tests.test_stage69_source_boundaries pdiddler.tests.test_stage69_manifest_provenance pdiddler.tests.test_stage69_authority_separation
       - name: Parse all three EXTERNALLY ACQUIRED pinned pages into review-only JSON (runner direct HTTP 403)
         run: |
           set -euo pipefail
@@ -61,8 +61,17 @@ jobs:
           assert d["autoDeploy"] is False
           candidate=json.loads(Path("/tmp/stage69/supreme_snapshot_" + __import__("datetime").datetime.now(__import__("datetime").timezone.utc).strftime("%Y_%m_%d") + ".json").read_text())
           assert candidate["researchOnly"] is True
+          assert candidate["sourceRowsMatched"] is True
+          assert candidate["rawGameMappingsVerified"] is False
           assert candidate["autoDeploy"] is False
           assert candidate["authorizesTrade"] is False and candidate["authorizesAccept"] is False
+          assert all(
+              row["sourceRecordMatched"] is True
+              and row["rawGameMappingVerified"] is False
+              and row["priceForTradeVerified"] is False
+              and row["verified"] is False
+              for row in candidate["rows"]
+          )
           assert d["authorizesTrade"] is False and d["authorizesAccept"] is False
           print("STATUS",d["status"],"changed",d["changedItems"],
                 "publication",d["candidatePublication"],"expires",d["candidateExpiresAt"])
