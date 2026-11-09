@@ -262,7 +262,7 @@ def main():
         raise ValueError("externally retrieved sources must stay research-only")
     imported = None
     if args.input_dir:
-        from pdiddler.stage69_manifest_provenance import read_manifest
+        from stage69_manifest_provenance import read_manifest
         imported = read_manifest(args.source_manifest, args.input_dir)
     mapping = load_mapping(args.mapping)
     if dict(Counter(row["page"] for row in mapping)) != EXPECTED:
