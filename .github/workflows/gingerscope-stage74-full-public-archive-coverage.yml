@@ -46,6 +46,7 @@ jobs:
           STAGE74_PINNED_GAME: /tmp/stage74_pinned_game.lua
           STAGE74_PINNED_SOURCE: /tmp/stage74_pinned_supreme.json
           STAGE74_PINNED_NEWER: /tmp/stage74_oct18_public_db.lua
+          STAGE74_REQUIRE_PINNED_FIXTURES: '1'
         run: |
           set -euo pipefail
           python3 -m unittest -v \
