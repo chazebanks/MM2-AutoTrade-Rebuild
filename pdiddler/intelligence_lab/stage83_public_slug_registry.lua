@@ -1,5 +1,5 @@
 -- Stage83 PUBLIC reference candidates only; source publisher expired.
--- Auto-generated from SEVEN verified historical source blobs.
+-- Auto-generated from EIGHT verified historical source blobs.
 -- Never prices, trading auth, live owned inventory or numeric site checker IDs.
 return {
   schema = "gingerscope-stage83-public-slug-registry-v1",
