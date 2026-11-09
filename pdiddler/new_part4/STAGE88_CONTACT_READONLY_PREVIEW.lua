@@ -120,11 +120,14 @@ local source={
               "pdiddler/pdiddler3_outgoing_eligibility_v2_SCANNER_EVIDENCE.lua"}
 }
 local function reviewed(name,...)
+ assert(live(),"stale-before-immutable-source-fetch")
  local spec=assert(source[name],"unreviewed-source-name")
  local body=game:HttpGet(ROOT..spec[1].."/"..spec[2],true)
+ assert(live(),"stale-after-immutable-source-fetch")
  assert(type(body)=="string" and #body>500,"immutable-source-unavailable")
  local fn,err=loadstring(body,"="..name)
  assert(fn,err)
+ assert(live(),"stale-before-immutable-source-execution")
  local output=fn(...)
  assert(type(output)=="table","immutable-source-invalid")
  return output
@@ -202,8 +205,14 @@ task.spawn(function()
    OUT.status="HELD"
    OUT.reason="job-player-or-gui-changed"
   elseif OUT.status=="OBSERVING" then
-   OUT.status=observed and "CLIENT_CONTACT_READINESS_OBSERVED" or "INCONCLUSIVE"
-   OUT.reason=observed and "NO_REQUESTS_PRICES_UNVERIFIED" or "NO_COMPLETE_SCAN"
+   local conclusive=(OUT.reachable or 0)+(OUT.unprofitable or 0)
+   if observed and OUT.ownContactEvidenceReady and conclusive>0 then
+    OUT.status="CLIENT_CONTACT_READINESS_OBSERVED"
+    OUT.reason="LOCAL_CONTACT_COUNTS_ONLY_PRICES_UNVERIFIED"
+   else
+    OUT.status="INCONCLUSIVE"
+    OUT.reason="OWN_EVIDENCE_OR_CONCLUSIVE_TARGET_MISSING"
+   end
   end
  end,function(e)return tostring(e)end)
  I.running=false
