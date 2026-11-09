@@ -139,6 +139,21 @@ class Stage77(unittest.TestCase):
         self.assertEqual(out['sourcePageRows']['chromas'],1)
         self.strict(out)
 
+    def test_only_documented_chroma_display_abbreviation(self):
+        w=dict(self.web)
+        w['chromas']=w['chromas'].replace(
+            b'>Chroma Emberscythe</a>',b'>C. Emberscythe</a>')
+        result=self.synthetic_result(w=w)
+        self.assertEqual(result['status'],'PINNED_PUBLIC_SOURCES_CORRESPOND_ONLY',result)
+        self.strict(result)
+        w['chromas']=w['chromas'].replace(
+            b'>C. Emberscythe</a>',b'>C. WrongName</a>')
+        self.assertEqual(self.synthetic_result(w=w)['status'],'INCONCLUSIVE')
+        w=dict(self.web)
+        w['ancients']=w['ancients'].replace(
+            b'>Gingerscope</a>',b'>C. Gingerscope</a>')
+        self.assertEqual(self.synthetic_result(w=w)['status'],'INCONCLUSIVE')
+
     def test_unreviewed_no_slug_and_moved_pet_are_rejected(self):
         w=dict(self.web)
         bad=b'<div class="itemcolumn"><div class="itemcell"><div class="itemhead">Unknown Ancient</div></div></div>'
