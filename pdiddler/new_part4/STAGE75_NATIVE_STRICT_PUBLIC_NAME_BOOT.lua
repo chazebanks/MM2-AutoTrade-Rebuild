@@ -7,6 +7,11 @@ local MARKER="[GINGERSCOPE STAGE75 PUBLIC NAME ONLY]"
 local JOB=tostring(game.JobId or "")
 local S={status="PREPARING",clipboardStatus="NOT_ATTEMPTED",
  authorizesTrade=false,authorizesAccept=false,readOnly=true}
+-- Fail before creating another GUI or overwriting clipboard if rerun in server.
+if type(E[KEY])=="table" and E[KEY].jobId==JOB then
+ warn("[STAGE75] already ran this server; no duplicate GUI/report")
+ return E[KEY]
+end
 local textLabel=nil
 local function gui(message)
  local ok=pcall(function()
@@ -63,15 +68,21 @@ local function base(reason)
  }
 end
 local function copy(text)
- local fns={setclipboard,toclipboard,E.setclipboard,E.toclipboard}
- local seen={}
- local attempted=false
- for _,fn in ipairs(fns) do
+ local fns,seen={},{}
+ local function add(fn)
   if type(fn)=="function" and not seen[fn] then
-   seen[fn]=true attempted=true
-   local ok,returned=pcall(fn,text)
-   if ok and returned~=false then return "COPY_REQUEST_SUCCEEDED" end
+   seen[fn]=true
+   fns[#fns+1]=fn
   end
+ end
+ add(setclipboard)
+ add(toclipboard)
+ add(E.setclipboard)
+ add(E.toclipboard)
+ local attempted=#fns>0
+ for _,fn in ipairs(fns) do
+  local ok,returned=pcall(fn,text)
+  if ok and returned~=false then return "COPY_REQUEST_SUCCEEDED" end
  end
  return attempted and "COPY_FAILED" or "COPY_UNAVAILABLE"
 end
@@ -90,17 +101,19 @@ local function finish(value)
  S.status=value.status
  local message=S.clipboardStatus=="COPY_REQUEST_SUCCEEDED"
    and "COPY SENT (PASTE CHECK)" or "COPY FAILED (USE CONSOLE)"
- status("ST75 COMPLETE | "..message.."\n"
-  .."Exact public-name matches: "..tostring(value.strictMatches or 0)
-  .." / "..tostring(value.sourceRows or 190)
-  .." | NO PRICES; OUTGOING PAUSED")
+ if value.status=="CLIENT_CATALOG_PUBLIC_NAME_ONLY" or
+    value.status=="CLIENT_CATALOG_COUNT_DRIFT_REVIEW_ONLY" or
+    value.status=="CLIENT_CATALOG_SHAPE_OR_AMBIGUITY_REVIEW_ONLY" then
+  status("ST75 COMPLETE | "..message.."\n"
+   .."Exact names: "..tostring(value.strictMatches or 0)
+   .."/"..tostring(value.sourceRows or 190).." | OUTGOING PAUSED")
+ else
+  status("ST75 STOPPED: "..tostring(value.status).." | "..message
+   .."\nNO PRICES; OUTGOING PAUSED")
+ end
  return S
 end
 if game.PlaceId~=142823291 then return finish(base("WRONG_GAME")) end
-if type(E[KEY])=="table" and E[KEY].jobId==JOB then
- warn("[STAGE75] already ran this server; no duplicate report")
- return E[KEY]
-end
 for _,name in ipairs({"PDIDDLER_PART4_CONTROLLER","PDIDDLER_OUTGOING_SESSION",
  "PDIDDLER_PART4_SESSION","PDIDDLER_HOPPING_SESSION",
  "PDIDDLER_STAGE25_SCANNER_ONLY","PDIDDLER_GINGERSCOPE_REPLACEMENT_PREVIEW"}) do
