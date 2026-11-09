@@ -61,7 +61,7 @@ class Stage82(unittest.TestCase):
         ):
             self.assertIs(r[flag],False,flag)
 
-    def test_six_actual_pinned_sources_and_full_189_candidates(self):
+    def test_seven_actual_pinned_sources_and_full_189_candidates(self):
         r=self.registry
         self.assertEqual(r["matchingPublicGameWeaponKeys"],189)
         self.assertEqual(len(r["candidates"]),189)
