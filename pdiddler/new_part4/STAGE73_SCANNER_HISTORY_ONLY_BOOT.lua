@@ -41,12 +41,10 @@ local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local PINS={
     profile={"snapshots/pdiddler_supreme_snapshot_2026_11_06.lua",
         "d9d7970f281f725ff21d1a409495fcc197e3d2dc"},
-    strict={"new_part4/P4_REPRICE_ONLY.lua",
-        "daf42166b9a713b69b0a8c93708ff13e86b36283"},
     historical={"intelligence_lab/stage72_historical_reference_preview.lua",
         "a10d80a086b644085a9cffd87c1f5ce0489597bc"},
     scannerView={"presentation/pdiddler3_scanner_view_stage73_history_v1.lua",
-        "8a5604bd2b44eb27293b134ed1a78382fe5b4048"},
+        "aaf45c6e0de5073596f34b7744205adfb6a40886"},
     scanner={"presentation/pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION.lua",
         "001d228a407076d3cc411a5a7132b0076ec4c027"},
     probe={"new_part4/STAGE25_READONLY_DIAGNOSTIC.lua",
@@ -74,12 +72,10 @@ local ok,why=pcall(function()
         "existing dated profile invalid")
     -- The dated profile's OWN SOURCE clock is authoritative: never
     -- override isFresh or change its original expiresAtEpoch.
-    local current=profile.isFresh()
-    assert(current~=true,
+    assert(profile.isFresh()~=true,
         "Stage73 historical preview must not replace a fresh-price renderer")
-    S.profile=profile
-    S.marketFresh=(current==true)
-    local reprice=fetchAndRun("strict")
+    -- Keep the historical source private to the view. The delayed Stage25
+    -- diagnostic treats a session with no active price profile as unverified.
     local historical=fetchAndRun("historical")
     assert(type(historical)=="table" and type(historical.preview)=="function")
     local preview=historical.preview({items={}},profile)
@@ -89,10 +85,10 @@ local ok,why=pcall(function()
        and preview.authorizesAccept==false,
        "historical preview would weaken trading gate")
     local view=fetchAndRun("scannerView",historical)
-    assert(type(reprice)=="table" and type(reprice.reprice)=="function")
     assert(type(view)=="table" and type(view.inventory)=="function")
     S.historicalPreviewOnly=true
-    S.rawScanner=fetchAndRun("scanner",profile,reprice,view)
+    -- The scanner API expects a policy table. History mode has no repricer.
+    S.rawScanner=fetchAndRun("scanner",profile,{},view)
     assert(type(S.rawScanner)=="table"
         and type(S.rawScanner.getRecord)=="function"
         and type(S.rawScanner.getVerificationState)=="function",

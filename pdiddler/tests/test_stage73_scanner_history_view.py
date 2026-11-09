@@ -18,6 +18,7 @@ HISTORY=ROOT/"pdiddler/intelligence_lab/stage72_historical_reference_preview.lua
 PROFILE=ROOT/"pdiddler/snapshots/pdiddler_supreme_snapshot_2026_11_06.lua"
 STRICT=ROOT/"pdiddler/new_part4/P4_REPRICE_ONLY.lua"
 BOOT=ROOT/"pdiddler/new_part4/STAGE73_SCANNER_HISTORY_ONLY_BOOT.lua"
+PROBE=ROOT/"pdiddler/new_part4/STAGE25_READONLY_DIAGNOSTIC.lua"
 HARNESS=r"""
 local mode=arg[1]
 local history=assert(dofile(arg[2]))
@@ -26,6 +27,54 @@ local strict=assert(dofile(arg[4]))
 local now=1794201000
 os.time=function() return now end
 local render=assert(loadfile(arg[5]))(history)
+local bootState,runProbe,report
+if mode=="boot-clock-rollback" then
+  local paths={
+    ["snapshots/pdiddler_supreme_snapshot_2026_11_06.lua"]=arg[3],
+    ["intelligence_lab/stage72_historical_reference_preview.lua"]=arg[2],
+    ["presentation/pdiddler3_scanner_view_stage73_history_v1.lua"]=arg[5],
+    ["new_part4/STAGE25_READONLY_DIAGNOSTIC.lua"]=arg[8],
+  }
+  local env={}
+  getgenv=function() return env end
+  loadstring=load
+  local elapsed=0
+  os.clock=function() return elapsed end
+  task={
+    spawn=function(callback) runProbe=callback end,
+    wait=function(seconds) elapsed=elapsed+seconds end,
+  }
+  game={JobId="stage73-fixture",PlaceId=142823291}
+  local players={LocalPlayer={}}
+  function players:GetPlayers() return {self.LocalPlayer} end
+  local http={JSONEncode=function(_,result) report=result return "{}" end}
+  function game:GetService(name)
+    if name=="Players" then return players end
+    if name=="HttpService" then return http end
+    error("unexpected service: "..name)
+  end
+  function game:HttpGet(url)
+    local name=assert(url:match("/pdiddler/(.+)$"))
+    if name=="presentation/pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION.lua" then
+      return [[local profile,policy,view=...
+        assert(type(policy)=="table" and next(policy)==nil)
+        return {getRecord=function() end,getVerificationState=function() end,
+          profile=profile,view=view}]]
+    end
+    local file=assert(io.open(assert(paths[name], "unexpected dependency: "..name),"rb"))
+    local source=file:read("*a")
+    file:close()
+    return source
+  end
+  local warnings={}
+  warn=function(msg) warnings[#warnings+1]=msg end
+  bootState=assert(dofile(arg[7]))
+  assert(bootState.status=="STAGE73_SCANNER_HISTORY_ONLY_NO_TRADE_AUTHORITY",
+    table.concat(warnings,", "))
+  assert(bootState.authorizesTrade==false and bootState.authorizesAccept==false)
+  profile=bootState.rawScanner.profile
+  render=bootState.rawScanner.view
+end
 local items={
   {id="PRIVATE_RAW_KEY_1",name="Gingerscope",page="ancient",
     cat="Weapons",type="Gun",checkerId="771",qty=1},
@@ -64,11 +113,18 @@ elseif mode=="fuzz" then
   else items[1].qty=2 end
 end
 local inv=items and {items=items,unmapped=0,unpriced=0,badQty=0} or nil
-if mode=="clock-rollback" then
+local clockRollback=mode=="clock-rollback" or mode=="boot-clock-rollback"
+if clockRollback then
   assert(not profile.isFresh())
   assert(render.inventory(inv,profile,strict).totalText=="UNVERIFIED")
   now=profile.observedAtEpoch+300
   assert(profile.isFresh(), "test clock must make the old profile appear fresh")
+end
+if bootState then
+  runProbe()
+  assert(bootState.probeStatus=="ONE_REPORT_CAPTURED")
+  assert(report.sourceFresh==false, "history diagnostic claimed a fresh source")
+  assert(report.authorizesTrade==false and report.authorizesAccept==false)
 end
 local result=render.inventory(inv,profile,strict)
 assert(type(result)=="table")
@@ -88,7 +144,7 @@ local summary=render.summary(7,1,0,{state="ready",reachable=1000},profile)
 assert(summary:find("Outgoing: paused - Supreme prices expired or unavailable",1,true))
 assert(not summary:find("Outgoing (unprocessed): Reachable 1000",1,true))
 if mode=="base" or mode=="fake-valued-row"
-   or mode=="expired-but-claimed-current" or mode=="clock-rollback" then
+   or mode=="expired-but-claimed-current" or clockRollback then
  assert(result.historicalReferencesShown==3)
  assert(result.detail:find("HISTORICAL REFERENCES ONLY (UNVERIFIED; NO TRADING)",1,true))
  assert(result.detail:find("Historical Supreme ref: 16000 each",1,true))
@@ -99,7 +155,7 @@ elseif mode=="missing-profile" or mode=="invalid-qty" or
    mode=="duplicate-key" or mode=="no-inventory" then
  assert(result.historicalReferencesShown==0)
 end
-if mode=="clock-rollback" then
+if clockRollback then
   assert(not result.detail:find("Snapshot expired: false",1,true))
   local _,idleRow=render.row({state="whitelist",inv=inv},nil,nil,profile,strict)
   assert(idleRow:find("Paused: Supreme prices expired or unavailable",1,true))
@@ -126,8 +182,7 @@ class Stage73ActualViewTests(unittest.TestCase):
         cls.temp.cleanup()
     def invoke(self,mode,seed=None):
         cmd=[self.lua,str(self.harness),mode,str(HISTORY),str(PROFILE),
-             str(STRICT),str(VIEW)]
-        if seed is not None: cmd.append(str(seed))
+             str(STRICT),str(VIEW),str(seed or 0),str(BOOT),str(PROBE)]
         p=subprocess.run(cmd,capture_output=True,text=True,timeout=6)
         self.assertEqual(p.returncode,0,(mode,seed,p.stdout[-1500:],p.stderr[-1800:]))
         self.assertIn("STAGE73_VIEW",p.stdout)
@@ -146,9 +201,9 @@ class Stage73ActualViewTests(unittest.TestCase):
         self.assertIn("stage72_historical_reference_preview.lua",boot)
         self.assertIn("pdiddler3_scanner_view_stage73_history_v1.lua",boot)
         self.assertIn("a10d80a086b644085a9cffd87c1f5ce0489597bc",boot)
-        self.assertIn("8a5604bd2b44eb27293b134ed1a78382fe5b4048",boot)
+        self.assertIn("aaf45c6e0de5073596f34b7744205adfb6a40886",boot)
         self.assertIn('S.status="STAGE73_SCANNER_HISTORY_ONLY_NO_TRADE_AUTHORITY"',boot)
-        self.assertIn("S.rawScanner=fetchAndRun(\"scanner\",profile,reprice,view)",boot)
+        self.assertIn("S.rawScanner=fetchAndRun(\"scanner\",profile,{},view)",boot)
         for bad in (":FireServer(",":InvokeServer(", "OfferItem(", "AcceptTrade(",
                     "DeclineTrade(", "SendRequest(", "SetValue(", "DiscordWebhook("):
             self.assertNotIn(bad,boot)
@@ -157,6 +212,8 @@ class Stage73ActualViewTests(unittest.TestCase):
         self.assertIn("shown=3",self.invoke("base"))
     def test_clock_rollback_cannot_promote_history_view_to_current_prices(self):
         self.assertIn("shown=3",self.invoke("clock-rollback"))
+    def test_boot_and_delayed_report_stay_history_only_after_clock_rollback(self):
+        self.assertIn("shown=3",self.invoke("boot-clock-rollback"))
     def test_forged_client_price_and_fake_outgoing_ready_never_promote(self):
         for mode in ("fake-valued-row","expired-but-claimed-current"):
             with self.subTest(mode=mode):
