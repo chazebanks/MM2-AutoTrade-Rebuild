@@ -1,3 +1,11 @@
+## Verified Stage81 actual-source test — 2026-11-09
+
+**PASS:** Exact CODE + documentation HEAD `a90687eb6555026c628495b693a37910d6d22536`, dedicated [GitHub Actions run 42696063209](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42696063209) SUCCESS: **7/7 executed Python unittest groups**, including five original Git SHA-1-pinned files (original 190-row old snapshot + 3 first-party Firecrawl HTML captures + reviewed Stage77 parser source) and 400 intentionally corrupted source inputs. Actual source parsed 190 historical records with **189 first-party `?item=` detail slugs** (15 Ancient, 128 Godly, 46 Chroma) plus **exactly 1 known priceless Nik's Scythe lacking a normal item slug**. Fixed Nov6 publisher ISO seen in all three original HTML captures; 72h upper bound passed Nov9 at 15:56:07Z. On same HEAD, existing official Luau, Lune, Selene/StyLua, replay and Hypothesis workflows also PASSED. This is a preserved **public-source** correlation, not authenticated current Roblox item→website slug, historical numeric checker index verification, fresh prices, server settlement or trade authority.
+
+**Root-cause architectural finding:** numeric `checkerId` from a historical snapshot is unnecessary to identify a public item page; Supreme's current first-party page uses a distinct stable **public slug and display name**. This is not proof that old site-local numeric indexes are wrong—only that we have no independent origin-backed evidence for them, and no reason to promote them automatically. The safer future read-only research path is an exact `(category, display name, verified public slug)` registry, with separately authenticated current client weapon identity. Repricing, auto Accept, outgoing, profit and Discord learning remain OFF. Keep PR151 DRAFT/UNMERGED until reviewed. No repeat Stage73/75/79/80 device tests.
+
+---
+
 # Stage 81 — Complete first-party website-slug provenance for the historical 190-item Supreme roster
 
 **2026-11-09.** Issue #122. Research only; no live MM2 inventory, no raw-item→Supreme numeric checker-ID proof, no market-price authorization or trading.
