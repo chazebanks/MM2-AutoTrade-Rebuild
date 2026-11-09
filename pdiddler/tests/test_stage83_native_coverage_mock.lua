@@ -87,7 +87,7 @@ local function build(profile,opts)
  end
  function gameObj:HttpGet(url,...)
   httpGets=httpGets+1
-  assert(url:find("42ab03b81fe1ab69613ec8b5797dad95252ee4d8",1,true))
+  assert(url:find("67c19a10f4dde23a005206e5b0c261d7e43c82a5",1,true))
   assert(select("#",...)==1)
   if opts.httpError then error("offline source not available") end
   if url:find("stage83_private_aggregate_coverage.lua",1,true) then
