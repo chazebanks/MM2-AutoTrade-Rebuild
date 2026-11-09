@@ -195,10 +195,13 @@ def build(game:bytes, roster:bytes, pages:dict[str,bytes],
     except (ValueError,TypeError,KeyError,UnicodeError,ImportError,
             json.JSONDecodeError,OverflowError,RecursionError,AttributeError):
         return report("INCONCLUSIVE","ARCHIVED_PUBLIC_IDENTITY_JOIN_UNREVIEWED",candidates={})
+    digest=hashlib.sha256(json.dumps(candidates,sort_keys=True,
+                                      separators=(",",":"),ensure_ascii=True).encode("utf-8")).hexdigest()
     return report(
         "PUBLIC_GAME_KEY_TO_WEBSITE_SLUG_CANDIDATES_ONLY",
         "NO_AUTHENTICATED_OWNED_KEY_NUMERIC_CHECKER_OR_FRESH_PRICE",
         candidates=candidates,
+        candidateRegistrySha256=digest,
         matchingPublicGameWeaponKeys=len(candidates),
         eligiblePublicGameKeys=eligible_count,
         publicGameKeysAbsentFromOldSupremeRoster=len(game_only_keys),
@@ -222,6 +225,13 @@ def lookup_public_candidate(report_object:object, raw_key:object)->dict:
     candidates=report_object.get("candidates")
     if type(candidates) is not dict or len(candidates)!=189:
         return report("INCONCLUSIVE","INCOMPLETE_REGISTRY")
+    try:
+        digest=hashlib.sha256(json.dumps(candidates,sort_keys=True,
+                               separators=(",",":"),ensure_ascii=True).encode("utf-8")).hexdigest()
+    except (ValueError,TypeError,OverflowError,RecursionError):
+        return report("INCONCLUSIVE","REGISTRY_DIGEST_UNAVAILABLE")
+    if report_object.get("candidateRegistrySha256")!=digest:
+        return report("INCONCLUSIVE","REGISTRY_CHANGED_SINCE_PINNED_BUILD")
     matched=candidates.get(raw_key)
     if type(matched) is not dict or matched.get("currentOwnedRawKeyVerified") is not False or (
         matched.get("priceForTradeVerified") is not False
