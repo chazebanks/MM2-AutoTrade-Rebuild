@@ -205,6 +205,15 @@ end
 if mode=="success" or mode=="copy-fails" then
  assert(panelStatus and panelStatus.Text and panelStatus.Text:find("DONE",1,true),
   "in-game status did not update")
+ assert(panelStatus.Text:find("NO TRADING",1,true)
+   and panelStatus.Text:find("UNVERIFIED",1,true),
+  "in-game final status hid safety restrictions")
+ local n=0
+ for line in (panelStatus.Text.."\\n"):gmatch("(.-)\\n") do
+  n=n+1
+  assert(#line<=46, "in-game status line would be too wide")
+ end
+ assert(n<=3,"in-game guide exceeds its three line mobile text budget")
 end
 io.write("STAGE75_TEST "..mode.." PASSED\n")
 '''
