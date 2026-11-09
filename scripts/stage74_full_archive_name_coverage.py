@@ -252,9 +252,9 @@ def main() -> None:
     if out["status"] != "ARCHIVED_PUBLIC_NAME_COVERAGE_ONLY":
         raise SystemExit(2)
     if a.newer_public_catalog is not None:
-        newer=evaluate_newer_public(a.newer_public_catalog.read_bytes(),
-                                    a.supreme_archive.read_bytes())
-        print(json.dumps(newer,sort_keys=True))
+        newer = evaluate_newer_public(a.newer_public_catalog.read_bytes(),
+                                      a.supreme_archive.read_bytes())
+        print(json.dumps(newer, sort_keys=True))
         if newer["status"] != "THIRD_PARTY_PUBLIC_NAME_CORROBORATION_ONLY":
             raise SystemExit(2)
 
