@@ -144,8 +144,12 @@ local function finish(status,reason)
  local c=core and core.result or nil
  if type(c)=="table" then
   M.coreTerminal=(c.stopReason=="TWO_POST_CLOSE_READS_FINISHED" and
+    c.status=="ELIGIBLE_DELTA_WITHOUT_RESULT_NAMED_RECEIPT" and
     c.beforeObserved==true and c.windowClosureObserved==true and
-    c.postReadbacksObserved==2 and c.closureStatus=="closed_unknown")
+    c.postReadbacksObserved==2 and c.closureStatus=="closed_unknown" and
+    c.readOnly==true and c.tradeOutcome=="UNKNOWN" and
+    c.serverCompletionProven==false and
+    c.mayRecordCompletedTrade==false and c.authorizesAccept==false)
   -- Allowlist own aggregate client numbers only, never names, raw IDs or items.
   M.ownReadbacks={
     status=type(c.status)=="string" and c.status or "UNKNOWN",
@@ -181,7 +185,11 @@ local function finish(status,reason)
  end
  M.clientCompatibleFlagPattern=compatible
  local own=M.ownReadbacks
- local positive=compatible and M.coreTerminal and own
+ -- Never promote a fatal/error/partial finished path even if an old or
+ -- injected core.result happens to have plausible counts and callback shapes.
+ local positive=(status=="CLIENT_OBSERVER_FINISHED" and
+   reason=="ONE_BOUND_WINDOW_FINISHED") and
+   compatible and M.coreTerminal and own
    and own.gainedEligibleCopies==1 and own.lostEligibleCopies==0
    and own.changedEligibleTypes==1
    and own.rawWeaponInventoryChanged==true
