@@ -1,3 +1,18 @@
+## Stage88 VERIFIED exact-code result and ONE native read-only check — 2026-11-09
+
+**Exact reviewed runnable CODE commit `b1e209c0b365164bfab10ba505c5f4cb57d204a2`**, clean [DRAFT PR158](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/158). [Dedicated GitHub Actions 42721396588](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42721396588) **SUCCESS** with **11/11 actual Lua5.4 native-wrapper mock groups**. It loaded the REAL Stage87 P3 contact logic/controller and Stage88 price-safe view in Lua5.4, and mocked only the 63KB native Roblox scanner (which depends on live game APIs and Luau). It independently downloaded and Git-blob SHA-verified the *real* original scanner `582ee363...`, contact view `95543350...`, P3 contact `a4ed1e...`, outgoing evidence controller `2c833de...`. All five baseline Luau, Lune, Selene/StyLua, sanitized replay and Hypothesis workflows also **SUCCESS** on same code SHA (six total). Tests: unarmed/wrong game/session owner, expired prices + matching local Ancient/Godly and contact-only output, invalid inventory remains unknown, zero players/unknown-only are now INCONCLUSIVE (not falsely PASS), job replacement during source fetch/observation fail closed, active TradeGUI hold, failed source, duplicate run guard, all quote/settlement/trading/Discord authority FALSE. Static policy confirms **no request/offer/Accept/Decline/teleport/webhook path** in Stage88 wrapper. Extra manual source inspection confirmed original T4 scanner only invokes `GetFullInventory(p.Name)` and `GetProfileData()` read-only RemoteFunctions; no FireServer or other trade command observed.
+
+**ONE native MAIN iPad / Delta / Tablet test now needed, no ALT trade:** Join a **fresh original MM2 game server** with other non-bot players, and do **not run any other pdiddler, bot, outgoing, or trade scripts**. Run exactly ONE code snippet below. The preview loads T4 scanner and checks contacts for about 35 seconds **after initial scanner startup**. It does not send requests, place/withdraw offers, click Accept/Decline, report profit, learn market or hop servers. It produces one `[GINGERSCOPE STAGE88 CONTACT PREVIEW]` aggregate JSON line, auto-copied where clipboard is supported, with reachable/no-items/unknown counts and price/authority FALSE. Paste ONLY that line; if it fails, send the first error/status and do NOT rerun in the same server: scanner background listeners cannot be safely removed without rejoining.
+
+```lua
+getgenv().PDIDDLER_STAGE88_CONTACT_READONLY_ARMED = true
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/b1e209c0b365164bfab10ba505c5f4cb57d204a2/pdiddler/new_part4/STAGE88_CONTACT_READONLY_PREVIEW.lua"))()
+```
+
+**Important limitation:** Offline green does not prove the actual Roblox scanner initialization, tablet GUI, or live remote/compatibility. User observation is required precisely to cross that boundary. This preview does not implement requests or trading, even if `reachable>0`. Successful client contact display warrants a *separate*, consented single-player request-only physical UI test; keep actual final acceptance/profit/Discord OFF. No repeated Stage79/80/83 mapping tests. Price freshness remains separate (Stage84 published Nov9 source was research-only and has its own expiry).
+
+---
+
 # Stage88 — Standalone native contact preview, NO outgoing request execution
 
 **2026-11-09. One practical next step after Stage87**: expose the scanner's locally observed contact-eligible Ancient/Godly/Chroma players in a real MM2 client even if published Supreme prices are expired, without ever loading the Stage51 trading bootstrap, Part4, Part5 hopper, legacy +15 balancing, automatic offers, Accept or Discord.
