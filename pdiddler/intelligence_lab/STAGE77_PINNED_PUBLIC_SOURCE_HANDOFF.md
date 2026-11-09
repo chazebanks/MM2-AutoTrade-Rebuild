@@ -1,3 +1,13 @@
+## Exact-head real-source CI outcome — 2026-11-09
+
+**PASS:** Source+tests HEAD `6775e10a8266da43b8b316cddaa3a8042c0f3dda`, dedicated [GitHub Actions 42682838049](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42682838049) downloaded **four** immutable actual public input Git blobs, verified all four raw Git object IDs and executed **15/15** real Python unittest groups (including the actual pinned-archives positive result and 400 seeded corruptions). This supersedes the prior 'real-source test pending' text below. The tested source parser returned `PINNED_PUBLIC_SOURCES_CORRESPOND_ONLY` for the four reviewed game/source slug/name/rarity/Chroma pairings. Luau/Lune, replay and Hypothesis also succeeded on this code HEAD; check status on any later documentation commit separately.
+
+**Real-source regressions and fixes before green:** Initial pinned run refused the source because the Ancient list contains unlinked priceless Nik's Scythe, which cannot be assigned a fabricated URL. Fixed to skip this exact known exception while continuing to reject any unknown unlinked row. The Chroma page contains seven distinct pet records in a `data-tier=pets` section; excluded only the explicitly reviewed seven names. Four Chroma weapon row links abbreviate `Chroma` as `C.`, while `data-name` has the full string; permit only exactly `C. ` expansion in a Chroma page, with negative tests against other aliases. Godlies contains exactly two `style=display:none` 1,000,000-value placeholder rows `Batwing`, `Black Luger`; explicitly quarantined them, reject any unfamiliar hidden row. Those are original site structures, not evidence of wrong four-key crosswalk. This source-only parser neither assigns prices nor calls gameplay code.
+
+**Trust boundary:** The Git blob SHAs authenticate immutable repository bytes, not the original website's server identity or the currently running Roblox server. The Supreme HTML was captured by Firecrawl Nov9 with page-level publisher Nov6; it is stale beyond the current 72h policy. The Oct18 MM2 catalogue is third-party. Independent *source strings* now agree for four public cases; no authenticated owned raw key, Supreme site-local numeric checker index, real-time valuation, market-learning outcome, trade, or settlement has been established. All authorization flags stay FALSE. Keep [draft PR147](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/147) unmerged; **no iPad test needed for this archived source task**.
+
+---
+
 # Stage77 — pinned independent public-source identity proof boundary
 
 **Date:** 2026-11-09. **Issue:** #122. **Status:** Research-only, no scanner or trading modifications.
