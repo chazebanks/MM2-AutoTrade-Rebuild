@@ -227,8 +227,25 @@ def lookup_public_candidate(report_object:object, raw_key:object)->dict:
         matched.get("priceForTradeVerified") is not False
     ):
         return report("UNMAPPED_PUBLIC_KEY","NO_REVIEWED_SOURCE_CORRESPONDENCE")
-    # Rebuild only canonical, recognized fields. Never forward arbitrary
-    # caller-injected checkerId, price, authority or provenance claims.
+    # Validate exact first-party URL form even against forged caller objects.
+    # A forged caller can still invent a public reference; this is NEVER
+    # authorization or authentication, including when this check succeeds.
+    page,slug,url=matched.get("page"),matched.get("slug"),matched.get("url")
+    name,kind,rarity,chroma=(matched.get("displayName"),
+                            matched.get("gameItemType"),
+                            matched.get("gameRarity"),
+                            matched.get("gameChroma"))
+    if (page not in SOURCE_PAGE or type(slug) is not str or
+        re.fullmatch(r"[A-Za-z0-9_'-]+",slug) is None or
+        url!=f"https://supremevalues.com/mm2/{SOURCE_PAGE[page]}?item={slug}" or
+        type(name) is not str or not name or len(name)>128 or
+        kind not in ("Knife","Gun") or rarity not in ("Ancient","Godly") or
+        type(chroma) is not bool or
+        page!=("chroma" if chroma else rarity.lower()) or
+        (chroma and not name.startswith("Chroma "))):
+        return report("INCONCLUSIVE","PUBLIC_REFERENCE_FIELDS_MALFORMED")
+    # Rebuild only canonical recognized public-reference fields.
+    # Historical numeric checkerId, supplied price or verified flags discarded.
     allowed=("page","displayName","slug","url","gameItemType","gameRarity","gameChroma")
     return report("PUBLIC_REFERENCE_LINK_ONLY",
                   "HISTORICAL_WEBSITE_REFERENCE_NOT_CURRENT_TRADE_VALUE",
