@@ -42,6 +42,14 @@ local S={state="BOOTING_READ_ONLY",reportReady=false,job=job,
  serverCompletionProven=false,mayRecordCompletedTrade=false}
 S.privateRawSnapshots={} -- in-memory only; never print or serialize.
 S.privateRawSnapshotFailure=nil
+-- Explicit one-shot scrub for the OUTER wrapper. Old source retained raw
+-- maps after observation via E[KEY] in the executor's shared environment.
+-- Call on ALL successful and failed wrapper exit paths, idempotently.
+function S.releasePrivateRawSnapshots()
+ S.privateRawSnapshots={}
+ S.privateRawSnapshotFailure=nil
+ return true
+end
 E[KEY]=S
 local function source(pin,name)
  local data=game:HttpGet(ROOT..pin.."/pdiddler/new_part4/"..name..".lua",true)
