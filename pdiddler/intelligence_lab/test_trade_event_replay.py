@@ -167,6 +167,95 @@ class SanitizedReplayTests(unittest.TestCase):
         too_long = trace([event(i, "OPEN") for i in range(1, 258)])
         self.assertEqual(R.replay_trace(too_long)["reason"], "EVENT_LIST_OUT_OF_BOUNDS")
 
+    def test_reopened_closed_client_session_token_is_quarantined(self):
+        # Without this guard, a delayed callback arriving after the second
+        # OPEN would be counted as part of a *different* trade window.
+        t = trace([
+            event(1, "OPEN", "s_main"),
+            event(2, "OFFER", "s_main", side="OURS", revision=1,
+                  signature="bundle_a"),
+            event(3, "CLOSE", "s_main"),
+            event(4, "OPEN", "s_main"),
+            event(5, "CALLBACK", "s_main", signal="ACCEPT_TRUE"),
+            event(6, "INVENTORY_DELTA", "s_main", gained=1, lost=0),
+        ])
+        result = R.replay_trace(t)
+        self.safe(result)
+        self.assertEqual(result["status"], "QUARANTINED")
+        self.assertEqual(result["reason"], "REUSED_CLIENT_SESSION_TOKEN")
+
+    def test_reopened_active_client_session_token_is_quarantined(self):
+        t = trace([
+            event(1, "OPEN", "s_main"),
+            event(2, "OFFER", "s_main", side="THEIRS", revision=1,
+                  signature="bundle_a"),
+            event(3, "OPEN", "s_main"),  # distinct ID, not redelivery
+        ])
+        result = R.replay_trace(t)
+        self.safe(result)
+        self.assertEqual(result["status"], "QUARANTINED")
+        self.assertEqual(result["reason"], "REUSED_CLIENT_SESSION_TOKEN")
+
+    def test_identical_open_redelivery_is_still_idempotent(self):
+        t = trace([
+            event(1, "OPEN", "s_main"),
+            event(2, "CLOSE", "s_main"),
+            event(3, "INVENTORY_DELTA", "s_main", gained=1, lost=0),
+        ])
+        # An EXACT duplicate ID+payload is not a new session.
+        t["events"].insert(1, deepcopy(t["events"][0]))
+        result = R.replay_trace(t)
+        self.safe(result)
+        self.assertEqual(result["status"], "CLIENT_REPLAY_ONLY")
+        self.assertEqual(result["duplicateEvents"], 1)
+        self.assertEqual(result["windowClosures"], 1)
+        self.assertEqual(result["postCloseDeltaObservations"], 1)
+
+    def test_new_distinct_token_after_close_preserves_session_isolation(self):
+        t = trace([
+            event(1, "OPEN", "s_old"),
+            event(2, "OFFER", "s_old", side="THEIRS", revision=1,
+                  signature="bundle_a"),
+            event(3, "CLOSE", "s_old"),
+            event(4, "OPEN", "s_new"),
+            event(5, "CALLBACK", "s_old", signal="ACCEPT_TRUE"),
+            event(6, "INVENTORY_DELTA", "s_old", gained=1, lost=0),
+            event(7, "OFFER", "s_new", side="OURS", revision=1,
+                  signature="bundle_b"),
+            event(8, "ACCEPT", "s_new", side="OURS", revision=1),
+            event(9, "CLOSE", "s_new"),
+        ])
+        result = R.replay_trace(t)
+        self.safe(result)
+        self.assertEqual(result["status"], "CLIENT_REPLAY_ONLY")
+        self.assertEqual(result["crossSessionEvents"], 2)
+        self.assertEqual(result["clientCallbackObservations"], 0)
+        self.assertEqual(result["clientInventoryDeltaObservations"], 0)
+        self.assertEqual(result["clientAcceptObservations"], 1)
+        self.assertEqual(result["windowClosures"], 2)
+
+    def test_400_reused_token_interleavings_always_fail_closed(self):
+        rng = random.Random(85042026)
+        for trial in range(400):
+            first = event(1, "OPEN", "s_main")
+            events = [first]
+            for n in range(2, rng.randrange(3, 20)):
+                events.append(event(
+                    n, "CALLBACK", "s_main",
+                    signal=rng.choice(sorted(R.CALLBACKS)),
+                ))
+            number = len(events) + 1
+            # Insert an optional CLOSE to cover both active and closed reuse.
+            if rng.choice((True, False)):
+                events.append(event(number, "CLOSE", "s_main"))
+                number += 1
+            events.append(event(number, "OPEN", "s_main"))
+            result = R.replay_trace(trace(events))
+            with self.subTest(trial=trial):
+                self.safe(result)
+                self.assertEqual(result["status"], "QUARANTINED")
+                self.assertEqual(result["reason"], "REUSED_CLIENT_SESSION_TOKEN")
+
     def test_500_seeded_safe_interleavings(self):
         rng = random.Random(68042026)
         for index in range(500):
