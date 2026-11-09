@@ -46,12 +46,14 @@ local function scenario(mode)
             PDIDDLER_STAGE89_TARGET_USERNAME=mode.user or "test_partner"}
  if mode.owner then env.PDIDDLER_OUTGOING_CONTROLLER={} end
  _G.getgenv=function()return env end
- _G.warn=function()end
+ _G.warn=function(v)env.lastWarning=tostring(v) end
  _G.setclipboard=function(s)env.clipboard=s end
  _G.os.clock=function()return elapsed end
  local playerList={}
  local players={Name="Players"}
+ function players:IsA(v)return v=="Players" end
  local lp={Name="test_self",UserId=1,Parent=players}
+ function lp:IsA(v)return v=="Player" end
  players.LocalPlayer=lp
  local target={Name="test_partner",UserId=2,Parent=players}
  function lp:FindFirstChildOfClass(k)
@@ -206,7 +208,7 @@ group("not armed, wrong game and owner block before download",function()
 end)
 group("real Stage87 partner and own candidate + exact manual card gives ONE request",function()
  local r,s,e=scenario({})
- assert(r.report.status=="CLIENT_PENDING_OBSERVED",r.report.reason)
+ assert(r.report.status=="CLIENT_PENDING_OBSERVED",r.report.reason.." | "..tostring(e.lastWarning))
  assert(r.report.requestTapCount==1 and s.mouseDown==1 and s.mouseUp==1)
  assert(r.report.clientPendingExactTargetObserved==true)
  assert(r.report.exactTargetClientBound==true)
