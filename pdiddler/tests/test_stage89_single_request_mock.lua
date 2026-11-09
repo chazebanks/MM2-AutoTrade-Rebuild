@@ -52,6 +52,7 @@ local function scenario(mode)
  local playerList={}
  local players={Name="Players"}
  local lp={Name="test_self",UserId=1,Parent=players}
+ players.LocalPlayer=lp
  local target={Name="test_partner",UserId=2,Parent=players}
  function lp:FindFirstChildOfClass(k)
   assert(k=="PlayerGui")
