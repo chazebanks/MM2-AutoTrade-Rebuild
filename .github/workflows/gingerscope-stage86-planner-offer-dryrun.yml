@@ -1,0 +1,51 @@
+name: Gingerscope Stage86 existing planner + offer-guard dry-run
+on:
+  push:
+    branches:
+      - integration/gingerscope-stage86-planner-offer-guard-dryrun
+    paths:
+      - 'pdiddler/intelligence_lab/stage86_planner_guard_dryrun.py'
+      - 'pdiddler/intelligence_lab/test_stage86_planner_guard_dryrun.py'
+      - 'pdiddler/intelligence_lab/STAGE86_DRYRUN_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage86-planner-offer-dryrun.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage86_planner_guard_dryrun.py'
+      - 'pdiddler/intelligence_lab/test_stage86_planner_guard_dryrun.py'
+      - 'pdiddler/intelligence_lab/STAGE86_DRYRUN_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage86-planner-offer-dryrun.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  existing-modules-synthetic-offer-dryrun:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download exact reviewed planner and snapshot guard original source
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope86
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/6ed48e084bd58fab38e3bf061ac36fb295ecf103/pdiddler/intelligence_lab/future_portfolio_planner.py' \
+            -o /tmp/gingerscope86/original_planner.py
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/2f49e2f25cdbf7c8ca01702db159d412cc4382bc/pdiddler/intelligence_lab/offer_snapshot_guard.py' \
+            -o /tmp/gingerscope86/original_guard.py
+          test "$(git hash-object /tmp/gingerscope86/original_planner.py)" = '78948cdacd2a760db5b888fce242d598fc6f14b6'
+          test "$(git hash-object /tmp/gingerscope86/original_guard.py)" = 'c5b87f159de5224d231b111da2541b8b23ac6284'
+      - name: Run actual plan-to-guard integration and 500 adversarial changes
+        env:
+          STAGE86_REQUIRE_PINNED: '1'
+          STAGE86_ORIGINAL_PLANNER: /tmp/gingerscope86/original_planner.py
+          STAGE86_ORIGINAL_GUARD: /tmp/gingerscope86/original_guard.py
+        run: |
+          set -euo pipefail
+          python3 -m py_compile pdiddler/intelligence_lab/stage86_planner_guard_dryrun.py pdiddler/intelligence_lab/test_stage86_planner_guard_dryrun.py
+          python3 -m unittest -v pdiddler.intelligence_lab.test_stage86_planner_guard_dryrun
