@@ -82,7 +82,16 @@ local scannerSource=[[
  assert(summary:find("Whitelist 7",1,true))
  assert(summary:find("Outgoing: PAUSED",1,true))
  assert(not summary:find("999999",1,true))
- return {getRecord=function()end,getVerificationState=function()end}
+ return {
+  getRecord=function()end,getVerificationState=function()end,
+  setStatus=function(message)
+   assert(type(message)=="string")
+   assert(message:find("SCREENSHOT",1,true))
+   assert(message:find("DO NOT TRADE",1,true))
+   _G.STAGE72_IN_GAME_INSTRUCTIONS_OBSERVED=true
+   return true
+  end
+ }
 ]]
 game={
  PlaceId=mode=="wrong-game" and 123 or 142823291,
@@ -160,6 +169,7 @@ else
  assert(first.maySendDiscordWebhook==false)
  assert(fetches==6)
  assert(strictCalls==0)
+ assert(_G.STAGE72_IN_GAME_INSTRUCTIONS_OBSERVED==true)
  local second=dofile(boot)
  assert(second==first)
  assert(fetches==6) -- repeated loader cannot duplicate scanner/profile RPC
