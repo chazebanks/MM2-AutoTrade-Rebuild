@@ -149,7 +149,7 @@ assert(not row:find("Outgoing: READY",1,true))
 local summary=render.summary(7,1,0,{state="ready",reachable=1000},profile)
 assert(summary:find("Outgoing: paused | prices UNVERIFIED",1,true))
 local summaryLines={}
-for line in (summary.."\\n"):gmatch("(.-)\\n") do summaryLines[#summaryLines+1]=line end
+for line in (summary.."\n"):gmatch("(.-)\n") do summaryLines[#summaryLines+1]=line end
 assert(#summaryLines==2,"summary must fit the two-line native T4.4 label")
 assert(#summaryLines[2]<=42,"outgoing status is too wide for panel")
 assert(not summary:find("Outgoing (unprocessed): Reachable 1000",1,true))
