@@ -147,7 +147,7 @@ game={
     S.state="FINISHED_READ_ONLY"
    end)
    return S
-  ]]
+  ]] .. string.rep("\n-- deterministic test fixture padding",220)
  end
 }
 local env={}
