@@ -7,6 +7,7 @@ on:
     paths:
       - 'pdiddler/intelligence_lab/stage76_first_party_slug_audit.py'
       - 'pdiddler/tests/test_stage76_first_party_slug_audit.py'
+      - 'pdiddler/intelligence_lab/STAGE76_FIRST_PARTY_SLUG_HANDOFF.md'
       - '.github/workflows/gingerscope-stage76-first-party-slug.yml'
   workflow_dispatch:
 jobs:
