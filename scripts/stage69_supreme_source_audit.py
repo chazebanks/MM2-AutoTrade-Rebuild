@@ -16,6 +16,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
 
 ROOT = Path(__file__).resolve().parents[1]
 PARSER = ROOT / "pdiddler/intelligence_lab/stage69_supreme_parser_reference.py"
@@ -30,6 +31,12 @@ SLUG = {"ancient": "ancients", "chroma": "chromas", "godly": "godlies"}
 EXPECTED = {"ancient": 16, "chroma": 46, "godly": 128}
 MAX_BYTES = 5 * 1024 * 1024
 MAX_PUBLISHER_AGE = 72 * 3600  # Existing policy only; not silently extended.
+
+class SourceHttpError(Exception):
+    def __init__(self, category: str, http_status: int):
+        super().__init__("PUBLIC_SUPREME_SOURCE_HTTP_REJECTED")
+        self.category = category
+        self.http_status = http_status
 
 def observation(status: str, reason: str) -> dict:
     return {
@@ -65,13 +72,20 @@ def load_official_pages_live():
     for page in PAGE_ORDER:
         url = f"https://supremevalues.com/mm2/{SLUG[page]}"
         req = Request(url, headers={
-            "User-Agent": "gingerscope-stage69-READ-ONLY-source-audit/1.0",
+            # Standard browser Accept/User-Agent headers. Public pages only;
+            # never assume a successful fetch proves publisher/authenticity.
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
             "Cache-Control": "no-cache",
         })
-        with urlopen(req, timeout=30) as response:
-            if response.geturl().split("?")[0].rstrip("/") != url:
-                raise ValueError(f"unexpected redirect for {page}")
-            data = response.read(MAX_BYTES + 1)
+        try:
+            with urlopen(req, timeout=30) as response:
+                if response.geturl().split("?")[0].rstrip("/") != url:
+                    raise ValueError(f"unexpected redirect for {page}")
+                data = response.read(MAX_BYTES + 1)
+        except HTTPError as ex:
+            # Expose only HTTP response code and category, never HTML payload.
+            raise SourceHttpError(page, int(ex.code)) from None
         if len(data) > MAX_BYTES or not data:
             raise ValueError(f"source payload invalid for {page}")
         results[page] = (data, int(time.time()))
@@ -213,6 +227,11 @@ def main():
         old = json.loads(args.baseline.read_text(encoding="utf-8"))
         source = load_official_pages_live() if args.fetch_live else load_supplied_pages(args.source_dir)
         report = audit(source, old, now=int(time.time()))
+    except SourceHttpError as exc:
+        report["reason"] = "FIRST_PARTY_SOURCE_HTTP_REJECTED"
+        report["exceptionType"] = "SourceHttpError"
+        report["httpStatus"] = exc.http_status
+        report["failedCategory"] = exc.category
     except Exception as exc:
         # Never print raw HTML, account details, response contents or secrets.
         report["reason"] = "SOURCE_FETCH_OR_BASELINE_READ_FAILED"
@@ -224,6 +243,7 @@ def main():
         "reason": report["reason"],
         "exceptionType": report.get("exceptionType"),
         "failedCategory": report.get("failedCategory"),
+        "httpStatus": report.get("httpStatus"),
         "changes": len(report["changes"]),
         "missing": len(report["missingCanonicalNames"]),
         "new": len(report["unmappedSourceNames"]),
