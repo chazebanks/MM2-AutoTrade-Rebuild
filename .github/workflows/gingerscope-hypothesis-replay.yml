@@ -28,8 +28,7 @@ jobs:
           python -c 'import hypothesis; print("Hypothesis", hypothesis.__version__)'
       - name: Run actual replay engine properties and state machine
         shell: bash
-        env:
-          HYPOTHESIS_PROFILE: ci
+        # @settings in the test file sets reproducible CI bounds explicitly.
         run: |
           set -euo pipefail
           python -m py_compile scripts/replay_trade_events.py
