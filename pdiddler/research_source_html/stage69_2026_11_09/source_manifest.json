@@ -9,9 +9,9 @@
       "path": "pdiddler/research_source_html/stage69_2026_11_09/ancients.html",
       "observedAt": "2026-11-09T05:05:01.574Z",
       "sourcePublisherIso": "2026-11-06T10:56:07-05:00",
-      "sourceGitBlobSha": null,
+      "sourceGitBlobSha": "7e11a2d835eadbb522d351bdabe393a7c9688f4b",
       "scrapeId": "01a1beb2-0cba-7472-9e00-fd96ae58b7ec",
-      "bytesUtf8": 76358
+      "bytesUtf8": 76373
     },
     {
       "page": "chroma",
@@ -19,9 +19,9 @@
       "path": "pdiddler/research_source_html/stage69_2026_11_09/chromas.html",
       "observedAt": "2026-11-09T05:05:07.638Z",
       "sourcePublisherIso": "2026-11-06T10:56:07-05:00",
-      "sourceGitBlobSha": null,
+      "sourceGitBlobSha": "0d2d156d9d9c499ef0e1213376796c1a916e6ce1",
       "scrapeId": "01a1beb2-239f-75aa-91a6-dd0b4927ffa2",
-      "bytesUtf8": 159756
+      "bytesUtf8": 159771
     },
     {
       "page": "godly",
@@ -29,9 +29,9 @@
       "path": "pdiddler/research_source_html/stage69_2026_11_09/godlies.html",
       "observedAt": "2026-11-09T05:05:13.789Z",
       "sourcePublisherIso": "2026-11-06T10:56:07-05:00",
-      "sourceGitBlobSha": null,
+      "sourceGitBlobSha": "2e4a0c1b8df894f9037e737ba80919b9b2d0c9ae",
       "scrapeId": "01a1beb2-3bae-717b-bed9-0dd5ee00105a",
-      "bytesUtf8": 328791
+      "bytesUtf8": 328806
     }
   ]
 }
