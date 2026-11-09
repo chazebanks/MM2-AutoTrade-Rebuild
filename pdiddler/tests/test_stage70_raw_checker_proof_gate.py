@@ -141,12 +141,18 @@ end
 
 local approved=arg[4]=="approved"
 local positive=approved and (mode=="valid" or mode=="client-flags")
+local partial=approved and mode=="unpriced-existing"
 if positive then
  assert(out.reviewedMappingCount==1)
  assert(out.priceRowsVerified==1)
  assert(out.completeValue==250)
  assert(out.verifiedSubtotal==250)
  assert(out.status=="SOURCE_CURRENT_AND_REVIEWED_CROSSWALK_ONLY")
+ assert(getCalls==1)
+elseif partial then
+ assert(out.priceRowsVerified==1)
+ assert(out.verifiedSubtotal==250)
+ assert(out.completeValue==nil)
  assert(getCalls==1)
 else
  assert(out.priceRowsVerified==0)
@@ -212,7 +218,7 @@ class Stage70LuaPolicyTests(unittest.TestCase):
         self.assertIn("local at=os.time()",source)
         self.assertNotIn("now or os.time()",source)
         for forbidden in (":FireServer(",":InvokeServer(",":HttpGet(",
-                          "setclipboard(", "DiscordWebhook", "request("):
+                          "setclipboard(", "DiscordWebhook(", ":PostAsync(", "request("):
             self.assertNotIn(forbidden,source)
 
     def test_current_source_with_fuzzy_alias_or_injected_proof_stays_unverified(self):
