@@ -209,7 +209,7 @@ if mode=="success" or mode=="copy-fails" then
    and panelStatus.Text:find("UNVERIFIED",1,true),
   "in-game final status hid safety restrictions")
  local n=0
- for line in (panelStatus.Text.."\\n"):gmatch("(.-)\\n") do
+ for line in (panelStatus.Text.."\n"):gmatch("(.-)\n") do
   n=n+1
   assert(#line<=46, "in-game status line would be too wide")
  end
