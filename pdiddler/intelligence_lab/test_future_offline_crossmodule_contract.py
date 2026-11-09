@@ -16,10 +16,10 @@ import unittest
 
 REPO=Path(__file__).resolve().parents[2]
 PINNED={
-    "pr105":"44375d272826aadc6f22fcb180275c87cf5bf5c3",
-    "pr106":"85bd69065ebf4b942d809c41a7c27959bf50f273",
-    "pr109":"9b831a1e9c2d09ac864e91e3fb7855e7943c2dad",
-    "pr110":"c02d5b7c17350cdb95dd6cb43ed7cd8ecb9e7dfc",
+    "pr105":"2f49e2f25cdbf7c8ca01702db159d412cc4382bc",
+    "pr106":"6ed48e084bd58fab38e3bf061ac36fb295ecf103",
+    "pr109":"4640d4fe7aa8e3b0efb670131533d0f31e3abbef",
+    "pr110":"48c825f1a14f10e6a8498e0a60e12e26fb196265",
 }
 NAMES={
     "pr105":"offer_snapshot_guard.py",
@@ -124,8 +124,8 @@ class OfflineCrossModuleContract(unittest.TestCase):
         starting=sum(market["items"][r["key"]]["value"]*r["quantity"] for r in own)
         self.assertGreaterEqual(len(planned["candidates"]),1)
         for candidate in planned["candidates"]:
-            self.assertLessEqual(len(candidate["offer"]),4)
-            self.assertLessEqual(len(candidate["receive"]),4)
+            self.assertLessEqual(sum(row["quantity"] for row in candidate["offer"]),4)
+            self.assertLessEqual(sum(row["quantity"] for row in candidate["receive"]),4)
             proposal,observed=exact_snapshot(candidate,market)
             inspected=self.guard.evaluate(proposal,observed,market,now=NOW)
             assert_never_authority(self,inspected)
@@ -144,6 +144,26 @@ class OfflineCrossModuleContract(unittest.TestCase):
             self.assertIn("NOT a verified inventory readback",
                           report["embedPreview"]["fields"][3]["value"])
         self.assertEqual(before,(own,theirs,market),"pure modules mutated inputs")
+
+    def test_stacked_shortlists_do_not_produce_oversized_offers(self):
+        own,theirs,market=synthetic()
+        own.append({"key":"OwnD","quantity":2})
+        market["items"]["OwnD"]=dict(market["items"]["OwnA"])
+        for rows,value in ((own,100),(theirs,120)):
+            for row in rows:
+                row["quantity"]=2
+                market["items"][row["key"]]["value"]=value
+        _,planned=self.chain(own,theirs,market)
+        for candidate in planned["candidates"]:
+            for side in ("offer","receive"):
+                self.assertLessEqual(sum(row["quantity"] for row in candidate[side]),4)
+            proposal,observed=exact_snapshot(candidate,market)
+            inspected=self.guard.evaluate(proposal,observed,market,now=NOW)
+            self.assertEqual(inspected["status"],"RESEARCH_CANDIDATE_ONLY")
+            preview=self.preview.build_preview(preview_payload(candidate,market,800))
+            self.assertEqual(preview["status"],"PREVIEW_ONLY")
+            assert_never_authority(self,inspected)
+            assert_never_authority(self,preview)
 
     def test_unverified_identity_does_not_enter_shortlist_or_planner(self):
         own,theirs,market=synthetic()

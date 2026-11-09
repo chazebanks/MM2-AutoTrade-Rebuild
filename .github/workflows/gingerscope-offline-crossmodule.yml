@@ -20,25 +20,25 @@ jobs:
       - name: Checkout tested PR105 offer guard (read-only, pinned)
         uses: actions/checkout@v4
         with:
-          ref: 44375d272826aadc6f22fcb180275c87cf5bf5c3
+          ref: 2f49e2f25cdbf7c8ca01702db159d412cc4382bc
           path: .offline_sources/pr105
           persist-credentials: false
       - name: Checkout tested PR106 portfolio planner (read-only, pinned)
         uses: actions/checkout@v4
         with:
-          ref: 85bd69065ebf4b942d809c41a7c27959bf50f273
+          ref: 6ed48e084bd58fab38e3bf061ac36fb295ecf103
           path: .offline_sources/pr106
           persist-credentials: false
       - name: Checkout tested PR109 Discord preview (read-only, pinned)
         uses: actions/checkout@v4
         with:
-          ref: 9b831a1e9c2d09ac864e91e3fb7855e7943c2dad
+          ref: 4640d4fe7aa8e3b0efb670131533d0f31e3abbef
           path: .offline_sources/pr109
           persist-credentials: false
       - name: Checkout tested PR110 full-inventory selector (read-only, pinned)
         uses: actions/checkout@v4
         with:
-          ref: c02d5b7c17350cdb95dd6cb43ed7cd8ecb9e7dfc
+          ref: 48c825f1a14f10e6a8498e0a60e12e26fb196265
           path: .offline_sources/pr110
           persist-credentials: false
       - name: Checkout tested PR107 runtime supervisor (read-only, pinned)
