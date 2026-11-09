@@ -123,7 +123,7 @@ S.jobId=JOB
 E[KEY]=S
 -- All payload scripts are immutable Git SHA-pinned, and contain no prices.
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
-local CORE_COMMIT="f651b9dc381671b58608cafa06eafd6ab4908a4d"
+local CORE_COMMIT="26581f34ad2992d82e3fb6f0bd391efffd96c7f4"
 local INDEX_COMMIT="4b8a66d1432446bf6e11b9c9183b0a3232797d73"
 local function loadPinned(commit,path)
  local url=ROOT..commit.."/pdiddler/"..path
