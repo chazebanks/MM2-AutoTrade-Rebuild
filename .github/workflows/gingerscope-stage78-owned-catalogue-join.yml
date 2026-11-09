@@ -1,0 +1,50 @@
+name: Gingerscope Stage78 strict owned raw catalogue join (offline research)
+on:
+  push:
+    branches:
+      - research/gingerscope-stage78-strict-owned-to-catalogue
+    paths:
+      - 'pdiddler/intelligence_lab/stage78_strict_owned_raw_catalogue_join.lua'
+      - 'pdiddler/tests/test_stage78_owned_raw_catalogue_join.lua'
+      - 'pdiddler/tests/test_stage78_pinned_legacy_raw_join.py'
+      - 'pdiddler/intelligence_lab/STAGE78_RAW_OWNED_CATALOGUE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage78-owned-catalogue-join.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage78_strict_owned_raw_catalogue_join.lua'
+      - 'pdiddler/tests/test_stage78_owned_raw_catalogue_join.lua'
+      - 'pdiddler/tests/test_stage78_pinned_legacy_raw_join.py'
+      - 'pdiddler/intelligence_lab/STAGE78_RAW_OWNED_CATALOGUE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage78-owned-catalogue-join.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-only-exact-raw-join:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install actual Lua5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Download exact immutable original scanner and verify Git blob
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 45 \
+            "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/18bc3de067d02a8a043b165f813e5804f8ad4bfc/pdiddler/pdiddler3_scanner_MODULE_v6.lua" \
+            -o /tmp/stage78-original-scanner.lua
+          test "$(git hash-object /tmp/stage78-original-scanner.lua)" = '65137e7e6966784cdb3c6bb3f6cd5adf885a68ba'
+      - name: Compile and execute Lua guard, pinned-source reproduction and 400 negative cases
+        env:
+          STAGE78_REQUIRE_PINNED: '1'
+          STAGE78_LEGACY_SCANNER: /tmp/stage78-original-scanner.lua
+        run: |
+          set -euo pipefail
+          lua5.4 -e 'assert(loadfile("pdiddler/intelligence_lab/stage78_strict_owned_raw_catalogue_join.lua"))'
+          lua5.4 -e 'assert(loadfile("pdiddler/tests/test_stage78_owned_raw_catalogue_join.lua"))'
+          python3 -m unittest -v pdiddler.tests.test_stage78_pinned_legacy_raw_join
