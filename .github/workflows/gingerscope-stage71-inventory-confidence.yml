@@ -1,0 +1,46 @@
+name: Stage71 read-only inventory observation vs price confidence
+on:
+  push:
+    branches:
+      - research/gingerscope-stage71-inventory-vs-price-confidence
+    paths:
+      - '.github/workflows/gingerscope-stage71-inventory-confidence.yml'
+      - 'pdiddler/presentation/stage71_inventory_price_confidence_view.lua'
+      - 'pdiddler/tests/test_stage71_inventory_price_confidence_view.py'
+      - 'pdiddler/presentation/STAGE71_INVENTORY_VS_PRICE_DISPLAY_HANDOFF.md'
+  pull_request:
+    paths:
+      - '.github/workflows/gingerscope-stage71-inventory-confidence.yml'
+      - 'pdiddler/presentation/stage71_inventory_price_confidence_view.lua'
+      - 'pdiddler/tests/test_stage71_inventory_price_confidence_view.py'
+      - 'pdiddler/presentation/STAGE71_INVENTORY_VS_PRICE_DISPLAY_HANDOFF.md'
+permissions:
+  contents: read
+jobs:
+  read-only-confidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install actual Lua5.4 runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Test user-visible scanner labels with actual Lua and 500 seeded hostile inputs
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_stage71_inventory_price_confidence_view
+      - name: Preserve Stage70 market identity source gate regression
+        run: |
+          set -euo pipefail
+          python3 -m unittest -q pdiddler.tests.test_stage70_raw_checker_proof_gate
+      - name: Preserve Stage69 current research source provenance regression
+        run: |
+          set -euo pipefail
+          python3 -m unittest -q \
+            pdiddler.tests.test_refresh_supreme_snapshot \
+            pdiddler.tests.test_stage25_market_diff \
+            pdiddler.tests.test_stage69_source_boundaries \
+            pdiddler.tests.test_stage69_manifest_provenance
