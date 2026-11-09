@@ -1,0 +1,63 @@
+name: Gingerscope Stage79 native own raw-key types (read-only)
+on:
+  push:
+    branches:
+      - research/gingerscope-stage79-native-raw-type-census
+    paths:
+      - 'pdiddler/intelligence_lab/stage79_typed_owned_census.lua'
+      - 'pdiddler/new_part4/STAGE79_READONLY_OWNED_TYPED_CENSUS.lua'
+      - 'pdiddler/tests/test_stage79_typed_owned_census.lua'
+      - 'pdiddler/tests/test_stage79_native_probe_mock.lua'
+      - 'pdiddler/tests/test_stage79_pinned_source_boundary.py'
+      - 'pdiddler/intelligence_lab/STAGE79_NATIVE_OWNED_TYPE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage79-native-own-raw-type.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage79_typed_owned_census.lua'
+      - 'pdiddler/new_part4/STAGE79_READONLY_OWNED_TYPED_CENSUS.lua'
+      - 'pdiddler/tests/test_stage79_typed_owned_census.lua'
+      - 'pdiddler/tests/test_stage79_native_probe_mock.lua'
+      - 'pdiddler/tests/test_stage79_pinned_source_boundary.py'
+      - 'pdiddler/intelligence_lab/STAGE79_NATIVE_OWNED_TYPE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage79-native-own-raw-type.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage79-readonly-exact-owned-types:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install actual Lua5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Download and SHA-check BOTH earlier original client source modules
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/001d228a407076d3cc411a5a7132b0076ec4c027/pdiddler/presentation/pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION.lua' \
+            -o /tmp/stage79-scanner-original.lua
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/262292e483dc9f812840fa5de7f34d79791eeaef/pdiddler/new_part4/STAGE66_ROLE_NEUTRAL_PRIVATE_RAW_SNAPSHOTS.lua' \
+            -o /tmp/stage79-stage66-core.lua
+          test "$(git hash-object /tmp/stage79-scanner-original.lua)" = '5395de38d88c76d049a51d801f2a01412defb8ee'
+          test "$(git hash-object /tmp/stage79-stage66-core.lua)" = '1579a2a70047783e8579f91540ff03037e13ba59'
+      - name: Test actual Luau-source boundary, pure Lua and native wrapper mocks
+        env:
+          STAGE79_PINNED_SCANNER: /tmp/stage79-scanner-original.lua
+          STAGE79_PINNED_STAGE66: /tmp/stage79-stage66-core.lua
+          STAGE79_REQUIRE_PINNED: '1'
+        run: |
+          set -euo pipefail
+          lua5.4 -e 'assert(loadfile("pdiddler/intelligence_lab/stage79_typed_owned_census.lua"))'
+          lua5.4 -e 'assert(loadfile("pdiddler/new_part4/STAGE79_READONLY_OWNED_TYPED_CENSUS.lua"))'
+          lua5.4 -e 'assert(loadfile("pdiddler/tests/test_stage79_typed_owned_census.lua"))'
+          lua5.4 -e 'assert(loadfile("pdiddler/tests/test_stage79_native_probe_mock.lua"))'
+          lua5.4 pdiddler/tests/test_stage79_typed_owned_census.lua
+          lua5.4 pdiddler/tests/test_stage79_native_probe_mock.lua
+          python3 -m unittest -v pdiddler.tests.test_stage79_pinned_source_boundary
