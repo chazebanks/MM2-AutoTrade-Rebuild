@@ -67,17 +67,30 @@ class FutureDiscordTradePreviewTests(unittest.TestCase):
             safe(x)
 
     def test_stack_math_and_negative_inventory_protection(self):
-        p=fixture();p["gave"][0]["quantity"]=20
+        p=fixture();p["gave"][0]["quantity"]=4
+        p["startingInventoryListedValue"]=0
         x=M.build_preview(p)
         self.assertEqual(x["status"],"BLOCKED")
         self.assertEqual(x["reason"],"PROJECTED_INVENTORY_TOTAL_OUT_OF_BOUNDS")
         p["startingInventoryListedValue"]=2000
         x=M.build_preview(p)
         self.assertEqual(x["status"],"PREVIEW_ONLY")
-        self.assertIn("Given: 700 pts",x["embedPreview"]["fields"][2]["value"])
+        self.assertIn("Given: 140 pts",x["embedPreview"]["fields"][2]["value"])
+
+    def test_preview_rejects_more_than_four_physical_copies_on_either_side(self):
+        for side in ("gave","received"):
+            with self.subTest(side=side):
+                p=fixture()
+                p["startingInventoryListedValue"]=2000
+                p[side][0]["quantity"]=3
+                p[side].append({**p[side][0],"quantity":2})
+                result=M.build_preview(p)
+                self.assertEqual(result["reason"],"OFFER_COPY_LIMIT_EXCEEDED")
+                safe(result)
 
     def test_fields_are_discord_size_compliant(self):
         p=fixture()
+        p["gave"][0]["quantity"]=1
         p["gave"]=copy.deepcopy(p["gave"])*4
         p["received"]=copy.deepcopy(p["received"])*4
         x=M.build_preview(p)

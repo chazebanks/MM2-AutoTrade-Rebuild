@@ -10,6 +10,7 @@ import re
 from typing import Any
 
 SCHEMA="gingerscope-future-trade-notification-preview-v1"
+MAX_COPIES_PER_SIDE=4
 SAFE_NAME=re.compile(r"^[A-Za-z0-9 .'_-]{1,70}$")
 DANGEROUS_INPUT={"username","userId","trader","webhook","webhookUrl",
                  "webhookToken","discordToken","authToken","serverTransactionId"}
@@ -26,7 +27,7 @@ def _base(status,reason):
 
 
 def _items(rows):
-    if not isinstance(rows,list) or len(rows)>4:
+    if not isinstance(rows,list) or len(rows)>MAX_COPIES_PER_SIDE:
         return None
     items=[]
     for x in rows:
@@ -64,6 +65,9 @@ def build_preview(payload: object) -> dict[str, Any]:
     b=_items(payload["received"])
     if a is None or b is None or not (a or b):
         return _base("BLOCKED","ITEMS_OR_QUANTITIES_MALFORMED")
+    if any(sum(row["quantity"] for row in items)>MAX_COPIES_PER_SIDE
+           for items in (a,b)):
+        return _base("BLOCKED","OFFER_COPY_LIMIT_EXCEEDED")
     start=payload["startingInventoryListedValue"]
     version=payload["catalogVersion"]
     if (type(start) is not int or not 0<=start<=1_000_000_000 or
