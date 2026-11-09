@@ -222,6 +222,19 @@ task.spawn(function()
     end
     S.reportStatus="GENERATED_READ_ONLY"
     S.probeStatus="ONE_REPORT_CAPTURED"
+    -- The original T4.4 initial scan may have painted its brief "Eligible"
+    -- row before the scanner API bridge was initialized. Recompose its
+    -- existing cached records ONCE through the history-first Stage73 view,
+    -- without running a new inventory scan or modifying the known-good scanner.
+    local repaint=false
+    if type(S.rawScanner.refreshPresentation)=="function" then
+        repaint=pcall(S.rawScanner.refreshPresentation)
+    end
+    S.presentationStatus=repaint and "CACHE_REPAINT_REQUESTED"
+        or "CACHE_REPAINT_UNAVAILABLE"
+    if not repaint then
+        warn("[GINGERSCOPE STAGE73] in-game cached view repaint unavailable; screenshot may show initial scan rows")
+    end
     S.clipboardStatus=copyOnce(payload)
     -- One complete console fallback, irrespective of clipboard outcome.
     print("[GINGERSCOPE STAGE73 READ-ONLY REPORT] "..payload)
