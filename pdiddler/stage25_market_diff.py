@@ -34,6 +34,19 @@ def indexed(snap: dict, label: str) -> dict:
         coverage.get("total") != 190 or coverage.get("finite") != 189 or
         coverage.get("unpriced") != 1):
         raise ValueError(f"{label}: incomplete canonical coverage")
+    research = snap.get("researchOnly") is True
+    if research:
+        if not (
+            snap.get("authorizesTrade") is False and
+            snap.get("authorizesAccept") is False and
+            snap.get("autoDeploy") is False and
+            snap.get("sourceRowsMatched") is True and
+            snap.get("rawGameMappingsVerified") is False and
+            snap.get("sourceAcquisition") == "EXTERNAL_SCRAPE_REVIEW_ONLY"
+        ):
+            raise ValueError(f"{label}: research candidate cannot promote trade or raw identity authority")
+    elif snap.get("researchOnly") not in (None, False):
+        raise ValueError(f"{label}: invalid research status")
     records = {}
     for r in rows:
         if not isinstance(r, dict):
@@ -41,7 +54,17 @@ def indexed(snap: dict, label: str) -> dict:
         page, rid, name = r.get("page"), r.get("id"), r.get("name")
         if page not in KEYS or not isinstance(rid, str) or not rid.isascii() or not rid.isdigit():
             raise ValueError(f"{label}: noncanonical identity")
-        if not isinstance(name, str) or not name.strip() or not isinstance(r.get("verified"), bool) or r["verified"] is not True:
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError(f"{label}: missing canonical source name")
+        if research:
+            if not (
+                r.get("verified") is False and
+                r.get("sourceRecordMatched") is True and
+                r.get("rawGameMappingVerified") is False and
+                r.get("priceForTradeVerified") is False
+            ):
+                raise ValueError(f"{label}: unverified raw game mapping was promoted")
+        elif r.get("verified") is not True:
             raise ValueError(f"{label}: unverified identity")
         val, demand, stability = r.get("supremeValue"), r.get("demand"), r.get("stability")
         if val is not None and (type(val) not in (int, float) or not math.isfinite(val) or val <= 0):
