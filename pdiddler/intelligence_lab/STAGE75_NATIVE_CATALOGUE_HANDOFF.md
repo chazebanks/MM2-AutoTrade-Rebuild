@@ -1,3 +1,11 @@
+## Stage75 CI retry checkpoint — 2026-11-09 (NOT NATIVE VERIFIED)
+
+Initial exact-source Stage75 GitHub job [42673099422](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42673099422) installed actual Lua5.4 and validated the pinned Oct18 public Git blob; 17 unit tests executed, **three test assertion failures**, not production trading errors. The deterministic fixture expected five overlapping asset-ID pairs even when one partner's catalogue record was absent or malformed (actual correct count four); corrected in test source. A scanner-code prohibition test incorrectly matched the **text of a comment** stating not to run a full catalogue census; test now checks executable lines. No tests or price/trade safety assertions disabled. A prior additional test run also had a legitimate early code issue and was fixed.
+
+Next exact-head run [42673632717](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42673632717) failed at **workflow scheduling** with **0 jobs** in GitHub Actions REST (not a failing Lua unit test); its PR-head Stage75 [42673639590](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42673639590), replay [42673639500](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42673639500), and Lune [42673639467](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42673639467) also show failure/zero jobs. Meanwhile same SHA Luau CLI, Hypothesis and Selene checks passed, indicating mixed GitHub job scheduling, **not** proof source test succeeded. Do not request MAIN iPad test until a NEW exact-head dedicated Stage75 run executes 17/17 actual tests and passes; no branch merge or auto-trading changes. Attempt one new docs-triggered run, then investigate if job dispatch continues failing.
+
+---
+
 # Stage75 — targeted read-only 13-key LIVE client catalogue comparison (NO trading)
 
 Date: 2026-11-09; follows the successful Stage73 native in-game layout smoke test and Stage74 historical public name comparisons.
