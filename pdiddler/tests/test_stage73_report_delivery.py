@@ -24,7 +24,7 @@ local paths = {
   ["presentation/pdiddler3_scanner_view_stage73_history_v1.lua"] = arg[5],
   ["new_part4/STAGE25_READONLY_DIAGNOSTIC.lua"] = arg[6],
 }
-local logs, warnings, statuses, clipboardCalls, copyAttempts = {}, {}, {}, {}, 0
+local logs, warnings, statuses, clipboardCalls, copyAttempts, repaintCalls = {}, {}, {}, {}, 0, 0
 print = function(s) logs[#logs+1] = tostring(s) end
 warn = function(s) warnings[#warnings+1] = tostring(s) end
 local elapsed = 0
@@ -77,6 +77,7 @@ function game:HttpGet(url)
           _G.testStatus(txt)
           return true
         end,
+        refreshPresentation=function() _G.testRefresh() end,
         profile=profile,view=view
       }]]
   end
@@ -86,6 +87,10 @@ function game:HttpGet(url)
   return s
 end
 _G.testStatus = function(s) statuses[#statuses+1] = s end
+_G.testRefresh = function()
+  repaintCalls=repaintCalls+1
+  if mode=="repaint_throws" then error("synthetic repaint error") end
+end
 if mode=="success" or mode=="timeout" or mode=="stale_session" then
   setclipboard=function(s)
     copyAttempts=copyAttempts+1
@@ -131,15 +136,22 @@ if mode=="encode_error" then
   assert(state.probeStatus=="REPORT_UNAVAILABLE")
   assert(state.reportStatus=="UNAVAILABLE")
   assert(state.clipboardStatus=="NOT_ATTEMPTED")
-  assert(reportCount==0 and copyAttempts==0)
+  assert(reportCount==0 and copyAttempts==0 and repaintCalls==0)
   assert(#warnings==1,"missing sanitized failure warning")
   assert(#statuses==1 and statuses[1]:find("REPORT FAILED",1,true))
 elseif mode=="stale_session" then
   assert(state.probeStatus=="ABORTED_SESSION_CHANGED")
-  assert(reportCount==0 and #statuses==0 and copyAttempts==0)
+  assert(reportCount==0 and #statuses==0 and copyAttempts==0 and repaintCalls==0)
 else
   assert(state.probeStatus=="ONE_REPORT_CAPTURED")
   assert(state.reportStatus=="GENERATED_READ_ONLY")
+  assert(repaintCalls==1,"expected one cached GUI repaint")
+  if mode=="repaint_throws" then
+    assert(state.presentationStatus=="CACHE_REPAINT_UNAVAILABLE")
+    assert(#warnings==1)
+  else
+    assert(state.presentationStatus=="CACHE_REPAINT_REQUESTED")
+  end
   assert(reportCount==1,"expected exactly one console receipt")
   assert(#statuses==1,"in-game status was not presented")
   local gui=statuses[1]
@@ -212,6 +224,8 @@ class Stage73ReportDeliveryTests(unittest.TestCase):
         self.run_mode("encode_error")
     def test_delayed_scan_timeout_is_distinguished_from_complete_scan(self):
         self.run_mode("timeout")
+    def test_repaint_failure_preserves_report_and_no_trade_safety(self):
+        self.run_mode("repaint_throws")
     def test_new_trade_session_aborts_old_result(self):
         self.run_mode("stale_session")
 
