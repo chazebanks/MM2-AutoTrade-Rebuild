@@ -154,7 +154,7 @@ else
   assert(first.examinedTargets==13 and #first.testResults==13)
   assert(numberOfGameCatalogueGets==13,"must read exactly 13 keys, no full census")
   assert(syncRequireCalls==1)
-  assert(first.overlappingItemIdPairs==(mode=="one_no_item_id" and 4 or 5))
+  assert(first.overlappingItemIdPairs==((mode=="one_no_item_id" or mode=="missing" or mode=="invalid_field") and 4 or 5))
   if mode=="missing" then
     assert(first.status=="PARTIAL_CLIENT_CATALOG_FIELDS_UNVERIFIED")
     assert(first.exactTargets==12 and first.missingTargets==1)
