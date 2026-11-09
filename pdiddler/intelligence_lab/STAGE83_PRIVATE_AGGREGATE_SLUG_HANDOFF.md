@@ -1,3 +1,19 @@
+## Exact-head Stage83 offline VERIFIED and one native test next — November 9, 2026
+
+**FINAL TESTED CODE SHA:** `61ba55afda3cc9971533ac9638fceb1ded726c5b`. [Dedicated Actions run 42702160213](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42702160213) **SUCCESS**: eight original Git-blob-pinned source inputs downloaded and verified; deterministic public-only 189-entry Lua static registry regenerated and compared byte-for-byte; actual Lua5.4 pure analyzer **14/14 groups + 400 seeded corrupted inputs** PASS; actual native wrapper executed against mocked Roblox services **9/9 groups**, including exactly one no-argument own `GetProfileData` request, no retry, same-client dedup, wrong game, Stage80 session isolation, missing Sync/source/remote, failure, empty data, numeric raw key and anonymized clipboard. Source/pin and policy Python suite **5/5 tests** PASS. The five project-wide Luau/Lune/Selene+StyLua/replay/Hypothesis workflows also PASSED at the exact code head. Corrected a documentation mismatch—registry generated from **eight**, not seven, immutable source files—and updated native helper+registry retrieval PIN to **`67c19a10f4dde23a005206e5b0c261d7e43c82a5`**. The user-facing loader below pins the WRAPPER to the **separately tested code commit** `61ba55af...`. No other live scanner/trading change.
+
+**NEXT ONE MAIN-only new native diagnostic** (justified distinct question, not repeat of Stage79 or 80): On a **fresh original MM2 game lobby with Tablet selected, no existing pdiddler/bot/rotation/trading probes active**, run ONE copy of the following in Delta. It makes **one read-only own-profile `GetProfileData` RPC**, two pinned project-code/public-source fetches, and NO trade, Accept, Decline, Teleport, Discord or prices:
+
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/61ba55afda3cc9971533ac9638fceb1ded726c5b/pdiddler/new_part4/STAGE83_READONLY_PUBLIC_SLUG_COVERAGE.lua"))()
+```
+
+Paste **ONE** automatically copied JSON line beginning `[GINGERSCOPE STAGE83 PUBLIC COVERAGE]` or a screenshot of only that aggregate marker if clipboard unavailable. It contains only counts (eligible keys/copies with old public slug match, missing old reference or metadata drift, plus total weapon/Misc counts). Do NOT send weapon names, raw IDs, player IDs, account profiles, offers or trade videos. A timeout or error is a result—**do not immediately rerun it** because an outstanding RemoteFunction cannot be canceled.
+
+**Never overinterpret a positive result**: it is a client-reported correspondence to a historical third-party/website public item mapping, not independently authenticated ownership or fresh market quotes. `currentOwnedRawToMarketSlugVerified=false`, `sourcePublisherFresh=false`, `currentPricesVerified=false` and all trade/Accept/Discord/profit/settlement-learning flags remain FALSE. It does NOT resolve the original Supreme numeric checker mapping or server-authenticated trade completion. PR153 remains **DRAFT/UNMERGED**; historical Supreme publisher date Nov6 expired 72h on Nov9 10:56:07 AM EST. Existing Stage79/80 classification root cause resolved, no retest of those tests.
+
+---
+
 # Stage 83 — Read-only current client coverage of historical Supreme website-slug candidates
 
 **2026-11-09. Scope:** One evidence question from Issue #122. Research-only, draft, no production scanner/Part4/Accept/Discord changes. Keep the old +15 rule superseded.
