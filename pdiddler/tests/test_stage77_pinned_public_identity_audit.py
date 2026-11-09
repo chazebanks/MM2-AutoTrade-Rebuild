@@ -124,6 +124,34 @@ class Stage77(unittest.TestCase):
         r=self.synthetic_result(w=w)
         self.assertEqual(r['status'],'INCONCLUSIVE',r)
 
+    def test_explicit_niks_scythe_and_chroma_pet_source_exceptions(self):
+        w=dict(self.web)
+        exceptional=b'<div class="itemcolumn"><div class="itemcell"><div class="itemhead">Nik\x27s Scythe</div></div></div>'
+        w['ancients']=w['ancients'].replace(b'</body>', exceptional+b'</body>')
+        pet=(b'<section data-tier="pets"><div class="itemcolumn"><div class="itemcell-exp" id="CBat">'
+             b'<button data-name="Chroma Fire Bat"></button><div class="itemhead">'
+             b'<a class="itemlink" href="https://supremevalues.com/mm2/chromas?item=CBat">Chroma Fire Bat</a>'
+             b'</div><div class="itembody">Class - <b>Godly</b></div></div></div></section>')
+        w['chromas']=w['chromas'].replace(b'</body>', pet+b'</body>')
+        out=self.synthetic_result(w=w)
+        self.assertEqual(out['status'],'PINNED_PUBLIC_SOURCES_CORRESPOND_ONLY',out)
+        self.assertEqual(out['sourcePageRows']['ancients'],1)
+        self.assertEqual(out['sourcePageRows']['chromas'],1)
+        self.strict(out)
+
+    def test_unreviewed_no_slug_and_moved_pet_are_rejected(self):
+        w=dict(self.web)
+        bad=b'<div class="itemcolumn"><div class="itemcell"><div class="itemhead">Unknown Ancient</div></div></div>'
+        w['ancients']=w['ancients'].replace(b'</body>',bad+b'</body>')
+        self.assertEqual(self.synthetic_result(w=w)['status'],'INCONCLUSIVE')
+        w=dict(self.web)
+        pet=(b'<div class="itemcolumn"><div class="itemcell-exp" id="CBat">'
+             b'<button data-name="Chroma Fire Bat"></button><div class="itemhead">'
+             b'<a class="itemlink" href="https://supremevalues.com/mm2/chromas?item=CBat">Chroma Fire Bat</a>'
+             b'</div><div class="itembody">Class - <b>Godly</b></div></div></div>')
+        w['chromas']=w['chromas'].replace(b'</body>',pet+b'</body>')
+        self.assertEqual(self.synthetic_result(w=w)['status'],'INCONCLUSIVE')
+
     def test_400_mutated_archive_inputs_never_authorize(self):
         rng=random.Random(77)
         for i in range(400):
