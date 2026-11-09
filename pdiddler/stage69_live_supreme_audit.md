@@ -5,6 +5,10 @@ A matched publisher row leaves the raw game identity and trade-price flags
 false. The preflight validates JSON and exercises the archived Lua profile
 in its existing consumer regression.
 
+Automatic checks replay the pinned capture at a fixed test clock and test
+rejection at its original expiry. Manually dispatched source checks still
+use the actual clock and require fresh source evidence.
+
 **Priority**: screenshot of T4.4 GUI clearly shows recognized eligible items yet item prices and totals `UNVERIFIED`. The presentation deliberately invokes `profile.isFresh()`; the pinned Nov6 Supreme snapshot expired Nov7 00:47:22 UTC. The Stage52 merged MM2Values feed is a distinct, research-only data source and must not be substituted for Supreme. [Issue #122](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/issues/122).
 
 ## First-party audit, Nov 8 2026 Eastern

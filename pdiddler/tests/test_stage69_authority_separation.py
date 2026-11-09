@@ -1,6 +1,6 @@
 """Stage69 source-row proof is NOT MM2 raw weapon/checker-ID price authority."""
 from copy import deepcopy
-from contextlib import redirect_stdout
+from contextlib import chdir, redirect_stdout
 import io
 import json
 from pathlib import Path
@@ -11,6 +11,7 @@ from unittest.mock import patch
 
 from pdiddler import refresh_supreme_snapshot as R
 from pdiddler import stage25_market_diff as D
+from pdiddler import stage69_manifest_provenance as M
 
 ROOT=Path(__file__).resolve().parents[1]
 OLD=json.loads((ROOT/"snapshots/supreme_snapshot_2026_11_04.json").read_text())
@@ -69,6 +70,41 @@ class SourceGameMappingSeparation(unittest.TestCase):
             for row in snapshot["rows"]
         ))
         report = D.compare(OLD, snapshot, now_epoch=observed)
+        self.assertEqual(report["status"], "REVIEW_ONLY_NO_TRADE_AUTHORITY")
+        self.assertEqual(report["changedItems"], 21)
+
+    def test_pinned_manifest_replays_with_original_expiry_and_rejects_expired_use(self):
+        source_dir = Path("pdiddler/research_source_html/stage69_2026_11_09")
+        replay_at = R.epoch("2026-11-09T06:09:00Z")
+        expires_at = "2026-11-09T15:56:07Z"
+        with tempfile.TemporaryDirectory() as directory:
+            args = [
+                "refresh_supreme_snapshot.py",
+                "--mapping", str(ROOT / "snapshots/supreme_snapshot_2026_11_04.json"),
+                "--input-dir", str(source_dir),
+                "--source-manifest", str(source_dir / "source_manifest.json"),
+                "--research-only",
+                "--date", "2026-11-09",
+            ]
+            replay = Path(directory) / "replay"
+            expired = Path(directory) / "expired"
+            with chdir(ROOT.parent), patch.dict("sys.modules", {"stage69_manifest_provenance": M}):
+                with (patch("sys.argv", args + ["--output-dir", str(replay)]),
+                      patch.object(R.time, "time", return_value=replay_at),
+                      redirect_stdout(io.StringIO())):
+                    R.main()
+                with (patch("sys.argv", args + ["--output-dir", str(expired)]),
+                      patch.object(R.time, "time", return_value=R.epoch(expires_at)),
+                      self.assertRaisesRegex(ValueError, "publication exceeds 72h")):
+                    R.main()
+            self.assertFalse(expired.exists())
+            self.assertEqual([p.name for p in replay.iterdir()],
+                             ["supreme_snapshot_2026_11_09.json"])
+            snapshot = json.loads((replay / "supreme_snapshot_2026_11_09.json").read_text())
+        self.assertEqual(snapshot["expiresAt"], expires_at)
+        self.assertEqual(snapshot["sourceAcquisition"], "EXTERNAL_SCRAPE_REVIEW_ONLY")
+        self.assertIs(snapshot["liveReady"], False)
+        report = D.compare(OLD, snapshot, now_epoch=replay_at)
         self.assertEqual(report["status"], "REVIEW_ONLY_NO_TRADE_AUTHORITY")
         self.assertEqual(report["changedItems"], 21)
 
