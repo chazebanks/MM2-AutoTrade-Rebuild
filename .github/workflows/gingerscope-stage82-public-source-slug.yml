@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Download six immutable original source files
+      - name: Download seven immutable original source files
         run: |
           set -euo pipefail
           mkdir -p /tmp/gingerscope82
