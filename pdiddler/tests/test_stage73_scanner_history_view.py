@@ -97,6 +97,12 @@ elseif mode=="missing-profile" then profile.sources.godly=nil
 elseif mode=="expired-but-claimed-current" then
   profile.liveReady=true
 elseif mode=="no-inventory" then items=nil
+elseif mode=="long-inventory" then
+  for i=5,90 do
+    items[#items+1]={id="SYNTHETIC_KEY_"..i,
+      name=string.format("ITEM_%02d",i),page="godly",cat="Weapons",
+      type="Knife",checkerId=tostring(2000+i),qty=(i%3)+1}
+  end
 elseif mode=="fuzz" then
   local z=(tonumber(arg[6]) or 0)%12
   if z==0 then items[1].checkerId="999999"
@@ -138,11 +144,28 @@ assert(not result.detail:find("Outgoing: READY",1,true))
 local state,row=render.row({state="whitelist",inv=inv},
   {state="ready",reason="fake-outgoing-ready"},nil,profile,strict)
 assert(state=="whitelist")
-assert(row:find("Outgoing: UNKNOWN | Paused: Supreme prices expired or unavailable",1,true))
+assert(row:find("Outgoing: paused | prices UNVERIFIED",1,true))
 assert(not row:find("Outgoing: READY",1,true))
 local summary=render.summary(7,1,0,{state="ready",reachable=1000},profile)
-assert(summary:find("Outgoing: paused - Supreme prices expired or unavailable",1,true))
+assert(summary:find("Outgoing: paused | prices UNVERIFIED",1,true))
+local summaryLines={}
+for line in (summary.."\\n"):gmatch("(.-)\\n") do summaryLines[#summaryLines+1]=line end
+assert(#summaryLines==2,"summary must fit the two-line native T4.4 label")
+assert(#summaryLines[2]<=42,"outgoing status is too wide for panel")
 assert(not summary:find("Outgoing (unprocessed): Reachable 1000",1,true))
+if mode=="long-inventory" then
+ assert(result.historicalReferencesShown==3)
+ local top=result.detail:find("HISTORICAL REFERENCES ONLY",1,true)
+ local itemsHeader=result.detail:find("Items (prices UNVERIFIED):",1,true)
+ assert(top and itemsHeader and top<itemsHeader,
+   "historical disclaimer must be visible before long inventory")
+ assert(result.itemsText:find("ITEM_90 x1",1,true),
+   "large inventory must retain last weapon and quantity")
+ assert(not result.itemsText:find("(UNVERIFIED:",1,true),
+   "do not repeat long price warning after every weapon")
+ assert(result.detail:find("Total value: UNVERIFIED",1,true))
+ assert(result.detail:find("Source: Supreme",1,true))
+end
 if mode=="base" or mode=="fake-valued-row"
    or mode=="expired-but-claimed-current" or clockRollback then
  assert(result.historicalReferencesShown==3)
@@ -201,7 +224,7 @@ class Stage73ActualViewTests(unittest.TestCase):
         self.assertIn("stage72_historical_reference_preview.lua",boot)
         self.assertIn("pdiddler3_scanner_view_stage73_history_v1.lua",boot)
         self.assertIn("a10d80a086b644085a9cffd87c1f5ce0489597bc",boot)
-        self.assertIn("aaf45c6e0de5073596f34b7744205adfb6a40886",boot)
+        self.assertIn("a7aa6e38f803e9935223daeeb1353f8699e5ede5",boot)
         self.assertIn('S.status="STAGE73_SCANNER_HISTORY_ONLY_NO_TRADE_AUTHORITY"',boot)
         self.assertIn("S.rawScanner=fetchAndRun(\"scanner\",profile,{},view)",boot)
         for bad in (":FireServer(",":InvokeServer(", "OfferItem(", "AcceptTrade(",
@@ -227,6 +250,9 @@ class Stage73ActualViewTests(unittest.TestCase):
                      "no-inventory"):
             with self.subTest(mode=mode):
                 self.assertIn("shown=0",self.invoke(mode))
+    def test_long_inventory_keeps_all_items_but_moves_provenance_to_top(self):
+        self.assertIn("shown=3",self.invoke("long-inventory"))
+
     def test_200_seeded_ui_states_keep_outgoing_paused(self):
         rng=random.Random(737373)
         for i in range(200):
