@@ -2,8 +2,8 @@
 -- REAL Stage87 contact eligibility, controller and Stage88 scanner presentation
 -- are executed. The 63KB native scanner is mocked (Luau + external Roblox).
 local PROBE="pdiddler/new_part4/STAGE88_CONTACT_READONLY_PREVIEW.lua"
-local P3="pdiddler/new_part4/P3_ELIGIBILITY_NO_LEGACY_PROFIT.lua"
-local ELIG="pdiddler/pdiddler3_outgoing_eligibility_v2_SCANNER_EVIDENCE.lua"
+local P3=os.getenv("STAGE88_P3_PINNED") or "/tmp/stage88/p3.lua"
+local ELIG=os.getenv("STAGE88_ELIGIBILITY_PINNED") or "/tmp/stage88/outgoing_eligibility.lua"
 local VIEW="pdiddler/presentation/pdiddler3_scanner_view_contact_v1.lua"
 local KEY="GINGERSCOPE_STAGE88_CONTACT_READONLY_PREVIEW"
 local failures=0
