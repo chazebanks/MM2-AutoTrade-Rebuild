@@ -98,7 +98,7 @@ test("legitimate no-eligible opponent never becomes reachable",function()
  noAuthority(w)
 end)
 test("exact raw strings, no numeric coercion or duplicate data",function()
- for _,change in ipairs({
+ for caseIndex,change in ipairs({
   function(x)x.items[1].id=53 end,
   function(x)x.items[1].id="test_chroma" end,
   function(x)x.items[1].id="" end,
@@ -116,11 +116,11 @@ test("exact raw strings, no numeric coercion or duplicate data",function()
   function(x)x.unpriced="0" end,
   function(x)x.fingerprint="" end,
   function(x)x.items[4]=item("test_sparse") end,
-  function(x)x.items[2]=nil end,
+  function(x)x.items[1]=nil end,
  }) do
   local x=own();change(x)
   local status=p3.evaluateContact(x,their())
-  assert(status=="unknown","unsafe candidate accepted")
+  assert(status=="unknown","unsafe candidate accepted case "..caseIndex)
  end
 end)
 test("outgoing controller contact reachability despite stale market",function()
