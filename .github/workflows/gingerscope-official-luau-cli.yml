@@ -1,0 +1,39 @@
+name: Gingerscope official Luau CLI gate (offline)
+# New isolated workflow. Does not modify or run the trading controller.
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - ci/gingerscope-luau-cli-0746-gate
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  official-luau-syntax-and-analysis:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install official Luau 0.746 CLI with GitHub release SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/luau-ubuntu-0.746.zip"
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 20 \
+            "https://github.com/luau-lang/luau/releases/download/0.746/luau-ubuntu.zip" \
+            --output "$archive"
+          echo "30f11c9cde8be2dc0e3066d210705532aac3726a2db89a6c5078080b6faa6cf8  $archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/luau-dist"
+          mkdir -p "$RUNNER_TEMP/luau-bin"
+          for executable in luau luau-analyze luau-compile; do
+            found="$(find "$RUNNER_TEMP/luau-dist" -type f -name "$executable" -print -quit)"
+            test -n "$found" || { echo "Official Luau zip missing $executable" >&2; exit 1; }
+            install -m 0755 "$found" "$RUNNER_TEMP/luau-bin/$executable"
+          done
+          echo "$RUNNER_TEMP/luau-bin" >>"$GITHUB_PATH"
+      - name: Compile actual MM2 files, statically analyze portable modules and test rejection
+        shell: bash
+        run: bash pdiddler/ci/official_luau_gate.sh
