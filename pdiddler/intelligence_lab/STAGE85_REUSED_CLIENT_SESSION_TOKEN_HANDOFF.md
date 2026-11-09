@@ -1,3 +1,11 @@
+## Stage85 exact-code CI PASS — 2026-11-09
+
+Original code+tests+handoff head **`00268b64bb8f9e495fb7f1bde159607d6183d043`** [DRAFT PR155](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/155) was actually executed by five triggered GitHub Actions, all SUCCESS: [sanitized event replay workflow run 42714542586](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42714542586) ran **18/18 focused tests**, including **400 reused same-session token negative cases**, plus **113/113 inherited offline intelligence tests**. Hypothesis replay properties/state-machine, official Luau, Lune and Selene/StyLua were also SUCCESS on exact head. The old replay used event ID dedup only; NEW `opened_sessions` fails closed on second *distinct* OPEN with an already-used client session token, active or closed, returning `QUARANTINED/REUSED_CLIENT_SESSION_TOKEN`. Exact same event ID+payload redelivery still dedups; proper new session token still allowed. This protects **offline observer association only**; no actual MM2 gameplay bug or server settlement proven. No native iPad test required. The PR stays **DRAFT/UNMERGED** pending review.
+
+**Next practical integration** is specifically ONE deterministic Part3→Part4 **manual-final-accept dry-run**, using real code paths and frozen synthetic values, not another speculative identity audit. Keep current price authority and all outgoing/final Accept/profit/Discord learning false.
+
+---
+
 # Stage 85 — Reused client session token rejection in actual offline trade-event replay
 
 **2026-11-09. Narrow root cause:** Existing merged `scripts/replay_trade_events.py` de-duplicated event IDs but did **not** remember previously opened sanitized trade *session tokens*. `OPEN(s_main)` → `CLOSE(s_main)` → another `OPEN(s_main)` with a **different event ID** silently reset the replay as if a new trade window started. A delayed `ACCEPT_TRUE`, `END_TRADE` or post-close `INVENTORY_DELTA` labelled with `s_main` could then be counted in that new client's window. These are still never settlement-authoritative, but the misleading timeline would impede real debugging and future strategy-integration tests.
