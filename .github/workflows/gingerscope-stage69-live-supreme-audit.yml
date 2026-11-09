@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/gingerscope-stage69-live-supreme-audit.yml'
       - 'pdiddler/stage69_live_supreme_audit.md'
+      - 'pdiddler/tests/test_stage69_source_boundaries.py'
       - 'pdiddler/refresh_supreme_snapshot.py'
       - 'pdiddler/stage25_market_diff.py'
   workflow_dispatch:
@@ -22,7 +23,7 @@ jobs:
       - name: Verify existing structured scraper and provenance tests
         run: |
           set -euo pipefail
-          python3 -m unittest -v pdiddler.tests.test_refresh_supreme_snapshot pdiddler.tests.test_stage25_market_diff
+          python3 -m unittest -v pdiddler.tests.test_refresh_supreme_snapshot pdiddler.tests.test_stage25_market_diff pdiddler.tests.test_stage69_source_boundaries
       - name: Fetch all three current publisher pages and create REVIEW-ONLY candidate
         run: |
           set -euo pipefail
