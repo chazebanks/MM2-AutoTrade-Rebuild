@@ -1,0 +1,34 @@
+{
+  "schema": "gingerscope-stage69-external-source-evidence-v1",
+  "purpose": "RESEARCH_ONLY_NO_TRADE_AUTHORITY",
+  "acquisition": "Firecrawl rawHtml maxAge=0, not guaranteed byte-identical to origin HTTP",
+  "items": [
+    {
+      "page": "ancient",
+      "url": "https://supremevalues.com/mm2/ancients",
+      "path": "pdiddler/research_source_html/stage84_2026_11_09/ancients.html",
+      "observedAt": "2026-11-09T22:26:48.761Z",
+      "sourcePublisherIso": "2026-11-09T13:58:33-05:00",
+      "scrapeId": "01a1c26b-d5ae-74b6-a75a-3c8381c3e9ef",
+      "bytesUtf8": 76908
+    },
+    {
+      "page": "godly",
+      "url": "https://supremevalues.com/mm2/godlies",
+      "path": "pdiddler/research_source_html/stage84_2026_11_09/godlies.html",
+      "observedAt": "2026-11-09T22:26:48.761Z",
+      "sourcePublisherIso": "2026-11-09T13:58:33-05:00",
+      "scrapeId": "01a1c26b-d5d9-707e-8576-cd1cbc30d53c",
+      "bytesUtf8": 329339
+    },
+    {
+      "page": "chroma",
+      "url": "https://supremevalues.com/mm2/chromas",
+      "path": "pdiddler/research_source_html/stage84_2026_11_09/chromas.html",
+      "observedAt": "2026-11-09T22:26:48.761Z",
+      "sourcePublisherIso": "2026-11-09T13:58:33-05:00",
+      "scrapeId": "01a1c26b-d789-712f-a98e-169045595f6e",
+      "bytesUtf8": 159614
+    }
+  ]
+}
