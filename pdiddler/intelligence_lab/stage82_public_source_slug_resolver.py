@@ -4,7 +4,7 @@ This is not a source of truth for a player's Weapons.Owned, a current game
 catalogue, a numeric Supreme checker ID, valuation, completed trades or
 automatic trading. Nothing here invokes Roblox, network access, or live scripts.
 
-The five Stage81 source files plus the October18 game db are SHA-pinned.
+The seven source files (game db, roster, three pages, two reviewed parsers) are SHA-pinned.
 """
 from __future__ import annotations
 
