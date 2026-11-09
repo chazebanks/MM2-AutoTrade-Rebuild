@@ -1,3 +1,17 @@
+## Stage80 exact-head offline CI result — 2026-11-09
+
+**PASS:** Clean [DRAFT PR #150](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/150) code SHA `08c9becf03cf38039c1bcde5da12c4421e434342`, [focused GitHub Actions 42690244778](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42690244778) SUCCESS. Verified TWO immutable original source Git blobs (actual Oct18 third-party 1,040-row game catalogue and exact Stage79 original classifier); executed **14/14 pure Lua5.4 test groups plus 400 seeded malformed cases**, **8/8 actual native wrapper mocked execution tests**, **3/3 Python tests**, including the real 13 `Misc` and 3 incomplete public records check. All five additional project Luau/Lune/Selene/replay/Hypothesis workflows also SUCCESS on the exact SHA. Two CI issues were caught and corrected before this green result: a stale Stage79 marker in the mock assertion, and missing Stage79 isolation-key check in the native wrapper; tests now verify the final code. No production scanner/P4/value/Discord changes. This is OFFLINE verification only, **not an observed native Stage80 result**.
+
+**NEXT EXACT ONE USER READ-ONLY TEST (main iPad after fresh rejoin, no ALT/trade):**
+
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/08c9becf03cf38039c1bcde5da12c4421e434342/pdiddler/new_part4/STAGE80_READONLY_OWNED_METADATA_REASON.lua"))()
+```
+
+Paste ONLY one aggregate `[GINGERSCOPE STAGE80 METADATA REASON]` JSON line from clipboard or Delta console; no raw keys, account screenshots, profile dumps or manual trades required. This single-client own-profile query executes at most one read-only `GetProfileData` RPC, local 4.5-second timeout, and no retries. It rejects presence of Stage79/stale pdiddler owners (fresh server required). If `miscKeys=1` and other reasons zero, likely confirm category-only Stage79 false alarm. If missing/other reasons, preserve inconclusive and identify specific field family without guessing item. Preserve all live price/trade/Accept/profit/Discord/learning authorizations FALSE, source publication Nov6 expired. PR150 remains DRAFT/UNMERGED.
+
+---
+
 # Stage80 — one remaining `Weapons.Owned` metadata category, not another trading test
 
 **Date:** 2026-11-09. **Issue:** #122. **Mode:** isolated read-only research. Do not merge or run before exact-head CI review.
