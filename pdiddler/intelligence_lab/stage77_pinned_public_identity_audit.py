@@ -29,6 +29,12 @@ TARGETS = {
 GAME_ROW = re.compile(r'(?m)^  \["([^"\n]+)"\]\s*=\s*\{\s*\n([\s\S]*?)^  \},?')
 GAME_FIELD = re.compile(r'(?m)^    \["(ItemName|ItemType|Rarity|Chroma)"\]\s*=\s*("[^"\n]*"|true|false)\s*,?\s*$')
 VOID = frozenset('area base br col embed hr img input link meta param source track wbr sep'.split())
+# Independent Stage69 source parser excludes these seven pets as non-weapons.
+# No blanket exclusion is permitted for future unknown pet/row structures.
+KNOWN_CHROMA_PETS = frozenset({
+    'Chroma Fire Bat', 'Chroma Fire Bear', 'Chroma Fire Bunny',
+    'Chroma Fire Cat', 'Chroma Fire Dog', 'Chroma Fire Fox', 'Chroma Fire Pig',
+})
 
 FLAGS = {
     'researchOnly': True, 'observedPublicSourcesOnly': True,
@@ -125,11 +131,26 @@ def website_records(raw: bytes, page: str):
     if len({n.attrs['data-updated-iso'] for n in nodes if 'data-updated-iso' in n.attrs}) != 1:
         raise ValueError('source publication attribute absent or ambiguous')
     rows = {}
+    pet_columns = {
+        id(n)
+        for section in nodes if section.tag == 'section' and section.attrs.get('data-tier') == 'pets'
+        for n in section.walk() if n.has_class('itemcolumn')
+    }
     for col in (n for n in nodes if n.has_class('itemcolumn')):
         descendants = list(col.walk())
         identities = [n for n in descendants if n.tag == 'div' and
                       (n.has_class('itemcell') or n.has_class('itemcell-exp')) and n.attrs.get('id')]
         if len(identities) != 1:
+            # One documented first-party exception: Nik's Scythe has no normal
+            # site slug or itemlink in the archived Ancient HTML. Never invent
+            # a URL or checker ID for this exceptional priceless item.
+            heads = [n.text() for n in descendants if n.has_class('itemhead')]
+            no_links = not any(n.tag == 'a' and n.has_class('itemlink') for n in descendants)
+            no_named_buttons = not any(n.tag == 'button' and 'data-name' in n.attrs for n in descendants)
+            if (page == 'ancients' and len(identities) == 0
+                    and heads == ["Nik's Scythe"] and no_links and no_named_buttons
+                    and id(col) not in pet_columns):
+                continue
             raise ValueError('missing/duplicated site row identity')
         slug = identities[0].attrs['id']
         if slug in rows:
@@ -143,6 +164,13 @@ def website_records(raw: bytes, page: str):
         name = one(buttons, 'source data-name')
         if link.text() != name:
             raise ValueError('source item link and data-name differ')
+        if id(col) in pet_columns:
+            if page != 'chromas' or name not in KNOWN_CHROMA_PETS:
+                raise ValueError('unreviewed nonweapon pet row')
+            # Never promote pets into the Godly/Ancient weapon identity index.
+            continue
+        if page == 'chromas' and name in KNOWN_CHROMA_PETS:
+            raise ValueError('known pet moved into weapon section')
         body = one([n for n in descendants if n.has_class('itembody')], 'source item body').text()
         if page == 'chromas':
             m = re.search(r'\bClass\s*-\s*(Ancient|Godly)\b', body)
