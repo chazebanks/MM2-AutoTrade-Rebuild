@@ -115,7 +115,7 @@ test("exact raw strings, no numeric coercion or duplicate data",function()
   function(x)x.badQty=1 end,
   function(x)x.unpriced="0" end,
   function(x)x.fingerprint="" end,
-  function(x)x.items[3]=item("test_extra") end,
+  function(x)x.items[4]=item("test_sparse") end,
   function(x)x.items[2]=nil end,
  }) do
   local x=own();change(x)
