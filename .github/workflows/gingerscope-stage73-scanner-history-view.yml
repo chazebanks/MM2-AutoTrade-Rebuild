@@ -8,6 +8,8 @@ on:
       - 'pdiddler/new_part4/STAGE73_SCANNER_HISTORY_ONLY_BOOT.lua'
       - 'pdiddler/presentation/pdiddler3_scanner_view_stage73_history_v1.lua'
       - 'pdiddler/tests/test_stage73_scanner_history_view.py'
+      - 'pdiddler/tests/test_stage73_report_delivery.py'
+      - 'pdiddler/new_part4/STAGE25_READONLY_DIAGNOSTIC.lua'
       - 'pdiddler/intelligence_lab/STAGE73_SCANNER_HISTORY_ONLY_HANDOFF.md'
   pull_request:
     paths:
@@ -15,6 +17,8 @@ on:
       - 'pdiddler/new_part4/STAGE73_SCANNER_HISTORY_ONLY_BOOT.lua'
       - 'pdiddler/presentation/pdiddler3_scanner_view_stage73_history_v1.lua'
       - 'pdiddler/tests/test_stage73_scanner_history_view.py'
+      - 'pdiddler/tests/test_stage73_report_delivery.py'
+      - 'pdiddler/new_part4/STAGE25_READONLY_DIAGNOSTIC.lua'
       - 'pdiddler/intelligence_lab/STAGE73_SCANNER_HISTORY_ONLY_HANDOFF.md'
 permissions:
   contents: read
@@ -34,7 +38,9 @@ jobs:
       - name: Execute actual T4.4 presentation and scanner-only boot source tests
         run: |
           set -euo pipefail
-          python3 -m unittest -v pdiddler.tests.test_stage73_scanner_history_view
+          python3 -m unittest -v \
+            pdiddler.tests.test_stage73_scanner_history_view \
+            pdiddler.tests.test_stage73_report_delivery
       - name: Inherited historical-value and trust-boundary regressions
         run: |
           set -euo pipefail
