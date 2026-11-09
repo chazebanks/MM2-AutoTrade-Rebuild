@@ -99,6 +99,8 @@ def _expected_page(item:dict) -> tuple[str,str]:
     if item["ItemType"] not in ("Gun","Knife"):
         raise ValueError("nontradeable archived item type")
     if chroma:
+        if rarity!="Godly" or name.lower().startswith("chroma "):
+            raise ValueError("ambiguous chroma variant or incompatible rarity")
         page="chroma"
         name="Chroma "+name
     elif rarity=="Ancient":
