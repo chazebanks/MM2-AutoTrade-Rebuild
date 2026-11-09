@@ -4,7 +4,7 @@
 local SOURCE="pdiddler/new_part4/STAGE89_ONE_TARGET_ONE_REQUEST_DIAGNOSTIC.lua"
 local P3=os.getenv("STAGE89_PINNED_P3") or "/tmp/stage89/p3.lua"
 local CONTROLLER=os.getenv("STAGE89_PINNED_CONTROLLER") or "/tmp/stage89/controller.lua"
-local VIEW="pdiddler/presentation/pdiddler3_scanner_view_contact_v1.lua"
+local VIEW=os.getenv("STAGE89_PINNED_VIEW") or "/tmp/stage89/view.lua"
 local KEY="GINGERSCOPE_STAGE89_SINGLE_REQUEST_DIAGNOSTIC"
 local groups=0
 local function group(name,fn)
