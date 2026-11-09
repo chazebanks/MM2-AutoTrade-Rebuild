@@ -68,11 +68,15 @@ local function say(t)
  if message then pcall(function()message.Text=t end) end
 end
 local function clip(t)
- for _,fn in ipairs({setclipboard,toclipboard}) do
-  if type(fn)=="function" then
-   local ok,success=pcall(fn,t)
-   if ok and success~=false then return true end
-  end
+ -- Do not use ipairs({setclipboard,toclipboard}): a missing first function
+ -- makes ipairs stop before reaching a valid fallback clipboard function.
+ if type(setclipboard)=="function" then
+  local ok,success=pcall(setclipboard,t)
+  if ok and success~=false then return true end
+ end
+ if type(toclipboard)=="function" then
+  local ok,success=pcall(toclipboard,t)
+  if ok and success~=false then return true end
  end
  return false
 end
