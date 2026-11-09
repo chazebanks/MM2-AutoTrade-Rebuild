@@ -257,7 +257,8 @@ class Stage75NativeLuaTests(unittest.TestCase):
                           'GetPlayers(', 'GetPlayerInventory(', 'TradeGUI',
                           'AcceptTrade', 'CompleteTrade', 'WaitForChild("Trade"'):
             self.assertNotIn(forbidden,SCRIPT)
-        self.assertNotIn("pairs(sync.Weapons)",SCRIPT)
+        executable="\n".join(line for line in SCRIPT.splitlines() if not line.lstrip().startswith("--"))
+        self.assertNotIn("pairs(sync.Weapons)",executable)
         self.assertIn("sync.Weapons[target.raw]",SCRIPT)
         self.assertIn("No inventory, trading, player names, prices",SCRIPT)
 
