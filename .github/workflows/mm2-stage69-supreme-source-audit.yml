@@ -4,7 +4,8 @@ on:
     paths:
       - 'pdiddler/intelligence_lab/stage69_supreme_parser_reference.py'
       - 'scripts/stage69_supreme_source_audit.py'
-      - 'pdiddler/intelligence_lab/test_stage69_supreme_source_audit.py'
+      - 'pdiddler/intelligence_lab/test_stage69*.py'
+      - 'pdiddler/intelligence_lab/STAGE69_SUPREME_PUBLIC_HTML_OBSERVATION_RESEARCH_ONLY.json'
       - 'pdiddler/intelligence_lab/STAGE69_SUPREME_SOURCE_REFRESH_RESEARCH.md'
       - '.github/workflows/mm2-stage69-supreme-source-audit.yml'
   push:
@@ -13,7 +14,8 @@ on:
     paths:
       - 'pdiddler/intelligence_lab/stage69_supreme_parser_reference.py'
       - 'scripts/stage69_supreme_source_audit.py'
-      - 'pdiddler/intelligence_lab/test_stage69_supreme_source_audit.py'
+      - 'pdiddler/intelligence_lab/test_stage69*.py'
+      - 'pdiddler/intelligence_lab/STAGE69_SUPREME_PUBLIC_HTML_OBSERVATION_RESEARCH_ONLY.json'
       - 'pdiddler/intelligence_lab/STAGE69_SUPREME_SOURCE_REFRESH_RESEARCH.md'
       - '.github/workflows/mm2-stage69-supreme-source-audit.yml'
   workflow_dispatch:
