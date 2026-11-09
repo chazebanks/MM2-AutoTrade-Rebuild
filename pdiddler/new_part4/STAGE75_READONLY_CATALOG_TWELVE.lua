@@ -121,7 +121,7 @@ local function emit(status)
   return game:GetService("HttpService"):JSONEncode(R)
  end)
  if not ok or type(payload)~="string" or #payload==0 or #payload>6000 then
-  guide("REPORT ENCODING FAILED. Open Delta console and send error marker.")
+  guide("REPORT FAILED. Check Delta console.\nNO TRADING")
   print(MARK.." REPORT_ENCODING_FAILED")
   return R
  end
@@ -132,7 +132,7 @@ local function emit(status)
   return game:GetService("HttpService"):JSONEncode(R)
  end)
  if not ok2 or type(report)~="string" or #report>6000 then
-  guide("REPORT ENCODING FAILED. Use Delta console.")
+  guide("REPORT FAILED. Use Delta console.\nNO TRADING")
   print(MARK.." REPORT_ENCODING_FAILED")
   return R
  end
@@ -140,9 +140,9 @@ local function emit(status)
  local copied=copyReport(line)
  print(line) -- exactly one complete console fallback
  if copied then
-  guide("DONE: "..status..". Copy sent (PASTE to confirm). Open ChatGPT and paste the report; no trade needed.")
+  guide("DONE: "..tostring(R.targetMatches).."/12 public labels matched\nPrices UNVERIFIED | NO TRADING\nCopy requested; PASTE report in ChatGPT")
  else
-  guide("DONE: "..status..". Clipboard unavailable. Copy the STAGE75 report line from Delta console.")
+  guide("DONE: catalogue check complete\nNO TRADING | prices UNVERIFIED\nClipboard failed; copy Delta console report")
  end
  return R
 end
@@ -172,7 +172,7 @@ local function check(row,expected)
  return "SOURCE_METADATA_EQUALITY_ONLY"
 end
 panel()
-guide("STEP 1/2: Read-only. Checking 12 PUBLIC game-catalogue entries. No inventory, prices, trades, or player data. Result will auto-copy.")
+guide("STEP 1/2: Checking 12 public items\nNO PLAYER INVENTORY OR TRADES\nReport will auto-copy")
 if type(game)~="table" and type(game)~="userdata" then
  return emit("GAME_UNAVAILABLE")
 end
@@ -204,7 +204,7 @@ for _ in pairs(sync.Weapons) do
  if count>3000 then return emit("UNEXPECTED_CATALOGUE_SIZE") end
 end
 R.catalogueRowsObserved=count
-guide("STEP 2/2: Comparing 12 public metadata labels. No inventory read or actions. Result will copy automatically.")
+guide("STEP 2/2: Checking catalogue labels\nNO TRADES OR PLAYER INVENTORY\nReport will auto-copy")
 for i,exp in ipairs(TARGETS) do
  local state=check(sync.Weapons[exp[1]],exp)
  if state=="MISSING" then R.targetMissing=R.targetMissing+1
