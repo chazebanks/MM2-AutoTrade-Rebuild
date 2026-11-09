@@ -129,7 +129,7 @@ local function reportFailed()
     S.probeStatus="REPORT_UNAVAILABLE"
     S.reportStatus="UNAVAILABLE"
     S.clipboardStatus="NOT_ATTEMPTED"
-    showFinalStatus("ST73 REPORT FAILED | SEE DELTA CONSOLE\\n"
+    showFinalStatus("ST73 REPORT FAILED | SEE DELTA CONSOLE\n"
         .."UNVERIFIED | OUTGOING PAUSED")
     warn("[GINGERSCOPE STAGE73] read-only report unavailable; no trade actions")
 end
@@ -231,7 +231,7 @@ task.spawn(function()
     local scanText=settled and "ST73 REPORT READY"
        or "ST73 SCAN TIMEOUT"
     showFinalStatus(scanText.." | "..copyText
-        .."\\nUNVERIFIED | OUTGOING PAUSED")
+        .."\nUNVERIFIED | OUTGOING PAUSED")
     print("[GINGERSCOPE STAGE73] "..S.clipboardStatus
         .." | "..S.scanWindowStatus.." | NO TRADING")
 end)
