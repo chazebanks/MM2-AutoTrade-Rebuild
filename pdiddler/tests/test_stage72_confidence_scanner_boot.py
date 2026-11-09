@@ -108,7 +108,7 @@ game={
     assert(url:find("001d228a407076d3cc411a5a7132b0076ec4c027",1,true))
     return scannerSource..string.rep("\n-- padded fixture",10)
   elseif url:find("P4_REPRICE_ONLY",1,true) then
-    return "return {reprice=function(...) return nil, 'no-preview' end}"..
+    return "return {reprice=function(...) error('legacy fuzzy repricer must not run') end}"..
       string.rep("\n-- mock pinned legacy strict",2)
   elseif url:find("pdiddler_supreme_snapshot_2026_11_06",1,true) then
     return [[
