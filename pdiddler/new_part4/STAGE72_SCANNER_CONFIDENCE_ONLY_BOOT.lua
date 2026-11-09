@@ -96,6 +96,12 @@ local ok,why=pcall(function()
    and type(scanner.getVerificationState)=="function",
    "scanner-only record API unavailable")
  S.scanner=scanner
+ -- Show the operator what to do INSIDE the existing purple scanner panel.
+ -- Do not lock status owner; scanner keeps control of its own updates.
+ if type(scanner.setStatus)=="function" then
+  pcall(scanner.setStatus,
+   "STAGE72 READ ONLY: wait for whitelist rows; SCREENSHOT this panel; DO NOT TRADE")
+ end
  S.status="READONLY_SCANNER_CONFIDENCE_DISPLAY"
 end)
 if not ok then
