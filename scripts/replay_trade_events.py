@@ -148,6 +148,10 @@ def replay_trace(source: object) -> dict[str, Any]:
         "windowClosures": 0,
     }
     seen: dict[str, str] = {}
+    # Client session tokens must be unique within one replay trace.
+    # Reopening a closed token would let a delayed callback or inventory
+    # readback be misclassified as part of an entirely new trade window.
+    opened_sessions: set[str] = set()
     active: str | None = None
     last_closed: str | None = None
     revision = 0
@@ -165,6 +169,12 @@ def replay_trace(source: object) -> dict[str, Any]:
         counts["uniqueEvents"] += 1
         kind, session = event["kind"], event["session"]
         if kind == "OPEN":
+            # An identical redelivery ID was already deduplicated above.
+            # A NEW OPEN with a previously used client session token is
+            # ambiguous even if a prior CLOSE was observed. Fail closed.
+            if session in opened_sessions:
+                return _result("QUARANTINED", "REUSED_CLIENT_SESSION_TOKEN")
+            opened_sessions.add(session)
             # An overlapping new OPEN supersedes the prior client session.
             if active is not None and active != session:
                 counts["crossSessionEvents"] += 1
