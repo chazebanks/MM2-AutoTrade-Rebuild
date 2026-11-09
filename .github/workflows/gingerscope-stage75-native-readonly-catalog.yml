@@ -1,0 +1,42 @@
+name: Gingerscope Stage75 twelve-key catalogue equality (read only)
+on:
+  push:
+    branches:
+      - research/gingerscope-stage75-current-catalog-twelve-key-equality
+    paths:
+      - 'pdiddler/new_part4/STAGE75_READONLY_CATALOG_TWELVE.lua'
+      - 'pdiddler/intelligence_lab/test_stage75_catalog_twelve_native.py'
+      - 'pdiddler/intelligence_lab/STAGE75_CURRENT_CATALOGUE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage75-native-readonly-catalog.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE75_READONLY_CATALOG_TWELVE.lua'
+      - 'pdiddler/intelligence_lab/test_stage75_catalog_twelve_native.py'
+      - 'pdiddler/intelligence_lab/STAGE75_CURRENT_CATALOGUE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage75-native-readonly-catalog.yml'
+permissions:
+  contents: read
+jobs:
+  native-mocked-catalogue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Fetch exact public third-party game catalogue (data ONLY; never execute)
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/mm2scripthub/mm2/0f2715187e7eae36eea4bd97afee809478fc877d/db' \
+            -o /tmp/stage75_oct18_db.lua
+          test "$(git hash-object /tmp/stage75_oct18_db.lua)" = '2be54c3f5c6b715844728c01a65cc2f24a55c02d'
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lua5.4
+      - name: Validate twelve embedded public metadata expectations and real Lua5.4 error modes
+        env:
+          STAGE75_REQUIRE_PINNED_FIXTURE: '1'
+          STAGE75_PINNED_PUBLIC: /tmp/stage75_oct18_db.lua
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.intelligence_lab.test_stage75_catalog_twelve_native
