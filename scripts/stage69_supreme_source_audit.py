@@ -222,6 +222,8 @@ def main():
     print(json.dumps({
         "status": report["status"],
         "reason": report["reason"],
+        "exceptionType": report.get("exceptionType"),
+        "failedCategory": report.get("failedCategory"),
         "changes": len(report["changes"]),
         "missing": len(report["missingCanonicalNames"]),
         "new": len(report["unmappedSourceNames"]),
