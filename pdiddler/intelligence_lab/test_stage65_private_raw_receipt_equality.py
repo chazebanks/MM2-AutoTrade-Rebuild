@@ -160,9 +160,13 @@ end
 local csv={}
 for k,v in pairs(result) do
  csv[#csv+1]=tostring(k).."="..tostring(v)
- assert(not tostring(k):find("PRIVATE_RAW",1,true))
- assert(not tostring(v):find("PRIVATE_RAW",1,true))
- assert(not tostring(v):find("INJECTED_SECRET",1,true))
+ -- The safe status enum intentionally says PRIVATE_RAW_PRIMITIVE_EQUALITY,
+ -- so reject source IDs themselves, not the descriptive status prefix.
+ for _,private in ipairs({secret,"PRIVATE_DIFFERENT_RAW_KEY",
+     "PRIVATE_EXTRA_WEAPON","INJECTED_SECRET"}) do
+  assert(not tostring(k):find(private,1,true))
+  assert(not tostring(v):find(private,1,true))
+ end
 end
 if mode=="exact" or mode=="shuffled-map" or mode=="zero-qty-key" then
  assert(result.status=="PRIVATE_RAW_PRIMITIVE_EQUALITY_CLIENT_ONLY",
