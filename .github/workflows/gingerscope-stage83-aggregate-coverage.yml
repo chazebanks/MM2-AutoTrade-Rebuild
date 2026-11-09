@@ -5,12 +5,14 @@ on:
       - research/gingerscope-stage83-private-aggregate-slug-coverage
     paths:
       - 'pdiddler/intelligence_lab/stage83_*'
+      - 'pdiddler/intelligence_lab/STAGE83_PRIVATE_AGGREGATE_SLUG_HANDOFF.md'
       - 'pdiddler/new_part4/STAGE83_READONLY_PUBLIC_SLUG_COVERAGE.lua'
       - 'pdiddler/tests/test_stage83_*'
       - '.github/workflows/gingerscope-stage83-aggregate-coverage.yml'
   pull_request:
     paths:
       - 'pdiddler/intelligence_lab/stage83_*'
+      - 'pdiddler/intelligence_lab/STAGE83_PRIVATE_AGGREGATE_SLUG_HANDOFF.md'
       - 'pdiddler/new_part4/STAGE83_READONLY_PUBLIC_SLUG_COVERAGE.lua'
       - 'pdiddler/tests/test_stage83_*'
       - '.github/workflows/gingerscope-stage83-aggregate-coverage.yml'
