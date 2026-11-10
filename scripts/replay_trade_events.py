@@ -148,6 +148,7 @@ def replay_trace(source: object) -> dict[str, Any]:
         "windowClosures": 0,
     }
     seen: dict[str, str] = {}
+    opened_sessions: set[str] = set()
     active: str | None = None
     last_closed: str | None = None
     revision = 0
@@ -165,6 +166,15 @@ def replay_trace(source: object) -> dict[str, Any]:
         counts["uniqueEvents"] += 1
         kind, session = event["kind"], event["session"]
         if kind == "OPEN":
+            # A new delivery ID cannot make a previously opened CLIENT
+            # session token into a new trade. Exact duplicate events have
+            # already been recognized by the ID+fingerprint gate above.
+            # Reuse would reset revision/acceptance and make old callback
+            # and post-close evidence appear associated with a fresh trade.
+            if session in opened_sessions:
+                return _result("QUARANTINED", "REUSED_CLIENT_SESSION_TOKEN",
+                               **counts)
+            opened_sessions.add(session)
             # An overlapping new OPEN supersedes the prior client session.
             if active is not None and active != session:
                 counts["crossSessionEvents"] += 1
