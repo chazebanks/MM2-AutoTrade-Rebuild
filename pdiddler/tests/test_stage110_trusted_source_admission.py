@@ -140,7 +140,7 @@ class Stage110SourceAdmission(unittest.TestCase):
         self.assertNotIn("currentValue",r)
         self.assertNotIn("price",r)
         self.assertNotIn("rawKey",r)
-        self.assertNotIn("newCaptureExpiryUtc",r)
+        self.assertIsNone(r["newCaptureExpiryUtc"])
 
 if __name__=="__main__":
     unittest.main()
