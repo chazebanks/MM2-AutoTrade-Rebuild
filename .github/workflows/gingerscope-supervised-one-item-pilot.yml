@@ -83,6 +83,7 @@ jobs:
               assert method in outgoing
           assert 'io.sideSignature(io.readSide' in bridge
           assert 'physical~=src.slots' in bridge
+          guided=Path('pdiddler/supervised/SUPERVISED_FOUR_SLOT_MANUAL_PILOT.lua').read_text()
           assert 'BLANK_SINGLETON_CLIENT' in bridge
           assert 'VISIBLE_STACK_TEXT_INVALID' in bridge
           assert '2f556afac5e5fd9cfdbf9e081eeea01a542d293' in guided
