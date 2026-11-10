@@ -205,7 +205,7 @@ function M.run(bound,io,gate,approval,opts)
  approval._consumed=true
  approval.armed=false
  local attempts,confirmed=0,0
- for _,approved in ipairs(selected) do
+ for itemIndex,approved in ipairs(selected) do
   -- Pause/partner/GUI/offer checks are redone before EVERY item.
   local before,reason=current(bound,expectedOwn,their)
   if not before or io.trade()~=root then
@@ -213,6 +213,14 @@ function M.run(bound,io,gate,approval,opts)
   end
   if #before.ours>=4 then
    return report("STOPPED","FOUR_PHYSICAL_SLOTS_ALREADY_USED",attempts,confirmed)
+  end
+  -- Advance to item i/N only after the preceding slot is GUI-confirmed.
+  -- A missing, hidden, or failing on-screen guide blocks the next remote.
+  if type(opts.onBeforeItem)=="function" then
+   local okStep,shown=pcall(opts.onBeforeItem,itemIndex,#selected,#before.ours)
+   if not okStep or shown~=true then
+    return report("STOPPED","ONSCREEN_STEP_UNAVAILABLE",attempts,confirmed)
+   end
   end
   local key=approved.raw
   local item={id=key,rawKey=key,name=approved.display}

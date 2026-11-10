@@ -70,7 +70,7 @@ local bridgeModule=loadFrozen(
     "616f905739ffb7bf70183475a79ec6c278dc9ddb",
     "supervised/supervised_p3_p4_handoff.lua")
 local planModule=loadFrozen(
-    "4f186f3ad1db538512a735e1a18e220f23e8715a",
+    "c599520caff852f481926124bc709f932721655b",
     "supervised/supervised_four_slot_operator_plan.lua")
 if not ioModule or type(ioModule.new)~="function"
     or not bridgeModule or type(bridgeModule.bind)~="function"
@@ -307,8 +307,8 @@ local function makeGuide(pg)
         local steps={
             OPEN={"1/3 MAIN - OPEN TRADE",
                 "Manually open an EMPTY trade with the consenting ALT. Keep both offers unchanged."},
-            OFFER={"2/3 MAIN - MULTI-ITEM",
-                "Checking exact partner and safe layout; attempting ONE approved item. ALT: do not change offer."},
+            OFFER={"2/3 MAIN - APPROVED OFFER",
+                "Checking the exact trade and approved multi-item plan. ALT: do not change offer."},
             VERIFY={"3/3 MAIN - VERIFY",
                 "Inspect the item in your offer. Manually Decline after recording the result."},
         }
@@ -322,6 +322,26 @@ local function makeGuide(pg)
         self.phase=phase
         self.updates+=1
         print("[SUPERVISED PILOT] "..info[1].." | "..info[2])
+        return true
+    end
+    -- Single CURRENT item instruction, with per-frame collision safety.
+    -- Controller calls this only after preceding slot is GUI-verified.
+    function guide:showItem(index,total,expected)
+        if self.stopped or self.phase~="OFFER"
+            or type(index)~="number" or type(total)~="number"
+            or index~=math.floor(index) or total~=math.floor(total)
+            or index<1 or total<1 or total>4 or index>total then
+            return false,"ONSCREEN_STEP_INVALID"
+        end
+        local ok,why=self:refresh(expected)
+        if not ok then return self:fail(why) end
+        ui.title.Text="2/3 MAIN - ITEM "..index.."/"..total
+        ui.body.Text="MAIN: confirming slot "..index.."/"..total..
+            ". ALT: keep offer unchanged. NEVER press final Accept."
+        ui.warning.Text="NEVER PRESS FINAL ACCEPT | CLIENT ONLY"
+        self.updates+=1
+        print("[SUPERVISED PILOT] 2/3 MAIN - ITEM "..index.."/"..total
+            .." | prior GUI slots verified; protected next offer")
         return true
     end
     function guide:finish(report)
@@ -488,9 +508,19 @@ local safe,why=guide:safeForOffer(root)
 if not safe then return finalize(blocked(why)) end
 
 local ok,result=pcall(planModule.run,
-    bound,io,gate,cfg,{wait=function(seconds)
-        task.wait(seconds)
-    end})
+    bound,io,gate,cfg,{
+        wait=function(seconds)
+            task.wait(seconds)
+        end,
+        onBeforeItem=function(index,total,priorVisible)
+            if priorVisible~=index-1 then return false end
+            local shown=guide:showItem(index,total,root)
+            if shown~=true then return false end
+            task.wait(0.05)
+            local safe=guide:safeForOffer(root)
+            return safe==true
+        end,
+    })
 gate.checkOutbound=nil
 if not ok or type(result)~="table" then
     -- A runtime exception could occur AFTER an OfferItem was dispatched.

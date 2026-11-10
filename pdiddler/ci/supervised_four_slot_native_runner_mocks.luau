@@ -129,7 +129,7 @@ local function fakeEnv(options)
      if url:find("616f905739ffb7bf70183475a79ec6c278dc9ddb",1,true)
         and url:find("supervised_p3_p4_handoff.lua",1,true)
      then return bridgeSource end
-     if url:find("4f186f3ad1db538512a735e1a18e220f23e8715a",1,true)
+     if url:find("c599520caff852f481926124bc709f932721655b",1,true)
         and url:find("supervised_four_slot_operator_plan.lua",1,true)
      then return planSource end
      if url:find("5b8ee35d7f281c23d9c2181abd97a063e59a0660",1,true)
@@ -189,6 +189,10 @@ local function fakeEnv(options)
          world.CurrentCamera.ViewportSize=vec(240,250)
        end
        if options.hideDuringOffer and waitCount==1 then screen.Enabled=false end
+       if options.obstructAfterFirst and #calls==1 then
+         t.AbsolutePosition=vec(0,0)
+         t.AbsoluteSize=vec(1024,768)
+       end
        runService.RenderStepped:Fire()
     end}
  }
@@ -222,6 +226,17 @@ check(r.clipboardCopied,true,"clipboard auto-export")
 check(r.tradeOutcome,"UNKNOWN","no settlement")
 check(r.authorizesAccept,false,"no automatic Accept")
 check(r.mayReportProfit,false,"no profit")
+local function itemStepLogs(env)
+ local result={}
+ for _,line in ipairs(env.stepTexts) do
+  if line:find("MAIN - ITEM",1,true) then result[#result+1]=line end
+ end
+ return result
+end
+local stepLogs=itemStepLogs(x)
+check(#stepLogs,2,"actual runner displays two ordered current item steps")
+check(stepLogs[1]:find("ITEM 1/2",1,true)~=nil,true,"first item 1 of 2")
+check(stepLogs[2]:find("ITEM 2/2",1,true)~=nil,true,"second item 2 of 2")
 check(#x.calls,2,"two physical OfferItem sends")
 check(x.calls[1].raw,"Iceblaster","first approved key")
 check(x.calls[2].raw,"Batwing","second approved key")
@@ -239,6 +254,7 @@ local r4=four.run()
 check(r4.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","four-slot visible")
 check(r4.clientVisibleAddedSlots,4,"four physical GUI slots")
 check(#four.calls,4,"exact four remote sends")
+check(#itemStepLogs(four),4,"four verified screen step transitions")
 -- Raw Scythe is historically displayed as Batwing. Pin the NEW REAL
 -- Lua controller source; the old immutable PR200 source must fail this test.
 do
@@ -276,10 +292,15 @@ local miss=noGui.run()
 check(miss.status,"STOPPED","no GUI proof stops")
 check(miss.offerAttempts,1,"one uncertain send only")
 check(#noGui.calls,1,"never retry unconfirmed send")
+check(#itemStepLogs(noGui),1,"no second step without first GUI item")
 local changed=fakeEnv({mutatePartnerAfterFirst=true})
 local c=changed.run()
 check(c.status,"STOPPED","opponent mutation stops")
 check(#changed.calls,1,"no further offers after opponent change")
+local obstructed=fakeEnv({obstructAfterFirst=true})
+local blockedByGeometry=obstructed.run()
+check(blockedByGeometry.status,"STOPPED","screen collision prevents second offer")
+check(#obstructed.calls,1,"no second remote after screen collision")
 local delayed=fakeEnv({startClosed=true,openAfter=3})
 local d=delayed.run()
 check(d.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","manual open step before trade")
