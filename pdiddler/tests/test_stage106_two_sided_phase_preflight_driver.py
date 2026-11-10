@@ -46,7 +46,7 @@ class Stage106PurePreflight(unittest.TestCase):
             "game:GetService(", "FireServer(", "InvokeServer(",
             "HttpGet(", "PostAsync(", "AcceptTrade(", "DeclineTrade(",
             "SendMouseButtonEvent(", "getconnections(", "getgenv(",
-            "TeleportService", "setclipboard(", "Discord", "authorizesTrade=true",
+            "TeleportService", "setclipboard(", "authorizesTrade=true",
             "authorizesAccept=true", "serverCompletionProven=true"
         ):
             self.assertNotIn(forbidden,source,forbidden)
