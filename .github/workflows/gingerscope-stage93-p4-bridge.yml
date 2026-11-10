@@ -1,19 +1,19 @@
-name: Gingerscope Stage93 one exact embedded-card request boundary
+name: Gingerscope Stage93 real Part4 client-only offer observer bridge
 on:
   push:
     branches:
-      - integration/gingerscope-stage93-single-consented-request
+      - integration/gingerscope-stage93-p4-offer-observer-bridge
     paths:
       - 'pdiddler/new_part4/STAGE93_P4_OFFER_OBSERVER_BRIDGE.lua'
       - 'pdiddler/tests/test_stage93_p4_bridge_mock.lua'
       - 'pdiddler/intelligence_lab/STAGE93_P4_BRIDGE_HANDOFF.md'
-      - '.github/workflows/gingerscope-stage93-one-request.yml'
+      - '.github/workflows/gingerscope-stage93-p4-bridge.yml'
   pull_request:
     paths:
       - 'pdiddler/new_part4/STAGE93_P4_OFFER_OBSERVER_BRIDGE.lua'
       - 'pdiddler/tests/test_stage93_p4_bridge_mock.lua'
       - 'pdiddler/intelligence_lab/STAGE93_P4_BRIDGE_HANDOFF.md'
-      - '.github/workflows/gingerscope-stage93-one-request.yml'
+      - '.github/workflows/gingerscope-stage93-p4-bridge.yml'
   workflow_dispatch:
 permissions:
   contents: read
