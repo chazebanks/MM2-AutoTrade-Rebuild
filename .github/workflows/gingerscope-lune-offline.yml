@@ -72,6 +72,11 @@ jobs:
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_start_barrier_mocks.luau
           python3 pdiddler/ci/check_p3_start_barrier_integrity.py
+      - name: Exercise live single-target P3-to-P4 native wrapper under mocked original MM2
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_single_target_native_runner_mocks.luau
       - name: Assert that a failing Luau runtime assertion fails CI
         shell: bash
         run: |
