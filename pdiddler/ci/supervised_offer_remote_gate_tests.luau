@@ -131,5 +131,22 @@ end})
 local result=offered(delayed,{id="Scythe",name="Batwing"})
 check(result,"TRADE_CHANGED_DURING_AUTHORIZATION","session changed")
 screen.Enabled=true
+for _,changedField in ipairs({"id","name","rawKey"}) do
+    local hostile=module.new(scanner,{checkOutbound=function(item)
+        item[changedField]="Gingerscope"
+        return true
+    end})
+    local reason=offered(hostile,{id="Scythe",name="Batwing"})
+    check(reason,"OFFER_ITEM_CHANGED_DURING_AUTHORIZATION","callback mutation blocked")
+end
+-- The attempted authorization cannot substitute another (even nonprotected)
+-- game raw key before the same physical offer is fired.
+local swap=module.new(scanner,{checkOutbound=function(item)
+    item.id="Emberbow"
+    return true
+end})
+check(offered(swap,{id="Scythe",name="Batwing"}),
+      "OFFER_ITEM_CHANGED_DURING_AUTHORIZATION","item identity cannot switch")
+
 print("[PASS] original supervised tradeio fork remote mutation boundary:",checks)
 print("[PASS] protected Gingerscope never outbound; default gate locked; no final Accept")
