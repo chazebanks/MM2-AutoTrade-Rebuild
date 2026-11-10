@@ -41,7 +41,7 @@ class NativeStage100(unittest.TestCase):
         finals=[x for x in r.stdout.splitlines()
             if x.startswith("STAGE100_NATIVE_TWO_SIDED_MOCK_PASS")]
         self.assertEqual(len(finals),1,r.stdout)
-        m=re.fullmatch(r"STAGE100_ACTUAL_NATIVE_GUI_EPOCH_TESTS_PASS groups=(\d+)",
+        m=re.fullmatch(r"STAGE100_NATIVE_TWO_SIDED_MOCK_PASS groups=(\d+)",
             finals[0])
         self.assertIsNotNone(m)
         self.assertEqual(int(m.group(1)),len(passed))
