@@ -102,6 +102,20 @@ expected("OFFER_SLOTS_UNREADABLE_OR_EMPTY",function(p,o)
  p.ours[1].quantity=1000001
  o.ours=deepcopy(p.ours)
 end)
+expected("PROTECTED_GINGERSCOPE_OUTGOING",function(p,o,c)
+ c.items.Gingerscope=entry(16000,5,"Stable")
+ c.items.receive.value=25000
+ p.ours={{index=1,key="Gingerscope",quantity=1}}
+ o.ours=deepcopy(p.ours)
+end)
+local receiveTarget,seenTarget,marketTarget=fixture()
+marketTarget.items.Gingerscope=entry(16000,5,"Stable")
+receiveTarget.theirs={{index=1,key="Gingerscope",quantity=1}}
+seenTarget.theirs=deepcopy(receiveTarget.theirs)
+local target=guard.evaluate(receiveTarget,seenTarget,marketTarget,NOW)
+assert(target.status=="RESEARCH_CANDIDATE_ONLY")
+assert(target.projectedListedGain==15900)
+assert(target.authorizesTrade==false and target.authorizesAccept==false)
 math.randomseed(6033)
 for i=1,1600 do
  local a,b,m=fixture()
