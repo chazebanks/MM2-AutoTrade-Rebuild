@@ -37,6 +37,15 @@ local function scenario(mode)
  local readyCount=0
  local sources=0
  local printed={}
+ local guiObjects={}
+ local createdPromptGui=nil
+ local guideSnapshots={}
+ local function guiObjectByName(name)
+  for _,x in ipairs(guiObjects) do
+   if x.Name==name then return x end
+  end
+  return nil
+ end
  local function node(class,name,parent)
   local n={ClassName=class,Name=name,Parent=parent,
     Visible=true,Enabled=true,Text="",children={},order={},attrs={}}
@@ -160,10 +169,47 @@ local function scenario(mode)
  }
  if mode.competingOwner then env.PDIDDLER_OUTGOING_CONTROLLER={} end
  if mode.oldStage97 then env.GINGERSCOPE_STAGE97_PARTNER_EVENT_READONLY={} end
+ -- Roblox GUI primitives needed by the actual user-visible instruction panel.
+ -- These mocks do not expose or click any MM2 TradeGUI controls.
+ _G.UDim2={new=function(xs,xo,ys,yo)
+  return {X={Scale=xs,Offset=xo},Y={Scale=ys,Offset=yo}}
+ end}
+ _G.UDim={new=function(scale,offset)
+  return {Scale=scale,Offset=offset}
+ end}
+ _G.Color3={fromRGB=function(r,g,b)return {r=r,g=g,b=b} end}
+ _G.Enum={
+  Font={Gotham="Gotham",GothamBold="GothamBold"},
+  TextXAlignment={Left="Left"},
+  TextYAlignment={Top="Top"}
+ }
+ _G.Instance={new=function(class)
+  if mode.promptCreationUnavailable then error("GUI primitives unavailable") end
+  local item={ClassName=class,Name="",Visible=true,Parent=nil}
+  function item:Destroy() self.Parent=nil;self.destroyed=true end
+  if class=="TextButton" then
+   item.MouseButton1Click={Connect=function(_,cb)
+    item.closeCallback=cb
+    return {Disconnect=function()end}
+   end}
+  end
+  guiObjects[#guiObjects+1]=item
+  if class=="ScreenGui" then createdPromptGui=item end
+  return item
+ end}
  _G.getgenv=function()return env end
  _G.warn=function(msg)printed[#printed+1]="WARN: "..tostring(msg) end
  _G.print=function(msg)
   printed[#printed+1]=tostring(msg)
+  if type(msg)=="string" and
+     (msg:find("[STAGE100] WAIT_FOR_MANUAL_TRADE_WINDOW",1,true) or
+      msg:find("[STAGE100] READY_",1,true)) then
+   local step=guiObjectByName("GuideStep")
+   local instruction=guiObjectByName("GuideInstruction")
+   guideSnapshots[#guideSnapshots+1]={
+    step=step and step.Text, instruction=instruction and instruction.Text
+   }
+  end
   if type(msg)=="string" and msg:find("[STAGE100] READY_ALT_ADD_ONE",1,true) then
    phase=1;phaseAt=elapsed;readyCount=readyCount+1
   elseif type(msg)=="string" and msg:find("[STAGE100] READY_MAIN_ADD_ONE",1,true) then
@@ -216,7 +262,11 @@ local function scenario(mode)
  if not ok then error("Stage100 launcher threw: "..tostring(handle)) end
  return {report=handle and handle.report,logs=printed,
   errorDetails=errorDetails,sources=sources,ready=readyCount,
-  clipboard=env.clipboard}
+  clipboard=env.clipboard,promptGui=createdPromptGui,
+  guideSteps=guideSnapshots,guideStep=guiObjectByName("GuideStep"),
+  guideInstruction=guiObjectByName("GuideInstruction"),
+  guidePanel=guiObjectByName("GuidePanel"),
+  guideDismiss=guiObjectByName("DismissWhenFinished")}
 end
 local function denied(t)
  local r=t.report
@@ -258,6 +308,41 @@ test("two-sided real original GUI ALT add→MAIN add→ALT remove",function()
  assert(t.report.stage9Frames>=10)
  eq(t.ready,3)
  eq(t.sources,3)
+ eq(t.report.onScreenGuideShown,true)
+ eq(t.report.onScreenGuideFinalShown,true)
+ eq(t.report.onScreenGuideCurrentStep,"COMPLETE - CLIENT GUI ONLY")
+ eq(#t.guideSteps,4)
+ eq(t.guideSteps[1].step,"STEP 1/4: OPEN TRADE")
+ eq(t.guideSteps[2].step,"STEP 2/4: ALT ADD")
+ eq(t.guideSteps[3].step,"STEP 3/4: MAIN ADD")
+ eq(t.guideSteps[4].step,"STEP 4/4: ALT REMOVE")
+ assert(t.guideSteps[2].instruction:find("On ALT:",1,true))
+ assert(t.guideSteps[3].instruction:find("On MAIN:",1,true))
+ eq(t.guidePanel.Draggable,true)
+ eq(t.guidePanel.Active,true)
+ eq(t.guideDismiss.Visible,true)
+ denied(t)
+end)
+test("on-screen prompt cannot initialize: fail closed rather than console-only",function()
+ local t=scenario({promptCreationUnavailable=true})
+ eq(t.report.status,"INCONCLUSIVE")
+ eq(t.report.reason,"IN_GAME_PROMPT_PANEL_UNAVAILABLE")
+ eq(t.report.onScreenGuideShown,false)
+ eq(t.report.observedAltAdd,false)
+ eq(t.sources,0)
+ eq(t.ready,0)
+ denied(t)
+end)
+test("on-screen guide reports safe timeout visibly and can be dismissed afterwards",function()
+ local t=scenario({noAltAdd=true})
+ eq(t.report.status,"INCONCLUSIVE")
+ eq(t.report.onScreenGuideShown,true)
+ eq(t.report.onScreenGuideFinalShown,true)
+ eq(t.guideStep.Text,"STOPPED - INCONCLUSIVE")
+ eq(t.guideDismiss.Visible,true)
+ assert(type(t.guideDismiss.closeCallback)=="function")
+ t.guideDismiss.closeCallback()
+ eq(t.promptGui.destroyed,true)
  denied(t)
 end)
 test("manual trade window appears after startup",function()
