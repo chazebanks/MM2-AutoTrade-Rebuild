@@ -65,10 +65,11 @@ jobs:
             else:
               assert "HttpGet(" not in s
           pure=Path("pdiddler/new_part4/stage116_client_evidence_view.lua").read_text()
-          for flag in ("authorizesAccept=false","authorizesTrade=false",
-                       "mayRecordCompletedTrade=false","mayReportProfit=false",
-                       "serverCompletionProven=false","relationProven=false",
-                       "tradeOutcome=\"UNKNOWN\""):
-            assert flag in pure,flag
+          import re
+          for field in ("authorizesAccept","authorizesTrade",
+                        "mayRecordCompletedTrade","mayReportProfit",
+                        "serverCompletionProven","relationProven"):
+            assert re.search(r"\\b"+field+r"\\s*=\\s*false\\b",pure),field
+          assert re.search(r'tradeOutcome\\s*=\\s*"UNKNOWN"',pure)
           print("STAGE116_READONLY_NO_SETTLEMENT_OR_IO_PASS")
           PY
