@@ -105,7 +105,7 @@ test("ALT only callback arriving after listener cannot masquerade as MAIN add",f
  local r=inspect(x)
  eq(r.status,"INCONCLUSIVE");eq(r.reason,"CLIENT_RAW_KEY_GUI_CANDIDATE_NOT_PROVEN");denied(r)
 end)
-test("stage106 refuses protected outgoing Gingerscope even if event matches",function()
+test("stage106 refuses protected outgoing target even if event matches",function()
  local x=fixture()
  x.after1.raw.our.slots={slot(1,"Gingerscope",1,false)}
  x.after2.raw.our.slots={slot(1,"Gingerscope",1,false)}
