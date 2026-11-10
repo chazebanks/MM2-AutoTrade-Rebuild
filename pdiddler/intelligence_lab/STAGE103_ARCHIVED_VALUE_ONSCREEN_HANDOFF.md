@@ -1,3 +1,18 @@
+## Verified Stage103 offline checkpoint — final script pin 23605cdd (Nov 10, 2026 UTC)
+
+**Actual Stage103 source+mock commit** `23605cddf4011aa11af5a1089830812592fa9dbb` (script Git blob `1c44057ab0b767a5b58218b3fdc456801b8a7213`) passed [focused GitHub Actions #42770510610](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42770510610): **3/3 Python tests executing 12/12 actual Lua5.4 original Stage9 native+Stage98+Stage102 archive/in-game overlay mock groups**, pinned 189-row original archived JSON SHA256 `47a025018f8bd24acbe4b193f7ec2a4aa158e88deced381d0f787406afa3339b`, all reviewed original Lua source Git blobs plus collision-safe layout, zero scripted gameplay and static no-Accept policy PASS. Mocked positive two-sided main Emberbow historical 650 vs ALT Batwing candidate, post-expiry clearly archived, unknown names, protected own Gingerscope warning persists until dismissed, missing/wrong partner, UI overlap, invalid archive, changed-offer-after-display invalidation and inherited prior Stage100 owner all checked. This is **OFFLINE**, not an actual iPad result. Five additional inherited CI workflows must remain green at exact final doc head.
+
+**NEXT ONE actual native iPad check** in a fresh original MM2 server MAIN iPad/Delta + consenting ALT `venossgaming90190`, with NO other pdiddler scripts, run on MAIN first:
+
+```lua
+getgenv().PDIDDLER_STAGE103_TARGET_USERNAME = "venossgaming90190"
+getgenv().PDIDDLER_STAGE103_READONLY_ARMED = true
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/23605cddf4011aa11af5a1089830812592fa9dbb/pdiddler/new_part4/STAGE103_READONLY_ARCHIVED_VALUE_OVERLAY.lua"))()
+```
+
+Follow the **non-overlapping purple ON-SCREEN** steps, one at a time: 1. Manually open EMPTY ALT trade, 2. ALT manually adds ONE expendable eligible weapon, 3. MAIN manually adds ONE expendable eligible weapon **NOT Gingerscope**; leave ALT offer unchanged. **NEITHER account final Accepts.** Keep both offers unchanged for 6 seconds. The purple panel should show each visible name, qty, archived Nov9 public research value/demand/stability (or NO EXACT PUBLIC MATCH), with explicit `ARCHIVED NOV 9 • NOT CURRENT` after 22:26:48Z. Values remain visible after safe completion until X. Return ONE `[GINGERSCOPE STAGE103 ARCHIVED VALUES]` sanitized JSON and whether display names/values/position appeared correct; if the panel blocks MM2 trade controls or stops INCONCLUSIVE, report instead of bypassing it or retrying in same JobId. **Historical quote only, never current price/verified raw item ID/automatic trade authority.** After this new item/value display test, focus on genuinely fresh first-party value publication and raw item mapping, not further generic GUI stages.
+
+---
 # Stage103 — REAL original Part4 GUI → Stage102 historical public-reference values on iPad (read-only)
 
 ## Prior milestones (do NOT repeat)
