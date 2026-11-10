@@ -13,13 +13,13 @@ The existing independently reviewed [PR105 four-slot snapshot guard](https://git
 This Stage98 experiment supplies a small **client-local observed GUI revision counter**, not a game-server version:
 - Accepts only snapshots with the SAME original client-local player references, GUI trade root, JobId, local observation session, explicit contextOK, both complete sides, acceptance flags false, max four visible slots **and conservatively four total copies per side**.
 - Reuses the **ACTUAL unchanged Stage9 `parseQuantity`** for blank=1, x2=2 / ×2=2 and validates slot order, duplicate indices, labels, chroma and optional raw text; labels and raw strings remain PRIVATE inside the module, never exported.
-- Requires an initially empty client trade. Any GUI add, removal, visible quantity change, position shift, chroma or optional raw GUI text change **increments a local epoch and revokes prior preview tokens**. Exactly equal subsequent samples at least 150 ms apart are marked stable RESEARCH-ONLY, never server-evidenced.
+- Requires an initially empty client trade. Any GUI add, removal, visible quantity change, position shift, chroma or optional raw GUI text change **increments a local epoch and revokes prior preview tokens**. It freezes the initial literal session/job and Player/GUI-root object references, rather than trusting a mutable caller's scope table; observation gaps over 2 seconds terminate the snapshot. Exactly equal subsequent samples at least 150 ms apart are marked stable RESEARCH-ONLY, never server-evidenced.
 - A callback note (not privileged and not a session-authenticated remote) instantly invalidates prior preview and marks `pendingClientCallback`; if a matching GUI change does not follow within 3s, observation is terminal INCONCLUSIVE. Even if one follows, the output retains `callbackCausalityProven=false` and `eventSessionAssociationProven=false`.
 - `freezePreview` produces an opaque **RESEARCH-ONLY** local token after two stable captures with at least one item and no pending callback; `checkPreview` revokes tokens on an epoch or local client-session change, missing stability, callback uncertainty or >2s observation age. It NEVER yields authority to send offers, Accept, report profit or conclude a trade.
 
 ## Actual previously reviewed code tested
 
-Focused GitHub Actions retrieves **two unchanged Git-blob pinned original modules**: Stage9 `p4_observer_contract.lua` `7c84456006bd684dacb0217d0ae092d6d67575a4` and PR105 `offer_snapshot_guard.lua` `c5b87f159de5224d231b111da2541b8b23ac6284`. Real Lua5.4 test suite and Python runner exercise:
+Focused GitHub Actions retrieves **two unchanged Git-blob pinned original modules**: Stage9 `p4_observer_contract.lua` `7c84456006bd684dacb0217d0ae092d6d67575a4` and PR105 `offer_snapshot_guard.lua` `c6546cf28670747f919e65025b7467950d89f295`. Real Lua5.4 test suite and Python runner exercise:
 - empty initial baseline; add, remove, extra slots, sorted indices, changed stack/Chroma, altered physical raw text, changed partner/root/job and acceptance flags;
 - duplicate/stale/unattributed callbacks, pending timeouts and late replay;
 - 700 adversarial mutations;
