@@ -28,7 +28,7 @@ PAGE_BLOBS={
 PUBLISHER="2026-11-09T18:58:33Z"
 CAPTURE_EXPIRES="2026-11-10T22:26:48Z"
 COUNTS={"ancient":16,"godly":128,"chroma":46}
-ALLOW_METADATA={"ItemName","ItemType","Rarity","Chroma"}
+REQUIRED_CLIENT_IDENTITY={"ItemName","ItemType","Rarity"}
 
 
 def _blob(raw:bytes)->str:
@@ -60,6 +60,12 @@ def _report(status:str,reason:str,**additional)->dict:
         "tradeOutcome":"UNKNOWN",
         **additional,
     }
+
+
+def _wall_epoch()->int:
+    # An untrusted caller may supply a past observation but cannot rewind
+    # the local clock to reactivate an archived publication.
+    return int(datetime.now(timezone.utc).timestamp())
 
 
 def _epoch(value:str)->int:
@@ -119,12 +125,12 @@ def _side(items,catalogue,registry,site):
         public=registry.get(key)
         meta=catalogue.get(key)
         if (not isinstance(public,dict) or not isinstance(meta,dict) or
-            set(meta)!=ALLOW_METADATA or
+            not REQUIRED_CLIENT_IDENTITY.issubset(meta) or
             meta["ItemName"]!=public["name"] or
             meta["ItemType"]!=public["type"] or
             meta["Rarity"]!=public["rarity"] or
-            type(meta["Chroma"]) is not bool or
-            meta["Chroma"]!=public["chroma"]):
+            type(meta.get("Chroma",False)) is not bool or
+            meta.get("Chroma",False)!=public["chroma"]):
             raise ValueError("local client catalog does not match public source")
         name=("Chroma "+public["name"]) if public["chroma"] else public["name"]
         priced=site.get((public["page"],name.casefold()))
@@ -147,9 +153,14 @@ def preview(registry_bytes:bytes,parser_bytes:bytes,html_pages:dict,
             evaluated_utc:str)->dict:
     """Pure deterministic, de-identified aggregate; NEVER a trading decision."""
     try:
-        if _epoch(evaluated_utc) < _epoch(PUBLISHER):
+        requested_at=_epoch(evaluated_utc)
+        wall_at=_wall_epoch()
+        if (type(wall_at) is not int or wall_at<=0 or
+            requested_at<_epoch(PUBLISHER) or wall_at<_epoch(PUBLISHER)):
             return _report("INCONCLUSIVE","IMPOSSIBLE_PRE_PUBLICATION_OBSERVATION")
-        if _epoch(evaluated_utc)>=_epoch(CAPTURE_EXPIRES):
+        # Never allow caller-controlled historical observation time to
+        # revive numerical display after this PINNED original expiry.
+        if max(requested_at,wall_at)>=_epoch(CAPTURE_EXPIRES):
             return _report("INCONCLUSIVE","FIXED_ORIGINAL_PUBLIC_CAPTURE_EXPIRED")
         if (not isinstance(our_rows,list) or not isinstance(their_rows,list)
             or not isinstance(local_client_catalogue,dict)):
