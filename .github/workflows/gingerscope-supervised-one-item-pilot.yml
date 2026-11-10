@@ -88,16 +88,21 @@ jobs:
               assert forbidden not in bridge
           plan=Path('pdiddler/supervised/supervised_four_slot_operator_plan.lua').read_text()
           guided=Path('pdiddler/supervised/SUPERVISED_FOUR_SLOT_MANUAL_PILOT.lua').read_text()
-          assert 'c599520caff852f481926124bc709f932721655b' in guided
+          assert '27e061555321c6a87bdd835ce3d1ff557443a909' in guided
           assert '4f186f3ad1db538512a735e1a18e220f23e8715a' not in guided
           assert 'function guide:showItem(' in guided
           assert 'onBeforeItem=function(index,total,priorVisible)' in guided
+          assert 'snapshotRejectReason' in guided
+          assert 'knownSnapshotReasons' in plan
+          assert 'transientSnapshotReasons' in plan
+          assert 'withSnapshotReason(' in plan
+          assert 'OfferItem:FireServer' not in plan
           assert 'e0dc690e6bf322e3a43c685547a817d1eda0761f' not in guided
           assert 'expectedDisplayNames' in plan
           assert 'expectedChromaFlags' in plan
           assert 'protected(display)' in plan
           assert 'candidate.name~=approved.display' in plan
-          assert 'ff3952f694503b8094fe2f39849a7583c7042bc0' == __import__('subprocess').check_output(
+          assert '2d5212d5da84e6eabfb137b619128bc375a7ca05' == __import__('subprocess').check_output(
               ['git','hash-object','pdiddler/supervised/supervised_four_slot_operator_plan.lua'],text=True).strip()
           assert 'bridgeModule.bind(' in guided
           assert 'planModule.run' in guided
