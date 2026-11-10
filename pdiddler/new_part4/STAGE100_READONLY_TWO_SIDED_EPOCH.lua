@@ -42,6 +42,8 @@ end
 local R={
  schema=SCHEMA,status="STARTING",reason="INITIALIZING",
  readOnly=true,clientOnly=true,oneShot=true,
+ onScreenGuideShown=false,onScreenGuideUpdates=0,
+ onScreenGuideFinalShown=false,onScreenGuideCurrentStep="NOT_READY",
  targetClientBound=false,exactPartnerGuiObserved=false,
  tradeWindowWaitPolls=0,stage9ObserverBound=false,stage9Frames=0,
  observedAltAdd=false,observedMainAdd=false,
@@ -72,6 +74,118 @@ local PG=LP and LP:FindFirstChildOfClass("PlayerGui")
 local I={running=true,report=R,jobId=tostring(game.JobId)}
 E[KEY]=I
 local target=nil
+-- In-game prompts are mandatory for any user-facing manual Stage100 action.
+-- Small draggable panel; GUI-only display, no trading input or game remotes.
+local guide=nil
+local function createGuide()
+ if not PG or PG.Parent~=LP then return false end
+ local screen=nil
+ local ok,created=pcall(function()
+  screen=Instance.new("ScreenGui")
+  screen.Name="PDIDDLER_STAGE100_ONSCREEN_GUIDE"
+  screen.ResetOnSpawn=false
+  screen.IgnoreGuiInset=false
+  screen.DisplayOrder=1200
+  local frame=Instance.new("Frame")
+  frame.Name="GuidePanel"
+  frame.Size=UDim2.new(0,292,0,154)
+  frame.Position=UDim2.new(1,-304,0,85)
+  frame.BackgroundColor3=Color3.fromRGB(29,23,42)
+  frame.BorderSizePixel=0
+  frame.Active=true
+  frame.Draggable=true -- Touch/mouse reposition, no game GUI interaction.
+  frame.Parent=screen
+  local corner=Instance.new("UICorner")
+  corner.CornerRadius=UDim.new(0,9)
+  corner.Parent=frame
+  local border=Instance.new("UIStroke")
+  border.Color=Color3.fromRGB(130,92,191)
+  border.Thickness=2
+  border.Parent=frame
+  local title=Instance.new("TextLabel")
+  title.Name="GuideTitle"
+  title.Position=UDim2.new(0,10,0,6)
+  title.Size=UDim2.new(1,-52,0,23)
+  title.BackgroundTransparency=1
+  title.Font=Enum.Font.GothamBold
+  title.TextSize=15
+  title.TextColor3=Color3.fromRGB(232,209,255)
+  title.TextXAlignment=Enum.TextXAlignment.Left
+  title.Text="PDIDDLER / STAGE 100"
+  title.Parent=frame
+  local step=Instance.new("TextLabel")
+  step.Name="GuideStep"
+  step.Position=UDim2.new(0,11,0,33)
+  step.Size=UDim2.new(1,-22,0,23)
+  step.BackgroundTransparency=1
+  step.Font=Enum.Font.GothamBold
+  step.TextSize=15
+  step.TextColor3=Color3.fromRGB(255,255,255)
+  step.TextXAlignment=Enum.TextXAlignment.Left
+  step.Text="STARTING"
+  step.Parent=frame
+  local instruction=Instance.new("TextLabel")
+  instruction.Name="GuideInstruction"
+  instruction.Position=UDim2.new(0,11,0,60)
+  instruction.Size=UDim2.new(1,-22,0,65)
+  instruction.BackgroundTransparency=1
+  instruction.Font=Enum.Font.Gotham
+  instruction.TextSize=14
+  instruction.TextColor3=Color3.fromRGB(239,234,248)
+  instruction.TextXAlignment=Enum.TextXAlignment.Left
+  instruction.TextYAlignment=Enum.TextYAlignment.Top
+  instruction.TextWrapped=true
+  instruction.Text="Preparing read-only test..."
+  instruction.Parent=frame
+  local warning=Instance.new("TextLabel")
+  warning.Name="GuideWarning"
+  warning.Position=UDim2.new(0,11,1,-25)
+  warning.Size=UDim2.new(1,-22,0,19)
+  warning.BackgroundTransparency=1
+  warning.Font=Enum.Font.GothamBold
+  warning.TextSize=11
+  warning.TextColor3=Color3.fromRGB(255,176,176)
+  warning.TextXAlignment=Enum.TextXAlignment.Left
+  warning.Text="MANUAL ONLY  |  NEVER FINAL ACCEPT"
+  warning.Parent=frame
+  local close=Instance.new("TextButton")
+  close.Name="DismissWhenFinished"
+  close.Position=UDim2.new(1,-34,0,5)
+  close.Size=UDim2.new(0,27,0,24)
+  close.BackgroundColor3=Color3.fromRGB(73,54,98)
+  close.BorderSizePixel=0
+  close.Text="X"
+  close.Font=Enum.Font.GothamBold
+  close.TextSize=13
+  close.TextColor3=Color3.fromRGB(255,255,255)
+  close.Visible=false
+  close.Parent=frame
+  close.MouseButton1Click:Connect(function()
+   pcall(function() screen:Destroy() end)
+  end)
+  screen.Parent=PG
+  return {root=screen,step=step,instruction=instruction,close=close}
+ end)
+ if not ok or type(created)~="table" then
+  if screen then pcall(function() screen:Destroy() end) end
+  return false
+ end
+ guide=created
+ R.onScreenGuideShown=true
+ return true
+end
+local function showGuide(step,message)
+ if not guide or guide.root.Parent~=PG then return false end
+ local ok=pcall(function()
+  guide.step.Text=step
+  guide.instruction.Text=message
+ end)
+ if ok then
+  R.onScreenGuideUpdates=R.onScreenGuideUpdates+1
+  R.onScreenGuideCurrentStep=step
+ end
+ return ok
+end
 local function result()
  R.elapsedSeconds=math.floor(math.max(0,os.clock()-started))
  local ok,json=pcall(function()
@@ -89,6 +203,17 @@ local function finish(status,reason)
  if not I.running then return I end
  I.running=false
  R.status=status;R.reason=reason
+ if guide and guide.root.Parent==PG then
+  local isPass=status=="CLIENT_TWO_SIDED_OFFER_WITHDRAWAL_EPOCH_OBSERVED"
+  local label=isPass and "COMPLETE - CLIENT GUI ONLY" or "STOPPED - INCONCLUSIVE"
+  local detail=isPass and
+   "All three manual changes observed. No trade occurred. Copy the sanitized Stage100 report from Delta." or
+   ("Stopped safely: "..tostring(reason)..". No final Accept. Copy the Stage100 report from Delta.")
+  if showGuide(label,detail) then
+   R.onScreenGuideFinalShown=true
+   pcall(function()guide.close.Visible=true end)
+  end
+ end
  result()
  return I
 end
@@ -175,6 +300,13 @@ local function run()
  if #matches~=1 then return finish("INCONCLUSIVE","TARGET_NOT_UNIQUE_IN_SERVER") end
  target=matches[1]
  R.targetClientBound=true
+ if not createGuide() then
+  return finish("INCONCLUSIVE","IN_GAME_PROMPT_PANEL_UNAVAILABLE")
+ end
+ if not showGuide("STEP 1/4: OPEN TRADE",
+   "MAIN: manually open an EMPTY trade with ALT within 30 seconds. Do not put items in yet.") then
+  return finish("INCONCLUSIVE","ONSCREEN_PROMPT_UPDATE_FAILED")
+ end
  print("[STAGE100] WAIT_FOR_MANUAL_TRADE_WINDOW: open an EMPTY trade with the ALT within 30 seconds. Never final Accept.")
  local root,why=nil,"EXACT_TRADE_WINDOW_NOT_OPEN"
  local deadline=os.clock()+30
@@ -295,6 +427,15 @@ local function run()
  R.stage9ObserverBound=true
  local token=nil
  local function phase(expectedOur,expectedTheir,name)
+  local steps={
+   ALT_ADD_ONE={"STEP 2/4: ALT ADD","On ALT: add ONE expendable weapon to their offer. MAIN stays EMPTY. Wait for the next prompt."},
+   MAIN_ADD_ONE={"STEP 3/4: MAIN ADD","On MAIN: add ONE expendable weapon to your offer. Leave ALT's item unchanged. Wait for next prompt."},
+   ALT_REMOVE_ONE={"STEP 4/4: ALT REMOVE","On ALT: REMOVE their offered weapon. Leave MAIN's weapon untouched. NEVER final Accept."}
+  }
+  local prompt=steps[name]
+  if not prompt or not showGuide(prompt[1],prompt[2]) then
+   return nil,"ONSCREEN_PROMPT_UPDATE_FAILED"
+  end
   print("[STAGE100] READY_"..name..": manually change only the requested side to "
     ..tostring(expectedOur).." MAIN slot(s) and "..tostring(expectedTheir)
     .." ALT slot(s). Leave both unaccepted. DO NOT final Accept.")
