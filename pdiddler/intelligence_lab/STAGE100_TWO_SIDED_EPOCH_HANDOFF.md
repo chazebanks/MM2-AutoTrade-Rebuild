@@ -1,3 +1,22 @@
+## Stage100 FINAL on-screen guide revision: collision-safe positioning (Nov 10 ET)
+
+**Permanent user rule:** [pdiddler/IN_GAME_TEST_PROMPT_POLICY.md](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/blob/main/pdiddler/IN_GAME_TEST_PROMPT_POLICY.md). Future manual multi-step MM2/Delta tests must show each ordered action on the actual game screen, not only Delta console. Display MAIN/ALT actor, safe next action and no-final-Accept warning. Advance only when verified; show PASS/STOP and sanitized report; test in mocks and iPad.
+
+**Current source-pin tested SHA `a7119802987a56bc65cfb203d180c0b922e5ffb9`**, script immutable Git blob `8d32148cf4624d351e1948e93295fd094e6d2ba4`, [focused Actions #42764830043](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42764830043) SUCCESS and five other workflows SUCCESS at exact same SHA. It loads an additional immutable pure safe-layout helper `pdiddler/new_part4/stage100_screen_prompt_overlay.lua` pinned to `5b8ee35d7f281c23d9c2181abd97a063e59a0660` (blob `e0eac8e039655999bd7bbac1f12da179db7c22ed`). The native mocks include viewport and trade-root rectangles, reject accidental trade-window overlap, test terminal/creation failures, and retain all four ordered prompts.
+
+**Correction to older guide description:** The FINAL implementation is NOT freely draggable; unrestricted dragging could obscure actual trade item or Accept/Decline controls. It auto-docks the compact purple panel to a viewport corner with a minimum gap to the exact visible trade-root rectangle. If no safe non-overlapping location exists, it returns `INCONCLUSIVE` rather than cover gameplay controls. Guide positioning checks use `Workspace.CurrentCamera.ViewportSize` and the actual trade-root `AbsolutePosition` / `AbsoluteSize`; this has passed mocked geometry, **not yet actual Delta native layout**. Users should share the sanitized reason if the screen is too cramped; never blindly force the panel over a trade. Terminal PASS/STOP prompt and dismiss-X remain.
+
+**NEXT one native Stage100 test, with FINAL on-screen code:** fresh original MM2 server, MAIN iPad/Delta and consenting ALT `venossgaming90190`, no older scripts. On MAIN execute exactly:
+
+```lua
+getgenv().PDIDDLER_STAGE100_TARGET_USERNAME = "venossgaming90190"
+getgenv().PDIDDLER_STAGE100_READONLY_ARMED = true
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/a7119802987a56bc65cfb203d180c0b922e5ffb9/pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua"))()
+```
+
+Follow the guide `STEP 1/4: OPEN TRADE` (MAIN opens EMPTY trade), `STEP 2/4: ALT ADD` (ALT adds one eligible expendable weapon), `STEP 3/4: MAIN ADD` (MAIN adds one eligible expendable weapon without ALT changing theirs), `STEP 4/4: ALT REMOVE` (ALT removes their weapon, MAIN unchanged). Never final Accept. Send ONE `[GINGERSCOPE STAGE100 TWO SIDED EPOCH]` sanitized JSON. This also tests real screen placement; if it stops with `ONSCREEN_GUIDE_*` or `SAFE_ONSCREEN_PLACEMENT_MODULE_UNAVAILABLE`, report and investigate actual iPad viewport and trade rectangles, NOT item identity. No rerun same server. After Stage100, prioritize weapon identity and independently current values/demand/stability/liquidity and strategy integration; no more generic GUI repetition.
+
+---
 ## New user requirement: IN-GAME ON-SCREEN ACTION PROMPTS (Nov 10, 2026)
 
 The user requested the current native test steps be displayed **directly on the iPad MM2 game screen**, not only in the Delta console, and requested that **future conversations implement this as the default for all manual multi-step tests**. Durable main rule: [pdiddler/IN_GAME_TEST_PROMPT_POLICY.md](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/blob/main/pdiddler/IN_GAME_TEST_PROMPT_POLICY.md).
@@ -11,7 +30,7 @@ The user requested the current native test steps be displayed **directly on the 
 ```lua
 getgenv().PDIDDLER_STAGE100_TARGET_USERNAME = "venossgaming90190"
 getgenv().PDIDDLER_STAGE100_READONLY_ARMED = true
-loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/666a2a17f6269c4cdfea3b711ae8fc551b904334/pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/a7119802987a56bc65cfb203d180c0b922e5ffb9/pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua"))()
 ```
 
 Use fresh original MM2 MAIN iPad+ALT, no older scripts, manually open empty trade when STEP 1/4 shows, add ALT one item when STEP 2/4 shows, add MAIN one item without altering ALT when STEP 3/4 shows, remove ALT item without altering MAIN when STEP 4/4 shows, never final Accept. Share ONE sanitized `[GINGERSCOPE STAGE100 TWO SIDED EPOCH]` result and optionally a screenshot showing the on-screen panel (only if verifying layout requires it). Before any new phase, read on-screen current step. After a successful native result, continue weapon identity/value integration per current handoff, not more repetitive GUI tests.
@@ -59,7 +78,7 @@ New **DRAFT Stage100 PR** stacked on Stage99 draft PR169, which is stacked on St
 ```lua
 getgenv().PDIDDLER_STAGE100_TARGET_USERNAME = "venossgaming90190"
 getgenv().PDIDDLER_STAGE100_READONLY_ARMED = true
-loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/666a2a17f6269c4cdfea3b711ae8fc551b904334/pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/a7119802987a56bc65cfb203d180c0b922e5ffb9/pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua"))()
 ```
 
 Run this FIRST in a fresh original MM2 server, no previous pdiddler scripts. Both accounts manually open a trade within 30s. ALT adds first; MAIN then adds one test item; ALT withdraws its own, strictly on the displayed prompts. Neither account presses final Accept. If inconclusive, do not retry the one-shot in the same JobId. Send ONE `[GINGERSCOPE STAGE100 TWO SIDED EPOCH]` sanitized JSON.
