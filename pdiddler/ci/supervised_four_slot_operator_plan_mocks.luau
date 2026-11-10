@@ -336,5 +336,80 @@ do
  eq(#x.sends,0,"no sends for incomplete snapshots")
 end
 
+
+-- Raw MM2 keys do not always equal the visible weapon label. Known prior
+-- client example: game key Scythe is displayed as Batwing. Do not fake
+-- an item identity match or require the human to choose an unsafe alias key.
+do
+ local x=fixture()
+ simulateOffer(x,function(key,category,index)
+  x.add(x.ours,index,key=="Scythe" and "Batwing" or key,1)
+ end)
+ local b=getBound(x)
+ local a=arm({"Iceblaster","Scythe"})
+ a.expectedDisplayNames={"Iceblaster","Batwing"}
+ a.expectedChromaFlags={false,false}
+ local r=x.plan.run(b,x.io,x.gate,a,{wait=function()end})
+ eq(r.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","separate raw and display alias approved")
+ eq(r.clientVisibleAddedSlots,2,"two physical GUI aliases confirmed")
+ eq(x.sends[2][1],"Scythe","outgoing remote uses raw game key, never display Batwing")
+end
+-- Chroma variants must be explicitly approved as Chroma and still bound to
+-- a distinct physical slot; a naked display label does not establish type.
+do
+ local x=fixture()
+ simulateOffer(x,function(_,_,i)x.add(x.ours,i,"Fang",1,true)end)
+ local b=getBound(x)
+ local a=arm({"ChromaFang"})
+ a.expectedDisplayNames={"Fang"}
+ a.expectedChromaFlags={true}
+ local r=x.plan.run(b,x.io,x.gate,a,{wait=function()end})
+ eq(r.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","explicit chroma variant accepted")
+ eq(x.sends[1][1],"ChromaFang","raw Chroma key dispatched")
+end
+-- Unknown/mismatched visual identity NEVER triggers a second send.
+do
+ local x=fixture()
+ simulateOffer(x,function(key,_,i)x.add(x.ours,i,key=="Scythe" and "NotBatwing" or key,1)end)
+ local b=getBound(x)
+ local a=arm({"Iceblaster","Scythe"})
+ a.expectedDisplayNames={"Iceblaster","Batwing"}
+ a.expectedChromaFlags={false,false}
+ local r=x.plan.run(b,x.io,x.gate,a,{wait=function()end})
+ eq(r.status,"STOPPED","wrong alias must stop")
+ eq(r.reason,"UNEXPECTED_OWN_OFFER_MUTATION","wrong alias visible")
+ eq(#x.sends,2,"do not retry dispatched but unconfirmed second item")
+end
+-- Protected visible-name cannot be laundered through ordinary raw key.
+do
+ local x=fixture()
+ local b=getBound(x)
+ local a=arm({"Iceblaster"})
+ a.expectedDisplayNames={"Gingerscope"}
+ local r=x.plan.run(b,x.io,x.gate,a,{wait=function()end})
+ eq(r.status,"BLOCKED","outgoing protected display block")
+ eq(#x.sends,0,"no Gingerscope by display alias")
+end
+-- Size mismatches, forged chroma flags, control characters, and duplicate
+-- visible variants fail BEFORE the guarded OfferItem remote.
+do
+ local alter={
+  function(a)a.expectedDisplayNames={"Iceblaster","Batwing"} end,
+  function(a)a.expectedDisplayNames={"Iceblaster\nBad"} end,
+  function(a)a.expectedChromaFlags={true,false}end,
+  function(a)a.expectedDisplayNames={"Laser","Laser"}end,
+ }
+ for i,change in ipairs(alter) do
+  local x=fixture()
+  local b=getBound(x)
+  local a=arm({"Iceblaster"})
+  if i==4 then a=arm({"Iceblaster","Batwing"}) end
+  change(a)
+  local r=x.plan.run(b,x.io,x.gate,a,{wait=function()end})
+  eq(r.status,"BLOCKED","reject malformed alias config "..i)
+  eq(#x.sends,0,"no physical remote on bad alias "..i)
+ end
+end
+
 print("[PASS] P3/P4 guarded physical multi-slot approved plan",tests)
 print("[PASS] four distinct physical slots, no auto Accept, no duplicate sends, Gingerscope protected")
