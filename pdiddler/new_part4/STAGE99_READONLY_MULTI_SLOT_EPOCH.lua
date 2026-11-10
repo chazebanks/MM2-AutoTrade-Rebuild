@@ -329,14 +329,42 @@ local function run()
   end
   return nil,"MANUAL_ALT_OFFER_PHASE_TIMEOUT"
  end
+ local function samePrivateSlot(a,b)
+  if type(a)~="table" or type(b)~="table" then return false end
+  for i=1,5 do if a[i]~=b[i] then return false end end
+  return true
+ end
+ local function copyPrivateSlot(a)
+  return {a[1],a[2],a[3],a[4],a[5]}
+ end
  local ok1,why1=phase(1,"ADD_FIRST")
  if not ok1 then return finish("INCONCLUSIVE",why1) end
  R.observedFirstAdd=true
+ local firstItem=copyPrivateSlot(state.their[1])
  local ok2,why3=phase(2,"ADD_SECOND_DIFFERENT")
  if not ok2 then return finish("INCONCLUSIVE",why3) end
+ -- Two slots alone are insufficient: forbid silent substitution or a
+ -- duplicate visible type. Compare private client strings WITHOUT logging.
+ local firstStill=false
+ local otherItem=nil
+ for _,item in ipairs(state.their or {}) do
+  if samePrivateSlot(item,firstItem) then
+   firstStill=true
+  else
+   otherItem=copyPrivateSlot(item)
+  end
+ end
+ if not firstStill or not otherItem or
+    (otherItem[2]==firstItem[2] and otherItem[3]==firstItem[3]) then
+  return finish("INCONCLUSIVE","SECOND_ITEM_NOT_DISTINCT_OR_FIRST_REPLACED")
+ end
  R.observedSecondAdd=true
  local ok3,why4=phase(1,"REMOVE_ONE")
  if not ok3 then return finish("INCONCLUSIVE",why4) end
+ if not samePrivateSlot(state.their[1],firstItem) and
+    not samePrivateSlot(state.their[1],otherItem) then
+  return finish("INCONCLUSIVE","REMAINING_ITEM_NOT_FROM_PRIOR_TWO")
+ end
  R.observedOneRemoval=true
  if R.revocationsVerified~=2 or
     R.localOfferEpoch<4 or R.theirMaxSlotCount~=2 then
