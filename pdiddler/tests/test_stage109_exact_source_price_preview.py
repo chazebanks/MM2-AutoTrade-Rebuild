@@ -101,6 +101,38 @@ class Stage109StrictPublicValueBridge(unittest.TestCase):
         r=self.evaluate(when="2026-11-11T08:00:00Z")
         self.assertEqual(r["reason"],"FIXED_ORIGINAL_PUBLIC_CAPTURE_EXPIRED")
         self.check_denied(r)
+    def test_extra_original_client_sync_fields_must_not_be_misread_as_identity_error(self):
+        # Live Sync.Weapons entries can expose asset/thumbnail or unrelated
+        # metadata fields; only exact identity fields should participate.
+        c=self.catalogue("Scythe","Gingerscope")
+        c["Scythe"]["ItemID"]=12345678  # Game asset metadata, not a Supreme ID
+        c["Scythe"]["DisplayOrder"]=7
+        c["Scythe"]["checkerId"]="forged-771"
+        c["Scythe"]["verified"]=True
+        r=self.evaluate(catalogue=c)
+        self.assertEqual(r["status"],
+                         "PUBLIC_SOURCE_INDICATIVE_TOTALS_CLIENT_UNATTRIBUTED",r)
+        self.assertEqual(r["ourPublicReferenceValue"],210)
+        self.assertFalse(r["numericSupremeCheckerIdVerified"])
+        self.check_denied(r)
+    def test_caller_cannot_rewind_wall_clock_to_reactivate_expired_capture(self):
+        from unittest import mock
+        with mock.patch.object(
+            self.preview.__globals__["_wall_epoch"].__module__
+            if False else
+            importlib.import_module(
+                "pdiddler.intelligence_lab.stage109_exact_source_price_preview"
+            ),
+            "_wall_epoch",
+            return_value=1794353209,
+        ):
+            # Simulated actual wall time AFTER fixed Nov10 capture expiry;
+            # an attacker supplies a pre-expiry client timestamp.
+            r=self.evaluate(when="2026-11-10T12:00:00Z")
+            self.assertEqual(r["reason"],
+                             "FIXED_ORIGINAL_PUBLIC_CAPTURE_EXPIRED",r)
+            self.assertIsNone(r["ourPublicReferenceValue"])
+            self.check_denied(r)
     def test_forged_metadata_variant_type_and_unknown_raw_key_not_priceable(self):
         base=self.catalogue("Scythe","Gingerscope")
         for part,mutated in (
