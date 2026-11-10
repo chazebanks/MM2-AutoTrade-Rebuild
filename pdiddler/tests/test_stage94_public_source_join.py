@@ -61,6 +61,7 @@ class ActualOriginalPublicSourceJoin(unittest.TestCase):
         }.items():
             assert blob(NEW/p)==d,(p,"new first-party source blob changed")
         s82=load(ROOT/"stage82.py","stage94_pinned_stage82")
+        parser77=load(ROOT/"stage77.py","stage94_pinned_stage77_new_site_links")
         s84=load(ROOT/"stage84.py","stage94_pinned_stage84")
         cls.old=s82.build(
           (ROOT/"game.lua").read_bytes(),
@@ -71,21 +72,29 @@ class ActualOriginalPublicSourceJoin(unittest.TestCase):
           (ROOT/"stage81.py").read_bytes()
         )
         # NOTE source keys old actual are ancients/godlies/chromas; map explicitly
+        cls.newSiteSlugs={
+          "ancient":parser77.website_records((NEW/"ancients.html").read_bytes(),"ancients"),
+          "godly":parser77.website_records((NEW/"godlies.html").read_bytes(),"godlies"),
+          "chroma":parser77.website_records((NEW/"chromas.html").read_bytes(),"chromas"),
+        }
         cls.new=s84.load_inputs(NEW,NEW/"source_manifest.json",
             ROOT/"parser.py",ROOT/"receipt.py",ROOT/"roster.json",now_epoch=T_OK)
         if cls.old.get("status")!="PUBLIC_GAME_KEY_TO_WEBSITE_SLUG_CANDIDATES_ONLY":
             raise AssertionError("Stage82 original did not build 189 public references")
         if len(cls.new["rows"])!=190:
             raise AssertionError("Stage84 original did not build 190 fresh source rows")
-    def join(self,old=None,new=None,now=T_OK):
+    def join(self,old=None,new=None,now=T_OK,slugs=None):
         return join_public_sources(self.old if old is None else old,
-                                   self.new if new is None else new,at_epoch=now)
+                                   self.new if new is None else new,
+                                   self.newSiteSlugs if slugs is None else slugs,
+                                   at_epoch=now)
     def test_actual_189_public_prices_research_only(self):
         r=self.join()
         self.assertEqual(r["status"],"PUBLIC_RESEARCH_JOIN_READY",r["reason"])
         self.assertTrue(r["sourceResearchFreshAtEvaluation"])
         self.assertEqual(len(r["rows"]),189)
         self.assertEqual(r["publicCandidates"],189)
+        self.assertTrue(r["newPublicationDetailSlugsIndependentlyReparsed"])
         lookup={x["publicItemName"]:x for x in r["rows"]}
         self.assertEqual(lookup["Gingerscope"]["researchSourceValue"],16000)
         self.assertEqual(lookup["Emberbow"]["researchSourceValue"],650)
@@ -133,6 +142,21 @@ class ActualOriginalPublicSourceJoin(unittest.TestCase):
         n=copy.deepcopy(self.new)
         random.Random(94).shuffle(n["rows"])
         self.assertEqual(self.join(new=n)["rows"],self.join()["rows"])
+    def test_new_publisher_detail_slug_and_base_rarity_must_still_match(self):
+        slugs=copy.deepcopy(self.newSiteSlugs)
+        p="ancient"
+        key=next(iter(slugs[p]))
+        slugs[p][key]=("Wrong Item",slugs[p][key][1])
+        self.assertEqual(self.join(slugs=slugs)["status"],"INCONCLUSIVE")
+        slugs=copy.deepcopy(self.newSiteSlugs)
+        p="chroma"
+        key=next(iter(slugs[p]))
+        slugs[p][key]=(slugs[p][key][0],"Godly" if slugs[p][key][1]=="Ancient" else "Ancient")
+        self.assertEqual(self.join(slugs=slugs)["status"],"INCONCLUSIVE")
+        slugs=copy.deepcopy(self.newSiteSlugs)
+        p="godly"
+        del slugs[p][next(iter(slugs[p]))]
+        self.assertEqual(self.join(slugs=slugs)["status"],"INCONCLUSIVE")
     def test_publisher_and_source_provenance_mutations_fail(self):
         for key,bad in (("publishedAt","2026-11-10T18:58:33Z"),
                         ("expiresAt","2026-11-19T22:26:48Z"),
@@ -169,7 +193,7 @@ class ActualOriginalPublicSourceJoin(unittest.TestCase):
            (self.old,self.new,"bad"),(self.old,self.new,-1),
            (self.old,self.new,False),
         ):
-            r=join_public_sources(old,new,at_epoch=when)
+            r=join_public_sources(old,new,self.newSiteSlugs,at_epoch=when)
             self.assertEqual(r["status"],"INCONCLUSIVE")
             self.assertEqual(r["rows"],[])
     def test_400_seeded_corruptions_never_authorize(self):
