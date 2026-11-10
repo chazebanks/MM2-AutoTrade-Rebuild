@@ -38,6 +38,8 @@ local function create()
  accepted.Visible=false
  local theirs=t:put(node("Frame","TheirOffer"))
  theirs:put(node("Frame","Container"))
+ local theirAccepted=theirs:put(node("Frame","Accepted"))
+ theirAccepted.Visible=false
  local label=theirs:put(node("TextLabel","Username"))
  label.Text="TrustedAlt"
  local players={}
@@ -127,6 +129,8 @@ local cases={
  function(x)x.username.Text="AnotherPerson" end,
  function(x)x.screen.Enabled=false end,
  function(x)x.accepted.Visible=true end,
+ function(x)x.t:FindFirstChild("TheirOffer").children.Accepted=nil end,
+ function(x)x.t:FindFirstChild("TheirOffer").children.Accepted.Visible=true end,
  function(x)x.t:FindFirstChild("YourOffer").children.Container=nil end,
  function(x)x.E.PDIDDLER_OUTGOING_SESSION=1 end,
  function(x)x.E.PDIDDLER_PART4_SESSION=1 end,
