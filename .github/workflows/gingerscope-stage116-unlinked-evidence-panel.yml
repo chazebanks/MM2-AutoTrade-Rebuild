@@ -69,7 +69,7 @@ jobs:
           for field in ("authorizesAccept","authorizesTrade",
                         "mayRecordCompletedTrade","mayReportProfit",
                         "serverCompletionProven","relationProven"):
-            assert re.search(r"\\b"+field+r"\\s*=\\s*false\\b",pure),field
-          assert re.search(r'tradeOutcome\\s*=\\s*"UNKNOWN"',pure)
+            assert re.search(r"\b"+field+r"\s*=\s*false\b",pure),field
+          assert re.search(r'tradeOutcome\s*=\s*"UNKNOWN"',pure)
           print("STAGE116_READONLY_NO_SETTLEMENT_OR_IO_PASS")
           PY
