@@ -1,0 +1,126 @@
+name: Gingerscope Stage111 original Supreme source archive (research-only)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage111_supreme_readonly_capture.py'
+      - 'pdiddler/tests/test_stage111_supreme_readonly_capture.py'
+      - 'pdiddler/intelligence_lab/STAGE111_SOURCE_CAPTURE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage111-supreme-source-archive.yml'
+  push:
+    branches:
+      - research/gingerscope-stage111-archive-supreme-capture
+    paths:
+      - 'pdiddler/intelligence_lab/stage111_supreme_readonly_capture.py'
+      - 'pdiddler/tests/test_stage111_supreme_readonly_capture.py'
+      - 'pdiddler/intelligence_lab/STAGE111_SOURCE_CAPTURE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage111-supreme-source-archive.yml'
+  workflow_dispatch:
+  # This schedule will NOT activate while the PR is unmerged.
+  # It is research capture only, on the repository DEFAULT branch after review.
+  schedule:
+    - cron: '17 16 * * *'
+permissions:
+  contents: read
+jobs:
+  pinned-source-and-capture-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Fetch Git-blob-pinned Stage69 parser and original three Stage84 Supreme pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope111/original
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/refresh_supreme_snapshot.py" -o /tmp/gingerscope111/parser.py
+          for tier in ancients godlies chromas; do
+            curl -fsSL --retry 3 --max-time 45 "$base/f08ceb35a9ff684ee2cf577ccce7542c436cc68e/pdiddler/research_source_html/stage84_2026_11_09/$tier.html" -o "/tmp/gingerscope111/original/$tier.html"
+          done
+          test "$(git hash-object /tmp/gingerscope111/parser.py)" = d5843a57f34078cbe7213aa78a4aa12a5775c016
+          test "$(git hash-object /tmp/gingerscope111/original/ancients.html)" = ce8178ab9579e8782d8f72a6dac051756a728506
+          test "$(git hash-object /tmp/gingerscope111/original/godlies.html)" = d3cf222a8e10cff3a9fb051b16188192389c4b2d
+          test "$(git hash-object /tmp/gingerscope111/original/chromas.html)" = 6c77624cac3df96168b008e9bc8eca68a2d78cf9
+      - name: Run original-source replay and hostile HTTPS/redirect/capture negatives
+        env:
+          STAGE111_REQUIRE_PINNED: '1'
+          STAGE111_ORIGINAL_PARSER: /tmp/gingerscope111/parser.py
+          STAGE111_ORIGINAL_HTML_DIR: /tmp/gingerscope111/original
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_stage111_supreme_readonly_capture
+      - name: Enforce zero production writes and never grant trade/Accept
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          source=Path('pdiddler/intelligence_lab/stage111_supreme_readonly_capture.py').read_text()
+          workflow=Path('.github/workflows/gingerscope-stage111-supreme-source-archive.yml').read_text()
+          for banned in ('authorizesTrade":True','authorizesAccept":True',
+                         'newResearchDatasetPublished":True',
+                         'requests.get(', 'subprocess.run(', 'os.replace(',
+                         'HttpGet(', 'FireServer(', 'AcceptTrade('):
+              assert banned not in source,banned
+          assert 'contents: write' not in workflow
+          assert 'git push' not in workflow
+          assert 'values/mm2values.lua' not in workflow
+          assert 'if: always()' in workflow
+          assert 'verify=True' in source
+          assert 'allow_redirects=False' in source
+          print('STAGE111_ORIGINAL_SOURCE_ARCHIVE_NO_PRODUCTION_WRITE_AUTHORITY_PASS')
+          PY
+
+  # Actual publisher capture happens ONLY on a manually dispatched workflow
+  # or schedule AFTER this reviewed PR lands on default branch. CI PR/push
+  # never hits the public Supreme website and never changes production data.
+  capture-public-pages:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    needs: pinned-source-and-capture-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install HTTPS source reader (no game/app credentials)
+        run: python -m pip install 'requests>=2.32,<3'
+      - name: Fetch four immutable Git source references (no price publishing)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/stage111_prior"
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/refresh_supreme_snapshot.py" -o "$RUNNER_TEMP/stage111_prior/parser.py"
+          for tier in ancients godlies chromas; do
+            curl -fsSL --retry 3 --max-time 45 "$base/f08ceb35a9ff684ee2cf577ccce7542c436cc68e/pdiddler/research_source_html/stage84_2026_11_09/$tier.html" -o "$RUNNER_TEMP/stage111_prior/$tier.html"
+          done
+          test "$(git hash-object "$RUNNER_TEMP/stage111_prior/parser.py")" = d5843a57f34078cbe7213aa78a4aa12a5775c016
+          test "$(git hash-object "$RUNNER_TEMP/stage111_prior/ancients.html")" = ce8178ab9579e8782d8f72a6dac051756a728506
+          test "$(git hash-object "$RUNNER_TEMP/stage111_prior/godlies.html")" = d3cf222a8e10cff3a9fb051b16188192389c4b2d
+          test "$(git hash-object "$RUNNER_TEMP/stage111_prior/chromas.html")" = 6c77624cac3df96168b008e9bc8eca68a2d78cf9
+      - name: Fetch official Supreme HTTPS pages into research-only artifact
+        env:
+          STAGE111_ORIGINAL_PARSER: ${{ runner.temp }}/stage111_prior/parser.py
+          STAGE111_ORIGINAL_HTML_DIR: ${{ runner.temp }}/stage111_prior
+          STAGE111_OUTPUT_DIR: ${{ runner.temp }}/stage111_supreme_source_capture
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.intelligence_lab.stage111_supreme_readonly_capture \
+            --parser "$STAGE111_ORIGINAL_PARSER" \
+            --prior-html-dir "$STAGE111_ORIGINAL_HTML_DIR" \
+            --output-dir "$STAGE111_OUTPUT_DIR"
+      - name: Retain exact source HTML, source hashes and admission result even on review failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage111-supreme-canonical-capture-research-only
+          path: ${{ runner.temp }}/stage111_supreme_source_capture/*
+          if-no-files-found: warn
+          retention-days: 14
