@@ -1,0 +1,88 @@
+name: Gingerscope Stage97 read-only partner callback native-window mock
+on:
+  push:
+    branches:
+      - diagnostic/gingerscope-stage97-partner-event-native
+    paths:
+      - 'pdiddler/new_part4/STAGE97_READONLY_PARTNER_EVENT_WITNESS.lua'
+      - 'pdiddler/tests/test_stage97_readonly_partner_event_mock.lua'
+      - 'pdiddler/tests/test_stage97_native_witness_driver.py'
+      - 'pdiddler/intelligence_lab/STAGE97_NATIVE_PARTNER_EVENT_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage97-partner-event-native.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE97_READONLY_PARTNER_EVENT_WITNESS.lua'
+      - 'pdiddler/tests/test_stage97_readonly_partner_event_mock.lua'
+      - 'pdiddler/tests/test_stage97_native_witness_driver.py'
+      - 'pdiddler/intelligence_lab/STAGE97_NATIVE_PARTNER_EVENT_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage97-partner-event-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  read-only-native-witness-under-actual-source-mocks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install real Lua5.4 and Python
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Verify immutable original Stage9 native+contract and Stage83 public catalogue
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope97
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope97/stage9.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_native_observer.lua" -o /tmp/gingerscope97/native.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua" -o /tmp/gingerscope97/stage83.lua
+          test "$(git hash-object /tmp/gingerscope97/stage9.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          test "$(git hash-object /tmp/gingerscope97/native.lua)" = a6338e946467ad738005bc5cb13cd2d2fbc2a2d0
+          test "$(git hash-object /tmp/gingerscope97/stage83.lua)" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          test "$(git hash-object pdiddler/intelligence_lab/stage95_p4_public_slot_boundary.lua)" = e1c75920b0118a5b2a947bb3e01943eb74e65359
+          test "$(git hash-object pdiddler/intelligence_lab/stage96_partner_event_gui_correlation.lua)" = a999c1fa9e602635f4991766040930837f4687c0
+          echo STAGE97_FIVE_ORIGINAL_SOURCE_BLOBS_PINNED_AND_VERIFIED
+      - name: Run actual one-shot MM2 client mock and fail-closed cases via Python
+        env:
+          STAGE97_PINNED_SOURCES_REQUIRED: '1'
+          STAGE97_ORIGINAL_STAGE9: /tmp/gingerscope97/stage9.lua
+          STAGE97_ORIGINAL_NATIVE: /tmp/gingerscope97/native.lua
+          STAGE97_ORIGINAL_STAGE83: /tmp/gingerscope97/stage83.lua
+        run: |
+          set -euo pipefail
+          python3 -m py_compile pdiddler/tests/test_stage97_native_witness_driver.py
+          python3 -m unittest -v pdiddler.tests.test_stage97_native_witness_driver
+      - name: Static no-transaction, one read-only UpdateTrade listener boundary
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          text=Path("pdiddler/new_part4/STAGE97_READONLY_PARTNER_EVENT_WITNESS.lua").read_text()
+          for required in (
+              'PDIDDLER_STAGE97_READONLY_ARMED',
+              'PDIDDLER_STAGE97_TARGET_USERNAME',
+              'remote.OnClientEvent:Connect(function(...)',
+              'connection:Disconnect()',
+              'stage96.inspect',
+              'R.actualRequestTaps=0' if 'R.actualRequestTaps=0' in text else 'actualRequestTaps=0',
+              'actualOffers=0,actualAccepts=0',
+              'eventSessionAssociationProven=false,callbackCausalityProven=false',
+              'authorizesTrade=false,authorizesAccept=false',
+              'mayRecordCompletedTrade=false,mayReportProfit=false',
+              'currentPricesVerified=false',
+              '[GINGERSCOPE STAGE97 PARTNER EVENT]',
+          ): assert required in text, required
+          for forbidden in (
+              ':FireServer(', ':InvokeServer(', 'SendMouseButtonEvent(',
+              'VirtualInputManager', 'TeleportService', 'PostAsync(',
+              'HttpPost(', 'AcceptTrade(', 'DeclineTrade(', 'getconnections(',
+              'RequestTrade(', 'OfferItem(',
+          ): assert forbidden not in text,forbidden
+          assert text.count('OnClientEvent:Connect(function(...)')==1
+          print('STAGE97_READ_ONLY_PROVENANCE_POLICY_PASS')
+          PY
