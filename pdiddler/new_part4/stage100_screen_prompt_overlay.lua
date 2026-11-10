@@ -19,7 +19,7 @@ end
 -- All candidate locations are in the same absolute viewport coordinates.
 -- UI has IgnoreGuiInset=true, while 72 top / 34 bottom preserve iPad
 -- system/Roblox bars. Refuse, rather than guess, a zero-sized trade root.
-function M.choose(viewport,trade)
+function M.choose(viewport,trade,requestedSize)
  if type(viewport)~="table" or not number(viewport.x) or
     not number(viewport.y) then return nil,"VIEWPORT_UNAVAILABLE" end
  local W,H=viewport.x,viewport.y
@@ -27,8 +27,14 @@ function M.choose(viewport,trade)
  local margin=14
  local top=72
  local bottom=34
- local width=math.min(304,W-2*margin)
- local height=96
+ requestedSize=requestedSize or {}
+ local requestedW=requestedSize.w or 304
+ local requestedH=requestedSize.h or 96
+ if not number(requestedW) or not number(requestedH) or
+    requestedW<240 or requestedW>512 or requestedH<80 or
+    requestedH>220 then return nil,"INVALID_PANEL_SIZE" end
+ local width=math.min(requestedW,W-2*margin)
+ local height=requestedH
  if width<240 or top+height+bottom>H then
   return nil,"NO_SAFE_PANEL_SIZE"
  end
