@@ -411,5 +411,60 @@ do
  end
 end
 
+
+-- A displayed numbered step precedes each physical send; step i+1 only
+-- appears after i real GUI slots are present, not after a timer.
+do
+ local x=fixture()
+ simulateOffer(x)
+ local bound=getBound(x)
+ local steps={}
+ local a=arm({"Iceblaster","Batwing","Laser"})
+ local r=x.plan.run(bound,x.io,x.gate,a,{
+  wait=function()end,
+  onBeforeItem=function(i,total,priorSlots)
+   steps[#steps+1]={i,total,priorSlots,#x.sends}
+   return true
+  end,
+ })
+ eq(r.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","guided offer succeeds")
+ eq(#steps,3,"three separate on-screen instructions")
+ for i,row in ipairs(steps) do
+  eq(row[1],i,"numbered current item")
+  eq(row[2],3,"fixed approved total")
+  eq(row[3],i-1,"previous physical slot observed first")
+  eq(row[4],i-1,"no premature remote before instruction")
+ end
+end
+do
+ local x=fixture()
+ simulateOffer(x)
+ local bound=getBound(x)
+ local r=x.plan.run(bound,x.io,x.gate,arm({"Iceblaster","Batwing"}),{
+  wait=function()end,
+  onBeforeItem=function(i) return i==1 end,
+ })
+ eq(r.status,"STOPPED","missing second instruction stops")
+ eq(r.reason,"ONSCREEN_STEP_UNAVAILABLE","specific UI reason")
+ eq(r.offerAttempts,1,"one attempt")
+ eq(r.clientVisibleAddedSlots,1,"one confirmed slot")
+ eq(#x.sends,1,"no second remote")
+ eq(x.gate.checkOutbound,nil,"no orphaned remote approval")
+end
+do
+ local x=fixture()
+ simulateOffer(x)
+ local b=getBound(x)
+ local ok,r=pcall(x.plan.run,b,x.io,x.gate,arm({"Iceblaster"}),{
+  wait=function()end,
+  onBeforeItem=function()error("guide failed")end,
+ })
+ eq(ok,true,"failed UI callback caught")
+ eq(r.status,"STOPPED","UI exception stops")
+ eq(r.reason,"ONSCREEN_STEP_UNAVAILABLE","UI failure reason")
+ eq(r.offerAttempts,0,"no remote attempted")
+ eq(#x.sends,0,"no concealed mutation")
+end
+
 print("[PASS] P3/P4 guarded physical multi-slot approved plan",tests)
 print("[PASS] four distinct physical slots, no auto Accept, no duplicate sends, Gingerscope protected")
