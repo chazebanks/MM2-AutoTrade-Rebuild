@@ -1,0 +1,70 @@
+name: Gingerscope Stage108 strict public source-name coverage (offline)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage108_strict_public_name_coverage.py'
+      - 'pdiddler/tests/test_stage108_strict_public_name_coverage.py'
+      - 'pdiddler/intelligence_lab/STAGE108_PUBLIC_NAME_COVERAGE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage108-public-name-coverage.yml'
+  push:
+    branches:
+      - research/gingerscope-stage108-strict-public-name-coverage
+    paths:
+      - 'pdiddler/intelligence_lab/stage108_strict_public_name_coverage.py'
+      - 'pdiddler/tests/test_stage108_strict_public_name_coverage.py'
+      - 'pdiddler/intelligence_lab/STAGE108_PUBLIC_NAME_COVERAGE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage108-public-name-coverage.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage83-to-stage84-public-name-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Fetch exact immutable public Stage83 Lua, Stage69 parser and Stage84 raw Supreme HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/stage108/html
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua" -o /tmp/stage108/stage83.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/refresh_supreme_snapshot.py" -o /tmp/stage108/parser.py
+          for page in ancients godlies chromas; do
+            curl -fsSL --retry 3 --max-time 45 "$base/f08ceb35a9ff684ee2cf577ccce7542c436cc68e/pdiddler/research_source_html/stage84_2026_11_09/$page.html" -o "/tmp/stage108/html/$page.html"
+          done
+          test "$(git hash-object /tmp/stage108/stage83.lua)" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          test "$(git hash-object /tmp/stage108/parser.py)" = d5843a57f34078cbe7213aa78a4aa12a5775c016
+          test "$(git hash-object /tmp/stage108/html/ancients.html)" = ce8178ab9579e8782d8f72a6dac051756a728506
+          test "$(git hash-object /tmp/stage108/html/godlies.html)" = d3cf222a8e10cff3a9fb051b16188192389c4b2d
+          test "$(git hash-object /tmp/stage108/html/chromas.html)" = 6c77624cac3df96168b008e9bc8eca68a2d78cf9
+          echo STAGE108_FIVE_ORIGINAL_PUBLIC_GIT_BLOBS_VERIFIED
+      - name: Run actual original-source coverage and hostile name/variant tests
+        env:
+          STAGE108_REQUIRE_PINNED: '1'
+          STAGE108_ORIGINAL_STAGE83: /tmp/stage108/stage83.lua
+          STAGE108_ORIGINAL_PARSER: /tmp/stage108/parser.py
+          STAGE108_ORIGINAL_HTML_DIR: /tmp/stage108/html
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_stage108_strict_public_name_coverage
+      - name: Confirm research-only no game, price or webhook actions
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('pdiddler/intelligence_lab/stage108_strict_public_name_coverage.py').read_text()
+          for bad in ('urlopen(', 'requests.get(', 'subprocess.run(', 'HttpGet(',
+                      'FireServer(', 'AcceptTrade(', 'PostAsync(', 'os.replace(',
+                      'authorizesTrade":True', 'authorizesAccept":True',
+                      'maySendDiscordWebhook":True','mayReportProfit":True'):
+              assert bad not in s,bad
+          for key in ('currentPricesVerified":False','rawItemIdConfirmed":False',
+                      'authorizesTrade":False','authorizesAccept":False',
+                      'numericSupremeCheckerIdVerified":False'):
+              assert key in s,key
+          print('STAGE108_PUBLIC_NAME_RESEARCH_ZERO_TRADE_AND_PRICE_AUTHORITY_PASS')
+          PY
