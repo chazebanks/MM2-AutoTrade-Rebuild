@@ -129,7 +129,7 @@ local function fakeEnv(options)
      if url:find("616f905739ffb7bf70183475a79ec6c278dc9ddb",1,true)
         and url:find("supervised_p3_p4_handoff.lua",1,true)
      then return bridgeSource end
-     if url:find("4f186f3ad1db538512a735e1a18e220f23e8715a",1,true)
+     if url:find("c599520caff852f481926124bc709f932721655b",1,true)
         and url:find("supervised_four_slot_operator_plan.lua",1,true)
      then return planSource end
      if url:find("5b8ee35d7f281c23d9c2181abd97a063e59a0660",1,true)
