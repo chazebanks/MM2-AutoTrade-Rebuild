@@ -358,6 +358,9 @@ task.spawn(function()
  for iteration=1,600 do
   if not running then break end
   task.wait(0.25)
+  -- Operator shutdown may occur DURING task.wait. Never overwrite the
+  -- final STOPPED receipt with a stale observer poll after that.
+  if not running then break end
   if startedJob~=game.JobId then
    shutdown("JOB_CHANGED");break
   end
