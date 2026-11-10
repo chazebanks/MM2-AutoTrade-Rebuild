@@ -254,10 +254,10 @@ test("four physical slots allow five stacked copies without granting trade autho
  eq(r.theirMatchedSlotCount,1);eq(p.theirs[1].quantity,5)
  denied(r)
 end)
-test("two physical slots may hold seven stacked copies",function()
+test("two distinct physical slots may hold seven stacked copies",function()
  local i=newFixture({ourGui={},ourEvent={},
-   theirGui={slot(1,"Batwing","x3",false),slot(2,"Batwing","x4",false)},
-   theirEvent={{"Scythe",3,"Weapons"},{"Scythe",4,"Weapons"}}})
+   theirGui={slot(1,"Batwing","x3",false),slot(2,"Gingerscope","x4",false)},
+   theirEvent={{"Scythe",3,"Weapons"},{"Gingerscope",4,"Weapons"}}})
  local r,p=inspect(i)
  eq(r.status,"CLIENT_MULTISLOT_RAW_KEY_CANDIDATES_MATCH_GUI_UNATTRIBUTED",r.reason)
  eq(r.theirMatchedSlotCount,2)
