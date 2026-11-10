@@ -20,8 +20,10 @@ local function scope()
    localPlayer={},partnerPlayer={}}
 end
 local function slot(i,label,qty,chroma,rawId)
+ local chromaValue=chroma
+ if chromaValue==nil then chromaValue=false end
  local t={slot=i,label=label or "Batwing",
-  amountText=qty==nil and "" or qty,chroma=chroma==nil and false or chroma}
+  amountText=qty==nil and "" or qty,chroma=chromaValue}
  if rawId~=nil then t.rawId=rawId end
  return t
 end
