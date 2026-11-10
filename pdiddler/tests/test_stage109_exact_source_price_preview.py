@@ -11,6 +11,8 @@ import os
 from pathlib import Path
 import random
 import unittest
+from unittest import mock
+from datetime import datetime, timezone
 
 class Stage109StrictPublicValueBridge(unittest.TestCase):
     @classmethod
@@ -26,6 +28,17 @@ class Stage109StrictPublicValueBridge(unittest.TestCase):
         cls.entries={e["key"]:e for e in parse_registry(cls.reg)}
         cls.preview=staticmethod(importlib.import_module(
             "pdiddler.intelligence_lab.stage109_exact_source_price_preview").preview)
+    def setUp(self):
+        # Replaying a Nov10 original publication in future CI must remain
+        # deterministic; production preview uses REAL unpatched wall clock.
+        pinned=datetime.fromisoformat("2026-11-10T09:00:00+00:00")
+        mod=importlib.import_module(
+            "pdiddler.intelligence_lab.stage109_exact_source_price_preview")
+        patcher=mock.patch.object(mod,"_wall_epoch",
+                                  return_value=int(pinned.timestamp()))
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def catalogue(self,*keys):
         return {key:{"ItemName":self.entries[key]["name"],
                      "ItemType":self.entries[key]["type"],
@@ -107,6 +120,7 @@ class Stage109StrictPublicValueBridge(unittest.TestCase):
         c=self.catalogue("Scythe","Gingerscope")
         c["Scythe"]["ItemID"]=12345678  # Game asset metadata, not a Supreme ID
         c["Scythe"]["DisplayOrder"]=7
+        c["Scythe"].pop("Chroma")  # missing false is valid in original Stage101
         c["Scythe"]["checkerId"]="forged-771"
         c["Scythe"]["verified"]=True
         r=self.evaluate(catalogue=c)
@@ -116,16 +130,9 @@ class Stage109StrictPublicValueBridge(unittest.TestCase):
         self.assertFalse(r["numericSupremeCheckerIdVerified"])
         self.check_denied(r)
     def test_caller_cannot_rewind_wall_clock_to_reactivate_expired_capture(self):
-        from unittest import mock
-        with mock.patch.object(
-            self.preview.__globals__["_wall_epoch"].__module__
-            if False else
-            importlib.import_module(
-                "pdiddler.intelligence_lab.stage109_exact_source_price_preview"
-            ),
-            "_wall_epoch",
-            return_value=1794353209,
-        ):
+        mod=importlib.import_module(
+            "pdiddler.intelligence_lab.stage109_exact_source_price_preview")
+        with mock.patch.object(mod,"_wall_epoch",return_value=1794353209):
             # Simulated actual wall time AFTER fixed Nov10 capture expiry;
             # an attacker supplies a pre-expiry client timestamp.
             r=self.evaluate(when="2026-11-10T12:00:00Z")
