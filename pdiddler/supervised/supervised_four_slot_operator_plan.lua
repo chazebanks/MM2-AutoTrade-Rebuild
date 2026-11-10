@@ -93,8 +93,11 @@ local function current(bound,own,their)
   snapshot.tradeOutcome~="UNKNOWN" then
   return nil,"SNAPSHOT_AUTHORITY_MISMATCH"
  end
- local ours=copySlots(snapshot.ours or {})
- local theirs=copySlots(snapshot.theirs or {})
+ if type(snapshot.ours)~="table" or type(snapshot.theirs)~="table" then
+  return nil,"PHYSICAL_SLOT_SNAPSHOT_UNREADABLE"
+ end
+ local ours=copySlots(snapshot.ours)
+ local theirs=copySlots(snapshot.theirs)
  if not ours or not theirs or
   snapshot.physicalOwnSlots~=#ours or
   snapshot.physicalTheirSlots~=#theirs or
@@ -204,7 +207,10 @@ function M.run(bound,io,gate,approval,opts)
   end
   local observed=false
   for _=1,5 do
-   opts.wait(0.2)
+   local waited=pcall(opts.wait,0.2)
+   if not waited then
+    return report("STOPPED","GUI_REPLICATION_WAIT_FAILED",attempts,confirmed)
+   end
    local fresh,reason=current(bound,nil,their)
    if not fresh or io.trade()~=root then
     return report("STOPPED",reason or "TRADE_ROOT_CHANGED",attempts,confirmed)
