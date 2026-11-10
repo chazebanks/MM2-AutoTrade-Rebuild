@@ -1,3 +1,19 @@
+# Stage95 COMPLETE OFFLINE: original P4 slot-identity compatibility, native Stage50/83/93 preserved (Nov 9 ET)
+
+**User correction honored:** Do NOT repeat native Stage43/44/50 one-own-Batwing raw key/client Owned/Sync/UpdateTrade matches, Stage79/80/83 69 eligible types/76 copies client public-reference coverage, or Stage91–93 actual request→alt trade GUI→original P4 observer manual alt offer add. These scoped results were already proven on the user's iPad.
+
+**Original Stage9 P4 source audit:** `p4_native_observer.lua` captures physical slot label, blank/x2 Amount, Chroma indicator, optional raw GUI item attribute. `p4_observer_contract.lua` requires price-complete scanner `checkerId` numeric strings even for item resolution, and falls back to displayed name when GUI raw ID is absent. Stage70 checker crosswalk is unverified/EMPTY. This is a **downstream contract mismatch**; not a reason to retest user raw inventory.
+
+New isolated **[DRAFT PR165 Stage95](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/165)** pure read-only module `pdiddler/intelligence_lab/stage95_p4_public_slot_boundary.lua` wraps the **real original unchanged** Stage9 `contract.normalize` inside original `p4_native_observer.capture`. Current local catalogue metadata + original static Stage83 189 public raw-key registry can classify a GUI **string** raw ID as a *client-only* public-reference candidate, without numeric Supreme checker IDs or price authority. If GUI `rawId` absent, **`NAME_ONLY_UNBOUND_NO_GUI_RAW_KEY`** even when label unique. Wrong variant/name/Chroma, quantity, malformed raw ID or partner/session/Accept cannot promote identity. No names/ids exported; all prices, offer/Accept/profit/Discord/settlement flags FALSE. GUI original adapter may stringify numeric UI attributes; thus even a text equality is NOT proof of original typed key/ownership/server transaction. Stage95 is NOT production/automated trader, no native iPad test for it.
+
+**Real source detail caught in CI:** Batwing display is **public raw `Scythe`**, not raw `Batwing`; test harness corrected to source key. Second fixture-only Lua `and/or` nil error corrected to test missing Amount distinctly from blank=1. No source check weakened.
+
+**Exact fully tested head SHA `d4dcfed067e5e03f2b41bfeb966d7b0f2f56fb77`**. [Focused GitHub Actions 42741842281](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42741842281) SUCCESS **18/18 Lua5.4 original Stage9-native+contract+Stage83 registry tests, 400 negative mutations, all THREE immutable original Git blobs validated**; plus five Luau/Lune/Selene+StyLua/replay/Hypothesis workflows SUCCESS on exact head (six green). Draft unmerged, production untouched.
+
+**NEXT exactly one remaining subproblem:** existing Stage43/44 actor-aware UpdateTrade event raw triples proven for ONE own Batwing, while Stage93 showed client GUI partner-side add. Inspect the EXISTING event/state modules to plan narrow partner-side callback→physical GUI identity correlation with bounded same root/partner/current revision, without fabricating server nonce, attaching numeric Supreme checkerIDs, or claiming transaction completion. This is NOT repeating own Batwing nor inventory scans. No auto offers/final Accept/Discord based on client-only data. [Issue122 Stage95 checkpoint](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/issues/122#issuecomment-6757143975), [Stage95 detailed handoff](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/blob/research/gingerscope-stage95-p4-identity-boundary/pdiddler/intelligence_lab/STAGE95_P4_IDENTITY_HANDOFF.md).
+
+---
+
 # Stage95 scope correction — DO NOT repeat completed identity experiments (Nov 9, 2026 ET)
 
 The user correctly objected to the suggestion to restart raw-key/offer identity verification after native Stage93. Previous actual work already established:
