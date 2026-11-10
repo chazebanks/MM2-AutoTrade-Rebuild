@@ -1,0 +1,80 @@
+name: Gingerscope Stage103 real in-game historical value read-only overlay
+on:
+  push:
+    branches:
+      - diagnostic/gingerscope-stage103-archived-value-display
+    paths:
+      - 'pdiddler/new_part4/STAGE103_READONLY_ARCHIVED_VALUE_OVERLAY.lua'
+      - 'pdiddler/tests/test_stage103_native_archived_value_overlay.lua'
+      - 'pdiddler/tests/test_stage103_native_archived_value_overlay_driver.py'
+      - 'pdiddler/intelligence_lab/STAGE103_ARCHIVED_VALUE_ONSCREEN_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage103-archived-value-ui.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE103_READONLY_ARCHIVED_VALUE_OVERLAY.lua'
+      - 'pdiddler/tests/test_stage103_native_archived_value_overlay.lua'
+      - 'pdiddler/tests/test_stage103_native_archived_value_overlay_driver.py'
+      - 'pdiddler/intelligence_lab/STAGE103_ARCHIVED_VALUE_ONSCREEN_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage103-archived-value-ui.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-native-archive-ui-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Pin original Stage9 native + Stage98 + Stage102 published reference module and geometry
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope103
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope103/contract.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_native_observer.lua" -o /tmp/gingerscope103/native.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/642768973f5eb560a184119237c44c84697a208f/pdiddler/intelligence_lab/stage98_client_offer_epoch.lua" -o /tmp/gingerscope103/stage98.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/c9e6646487ca0c673a0edc3423046d1412c52e02/pdiddler/intelligence_lab/stage102_lua_public_reference_preview.lua" -o /tmp/gingerscope103/stage102.lua
+          test "$(git hash-object /tmp/gingerscope103/contract.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          test "$(git hash-object /tmp/gingerscope103/native.lua)" = a6338e946467ad738005bc5cb13cd2d2fbc2a2d0
+          test "$(git hash-object /tmp/gingerscope103/stage98.lua)" = 748639e88823198fd7cc0dce92fba49ad07e2729
+          test "$(git hash-object /tmp/gingerscope103/stage102.lua)" = 40e4ea5d16f22ed2316d0b40627f37253ebd19d5
+          test "$(git hash-object pdiddler/new_part4/stage100_screen_prompt_overlay.lua)" = e0eac8e039655999bd7bbac1f12da179db7c22ed
+          echo STAGE103_FIVE_ORIGINAL_LUA_SOURCE_GIT_BLOBS_VERIFIED
+      - name: Execute actual archived real 189-row Lua native GUI/overlay tests
+        env:
+          STAGE103_REQUIRE_PINNED: '1'
+          STAGE103_ORIGINAL_STAGE9: /tmp/gingerscope103/contract.lua
+          STAGE103_ORIGINAL_NATIVE: /tmp/gingerscope103/native.lua
+          STAGE103_ORIGINAL_STAGE98: /tmp/gingerscope103/stage98.lua
+          STAGE103_ORIGINAL_STAGE102: /tmp/gingerscope103/stage102.lua
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_stage103_native_archived_value_overlay_driver
+      - name: Static no-trade/no-price-authority and in-game safety guard
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path("pdiddler/new_part4/STAGE103_READONLY_ARCHIVED_VALUE_OVERLAY.lua").read_text()
+          required=("source(\"stage102\")","pinnedArchive()","source(\"promptLayout\")",
+                   "values.preview(archive,state,os.time(),os.clock())",
+                   "ARCHIVED NOV 9 • NOT CURRENT",
+                   "PROTECTED_GINGERSCOPE_IN_OUR_OFFER",
+                   "offerPreviewInvalidatedDuringHold=true",
+                   "actualRequestTaps=0,actualOffers=0,actualAccepts=0",
+                   "authorizesAccept=false","marketPriceNotVerified=true")
+          for r in required: assert r in s,r
+          for bad in (":FireServer(",":InvokeServer(", "VirtualInputManager",
+                      "SendMouseButtonEvent(", "TeleportService", "PostAsync(",
+                      "OnClientEvent:Connect(", "HttpPost(", "AcceptTrade("):
+              assert bad not in s,bad
+          print("STAGE103_READONLY_ARCHIVAL_GUI_VALUES_NO_TRADING_AUTHORITY_PASS")
+          PY
