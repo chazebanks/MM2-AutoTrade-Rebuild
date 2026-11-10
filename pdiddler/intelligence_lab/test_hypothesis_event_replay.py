@@ -34,6 +34,23 @@ def safe(output):
     assert output["readOnly"] is True
     assert output["simulationOnly"] is True
     assert RUN not in repr(output)
+    assert output["operatorCorroborationProven"] is False
+    assert output["clientEvidenceTier"] in {
+        "NO_TERMINAL_CLIENT_EVIDENCE",
+        "CLIENT_WINDOW_CLOSED_ONLY",
+        "CLIENT_POSTCLOSE_NO_CHANGE",
+        "CLIENT_POSTCLOSE_CHANGE_UNATTRIBUTED",
+        "CLIENT_POSTCLOSE_READBACKS_CONFLICT",
+    }
+    assert (output["postCloseChangedReadbacks"]
+            + output["postCloseUnchangedReadbacks"]
+            == output["postCloseDeltaObservations"]), output
+    assert 0 <= output["postCloseReadbackRepeats"] <= output[
+        "postCloseDeltaObservations"
+    ], output
+    assert 0 <= output["postCloseDistinctReadbackPatterns"] <= output[
+        "postCloseDeltaObservations"
+    ], output
 
 
 class ClientEventReplayMachine(RuleBasedStateMachine):
