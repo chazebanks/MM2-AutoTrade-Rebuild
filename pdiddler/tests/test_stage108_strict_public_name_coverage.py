@@ -87,6 +87,36 @@ class Stage108SourceNameOnly(unittest.TestCase):
         self.assertNotIn("Scythe",str(r))
         self.assertNotIn("venossgaming90190",str(r))
 
+    def test_modern_2026_public_names_present_but_not_current_game_authenticated(self):
+        historical={r["key"]:r for r in self.mod.parse_registry(self.registry)}
+        # Stage71's older decompiled v1456 archive omitted these 2026 items.
+        # Stage83 public registry includes them, and Nov9 official SITE names
+        # corroborate them. This is not authentication of current owned keys.
+        expected=("Emberbow","Emberscythe","Mortal","Immortal",
+                  "EmberbowChroma","EmberscytheChroma",
+                  "MortalChroma","ImmortalChroma")
+        for raw in expected:
+            with self.subTest(raw=raw):
+                item=historical[raw]
+                rows,_=self.parse(self.pages[item["page"]].decode("utf-8"),
+                                  item["page"])
+                name=("Chroma "+item["name"]) if item["chroma"] else item["name"]
+                self.assertEqual(
+                    sum(r["name"].casefold()==name.casefold() for r in rows),1)
+        self.denied(self.evaluate())
+
+    def test_supreme_ancient_extra_record_is_not_an_unreviewed_raw_game_key(self):
+        catalog=self.mod.parse_registry(self.registry)
+        registered={r["name"].casefold() for r in catalog
+                    if r["page"]=="ancient"}
+        site,_=self.parse(self.pages["ancient"].decode("utf-8"),"ancient")
+        surplus={r["name"] for r in site if r["name"].casefold()
+                 not in registered}
+        self.assertEqual(surplus,{"Nik's Scythe"})
+        r=self.evaluate()
+        self.assertEqual(r["unmatchedSupremeSourceNameCount"],1)
+        self.denied(r)
+
     def test_no_fuzzy_or_punctuation_alias_promotions(self):
         entries=[
             {"key":"T","name":"Traveler's Axe","type":"Knife","rarity":"Ancient",
