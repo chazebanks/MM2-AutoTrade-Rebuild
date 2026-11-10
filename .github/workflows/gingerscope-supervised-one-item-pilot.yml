@@ -7,6 +7,8 @@ on:
       - 'pdiddler/new_part4/stage100_screen_prompt_overlay.lua'
       - 'pdiddler/ci/supervised_one_item_pilot_tests.luau'
       - 'pdiddler/ci/supervised_one_item_native_runner_mocks.luau'
+      - 'pdiddler/supervised/supervised_p3_p4_handoff.lua'
+      - 'pdiddler/ci/supervised_p3_p4_handoff_mocks.luau'
       - '.github/workflows/gingerscope-supervised-one-item-pilot.yml'
   push:
     branches:
@@ -39,12 +41,18 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_one_item_native_runner_mocks.luau
+      - name: Exercise live P3->P4 exact session and physical slot interface in Lua
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_p4_handoff_mocks.luau
       - name: Verify no auto trading, final Accept, market quote or Discord source
         run: |
           set -euo pipefail
           test "$(git hash-object pdiddler/supervised/pdiddler4_tradeio_supervised_v2.lua)" = eb4dc6342d1d6dda6292490cd8fa00314199d589
           test "$(git hash-object pdiddler/supervised/supervised_one_item_policy.lua)" = d67f8addbeb14552a35cded9a55f2c4ddf92dd56
           test "$(git hash-object pdiddler/new_part4/stage100_screen_prompt_overlay.lua)" = e0eac8e039655999bd7bbac1f12da179db7c22ed
+          test "$(git hash-object pdiddler/pdiddler3_outgoing_PART4_BRIDGE_v5.lua)" = a13596ecae607c323b1fc93f34072b3e959c3f84
+          test "$(git hash-object pdiddler/pdiddler3_scanner_MODULE_v6_5_PART4_STATUS_BRIDGE.lua)" = f7190538cbc882e23b22f723f3af0b6140a98bcd
           python3 - <<'PY'
           from pathlib import Path
           controller=Path('pdiddler/supervised/supervised_one_item_policy.lua').read_text()
@@ -54,6 +62,18 @@ jobs:
                                 'DeclineTrade:FireServer(', 'OfferItem:FireServer(',
                                 'TeleportService', 'PostAsync(', 'GetFullInventory:InvokeServer('):
                   assert forbidden not in s,forbidden
+          bridge=Path('pdiddler/supervised/supervised_p3_p4_handoff.lua').read_text()
+          scanner=Path('pdiddler/pdiddler3_scanner_MODULE_v6_5_PART4_STATUS_BRIDGE.lua').read_text()
+          outgoing=Path('pdiddler/pdiddler3_outgoing_PART4_BRIDGE_v5.lua').read_text()
+          for method in ('getRecord','isWhitelisted'):
+              assert f'function ScannerAPI.{method}(' in scanner
+          for method in ('isPaused=function()', 'resume=function(reason)'):
+              assert method in outgoing
+          assert 'io.sideSignature(io.readSide' in bridge
+          assert 'physical~=src.slots' in bridge
+          assert 'PROTECTED_GINGERSCOPE_IN_OWN_OFFER' in bridge
+          for forbidden in ('OfferItem:FireServer(', 'AcceptTrade:FireServer(', 'DeclineTrade:FireServer(', 'PostAsync('):
+              assert forbidden not in bridge
           assert runner.count('game:HttpGet(')==1
           assert 'THEIR_ACCEPT_STATE_UNKNOWN' in controller
           assert controller.count('their:FindFirstChild("Accepted")')==1
