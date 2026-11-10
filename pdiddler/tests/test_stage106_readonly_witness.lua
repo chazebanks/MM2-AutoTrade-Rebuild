@@ -262,6 +262,9 @@ local function newWorld(options)
     local function buildTrade()
         local screen = object("ScreenGui", "TradeGUI", playerGui)
         local container = object("Frame", "Container", screen)
+        if options.hideTradeContainer then
+            container.Visible = false
+        end
         local root = object("Frame", "Trade", container)
         root._absolutePosition = options.tradePosition or { X = 450, Y = 150 }
         root._absoluteSize = options.tradeSize or { X = 360, Y = 360 }
@@ -271,7 +274,13 @@ local function newWorld(options)
         local theirs = object("Frame", "TheirOffer", root)
         object("Frame", "Accepted", theirs).Visible = false
         object("Frame", "Container", theirs)
-        textNode("Username", "(venossgaming90190)", theirs)
+        local header = textNode("Username", "(venossgaming90190)", theirs)
+        if options.hidePartnerHeader then
+            header.Visible = false
+        end
+        if options.hideTheirOffer then
+            theirs.Visible = false
+        end
         state.screen = screen
         state.root = root
         state.ours = ours
@@ -910,6 +919,24 @@ test("changed target, JobId or GUI root fails closed", function()
     )
     expectStopped({ openImmediately = true, jobChanges = true }, "SESSION_OR_TARGET_CHANGED", true)
     expectStopped({ openImmediately = true, rootChanges = true }, "TRADE_GUI_ROOT_CHANGED", true)
+end)
+
+test("hidden trade ancestor is not an open current GUI root", function()
+    expectStopped({
+        openImmediately = true,
+        hideTradeContainer = true,
+    }, "MANUAL_TRADE_WINDOW_NOT_OBSERVED_WITHIN_30S", false)
+end)
+
+test("hidden partner header or hidden partner offer cannot establish identity", function()
+    expectStopped({
+        openImmediately = true,
+        hidePartnerHeader = true,
+    }, "TRADE_PARTNER_HEADER_UNAVAILABLE", false)
+    expectStopped({
+        openImmediately = true,
+        hideTheirOffer = true,
+    }, "TRADE_PARTNER_HEADER_UNAVAILABLE", false)
 end)
 
 test("exact target absence never attaches listener", function()
