@@ -11,6 +11,8 @@ on:
       - 'pdiddler/ci/supervised_p3_p4_handoff_mocks.luau'
       - 'pdiddler/supervised/supervised_four_slot_operator_plan.lua'
       - 'pdiddler/ci/supervised_four_slot_operator_plan_mocks.luau'
+      - 'pdiddler/supervised/SUPERVISED_FOUR_SLOT_MANUAL_PILOT.lua'
+      - 'pdiddler/ci/supervised_four_slot_native_runner_mocks.luau'
       - '.github/workflows/gingerscope-supervised-one-item-pilot.yml'
   push:
     branches:
@@ -51,6 +53,10 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_four_slot_operator_plan_mocks.luau
+      - name: Execute actual guided four-slot iPad runner under mocked original MM2
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_four_slot_native_runner_mocks.luau
       - name: Verify no auto trading, final Accept, market quote or Discord source
         run: |
           set -euo pipefail
@@ -81,6 +87,17 @@ jobs:
           for forbidden in ('OfferItem:FireServer(', 'AcceptTrade:FireServer(', 'DeclineTrade:FireServer(', 'PostAsync('):
               assert forbidden not in bridge
           plan=Path('pdiddler/supervised/supervised_four_slot_operator_plan.lua').read_text()
+          guided=Path('pdiddler/supervised/SUPERVISED_FOUR_SLOT_MANUAL_PILOT.lua').read_text()
+          assert 'bridgeModule.bind(' in guided
+          assert 'planModule.run' in guided
+          assert 'guide:safeForOffer(root)' in guided
+          assert 'E.PDIDDLER_SUPERVISED_FOUR_SLOT_SPENT_JOB' in guided
+          assert 'E.PDIDDLER_SUPERVISED_FOUR_SLOT_LAST_SANITIZED_JSON=json' in guided
+          assert 'manualContactOnly=true' in guided
+          assert 'noAutomaticAcceptAcknowledged' in guided
+          assert guided.count('game:HttpGet(')==1
+          for forbidden in ('AcceptTrade:FireServer(', 'SendRequest:FireServer(', 'OfferItem:FireServer(', 'DeclineTrade:FireServer(', 'TeleportService', 'PostAsync('):
+              assert forbidden not in guided
           assert 'spentBindings' in plan
           assert 'approval.noAutomaticAcceptAcknowledged~=true' in plan
           assert 'candidateAdded(expectedOwn,fresh.ours,key)' in plan
