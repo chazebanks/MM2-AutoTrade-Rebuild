@@ -1,0 +1,53 @@
+name: Supervised MM2 trade I/O — protected item outbound boundary
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/supervised/pdiddler4_tradeio_supervised_v2.lua'
+      - 'pdiddler/ci/supervised_offer_remote_gate_tests.luau'
+      - '.github/workflows/gingerscope-supervised-offer-remote-gate.yml'
+      - 'pdiddler/supervised/SUPERVISED_TRADE_HANDOFF.md'
+  push:
+    branches:
+      - fix/supervised-trade-protected-offer-remote-gate
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-mocked-remote-offer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install exact SHA256 pinned official Lune v0.11.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 50 'https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip' -o "$RUNNER_TEMP/lune.zip"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/lune-dist"
+          found="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
+          test -n "$found"
+          install -m 0755 "$found" "$RUNNER_TEMP/lune"
+      - name: Test exact supervised trade I/O using mocked Roblox OfferItem remote
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_offer_remote_gate_tests.luau
+      - name: Verify original I/O remains byte-identical and supervised gate is fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object pdiddler/pdiddler4_tradeio_v1.lua)" = 0c12285438ee66166aa89086c891f697a33338fc
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('pdiddler/supervised/pdiddler4_tradeio_supervised_v2.lua').read_text()
+          assert s.count('OfferItem:FireServer(')==1
+          assert 'PROTECTED_GINGERSCOPE_OUTGOING' in s
+          assert 'SUPERVISED_OFFER_GATE_MISSING' in s
+          assert 'TRADE_CHANGED_DURING_AUTHORIZATION' in s
+          for banned in ('AcceptTrade:FireServer(', 'PostAsync(', 'HttpGet(', 'TeleportService'):
+              assert banned not in s,banned
+          print('SUPERVISED_OFFER_REMOTE_GINGERSCOPE_GUARD_NO_FINAL_ACCEPT_PASS')
+          PY
