@@ -69,8 +69,6 @@ class Stage111ArchivedSourceCaptureTests(unittest.TestCase):
             "pdiddler.intelligence_lab.stage111_supreme_readonly_capture")
         cls.parser=Path(os.environ["STAGE111_ORIGINAL_PARSER"]).read_bytes()
         root=Path(os.environ["STAGE111_ORIGINAL_HTML_DIR"])
-        cls.old={k:(root/(k+"s" if k!="chroma" else "chromas")).with_suffix(".html").read_bytes()
-                 for k in ()}
         cls.old={k:(root/(f+".html")).read_bytes() for k,f in (
             ("ancient","ancients"),("godly","godlies"),("chroma","chromas"))}
         self_hashes={k:blob(v) for k,v in cls.old.items()}
@@ -84,7 +82,7 @@ class Stage111ArchivedSourceCaptureTests(unittest.TestCase):
         data=self.old if old is None else old
         return FakeSession({URLS[k]:FakeResponse(URLS[k],v) for k,v in data.items()})
 
-    def run(self,session=None,old=None,time="2026-11-10T14:00:00Z",
+    def capture_run(self,session=None,old=None,time="2026-11-10T14:00:00Z",
             parser=None,baseline=None,output=None):
         session=self.session(old) if session is None else session
         result=self.m.collect_and_admit(
@@ -115,7 +113,7 @@ class Stage111ArchivedSourceCaptureTests(unittest.TestCase):
 
     def test_all_three_real_original_supreme_pages_archive_unchanged_no_market_update(self):
         with tempfile.TemporaryDirectory() as td:
-            result,session=self.run(output=Path(td))
+            result,session=self.capture_run(output=Path(td))
             self.assertEqual(result["status"],"NO_NEW_PUBLISHER_PUBLICATION",result)
             self.assertEqual(result["admission"]["rowChangeCount"],0)
             self.assertEqual(result["admission"]["observedPublisherUtc"],
@@ -143,7 +141,7 @@ class Stage111ArchivedSourceCaptureTests(unittest.TestCase):
                                  hashlib.sha256(raw).hexdigest())
 
     def test_retrieval_after_expiry_does_not_republish_or_redate_old_source(self):
-        result,_=self.run(time="2026-11-12T14:00:00Z")
+        result,_=self.capture_run(time="2026-11-12T14:00:00Z")
         self.assertEqual(result["status"],"NO_NEW_PUBLISHER_PUBLICATION")
         self.assertIsNone(result["admission"]["newCaptureExpiryUtc"])
         self.denied(result)
@@ -154,7 +152,7 @@ class Stage111ArchivedSourceCaptureTests(unittest.TestCase):
                  for k,v in self.old.items()}
         for k in self.old:
             self.assertNotEqual(altered[k],self.old[k],k)
-        result,_=self.run(old=altered,time="2026-11-10T19:00:00Z")
+        result,_=self.capture_run(old=altered,time="2026-11-10T19:00:00Z")
         self.assertEqual(result["status"],"NEW_PUBLISHER_CANDIDATE_REVIEW_REQUIRED",result)
         self.denied(result)
 
@@ -171,7 +169,7 @@ class Stage111ArchivedSourceCaptureTests(unittest.TestCase):
                 session=self.session()
                 session.data[URLS["ancient"]]=FakeResponse(
                     URLS["ancient"],self.old["ancient"],**kw)
-                result,_=self.run(session=session)
+                result,_=self.capture_run(session=session)
                 self.assertEqual(result["status"],"INCONCLUSIVE",result)
                 self.denied(result)
 
@@ -185,7 +183,7 @@ class Stage111ArchivedSourceCaptureTests(unittest.TestCase):
                     s.data[URLS["godly"]].raise_stream=True
                 if case=="short":s.data[URLS["godly"]].data=b"<html></html>"
                 if case=="big":s.data[URLS["godly"]].data=b"x"*800001
-                result,_=self.run(session=s)
+                result,_=self.capture_run(session=s)
                 self.assertEqual(result["status"],"INCONCLUSIVE",result)
                 self.denied(result)
                 self.assertNotEqual(result["status"],
@@ -197,13 +195,13 @@ class Stage111ArchivedSourceCaptureTests(unittest.TestCase):
             (self.parser,{**self.old,"ancient":self.old["ancient"]+b" "}),
         ):
             with self.subTest(kind=len(parser)):
-                result,session=self.run(parser=parser,baseline=baseline)
+                result,session=self.capture_run(parser=parser,baseline=baseline)
                 self.assertEqual(result["status"],"INCONCLUSIVE",result)
                 self.assertEqual(len(session.queries),0)
                 self.denied(result)
 
     def test_untrusted_mocked_tls_status_never_authenticates_real_publication(self):
-        result,_=self.run()
+        result,_=self.capture_run()
         self.assertFalse(result["authenticatesExternalSource"])
         self.assertFalse(result["admission"]["externalCaptureAuthenticated"])
         self.assertNotIn("gameRawItemId",str(result))
@@ -211,12 +209,48 @@ class Stage111ArchivedSourceCaptureTests(unittest.TestCase):
         self.assertNotIn("priceForTrade",result)
         self.denied(result)
 
+    def test_actual_cli_reads_correct_plural_source_filenames_and_writes_only_capture(self):
+        import sys
+        from unittest import mock
+        from types import SimpleNamespace
+        from contextlib import nullcontext
+
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            original=root/"prior"
+            original.mkdir()
+            (original/"parser.py").write_bytes(self.parser)
+            for category,p in (("ancient","ancients"),("godly","godlies"),
+                               ("chroma","chromas")):
+                (original/(p+".html")).write_bytes(self.old[category])
+            session=self.session()
+            class ContextSession:
+                def __enter__(inner):
+                    return session
+                def __exit__(inner,exc_type,exc,tb):
+                    pass
+            # Actual CLI module, but NO external requests or real game.
+            fake_requests=SimpleNamespace(Session=lambda:ContextSession())
+            with mock.patch.dict(sys.modules,{"requests":fake_requests}):
+                with mock.patch.object(self.m,"_clock_utc",
+                                       return_value="2026-11-10T14:00:00Z"):
+                    code=self.m.main([
+                        "--parser",str(original/"parser.py"),
+                        "--prior-html-dir",str(original),
+                        "--output-dir",str(root/"capture"),
+                    ])
+            self.assertEqual(code,0)
+            self.assertEqual(len(session.queries),3)
+            saved=json.loads((root/"capture/source_audit.json").read_text())
+            self.assertEqual(saved["status"],"NO_NEW_PUBLISHER_PUBLICATION")
+            self.denied(saved)
+
     def test_artifact_writer_does_not_modify_any_repo_value_file(self):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td)
             value=root/"mm2values.lua"
             value.write_bytes(b"ORIGINAL_LIVE_RESEARCH_VALUE_BYTES")
-            report,_=self.run(output=root/"capture")
+            report,_=self.capture_run(output=root/"capture")
             self.assertEqual(value.read_bytes(),b"ORIGINAL_LIVE_RESEARCH_VALUE_BYTES")
             self.assertTrue((root/"capture/source_audit.json").is_file())
             self.denied(report)
