@@ -1,5 +1,5 @@
 -- Stage97: READ-ONLY one-window partner UpdateTrade / Part4 GUI correlation.
--- Original MM2, manually opened trade with a consenting ALT.
+-- Original MM2, manually open a consenting ALT trade during 30s startup wait.
 -- No request tap, offer, Accept, Decline, hop, Discord, price or ownership call.
 -- Does not prove a server transaction nonce or causal attribution.
 local E=(type(getgenv)=="function" and getgenv()) or _G
@@ -42,6 +42,7 @@ local R={
  schema=SCHEMA,status="STARTING",reason="INITIALIZING",
  readOnly=true,clientOnly=true,contactRequestOnly=false,
  targetClientBound=false,exactPartnerGuiObserved=false,
+ tradeWindowWaitPolls=0,
  stage9ObserverBound=false,stage9Frames=0,
  eventReceiptCount=0,onePartnerGuiSlotObserved=false,
  partnerEventTupleObserved=false,clientNameQuantityConsistent=false,
@@ -207,8 +208,28 @@ local function run()
  if #matches~=1 then return finish("INCONCLUSIVE","TARGET_NOT_UNIQUE_IN_SERVER") end
  target=matches[1]
  R.targetClientBound=true
- local root,why=exactRoot()
- if not root then return finish("INCONCLUSIVE",why) end
+ -- The original native test reached this check before any TradeGUI root
+ -- was visible (elapsedSeconds=0). Give the operator a bounded window to
+ -- MANUALLY open a trade; this script does not click or send a request.
+ print("[STAGE97] WAIT_FOR_MANUAL_TRADE_WINDOW: manually open trade with consenting ALT; leave both offers empty. No final Accept.")
+ local deadline=os.clock()+30
+ local root,why=nil,"EXACT_TRADE_WINDOW_NOT_OPEN"
+ while live() and os.clock()<deadline do
+  root,why=exactRoot()
+  R.tradeWindowWaitPolls=math.min(R.tradeWindowWaitPolls+1,600)
+  if root then break end
+  -- Never wait through a wrong partner, ambiguous GUI, or changed session.
+  if why~="EXACT_TRADE_WINDOW_NOT_OPEN" then
+   return finish("INCONCLUSIVE",why)
+  end
+  task.wait(0.1)
+ end
+ if not live() then
+  return finish("INCONCLUSIVE","SESSION_OR_TARGET_CHANGED_DURING_MANUAL_TRADE_WAIT")
+ end
+ if not root then
+  return finish("INCONCLUSIVE","MANUAL_TRADE_WINDOW_NOT_OBSERVED_WITHIN_30S")
+ end
  R.exactPartnerGuiObserved=true
  -- Pinned original Stage9 capture; all other modules are passive.
  local p4contract=source("stage9contract")
