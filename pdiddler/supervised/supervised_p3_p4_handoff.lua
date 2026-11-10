@@ -80,26 +80,43 @@ local function side(io,t,name)
    return nil,"INVALID_GUI_SLOT_OR_STACK"
   end
   seen[e.index]=true
-  -- Original P4 readSide defaults malformed/zero x-counts to ONE. That
-  -- is unsafe for balancing: inspect actual physical amount label too.
+  -- Original protected P4 readSide maps EMPTY Amount.Text to qty=1.
+  -- In MM2 the single visible copy may be intentionally shown WITHOUT
+  -- an x1 caption. Only exact empty string + client-read qty 1 counts as
+  -- an implicit singleton. x0, malformed x?, >1 conflicts still FAIL.
+  -- Never promote this client UI observation to server/ownership/price proof.
   local slot=container:FindFirstChild("NewItem"..e.index)
   local box=slot and slot:FindFirstChild("Container")
   local amount=box and box:FindFirstChild("Amount")
+  local quantityLabelEvidence="ABSENT_SINGLETON_CLIENT"
   if amount and amount.Visible==true then
-   local text=amount.Text
-   local n=type(text)=="string" and
-      tonumber(text:match("^[xX]%s*(%d+)$")) or nil
-   if not int(n,1000000) or n~=e.qty then
+   if not amount:IsA("TextLabel") and
+      not amount:IsA("TextButton") then
     return nil,"VISIBLE_STACK_TEXT_INVALID"
+   end
+   local text=amount.Text
+   if text=="" then
+    if e.qty~=1 then return nil,"VISIBLE_STACK_TEXT_INVALID" end
+    quantityLabelEvidence="BLANK_SINGLETON_CLIENT"
+   else
+    local n=type(text)=="string" and
+       tonumber(text:match("^[xX]%s*(%d+)$")) or nil
+    if not int(n,1000000) or n~=e.qty then
+     return nil,"VISIBLE_STACK_TEXT_INVALID"
+    end
+    quantityLabelEvidence="EXPLICIT_X_COUNT_CLIENT"
    end
   elseif amount and e.qty~=1 then
    return nil,"HIDDEN_STACK_TEXT_CONFLICT"
+  elseif amount then
+   quantityLabelEvidence="HIDDEN_SINGLETON_CLIENT"
   end
   if name=="YourOffer" and
     (protected(e.shown) or protected(e.internalId)) then
    return nil,"PROTECTED_GINGERSCOPE_IN_OWN_OFFER"
   end
   out[#out+1]={physicalSlot=e.index,quantity=e.qty,
+   quantityLabelEvidence=quantityLabelEvidence,
    displayCandidate=e.shown,chromaCandidate=e.isChroma,
    internalIdCandidate=e.internalId,rawItemIdAuthenticated=false}
  end

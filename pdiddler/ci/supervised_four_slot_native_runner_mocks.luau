@@ -102,7 +102,9 @@ local function fakeEnv(options)
    if options.chromaRaw and options.chromaRaw[raw] then
      slot:put(node("Frame","Tags")):put(node("Frame","Chroma"))
    end
-   slot:put(node("Frame","Container")):put(node("TextLabel","Amount")).Text="x1"
+   slot:put(node("Frame","Container")):put(node("TextLabel","Amount")).Text=
+      options.malformedFirstAmount and index==1 and options.malformedFirstAmount
+      or options.blankSingletonAmount and "" or "x1"
    if options.mutatePartnerAfterFirst and index==1 then
      local pslot=theirs.children.Container:put(node("Frame","NewItem1"))
      pslot:put(node("Frame","ItemName")):put(node("TextLabel","Label")).Text="Emberbow"
@@ -133,7 +135,7 @@ local function fakeEnv(options)
      if url:find("a599c31c53d25e6799b9d631f45f282b445dcda0",1,true)
         and url:find("pdiddler4_tradeio_supervised_v2.lua",1,true)
      then return tradeIOSource end
-     if url:find("616f905739ffb7bf70183475a79ec6c278dc9ddb",1,true)
+     if url:find("2f556afac5e5fd9cfdbf9e081eeea01a542d293",1,true)
         and url:find("supervised_p3_p4_handoff.lua",1,true)
      then return bridgeSource end
      if url:find("27e061555321c6a87bdd835ce3d1ff557443a909",1,true)
@@ -398,6 +400,30 @@ do
  check(observed.status,"STOPPED","live accept state stops after first item")
  check(observed.snapshotRejectReason,"ACCEPT_ALREADY_SET","accept flag never hidden")
  check(#accepted.calls,1,"never dispatch second after acceptance")
+end
+
+
+-- Full pinned native launcher: actual first/second offered singleton GUI slots
+-- show EMPTY Amount.Text, matching observed MM2 client display convention.
+do
+ local singleton=fakeEnv({blankSingletonAmount=true})
+ local r=singleton.run()
+ check(r.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","real singleton blank quantity label")
+ check(r.offerAttempts,2,"two precisely approved physical requests")
+ check(r.clientVisibleAddedSlots,2,"two blank-labeled singleton slots seen")
+ check(#singleton.calls,2,"no item offer retry")
+ check(r.authorizesAccept,false,"still no final Accept")
+ check(r.clipboardCopied,true,"auto-copy after blank singleton proof")
+end
+-- Invalid x0 means unresolved quantity, NOT a valid singleton.
+do
+ local zero=fakeEnv({malformedFirstAmount="x0"})
+ local r=zero.run()
+ check(r.status,"STOPPED","zero quantity remains blocked")
+ check(r.snapshotRejectReason,"VISIBLE_STACK_TEXT_INVALID","zero reason detailed")
+ check(r.offerAttempts,1,"only first remote attempted")
+ check(r.clientVisibleAddedSlots,0,"never fake a copy for x0")
+ check(#zero.calls,1,"second remote suppressed on zero")
 end
 
 print("[PASS] actual supervised 4-slot iPad runner original MM2 mocks:",tests)
