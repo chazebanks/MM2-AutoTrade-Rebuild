@@ -1,3 +1,19 @@
+## STAGE100 ON-SCREEN GUIDE CURRENT VERIFIED LOADER — NOV 10, 2026
+
+Exact latest tested source/PR170 head `59d869b7d4d8fbcee3f2709e266b47ffb4a05d78`, [focused GitHub Actions 42765230499](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42765230499) SUCCESS 3 Python tests exercising >=19 actual Lua5.4 GUI/layout mock groups + immutable Stage9 native/contract, Stage98 and exact pin-verified live prompt layout module; **five other CI workflows all SUCCESS at exact same head (six green)**. Source `pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua` includes four numbered IN-GAME prompts, collision-tested positioning **OUTSIDE** the absolute TradeGUI rectangle (12px gap), disabled panel dragging to avoid accidental button coverage, and final PASS/STOP+optional dismiss. Full-screen/too-small/unavailable viewport fails INCONCLUSIVE rather than drawing over the TradeGUI. **NOT yet personally verified on iPad**; code tests are mocked GUI. **Supersedes loader pins 7154226f/eeae57d1 which did NOT have trade-collision-safe guide.** Run once in fresh original MM2/Delta on MAIN with consenting ALT `venossgaming90190`, no other scripts:
+
+```lua
+getgenv().PDIDDLER_STAGE100_TARGET_USERNAME = "venossgaming90190"
+getgenv().PDIDDLER_STAGE100_READONLY_ARMED = true
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/59d869b7d4d8fbcee3f2709e266b47ffb4a05d78/pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua"))()
+```
+
+Follow the **on-screen** OPEN TRADE (both empty, manually open trade within 30s) → ALT ADD one eligible test weapon → MAIN ADD one eligible test weapon (ALT unchanged) → ALT REMOVE its weapon (MAIN unchanged). NEVER final Accept. The script makes zero offers/requests/Accepts/Declines/hops; only watches. Return one `[GINGERSCOPE STAGE100 TWO SIDED EPOCH]` sanitized JSON. No retry on same JobId if INCONCLUSIVE. If the actual iPad layout prevents non-overlapping placement, report it, don't bypass panel or cover buttons.
+
+**Permanent future-conversation rule:** [`pdiddler/GINGERSCOPE_ONSCREEN_MANUAL_TEST_POLICY.md`](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/blob/main/pdiddler/GINGERSCOPE_ONSCREEN_MANUAL_TEST_POLICY.md) — every future manual test MUST have in-game step instructions, collision-safe responsive layout avoiding MM2 trade controls, and fail closed if no safe space. Future agents MUST read this policy; continue to next **weapon raw identity + fresh value/demand/stability/liquidity** after Stage100 native test, not generic GUI repetitions.
+
+---
+
 # NOV 10, 2026 USER RULE: FUTURE NATIVE MM2 TESTS MUST SHOW NEXT STEP ON THE GAME SCREEN
 
 **Permanent cross-conversation policy:** [pdiddler/IN_GAME_TEST_PROMPT_POLICY.md](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/blob/main/pdiddler/IN_GAME_TEST_PROMPT_POLICY.md). In every future manual multi-step Delta/MM2 diagnostic, show a real, readable `PlayerGui` overlay specifying the **current** operator action (**MAIN vs ALT**) and no-final-Accept safety reminder; do not rely on console or assistant chat alone. Change the prompt only after the previous step's GUI evidence is verified; show final PASS/STOP and sanitized report, and fail closed if on-screen guidance or a safe non-overlapping placement is unavailable. Independently CI-test the GUI and live iPad layout. **New conversations must read this file before scripting.**
