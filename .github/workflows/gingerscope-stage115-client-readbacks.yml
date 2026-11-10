@@ -1,0 +1,73 @@
+name: Gingerscope Stage115 post-close client evidence safety (offline)
+on:
+  pull_request:
+    paths:
+      - 'scripts/replay_trade_events.py'
+      - 'pdiddler/intelligence_lab/test_trade_event_replay.py'
+      - 'pdiddler/intelligence_lab/test_hypothesis_event_replay.py'
+      - 'pdiddler/intelligence_lab/SANITIZED_EVENT_REPLAY_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage115-client-readbacks.yml'
+  push:
+    branches:
+      - main
+      - fix/gingerscope-stage115-postclose-evidence-tiers
+    paths:
+      - 'scripts/replay_trade_events.py'
+      - 'pdiddler/intelligence_lab/test_trade_event_replay.py'
+      - 'pdiddler/intelligence_lab/test_hypothesis_event_replay.py'
+      - 'pdiddler/intelligence_lab/SANITIZED_EVENT_REPLAY_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage115-client-readbacks.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage115-real-replay-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned Hypothesis without any Roblox/account plugins
+        run: |
+          set -euo pipefail
+          python -m pip install 'hypothesis==6.170.15'
+      - name: Compile actual model and execute complete Stage112/113/115 replay tests
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/replay_trade_events.py
+          python -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_trade_event_replay.py'
+      - name: Execute original Hypothesis property tests on the actual model
+        run: |
+          set -euo pipefail
+          python -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_hypothesis_event_replay.py'
+      - name: Verify compatibility with complete offline intelligence suite
+        run: |
+          set -euo pipefail
+          python -m unittest discover -q -s pdiddler/intelligence_lab
+      - name: Assert terminal authority stays denied and no Roblox I/O was added
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          s=Path("scripts/replay_trade_events.py").read_text()
+          for token in (
+              '"tradeOutcome": "UNKNOWN"',
+              '"serverCompletionProven": False',
+              '"serverTransactionIdAuthenticated": False',
+              '"mayRecordCompletedTrade": False',
+              '"mayReportProfit": False',
+              '"authorizesTrade": False',
+              '"authorizesAccept": False',
+              '"operatorCorroborationProven": False',
+              '"CLIENT_POSTCLOSE_READBACKS_CONFLICT"',
+          ):
+              assert token in s,token
+          for disallowed in ("FireServer(", "InvokeServer(", "HttpGet(",
+                             "PostAsync(", "urlopen(", "requests.get("):
+              assert disallowed not in s, disallowed
+          print("STAGE115_NO_TRADE_OR_SETTLEMENT_AUTHORITY_PASS")
+          PY
