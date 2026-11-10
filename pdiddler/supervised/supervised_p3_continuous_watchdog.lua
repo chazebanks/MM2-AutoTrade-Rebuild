@@ -99,7 +99,7 @@ function M.new(supervisor,p3,io,ctx,scheduler)
   if phase.status=="P3_SUPERVISOR_ARMED_CLIENT_ONLY" then
    local okP,paused=pcall(p3.isPaused)
    local okT,trade=pcall(io.trade)
-   if not okP or not okT then
+   if not okP or type(paused)~="boolean" or not okT then
     watchdog.stop()
     lastResult=report("BLOCKED","P3_WATCHDOG_TRADE_READ_FAILED")
     return lastResult
