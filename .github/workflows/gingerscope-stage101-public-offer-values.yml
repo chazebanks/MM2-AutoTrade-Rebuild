@@ -1,0 +1,109 @@
+name: Gingerscope Stage101 actual 189 public values to name-only offer research
+on:
+  push:
+    branches:
+      - research/gingerscope-stage101-offer-name-value-preview
+    paths:
+      - 'pdiddler/intelligence_lab/stage101_offer_public_value_preview.py'
+      - 'pdiddler/tests/test_stage101_offer_public_value_preview.py'
+      - 'pdiddler/intelligence_lab/STAGE101_OFFER_VALUES_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage101-public-offer-values.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage101_offer_public_value_preview.py'
+      - 'pdiddler/tests/test_stage101_offer_public_value_preview.py'
+      - 'pdiddler/intelligence_lab/STAGE101_OFFER_VALUES_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage101-public-offer-values.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-stage82-stage84-original-source-join:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Fetch two original reviewed modules and source blobs at exact pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope94 pdiddler/research_source_html/stage84_2026_11_09
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/mm2scripthub/mm2/0f2715187e7eae36eea4bd97afee809478fc877d/db' -o /tmp/gingerscope94/game.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/snapshots/supreme_snapshot_2026_11_06.json" -o /tmp/gingerscope94/roster.json
+          curl -fsSL --retry 3 --max-time 45 "$base/6775e10a8266da43b8b316cddaa3a8042c0f3dda/pdiddler/intelligence_lab/stage77_pinned_public_identity_audit.py" -o /tmp/gingerscope94/stage77.py
+          curl -fsSL --retry 3 --max-time 45 "$base/252a3336c7d3e10b01df1bf0aad10a25755b3477/pdiddler/intelligence_lab/stage81_pinned_website_slug_coverage.py" -o /tmp/gingerscope94/stage81.py
+          for item in ancients godlies chromas; do
+            curl -fsSL --retry 3 --max-time 45 "$base/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/research_source_html/stage69_2026_11_09/$item.html" -o "/tmp/gingerscope94/old_$item.html"
+          done
+          curl -fsSL --retry 3 --max-time 45 "$base/e96944c715bddcebc5cf133de1e0ff7d1b2054f4/pdiddler/intelligence_lab/stage82_public_source_slug_resolver.py" -o /tmp/gingerscope94/stage82.py
+          curl -fsSL --retry 3 --max-time 45 "$base/f08ceb35a9ff684ee2cf577ccce7542c436cc68e/pdiddler/intelligence_lab/stage84_nov9_publisher_refresh.py" -o /tmp/gingerscope94/stage84.py
+          curl -fsSL --retry 3 --max-time 45 "$base/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/refresh_supreme_snapshot.py" -o /tmp/gingerscope94/parser.py
+          curl -fsSL --retry 3 --max-time 45 "$base/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/stage69_manifest_provenance.py" -o /tmp/gingerscope94/receipt.py
+          for item in ancients godlies chromas; do
+            curl -fsSL --retry 3 --max-time 45 "$base/f08ceb35a9ff684ee2cf577ccce7542c436cc68e/pdiddler/research_source_html/stage84_2026_11_09/$item.html" -o "pdiddler/research_source_html/stage84_2026_11_09/$item.html"
+          done
+          curl -fsSL --retry 3 --max-time 45 "$base/f08ceb35a9ff684ee2cf577ccce7542c436cc68e/pdiddler/research_source_html/stage84_2026_11_09/source_manifest.json" -o pdiddler/research_source_html/stage84_2026_11_09/source_manifest.json
+          curl -fsSL --retry 3 --max-time 45 "$base/98441d065fcaaa02fa09367a5639f8abd4fb4bb8/pdiddler/intelligence_lab/stage94_public_source_join.py" -o pdiddler/intelligence_lab/stage94_public_source_join.py
+          curl -fsSL --retry 3 --max-time 45 "$base/98441d065fcaaa02fa09367a5639f8abd4fb4bb8/pdiddler/tests/test_stage94_public_source_join.py" -o pdiddler/tests/test_stage94_public_source_join.py
+          test "$(git hash-object pdiddler/intelligence_lab/stage94_public_source_join.py)" = 498609b17db84008ba80c25d8cb1c800cf0ba59b
+          test "$(git hash-object pdiddler/tests/test_stage94_public_source_join.py)" = aa299150da177a4d92c4eba02593cb3df9100feb
+          echo STAGE101_ORIGINAL_STAGE94_JOIN_AND_TEST_BLOBS_VERIFIED
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          base=Path('/tmp/gingerscope94')
+          expected={
+            'game.lua':'2be54c3f5c6b715844728c01a65cc2f24a55c02d',
+            'roster.json':'a85af4f6137278540e1fed0c27e7e801553e4111',
+            'stage77.py':'754fbe3189d5108272c32a27fc52bf3834011d38',
+            'stage81.py':'bff17e1c164d7075a975b0a5e1da27ac2d20a2ba',
+            'old_ancients.html':'7e11a2d835eadbb522d351bdabe393a7c9688f4b',
+            'old_godlies.html':'2e4a0c1b8df894f9037e737ba80919b9b2d0c9ae',
+            'old_chromas.html':'0d2d156d9d9c499ef0e1213376796c1a916e6ce1',
+            'stage82.py':'91362b647a8cc630e4fabcf7aa5d65eb44adb399',
+            'stage84.py':'2a5aba0e339a3a27cd43e20d2a7731ac37c99822',
+            'parser.py':'d5843a57f34078cbe7213aa78a4aa12a5775c016',
+            'receipt.py':'9b6faa9f7a9890d69635542529703fedc8e4d55f',
+          }
+          source=Path('pdiddler/research_source_html/stage84_2026_11_09')
+          expected_new={
+            'ancients.html':'ce8178ab9579e8782d8f72a6dac051756a728506',
+            'godlies.html':'d3cf222a8e10cff3a9fb051b16188192389c4b2d',
+            'chromas.html':'6c77624cac3df96168b008e9bc8eca68a2d78cf9',
+            'source_manifest.json':'7e47985b626d3a6904b1b05aa3dd0474f3f2cdb3'
+          }
+          for path,sha in [(base/name,sha) for name,sha in expected.items()]+[(source/name,sha) for name,sha in expected_new.items()]:
+            b=path.read_bytes()
+            actual=hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
+            assert actual==sha,(str(path),actual,sha)
+          print('STAGE94_ALL_15_ORIGINAL_SOURCE_BLOBS_VERIFIED')
+          PY
+      - name: Run Stage94 actual original-source validations, then Stage101 offered-name preview cases
+        env:
+          STAGE94_REQUIRE_PINNED: '1'
+          STAGE101_REQUIRE_PINNED: '1'
+        run: |
+          set -euo pipefail
+          python3 -m py_compile pdiddler/intelligence_lab/stage94_public_source_join.py pdiddler/intelligence_lab/stage101_offer_public_value_preview.py pdiddler/tests/test_stage94_public_source_join.py pdiddler/tests/test_stage101_offer_public_value_preview.py
+          python3 -m unittest -v pdiddler.tests.test_stage94_public_source_join pdiddler.tests.test_stage101_offer_public_value_preview
+      - name: Static check no network/Roblox/trade or false valuation authority
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path("pdiddler/intelligence_lab/stage101_offer_public_value_preview.py").read_text()
+          required=("nameOnlyUnbound", "identityEvidence", "sourceExpiry",
+                   "sourcePublisherFreshForTrade", "priceForTradeVerified",
+                   "numericSupremeCheckerIdVerified","authorizesTrade",
+                   "authorizesAccept","liquidity","HISTORICAL_RESEARCH_WITHIN_CAPTURE_WINDOW",
+                   "ARCHIVED_RESEARCH_CAPTURE_EXPIRED")
+          for x in required: assert x in s,x
+          for bad in ("requests.get(", "urlopen(", "urllib.request","HttpGet(",
+                      "FireServer(", "InvokeServer(", "AcceptTrade(",
+                      "SendMouseButtonEvent(", "PostAsync("):
+              assert bad not in s,bad
+          print("STAGE101_NAME_ONLY_PRICE_RESEARCH_NO_TRADING_AUTHORITY_PASS")
+          PY
