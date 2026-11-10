@@ -235,7 +235,7 @@ group("capitalization variants still bind unique exact Roblox username",function
  local r,s=scenario({user="TEST_PARTNER"})
  assert(r.report.status=="CLIENT_PENDING_OBSERVED" and s.mouseDown==1)
  safe(r,s)
- local r2,s2=scenario({user="Venossgaming90190",actualTargetName="venossgaming90190"})
+ local r2,s2=scenario({user="TestCaseAlias90190",actualTargetName="testcasealias90190"})
  assert(r2.report.status=="CLIENT_PENDING_OBSERVED" and s2.mouseDown==1)
  safe(r2,s2)
 end)
