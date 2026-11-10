@@ -185,6 +185,10 @@ local function fakeEnv(options)
          world.CurrentCamera.ViewportSize=vec(240,250)
        end
        if options.hideDuringOffer and waitCount==1 then screen.Enabled=false end
+       if options.obstructAfterFirst and #calls==1 then
+         t.AbsolutePosition=vec(0,0)
+         t.AbsoluteSize=vec(1024,768)
+       end
        runService.RenderStepped:Fire()
     end}
  }
@@ -218,6 +222,17 @@ check(r.clipboardCopied,true,"clipboard auto-export")
 check(r.tradeOutcome,"UNKNOWN","no settlement")
 check(r.authorizesAccept,false,"no automatic Accept")
 check(r.mayReportProfit,false,"no profit")
+local function offeredSteps(t)
+ local out={}
+ for _,msg in ipairs(t.stepTexts) do
+  if msg:find("MAIN - ITEM",1,true) then out[#out+1]=msg end
+ end
+ return out
+end
+local steps=offeredSteps(x)
+check(#steps,2,"one on-screen step per remotely placed item")
+check(steps[1]:find("ITEM 1/2",1,true)~=nil,true,"first instruction reflects item count")
+check(steps[2]:find("ITEM 2/2",1,true)~=nil,true,"second instruction only after first GUI confirmation")
 check(#x.calls,2,"two physical OfferItem sends")
 check(x.calls[1].raw,"Iceblaster","first approved key")
 check(x.calls[2].raw,"Batwing","second approved key")
@@ -234,16 +249,22 @@ four.E.PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT.weaponKeys={
 local r4=four.run()
 check(r4.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","four-slot visible")
 check(r4.clientVisibleAddedSlots,4,"four physical GUI slots")
+check(#offeredSteps(four),4,"four distinct current in-game item steps")
 check(#four.calls,4,"exact four remote sends")
 local noGui=fakeEnv({noGuiReplication=true})
 local miss=noGui.run()
 check(miss.status,"STOPPED","no GUI proof stops")
 check(miss.offerAttempts,1,"one uncertain send only")
 check(#noGui.calls,1,"never retry unconfirmed send")
+check(#offeredSteps(noGui),1,"never advance to item two without GUI confirmation")
 local changed=fakeEnv({mutatePartnerAfterFirst=true})
 local c=changed.run()
 check(c.status,"STOPPED","opponent mutation stops")
 check(#changed.calls,1,"no further offers after opponent change")
+local obstructed=fakeEnv({obstructAfterFirst=true})
+local obstructedResult=obstructed.run()
+check(obstructedResult.status,"STOPPED","no instruction space stops after first offer")
+check(#obstructed.calls,1,"no second remote after obstruction")
 local delayed=fakeEnv({startClosed=true,openAfter=3})
 local d=delayed.run()
 check(d.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","manual open step before trade")
