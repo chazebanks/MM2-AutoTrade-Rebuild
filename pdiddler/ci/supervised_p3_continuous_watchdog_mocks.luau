@@ -205,7 +205,9 @@ local function setup()
    reports[#reports+1]=r.status
   end,
  }
- local watcher,why=x.watchdog.new(boss,x.p3,x.io,ctx,scheduler)
+ local watcher,why=x.watchdog.new(boss,{
+   isPaused=function()return boss.isP3Paused()end
+ },x.io,ctx,scheduler)
  eq(type(watcher),"table","watchdog constructed")
  eq(why,nil,"no watchdog constructor error")
  flags.monitor=function()return watcher.isReady()end
@@ -311,7 +313,9 @@ do
   end,
   now=function()return now end,
  }
- watcher=x.watchdog.new(boss,x.p3,x.io,
+ watcher=x.watchdog.new(boss,{
+   isPaused=function()return boss.isP3Paused()end
+ },x.io,
   {getJobId=function()return x.ctx.job end,
    isLive=function()return true end,
    onStatus=function()end},sched)

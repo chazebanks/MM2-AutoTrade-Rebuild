@@ -204,6 +204,14 @@ function M.new(scanner,outgoingFactory,coordinatorModule,bridge,io,
   end
   return observed
  end
+ -- Read-only facade for the real original P3 fork's pause flag.
+ -- No caller receives the mutable P3 state or request/Accept controls.
+ function supervisor.isP3Paused()
+  if state~="ARMED" or not epochLive() then return nil end
+  local ok,v=pcall(outgoing.isPaused)
+  if not ok or type(v)~="boolean" then return nil end
+  return v
+ end
  function supervisor.resumeAfterClose()
   if state~="ARMED" then return false,"SUPERVISOR_NOT_ARMED" end
   if not epochLive() then return false,"P3_JOB_OR_EPOCH_CHANGED" end

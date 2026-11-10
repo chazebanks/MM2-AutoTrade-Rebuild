@@ -186,6 +186,7 @@ do
  eq(events[1],"P3_RUN_GATED","first instantiates closed original P3")
  eq(events[2],"P4_OBSERVER_ATTACH","observer attached BEFORE any P3 arm")
  eq(boss.status().status,"P3_SUPERVISOR_PREPARED_NOT_ARMED","startup default deny")
+ eq(boss.isP3Paused(),nil,"P3 pause not claimed before operator arm")
  eq(x.p3.armed,nil,"no real request rotation before user arming")
  eq(#x.sends,0,"no offer remote")
  local idle=boss.poll()
@@ -217,12 +218,14 @@ do
  eq(x.p3.armed,true,"actual gated original P3 arm invoked")
  eq(events[#events],"P3_ARM_CHECK","called real P3 arm only after observer")
  eq(boss.status().status,"P3_SUPERVISOR_ARMED_CLIENT_ONLY","P3 can now send requests")
+ eq(boss.isP3Paused(),false,"real original P3 not paused while rotating")
  eq(boss.arm(optIn),false,"never arm twice")
  eq(boss.poll().status,"P3_ROTATING","observer reads active original queue")
  x.screen.Enabled=true
  x.p3.state.processed[x.p.UserId]="trade-open"
  x.p3.state.active=nil
  x.p3.paused=true
+ eq(boss.isP3Paused(),true,"original P3 actual pause surfaced read-only")
  local observe=boss.poll()
  eq(observe.status,"P4_TWO_SIDED_CLIENT_SNAPSHOT","real P3 processed opens exact P4")
  eq(observe.authorizesAccept,false,"no automatic final Accept")
@@ -238,6 +241,7 @@ do
  eq(x.p3.resumed,1,"one resume")
  eq(#x.sends,0,"no P4 offers or final Accept by startup glue")
  eq(boss.stop(),true,"stops original P3 and observer")
+ eq(boss.isP3Paused(),nil,"stopped supervisor never claims original P3 paused")
  eq(x.p3.stopped,true,"underlying P3 stopped")
  eq(boss.arm(optIn),false,"cannot restart stopped supervisor")
  eq(#x.sends,0,"no remotes on stop")

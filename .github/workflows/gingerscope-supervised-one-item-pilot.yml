@@ -17,6 +17,8 @@ on:
       - 'pdiddler/ci/supervised_p3_atomic_bootstrap_mocks.luau'
       - 'pdiddler/supervised/supervised_p3_continuous_watchdog.lua'
       - 'pdiddler/ci/supervised_p3_continuous_watchdog_mocks.luau'
+      - 'pdiddler/supervised/SUPERVISED_P3_NATIVE_STARTUP.lua'
+      - 'pdiddler/ci/supervised_p3_native_runner_mocks.luau'
       - 'pdiddler/ci/check_p3_start_barrier_integrity.py'
       - 'pdiddler/supervised/supervised_four_slot_operator_plan.lua'
       - 'pdiddler/ci/supervised_four_slot_operator_plan_mocks.luau'
@@ -82,6 +84,10 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_continuous_watchdog_mocks.luau
+      - name: Execute opt-in original MM2 P3 in-game ARM runner with real protected modules
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_native_runner_mocks.luau
       - name: Verify full P3 source unchanged except the four reviewed start-barrier changes
         run: |
           set -euo pipefail
@@ -123,6 +129,17 @@ jobs:
           p3Coordinator=Path('pdiddler/supervised/supervised_real_p3_rotation_handoff.lua').read_text()
           assert 'P3_NO_FRESH_ACCEPTED_TARGET' in p3Coordinator
           startGate=Path('pdiddler/supervised/pdiddler3_outgoing_START_GATED_v1.lua').read_text()
+          native=Path('pdiddler/supervised/SUPERVISED_P3_NATIVE_STARTUP.lua').read_text()
+          assert native.count('game:HttpGet(')==1
+          assert 'function guide:refresh()' in native
+          assert 'ui.arm.Activated:Connect(' in native
+          assert 'supervisor.isP3Paused()' in native
+          assert 'watcher.isReady()==true' in native
+          assert 'MISSING_FAKE' not in native
+          assert 'return session~=nil and false' not in native
+          assert 'getWhitelist' in native
+          for forbidden in ('OfferItem:FireServer(', 'AcceptTrade:FireServer(', 'DeclineTrade:FireServer(', 'TeleportService', 'PostAsync('):
+              assert forbidden not in native,forbidden
           supervisor=Path('pdiddler/supervised/supervised_p3_startup_supervisor.lua').read_text()
           assert 'requiresExplicitStart=true' in supervisor
           watchdog=Path('pdiddler/supervised/supervised_p3_continuous_watchdog.lua').read_text()
