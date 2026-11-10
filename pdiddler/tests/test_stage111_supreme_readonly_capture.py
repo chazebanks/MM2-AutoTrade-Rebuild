@@ -173,6 +173,32 @@ class Stage111ArchivedSourceCaptureTests(unittest.TestCase):
                 self.assertEqual(result["status"],"INCONCLUSIVE",result)
                 self.denied(result)
 
+    def test_declared_uncompressed_http_length_mismatch_rejected(self):
+        # The page may still parse all 190 items despite a shortened tail;
+        # a contradictory declared uncompressed wire length must not count
+        # as a complete raw source capture.
+        for delta in (-2,3):
+            with self.subTest(delta=delta):
+                client=self.session()
+                resp=client.data[URLS["godly"]]
+                resp.headers["Content-Length"]=str(len(resp.data)+delta)
+                report,_=self.capture_run(session=client)
+                self.assertEqual(report["status"],"INCONCLUSIVE",report)
+                self.assertEqual(report["reason"],
+                                 "CANONICAL_SOURCE_CONTENT_LENGTH_MISMATCH")
+                self.denied(report)
+
+    def test_compressed_wire_content_length_is_not_uncompressed_body_length(self):
+        # Requests.iter_content automatically decompresses supported encodings.
+        # Its Content-Length may describe *compressed* on-wire bytes.
+        client=self.session()
+        response=client.data[URLS["godly"]]
+        response.headers["Content-Encoding"]="gzip"
+        response.headers["Content-Length"]="1742"
+        report,_=self.capture_run(session=client)
+        self.assertEqual(report["status"],"NO_NEW_PUBLISHER_PUBLICATION",report)
+        self.denied(report)
+
     def test_missing_page_transport_interrupt_small_and_oversize_fail_closed(self):
         tests=("missing","interrupt","short","big")
         for case in tests:
