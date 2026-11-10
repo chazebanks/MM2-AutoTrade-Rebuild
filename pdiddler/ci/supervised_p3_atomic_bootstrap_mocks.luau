@@ -284,5 +284,44 @@ do
  eq(ok,true,"unsafe rendered state does not propagate error")
  eq(x.p3.armed,nil,"unsafe monitor blocked")
 end
+
+-- Lost safety UI AFTER arm must stop the real outgoing queue at next
+-- supervisory poll; it is not enough to check the GUI only at startup.
+for _,change in ipairs({
+ {key="screen",reason="P3_ONSCREEN_INSTRUCTIONS_LOST"},
+ {key="monitor",reason="P3_WATCHDOG_LOST"},
+ {key="external",reason="P3_EXTERNAL_CONTROLLER_DETECTED"},
+ {key="ready",reason="P3_SCANNER_OR_LOBBY_UNSAFE"},
+}) do
+ local x=fixture()
+ local boss,err,events,flags=newSupervisor(x)
+ eq(boss.arm(optIn),true,"armed before dynamic safety loss")
+ flags[change.key]=false
+ local status=boss.poll()
+ eq(status.status,"BLOCKED","safety loss stops original P3")
+ eq(status.reason,change.reason,"exact anonymous post-arm cause")
+ eq(x.p3.stopped,true,"underlying outgoing P3 task stopped")
+ eq(x.p3.armed,false,"original P3 arm revoked")
+ eq(#x.sends,0,"no item offer leaked on lost supervision")
+ eq(boss.arm(optIn),false,"cannot rearm after safety loss")
+end
+-- If callbacks change mid-pause the observer MUST NOT authorize a
+-- stale trade context or send further requests.
+do
+ local x=fixture()
+ local boss,err,events,flags=newSupervisor(x)
+ eq(boss.arm(optIn),true,"user approved queue before pause")
+ x.screen.Enabled=true
+ x.p3.state.processed[x.p.UserId]="trade-open"
+ x.p3.paused=true
+ eq(boss.poll().status,"P4_TWO_SIDED_CLIENT_SNAPSHOT","initial pause observed")
+ flags.monitor=false
+ local blocked=boss.poll()
+ eq(blocked.status,"BLOCKED","missing live watchdog revokes P3 during pause")
+ eq(blocked.reason,"P3_WATCHDOG_LOST","no provenance inferred")
+ eq(x.p3.stopped,true,"original P3 fork halted while trade open")
+ eq(#x.sends,0,"supervisor never offers")
+end
+
 print("[PASS] actual P3 outgoing startup + original P4 observer atomic bootstrap:",tests)
 print("[PASS] no unsolicited requests, status-only P4, manual final Accept, explicit render/watchdog barrier")
