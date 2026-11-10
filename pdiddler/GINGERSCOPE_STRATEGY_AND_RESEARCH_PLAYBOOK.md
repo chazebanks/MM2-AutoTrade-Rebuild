@@ -1,3 +1,13 @@
+# LATEST USER GOAL + NEXT-CONVERSATION REFERENCE (NOV 10, 2026)
+
+**Canonical continuation / source-order:** [`pdiddler/GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md`](./GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md) → [latest checkpoint](./GINGERSCOPE_LATEST_CHECKPOINT.md) → [on-screen instruction policy](./GINGERSCOPE_ONSCREEN_MANUAL_TEST_POLICY.md) → actual current GitHub PRs/source/native receipts. All old “NEXT Stage…” directions below are historical unless reconfirmed by current code.
+
+**New permanent strategic decision:** Once Gingerscope is acquired, reserve/protect it permanently from automatic outgoing trades, **KEEP BUILDING** the rest of the inventory. Gingerscope is a milestone, not a shutdown flag/value ceiling. Evaluate future upgrades/downgrades on liquidity/retradability/demand/stability/desirability/concentration in addition to value; no old mandatory +15 margin. This is a user preference, NOT authorization to turn on automatic trading or adjust code without separate review.
+
+**Current evidence:** Stage103 actual iPad client-only historical two-sided name/value panel PASS, Stage104 first-party date audit OFFLINE 6/6 CI. No verified raw game key→physical offered slot, Supreme numeric checker ID, current price or server settlement/Discord. **Important parallel main-based DRAFT [PR171](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/171) Stage101 raw-key matcher** already implemented OFFLINE green, distinct from DRAFT PR172 Stage101 public-value matcher; must REVIEW before new identity work. Fresh MM2 iPad manual tests must show numbered instructions ON-SCREEN without covering actual trade controls. Do not repeat completed visual GUI probes.
+
+---
+
 ## VERIFIED Hypothesis mainline integration and inherited replay CI fix (2026-11-09 UTC)
 
 - **PR135 Hypothesis** is now correctly based on `main` after replay PR134 merged. Its `test_hypothesis_event_replay.py` imports the real merged replay module, adds one state-machine test plus three 250-case property tests; synthetic client-only events NEVER authorize trade/Accept, reported profit, completion or Discord learning. The Hypothesis workflow checks PRs and **main pushes**, with bounded test settings explicitly in the test source rather than an unregistered `HYPOTHESIS_PROFILE` environment name.
