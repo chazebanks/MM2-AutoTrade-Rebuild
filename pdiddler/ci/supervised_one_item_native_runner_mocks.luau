@@ -92,7 +92,8 @@ local function fakeEnv(options)
  if options.noCamera then world.CurrentCamera=nil end
  local service={Players=players,ReplicatedStorage=RS,
        VirtualInputManager={},GuiService={},Workspace=world,
-       RunService=options.noRender and nil or runService}
+       RunService=runService}
+ if options.noRender then service.RunService=nil end
  local sourceReads={}
  local game={
    PlaceId=142823291,JobId="MOCK_JOB_123",
