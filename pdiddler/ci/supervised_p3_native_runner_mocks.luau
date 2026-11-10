@@ -201,6 +201,9 @@ local function fakeEnv(options)
   E.PDIDDLER_SUPERVISED_P3_NATIVE.targetName="MissingAlt"
  end
  if options.ownerConflict then E.PDIDDLER_PART4_SESSION=99 end
+ if options.pilotConflict then
+   E.PDIDDLER_SUPERVISED_FOUR_SLOT_GUIDE_JOB="FAKE_JOB_P3"
+ end
  local sourceReads={}
  local game={
   PlaceId=options.invalidPlace and 123 or 142823291,
@@ -309,6 +312,7 @@ do
 end
 for _,opts in ipairs({
  {invalidPlace=true},{invalidConfig=true},{ownerConflict=true},
+ {pilotConflict=true},
  {noAltTest=true},{badTarget=true},
  {noCamera=true},{failUI=true},
 }) do
