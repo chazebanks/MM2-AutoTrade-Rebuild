@@ -96,6 +96,7 @@ jobs:
           ActualOriginalPublicSourceJoin.setUpClass()
           x=join_public_sources(ActualOriginalPublicSourceJoin.old,
                                 ActualOriginalPublicSourceJoin.new,
+                                ActualOriginalPublicSourceJoin.newSiteSlugs,
                                 at_epoch=int(time.time()))
           assert x["status"] in ("PUBLIC_RESEARCH_JOIN_READY",
                                  "PUBLIC_JOIN_ARCHIVED_SOURCE_EXPIRED"),x["reason"]
