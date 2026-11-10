@@ -22,7 +22,7 @@ EXPIRES="2026-11-10T22:26:48Z"
 CATEGORY={"ancient":"ancients","godly":"godlies","chroma":"chromas"}
 EXPECTED={"ancient":15,"godly":128,"chroma":46}
 NEW_BLOBS={"ancient":"ce8178ab9579e8782d8f72a6dac051756a728506",
-           "godly":"d3cf222a8e10cff3a9fb051b16188192389c4b2",
+           "godly":"d3cf222a8e10cff3a9fb051b16188192389c4b2d",
            "chroma":"6c77624cac3df96168b008e9bc8eca68a2d78cf9"}
 DENIED={
  "readOnly":True,"researchOnly":True,"clientOnly":False,
