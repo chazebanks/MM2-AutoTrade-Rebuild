@@ -96,7 +96,7 @@ for i,case in ipairs(cases) do
  local x=standard()
  case.edit(x)
  local rr=policy.run(x.io,x.gate,x.players,x.me,x.cfg)
- denied(rr,case.reason.."_ALT_IGNORE")
+ denied(rr,case.reason)
  -- Normalize any intentional detail-free reasons while always proving
  -- that invalid preconditions result in ZERO remote sends.
  eq(x.sends(),0,"invalid case #"..i)
