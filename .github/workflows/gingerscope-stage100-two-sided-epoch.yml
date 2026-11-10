@@ -5,6 +5,7 @@ on:
       - diagnostic/gingerscope-stage100-two-sided-offer-epoch
     paths:
       - 'pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua'
+      - 'pdiddler/new_part4/stage100_screen_prompt_overlay.lua'
       - 'pdiddler/tests/test_stage100_native_two_sided_epoch.lua'
       - 'pdiddler/tests/test_stage100_native_two_sided_epoch_driver.py'
       - 'pdiddler/intelligence_lab/STAGE100_TWO_SIDED_EPOCH_HANDOFF.md'
@@ -12,6 +13,7 @@ on:
   pull_request:
     paths:
       - 'pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua'
+      - 'pdiddler/new_part4/stage100_screen_prompt_overlay.lua'
       - 'pdiddler/tests/test_stage100_native_two_sided_epoch.lua'
       - 'pdiddler/tests/test_stage100_native_two_sided_epoch_driver.py'
       - 'pdiddler/intelligence_lab/STAGE100_TWO_SIDED_EPOCH_HANDOFF.md'
@@ -44,7 +46,10 @@ jobs:
           test "$(git hash-object /tmp/gingerscope99/contract.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
           test "$(git hash-object /tmp/gingerscope99/native.lua)" = a6338e946467ad738005bc5cb13cd2d2fbc2a2d0
           test "$(git hash-object /tmp/gingerscope99/stage98.lua)" = 748639e88823198fd7cc0dce92fba49ad07e2729
-          echo STAGE100_THREE_ORIGINAL_GIT_BLOBS_VERIFIED
+          test "$(git hash-object pdiddler/new_part4/stage100_screen_prompt_overlay.lua)" = e0eac8e039655999bd7bbac1f12da179db7c22ed
+          curl -fsSL --retry 3 --max-time 45 "$base/5b8ee35d7f281c23d9c2181abd97a063e59a0660/pdiddler/new_part4/stage100_screen_prompt_overlay.lua" -o /tmp/gingerscope99/pinned_prompt_layout.lua
+          cmp -s /tmp/gingerscope99/pinned_prompt_layout.lua pdiddler/new_part4/stage100_screen_prompt_overlay.lua
+          echo STAGE100_FOUR_SOURCE_GIT_BLOBS_VERIFIED_AND_PROMPT_REMOTE_IDENTICAL
       - name: Run actual original-source Lua native adapter mocks under Python
         env:
           STAGE100_REQUIRE_PINNED: '1'
@@ -62,6 +67,11 @@ jobs:
           s=Path("pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua").read_text()
           assert 'PDIDDLER_STAGE100_READONLY_ARMED' in s
           assert 'source("stage9native")' in s and 'source("stage98")' in s
+          assert 'source("promptLayout")' in s and 'placeGuide(' in s
+          assert 'frame.Draggable=false' in s and 'screen.IgnoreGuiInset=true' in s
+          g=Path("pdiddler/new_part4/stage100_screen_prompt_overlay.lua").read_text()
+          assert 'NO_SAFE_SPACE_OUTSIDE_TRADE' in g
+          assert 'intersects(candidate,t,12)' in g
           for required in (
               'epochs.observe(', 'epochs.freezePreview(', 'epochs.checkPreview(',
               'CLIENT_TWO_SIDED_OFFER_WITHDRAWAL_EPOCH_OBSERVED',
