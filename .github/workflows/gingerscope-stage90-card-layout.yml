@@ -1,0 +1,75 @@
+name: Gingerscope Stage90 read-only card-layout native audit
+on:
+  push:
+    branches:
+      - diagnostic/gingerscope-stage90-card-layout-readonly
+    paths:
+      - 'pdiddler/intelligence_lab/stage90_card_layout_readonly.lua'
+      - 'pdiddler/new_part4/STAGE90_READONLY_CARD_LAYOUT.lua'
+      - 'pdiddler/tests/test_stage90_card_layout.lua'
+      - 'pdiddler/intelligence_lab/STAGE90_CARD_LAYOUT_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage90-card-layout.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage90_card_layout_readonly.lua'
+      - 'pdiddler/new_part4/STAGE90_READONLY_CARD_LAYOUT.lua'
+      - 'pdiddler/tests/test_stage90_card_layout.lua'
+      - 'pdiddler/intelligence_lab/STAGE90_CARD_LAYOUT_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage90-card-layout.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  one-shot-ui-structure-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install actual Lua5.4
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Verify read-only module's fixed commit exists and bytes match source
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope90
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/14fefa245f0e3b72303f72b93101dd9b773e5e7d/pdiddler/intelligence_lab/stage90_card_layout_readonly.lua' -o /tmp/gingerscope90/card_layout.lua
+          test "$(git hash-object /tmp/gingerscope90/card_layout.lua)" = '140c01c084d5a2e643f10ffd1573e98e5a2cc6cd'
+          cmp /tmp/gingerscope90/card_layout.lua pdiddler/intelligence_lab/stage90_card_layout_readonly.lua
+      - name: Execute actual pure layout and standalone native wrapper in Lua mock GUI
+        run: |
+          set -euo pipefail
+          luac5.4 -p pdiddler/intelligence_lab/stage90_card_layout_readonly.lua
+          luac5.4 -p pdiddler/new_part4/STAGE90_READONLY_CARD_LAYOUT.lua
+          luac5.4 -p pdiddler/tests/test_stage90_card_layout.lua
+          lua5.4 pdiddler/tests/test_stage90_card_layout.lua
+      - name: Enforce read-only policy and anonymized output
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          core=Path("pdiddler/intelligence_lab/stage90_card_layout_readonly.lua").read_text()
+          wrapper=Path("pdiddler/new_part4/STAGE90_READONLY_CARD_LAYOUT.lua").read_text()
+          for bad in (
+            'SendMouseButtonEvent','VirtualInputManager','FireServer(',
+            'InvokeServer(', 'TradeRequest:','Trade:','OfferItem',
+            'AcceptTrade','DeclineRequest',':Teleport(',
+            'TeleportService','PostAsync(', 'HttpPost(',
+            'sethiddenproperty(', 'getconnections(', 'RemoteFunction',
+          ):
+            assert bad not in core and bad not in wrapper, f"Physical action forbidden: {bad}"
+          assert 'readOnly=true' in wrapper and 'actualRequestTaps=0' in wrapper
+          assert 'authorizesTrade=false' in wrapper and 'authorizesAccept=false' in wrapper
+          assert 'serverAttestation=false' in wrapper
+          assert 'PDIDDLER_STAGE90_READONLY_ARMED' in wrapper
+          assert wrapper.count('game:HttpGet(')==1, "only fixed-source module fetched"
+          assert 'GetDescendants()' in core
+          assert 'SIBLING_USERNAME_NEAR_PROFILE_TRADE' in core
+          assert 'DIRECT_POPUP_HEADER_MATCH' in core
+          assert 'no source' not in wrapper.lower()
+          print("STAGE90_POLICY_PASS no trading, data publication or unsafe fallback click")
+          PY
