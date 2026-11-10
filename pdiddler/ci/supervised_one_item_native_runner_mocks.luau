@@ -141,7 +141,7 @@ local function fakeEnv(options)
  local env={
     game=game,getgenv=function()return E end,
     Instance=instance,Enum=enums,
-    setclipboard=options.clipboardUnavailable and nil or function(txt)
+    setclipboard=function(txt)
         if options.clipboardFailure then error("clipboard permission denied") end
         table.insert(copied,txt)
     end,
@@ -169,6 +169,11 @@ local function fakeEnv(options)
        runService.RenderStepped:Fire()
     end}
  }
+ if options.clipboardUnavailable then env.setclipboard=nil end
+ if options.toclipboardOnly then
+    env.toclipboard=env.setclipboard
+    env.setclipboard=nil
+ end
  env.loadstring=function(source)
    return luau.load(source,{environment=env,injectGlobals=true})
  end
