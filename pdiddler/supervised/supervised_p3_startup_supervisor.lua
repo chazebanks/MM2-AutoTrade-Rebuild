@@ -176,6 +176,22 @@ function M.new(scanner,outgoingFactory,coordinatorModule,bridge,io,
    supervisor.stop()
    return result("BLOCKED","P3_JOB_OR_EPOCH_CHANGED")
   end
+  -- The original P3 start-gate's readyCheck is checked when it arms,
+  -- NOT on every subsequent request loop iteration. Close the gap:
+  -- a live watchdog must call poll repeatedly while the queue is armed.
+  -- Any lost on-screen safety, watchdog, or independent-transaction
+  -- protection stops the REAL P3 loop rather than merely logging.
+  for _,check in ipairs({
+   {ctx.onScreenSafe,"P3_ONSCREEN_INSTRUCTIONS_LOST"},
+   {ctx.watchdogReady,"P3_WATCHDOG_LOST"},
+   {ctx.noOtherTransactionOwner,"P3_EXTERNAL_CONTROLLER_DETECTED"},
+   {ctx.readyCheck,"P3_SCANNER_OR_LOBBY_UNSAFE"},
+  }) do
+   if not trueCall(check[1]) then
+    supervisor.stop()
+    return result("BLOCKED",check[2])
+   end
+  end
   local ok,observed=pcall(coordinator.poll)
   if not ok or type(observed)~="table" or
      type(observed.status)~="string" then
@@ -191,6 +207,12 @@ function M.new(scanner,outgoingFactory,coordinatorModule,bridge,io,
  function supervisor.resumeAfterClose()
   if state~="ARMED" then return false,"SUPERVISOR_NOT_ARMED" end
   if not epochLive() then return false,"P3_JOB_OR_EPOCH_CHANGED" end
+  if not trueCall(ctx.onScreenSafe) or
+     not trueCall(ctx.watchdogReady) or
+     not trueCall(ctx.noOtherTransactionOwner) then
+   supervisor.stop()
+   return false,"P3_SUPERVISION_LOST_NO_RESUME"
+  end
   local ok,yes,reason=pcall(coordinator.resumeAfterClose)
   if not ok or yes~=true then
    return false,ok and tostring(reason or "P4_CLOSE_UNVERIFIED")
