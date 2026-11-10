@@ -96,7 +96,15 @@ end
 
 -- Export ONLY bounded, non-identifying client-status fields. Never copy
 -- partner usernames, item keys, job IDs, private catalogue or inventory.
-local function exportResult(report)
+local function exportResult(report,guide)
+    local function onScreen(copyStatus)
+        if not guide or not guide.finished or guide.stopped
+            or not guide.ui or not guide.ui.body then return end
+        pcall(function()
+            guide.ui.body.Text="Status: "..tostring(report.status)
+                .." | "..copyStatus..". MAIN manually Decline."
+        end)
+    end
     if type(report)~="table" then return false end
     local payload={
         schema="gingerscope-supervised-one-item-pilot-status-v1",
@@ -120,6 +128,7 @@ local function exportResult(report)
     if not ok or type(json)~="string" then
         report.clipboardCopied=false
         warn("[PILOT RESULT] JSON export unavailable; screenshot the status")
+        onScreen("COPY FAILED - SCREENSHOT")
         return false
     end
     E.PDIDDLER_SUPERVISED_ONE_ITEM_LAST_SANITIZED_JSON=json
@@ -130,9 +139,11 @@ local function exportResult(report)
         or nil
     local copied=false
     if copyFn then
-        copied=pcall(copyFn,json)
+        local okCopy,result=pcall(copyFn,json)
+        copied=okCopy and result~=false
     end
     report.clipboardCopied=copied
+    onScreen(copied and "COPIED - PASTE IN CHATGPT" or "COPY FAILED - SCREENSHOT")
     print("[PILOT RESULT JSON] "..json)
     print(copied and "[PILOT] RESULT COPIED TO CLIPBOARD"
         or "[PILOT] CLIPBOARD UNAVAILABLE; USE RESULT JSON OR SCREENSHOT")
@@ -362,7 +373,7 @@ if not guide then
     warn("[SUPERVISED PILOT] "..tostring(guideWhy).."; no offer attempted")
     local report=blocked(guideWhy)
     E.PDIDDLER_SUPERVISED_ONE_ITEM_RESULT=report
-    exportResult(report)
+    exportResult(report,guide)
     return report
 end
 E.PDIDDLER_SUPERVISED_ONE_ITEM_GUIDE_JOB=game.JobId
@@ -371,7 +382,7 @@ if not shown then
     warn("[SUPERVISED PILOT] "..tostring(showWhy).."; no offer attempted")
     local report=blocked(showWhy)
     E.PDIDDLER_SUPERVISED_ONE_ITEM_RESULT=report
-    exportResult(report)
+    exportResult(report,guide)
     return report
 end
 local visibleRoot=nil
@@ -390,7 +401,7 @@ if not visibleRoot or guide.stopped then
     local report=blocked(why)
     guide:finish(report)
     E.PDIDDLER_SUPERVISED_ONE_ITEM_RESULT=report
-    exportResult(report)
+    exportResult(report,guide)
     return report
 end
 shown,showWhy=guide:show("OFFER",visibleRoot)
@@ -398,7 +409,7 @@ if not shown then
     local report=blocked(showWhy)
     guide:finish(report)
     E.PDIDDLER_SUPERVISED_ONE_ITEM_RESULT=report
-    exportResult(report)
+    exportResult(report,guide)
     return report
 end
 task.wait(0.15) -- allow the current on-screen instruction to render
@@ -418,7 +429,7 @@ if not safe then
     local report=blocked(reason)
     guide:finish(report)
     E.PDIDDLER_SUPERVISED_ONE_ITEM_RESULT=report
-    exportResult(report)
+    exportResult(report,guide)
     return report
 end
 local okRun,report=pcall(pilot.run,io,gate,players,lp,cfg)
@@ -428,7 +439,7 @@ if not okRun or type(report)~="table" then
     local failed=blocked("PILOT_RUNTIME_FAILURE")
     guide:finish(failed)
     E.PDIDDLER_SUPERVISED_ONE_ITEM_RESULT=failed
-    exportResult(failed)
+    exportResult(failed,guide)
     warn("[SUPERVISED PILOT] local preflight failed; no completion claimed")
     return failed
 end
@@ -480,7 +491,7 @@ report.onScreenGuidePlacementFailures=guide.layoutFailures
 report.onScreenGuideFinalShown=guide:finish(report)
 report.onScreenGuideNonOverlappingTrade=report.onScreenGuideFinalShown
 E.PDIDDLER_SUPERVISED_ONE_ITEM_RESULT=report
-exportResult(report)
+exportResult(report,guide)
 print("[PDIDDLER SUPERVISED]",tostring(report.status),
     tostring(report.reason),"outcome UNKNOWN; NEVER FINAL ACCEPT")
 return report
