@@ -3,6 +3,8 @@
 -- original Stage9 physical GUI slots + current local Sync.Weapons metadata.
 -- Candidate raw keys NEVER establish a server transaction, unique instance,
 -- current market price or permission to trade/Accept.
+-- Four offered slots per side, not four total copies: stacks use Stage9's
+-- positive integer quantity bound (<= 1,000,000), without trading authority.
 local M={}
 local function finite(v)
  return type(v)=="number" and v==v and v~=math.huge and v~=-math.huge
@@ -84,7 +86,7 @@ local function guiSide(side,parser)
     side.accepted~=false then return nil,"GUI_SIDE_OR_ACCEPT_UNVERIFIED" end
  local n=dense(side.slots,4)
  if not n then return nil,"GUI_SLOTS_NOT_DENSE_OR_TOO_MANY" end
- local out,used,copies={}, {},0
+ local out,used={}, {}
  for i=1,n do
   local slot=side.slots[i]
   if type(slot)~="table" or getmetatable(slot)~=nil or
@@ -95,19 +97,17 @@ local function guiSide(side,parser)
   end
   used[slot.slot]=true
   local qty=parser(slot.amountText)
-  if not integer(qty,1,4) then
+  if not integer(qty,1,1000000) then
    return nil,"GUI_SLOT_STACK_QUANTITY_UNVERIFIED"
   end
   if slot.rawId~=nil and slot.rawId~="" and
      not safeString(slot.rawId,128) then
    return nil,"GUI_SLOT_RAW_TEXT_INVALID"
   end
-  copies=copies+qty
   out[#out+1]={index=slot.slot,quantity=qty,
      visibleName=normalize(slot.label),
      chroma=slot.chroma,rawText=slot.rawId or ""}
  end
- if copies>4 then return nil,"GUI_FOUR_COPY_LIMIT_EXCEEDED" end
  table.sort(out,function(a,b)return a.index<b.index end)
  return out
 end
@@ -174,24 +174,22 @@ end
 local function eventSide(offer,catalogue,registry)
  local n=dense(offer,4)
  if not n then return nil,"EVENT_OFFER_NOT_DENSE_OR_TOO_MANY" end
- local out,copies={},0
+ local out={}
  for i=1,n do
   local triple=offer[i]
   if not exactFields(triple,TRIPLE,3) or
      type(triple[1])~="string" or triple[3]~="Weapons" or
-     not integer(triple[2],1,4) then
+     not integer(triple[2],1,1000000) then
    return nil,"EVENT_WEAPON_TUPLE_INVALID"
   end
   local item=catalogEntry(triple[1],catalogue,registry)
   if not item then
    return nil,"EVENT_KEY_NOT_IN_SAME_CLIENT_PUBLIC_VARIANT_CATALOGUE"
   end
-  copies=copies+triple[2]
   out[#out+1]={key=triple[1],quantity=triple[2],
     visibleName=item.normalizedName,chroma=item.chroma,
     rarity=item.rarity,itemType=item.itemType}
  end
- if copies>4 then return nil,"EVENT_FOUR_COPY_LIMIT_EXCEEDED" end
  return out
 end
 local function eventSnapshot(receipt,scope,catalogue,registry)
