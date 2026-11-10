@@ -26,6 +26,16 @@ for _,owner in ipairs({
         return nil
     end
 end
+-- Older Part3/Part4 controllers use these actual session owners, not the
+-- generic _ACTIVE flags above. Even a stale owner marker is a reason to
+-- require a fresh server for the one-item manual pilot.
+if E.PDIDDLER_PART4_SESSION~=nil
+    or E.PDIDDLER_OUTGOING_SESSION~=nil
+    or (type(E.GINGERSCOPE_STAGE106_READONLY_WITNESS)=="table"
+        and E.GINGERSCOPE_STAGE106_READONLY_WITNESS.running==true) then
+    warn("[SUPERVISED PILOT] other trade/test session owner present; use a fresh server")
+    return nil
+end
 if E.PDIDDLER_SUPERVISED_ONE_ITEM_SPENT_JOB==game.JobId then
     warn("[SUPERVISED PILOT] one offer already attempted in this job")
     return nil
