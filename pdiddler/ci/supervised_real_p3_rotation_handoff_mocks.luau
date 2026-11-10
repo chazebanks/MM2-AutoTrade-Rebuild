@@ -82,10 +82,14 @@ local function fixture()
  local io=iomod.new({resolveOfferEntry=function()return nil end},gate)
  local scanner={state="whitelist",object=p}
  function scanner.isWhitelisted(uid)
-  return uid==2 and scanner.state=="whitelist"
+  return (uid==2 or (players.other and uid==players.other.UserId))
+      and scanner.state=="whitelist"
  end
  function scanner.getRecord(uid)
   if uid==2 then return {state=scanner.state,player=scanner.object}end
+  if players.other and uid==players.other.UserId then
+   return {state=scanner.state,player=players.other}
+  end
  end
  local outgoing={session=18,paused=false,resumed=0,state={processed={},active=nil}}
  function outgoing.isPaused() return outgoing.paused end
