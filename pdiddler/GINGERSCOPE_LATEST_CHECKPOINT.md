@@ -1,3 +1,23 @@
+# CURRENT Stage97 native first test BLOCKED PRE-GUI; bounded manual-open FIX tested and ready (Nov9, 2026 ET)
+
+**Actual MAIN iPad/Delta first Stage97 report:** `[GINGERSCOPE STAGE97 PARTNER EVENT]` `status=INCONCLUSIVE`, `reason=EXACT_TRADE_WINDOW_NOT_OPEN`, `elapsedSeconds=0`, `targetClientBound=true`, `exactPartnerGuiObserved=false`, `stage9ObserverBound=false`, `stage9Frames=0`, `eventReceiptCount=0`, every automatic request/offer/Accept/Decline/Teleport zero, all server/ownership/price/settlement/causal attribution flags false. **No partner callback was observed because no listener ever attached.** This is a startup GUI timing/availability blocker, NOT a failed Stage96 event correlation test; do not assume the user forgot to open the trade. Do not retest Stage43/44/50 Batwing raw-key, Stage79–83 inventory, Stage91–93 exact partner trade or Stage94 public price mapping.
+
+**Isolated Stage97 FIX committed to existing [DRAFT PR167](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/167), no new stage:** client exact target bound, then print `[STAGE97] WAIT_FOR_MANUAL_TRADE_WINDOW`, passively wait up to 30 seconds for the operator to MANUALLY open one current exact partner MM2 trade window. No request click. Retry ONLY absence of visible trade window; wrong partner, ambiguous GUI, job/player/owner mismatch immediately fail. If timeout `MANUAL_TRADE_WINDOW_NOT_OBSERVED_WITHIN_30S` with zero event listener. Once open, preserve original read-only Stage9 two stable empty-offer checks, one passive `UpdateTrade` handler, alt manual one-item offer addition and pure Stage96 callback/GUI client-only comparison. Neither account presses final Accept. No auto requests/offers/Declines/hops/Discord/market pricing.
+
+**Final tested SHA `c9646d74977e58a9599ce0034eab03e3b8474b4a`**, [focused Actions #42751643060](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42751643060) SUCCESS original pinned Stage9/83/95/96 Lua5.4 wrapper executed under Python, with three NEW fail-closed tests for delayed manual trade, 30-second no GUI timeout, wrong-partner appearing after wait; all five inherited Luau/Lune/Selene+StyLua/replay/Hypothesis CI SUCCESS at same SHA (**6/6 green**). **No native test of fixed version yet.** DRAFT/unmerged.
+
+**NEXT one specific iPad test** in a FRESH original MM2 server with main iPad/Delta and consenting test alt `venossgaming90190`, no older scripts: EXECUTE the fixed pinned one-shot first:
+
+```lua
+getgenv().PDIDDLER_STAGE97_TARGET_USERNAME = "venossgaming90190"
+getgenv().PDIDDLER_STAGE97_READONLY_ARMED = true
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/c9646d74977e58a9599ce0034eab03e3b8474b4a/pdiddler/new_part4/STAGE97_READONLY_PARTNER_EVENT_WITNESS.lua"))()
+```
+
+After `[STAGE97] WAIT_FOR_MANUAL_TRADE_WINDOW`, MAIN/ALT manually send/accept a normal TRADE INVITATION to OPEN item-trade window within 30 seconds, both offers empty. After `[STAGE97] READY`, ALT manually adds ONE expendable eligible Ancient/Godly/Chroma weapon to THEIR offer; main stays empty; NO final Accept on either account. Return ONE `[GINGERSCOPE STAGE97 PARTNER EVENT]` aggregate. Never retry same JobId. Positive callback/GUI match remains **client-consistent UNATTRIBUTED**, never authenticated server session, ownership, pricing, profit, Discord or trade authority. [Issue122 evidence](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/issues/122#issuecomment-6758417844) and [Stage97 handoff](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/blob/diagnostic/gingerscope-stage97-partner-event-native/pdiddler/intelligence_lab/STAGE97_NATIVE_PARTNER_EVENT_HANDOFF.md).
+
+---
+
 # LATEST: Stage96 pure partner-client event comparator CI green; Stage97 native read-only witness ready for ONE manual test (Nov 9, 2026 ET)
 
 **Existing native proof intentionally preserved:** Stage43/44/50 current MAIN one-own-Batwing (`Scythe` raw key) `Sync.Weapons` / preoffer Owned / player-oriented `UpdateTrade` client match, Stage79–83 aggregate 69/69 eligible weapon keys +76/76 eligible copies historical public metadata/Chroma match, and Stage91–93 exact target request→trade GUI→original Stage9 native Part4 20 frames ALT manual GUI item addition ALL previously PASSED. DO NOT REPEAT these just to reestablish them. They remain client-local observations, not server-attested settlement.
