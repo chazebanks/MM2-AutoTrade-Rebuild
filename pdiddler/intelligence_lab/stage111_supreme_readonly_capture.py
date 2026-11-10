@@ -103,6 +103,19 @@ def _fetch_one(session,category,clock):
         raw=b"".join(chunks)
         if not 1000<len(raw)<800000:
             raise CaptureRejected("CANONICAL_SOURCE_BODY_INCOMPLETE")
+        # Content-Length is an on-wire byte count. Requests.iter_content
+        # decompresses gzip/deflate/br before yielding bytes. Only compare
+        # counts for an identity (uncompressed) HTTP representation.
+        declared=header.get("Content-Length")
+        if declared is not None:
+            if (not isinstance(declared,str) or
+                not re.fullmatch(r"[0-9]{1,12}",declared)):
+                raise CaptureRejected("CANONICAL_SOURCE_CONTENT_LENGTH_INVALID")
+            encoding=header.get("Content-Encoding","")
+            if (not isinstance(encoding,str) or
+                (encoding.strip().lower() in ("","identity") and
+                 int(declared)!=len(raw))):
+                raise CaptureRejected("CANONICAL_SOURCE_CONTENT_LENGTH_MISMATCH")
         observed=_checked_utc(clock())
         capture={
             "url":url,
