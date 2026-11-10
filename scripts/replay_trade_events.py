@@ -42,10 +42,11 @@ FALSE_AUTHORITY = {
     "authorizesTrade": False,
     "authorizesAccept": False,
     "discordWebhookSent": False,
+    "operatorCorroborationProven": False,
 }
 
 
-def _result(status: str, reason: str, **counts: int | bool | None) -> dict[str, Any]:
+def _result(status: str, reason: str, **counts: int | bool | str | None) -> dict[str, Any]:
     result: dict[str, Any] = {
         "schema": RESULT_SCHEMA,
         "status": status,
@@ -65,6 +66,11 @@ def _result(status: str, reason: str, **counts: int | bool | None) -> dict[str, 
         "clientCallbackObservations": 0,
         "clientInventoryDeltaObservations": 0,
         "postCloseDeltaObservations": 0,
+        "postCloseUnchangedReadbacks": 0,
+        "postCloseChangedReadbacks": 0,
+        "postCloseReadbackRepeats": 0,
+        "postCloseDistinctReadbackPatterns": 0,
+        "clientEvidenceTier": "NO_TERMINAL_CLIENT_EVIDENCE",
         "ambiguousDeclineSignals": 0,
         "windowClosures": 0,
         "activeSession": False,
@@ -147,13 +153,20 @@ def replay_trace(source: object) -> dict[str, Any]:
         "acceptanceInvalidations": 0, "clientAcceptObservations": 0,
         "repeatClientAcceptObservations": 0,
         "clientCallbackObservations": 0, "clientInventoryDeltaObservations": 0,
-        "postCloseDeltaObservations": 0, "ambiguousDeclineSignals": 0,
+        "postCloseDeltaObservations": 0,
+        "postCloseUnchangedReadbacks": 0,
+        "postCloseChangedReadbacks": 0,
+        "postCloseReadbackRepeats": 0,
+        "postCloseDistinctReadbackPatterns": 0,
+        "ambiguousDeclineSignals": 0,
         "windowClosures": 0,
     }
     seen: dict[str, str] = {}
     opened_sessions: set[str] = set()
     active: str | None = None
     last_closed: str | None = None
+    postclose_patterns: set[tuple[int, int]] = set()
+    client_evidence_tier = "NO_TERMINAL_CLIENT_EVIDENCE"
     revision = 0
     accepted: set[str] = set()
     for event in events:
@@ -183,13 +196,36 @@ def replay_trace(source: object) -> dict[str, Any]:
                 counts["crossSessionEvents"] += 1
             active = session
             last_closed = None
+            # A new client trade cannot inherit the last closed session's
+            # inventory-readback evidence, whether it showed changes or not.
+            postclose_patterns.clear()
+            counts["postCloseDistinctReadbackPatterns"] = 0
+            client_evidence_tier = "NO_TERMINAL_CLIENT_EVIDENCE"
             revision = 0
             accepted.clear()
             continue
         if kind == "INVENTORY_DELTA" and last_closed == session and active is None:
-            # A post-close readback is observable, not attributable settlement.
+            # A post-close readback is observable, NOT a transferred-item
+            # receipt. The event's gained/lost counts are snapshot deltas,
+            # not cumulative per-event gains, and may be replayed.
             counts["clientInventoryDeltaObservations"] += 1
             counts["postCloseDeltaObservations"] += 1
+            signature = (event["gained"], event["lost"])
+            if signature in postclose_patterns:
+                counts["postCloseReadbackRepeats"] += 1
+            else:
+                postclose_patterns.add(signature)
+            counts["postCloseDistinctReadbackPatterns"] = len(postclose_patterns)
+            if signature == (0, 0):
+                counts["postCloseUnchangedReadbacks"] += 1
+            else:
+                counts["postCloseChangedReadbacks"] += 1
+            if len(postclose_patterns) > 1:
+                client_evidence_tier = "CLIENT_POSTCLOSE_READBACKS_CONFLICT"
+            elif signature == (0, 0):
+                client_evidence_tier = "CLIENT_POSTCLOSE_NO_CHANGE"
+            else:
+                client_evidence_tier = "CLIENT_POSTCLOSE_CHANGE_UNATTRIBUTED"
             continue
         if active != session:
             counts["crossSessionEvents"] += 1
@@ -199,6 +235,11 @@ def replay_trace(source: object) -> dict[str, Any]:
             last_closed = session
             active = None
             accepted.clear()
+            # A closed GUI without a distinct post-close inventory readback
+            # has no positive/negative transfer evidence.
+            postclose_patterns.clear()
+            counts["postCloseDistinctReadbackPatterns"] = 0
+            client_evidence_tier = "CLIENT_WINDOW_CLOSED_ONLY"
             continue
         if kind == "OFFER":
             new_rev = event["revision"]
@@ -235,6 +276,7 @@ def replay_trace(source: object) -> dict[str, Any]:
         **counts, activeSession=(active is not None),
         currentRevision=(revision if active is not None else None),
         currentRevisionAcceptedSides=(len(accepted) if active is not None else 0),
+        clientEvidenceTier=client_evidence_tier,
     )
 
 
