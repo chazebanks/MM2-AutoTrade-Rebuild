@@ -274,13 +274,29 @@ local function run()
  if not token then return finish("HELD","CONTACT_AUTHORIZATION_CHANGED") end
  local permitted,why5=controller:prepare(target,token)
  if type(permitted)~="function" then return finish("HELD","CONTACT_PREPARE_FAILED") end
- -- Input boundary. No yield between final revalidation and pointer down.
+ -- Match the existing reviewed tablet tap convention: account for the
+ -- visible Roblox GuiService inset before input dispatch. No speculative
+ -- origin/zero-offset fallback when a native layout is unavailable.
+ local okInset,inset=pcall(function()
+  return game:GetService("GuiService"):GetGuiInset()
+ end)
+ local insetX,insetY
+ local validInset=okInset and inset~=nil and pcall(function()
+  insetX,insetY=inset.X,inset.Y
+ end)
+ if not validInset or type(insetX)~="number" or type(insetY)~="number"
+    or insetX~=insetX or insetY~=insetY
+    or math.abs(insetX)>1000 or math.abs(insetY)>1000 then
+  return finish("HELD","GUI_INSET_UNAVAILABLE")
+ end
+ local pos,sz=tradeButton.AbsolutePosition,tradeButton.AbsoluteSize
+ local x,y=pos.X+sz.X/2+insetX,pos.Y+sz.Y/2+insetY
+ -- Input boundary: final player/card/permit validation occurs AFTER we
+ -- calculate geometry and immediately BEFORE the ONE physical mouse-down.
  local button=select(1,exactCard())
  if button~=tradeButton or not permitted() or not live() then
   return finish("HELD","CARD_OR_CONTACT_CHANGED_BEFORE_TAP")
  end
- local pos,sz=button.AbsolutePosition,button.AbsoluteSize
- local x,y=pos.X+sz.X/2,pos.Y+sz.Y/2
  -- Ownership of this one physical attempt is reserved BEFORE dispatch.
  -- Even if the input API throws, do not retry; the server might have received it.
  R.requestTapCount=1
