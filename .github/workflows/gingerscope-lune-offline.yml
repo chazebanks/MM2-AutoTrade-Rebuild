@@ -66,6 +66,12 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_real_p3_rotation_handoff_mocks.luau
+      - name: Exercise original P3 outgoing with explicit startup gate under Lune
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_start_barrier_mocks.luau
+          python3 pdiddler/ci/check_p3_start_barrier_integrity.py
       - name: Assert that a failing Luau runtime assertion fails CI
         shell: bash
         run: |

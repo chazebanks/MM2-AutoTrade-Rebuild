@@ -11,6 +11,9 @@ on:
       - 'pdiddler/ci/supervised_p3_p4_handoff_mocks.luau'
       - 'pdiddler/supervised/supervised_real_p3_rotation_handoff.lua'
       - 'pdiddler/ci/supervised_real_p3_rotation_handoff_mocks.luau'
+      - 'pdiddler/supervised/pdiddler3_outgoing_START_GATED_v1.lua'
+      - 'pdiddler/ci/supervised_p3_start_barrier_mocks.luau'
+      - 'pdiddler/ci/check_p3_start_barrier_integrity.py'
       - 'pdiddler/supervised/supervised_four_slot_operator_plan.lua'
       - 'pdiddler/ci/supervised_four_slot_operator_plan_mocks.luau'
       - 'pdiddler/supervised/SUPERVISED_FOUR_SLOT_MANUAL_PILOT.lua'
@@ -63,6 +66,14 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_four_slot_native_runner_mocks.luau
+      - name: Exercise FULL supervised P3 startup gate with real 1800-line Luau source
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_start_barrier_mocks.luau
+      - name: Verify full P3 source unchanged except the four reviewed start-barrier changes
+        run: |
+          set -euo pipefail
+          python3 pdiddler/ci/check_p3_start_barrier_integrity.py
       - name: Verify no auto trading, final Accept, market quote or Discord source
         run: |
           set -euo pipefail
@@ -99,6 +110,11 @@ jobs:
           assert 'PROTECTED_GINGERSCOPE_IN_OWN_OFFER' in bridge
           p3Coordinator=Path('pdiddler/supervised/supervised_real_p3_rotation_handoff.lua').read_text()
           assert 'P3_NO_FRESH_ACCEPTED_TARGET' in p3Coordinator
+          startGate=Path('pdiddler/supervised/pdiddler3_outgoing_START_GATED_v1.lua').read_text()
+          assert 'requiresExplicitStart~=true' in startGate
+          assert 'if S.startGateOpen~=true then' in startGate
+          assert 'local ok,ready=pcall(options.readyCheck)' in startGate
+          assert 'P3_QUEUE_ARMED_NO_FINAL_ACCEPT' in startGate
           assert 'P3_MULTIPLE_NEW_TRADE_OUTCOMES' in p3Coordinator
           assert 'P3_CLIENT_PROCESSED_TRADE_OPEN_UNATTESTED' in p3Coordinator
           assert 'preexisting[tostring(uid)]=true' in p3Coordinator
