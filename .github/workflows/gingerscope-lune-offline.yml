@@ -77,6 +77,11 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_atomic_bootstrap_mocks.luau
+      - name: Test continuous supervised P3 watchdog and P4 closure gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_continuous_watchdog_mocks.luau
       - name: Assert that a failing Luau runtime assertion fails CI
         shell: bash
         run: |
