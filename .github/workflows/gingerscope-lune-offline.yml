@@ -72,6 +72,11 @@ jobs:
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_start_barrier_mocks.luau
           python3 pdiddler/ci/check_p3_start_barrier_integrity.py
+      - name: Exercise supervised real P3/P4 atomic startup supervisor
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_atomic_bootstrap_mocks.luau
       - name: Assert that a failing Luau runtime assertion fails CI
         shell: bash
         run: |
