@@ -152,10 +152,17 @@ function M.inspect(raw,catalogue,registry,parseQuantity)
  ok,why=inspectSide(raw.their,out,"theirSlots",catalogue,registry,parseQuantity)
  if not ok then out.reason=why;return out end
  out.clientGuiOfferObserved=true
- out.status="CLIENT_GUI_PUBLIC_REFERENCE_CANDIDATES_ONLY"
- out.reason=out.rejectedSlotCount==0 and out.nameOnlyUnboundCount==0
-    and "CLIENT_GUI_RAW_TEXT_CANDIDATES_NOT_AUTHORITATIVE"
-     or "UNBOUND_OR_REJECTED_PHYSICAL_SLOT_IDENTITY"
+ if out.rejectedSlotCount>0 then
+  -- Never report a mixed known/unknown offer as an overall positive sample.
+  out.status="INCONCLUSIVE"
+  out.reason="AT_LEAST_ONE_PHYSICAL_SLOT_IDENTITY_REJECTED"
+ elseif out.nameOnlyUnboundCount>0 then
+  out.status="CLIENT_DISPLAY_ONLY_UNBOUND"
+  out.reason="GUI_NAMES_WITHOUT_RAW_KEYS_NOT_IDENTITY"
+ else
+  out.status="CLIENT_GUI_PUBLIC_REFERENCE_CANDIDATES_ONLY"
+  out.reason="CLIENT_GUI_RAW_TEXT_CANDIDATES_NOT_AUTHORITATIVE"
+ end
  return out
 end
 -- Inject into the ORIGINAL Stage9 native adapter's existing
