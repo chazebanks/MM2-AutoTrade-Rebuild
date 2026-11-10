@@ -66,7 +66,7 @@ local function scenario(mode)
   return nil
  end
  function players:GetPlayerByUserId(uid)
-  if mode.targetReplace and elapsed>5002 then return {Name=target.Name,UserId=2,Parent=players} end
+  if mode.targetReplace then return {Name=target.Name,UserId=2,Parent=players} end
   if uid==target.UserId and target.Parent==players then return target end
   return nil
  end
