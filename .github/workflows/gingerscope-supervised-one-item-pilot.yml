@@ -108,7 +108,7 @@ jobs:
               assert forbidden not in guided
           assert 'spentBindings' in plan
           assert 'approval.noAutomaticAcceptAcknowledged~=true' in plan
-          assert 'candidateAdded(expectedOwn,fresh.ours,key)' in plan
+          assert 'candidateAdded(expectedOwn,fresh.ours,approved)' in plan
           assert 'gate.checkOutbound=nil' in plan
           assert 'PROTECTED_GINGERSCOPE_IN_OWN_OFFER' in bridge
           for forbidden in ('AcceptTrade:FireServer(', 'OfferItem:FireServer(', 'DeclineTrade:FireServer(', 'SendRequest:FireServer(', 'PostAsync(', 'TeleportService'):
