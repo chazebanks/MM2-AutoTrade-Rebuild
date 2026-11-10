@@ -128,6 +128,8 @@ end
 
 local function newSupervisor(x,options)
  options=options or {}
+ x.scanner.getWhitelist=function()return {x.p} end
+ x.scanner.hasPendingWork=function()return false end
  x.screen.Enabled=false -- queue starts before any original MM2 trade opens
  local events={}
  local outgoingModule={}
