@@ -36,6 +36,11 @@ jobs:
           set -euo pipefail
           "$RUNNER_TEMP/lune" --version
           "$RUNNER_TEMP/lune" run pdiddler/ci/lune_pure_runtime_tests.luau
+      - name: Execute supervised physical OfferItem gate mocked Roblox runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_offer_remote_gate_tests.luau
       - name: Assert that a failing Luau runtime assertion fails CI
         shell: bash
         run: |
