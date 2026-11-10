@@ -1,5 +1,17 @@
 # Stage116 — unlinked client evidence display, passive native panel (RESEARCH ONLY)
 
+## REAL IPAD SCREENSHOT — 2026-11-10 — display-only placement VERIFIED, trade-window collision UNTESTED
+
+The user **actually executed the Stage116 display-only script in original MM2 on iPad/Delta** and supplied a screenshot (2026-11-10 current chat, IMG_2281.jpeg). **Screen interpretation is strictly limited to visibly shown facts**:
+- The purple/black Stage116 panel is clearly present in the **upper-left**, beneath the Roblox top-bar icons; the heading reads **"OUTCOME UNKNOWN - CLIENT ONLY"**.
+- The two text fields read exactly **"No Stage106 candidate report available"** and **"No Stage115 sanitized replay report available"**. Those are **correct** in this fresh game session with no prior finished in-memory Stage106 witness or separately supplied Stage115 offline report. Never turn these absences into claimed weapon evidence or rerun Stage106.
+- The footer reads **"UNLINKED RECORDS. Not proof of completed trade."** The visible text is legible and appears contained within the panel. The player list is visible on the **right** side; ordinary mobile controls are still visible; no overlap with those *visible* controls is apparent.
+- **NO TRADE WINDOW was open in the screenshot**, and no Accept/Decline buttons were displayed. Therefore **real iPad non-overlap DURING an active trade remains UNVERIFIED**. Runtime mock tests previously passed same-frame reflow, and the native screenshot only proves the idle/no-trade placement. There is no evidence of any native inventory readback, actual completed trade, market prices, client session binding or verified server settlement.
+- The screenshot does not verify whether the dismiss button works on the physical device, or alternate orientations/viewports. It *does* verify real iPad on-screen display, correct missing-data wording and absence of visible idle-screen overlap. Do not overclaim full GUI test completion.
+
+**Result:** `NATIVE_IDLE_DISPLAY_VISIBLE_PASS / ACTIVE_TRADE_COLLISION_UNTESTED`. This is sufficient to close the *first display-only screenshot request*, but **NOT** sufficient to certify all responsive trade-state UI behavior or merge/enable the native panel in production. Do not repeat Stage106/ALT item experiment just for UI confirmation. This is a useful display shell; without a real live read-only evidence source, it currently conveys unknown/no data. Continue work on a separate actual client observation source or a bounded genuine game-result contract; do not build a fake "completed trade" detector by joining client reports from unrelated sessions.
+
+
 ## Purpose and exact evidence boundary
 
 The user completed original MM2 iPad/Delta Stage106 on Nov10: one actual client `UpdateTrade` receipt with stable 1+1 physical offered slots and client raw-key candidates matched visible GUI names. Status `CLIENT_MULTISLOT_RAW_KEY_CANDIDATES_MATCH_GUI_UNATTRIBUTED` is **CLIENT-ONLY**; no server session signed ID, unique weapon instance, current price or completed trade was proven.
