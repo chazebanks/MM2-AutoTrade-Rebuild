@@ -209,7 +209,8 @@ function M.new(scanner,outgoingFactory,coordinatorModule,bridge,io,
  function supervisor.isP3Paused()
   if state~="ARMED" or not epochLive() then return nil end
   local ok,v=pcall(outgoing.isPaused)
-  return ok and type(v)=="boolean" and v or nil
+  if not ok or type(v)~="boolean" then return nil end
+  return v
  end
  function supervisor.resumeAfterClose()
   if state~="ARMED" then return false,"SUPERVISOR_NOT_ARMED" end
