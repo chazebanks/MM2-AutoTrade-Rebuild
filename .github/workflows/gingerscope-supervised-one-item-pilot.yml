@@ -83,6 +83,12 @@ jobs:
               assert method in outgoing
           assert 'io.sideSignature(io.readSide' in bridge
           assert 'physical~=src.slots' in bridge
+          assert 'BLANK_SINGLETON_CLIENT' in bridge
+          assert 'VISIBLE_STACK_TEXT_INVALID' in bridge
+          assert '2f556afac5e5fd9cfdbf9e081eeea01a542d293' in guided
+          assert '616f905739ffb7bf70183475a79ec6c278dc9ddb' not in guided
+          assert 'd496d6311dc6c5e24e059fcd71014e274a4be76b' == __import__('subprocess').check_output(
+              ['git','hash-object','pdiddler/supervised/supervised_p3_p4_handoff.lua'],text=True).strip()
           assert 'PROTECTED_GINGERSCOPE_IN_OWN_OFFER' in bridge
           for forbidden in ('OfferItem:FireServer(', 'AcceptTrade:FireServer(', 'DeclineTrade:FireServer(', 'PostAsync('):
               assert forbidden not in bridge
