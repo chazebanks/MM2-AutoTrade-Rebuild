@@ -10,7 +10,19 @@ import subprocess
 import tempfile
 import unittest
 
-from pdiddler.tests.test_stage102_public_lua_bridge import as_lua
+# Keep this small serializer local: importing Stage102's Python driver would
+# transitively load Stage94 research-only fixture modules not needed on iPad.
+def as_lua(obj):
+    if obj is None: return "nil"
+    if type(obj) is bool: return "true" if obj else "false"
+    if type(obj) is int: return str(obj)
+    if type(obj) is str: return json.dumps(obj,ensure_ascii=False)
+    if type(obj) is list:
+        return "{"+",".join(as_lua(x) for x in obj)+"}"
+    if type(obj) is dict:
+        return "{"+",".join("["+json.dumps(str(k),ensure_ascii=False)+"]="+as_lua(v)
+                            for k,v in sorted(obj.items()))+"}"
+    raise TypeError(type(obj))
 
 SCRIPT=Path("pdiddler/new_part4/STAGE103_READONLY_ARCHIVED_VALUE_OVERLAY.lua")
 TEST=Path("pdiddler/tests/test_stage103_native_archived_value_overlay.lua")
