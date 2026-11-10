@@ -80,6 +80,9 @@ local function scenario(mode)
  local players={Name="Players"}
  local me={Name="test_main",UserId=1,Parent=players}
  local alt={Name="venossgaming90190",UserId=2,Parent=players}
+ function players:IsA(k)return k=="Players" end
+ function me:IsA(k)return k=="Player" end
+ function alt:IsA(k)return k=="Player" end
  players.LocalPlayer=me
  function players:GetPlayers()
   if mode.noTarget then return {me} end
