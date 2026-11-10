@@ -1,0 +1,348 @@
+-- ORIGINAL MM2, native supervised PART3 activation runner.
+-- P3 scanner + real gated outgoing + protected P4 observer + watchdog.
+-- THIS RUNNER DOES NOT OFFER ITEMS OR PRESS FINAL ACCEPT.
+-- P3 requests can start ONLY AFTER a LIVE human taps ARM P3 in the game.
+-- All source dependencies are exact SHA pinned. Never use legacy balancer.
+local E=(type(getgenv)=="function" and getgenv()) or _G
+local KEY="PDIDDLER_SUPERVISED_P3_NATIVE"
+local cfg=E[KEY]
+if game.PlaceId~=142823291 or type(cfg)~="table"
+    or cfg.enableNativeSupervisor~=true
+    or cfg.finalAcceptMustRemainManual~=true then
+    warn("[P3 NATIVE] Original MM2 and explicit configuration required")
+    return nil
+end
+if E.PDIDDLER_SUPERVISED_P3_USED_JOB==game.JobId
+    or E.PDIDDLER_SUPERVISED_P3_NATIVE_OWNER~=nil
+    or E.PDIDDLER_OUTGOING_SESSION~=nil
+    or E.PDIDDLER_PART4_SESSION~=nil
+    or E.PDIDDLER_PART4_CONTROLLER_ACTIVE==true
+    or E.PDIDDLER_OUTGOING_CONTROLLER_ACTIVE==true
+    or E.PDIDDLER_AUTOTRADE_ACTIVE==true then
+    warn("[P3 NATIVE] Another P3/P4 owner or previous test in this job")
+    return nil
+end
+local Players=game:GetService("Players")
+local LP=Players.LocalPlayer
+local PG=LP and LP:FindFirstChildOfClass("PlayerGui")
+local World=game:GetService("Workspace")
+if not PG or not World or not World.CurrentCamera then
+    warn("[P3 NATIVE] GUI and live camera required")
+    return nil
+end
+local function loadFrozen(rev,path,maxSize)
+    local url="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
+       ..rev.."/pdiddler/"..path
+    local ok,source=pcall(function()return game:HttpGet(url)end)
+    if not ok or type(source)~="string" or #source<100
+        or #source>(maxSize or 95000) then return nil end
+    local compiler=loadstring or load
+    if type(compiler)~="function" then return nil end
+    local okLoad,result=pcall(function()
+       return assert(compiler(source))()
+    end)
+    return okLoad and type(result)=="table" and result or nil
+end
+local geometry=loadFrozen("5b8ee35d7f281c23d9c2181abd97a063e59a0660",
+    "new_part4/stage100_screen_prompt_overlay.lua")
+local ioModule=loadFrozen("a599c31c53d25e6799b9d631f45f282b445dcda0",
+    "supervised/pdiddler4_tradeio_supervised_v2.lua")
+local bridge=loadFrozen("2f556afac5e5fd9cfdbf9e081eeea01a542d293",
+    "supervised/supervised_p3_p4_handoff.lua")
+local coordinator=loadFrozen("dfcfc7d52ce5f9cc64390bb5e28ce79512f1c001",
+    "supervised/supervised_real_p3_rotation_handoff.lua")
+local outgoingModule=loadFrozen("2036ae5bd937620f21d46600f99550a1b233a654",
+    "supervised/pdiddler3_outgoing_START_GATED_v1.lua")
+local bootModule=loadFrozen("5779457dc2024579db3c25a0f0679299751846f4",
+    "supervised/supervised_p3_startup_supervisor.lua")
+local watchdogModule=loadFrozen("dd032dd85d00953404ccb49c45173ef54554d145",
+    "supervised/supervised_p3_continuous_watchdog.lua")
+if not geometry or type(geometry.choose)~="function"
+    or not ioModule or type(ioModule.new)~="function"
+    or not bridge or type(bridge.bind)~="function"
+    or not coordinator or type(coordinator.new)~="function"
+    or not outgoingModule or type(outgoingModule.run)~="function"
+    or not bootModule or type(bootModule.new)~="function"
+    or not watchdogModule or type(watchdogModule.new)~="function" then
+    warn("[P3 NATIVE] Immutable source unavailable: P3 remains disabled")
+    return nil
+end
+local owner={job=game.JobId,running=true}
+E.PDIDDLER_SUPERVISED_P3_NATIVE_OWNER=owner
+local function statusRecord(status,reason)
+    return {
+        schema="gingerscope-p3-native-rotation-status-v1",
+        status=tostring(status or "UNKNOWN"),
+        reason=tostring(reason or "UNKNOWN"),
+        authorizesOffer=false,authorizesAccept=false,
+        serverCompletionProven=false,mayReportProfit=false,
+        maySendDiscordWebhook=false,tradeOutcome="UNKNOWN",
+    }
+end
+local last=statusRecord("LOADING","P3_DEFAULT_CLOSED")
+local function clipboard(r)
+    local obj=statusRecord(r.status,r.reason)
+    local http=game:GetService("HttpService")
+    local ok,json=pcall(function()return http:JSONEncode(obj)end)
+    if not ok or type(json)~="string" then
+        warn("[P3 NATIVE] Result serialization unavailable")
+        return false
+    end
+    E.PDIDDLER_SUPERVISED_P3_LAST_JSON=json
+    local fn=type(setclipboard)=="function" and setclipboard
+      or type(toclipboard)=="function" and toclipboard
+      or type(E.setclipboard)=="function" and E.setclipboard
+      or nil
+    local copied=false
+    if fn then
+        local a,b=pcall(fn,json)
+        copied=a and b~=false
+    end
+    print("[P3 NATIVE RESULT JSON] "..json)
+    return copied
+end
+local ui={}
+local made=pcall(function()
+    ui.screen=Instance.new("ScreenGui")
+    ui.screen.Name="PDIDDLER_P3_ExplicitArm"
+    ui.screen.ResetOnSpawn=false
+    ui.screen.IgnoreGuiInset=true
+    ui.screen.DisplayOrder=150
+    ui.screen.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
+    ui.screen.Parent=PG
+    ui.panel=Instance.new("Frame")
+    ui.panel.Name="LiveStatus"
+    ui.panel.BackgroundColor3=Color3.fromRGB(28,23,40)
+    ui.panel.BorderSizePixel=0
+    ui.panel.Active=false
+    ui.panel.Visible=false
+    ui.panel.Parent=ui.screen
+    local stroke=Instance.new("UIStroke")
+    stroke.Color=Color3.fromRGB(177,128,239)
+    stroke.Thickness=1
+    stroke.Parent=ui.panel
+    local corner=Instance.new("UICorner")
+    corner.CornerRadius=UDim.new(0,10)
+    corner.Parent=ui.panel
+    local function label(n,y,h,size)
+        local q=Instance.new("TextLabel")
+        q.Name=n
+        q.BackgroundTransparency=1
+        q.TextColor3=Color3.fromRGB(255,255,255)
+        q.TextSize=size
+        q.TextWrapped=true
+        q.TextXAlignment=Enum.TextXAlignment.Left
+        q.Font=Enum.Font.GothamBold
+        q.Position=UDim2.fromOffset(12,y)
+        q.Size=UDim2.fromOffset(280,h)
+        q.Parent=ui.panel
+        return q
+    end
+    ui.title=label("CurrentStep",7,24,14)
+    ui.body=label("WhatToDo",32,52,12)
+    ui.warning=label("Safety",90,18,11)
+    ui.warning.Text="NO FINAL ACCEPT | NO AUTO OFFERS"
+    local function action(n,text,x)
+        local q=Instance.new("TextButton")
+        q.Name=n
+        q.Text=text
+        q.TextSize=13
+        q.TextColor3=Color3.fromRGB(255,255,255)
+        q.BackgroundColor3=Color3.fromRGB(88,55,129)
+        q.Position=UDim2.fromOffset(x,111)
+        q.Size=UDim2.fromOffset(128,28)
+        q.Parent=ui.panel
+        q.Active=false
+        q.Visible=false
+        return q
+    end
+    ui.arm=action("ArmP3","ARM P3",12)
+    ui.stop=action("StopP3","STOP / COPY",164)
+end)
+if not made then
+    E.PDIDDLER_SUPERVISED_P3_NATIVE_OWNER=nil
+    if ui.screen then pcall(function()ui.screen:Destroy()end) end
+    warn("[P3 NATIVE] GUI construction failed; no P3 requested")
+    return nil
+end
+local guide={stopped=false,phase="PREPARED",layoutFailures=0}
+local armed=false
+local watcher=nil
+local supervisor=nil
+local function visibleTrade()
+    local roots={}
+    for _,name in ipairs({"TradeGUI_Phone","TradeGUI"}) do
+        local g=PG:FindFirstChild(name)
+        local container=g and g:FindFirstChild("Container")
+        local t=container and container:FindFirstChild("Trade")
+        if g and g.Enabled==true and container
+           and container.Visible==true and t and t.Visible==true then
+            roots[#roots+1]=t
+        end
+    end
+    if #roots>1 then return nil,"MULTIPLE_TRADE_ROOTS" end
+    return roots[1],nil
+end
+function guide:refresh()
+    if self.stopped or not owner.running or
+      ui.screen.Parent~=PG or ui.panel.Parent~=ui.screen then
+        return false,"GUIDE_REMOVED_OR_STOPPED"
+    end
+    local camera=World.CurrentCamera
+    if not camera then return false,"CAMERA_MISSING" end
+    local ok,v=pcall(function()return camera.ViewportSize end)
+    if not ok or not v then return false,"VIEWPORT_UNAVAILABLE" end
+    local trade,err=visibleTrade()
+    if err then return false,err end
+    local bounds=nil
+    if trade then
+        local good,p,sz=pcall(function()
+            return trade.AbsolutePosition,trade.AbsoluteSize
+        end)
+        if not good or not p or not sz then
+           return false,"TRADE_BOUNDS_MISSING"
+        end
+        bounds={x=p.X,y=p.Y,w=sz.X,h=sz.Y}
+    end
+    local pos,why=geometry.choose(
+        {x=v.X,y=v.Y},bounds,{w=304,h=148})
+    if not pos then return false,why end
+    local laid=pcall(function()
+        ui.panel.Position=UDim2.fromOffset(pos.x,pos.y)
+        ui.panel.Size=UDim2.fromOffset(pos.w,pos.h)
+        ui.panel.Visible=true
+    end)
+    if not laid then return false,"PANEL_LAYOUT_FAILED" end
+    return true,"NONOVERLAPPING_P3_PANEL"
+end
+function guide:show(r)
+    local ok,why=self:refresh()
+    if not ok then
+        self.layoutFailures+=1
+        ui.panel.Visible=false
+        error("P3_GUIDE_"..tostring(why))
+    end
+    local status=r.status or "UNKNOWN"
+    self.phase=status
+    if status=="P3_SUPERVISOR_PREPARED_NOT_ARMED" then
+        ui.title.Text="1/2 MAIN — ARM REAL P3"
+        ui.body.Text="MAIN: tap ARM to start real outgoing requests. ALT: no action. Final Accept OFF."
+    elseif status=="P4_TWO_SIDED_CLIENT_SNAPSHOT" then
+        ui.title.Text="2/2 MAIN — TRADE WINDOW OPEN"
+        ui.body.Text="MAIN: inspect the open trade, manually Decline to continue. ALT: no action."
+    else
+        ui.title.Text="2/2 MAIN — P3 OBSERVER"
+        ui.body.Text="Status: "..tostring(status)..
+           ". MAIN: STOP/COPY if needed. Final Accept OFF."
+    end
+    ui.arm.Visible=not armed and
+        watcher~=nil and watcher.isReady()
+    ui.arm.Active=ui.arm.Visible
+    ui.stop.Visible=true
+    ui.stop.Active=true
+end
+local function stop(reason)
+    if not owner.running then return false end
+    owner.running=false
+    if watcher then pcall(watcher.stop) end
+    if supervisor then pcall(supervisor.stop) end
+    local r=statusRecord("STOPPED",reason or "OPERATOR_STOPPED")
+    last=r
+    clipboard(r)
+    pcall(function()ui.screen:Destroy()end)
+    E.PDIDDLER_SUPERVISED_P3_USED_JOB=game.JobId
+    E.PDIDDLER_SUPERVISED_P3_NATIVE_OWNER=nil
+    return true
+end
+ui.stop.Activated:Connect(function()
+    stop("OPERATOR_STOPPED")
+end)
+-- Hide original scanner's large GUI: do not obscure MM2 trade controls.
+local function suppressLegacyScannerGUI()
+    local roots={PG,game:GetService("CoreGui")}
+    if type(gethui)=="function" then
+        local ok,h=pcall(gethui)
+        if ok and h then roots[#roots+1]=h end
+    end
+    for _,root in ipairs(roots) do
+        local gui=root and root:FindFirstChild("MM2EligibilityScannerT41")
+        if gui and gui:IsA("ScreenGui") then gui.Enabled=false end
+    end
+end
+local scanner=loadFrozen("2036ae5bd937620f21d46600f99550a1b233a654",
+     "pdiddler3_scanner_MODULE_v6_5_PART4_STATUS_BRIDGE.lua")
+if not scanner or type(scanner.getRecord)~="function" then
+    stop("ORIGINAL_SCANNER_UNAVAILABLE")
+    return nil
+end
+suppressLegacyScannerGUI()
+local gate={}
+local okIO,io=pcall(ioModule.new,{
+  resolveOfferEntry=function()return nil end
+},gate)
+if not okIO or type(io)~="table" then
+    stop("PROTECTED_TRADEIO_UNAVAILABLE")
+    return nil
+end
+local function stillLive()
+    return owner.running and E.PDIDDLER_SUPERVISED_P3_NATIVE_OWNER==owner
+       and game.JobId==owner.job and LP.Parent==Players
+       and LP:FindFirstChildOfClass("PlayerGui")==PG
+       and ui.screen.Parent==PG
+end
+local ctx={
+    getJobId=function()return game.JobId end,
+    getP3Session=function()return E.PDIDDLER_OUTGOING_SESSION end,
+    onScreenSafe=function()
+        local ok,safe=pcall(guide.refresh,guide)
+        return ok and safe==true
+    end,
+    watchdogReady=function()
+        return watcher~=nil and watcher.isReady()==true
+    end,
+    noOtherTransactionOwner=function()
+        return not E.PDIDDLER_PART4_SESSION and
+          E.PDIDDLER_OUTGOING_CONTROLLER_ACTIVE~=true and
+          E.PDIDDLER_PART4_CONTROLLER_ACTIVE~=true and
+          E.PDIDDLER_AUTOTRADE_ACTIVE~=true
+    end,
+    readyCheck=function()
+        local ok,a=pcall(scanner.getWhitelist)
+        return ok and type(a)=="table" and stillLive()
+    end,
+}
+local sup,why=bootModule.new(scanner,outgoingModule,coordinator,
+    bridge,io,Players,LP,ctx)
+if not sup then
+    stop(type(why)=="table" and why.reason or "ATOMIC_SUPERVISOR_NOT_AVAILABLE")
+    return nil
+end
+supervisor=sup
+local watchdogCtx={
+    getJobId=ctx.getJobId,
+    isLive=stillLive,
+    onStatus=function(r)
+        last=statusRecord(r.status,r.reason)
+        guide:show(last)
+        suppressLegacyScannerGUI()
+    end,
+}
+local monitor,whyMonitor=watchdogModule.new(
+    supervisor, -- The watchdog MUST control the same guarded supervisor
+    -- It needs the actual P3 isPaused from the original fork. Capture once
+    -- from the supervisor's injected original outgoing through approved facade.
+    {isPaused=function()
+        local session=E.PDIDDLER_OUTGOING_SESSION
+        return session~=nil and false
+    end},
+    io,watchdogCtx,{
+       spawn=function(fn)task.spawn(fn)end,
+       wait=function(seconds)task.wait(seconds)end,
+       now=function()return os.clock()end,
+    })
+-- IMPORTANT: This native runner is INSTALL-ONLY until the real gated P3
+-- isPaused facade is exposed by a verified bootstrap API. Never fake the
+-- original P3 paused state or silently arm a queue with a broken watchdog.
+if monitor then pcall(monitor.stop) end
+stop("REAL_P3_PAUSED_INTERFACE_NOT_EXPOSED_NO_ARM")
+return last
