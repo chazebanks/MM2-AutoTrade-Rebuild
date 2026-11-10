@@ -107,7 +107,9 @@ if not loaded or type(inspector)~="table" or
    type(inspector.inspect)~="function" then
  return emit("INCONCLUSIVE","READONLY_LAYOUT_MODULE_INVALID")
 end
-local deadline=os.clock()+8
+-- Allow time to open the player card AFTER invoking Delta, since opening
+-- an executor overlay may dismiss an already-open MM2 popup on iPad.
+local deadline=os.clock()+20
 local best=nil
 local matches={"DIRECT_POPUP_HEADER_MATCH","ALTERNATIVE_CARD_CONTAINS_EXACT_USERNAME","SIBLING_USERNAME_NEAR_PROFILE_TRADE"}
 while live() and os.clock()<deadline do
