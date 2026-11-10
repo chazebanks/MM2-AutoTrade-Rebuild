@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
+import hashlib
+import json
 import re
 from typing import Any
 
@@ -17,6 +19,11 @@ SCHEMA="gingerscope-stage101-name-only-public-value-preview-v1"
 ORIGINAL_SOURCE_SCHEMA="gingerscope-stage94-public-catalogue-new-publisher-research-join-v1"
 PUBLISHED="2026-11-09T18:58:33Z"
 EXPIRES="2026-11-10T22:26:48Z"
+# Hash of actual 189 rows rebuilt from Stage94's 15 exact pinned ORIGINAL
+# archives. Each authentic historical row has been separately re-parsed.
+# A caller cannot silently replace a unit price/demand/name with a copied
+# "verified-looking" Stage94 result without breaking this digest.
+ORIGINAL_STAGE94_ROWS_SHA256="6eafa73001f59f41d07e6fee6959be38dabd8b2d43e690ede30852f9b0ee532a"
 CATEGORIES={"ancient":15, "godly":128, "chroma":46}
 MAX_ITEM_QUANTITY=4
 FALSE={
@@ -89,6 +96,10 @@ def _source(source:object,now:int)->tuple[list[dict[str,Any]],str]:
             "STAGE94_PREVIEW_OR_AUTHORITY_PROVENANCE_INVALID")
     rows=source.get("rows")
     require(type(rows) is list and len(rows)==189,"STAGE94_PUBLIC_COVERAGE_MISSING")
+    originalDigest=hashlib.sha256(json.dumps(rows,sort_keys=True,
+        separators=(",",":"),ensure_ascii=True).encode()).hexdigest()
+    require(originalDigest==ORIGINAL_STAGE94_ROWS_SHA256,
+            "ORIGINAL_STAGE94_PUBLIC_189_ROW_DIGEST_CHANGED")
     seenRaw=set()
     seenPageName=set()
     categoryCount=Counter()
