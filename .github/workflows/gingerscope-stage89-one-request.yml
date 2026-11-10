@@ -59,7 +59,7 @@ jobs:
           p=Path('pdiddler/new_part4/STAGE89_ONE_TARGET_ONE_REQUEST_DIAGNOSTIC.lua').read_text()
           for required in (
               'PDIDDLER_STAGE89_TARGET_USERNAME', 'PDIDDLER_STAGE89_ONE_REQUEST_ARMED',
-              'controller:prepare(target,token)', 'trimName(username.Text):lower()==target.Name:lower()',
+              'controller:prepare(target,token)', 'trimName(username.Text):lower()~=target.Name:lower()',
               'R.requestTapCount=1', 'return finish("UNCERTAIN","NO_CONFIRMED_REQUEST_UI_NO_RETRY")',
               'actualOffers=0', 'actualAccepts=0', 'actualDeclines=0',
               'authorizesTrade=false', 'authorizesAccept=false',
