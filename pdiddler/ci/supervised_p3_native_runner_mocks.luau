@@ -48,7 +48,13 @@ end
 local scannerCode=[[
 local P=game:GetService("Players")
 local api={}
-function api.getWhitelist()return{}end
+function api.getWhitelist()
+ local result={}
+ for _,p in ipairs(P:GetPlayers()) do
+  if p~=P.LocalPlayer then result[#result+1]=p end
+ end
+ return result
+end
 function api.hasPendingWork()return false end
 function api.getRecord(uid)
  local player=P:GetPlayerByUserId(uid)
@@ -63,6 +69,7 @@ local outgoingCode=[[
 local M={}
 function M.run(scanner,opt)
  local E=getgenv()
+ E.__SCANNER_P3_SEES=scanner
  E.PDIDDLER_OUTGOING_SESSION=18
  local state={processed={},active=nil}
  local armed=false
@@ -151,6 +158,7 @@ local function fakeEnv(options)
  local players={}
  local lp={Name="MainAccount",UserId=1,Parent=players}
  local partner={Name="TrustedAlt",DisplayName="Alias",UserId=2,Parent=players}
+ local outsider={Name="OtherPerson",DisplayName="Stranger",UserId=99,Parent=players}
  players.LocalPlayer=lp
  pg.Parent=lp
  function lp:FindFirstChildOfClass(k)
@@ -158,11 +166,12 @@ local function fakeEnv(options)
  end
  function players:GetPlayerByUserId(id)
   if id==2 then return partner end
+  if id==99 then return outsider end
  end
  function players:FindFirstChild(name)
   if name=="TrustedAlt" then return partner end
  end
- function players:GetPlayers()return{lp,partner}end
+ function players:GetPlayers()return{lp,partner,outsider}end
  local RS=node("ReplicatedStorage","ReplicatedStorage")
  local folder=RS:put(node("Folder","Trade"))
  local remote=folder:put(node("RemoteEvent","OfferItem"))
@@ -180,9 +189,16 @@ local function fakeEnv(options)
  }
  local E={PDIDDLER_SUPERVISED_P3_NATIVE={
    enableNativeSupervisor=true,finalAcceptMustRemainManual=true,
+   altOnlyTest=true,targetName="TrustedAlt",
  }}
  if options.invalidConfig then
   E.PDIDDLER_SUPERVISED_P3_NATIVE.enableNativeSupervisor=false
+ end
+ if options.noAltTest then
+  E.PDIDDLER_SUPERVISED_P3_NATIVE.altOnlyTest=false
+ end
+ if options.badTarget then
+  E.PDIDDLER_SUPERVISED_P3_NATIVE.targetName="MissingAlt"
  end
  if options.ownerConflict then E.PDIDDLER_PART4_SESSION=99 end
  local sourceReads={}
@@ -257,6 +273,10 @@ do
  eq(type(runtime),"table","native runner returned controls")
  eq(#x.readSources,8,"all eight exact pinned module sources fetched")
  eq(x.E.__P3.armCalls,0,"real P3 request queue closed at startup")
+ eq(#x.E.__SCANNER_P3_SEES.getWhitelist(),1,"P3 rotation receives ONLY explicit ALT")
+ eq(x.E.__SCANNER_P3_SEES.getWhitelist()[1].Name,"TrustedAlt","exact target name")
+ eq(x.E.__SCANNER_P3_SEES.isWhitelisted(99),false,"other eligible player categorically excluded")
+ eq(x.E.__SCANNER_P3_SEES.getRecord(99),nil,"other player's profile cannot become P3 request candidate")
  eq(x.E.__P3.isArmed(),false,"default deny no requests")
  local arm=x.armButton()
  eq(type(arm),"table","arm appears inside game")
@@ -289,6 +309,7 @@ do
 end
 for _,opts in ipairs({
  {invalidPlace=true},{invalidConfig=true},{ownerConflict=true},
+ {noAltTest=true},{badTarget=true},
  {noCamera=true},{failUI=true},
 }) do
  local x=fakeEnv(opts)
