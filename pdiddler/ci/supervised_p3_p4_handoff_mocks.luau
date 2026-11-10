@@ -250,5 +250,50 @@ do
  eq(#x.sends,0,"no remote with multiple roots")
 end
 
+
+-- The original MM2 DisplayItem-style renderer uses an EMPTY quantity
+-- label to represent ONE item; the previous guard incorrectly required x1
+-- for every visible Amount label, blocking our real iPad two-item test.
+do
+ local x=fixture()
+ local slot=x.add(x.ours,1,"Iceblaster",1)
+ slot.children.Container.children.Amount.Text=""
+ local b=x.module.bind(x.scanner,x.p3,x.io,x.players,x.lp,x.ctx)
+ local r=b.capture()
+ eq(r.status,"CLIENT_UNPRICED_TWO_SIDED_SNAPSHOT","empty Amount represents one GUI copy")
+ eq(r.physicalOwnSlots,1,"singleton occupies one physical slot")
+ eq(r.ours[1].quantity,1,"client implicit singleton quantity")
+ eq(r.ours[1].quantityLabelEvidence,"BLANK_SINGLETON_CLIENT","quantity source not fabricated x1")
+ eq(r.rawItemIdsAuthenticated,false,"no server authority from blank label")
+end
+-- An empty display quantity MUST NOT silently convert an explicit larger
+-- raw slot count to one; every actual xN stack must still reconcile.
+do
+ local x=fixture()
+ local slot=x.add(x.ours,1,"Iceblaster",3)
+ slot.children.Container.children.Amount.Text=""
+ local underlying=x.io.readSide
+ x.io.readSide=function(t,side)
+  local data=underlying(t,side)
+  if side=="YourOffer" and data.entries[1] then
+    data.entries[1].qty=3
+  end
+  return data
+ end
+ local b=x.module.bind(x.scanner,x.p3,x.io,x.players,x.lp,x.ctx)
+ local r=b.capture()
+ eq(r.status,"REJECTED","blank text cannot hide stack of 3")
+ eq(r.reason,"VISIBLE_STACK_TEXT_INVALID","non-singleton blank rejected")
+end
+for _,label in ipairs({"x0","x-1","x?","two","x1.5"," "}) do
+ local x=fixture()
+ local slot=x.add(x.ours,1,"Iceblaster",1)
+ slot.children.Container.children.Amount.Text=label
+ local b=x.module.bind(x.scanner,x.p3,x.io,x.players,x.lp,x.ctx)
+ local r=b.capture()
+ eq(r.status,"REJECTED","malformed visible count rejected")
+ eq(r.reason,"VISIBLE_STACK_TEXT_INVALID","bad count reason stable")
+end
+
 print("[PASS] actual guarded TradeIO + live P3/P4 session bridge:",tests)
 print("[PASS] four PHYSICAL slots (stacks allowed), no remote, no Accept, stale session fails closed")
