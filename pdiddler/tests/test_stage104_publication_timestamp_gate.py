@@ -183,6 +183,36 @@ class ActualStage104PublisherAudit(unittest.TestCase):
             r=self.audit(c)
             self.assertEqual(r["status"],"INCONCLUSIVE",kind)
             self.check_authority_denied(r)
+    def test_same_count_ancient_name_replacement_is_not_a_safe_publication_candidate(self):
+        # A different Ancient can replace another while page count stays 16.
+        # No new source-name -> game-key mapping should be published from this.
+        def renamed(html,page):
+            rows,stamp=self.parse(html,page)
+            if page=="ancient":
+                rows[1]["name"]+=" New 2026 Edition"
+            return rows,"2026-11-10T18:58:33Z"
+        c=copy.deepcopy(self.original)
+        for v in c.values():v["retrievedAtUtc"]="2026-11-10T19:00:00Z"
+        r=self.audit(c,parse_page=renamed,evaluation_utc="2026-11-10T19:10:00Z")
+        self.assertEqual(r["status"],"INCONCLUSIVE",r)
+        self.assertEqual(r["reason"],"PUBLISHED_WEAPON_NAME_ROSTER_CHANGED",r)
+        self.check_authority_denied(r)
+    def test_same_date_priceless_source_label_drift_is_not_silent(self):
+        # The publisher sometimes has nonnumeric "Priceless" labels.
+        # If label text changes while numeric value remains None, detect it.
+        def altered_label(html,page):
+            rows,stamp=self.parse(html,page)
+            if page=="ancient":
+                item=next(x for x in rows if x["supremeValue"] is None)
+                self.assertIsInstance(item["supremeLabel"],str)
+                item["supremeLabel"]+=" (changed)"
+            return rows,stamp
+        r=self.audit(parse_page=altered_label)
+        self.assertEqual(r["status"],"NO_NEW_PUBLISHER_PUBLICATION",r)
+        self.assertEqual(r["reason"],
+                         "UNCHANGED_PUBLISHER_DATE_BUT_ROW_DRIFT_REVIEW_REQUIRED",r)
+        self.assertEqual(r["rowChangeCount"],1,r)
+        self.check_authority_denied(r)
     def test_300_seeded_url_and_clock_mutants_never_approve_trade(self):
         rng=random.Random(104)
         for i in range(300):
