@@ -42,6 +42,7 @@ local function create()
  label.Text="TrustedAlt"
  local players={}
  local lp={Name="MainAccount",UserId=1,Parent=players}
+ players.LocalPlayer=lp
  local partner={Name="TrustedAlt",DisplayName="TrustedAlt",UserId=2,Parent=players}
  function players:FindFirstChild(name)
   if name=="TrustedAlt" then return partner end
