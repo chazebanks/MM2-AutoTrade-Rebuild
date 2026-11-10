@@ -1,0 +1,68 @@
+name: Gingerscope Stage110 original parser and baseline source admission (offline)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage110_trusted_source_admission.py'
+      - 'pdiddler/tests/test_stage110_trusted_source_admission.py'
+      - 'pdiddler/intelligence_lab/STAGE110_TRUSTED_SOURCE_ADMISSION_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage110-source-admission.yml'
+  push:
+    branches:
+      - research/gingerscope-stage110-reviewed-source-admission
+    paths:
+      - 'pdiddler/intelligence_lab/stage110_trusted_source_admission.py'
+      - 'pdiddler/tests/test_stage110_trusted_source_admission.py'
+      - 'pdiddler/intelligence_lab/STAGE110_TRUSTED_SOURCE_ADMISSION_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage110-source-admission.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-supreme-source-admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Fetch four immutable Git-blob-pinned official source artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope110/original
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/refresh_supreme_snapshot.py" -o /tmp/gingerscope110/parser.py
+          for tier in ancients godlies chromas; do
+            curl -fsSL --retry 3 --max-time 45 "$base/f08ceb35a9ff684ee2cf577ccce7542c436cc68e/pdiddler/research_source_html/stage84_2026_11_09/$tier.html" -o "/tmp/gingerscope110/original/$tier.html"
+          done
+          test "$(git hash-object /tmp/gingerscope110/parser.py)" = d5843a57f34078cbe7213aa78a4aa12a5775c016
+          test "$(git hash-object /tmp/gingerscope110/original/ancients.html)" = ce8178ab9579e8782d8f72a6dac051756a728506
+          test "$(git hash-object /tmp/gingerscope110/original/godlies.html)" = d3cf222a8e10cff3a9fb051b16188192389c4b2d
+          test "$(git hash-object /tmp/gingerscope110/original/chromas.html)" = 6c77624cac3df96168b008e9bc8eca68a2d78cf9
+          echo STAGE110_FOUR_PINNED_SOURCE_GIT_BLOBS_VERIFIED
+      - name: Run pinned parser baseline source and forged-candidate tests
+        env:
+          STAGE110_REQUIRE_PINNED: '1'
+          STAGE110_ORIGINAL_PARSER: /tmp/gingerscope110/parser.py
+          STAGE110_ORIGINAL_HTML_DIR: /tmp/gingerscope110/original
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_stage110_trusted_source_admission
+      - name: Static source gate denies trading and newer-source promotion
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('pdiddler/intelligence_lab/stage110_trusted_source_admission.py').read_text()
+          for bad in ('requests.get(', 'urlopen(', 'subprocess.run(', 'HttpGet(',
+                      'FireServer(', 'AcceptTrade(', 'PostAsync(',
+                      'os.replace(', 'authorizesAccept": True',
+                      'authorizesTrade": True','newResearchDatasetPublished": True'):
+              assert bad not in s,bad
+          for good in ('PINNED_ORIGINAL_PARSER_MISMATCH',
+                       'PINNED_ORIGINAL_PRIOR_HTML_MISMATCH',
+                       'externalCaptureAuthenticated',
+                       'newResearchDatasetPublished'):
+              assert good in s,good
+          print('STAGE110_ORIGINAL_PARSER_PRIOR_BASELINE_ONLY_NO_TRADE_AUTHORITY_PASS')
+          PY
