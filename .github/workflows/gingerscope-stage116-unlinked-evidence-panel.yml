@@ -27,7 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           curl -fsSL --retry 3 --max-time 50 'https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip' -o "$RUNNER_TEMP/lune.zip"
-          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
           unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/lune-dist"
           found="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
           test -n "$found"
