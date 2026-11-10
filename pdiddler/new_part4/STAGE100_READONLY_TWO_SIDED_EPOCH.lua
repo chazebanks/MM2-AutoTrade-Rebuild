@@ -44,6 +44,7 @@ local R={
  readOnly=true,clientOnly=true,oneShot=true,
  onScreenGuideShown=false,onScreenGuideUpdates=0,
  onScreenGuideFinalShown=false,onScreenGuideCurrentStep="NOT_READY",
+ onScreenGuideNonOverlappingTrade=false,onScreenGuidePlacementFailures=0,
  targetClientBound=false,exactPartnerGuiObserved=false,
  tradeWindowWaitPolls=0,stage9ObserverBound=false,stage9Frames=0,
  observedAltAdd=false,observedMainAdd=false,
@@ -77,6 +78,48 @@ local target=nil
 -- In-game prompts are mandatory for any user-facing manual Stage100 action.
 -- Small draggable panel; GUI-only display, no trading input or game remotes.
 local guide=nil
+local guideLayout=nil
+local lastTradeRoot=nil
+local function placeGuide(tradeRoot)
+ if not guide or not guideLayout or guide.root.Parent~=PG then
+  return false,"PANEL_OR_PLANNER_UNAVAILABLE"
+ end
+ local ok,vp,tr=pcall(function()
+  local camera=game:GetService("Workspace").CurrentCamera
+  local v=camera and camera.ViewportSize
+  if not v then return nil,nil end
+  local bounds=nil
+  if tradeRoot then
+   local p,z=tradeRoot.AbsolutePosition,tradeRoot.AbsoluteSize
+   if not p or not z then return nil,nil end
+   bounds={x=p.X,y=p.Y,w=z.X,h=z.Y}
+  end
+  return {x=v.X,y=v.Y},bounds
+ end)
+ if not ok or not vp or (tradeRoot and not tr) then
+  guide.frame.Visible=false
+  R.onScreenGuidePlacementFailures=R.onScreenGuidePlacementFailures+1
+  return false,"VIEWPORT_OR_TRADE_BOUNDS_MISSING"
+ end
+ local placement,reason=guideLayout.choose(vp,tr,{w=292,h=154})
+ if not placement then
+  guide.frame.Visible=false
+  R.onScreenGuidePlacementFailures=R.onScreenGuidePlacementFailures+1
+  return false,reason
+ end
+ local updated=pcall(function()
+  guide.frame.Position=UDim2.fromOffset(placement.x,placement.y)
+  guide.frame.Size=UDim2.fromOffset(placement.w,placement.h)
+  guide.frame.Visible=true
+ end)
+ if not updated then
+  guide.frame.Visible=false
+  R.onScreenGuidePlacementFailures=R.onScreenGuidePlacementFailures+1
+  return false,"PANEL_GEOMETRY_UPDATE_FAILED"
+ end
+ if tradeRoot then R.onScreenGuideNonOverlappingTrade=true end
+ return true,reason
+end
 local function createGuide()
  if not PG or PG.Parent~=LP then return false end
  local screen=nil
@@ -84,16 +127,16 @@ local function createGuide()
   screen=Instance.new("ScreenGui")
   screen.Name="PDIDDLER_STAGE100_ONSCREEN_GUIDE"
   screen.ResetOnSpawn=false
-  screen.IgnoreGuiInset=false
+  screen.IgnoreGuiInset=true
   screen.DisplayOrder=1200
   local frame=Instance.new("Frame")
   frame.Name="GuidePanel"
   frame.Size=UDim2.new(0,292,0,154)
-  frame.Position=UDim2.new(1,-304,0,85)
+  frame.Position=UDim2.fromOffset(14,72)
   frame.BackgroundColor3=Color3.fromRGB(29,23,42)
   frame.BorderSizePixel=0
-  frame.Active=true
-  frame.Draggable=true -- Touch/mouse reposition, no game GUI interaction.
+  frame.Active=false
+  frame.Draggable=false -- Never allow dragging the guide onto trade controls.
   frame.Parent=screen
   local corner=Instance.new("UICorner")
   corner.CornerRadius=UDim.new(0,9)
@@ -164,7 +207,7 @@ local function createGuide()
    pcall(function() screen:Destroy() end)
   end)
   screen.Parent=PG
-  return {root=screen,step=step,instruction=instruction,close=close}
+  return {root=screen,frame=frame,step=step,instruction=instruction,close=close}
  end)
  if not ok or type(created)~="table" then
   if screen then pcall(function() screen:Destroy() end) end
@@ -176,6 +219,9 @@ local function createGuide()
 end
 local function showGuide(step,message)
  if not guide or guide.root.Parent~=PG then return false end
+ -- Re-evaluate the live trade rectangle on every step; never draw over it.
+ local placed=placeGuide(lastTradeRoot)
+ if not placed then return false end
  local ok=pcall(function()
   guide.step.Text=step
   guide.instruction.Text=message
@@ -255,6 +301,7 @@ local function exactRoot()
     "EXACT_TRADE_WINDOW_NOT_OPEN"
  end
  local root=roots[1]
+ lastTradeRoot=root -- Even an unexpected partner's trade UI must be avoided.
  local theirs=root:FindFirstChild("TheirOffer")
  local name=theirs and theirs:FindFirstChild("Username")
  if not name or not (name:IsA("TextLabel") or name:IsA("TextButton"))
@@ -265,6 +312,12 @@ local function exactRoot()
  if trim(shown):lower()~=target.Name:lower() then
   return nil,"TRADE_GUI_WRONG_PARTNER"
  end
+ if guide then
+  local placed,layoutReason=placeGuide(root)
+  if not placed then
+   return nil,"ONSCREEN_GUIDE_"..tostring(layoutReason)
+  end
+ end
  return root,"EXACT_CURRENT_CLIENT_PARTNER"
 end
 local ROOT="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
@@ -274,7 +327,9 @@ local SOURCES={
  stage9native={"1971b93d324f0275e6a9affb472ac3e804439ed8",
  "pdiddler/new_part4/p4_native_observer.lua"},
  stage98={"642768973f5eb560a184119237c44c84697a208f",
- "pdiddler/intelligence_lab/stage98_client_offer_epoch.lua"}
+ "pdiddler/intelligence_lab/stage98_client_offer_epoch.lua"},
+ promptLayout={"5b8ee35d7f281c23d9c2181abd97a063e59a0660",
+ "pdiddler/new_part4/stage100_screen_prompt_overlay.lua"}
 }
 local function source(key)
  local p=SOURCES[key]
@@ -300,6 +355,10 @@ local function run()
  if #matches~=1 then return finish("INCONCLUSIVE","TARGET_NOT_UNIQUE_IN_SERVER") end
  target=matches[1]
  R.targetClientBound=true
+ guideLayout=source("promptLayout")
+ if type(guideLayout)~="table" or type(guideLayout.choose)~="function" then
+  return finish("INCONCLUSIVE","SAFE_ONSCREEN_PLACEMENT_MODULE_UNAVAILABLE")
+ end
  if not createGuide() then
   return finish("INCONCLUSIVE","IN_GAME_PROMPT_PANEL_UNAVAILABLE")
  end
