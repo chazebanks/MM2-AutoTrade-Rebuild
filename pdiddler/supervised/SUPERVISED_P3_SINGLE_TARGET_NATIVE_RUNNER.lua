@@ -142,28 +142,36 @@ local function currentTrade()
  return result,nil
 end
 local function placeGuide(title,body)
+ local function notSafe(reason)
+  -- A previously placed overlay must disappear IMMEDIATELY when the
+  -- viewport or MM2 TradeGUI bounds no longer permit safe placement.
+  if statusUI.frame then
+   pcall(function()statusUI.frame.Visible=false end)
+  end
+  return false,reason
+ end
  if not statusUI.screen or statusUI.screen.Parent~=PG then
-  return false,"GUIDE_REMOVED"
+  return notSafe("GUIDE_REMOVED")
  end
  local v=World.CurrentCamera and World.CurrentCamera.ViewportSize
  if not v or not v.X or not v.Y then
-  return false,"VIEWPORT_INVALID"
+  return notSafe("VIEWPORT_INVALID")
  end
  local trade,reason=currentTrade()
- if reason then return false,reason end
+ if reason then return notSafe(reason) end
  local rect=nil
  if trade then
   local ok,pos,size=pcall(function()
      return trade.AbsolutePosition,trade.AbsoluteSize
   end)
   if not ok or not pos or not size then
-    return false,"TRADE_BOUNDS_UNKNOWN"
+    return notSafe("TRADE_BOUNDS_UNKNOWN")
   end
   rect={x=pos.X,y=pos.Y,w=size.X,h=size.Y}
  end
  local area,why=geom.choose(
   {x=v.X,y=v.Y},rect,{w=304,h=120})
- if not area then return false,why or "GUIDE_NO_SAFE_SPACE" end
+ if not area then return notSafe(why or "GUIDE_NO_SAFE_SPACE") end
  local ok=pcall(function()
   statusUI.frame.Position=UDim2.fromOffset(area.x,area.y)
   statusUI.frame.Size=UDim2.fromOffset(area.w,area.h)
@@ -171,7 +179,7 @@ local function placeGuide(title,body)
   statusUI.body.Text=body
   statusUI.frame.Visible=true
  end)
- if not ok then return false,"GUIDE_LAYOUT_ERROR" end
+ if not ok then return notSafe("GUIDE_LAYOUT_ERROR") end
  return true,nil
 end
 local function terminate(reason)
