@@ -57,7 +57,7 @@ class Stage98LocalRevision(unittest.TestCase):
             "authorizesAccept=false", "serverCompletionProven=false"
         ):
             self.assertIn(term,source,term)
-        for term in ("Guard.evaluate(","original Stage105","700 deterministic"):
+        for term in ("Guard.evaluate(","actual prior Stage105","700 deterministic"):
             self.assertIn(term,test,term)
         for forbidden in (
             "FireServer(", "InvokeServer(", "HttpPost(", "PostAsync(",
