@@ -473,11 +473,11 @@ end
 do
  local x=fixture()
  local b=getBound(x)
- local calls=0
+ local firstPost=true
  local realCapture=b.capture
  b.capture=function()
-  calls+=1
-  if #x.sends==1 and calls==5 then
+  if #x.sends==1 and firstPost then
+   firstPost=false
    return {status="REJECTED",reason="PHYSICAL_GUI_SLOTS_NOT_RECONCILED"}
   end
   return realCapture()
