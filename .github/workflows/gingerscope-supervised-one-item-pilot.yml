@@ -4,6 +4,7 @@ on:
     paths:
       - 'pdiddler/supervised/supervised_one_item_policy.lua'
       - 'pdiddler/supervised/SUPERVISED_ONE_ITEM_MANUAL_PILOT.lua'
+      - 'pdiddler/new_part4/stage100_screen_prompt_overlay.lua'
       - 'pdiddler/ci/supervised_one_item_pilot_tests.luau'
       - 'pdiddler/ci/supervised_one_item_native_runner_mocks.luau'
       - '.github/workflows/gingerscope-supervised-one-item-pilot.yml'
@@ -43,6 +44,7 @@ jobs:
           set -euo pipefail
           test "$(git hash-object pdiddler/supervised/pdiddler4_tradeio_supervised_v2.lua)" = eb4dc6342d1d6dda6292490cd8fa00314199d589
           test "$(git hash-object pdiddler/supervised/supervised_one_item_policy.lua)" = d67f8addbeb14552a35cded9a55f2c4ddf92dd56
+          test "$(git hash-object pdiddler/new_part4/stage100_screen_prompt_overlay.lua)" = e0eac8e039655999bd7bbac1f12da179db7c22ed
           python3 - <<'PY'
           from pathlib import Path
           controller=Path('pdiddler/supervised/supervised_one_item_policy.lua').read_text()
@@ -59,6 +61,10 @@ jobs:
           assert 'a599c31c53d25e6799b9d631f45f282b445dcda0' in runner
           assert '9540fc5fc3576729f9dd308d8d8222d848e27063' in runner
           assert 'PDIDDLER_SUPERVISED_ONE_ITEM_SPENT_JOB' in runner
+          assert 'ONSCREEN_GUIDE_' in runner
+          assert 'guide:safeForOffer' in runner
+          assert 'RenderStepped:Connect' in runner
+          assert '5b8ee35d7f281c23d9c2181abd97a063e59a0660' in runner
           assert 'manualOfferOnly' in controller
           assert 'PROTECTED_GINGERSCOPE_OUTGOING' in controller
           assert 'authorizesAccept=false' in controller
