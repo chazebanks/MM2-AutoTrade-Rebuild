@@ -1,3 +1,11 @@
+# Stage91 REAL iPad request-pending checkpoint (Nov 9, 2026 ET)
+
+**Actual, not mocked:** User sent `[GINGERSCOPE STAGE91 SINGLE REQUEST]` with `status=CLIENT_PENDING_OBSERVED`, `reason=NOT_SERVER_AUTHENTICATED`, `cardLayout=ALTERNATIVE_EMBEDDED_CARD`, `requestTapCount=1`, `clientPendingExactTargetObserved=true`, `exactTargetClientBound=true`, `visibleCardExactNameMatched=true`, `ownContactEvidenceReady=true`, `tradeWindowObserved=false`, `elapsedSeconds=12`; **all scripted offers/Accepts/Declines/Teleports zero**. `serverAttestation=false`, `serverCompletionProven=false`, `authorizesTrade=false`, `authorizesAccept=false`, `tradeOutcome=UNKNOWN`, price and Discord/learning unverified. This is a PASS for the **narrow native single Trade-button tap and client pending-UI proof**; it is NOT evidence of alt receipt or actual trade-open/settlement. **Do not repeat Stage89–91 solely to reprove request UI**.
+
+**Next single milestone:** read-only exact trade-partner identity after consenting alt manually accepts an explicitly sent single request. Code must not auto-accept/offer, retry uncertain requests, auto-decline or hop. [Issue #122 evidence](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/issues/122#issuecomment-6756031306).
+
+---
+
 # Latest Gingerscope checkpoint — Stage91 request-only diagnostic
 
 Date: November 9, 2026 Eastern. This short file supplements the historical `GINGERSCOPE_ACTIVE_HANDOFF.md` and `GINGERSCOPE_READ_FIRST_NEXT_CONVERSATION.md`. Read the latest stage-specific handoff, open PRs and Issue #122 as well before editing anything. **Do not revert to older Stage89/90 instructions or superseded +15 trade rules.**
