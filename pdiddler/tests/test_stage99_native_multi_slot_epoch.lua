@@ -151,9 +151,11 @@ local function scenario(mode)
   if url:find("stage98_client_offer_epoch.lua",1,true) then return modules.epoch end
   error("Unexpected requested module "..url)
  end
+ local armed=true
+ if mode.disarmed then armed=false end
  local env={
   PDIDDLER_STAGE99_TARGET_USERNAME=mode.badUsername and "%" or alt.Name,
-  PDIDDLER_STAGE99_READONLY_ARMED=mode.disarmed and false or true
+  PDIDDLER_STAGE99_READONLY_ARMED=armed
  }
  if mode.competingOwner then env.PDIDDLER_OUTGOING_CONTROLLER={} end
  _G.getgenv=function()return env end
