@@ -300,5 +300,41 @@ do
  eq(r.reason,"SNAPSHOT_AUTHORITY_MISMATCH","no false source authority")
  eq(#x.sends,0,"no remote with forged authority")
 end
+
+-- Failure to schedule the next readback must not throw or lose the result
+-- after one physical send; the arm stays consumed and no resend occurs.
+do
+ local x=fixture()
+ simulateOffer(x)
+ local b=getBound(x)
+ local a=arm({"Iceblaster","Batwing"})
+ local ok,r=pcall(x.plan.run,b,x.io,x.gate,a,{wait=function()
+  error("fake executor wait failed")
+ end})
+ eq(ok,true,"scheduler failure caught by controller")
+ eq(r.status,"STOPPED","scheduler failure bounded")
+ eq(r.reason,"GUI_REPLICATION_WAIT_FAILED","scheduler reason")
+ eq(r.offerAttempts,1,"one attempted offer only")
+ eq(#x.sends,1,"no duplicate remote after scheduler crash")
+ eq(a._consumed,true,"approval remains spent")
+ eq(x.gate.checkOutbound,nil,"no stale gate after scheduling failure")
+end
+-- A forged or incomplete slot snapshot must not turn missing arrays into
+-- an apparently valid empty own offer.
+do
+ local x=fixture()
+ local b=getBound(x)
+ local old=b.capture
+ b.capture=function()
+  local r=old()
+  r.ours=nil
+  return r
+ end
+ local r=x.plan.run(b,x.io,x.gate,arm({"Iceblaster"}),{wait=function()end})
+ eq(r.status,"BLOCKED","incomplete slot snapshot denied")
+ eq(r.reason,"PHYSICAL_SLOT_SNAPSHOT_UNREADABLE","missing-array reason")
+ eq(#x.sends,0,"no sends for incomplete snapshots")
+end
+
 print("[PASS] P3/P4 guarded physical multi-slot approved plan",tests)
 print("[PASS] four distinct physical slots, no auto Accept, no duplicate sends, Gingerscope protected")
