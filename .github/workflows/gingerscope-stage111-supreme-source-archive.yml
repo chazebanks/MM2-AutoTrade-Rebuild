@@ -63,9 +63,9 @@ jobs:
                          'requests.get(', 'subprocess.run(', 'os.replace(',
                          'HttpGet(', 'FireServer(', 'AcceptTrade('):
               assert banned not in source,banned
-          assert 'contents: write' not in workflow
-          assert 'git push' not in workflow
-          assert 'values/mm2values.lua' not in workflow
+          assert ('contents:'+' write') not in workflow
+          assert ('git'+' push') not in workflow
+          assert ('values/'+'mm2values.lua') not in workflow
           assert 'if: always()' in workflow
           assert 'verify=True' in source
           assert 'allow_redirects=False' in source
