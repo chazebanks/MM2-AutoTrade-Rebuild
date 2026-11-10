@@ -250,6 +250,123 @@ class SanitizedReplayTests(unittest.TestCase):
         self.assertEqual(r["repeatClientAcceptObservations"], 0, r)
         self.assertEqual(r["currentRevisionAcceptedSides"], 1, r)
 
+    def test_postclose_zero_zero_readback_is_no_change_not_gained_item(self):
+        t = trace([event(1, "OPEN"), event(2, "CLOSE"),
+                   event(3, "INVENTORY_DELTA", gained=0, lost=0)])
+        r = R.replay_trace(t)
+        self.safe(r)
+        self.assertEqual(r["clientEvidenceTier"], "CLIENT_POSTCLOSE_NO_CHANGE", r)
+        self.assertEqual(r["postCloseUnchangedReadbacks"], 1, r)
+        self.assertEqual(r["postCloseChangedReadbacks"], 0, r)
+        self.assertEqual(r["postCloseReadbackRepeats"], 0, r)
+        self.assertEqual(r["postCloseDeltaObservations"], 1)
+        self.assertFalse(r["operatorCorroborationProven"])
+
+    def test_changed_postclose_readback_remains_unattributed(self):
+        t = trace([event(1, "OPEN"),
+                   event(2, "OFFER", side="OURS", revision=1, signature="bundle_a"),
+                   event(3, "ACCEPT", side="OURS", revision=1),
+                   event(4, "ACCEPT", side="THEIRS", revision=1),
+                   event(5, "CALLBACK", signal="ACCEPT_TRUE"),
+                   event(6, "CLOSE"),
+                   event(7, "INVENTORY_DELTA", gained=1, lost=1)])
+        r = R.replay_trace(t)
+        self.safe(r)
+        self.assertEqual(r["clientEvidenceTier"],
+                         "CLIENT_POSTCLOSE_CHANGE_UNATTRIBUTED", r)
+        self.assertEqual(r["postCloseChangedReadbacks"], 1, r)
+        self.assertEqual(r["postCloseUnchangedReadbacks"], 0, r)
+        self.assertEqual(r["tradeOutcome"], "UNKNOWN")
+        self.assertFalse(r["mayRecordCompletedTrade"])
+        self.assertFalse(r["mayReportProfit"])
+
+    def test_differently_ided_identical_readbacks_are_not_two_transfers(self):
+        t = trace([event(1, "OPEN"), event(2, "CLOSE"),
+                   event(3, "INVENTORY_DELTA", gained=1, lost=0),
+                   event(4, "INVENTORY_DELTA", gained=1, lost=0),
+                   event(5, "INVENTORY_DELTA", gained=1, lost=0)])
+        r = R.replay_trace(t)
+        self.safe(r)
+        self.assertEqual(r["clientEvidenceTier"],
+                         "CLIENT_POSTCLOSE_CHANGE_UNATTRIBUTED", r)
+        self.assertEqual(r["postCloseReadbackRepeats"], 2, r)
+        self.assertEqual(r["postCloseChangedReadbacks"], 3, r)
+        self.assertEqual(r["postCloseDistinctReadbackPatterns"], 1, r)
+        self.assertEqual(r["tradeOutcome"], "UNKNOWN")
+
+    def test_inconsistent_postclose_snapshots_deny_a_stable_client_change(self):
+        t = trace([event(1, "OPEN"), event(2, "CLOSE"),
+                   event(3, "INVENTORY_DELTA", gained=1, lost=0),
+                   event(4, "INVENTORY_DELTA", gained=0, lost=0),
+                   event(5, "INVENTORY_DELTA", gained=2, lost=1)])
+        r = R.replay_trace(t)
+        self.safe(r)
+        self.assertEqual(r["clientEvidenceTier"],
+                         "CLIENT_POSTCLOSE_READBACKS_CONFLICT", r)
+        self.assertEqual(r["postCloseDistinctReadbackPatterns"], 3, r)
+        self.assertEqual(r["postCloseUnchangedReadbacks"], 1, r)
+        self.assertEqual(r["postCloseChangedReadbacks"], 2, r)
+
+    def test_accept_callback_and_inventory_before_close_not_terminal(self):
+        t = trace([event(1, "OPEN"),
+                   event(2, "OFFER", side="THEIRS", revision=1,
+                         signature="bundle_a"),
+                   event(3, "ACCEPT", side="OURS", revision=1),
+                   event(4, "CALLBACK", signal="ACCEPT_TRUE"),
+                   event(5, "INVENTORY_DELTA", gained=1, lost=0)])
+        r = R.replay_trace(t)
+        self.safe(r)
+        self.assertEqual(r["clientEvidenceTier"],
+                         "NO_TERMINAL_CLIENT_EVIDENCE", r)
+        self.assertEqual(r["postCloseChangedReadbacks"], 0)
+        self.assertEqual(r["postCloseDeltaObservations"], 0)
+
+    def test_closure_only_is_not_inferred_settlement(self):
+        r = R.replay_trace(trace([event(1, "OPEN"),event(2, "CLOSE")]))
+        self.safe(r)
+        self.assertEqual(r["clientEvidenceTier"], "CLIENT_WINDOW_CLOSED_ONLY", r)
+        self.assertEqual(r["tradeOutcome"], "UNKNOWN")
+
+    def test_new_session_cannot_inherit_previous_closed_readback_tier(self):
+        t = trace([event(1, "OPEN", "s_old"),
+                   event(2, "CLOSE", "s_old"),
+                   event(3, "INVENTORY_DELTA", "s_old", gained=1, lost=0),
+                   event(4, "OPEN", "s_new"),
+                   event(5, "OFFER", "s_new", side="THEIRS",
+                         revision=1, signature="bundle_b"),
+                   event(6, "INVENTORY_DELTA", "s_old", gained=1, lost=0)])
+        r = R.replay_trace(t)
+        self.safe(r)
+        self.assertEqual(r["clientEvidenceTier"],
+                         "NO_TERMINAL_CLIENT_EVIDENCE", r)
+        self.assertEqual(r["postCloseDeltaObservations"], 1, r)
+        self.assertEqual(r["crossSessionEvents"], 1, r)
+        self.assertFalse(r["operatorCorroborationProven"])
+
+    def test_exact_duplicate_readback_event_id_does_not_repeat_observation(self):
+        t = trace([event(1, "OPEN"),event(2, "CLOSE"),
+                   event(3, "INVENTORY_DELTA", gained=0, lost=0)])
+        t["events"].append(deepcopy(t["events"][-1]))
+        r = R.replay_trace(t)
+        self.safe(r)
+        self.assertEqual(r["clientEvidenceTier"], "CLIENT_POSTCLOSE_NO_CHANGE")
+        self.assertEqual(r["duplicateEvents"], 1)
+        self.assertEqual(r["postCloseReadbackRepeats"], 0)
+        self.assertEqual(r["postCloseDeltaObservations"], 1)
+
+    def test_spoofed_human_operator_or_settlement_flag_is_rejected(self):
+        for key in ("operatorCorroborated","serverVerified","settledTrade",
+                    "completedProfit","clientEvidenceTier"):
+            with self.subTest(key=key):
+                t = trace([event(1, "OPEN"),event(2, "CLOSE"),
+                           event(3, "INVENTORY_DELTA", gained=1, lost=0)])
+                t["events"][-1][key] = True
+                r = R.replay_trace(t)
+                self.safe(r)
+                self.assertEqual(r["status"], "QUARANTINED", r)
+                self.assertEqual(r["clientEvidenceTier"],
+                                 "NO_TERMINAL_CLIENT_EVIDENCE")
+
     def test_raw_decline_signal_is_not_opponent_rejection(self):
         t = trace([event(1, "OPEN"),
              event(2, "CALLBACK", signal="DECLINE_SIGNAL"), event(3, "CLOSE")])
