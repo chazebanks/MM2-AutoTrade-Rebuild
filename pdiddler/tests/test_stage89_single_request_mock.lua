@@ -122,7 +122,7 @@ local function scenario(mode)
  local virtualInput={}
  function virtualInput:SendMouseButtonEvent(x,y,buttonIndex,pressed,gameArg,flags)
   assert(buttonIndex==0 and gameArg==gameObj and flags==0)
-  assert(x==160 and y==257.5)
+  assert(x==172 and y==281.5,"GUI inset must be applied for tablet input")
   if pressed then
    summary.mouseDown=summary.mouseDown+1
    if mode.failDown then error("mock input error after dispatch") end
@@ -148,8 +148,14 @@ local function scenario(mode)
   end
   return '{"stage":"89","status":"'..data.status..'"}'
  end
+ local guiService={
+  GetGuiInset=function()
+   if mode.noGuiInset then error("native inset missing") end
+   return {X=12,Y=24}
+  end
+ }
  local services={Players=players,VirtualInputManager=virtualInput,
-                 HttpService=httpService}
+                 GuiService=guiService,HttpService=httpService}
  function gameObj:GetService(name)
   return assert(services[name],"unexpected game service "..name)
  end
@@ -240,6 +246,12 @@ group("wrong username and ambiguous folded username never tap",function()
  local r2,s2=scenario({ambiguousName=true})
  assert(r2.report.status=="HELD" and s2.mouseDown==0)
  safe(r2,s2)
+end)
+group("GUI inset unavailable blocks before any physical Trade tap",function()
+ local r,s=scenario({noGuiInset=true})
+ assert(r.report.status=="HELD" and r.report.reason=="GUI_INSET_UNAVAILABLE")
+ assert(r.report.requestTapCount==0 and s.mouseDown==0)
+ safe(r,s)
 end)
 group("no pending confirmation never causes a second click",function()
  local r,s=scenario({pendingAfterTap=false})
