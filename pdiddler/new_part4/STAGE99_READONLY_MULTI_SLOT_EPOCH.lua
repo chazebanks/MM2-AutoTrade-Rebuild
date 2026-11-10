@@ -27,6 +27,7 @@ for _,k in ipairs({
  "GINGERSCOPE_STAGE91_SINGLE_REQUEST_DIAGNOSTIC",
  "GINGERSCOPE_STAGE92_SINGLE_REQUEST_DIAGNOSTIC",
  "GINGERSCOPE_STAGE93_SINGLE_REQUEST_DIAGNOSTIC",
+ "GINGERSCOPE_STAGE97_PARTNER_EVENT_READONLY",
  "PDIDDLER_GINGERSCOPE_REPLACEMENT_PREVIEW",
  "PDIDDLER_OUTGOING_CONTROLLER","PDIDDLER_OUTGOING_SESSION",
  "PDIDDLER_OUTGOING_BUSY_SESSION","PDIDDLER_PART4_SESSION",
@@ -332,9 +333,13 @@ local function run()
   end
   return nil,"MANUAL_ALT_OFFER_PHASE_TIMEOUT"
  end
- local function samePrivateSlot(a,b)
+ -- A native UI may renumber NewItem2 to NewItem1 after a removal.
+ -- For continuity compare visible item label, Chroma, quantity and optional
+ -- raw GUI text; Stage98 STILL records the slot-index movement as a
+ -- new local visual revision, never as server item-identity proof.
+ local function samePrivateItem(a,b)
   if type(a)~="table" or type(b)~="table" then return false end
-  for i=1,5 do if a[i]~=b[i] then return false end end
+  for i=2,5 do if a[i]~=b[i] then return false end end
   return true
  end
  local function copyPrivateSlot(a)
@@ -351,7 +356,7 @@ local function run()
  local firstStill=false
  local otherItem=nil
  for _,item in ipairs(state.their or {}) do
-  if samePrivateSlot(item,firstItem) then
+  if samePrivateItem(item,firstItem) then
    firstStill=true
   else
    otherItem=copyPrivateSlot(item)
@@ -364,8 +369,8 @@ local function run()
  R.observedSecondAdd=true
  local ok3,why4=phase(1,"REMOVE_ONE")
  if not ok3 then return finish("INCONCLUSIVE",why4) end
- if not samePrivateSlot(state.their[1],firstItem) and
-    not samePrivateSlot(state.their[1],otherItem) then
+ if not samePrivateItem(state.their[1],firstItem) and
+    not samePrivateItem(state.their[1],otherItem) then
   return finish("INCONCLUSIVE","REMAINING_ITEM_NOT_FROM_PRIOR_TWO")
  end
  R.observedOneRemoval=true
