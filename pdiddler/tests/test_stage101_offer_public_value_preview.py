@@ -160,6 +160,25 @@ class ActualOriginalStage101Preview(unittest.TestCase):
             r=preview_public_reference(s,offer(),now_epoch=T_PRE)
             self.assertEqual(r["status"],"INCONCLUSIVE",change)
             self.check_denied(r)
+    def test_forged_but_plausible_189_row_prices_and_demand_are_rejected(self):
+        for change in ("value_plus_five","demand_plus_one","row_reorder",
+                       "historical_raw_key_substitution","stable_to_volatile"):
+            x=copy.deepcopy(self.source)
+            row=x["rows"][0]
+            if change=="value_plus_five":
+                row["researchSourceValue"]+=5
+            elif change=="demand_plus_one":
+                row["researchDemand"]=(row["researchDemand"]+1)%12
+            elif change=="row_reorder":
+                x["rows"][0],x["rows"][1]=x["rows"][1],x["rows"][0]
+            elif change=="historical_raw_key_substitution":
+                row["historicalPublicRawKey"]="different_plausible_archive_key"
+            elif change=="stable_to_volatile":
+                row["researchStability"]="Changing"
+            r=preview_public_reference(x,offer(),now_epoch=T_PRE)
+            self.assertEqual(r["status"],"INCONCLUSIVE",change)
+            self.assertEqual(r["rows"],[])
+            self.check_denied(r)
     def test_missing_offer_identity_or_accept_flags_never_approved(self):
         for field,bad in (("exactPartnerClientBound",False),
                           ("stage9ObserverBound",False),
