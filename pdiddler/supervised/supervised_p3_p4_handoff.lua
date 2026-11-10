@@ -80,6 +80,21 @@ local function side(io,t,name)
    return nil,"INVALID_GUI_SLOT_OR_STACK"
   end
   seen[e.index]=true
+  -- Original P4 readSide defaults malformed/zero x-counts to ONE. That
+  -- is unsafe for balancing: inspect actual physical amount label too.
+  local slot=container:FindFirstChild("NewItem"..e.index)
+  local box=slot and slot:FindFirstChild("Container")
+  local amount=box and box:FindFirstChild("Amount")
+  if amount and amount.Visible==true then
+   local text=amount.Text
+   local n=type(text)=="string" and
+      tonumber(text:match("^[xX]%s*(%d+)$")) or nil
+   if not int(n,1000000) or n~=e.qty then
+    return nil,"VISIBLE_STACK_TEXT_INVALID"
+   end
+  elseif amount and e.qty~=1 then
+   return nil,"HIDDEN_STACK_TEXT_CONFLICT"
+  end
   if name=="YourOffer" and
     (protected(e.shown) or protected(e.internalId)) then
    return nil,"PROTECTED_GINGERSCOPE_IN_OWN_OFFER"
@@ -139,6 +154,16 @@ function M.bind(scanner,outgoing,io,players,me,ctx)
    return nil,"PART3_SCANNER_RECORD_CHANGED"
   end
   if outgoing.isPaused()~=true then return nil,"PART3_NOT_PAUSED" end
+  -- TradeIO selects the first enabled MM2 GUI. Two simultaneous visible
+  -- roots would be ambiguous even if one happens to match the partner.
+  local rootCount=0
+  for _,screenName in ipairs({"TradeGUI_Phone","TradeGUI"}) do
+   local screen=pg:FindFirstChild(screenName)
+   local layout=screen and screen:FindFirstChild("Container")
+   local candidate=layout and layout:FindFirstChild("Trade")
+   if candidate and visible(candidate,pg) then rootCount+=1 end
+  end
+  if rootCount>1 then return nil,"MULTIPLE_VISIBLE_TRADE_ROOTS" end
   local t=io.trade()
   if not t or not visible(t,pg) then return nil,"NO_VISIBLE_TRADE" end
   if session.root and session.root~=t then
