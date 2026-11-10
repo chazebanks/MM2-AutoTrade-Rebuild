@@ -1,0 +1,84 @@
+name: Gingerscope Stage100 real Part4 GUI→local offer epoch read-only
+on:
+  push:
+    branches:
+      - diagnostic/gingerscope-stage100-two-sided-offer-epoch
+    paths:
+      - 'pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua'
+      - 'pdiddler/tests/test_stage100_native_two_sided_epoch.lua'
+      - 'pdiddler/tests/test_stage100_native_two_sided_epoch_driver.py'
+      - 'pdiddler/intelligence_lab/STAGE100_TWO_SIDED_EPOCH_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage100-two-sided-epoch.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua'
+      - 'pdiddler/tests/test_stage100_native_two_sided_epoch.lua'
+      - 'pdiddler/tests/test_stage100_native_two_sided_epoch_driver.py'
+      - 'pdiddler/intelligence_lab/STAGE100_TWO_SIDED_EPOCH_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage100-two-sided-epoch.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-native-stage9-to-stage98:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Download immutable original native Part4 and Stage98 local epoch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope99
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope99/contract.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_native_observer.lua" -o /tmp/gingerscope99/native.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/642768973f5eb560a184119237c44c84697a208f/pdiddler/intelligence_lab/stage98_client_offer_epoch.lua" -o /tmp/gingerscope99/stage98.lua
+          test "$(git hash-object /tmp/gingerscope99/contract.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          test "$(git hash-object /tmp/gingerscope99/native.lua)" = a6338e946467ad738005bc5cb13cd2d2fbc2a2d0
+          test "$(git hash-object /tmp/gingerscope99/stage98.lua)" = 748639e88823198fd7cc0dce92fba49ad07e2729
+          echo STAGE100_THREE_ORIGINAL_GIT_BLOBS_VERIFIED
+      - name: Run actual original-source Lua native adapter mocks under Python
+        env:
+          STAGE100_REQUIRE_PINNED: '1'
+          STAGE100_ORIGINAL_STAGE9: /tmp/gingerscope99/contract.lua
+          STAGE100_ORIGINAL_NATIVE: /tmp/gingerscope99/native.lua
+          STAGE100_ORIGINAL_STAGE98: /tmp/gingerscope99/stage98.lua
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_stage100_native_two_sided_epoch_driver
+      - name: Enforce single read-only native GUI witness, no gameplay authority
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path("pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua").read_text()
+          assert 'PDIDDLER_STAGE100_READONLY_ARMED' in s
+          assert 'source("stage9native")' in s and 'source("stage98")' in s
+          for required in (
+              'epochs.observe(', 'epochs.freezePreview(', 'epochs.checkPreview(',
+              'CLIENT_TWO_SIDED_OFFER_WITHDRAWAL_EPOCH_OBSERVED',
+              'NO_UNOBSERVED_MUTATIONS_PROVEN' if 'NO_UNOBSERVED_MUTATIONS_PROVEN' in s else 'noUnobservedMutationsProven=false',
+              'eventSessionAssociationProven=false,callbackCausalityProven=false',
+              'serverTradeRevisionProven=false,serverAttestation=false',
+              'actualRequestTaps=0,actualOffers=0,actualAccepts=0',
+              'authorizesTrade=false','authorizesAccept=false',
+              'currentPricesVerified=false','serverCompletionProven=false',
+          ):
+              assert required in s,required
+          for bad in (
+              ':FireServer(',':InvokeServer(', 'VirtualInputManager',
+              'SendMouseButtonEvent(', 'OnClientEvent:Connect(',
+              'TeleportService', 'PostAsync(', 'HttpPost(',
+              'AcceptTrade(', 'DeclineTrade(', 'getconnections(',
+          ):
+              assert bad not in s,bad
+          print('STAGE100_NATIVE_READONLY_NO_GAMEPLAY_POLICY_PASS')
+          PY
