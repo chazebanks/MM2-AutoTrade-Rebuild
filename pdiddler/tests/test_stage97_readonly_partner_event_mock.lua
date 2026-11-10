@@ -24,6 +24,13 @@ end
 local savedPrint=print
 local function scenario(mode)
  mode=mode or {}
+ local originalXpcall=xpcall
+ local errorDetails=nil
+ _G.xpcall=function(fn,handler)
+  local ok,e=originalXpcall(fn,function(err)return debug.traceback(tostring(err),2)end)
+  if not ok then errorDetails=e end
+  return ok,e
+ end
  local elapsed=5000
  local readyAt=nil
  local emitted=false
@@ -238,11 +245,12 @@ local function scenario(mode)
   return assert(loadfile(SCRIPT))()
  end)
  _G.print=savedPrint
+ _G.xpcall=originalXpcall
  if not ok then error("wrapper error: "..tostring(ret)) end
  local r=ret and ret.report or nil
  return {report=r,connects=connects,disconnects=disconnects,
   eventReceiptCount=receiptCount,sources=sources,logs=printed,
-  clipboard=env.clipboard}
+  clipboard=env.clipboard,errorDetails=errorDetails}
 end
 local function denied(s)
  local r=s.report
@@ -272,7 +280,7 @@ local function denied(s)
 end
 test("actual read-only original Stage9/95/96 wrapper observes partner event GUI consistency",function()
  local s=scenario()
- equals(s.report.status,"CLIENT_PARTNER_EVENT_GUI_NAME_QTY_CONSISTENT_UNATTRIBUTED",s.report.reason)
+ equals(s.report.status,"CLIENT_PARTNER_EVENT_GUI_NAME_QTY_CONSISTENT_UNATTRIBUTED",tostring(s.report.reason).." debug="..tostring(s.errorDetails))
  equals(s.report.stage9ObserverBound,true)
  equals(s.report.partnerEventTupleObserved,true)
  equals(s.report.onePartnerGuiSlotObserved,true)
@@ -289,7 +297,7 @@ test("GUI raw attribute remains client-only even when exactly equal to event tex
 end)
 test("original Stage42 partner may be Player1 while local client is Player2",function()
  local s=scenario({localSecond=true})
- equals(s.report.status,"CLIENT_PARTNER_EVENT_GUI_NAME_QTY_CONSISTENT_UNATTRIBUTED",s.report.reason)
+ equals(s.report.status,"CLIENT_PARTNER_EVENT_GUI_NAME_QTY_CONSISTENT_UNATTRIBUTED",tostring(s.report.reason).." debug="..tostring(s.errorDetails))
  denied(s)
 end)
 test("unknown event raw key is not silently inferred from GUI Batwing name",function()
