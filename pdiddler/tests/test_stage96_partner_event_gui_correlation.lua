@@ -57,8 +57,10 @@ local function blankSide(slots)
 end
 local function physicalSlot(raw,qt,display,chroma)
  local m=raw and cats[raw]
+ local chromaValue=chroma
+ if chromaValue==nil then chromaValue=m and m.Chroma or false end
  return {slot=1,rawId=nil,label=display or (m and m.ItemName or "Batwing"),
-  chroma=chroma==nil and (m and m.Chroma or false) or chroma,
+  chroma=chromaValue,
   amountText=qt or ""}
 end
 local function pack(root)
