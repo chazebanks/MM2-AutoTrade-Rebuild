@@ -68,18 +68,29 @@ local function fakeEnv(options)
  local theirAccepted=theirs:put(node("Frame","Accepted"))
  theirAccepted.Visible=false
  local username=theirs:put(node("TextLabel","Username"))
- username.Text="TrustedAlt"
+ username.Text=options.headerText or "TrustedAlt"
+ if options.hidePartnerHeader then username.Visible=false end
  local players={}
  local lp={Name="MainAccount",UserId=1,Parent=players}
  players.LocalPlayer=lp
- local partner={Name="TrustedAlt",DisplayName="TrustedAlt",UserId=2,Parent=players}
+ local partner={Name="TrustedAlt",DisplayName=options.partnerDisplayName or "TrustedAlt",UserId=2,Parent=players}
+ local other=options.extraPlayer and {
+   Name=options.extraPlayer.Name,
+   DisplayName=options.extraPlayer.DisplayName,
+   UserId=99,Parent=players
+ } or nil
  function players:FindFirstChild(name)
    if type(name)~="string" then
      error("Roblox FindFirstChild requires a string")
    end
    if name=="TrustedAlt" then return partner end
  end
- function players:GetPlayers()return {lp,partner} end
+ function players:GetPlayers()
+   if options.censusFailure then error("census unavailable") end
+   local list={lp,partner}
+   if other then list[#list+1]=other end
+   return list
+ end
  function lp:FindFirstChildOfClass(kind)
    if kind=="PlayerGui" then return pg end
  end
@@ -424,6 +435,52 @@ do
  check(r.offerAttempts,1,"only first remote attempted")
  check(r.clientVisibleAddedSlots,0,"never fake a copy for x0")
  check(#zero.calls,1,"second remote suppressed on zero")
+end
+
+
+-- Production UI may show a display name or a different account. The exact
+-- ALT username remains mandatory: copy only categorical, anonymous reasons.
+do
+ local onlyDisplay=fakeEnv({headerText="Alt",partnerDisplayName="Alt"})
+ local r=onlyDisplay.run()
+ check(r.status,"BLOCKED","display-only header stopped before any item")
+ check(r.reason,"TRADE_PARTNER_WRONG_OR_AMBIGUOUS","reason not relaxed")
+ check(r.partnerCheckReason,"PARTNER_LABEL_DISPLAY_ONLY","actual native display mismatch classified")
+ check(r.offerAttempts,0,"no remote attempts for display-name-only")
+ check(#onlyDisplay.calls,0,"no physical remotes")
+ check(r.clipboardCopied,true,"reason auto-copied")
+ check(onlyDisplay.copied[1]:find("PARTNER_LABEL_DISPLAY_ONLY",1,true)~=nil,
+  true,"allowlisted partner mismatch exported")
+ check(onlyDisplay.copied[1]:find("TrustedAlt",1,true),nil,
+  "no Roblox username in clipboard")
+end
+do
+ local conflict=fakeEnv({extraPlayer={Name="OtherUser",DisplayName="TrustedAlt"}})
+ local r=conflict.run()
+ check(r.status,"BLOCKED","alias colliding partner blocked")
+ check(r.partnerCheckReason,"PARTNER_LABEL_AMBIGUOUS","ambiguous reason exported")
+ check(#conflict.calls,0,"collision permits zero offer")
+end
+do
+ local gone=fakeEnv({hidePartnerHeader=true})
+ local r=gone.run()
+ check(r.status,"BLOCKED","hidden trade header cannot bind")
+ check(r.partnerCheckReason,"PARTNER_HEADER_UNAVAILABLE","unreadable header detail")
+ check(#gone.calls,0,"hidden header cannot offer")
+end
+do
+ local wrong=fakeEnv({headerText="OtherUser",
+   extraPlayer={Name="OtherUser",DisplayName="Else"}})
+ local r=wrong.run()
+ check(r.partnerCheckReason,"PARTNER_LABEL_OTHER_PLAYER","known different player")
+ check(#wrong.calls,0,"no offer to different player")
+end
+do
+ local formatted=fakeEnv({headerText="(TrustedAlt)"})
+ local r=formatted.run()
+ check(r.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED",
+  "original parenthesized exact Roblox username permitted")
+ check(#formatted.calls,2,"exact bracketed username still works")
 end
 
 print("[PASS] actual supervised 4-slot iPad runner original MM2 mocks:",tests)
