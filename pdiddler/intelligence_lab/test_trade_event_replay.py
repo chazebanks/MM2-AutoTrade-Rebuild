@@ -109,6 +109,147 @@ class SanitizedReplayTests(unittest.TestCase):
         self.assertEqual(x["clientCallbackObservations"], 0)
         self.assertEqual(x["windowClosures"], 1)
 
+    def test_repeated_open_while_active_must_not_reset_same_session_revision(self):
+        # A distinct delivery ID for OPEN is not proof of a distinct trade.
+        # Resetting revision=0 here could misassociate the old session's
+        # callbacks/offers with a falsely new client session.
+        t = trace([
+            event(1, "OPEN", "s_main"),
+            event(2, "OFFER", "s_main", side="THEIRS", revision=1,
+                  signature="bundle_a"),
+            event(3, "ACCEPT", "s_main", side="OURS", revision=1),
+            event(4, "OPEN", "s_main"),
+            event(5, "CALLBACK", "s_main", signal="END_TRADE"),
+        ])
+        x = R.replay_trace(t)
+        self.safe(x)
+        self.assertEqual(x["status"], "QUARANTINED", x)
+        self.assertEqual(x["reason"], "REUSED_CLIENT_SESSION_TOKEN", x)
+
+    def test_reopening_closed_session_token_must_not_count_another_trade(self):
+        t = trace([
+            event(1, "OPEN", "s_main"),
+            event(2, "CLOSE", "s_main"),
+            event(3, "INVENTORY_DELTA", "s_main", gained=1, lost=0),
+            event(4, "OPEN", "s_main"),
+            event(5, "OFFER", "s_main", side="OURS", revision=1,
+                  signature="bundle_b"),
+        ])
+        x = R.replay_trace(t)
+        self.safe(x)
+        self.assertEqual(x["status"], "QUARANTINED", x)
+        self.assertEqual(x["reason"], "REUSED_CLIENT_SESSION_TOKEN", x)
+        self.assertFalse(x["mayRecordCompletedTrade"])
+
+    def test_old_client_session_token_cannot_be_reintroduced_after_new_open(self):
+        t = trace([
+            event(1, "OPEN", "s_old"),
+            event(2, "OPEN", "s_new"),
+            event(3, "CALLBACK", "s_old", signal="END_TRADE"),
+            event(4, "OPEN", "s_old"),
+        ])
+        x = R.replay_trace(t)
+        self.safe(x)
+        self.assertEqual(x["status"], "QUARANTINED", x)
+        self.assertEqual(x["reason"], "REUSED_CLIENT_SESSION_TOKEN", x)
+
+    def test_exact_duplicate_open_delivery_is_still_idempotent(self):
+        t = trace([event(1, "OPEN", "s_main"),
+                   event(2, "OFFER", "s_main", side="THEIRS",
+                         revision=1, signature="bundle_a"),
+                   event(3, "CLOSE", "s_main")])
+        t["events"].insert(1, deepcopy(t["events"][0]))
+        x = R.replay_trace(t)
+        self.safe(x)
+        self.assertEqual(x["status"], "CLIENT_REPLAY_ONLY", x)
+        self.assertEqual(x["duplicateEvents"], 1)
+        self.assertEqual(x["windowClosures"], 1)
+
+    def test_distinct_delivery_ids_same_side_same_revision_do_not_mean_two_acceptances(self):
+        t = trace([
+            event(1, "OPEN"),
+            event(2, "OFFER", side="THEIRS", revision=1, signature="bundle_a"),
+            event(3, "ACCEPT", side="OURS", revision=1),
+            event(4, "ACCEPT", side="OURS", revision=1),
+        ])
+        r = R.replay_trace(t)
+        self.safe(r)
+        self.assertEqual(r["status"], "CLIENT_REPLAY_ONLY")
+        self.assertEqual(r["clientAcceptObservations"], 1, r)
+        self.assertEqual(r["repeatClientAcceptObservations"], 1, r)
+        self.assertEqual(r["currentRevisionAcceptedSides"], 1, r)
+        self.assertFalse(r["serverCompletionProven"])
+
+    def test_repeated_our_accept_plus_their_accept_is_two_distinct_client_sides(self):
+        t = trace([
+            event(1, "OPEN"),
+            event(2, "OFFER", side="OURS", revision=1, signature="bundle_a"),
+            event(3, "ACCEPT", side="OURS", revision=1),
+            event(4, "ACCEPT", side="OURS", revision=1),
+            event(5, "ACCEPT", side="THEIRS", revision=1),
+            event(6, "CALLBACK", signal="ACCEPT_TRUE"),
+            event(7, "CLOSE"),
+            event(8, "INVENTORY_DELTA", gained=1, lost=1),
+        ])
+        r = R.replay_trace(t)
+        self.safe(r)
+        self.assertEqual(r["clientAcceptObservations"], 2, r)
+        self.assertEqual(r["repeatClientAcceptObservations"], 1, r)
+        self.assertEqual(r["currentRevisionAcceptedSides"], 0, r)
+        self.assertEqual(r["tradeOutcome"], "UNKNOWN")
+        self.assertEqual(r["postCloseDeltaObservations"], 1)
+
+    def test_new_offer_invalidates_side_and_allows_new_revision_accept(self):
+        t = trace([
+            event(1, "OPEN"),
+            event(2, "OFFER", side="THEIRS", revision=1, signature="bundle_a"),
+            event(3, "ACCEPT", side="OURS", revision=1),
+            event(4, "ACCEPT", side="OURS", revision=1),
+            event(5, "OFFER", side="THEIRS", revision=2, signature="bundle_b"),
+            event(6, "ACCEPT", side="OURS", revision=2),
+            event(7, "ACCEPT", side="OURS", revision=1),
+            event(8, "ACCEPT", side="THEIRS", revision=2),
+        ])
+        r = R.replay_trace(t)
+        self.safe(r)
+        self.assertEqual(r["clientAcceptObservations"], 3, r)
+        self.assertEqual(r["repeatClientAcceptObservations"], 1, r)
+        self.assertEqual(r["staleEvents"], 1, r)
+        self.assertEqual(r["acceptanceInvalidations"], 1, r)
+        self.assertEqual(r["currentRevisionAcceptedSides"], 2, r)
+
+    def test_exact_duplicate_accept_id_is_idempotent_not_logical_repeat(self):
+        t = trace([
+            event(1, "OPEN"),
+            event(2, "OFFER", side="OURS", revision=1, signature="bundle_a"),
+            event(3, "ACCEPT", side="OURS", revision=1),
+        ])
+        t["events"].append(deepcopy(t["events"][-1]))
+        r = R.replay_trace(t)
+        self.safe(r)
+        self.assertEqual(r["duplicateEvents"], 1, r)
+        self.assertEqual(r["clientAcceptObservations"], 1, r)
+        self.assertEqual(r["repeatClientAcceptObservations"], 0, r)
+        self.assertEqual(r["currentRevisionAcceptedSides"], 1, r)
+
+    def test_delayed_accept_from_prior_session_does_not_count_unique_side(self):
+        t = trace([
+            event(1, "OPEN", "s_old"),
+            event(2, "OFFER", "s_old", side="OURS",
+                  revision=1, signature="bundle_a"),
+            event(3, "OPEN", "s_new"),
+            event(4, "OFFER", "s_new", side="OURS",
+                  revision=1, signature="bundle_b"),
+            event(5, "ACCEPT", "s_old", side="OURS", revision=1),
+            event(6, "ACCEPT", "s_new", side="THEIRS", revision=1),
+        ])
+        r = R.replay_trace(t)
+        self.safe(r)
+        self.assertEqual(r["crossSessionEvents"], 2, r)
+        self.assertEqual(r["clientAcceptObservations"], 1, r)
+        self.assertEqual(r["repeatClientAcceptObservations"], 0, r)
+        self.assertEqual(r["currentRevisionAcceptedSides"], 1, r)
+
     def test_raw_decline_signal_is_not_opponent_rejection(self):
         t = trace([event(1, "OPEN"),
              event(2, "CALLBACK", signal="DECLINE_SIGNAL"), event(3, "CLOSE")])
