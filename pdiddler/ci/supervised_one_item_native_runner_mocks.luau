@@ -126,7 +126,7 @@ local cases={
  function(x)x.username.Text="AnotherPerson" end,
  function(x)x.screen.Enabled=false end,
  function(x)x.accepted.Visible=true end,
- function(x)x.t:FindFirstChild("YourOffer").Container=nil end,
+ function(x)x.t:FindFirstChild("YourOffer").children.Container=nil end,
 }
 for i,alter in ipairs(cases) do
  local x=create()
