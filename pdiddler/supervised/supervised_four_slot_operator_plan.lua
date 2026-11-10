@@ -28,6 +28,23 @@ end
 local function protected(s)
  return norm(s):find("gingerscope",1,true)~=nil
 end
+local function displayValid(s)
+ return type(s)=="string" and #s>=1 and #s<=90 and
+    not s:find("[%c]") and not s:find("^%s") and
+    not s:find("%s$") and norm(s)~=""
+end
+local function providedArrayValid(src,n,kind)
+ if src==nil then return true end
+ if type(src)~="table" or #src~=n then return false end
+ local count=0
+ for i,v in pairs(src) do
+  if type(i)~="number" or i~=math.floor(i) or i<1 or i>n
+   or (kind=="display" and not displayValid(v))
+   or (kind=="chroma" and type(v)~="boolean") then return false end
+  count+=1
+ end
+ return count==n
+end
 local function copySlots(items)
  local result={}
  for i,s in ipairs(items) do
@@ -58,7 +75,7 @@ local function matches(a,b)
  end
  return true
 end
-local function candidateAdded(before,after,key)
+local function candidateAdded(before,after,expected)
  if #after~=#before+1 or #after>4 then return false end
  -- Previous slots must be unchanged, independent of their GUI order.
  local previous={}
@@ -74,10 +91,11 @@ local function candidateAdded(before,after,key)
  end
  if #additions~=1 then return false end
  local added=additions[1]
- -- Raw game key = GUI display is a conservative *candidate* in this
- -- deliberately narrow manual pilot, not authenticated item identity.
- return norm(added.displayCandidate)==norm(key) and
-    added.chromaCandidate==false and added.quantity==1 and
+ -- Raw weapon key and GUI-visible label are separate client claims.
+ -- The visible text/Chroma tag must match the operator's explicit approval.
+ return type(added.displayCandidate)=="string" and
+    added.displayCandidate:lower()==expected.display:lower() and
+    added.chromaCandidate==expected.chroma and added.quantity==1 and
     not protected(added.internalIdCandidate) and
     not protected(added.displayCandidate)
 end
@@ -139,17 +157,31 @@ function M.run(bound,io,gate,approval,opts)
  if type(keys)~="table" or #keys<1 or #keys>4 then
   return report("BLOCKED","PLAN_PHYSICAL_SLOT_COUNT_INVALID")
  end
+ local names=approval.expectedDisplayNames
+ local flags=approval.expectedChromaFlags
+ if not providedArrayValid(names,#keys,"display") or
+    not providedArrayValid(flags,#keys,"chroma") then
+  return report("BLOCKED","PLAN_DISPLAY_OR_CHROMA_SHAPE_INVALID")
+ end
  local keyCount=0
- local selected,seen={},{}
+ local selected,seenRaw,seenDisplay={},{},{}
  for k,key in pairs(keys) do
   keyCount+=1
   if type(k)~="number" or k~=math.floor(k) or
    k<1 or k>#keys or not rawKeyValid(key) or
-   protected(key) or seen[norm(key)] then
+   protected(key) or seenRaw[norm(key)] then
    return report("BLOCKED","PLAN_ITEM_IDENTITY_INVALID_OR_PROTECTED")
   end
-  selected[k]=key
-  seen[norm(key)]=true
+  local display=(names and names[k]) or key
+  local chroma=(flags and flags[k]) or false
+  local variant=norm(display)..":"..tostring(chroma)
+  if not displayValid(display) or protected(display) or
+      seenDisplay[variant] then
+   return report("BLOCKED","PLAN_DISPLAY_INVALID_AMBIGUOUS_OR_PROTECTED")
+  end
+  selected[k]={raw=key,display=display,chroma=chroma}
+  seenRaw[norm(key)]=true
+  seenDisplay[variant]=true
  end
  if keyCount~=#keys then
   return report("BLOCKED","PLAN_SPARSE_OR_EXTRA_SLOTS")
@@ -173,7 +205,7 @@ function M.run(bound,io,gate,approval,opts)
  approval._consumed=true
  approval.armed=false
  local attempts,confirmed=0,0
- for _,key in ipairs(selected) do
+ for _,approved in ipairs(selected) do
   -- Pause/partner/GUI/offer checks are redone before EVERY item.
   local before,reason=current(bound,expectedOwn,their)
   if not before or io.trade()~=root then
@@ -182,13 +214,15 @@ function M.run(bound,io,gate,approval,opts)
   if #before.ours>=4 then
    return report("STOPPED","FOUR_PHYSICAL_SLOTS_ALREADY_USED",attempts,confirmed)
   end
-  local item={id=key,rawKey=key,name=key}
+  local key=approved.raw
+  local item={id=key,rawKey=key,name=approved.display}
   local pending=true
   local callbackSeen=false
   gate.checkOutbound=function(candidate,observed)
    if not pending or candidate~=item or observed~=root
     or candidate.id~=key or candidate.rawKey~=key
-    or candidate.name~=key or protected(candidate.id) then
+    or candidate.name~=approved.display or protected(candidate.id)
+    or protected(candidate.name) then
     return false
    end
    local nextState=io.trade()==root and current(bound,expectedOwn,their)
@@ -217,7 +251,7 @@ function M.run(bound,io,gate,approval,opts)
    end
    if matches(fresh.ours,expectedOwn) then
     -- Waiting on GUI replication; do not attempt a second send.
-   elseif candidateAdded(expectedOwn,fresh.ours,key) then
+   elseif candidateAdded(expectedOwn,fresh.ours,approved) then
     expectedOwn=fresh.ours
     observed=true
     confirmed+=1
