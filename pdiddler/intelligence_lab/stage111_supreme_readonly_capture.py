@@ -218,9 +218,7 @@ def main(argv:list[str]|None=None)->int:
     args=p.parse_args(argv)
     import requests
     source=args.prior_html_dir
-    prior={p:(source/(p+"s.html" if p!="chroma" else "chromas.html")).read_bytes()
-           for p in ("ancient","godly","chroma")}
-    # Explicit filenames avoid accidental singular/plural misconversion.
+    # Explicit reviewed filenames avoid accidental singular/plural drift.
     prior={
         "ancient":(source/"ancients.html").read_bytes(),
         "godly":(source/"godlies.html").read_bytes(),
@@ -230,7 +228,7 @@ def main(argv:list[str]|None=None)->int:
         session.trust_env=False
         result=collect_and_admit(
             session,parser_bytes=args.parser.read_bytes(),
-            prior_html=prior,artifact_dir=args.output_dir,
+            prior_html=prior,clock=_clock_utc,artifact_dir=args.output_dir,
         )
     print("STAGE111_SUPREME_SOURCE_CAPTURE",
           "status="+result["status"],
