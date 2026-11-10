@@ -201,6 +201,7 @@ local function scenario(mode)
  }
  if mode.competingOwner then env.PDIDDLER_OUTGOING_CONTROLLER={} end
  if mode.oldStage97 then env.GINGERSCOPE_STAGE97_PARTNER_EVENT_READONLY={} end
+ if mode.oldStage100 then env.GINGERSCOPE_STAGE100_TWO_SIDED_OFFER_EPOCH_READONLY={} end
  -- Roblox GUI primitives needed by the actual user-visible instruction panel.
  -- These mocks do not expose or click any MM2 TradeGUI controls.
  _G.UDim2={new=function(xs,xo,ys,yo)
@@ -401,7 +402,7 @@ test("fullscreen trade and tiny viewport never obstruct controls",function()
 end)
 test("wrong partner and ambiguous GUI fail",function()
  for _,m in ipairs({{wrongPartner=true},{doubleRoot=true},{noTarget=true},
-    {duplicateTarget=true},{competingOwner=true}}) do
+    {duplicateTarget=true},{competingOwner=true},{oldStage100=true}}) do
   local t=scenario(m)
   if t.report then
    eq(t.report.status,"INCONCLUSIVE");denied(t)
