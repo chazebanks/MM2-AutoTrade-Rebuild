@@ -9,6 +9,8 @@ on:
       - 'pdiddler/ci/supervised_one_item_native_runner_mocks.luau'
       - 'pdiddler/supervised/supervised_p3_p4_handoff.lua'
       - 'pdiddler/ci/supervised_p3_p4_handoff_mocks.luau'
+      - 'pdiddler/supervised/supervised_real_p3_rotation_handoff.lua'
+      - 'pdiddler/ci/supervised_real_p3_rotation_handoff_mocks.luau'
       - 'pdiddler/supervised/supervised_four_slot_operator_plan.lua'
       - 'pdiddler/ci/supervised_four_slot_operator_plan_mocks.luau'
       - 'pdiddler/supervised/SUPERVISED_FOUR_SLOT_MANUAL_PILOT.lua'
@@ -49,6 +51,10 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_p4_handoff_mocks.luau
+      - name: Verify actual P3 processed rotation handoff to guarded P4 with LIVE Lua mocks
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_real_p3_rotation_handoff_mocks.luau
       - name: Exercise approved multi-item four physical-slot plan against real guarded IO
         run: |
           set -euo pipefail
@@ -91,6 +97,15 @@ jobs:
           assert 'd496d6311dc6c5e24e059fcd71014e274a4be76b' == __import__('subprocess').check_output(
               ['git','hash-object','pdiddler/supervised/supervised_p3_p4_handoff.lua'],text=True).strip()
           assert 'PROTECTED_GINGERSCOPE_IN_OWN_OFFER' in bridge
+          p3Coordinator=Path('pdiddler/supervised/supervised_real_p3_rotation_handoff.lua').read_text()
+          assert 'P3_NO_FRESH_ACCEPTED_TARGET' in p3Coordinator
+          assert 'P3_MULTIPLE_NEW_TRADE_OUTCOMES' in p3Coordinator
+          assert 'P3_CLIENT_PROCESSED_TRADE_OPEN_UNATTESTED' in p3Coordinator
+          assert 'preexisting[tostring(uid)]=true' in p3Coordinator
+          assert 'consumed[tostring(uid)]=true' in p3Coordinator
+          assert 'resumeAfterClose' in p3Coordinator
+          for forbidden in ('OfferItem:FireServer(', 'AcceptTrade:FireServer(', 'SendRequest:FireServer(', 'DeclineRequest:FireServer(', 'DeclineTrade:FireServer(', 'TeleportService', 'PostAsync('):
+              assert forbidden not in p3Coordinator,forbidden
           for forbidden in ('OfferItem:FireServer(', 'AcceptTrade:FireServer(', 'DeclineTrade:FireServer(', 'PostAsync('):
               assert forbidden not in bridge
           plan=Path('pdiddler/supervised/supervised_four_slot_operator_plan.lua').read_text()
