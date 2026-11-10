@@ -111,12 +111,14 @@ local function exportResult(report,guide)
             or not guide.ui or not guide.ui.body then return end
         pcall(function()
             guide.ui.body.TextSize=12
+            local detail=type(report.snapshotRejectReason)=="string"
+                and report.snapshotRejectReason or "NO_DETAIL"
             if report.clipboardCopied==true then
-                guide.ui.body.Text="OUTCOME UNKNOWN. RESULT COPIED. "
-                    .."Paste in ChatGPT. MAIN manually Decline."
+                guide.ui.body.Text="COPIED. Cause: "..detail
+                    ..". Paste report. MAIN manually Decline."
             else
-                guide.ui.body.Text="COPY FAILED: "..tostring(report.status)
-                    ..". Screenshot this result."
+                guide.ui.body.Text="COPY FAILED. Cause: "..detail
+                    ..". Screenshot. MAIN manually Decline."
             end
         end)
     end
