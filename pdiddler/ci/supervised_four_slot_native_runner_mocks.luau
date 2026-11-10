@@ -282,5 +282,13 @@ for _,options in ipairs({
  check(result.status,"BLOCKED","unsafe guide blocks")
  check(#v.calls,0,"no remote when UI unsafe")
 end
+-- A malformed exact username must not throw or arm any remote.
+do
+ local invalid=fakeEnv()
+ invalid.E.PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT.targetName=nil
+ local ok,report=pcall(invalid.run)
+ check(ok,true,"nil target config handled without runtime crash")
+ check(#invalid.calls,0,"nil target cannot offer")
+end
 print("[PASS] actual supervised 4-slot iPad runner original MM2 mocks:",tests)
 print("[PASS] 1..4 selected OfferItem, mandatory on-screen UI, clipboard; no final Accept")
