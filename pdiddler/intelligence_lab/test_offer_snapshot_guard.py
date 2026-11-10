@@ -65,21 +65,33 @@ class OfferSnapshotGuardTests(unittest.TestCase):
         self.assertEqual(MOD.evaluate(p,o,c,now=NOW)['reason'],'RECEIVED_ITEM_LOW_DEMAND')
         p['theirs'][0]['key']='falling';o['theirs'][0]['key']='falling'
         self.assertEqual(MOD.evaluate(p,o,c,now=NOW)['reason'],'RECEIVED_ITEM_UNSTABLE')
-    def test_four_physical_copies_are_allowed_but_five_are_rejected(self):
+    def test_stacked_copies_above_four_are_valid_when_physical_slots_at_most_four(self):
         p,o,c=fixture()
-        for side in ('ours','theirs'):
-            p[side][0]['quantity']=4
-            o[side]=copy.deepcopy(p[side])
-        self.assertEqual(MOD.evaluate(p,o,c,now=NOW)['projectedListedGain'],20)
-        for side in ('ours','theirs'):
-            with self.subTest(side=side):
-                p,o,c=fixture()
-                p[side][0]['quantity']=3
-                p[side].append({'index':2,'key':'stack','quantity':2})
-                o[side]=copy.deepcopy(p[side])
-                result=MOD.evaluate(p,o,c,now=NOW)
-                self.assertEqual(result['reason'],'OFFER_COPY_LIMIT_EXCEEDED')
-                must_never_authorize(result)
+        p['ours']=[{'index':1,'key':'own','quantity':5}]
+        p['theirs']=[{'index':1,'key':'receive','quantity':6}]
+        o['ours']=copy.deepcopy(p['ours'])
+        o['theirs']=copy.deepcopy(p['theirs'])
+        result=MOD.evaluate(p,o,c,now=NOW)
+        self.assertEqual(result['status'],'RESEARCH_CANDIDATE_ONLY',result)
+        self.assertEqual(result['valueOffered'],500)
+        self.assertEqual(result['valueRequested'],630)
+        self.assertEqual(result['projectedListedGain'],130)
+        must_never_authorize(result)
+    def test_stack_x21_within_one_physical_slot_and_invalid_parser_ceiling(self):
+        p,o,c=fixture()
+        p['ours']=[{'index':1,'key':'stack','quantity':21}]
+        p['theirs']=[{'index':1,'key':'receive','quantity':13}]
+        o['ours']=copy.deepcopy(p['ours'])
+        o['theirs']=copy.deepcopy(p['theirs'])
+        result=MOD.evaluate(p,o,c,now=NOW)
+        self.assertEqual(result['status'],'RESEARCH_CANDIDATE_ONLY',result)
+        self.assertEqual(result['projectedListedGain'],105)
+        must_never_authorize(result)
+        p['ours'][0]['quantity']=1_000_001
+        o['ours']=copy.deepcopy(p['ours'])
+        invalid=MOD.evaluate(p,o,c,now=NOW)
+        self.assertEqual(invalid['reason'],'OFFER_SLOTS_UNREADABLE_OR_EMPTY')
+        must_never_authorize(invalid)
     def test_catalog_freshness_source_identity(self):
         p,o,c=fixture();c['publisherUpdatedAtUnix']=None
         self.assertEqual(MOD.evaluate(p,o,c,now=NOW)['reason'],'PUBLISHER_TIMESTAMP_MISSING_OR_EXPIRED')
