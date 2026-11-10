@@ -92,6 +92,27 @@ class OfferSnapshotGuardTests(unittest.TestCase):
         invalid=MOD.evaluate(p,o,c,now=NOW)
         self.assertEqual(invalid['reason'],'OFFER_SLOTS_UNREADABLE_OR_EMPTY')
         must_never_authorize(invalid)
+    def test_protected_gingerscope_outgoing_is_rejected_even_for_large_listed_gain(self):
+        p,o,c=fixture()
+        c['items']['Gingerscope']={'value':16000,'demand':5,'stability':'Stable',
+                                  'identityLinkEvidence':'INDEPENDENT_EXACT'}
+        c['items']['receive']['value']=25000
+        p['ours']=[{'index':1,'key':'Gingerscope','quantity':1}]
+        o['ours']=copy.deepcopy(p['ours'])
+        result=MOD.evaluate(p,o,c,now=NOW)
+        self.assertEqual(result['status'],'REJECTED',result)
+        self.assertEqual(result['reason'],'PROTECTED_GINGERSCOPE_OUTGOING')
+        must_never_authorize(result)
+    def test_receiving_gingerscope_remains_a_valid_research_candidate(self):
+        p,o,c=fixture()
+        c['items']['Gingerscope']={'value':16000,'demand':5,'stability':'Stable',
+                                  'identityLinkEvidence':'INDEPENDENT_EXACT'}
+        p['theirs']=[{'index':1,'key':'Gingerscope','quantity':1}]
+        o['theirs']=copy.deepcopy(p['theirs'])
+        result=MOD.evaluate(p,o,c,now=NOW)
+        self.assertEqual(result['status'],'RESEARCH_CANDIDATE_ONLY',result)
+        self.assertEqual(result['projectedListedGain'],15900)
+        must_never_authorize(result)
     def test_catalog_freshness_source_identity(self):
         p,o,c=fixture();c['publisherUpdatedAtUnix']=None
         self.assertEqual(MOD.evaluate(p,o,c,now=NOW)['reason'],'PUBLISHER_TIMESTAMP_MISSING_OR_EXPIRED')
