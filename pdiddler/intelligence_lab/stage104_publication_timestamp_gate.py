@@ -67,6 +67,7 @@ def _rowcanon(rows:list)->list:
         value=r["supremeValue"]
         demand=r["demand"]
         stability=r["stability"]
+        source_label=r["supremeLabel"]
         if not isinstance(name,str) or not 1<=len(name)<=128 or re.search(
             r"[\x00-\x1f\x7f]",name):
             raise Reject("BAD_PUBLIC_WEAPON_NAME")
@@ -79,7 +80,16 @@ def _rowcanon(rows:list)->list:
         if type(demand) is not int or not 0<=demand<=11 or not isinstance(
             stability,str) or not stability or len(stability)>80:
             raise Reject("BAD_PUBLIC_DEMAND_OR_STABILITY")
-        out.append((folded,value,demand,stability))
+        # The published *text* for nonnumeric values is source metadata too.
+        # Ignoring it can make a changed "Priceless" row appear unchanged.
+        if value is None:
+            if (not isinstance(source_label,str) or
+                not 1<=len(source_label)<=128 or
+                re.search(r"[\x00-\x1f\x7f]",source_label)):
+                raise Reject("BAD_PUBLIC_NONNUMERIC_VALUE_LABEL")
+        elif source_label is not None:
+            raise Reject("UNEXPECTED_PUBLIC_NUMERIC_VALUE_LABEL")
+        out.append((folded,value,source_label,demand,stability))
     return sorted(out)
 
 def _hashrows(rows:dict)->str:
@@ -154,6 +164,13 @@ def audit_publication(
             raise Reject("MIXED_SOURCE_ORIGIN_NEEDS_REVIEW")
         if len(set(stamps.values()))!=1:
             raise Reject("MIXED_PUBLICATION_TIMESTAMPS")
+        # Identical counts do NOT imply identical weapons. A renamed or
+        # substituted item is a new identity-review event, not price drift.
+        for page in PATHS:
+            old_names={r[0] for r in prior[page]}
+            new_names={r[0] for r in parsed[page]}
+            if old_names!=new_names:
+                return _deny("PUBLISHED_WEAPON_NAME_ROSTER_CHANGED")
         current=next(iter(stamps.values()))
         changed=sum(
             a!=b for p in PATHS for a,b in zip(prior[p],parsed[p])
