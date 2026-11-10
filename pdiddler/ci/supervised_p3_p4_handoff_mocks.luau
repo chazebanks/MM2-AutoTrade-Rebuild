@@ -157,6 +157,12 @@ for _,case in ipairs({
     end,"PROTECTED_GINGERSCOPE_IN_OWN_OFFER"},
  {"invalid stack",function(x)x.add(x.ours,1,"Iceblaster",1000001)
     end,"INVALID_GUI_SLOT_OR_STACK"},
+ {"zero-stack shown",function(x)x.add(x.ours,1,"Iceblaster",0)
+    end,"VISIBLE_STACK_TEXT_INVALID"},
+ {"unparsable-stack shown",function(x)
+      local slot=x.add(x.ours,1,"Iceblaster",2)
+      slot.children.Container.children.Amount.Text="x??"
+    end,"VISIBLE_STACK_TEXT_INVALID"},
 }) do
  local x=fixture()
  local b,why=x.module.bind(x.scanner,x.p3,x.io,x.players,x.lp,x.ctx)
@@ -231,5 +237,18 @@ do
  eq(r.status,"CLIENT_UNPRICED_TWO_SIDED_SNAPSHOT","incoming protected candidate can be read")
  eq(r.theirs[1].quantity,2,"incoming quantity")
 end
+-- Original P4 I/O chooses first valid TradeGUI. If two trade GUI roots
+-- are simultaneously visible, the handoff must fail instead of assuming one.
+do
+ local x=fixture()
+ local other=x.pg:put(node("ScreenGui","TradeGUI_Phone"))
+ local outer=other:put(node("Frame","Container"))
+ outer:put(node("Frame","Trade"))
+ local b,e=x.module.bind(x.scanner,x.p3,x.io,x.players,x.lp,x.ctx)
+ eq(b,nil,"reject multiple visible trade roots")
+ eq(e.reason,"MULTIPLE_VISIBLE_TRADE_ROOTS","ambiguous trade root reported")
+ eq(#x.sends,0,"no remote with multiple roots")
+end
+
 print("[PASS] actual guarded TradeIO + live P3/P4 session bridge:",tests)
 print("[PASS] four PHYSICAL slots (stacks allowed), no remote, no Accept, stale session fails closed")
