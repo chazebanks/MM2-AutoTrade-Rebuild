@@ -60,6 +60,8 @@ def _result(status: str, reason: str, **counts: int | bool | None) -> dict[str, 
         "offerMutations": 0,
         "acceptanceInvalidations": 0,
         "clientAcceptObservations": 0,
+        "repeatClientAcceptObservations": 0,
+        "currentRevisionAcceptedSides": 0,
         "clientCallbackObservations": 0,
         "clientInventoryDeltaObservations": 0,
         "postCloseDeltaObservations": 0,
@@ -143,11 +145,13 @@ def replay_trace(source: object) -> dict[str, Any]:
         "uniqueEvents": 0, "duplicateEvents": 0, "staleEvents": 0,
         "crossSessionEvents": 0, "offerMutations": 0,
         "acceptanceInvalidations": 0, "clientAcceptObservations": 0,
+        "repeatClientAcceptObservations": 0,
         "clientCallbackObservations": 0, "clientInventoryDeltaObservations": 0,
         "postCloseDeltaObservations": 0, "ambiguousDeclineSignals": 0,
         "windowClosures": 0,
     }
     seen: dict[str, str] = {}
+    opened_sessions: set[str] = set()
     active: str | None = None
     last_closed: str | None = None
     revision = 0
@@ -165,6 +169,15 @@ def replay_trace(source: object) -> dict[str, Any]:
         counts["uniqueEvents"] += 1
         kind, session = event["kind"], event["session"]
         if kind == "OPEN":
+            # A new delivery ID cannot make a previously opened CLIENT
+            # session token into a new trade. Exact duplicate events have
+            # already been recognized by the ID+fingerprint gate above.
+            # Reuse would reset revision/acceptance and make old callback
+            # and post-close evidence appear associated with a fresh trade.
+            if session in opened_sessions:
+                return _result("QUARANTINED", "REUSED_CLIENT_SESSION_TOKEN",
+                               **counts)
+            opened_sessions.add(session)
             # An overlapping new OPEN supersedes the prior client session.
             if active is not None and active != session:
                 counts["crossSessionEvents"] += 1
@@ -203,8 +216,13 @@ def replay_trace(source: object) -> dict[str, Any]:
             if revision == 0 or event["revision"] != revision:
                 counts["staleEvents"] += 1
                 continue
-            accepted.add(event["side"])
-            counts["clientAcceptObservations"] += 1
+            # Different client delivery IDs do not prove distinct accepted
+            # sides at the same offer revision. Report repeats separately.
+            if event["side"] in accepted:
+                counts["repeatClientAcceptObservations"] += 1
+            else:
+                accepted.add(event["side"])
+                counts["clientAcceptObservations"] += 1
         elif kind == "CALLBACK":
             counts["clientCallbackObservations"] += 1
             if event["signal"] == "DECLINE_SIGNAL":
@@ -216,6 +234,7 @@ def replay_trace(source: object) -> dict[str, Any]:
         "CLIENT_REPLAY_ONLY", "ORDERED_CLIENT_OBSERVATIONS_NOT_SETTLEMENT",
         **counts, activeSession=(active is not None),
         currentRevision=(revision if active is not None else None),
+        currentRevisionAcceptedSides=(len(accepted) if active is not None else 0),
     )
 
 
