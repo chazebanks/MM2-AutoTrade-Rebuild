@@ -138,7 +138,8 @@ end)
 local function mockRun(mode)
  mode=mode or {}
  local tick=100
- local pg,board=gui(mode.card or "direct","test_partner")
+ local pg,board,popup=gui(mode.card or "direct","test_partner")
+ if mode.cardShowsLater and popup then popup.Visible=false end
  local players={Name="Players"}
  local lp={Name="test_main",UserId=1,Parent=players}
  local target={Name="test_partner",UserId=2,Parent=players}
@@ -192,6 +193,7 @@ local function mockRun(mode)
  _G.loadstring=load
  _G.task={wait=function(step)
   tick=tick+(step or 0.2)
+  if mode.cardShowsLater and popup and tick>102 then popup.Visible=true end
   if mode.changeJob and tick>100.6 then gameObj.JobId="changed_job" end
  end}
  local ok,result=pcall(dofile,WRAPPER)
@@ -204,6 +206,11 @@ group("actual wrapper direct card yields read-only structural evidence",function
  assert(r.report.layout=="DIRECT_POPUP_HEADER_MATCH")
  assert(r.report.targetInServer and r.report.samples>=1)
  assert(s.gets==1 and s.clipboard:find("[GINGERSCOPE STAGE90 CARD LAYOUT]",1,true))
+end)
+group("actual wrapper sees card opened AFTER the Delta overlay was dismissed",function()
+ local r,st=mockRun({cardShowsLater=true})
+ assert(r.report.status=="CARD_LAYOUT_OBSERVED" and r.report.layout=="DIRECT_POPUP_HEADER_MATCH")
+ assert(r.report.samples>=9 and r.report.actualRequestTaps==0)
 end)
 group("actual wrapper recognizes sibling header without any physical request",function()
  local r,s=mockRun({card="sibling"})
