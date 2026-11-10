@@ -1,3 +1,22 @@
+## New user requirement: IN-GAME ON-SCREEN ACTION PROMPTS (Nov 10, 2026)
+
+The user requested the current native test steps be displayed **directly on the iPad MM2 game screen**, not only in the Delta console, and requested that **future conversations implement this as the default for all manual multi-step tests**. Durable main rule: [pdiddler/IN_GAME_TEST_PROMPT_POLICY.md](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/blob/main/pdiddler/IN_GAME_TEST_PROMPT_POLICY.md).
+
+**Stage100 GUI implementation:** same existing PR170, no new trading or market code. In `STAGE100_READONLY_TWO_SIDED_EPOCH.lua`, create a compact dark-purple draggable `PDIDDLER_STAGE100_ONSCREEN_GUIDE` under MAIN `PlayerGui` once the consenting ALT is bound. Prompts `STEP 1/4: OPEN TRADE`, `STEP 2/4: ALT ADD`, `STEP 3/4: MAIN ADD`, `STEP 4/4: ALT REMOVE` appear on screen before corresponding console prompts; every step changes only after the previous observed offer transition has been validated. Warning `MANUAL ONLY | NEVER FINAL ACCEPT` remains visible. A terminal `COMPLETE - CLIENT GUI ONLY` or `STOPPED - INCONCLUSIVE` stays visible until operator chooses X to dismiss. Panel can be dragged by touch, sits at upper-right edge by default and is under ~300px wide. If guide construction/update fails, return INCONCLUSIVE without continuing; no console-only silent fallback. Sanitized report adds `onScreenGuideShown`, `onScreenGuideUpdates`, `onScreenGuideFinalShown`, `onScreenGuideCurrentStep` (no weapon, account or JobId).
+
+**Verified changed SOURCE SHA `666a2a17f6269c4cdfea3b711ae8fc551b904334`** (before handoff-only update), script Git blob `f1aed343b622d6bc828fc8ae47527d55eab5e705`. [Focused GitHub Actions 42764466599](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42764466599) **SUCCESS**: 15 actual Lua5.4 mocked Roblox Stage100 groups run via three Python tests, immutable real Stage9/Stage98 blobs checked; tests verify all FOUR screen steps, proper ALT/MAIN instructions, draggable property, final close button, STOPPED UI, and fail-closed when Instance GUI creation fails. Five inherited Luau/Lune/Selene+StyLua/replay/Hypothesis CI **SUCCESS at exact same code SHA (6/6 green)**. No ACTUAL iPad visual/position test of this overlay yet; do not call it native-verified.
+
+**Next device run MUST use the UPDATED pinned GUI-enabled Stage100 source** (not earlier no-overlay source):
+
+```lua
+getgenv().PDIDDLER_STAGE100_TARGET_USERNAME = "venossgaming90190"
+getgenv().PDIDDLER_STAGE100_READONLY_ARMED = true
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/666a2a17f6269c4cdfea3b711ae8fc551b904334/pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua"))()
+```
+
+Use fresh original MM2 MAIN iPad+ALT, no older scripts, manually open empty trade when STEP 1/4 shows, add ALT one item when STEP 2/4 shows, add MAIN one item without altering ALT when STEP 3/4 shows, remove ALT item without altering MAIN when STEP 4/4 shows, never final Accept. Share ONE sanitized `[GINGERSCOPE STAGE100 TWO SIDED EPOCH]` result and optionally a screenshot showing the on-screen panel (only if verifying layout requires it). Before any new phase, read on-screen current step. After a successful native result, continue weapon identity/value integration per current handoff, not more repetitive GUI tests.
+
+---
 ## Current verified Stage100 checkpoint (Nov 10, 2026 ET)
 
 **Stage100 [DRAFT PR170](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/170)** current head `7154226fc10a1667959c35a5a88d8d8a5b4047b8`; the actual Stage100 executable is byte-for-byte **identical** to commit `eeae57d1cdc1978a8c4f3f93083b5ce13fb4a9f4` (same original Git blob `78a2c265ed350a60dcbffe66892d8664ba2fd01a`). [Focused Actions #42763170877](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42763170877) **SUCCESS**, 3/3 Python tests executing 13 actual Lua5.4 native-wrapper mock groups, all 3 immutable actual original Stage9 native/contract and Stage98 Git blobs checked, static no-auto-offer/Accept policy PASS. The other five official Luau/Lune/Selene+StyLua/sanitized-replay/Hypothesis workflows **SUCCESS at exact current code SHA (6/6 green)**. **No actual Stage100 iPad native result yet**. Prior native Stage99 0→1→2→1 ALT-only GUI revision success must be retained; do not rerun it.
@@ -40,7 +59,7 @@ New **DRAFT Stage100 PR** stacked on Stage99 draft PR169, which is stacked on St
 ```lua
 getgenv().PDIDDLER_STAGE100_TARGET_USERNAME = "venossgaming90190"
 getgenv().PDIDDLER_STAGE100_READONLY_ARMED = true
-loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/eeae57d1cdc1978a8c4f3f93083b5ce13fb4a9f4/pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/666a2a17f6269c4cdfea3b711ae8fc551b904334/pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua"))()
 ```
 
 Run this FIRST in a fresh original MM2 server, no previous pdiddler scripts. Both accounts manually open a trade within 30s. ALT adds first; MAIN then adds one test item; ALT withdraws its own, strictly on the displayed prompts. Neither account presses final Accept. If inconclusive, do not retry the one-shot in the same JobId. Send ONE `[GINGERSCOPE STAGE100 TWO SIDED EPOCH]` sanitized JSON.
