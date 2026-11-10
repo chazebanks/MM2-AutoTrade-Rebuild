@@ -327,6 +327,7 @@ E.PDIDDLER_P3_SUPERVISED_REPORT=state
 local lastStatus=nil
 local turnBound=false
 local lost=0
+local controllerHandle=nil
 local function publish(r)
  if type(r)~="table" then return end
  state=report(r.status or "UNKNOWN",r.reason or "UNKNOWN",
@@ -343,6 +344,9 @@ local function shutdown(reason)
  running=false
  if outgoing and outgoing.stop then outgoing.stop() end
  if observer and observer.stop then observer.stop() end
+ if E.PDIDDLER_P3_SUPERVISED_CONTROLLER==controllerHandle then
+  E.PDIDDLER_P3_SUPERVISED_CONTROLLER=nil
+ end
  publish(report("STOPPED",reason))
  placeGuide("STOP - READ ONLY",
    "MAIN: no further requests. Outcome UNKNOWN. Do not press final Accept.")
@@ -358,10 +362,11 @@ local function shutdown(reason)
   print("[P3 SUPERVISED RESULT]",json)
  end
 end
-E.PDIDDLER_P3_SUPERVISED_CONTROLLER={
+controllerHandle={
  stop=function() shutdown("OPERATOR_STOP") end,
  report=function()return state end,
 }
+E.PDIDDLER_P3_SUPERVISED_CONTROLLER=controllerHandle
 task.spawn(function()
  for iteration=1,600 do
   if not running then break end
@@ -409,4 +414,4 @@ task.spawn(function()
  end
  if running then shutdown("PILOT_WATCH_WINDOW_ENDED") end
 end)
-return E.PDIDDLER_P3_SUPERVISED_CONTROLLER
+return controllerHandle
