@@ -67,7 +67,7 @@ local ioModule=loadFrozen(
     "a599c31c53d25e6799b9d631f45f282b445dcda0",
     "supervised/pdiddler4_tradeio_supervised_v2.lua")
 local bridgeModule=loadFrozen(
-    "616f905739ffb7bf70183475a79ec6c278dc9ddb",
+    "2f556afac5e5fd9cfdbf9e081eeea01a542d293",
     "supervised/supervised_p3_p4_handoff.lua")
 local planModule=loadFrozen(
     "27e061555321c6a87bdd835ce3d1ff557443a909",
