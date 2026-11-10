@@ -1,5 +1,7 @@
 -- Stage98: local offer-revision invalidation over unchanged Stage9 physical GUI
 -- observations. Research-only; a client revision is NOT a server trade nonce.
+-- Four distinct physical slots, not a four-copy ceiling: stacked quantity uses
+-- original Stage9 positive integer parser bound. Research only, no trade authority.
 -- No GUI access, game remotes, pricing, ownership, item placement, or Accept.
 local M={}
 local function response(status,reason,s)
@@ -65,7 +67,7 @@ local function side(raw,parseQuantity)
    return nil,"PHYSICAL_SLOT_SHAPE_OR_VARIANT_INVALID"
   end
   local qty=parseQuantity(v.amountText)
-  if not integer(qty,1,20) then
+  if not integer(qty,1,1000000) then
    return nil,"PHYSICAL_STACK_QUANTITY_UNVERIFIED"
   end
   local rawId=v.rawId
@@ -81,7 +83,6 @@ local function side(raw,parseQuantity)
   -- These private strings remain internal, never sent in a report/token.
   out[#out+1]={v.slot,canonical,v.chroma,qty,rawId or ""}
  end
- if copies>4 then return nil,"FOUR_COPY_CONSERVATIVE_LIMIT_EXCEEDED" end
  table.sort(out,function(a,b)return a[1]<b[1]end)
  return {rows=out,copies=copies,nameOnly=names}
 end
