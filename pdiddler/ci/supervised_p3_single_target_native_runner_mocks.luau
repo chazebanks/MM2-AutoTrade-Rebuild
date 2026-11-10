@@ -175,10 +175,13 @@ local function fake(options)
   noAutomaticAcceptAcknowledged=true,
   targetName=options.wrongTarget and "OtherAccount" or "TrustedAlt",
  }}
+ local created={}
  local UI={}
  function UI.new(kind)
   if options.uiCreationFails and kind=="ScreenGui" then error("no UI")end
-  return node(kind)
+  local item=node(kind)
+  created[#created+1]=item
+  return item
  end
  local Enum={ZIndexBehavior={Sibling="Sibling"},
   TextXAlignment={Left="Left"},Font={GothamBold="GothamBold"}}
@@ -211,6 +214,10 @@ local function fake(options)
   if options.shrinkOnAccept and ticks==2 then
    world.CurrentCamera.ViewportSize=vec(220,190)
   end
+  if options.obstructAfterAccept and ticks==2 then
+   trade.AbsolutePosition=vec(0,0)
+   trade.AbsoluteSize=vec(1024,768)
+  end
   if ticks==8 then
    local ctl=E.PDIDDLER_P3_SUPERVISED_CONTROLLER
    if ctl then ctl.stop() end
@@ -227,7 +234,8 @@ local function fake(options)
  end
  return {start=start,drain=drain,E=E,reads=reads,
   copied=clipboard,sends=function()return sends end,
-  pg=pg,screen=tradeScreen,world=world,tasks=tasks}
+  pg=pg,screen=tradeScreen,world=world,tasks=tasks,
+  created=created}
 end
 do
  local x=fake()
@@ -278,5 +286,30 @@ do
   "wrong later partner causes fail-closed shutdown")
  check(x.sends(),0,"never sends items to wrong partner")
 end
+
+-- If screen changes after an accepted request, the active card may no
+-- longer fit outside the trade controls. Hide it BEFORE stopping: never
+-- leave a stale overlay visible over MM2's Accept/Decline.
+for _,option in ipairs({
+ {shrinkOnAccept=true},
+ {obstructAfterAccept=true}
+}) do
+ local x=fake(option)
+ local ctl=x.start()
+ check(type(ctl),"table","initial safe viewport starts supervisor")
+ x.drain()
+ check(x.E.PDIDDLER_P3_SUPERVISED_REPORT.status,"STOPPED",
+  "runtime geometry failure stops queue")
+ check(x.E.TEST_P3_OUTGOING.stopped,true,
+  "original outgoing queue stopped on invalid screen")
+ check(x.sends(),0,"never physically offer during bad viewport")
+ local card=nil
+ for _,instance in ipairs(x.created) do
+  if instance.ClassName=="Frame" then card=instance;break end
+ end
+ check(type(card),"table","actual guidance card was constructed")
+ check(card.Visible,false,"unsafe stale guidance panel hidden immediately")
+end
+
 print("[PASS] actual one-target native P3/P4 supervisor wrapper",tests)
 print("[PASS] six immutable sources, no auto offer or final Accept, exact ALT, safe GUI")
