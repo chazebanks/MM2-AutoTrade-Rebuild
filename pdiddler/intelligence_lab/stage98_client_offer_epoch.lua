@@ -93,7 +93,7 @@ local function equalRows(a,b)
  return true
 end
 local function sameScope(v,c)
- return type(v)=="table" and type(v.raw)=="table" and
+ return type(v)=="table" and
    v.session==c.session and v.jobId==c.jobId and
    rawequal(v.root,c.root) and
    rawequal(v.localPlayer,c.localPlayer) and
@@ -124,7 +124,8 @@ function M.observe(s,v)
  if type(s)~="table" or s.dead then
   return response("INCONCLUSIVE","STATE_ALREADY_CLOSED",s)
  end
- if not sameScope(v,s.scope) or not finite(v.at) or v.at<0 or
+ if not sameScope(v,s.scope) or type(v.raw)~="table" or
+    not finite(v.at) or v.at<0 or
     (s.lastAt~=nil and v.at<=s.lastAt) then
   return halt(s,"CLIENT_SCOPE_OR_MONOTONIC_CLOCK_CHANGED")
  end
@@ -186,8 +187,9 @@ function M.noteClientCallback(s,e)
     "NO_SERVER_TRANSACTION_OR_REVISION_PROOF",s)
 end
 local MARKER={}
-function M.freezePreview(s)
+function M.freezePreview(s,now)
  if type(s)~="table" or s.dead or s.first or s.pending or
+    not finite(now) or now<s.lastAt or now-s.lastAt>2 or
     s.stable<2 or s.lastAt==nil or s.changedAt==nil or
     s.lastAt-s.changedAt<.15 or
     s.countO+s.countT==0 then
@@ -198,8 +200,10 @@ function M.freezePreview(s)
    "CLIENT_PREVIEW_TOKEN_CREATED_RESEARCH_ONLY",
    "LOCAL_REVISION_TOKEN_NEVER_AUTHORIZES_TRADE",s)
 end
-function M.checkPreview(s,token)
- if type(s)~="table" or s.dead or type(token)~="table"
+function M.checkPreview(s,token,now)
+ if type(s)~="table" or s.dead or type(token)~="table" or
+    not finite(now) or not finite(s.lastAt) or
+    now<s.lastAt or now-s.lastAt>2
     or token.marker~=MARKER or not rawequal(token.owner,s)
     or token.epoch~=s.epoch or s.pending or s.stable<2 then
   return response("CLIENT_PREVIEW_REVOKED",
