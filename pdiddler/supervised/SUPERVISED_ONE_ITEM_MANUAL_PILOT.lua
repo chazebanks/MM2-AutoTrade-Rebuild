@@ -101,8 +101,14 @@ local function exportResult(report,guide)
         if not guide or not guide.finished or guide.stopped
             or not guide.ui or not guide.ui.body then return end
         pcall(function()
-            guide.ui.body.Text="Status: "..tostring(report.status)
-                .." | "..copyStatus..". MAIN manually Decline."
+            guide.ui.body.TextSize=12
+            if report.clipboardCopied==true then
+                guide.ui.body.Text="OUTCOME UNKNOWN. RESULT COPIED. "
+                    .."Paste in ChatGPT. MAIN manually Decline."
+            else
+                guide.ui.body.Text="COPY FAILED: "..tostring(report.status)
+                    ..". Screenshot this result."
+            end
         end)
     end
     if type(report)~="table" then return false end
