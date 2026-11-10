@@ -5,6 +5,42 @@
 -- settlement, profit reporting, Discord or automatic contact requests.
 local M={}
 local spentBindings=setmetatable({},{__mode="k"})
+-- All public error codes are static and anonymous; reject raw GUI strings.
+local knownSnapshotReasons={
+    HANDOFF_RELEASED=true,JOB_OR_EPOCH_CHANGED=true,
+    PLAYER_GUI_CHANGED=true,PARTNER_LEFT_OR_REPLACED=true,
+    PART3_CONTACT_NOT_ELIGIBLE=true,PART3_SCANNER_RECORD_CHANGED=true,
+    PART3_NOT_PAUSED=true,MULTIPLE_VISIBLE_TRADE_ROOTS=true,
+    NO_VISIBLE_TRADE=true,TRADE_ROOT_CHANGED=true,
+    TRADE_PARTNER_WRONG_OR_AMBIGUOUS=true,ACCEPT_UNKNOWN=true,
+    ACCEPT_ALREADY_SET=true,OFFER_SIGNATURE_MISSING=true,
+    SIDE_CONTAINER_MISSING=true,UNREADABLE_SIDE=true,
+    MORE_THAN_FOUR_PHYSICAL_SLOTS=true,
+    PHYSICAL_GUI_SLOTS_NOT_RECONCILED=true,
+    INVALID_GUI_SLOT_OR_STACK=true,
+    VISIBLE_STACK_TEXT_INVALID=true,HIDDEN_STACK_TEXT_CONFLICT=true,
+    PROTECTED_GINGERSCOPE_IN_OWN_OFFER=true,
+    OFFER_CHANGED_DURING_CAPTURE=true,
+}
+local transientSnapshotReasons={
+    PHYSICAL_GUI_SLOTS_NOT_RECONCILED=true,
+    VISIBLE_STACK_TEXT_INVALID=true,
+    OFFER_CHANGED_DURING_CAPTURE=true,
+}
+local function safeSnapshotReason(snapshot)
+    if type(snapshot)=="table" and snapshot.status=="REJECTED"
+       and knownSnapshotReasons[snapshot.reason]==true then
+        return snapshot.reason
+    end
+    return "UNKNOWN_SNAPSHOT_REJECTION"
+end
+local function withSnapshotReason(output,detail)
+    if type(detail)=="string" then
+        output.snapshotRejectReason=knownSnapshotReasons[detail]
+            and detail or "UNKNOWN_SNAPSHOT_REJECTION"
+    end
+    return output
+end
 local function report(status,reason,attempts,confirmed)
  return {
   schema="pdiddler-supervised-physical-slot-plan-v1",
@@ -103,7 +139,8 @@ local function current(bound,own,their)
  local ok,snapshot=pcall(bound.capture)
  if not ok or type(snapshot)~="table" or
     snapshot.status~="CLIENT_UNPRICED_TWO_SIDED_SNAPSHOT" then
-  return nil,"P3_P4_LIVE_SNAPSHOT_REJECTED"
+  return nil,"P3_P4_LIVE_SNAPSHOT_REJECTED",
+     ok and safeSnapshotReason(snapshot) or "UNKNOWN_SNAPSHOT_REJECTION"
  end
  if snapshot.authorizesOffer~=false or snapshot.authorizesAccept~=false
   or snapshot.pricesAuthenticated~=false or
@@ -247,18 +284,36 @@ function M.run(bound,io,gate,approval,opts)
    return report("STOPPED","GUARDED_OFFER_REMOTE_DENIED_OR_UNCONFIRMED",
      attempts,confirmed)
   end
+  -- The outgoing remote was already fired ONCE. These polls are read
+  -- ONLY: neither the controller nor the on-screen guide can resend.
+  -- Rendering sometimes exposes a physical slot before its label/amount
+  -- has become readable. Treat only known transient observer codes as
+  -- candidates for bounded rechecks; NEVER retry acceptance, partner,
+  -- job, trade-root or protected item changes.
   local observed=false
+  local lastTransientReason=nil
   for _=1,5 do
    local waited=pcall(opts.wait,0.2)
    if not waited then
     return report("STOPPED","GUI_REPLICATION_WAIT_FAILED",attempts,confirmed)
    end
-   local fresh,reason=current(bound,nil,their)
-   if not fresh or io.trade()~=root then
-    return report("STOPPED",reason or "TRADE_ROOT_CHANGED",attempts,confirmed)
+   local fresh,reason,detail=current(bound,nil,their)
+   if io.trade()~=root then
+    return report("STOPPED","TRADE_ROOT_CHANGED",attempts,confirmed)
    end
-   if matches(fresh.ours,expectedOwn) then
-    -- Waiting on GUI replication; do not attempt a second send.
+   if not fresh then
+    if reason=="P3_P4_LIVE_SNAPSHOT_REJECTED" and
+       transientSnapshotReasons[detail]==true then
+      lastTransientReason=detail
+      -- One more bounded read may reconcile a partially rendered GUI.
+    else
+      return withSnapshotReason(report("STOPPED",
+          reason or "P3_P4_LIVE_SNAPSHOT_REJECTED",
+          attempts,confirmed),detail)
+    end
+   elseif matches(fresh.ours,expectedOwn) then
+    -- Waiting for the first valid slot; do not dispatch anything else.
+    lastTransientReason=nil
    elseif candidateAdded(expectedOwn,fresh.ours,approved) then
     expectedOwn=fresh.ours
     observed=true
@@ -266,11 +321,16 @@ function M.run(bound,io,gate,approval,opts)
     break
    else
     return report("STOPPED","UNEXPECTED_OWN_OFFER_MUTATION",
-      attempts,confirmed)
+       attempts,confirmed)
    end
   end
   if not observed then
-   return report("STOPPED","ITEM_GUI_CONFIRMATION_TIMEOUT",attempts,confirmed)
+    if lastTransientReason then
+      return withSnapshotReason(report("STOPPED",
+          "P3_P4_LIVE_SNAPSHOT_REJECTED",attempts,confirmed),
+          lastTransientReason)
+    end
+    return report("STOPPED","ITEM_GUI_CONFIRMATION_TIMEOUT",attempts,confirmed)
   end
  end
  local final,reason=current(bound,expectedOwn,their)

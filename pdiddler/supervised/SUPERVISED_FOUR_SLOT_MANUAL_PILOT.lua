@@ -70,7 +70,7 @@ local bridgeModule=loadFrozen(
     "616f905739ffb7bf70183475a79ec6c278dc9ddb",
     "supervised/supervised_p3_p4_handoff.lua")
 local planModule=loadFrozen(
-    "c599520caff852f481926124bc709f932721655b",
+    "27e061555321c6a87bdd835ce3d1ff557443a909",
     "supervised/supervised_four_slot_operator_plan.lua")
 if not ioModule or type(ioModule.new)~="function"
     or not bridgeModule or type(bridgeModule.bind)~="function"
@@ -111,12 +111,14 @@ local function exportResult(report,guide)
             or not guide.ui or not guide.ui.body then return end
         pcall(function()
             guide.ui.body.TextSize=12
+            local detail=type(report.snapshotRejectReason)=="string"
+                and report.snapshotRejectReason or "NO_DETAIL"
             if report.clipboardCopied==true then
-                guide.ui.body.Text="OUTCOME UNKNOWN. RESULT COPIED. "
-                    .."Paste in ChatGPT. MAIN manually Decline."
+                guide.ui.body.Text="COPIED. Cause: "..detail
+                    ..". Paste report. MAIN manually Decline."
             else
-                guide.ui.body.Text="COPY FAILED: "..tostring(report.status)
-                    ..". Screenshot this result."
+                guide.ui.body.Text="COPY FAILED. Cause: "..detail
+                    ..". Screenshot. MAIN manually Decline."
             end
         end)
     end
@@ -125,6 +127,11 @@ local function exportResult(report,guide)
         schema="gingerscope-supervised-four-slot-native-status-v1",
         status=tostring(report.status or "UNKNOWN"),
         reason=tostring(report.reason or "UNKNOWN"),
+        -- Static anonymous controller code only, never partner/item/JobId.
+        snapshotRejectReason=type(report.snapshotRejectReason)=="string"
+          and report.snapshotRejectReason:match("^[A-Z_]+$")
+          and #report.snapshotRejectReason<=72
+          and report.snapshotRejectReason or nil,
         offerAttempts=tonumber(report.offerAttempts),
         offerAttemptsKnown=report.offerAttemptsKnown~=false,
         clientVisibleAddedSlots=tonumber(report.clientVisibleAddedSlots),
@@ -355,8 +362,10 @@ local function makeGuide(pg)
         end
         ui.title.Text=report.status=="CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED"
             and "PASS - CLIENT SLOTS VISIBLE" or "STOP / CHECK RESULT"
+        ui.body.TextSize=12
         ui.body.Text="Status: "..tostring(report.status)
-            .." | Outcome UNKNOWN. Result auto-copies; MAIN manually Decline."
+            .." | Snapshot: "..tostring(report.snapshotRejectReason or "NO_DETAIL")
+            .." | Outcome UNKNOWN. MAIN manually Decline."
         ui.warning.Text="NEVER PRESS FINAL ACCEPT"
         ui.dismiss.Visible=true
         ui.dismiss.Active=true

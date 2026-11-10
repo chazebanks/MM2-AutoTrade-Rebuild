@@ -85,13 +85,20 @@ local function fakeEnv(options)
  end
  local remote=node("RemoteEvent","OfferItem")
  local calls={}
+ local afterOfferWaits=0
  function remote:FireServer(raw,category)
    table.insert(calls,{raw=raw,category=category})
    if options.noGuiReplication then return end
    local index=#calls
    local slot=ours.children.Container:put(node("Frame","NewItem"..index))
-   slot:put(node("Frame","ItemName")):put(node("TextLabel","Label")).Text=
-      (options.aliases and options.aliases[raw]) or raw
+   local textLabel=slot:put(node("Frame","ItemName")):put(node("TextLabel","Label"))
+   textLabel.Text=(options.aliases and options.aliases[raw]) or raw
+   if options.transientBlankFirstLabel or options.persistentBlankFirstLabel then
+      if index==1 then textLabel.Text="" end
+   end
+   if options.flipAcceptedAfterFirst and index==1 then
+      theirAccepted.Visible=true
+   end
    if options.chromaRaw and options.chromaRaw[raw] then
      slot:put(node("Frame","Tags")):put(node("Frame","Chroma"))
    end
@@ -129,7 +136,7 @@ local function fakeEnv(options)
      if url:find("616f905739ffb7bf70183475a79ec6c278dc9ddb",1,true)
         and url:find("supervised_p3_p4_handoff.lua",1,true)
      then return bridgeSource end
-     if url:find("c599520caff852f481926124bc709f932721655b",1,true)
+     if url:find("27e061555321c6a87bdd835ce3d1ff557443a909",1,true)
         and url:find("supervised_four_slot_operator_plan.lua",1,true)
      then return planSource end
      if url:find("5b8ee35d7f281c23d9c2181abd97a063e59a0660",1,true)
@@ -189,6 +196,17 @@ local function fakeEnv(options)
          world.CurrentCamera.ViewportSize=vec(240,250)
        end
        if options.hideDuringOffer and waitCount==1 then screen.Enabled=false end
+       if options.transientBlankFirstLabel and #calls==1 then
+          afterOfferWaits+=1
+          if afterOfferWaits==2 then
+             local slot=ours.children.Container:FindFirstChild("NewItem1")
+             local label=slot and slot.children.ItemName and
+                slot.children.ItemName.children.Label
+             if label then label.Text=
+                (options.aliases and options.aliases[calls[1].raw]) or
+                calls[1].raw end
+          end
+       end
        if options.obstructAfterFirst and #calls==1 then
          t.AbsolutePosition=vec(0,0)
          t.AbsoluteSize=vec(1024,768)
@@ -350,5 +368,37 @@ do
  check(ok,true,"nil target config handled without runtime crash")
  check(#invalid.calls,0,"nil target cannot offer")
 end
+
+-- Reproduce the native first-item receipt: one physical remote was sent,
+-- GUI slot exists but ItemName label is initially blank during replication.
+do
+ local pending=fakeEnv({transientBlankFirstLabel=true})
+ local observed=pending.run()
+ check(observed.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","temporary partial slot reconciled")
+ check(observed.clientVisibleAddedSlots,2,"both slots confirmed after stable client frame")
+ check(observed.offerAttempts,2,"no extra remote on temporary frame")
+ check(#pending.calls,2,"one send per planned raw weapon")
+ check(observed.clipboardCopied,true,"client result automatically copied")
+end
+do
+ local pending=fakeEnv({persistentBlankFirstLabel=true})
+ local observed=pending.run()
+ check(observed.status,"STOPPED","persistent missing label stopped")
+ check(observed.reason,"P3_P4_LIVE_SNAPSHOT_REJECTED","prior user status retained")
+ check(observed.snapshotRejectReason,"PHYSICAL_GUI_SLOTS_NOT_RECONCILED","precise runtime cause")
+ check(observed.clientVisibleAddedSlots,0,"no fabricated verified slots")
+ check(observed.offerAttempts,1,"one physical attempt")
+ check(#pending.calls,1,"no retry or second send on persistent missing label")
+ check(pending.copied[1]:find("PHYSICAL_GUI_SLOTS_NOT_RECONCILED",1,true)~=nil,true,
+  "clipboard explicitly reports exact safe cause")
+end
+do
+ local accepted=fakeEnv({flipAcceptedAfterFirst=true})
+ local observed=accepted.run()
+ check(observed.status,"STOPPED","live accept state stops after first item")
+ check(observed.snapshotRejectReason,"ACCEPT_ALREADY_SET","accept flag never hidden")
+ check(#accepted.calls,1,"never dispatch second after acceptance")
+end
+
 print("[PASS] actual supervised 4-slot iPad runner original MM2 mocks:",tests)
 print("[PASS] 1..4 selected OfferItem, mandatory on-screen UI, clipboard; no final Accept")
