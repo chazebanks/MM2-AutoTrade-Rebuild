@@ -306,6 +306,17 @@ do
  x.stopButton().Activated:Fire()
  eq(x.E.__P3.stopped,true,"STOP button revokes outgoing queue")
  eq(#x.copied,1,"STOP exports anonymous result")
+ local receipt=serde.decode("json",x.copied[1])
+ eq(receipt.p3ArmObservedClient,true,"STOP retains operator ARM milestone")
+ eq(receipt.clientTradeWindowObserved,true,"STOP retains exact P4 window milestone")
+ eq(receipt.clientResumeObserved,true,"STOP retains safe original P3 queue resume")
+ eq(receipt.lastObservedStatus,"P3_RESUMED_AFTER_CLIENT_TRADE_CLOSED",
+    "STOP preserves last meaningful observed state")
+ eq(receipt.serverCompletionProven,false,"no completed server settlement")
+ eq(receipt.authorizesAccept,false,"no automatic final Accept")
+ eq(receipt.mayReportProfit,false,"no fabricated value/profit")
+ eq(x.copied[1]:find("TrustedAlt",1,true),nil,
+    "anonymized STOP receipt contains no partner name")
  eq(x.E.PDIDDLER_SUPERVISED_P3_NATIVE_OWNER,nil,"owner released")
  eq(#x.offers,0,"never issued OfferItem")
  eq(x.run(),nil,"cannot run again in same JobId")
@@ -331,5 +342,21 @@ for _,opts in ipairs({
    "unsafe viewport/trade cannot arm original P3")
  eq(#x.offers,0,"zero item offers in unsafe viewport")
 end
+
+do
+ local x=fakeEnv()
+ x.run()
+ -- If STOP is tapped without arming, report must not claim requests,
+ -- a trade window, or a resumed session.
+ x.stopButton().Activated:Fire()
+ eq(#x.copied,1,"pre-arm STOP still copies safe receipt")
+ local r=serde.decode("json",x.copied[1])
+ eq(r.p3ArmObservedClient,false,"no fake ARM")
+ eq(r.clientTradeWindowObserved,false,"no fake trade window")
+ eq(r.clientResumeObserved,false,"no fake resume")
+ eq(r.tradeOutcome,"UNKNOWN","client only even with no activity")
+ eq(x.E.__P3.armCalls,0,"no outgoing when stopped before user arming")
+end
+
 print("[PASS] original MM2 native P3 explicit ARM GUI + real P4 coordinator:",tests)
 print("[PASS] eight pinned loads, no request before tap, close/resume, STOP clipboard, never final Accept")
