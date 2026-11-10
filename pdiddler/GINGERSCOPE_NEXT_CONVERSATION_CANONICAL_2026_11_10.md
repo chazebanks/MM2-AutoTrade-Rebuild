@@ -1,5 +1,17 @@
 # GINGERSCOPE / PDIDDLER — CANONICAL NEXT-CONVERSATION HANDOFF
 
+## NOV10 REAL MAIN iPAD/DELTA SUPERVISED ONE-ITEM OFFER PASS — TEST CLOSED
+
+**Verified user-returned real-device sanitized JSON after PR198 auto-clipboard fix:**
+
+```json
+{"onScreenGuidePlacementFailures":0,"authorizesAccept":false,"clientOfferVisible":true,"maySendDiscordWebhook":false,"reason":"NO_ITEM_OWNERSHIP_OR_SETTLEMENT_ATTESTATION","tradeOutcome":"UNKNOWN","mayReportProfit":false,"offerCount":1,"serverCompletionProven":false,"status":"CLIENT_OFFER_VISIBLE_UNATTRIBUTED","onScreenGuideFinalShown":true,"schema":"gingerscope-supervised-one-item-pilot-status-v1","onScreenGuideShown":true}
+```
+
+**CLOSED, do NOT rerun this one-item placement proof.** The real iPad/Delta client displayed **one explicitly armed outgoing offer** via current PR198 guarded OfferItem pilot; reported its own offered item visible, in-game step panel and terminal panel shown, 0 guide placement failures; sanitized JSON successfully copied and pasted. This is stronger than earlier offline simulated placement and establishes client-visible offer placement in this one session only. It does NOT independently prove exact server-side ownership of a unique weapon instance, authoritative transaction/session mapping, offer mutation causal provenance, server completion, profit or Discord learner eligibility. `tradeOutcome=UNKNOWN`, `authorizesAccept=false`, `mayReportProfit=false` remain enforced. The user had previously lost the PR197 test receipt after leaving; the newer PR198 observation supersedes the missing-report milestone. **Avoid requesting another one-item test, Stage106, Stage100, Stage103, or Stage116 idle diagnostic.**
+
+**NEXT actual functional development:** controlled, fail-closed Part3 contact/rotation handoff into Part4 **supervised multi-slot / counterparty-offer revision-aware negotiation and inventory compounding**. Review actual existing PR105/PR181 four PHYSICAL slots vs stacked copies, PR106 portfolio planner, PR156 Stage86 planner/guard dry-run, PR157 contact-only eligibility, PR163 Stage93 exact trade/observer handoff and original Part3 scanner/Part4 controller. Do not merge archived drafts blindly. Never use Oct31 legacy values/Nov2 demand, old forced +15/highest-item opener, or unverified game keys to authorize automatic offers. Gingerscope permanently protected outgoing; NO auto final Accept; no asserted settlement or Discord profit. Work one practical integration issue at a time and test Lua/Python CI before another genuinely needed device action.
+
 ## NOV10 CURRENT — PR198 AUTOMATIC CLIPBOARD RESULT FIX MERGED; PRIOR iPAD PILOT REPORT LOST
 
 **PR198 [MERGED](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/198)** to main at **df76fb147ad68db31f8a8b11655d144048bf2e3b** (reviewed exact branch SHA `af30ac44aa76fb65daf5adca0136772d4057da41`). **6/6 exact-head GitHub workflows SUCCESS**; dedicated [Actions 42875241414](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42875241414) ran 193 pure-policy checks + **107 actual native-wrapper mock assertions**, including successful sanitized JSON clipboard, missing clipboard, permission failure and JSON failure. The old PR197 launcher DID NOT COPY results despite UI telling the user to copy; user ran the real iPad pilot and left the server, so the actual device receipt/offer result is **NOT AVAILABLE / INCONCLUSIVE**. Do NOT invent a result. Do NOT ask user to run an impossible same-server recovery.
