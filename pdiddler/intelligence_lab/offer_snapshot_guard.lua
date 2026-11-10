@@ -114,6 +114,13 @@ function M.evaluate(proposal,observation,catalog,now,minimumGain,minimumReceived
  if not equalSlots(ours,currentOurs) or not equalSlots(theirs,currentTheirs) then
   return reject("OFFER_SLOTS_CHANGED")
  end
+ -- Stage83 exact raw game key, not an unverified display-name guess:
+ -- OUR Gingerscope is protected regardless of any hypothetical listed gain.
+ for _,row in ipairs(ours) do
+  if row[2]=="Gingerscope" then
+   return reject("PROTECTED_GINGERSCOPE_OUTGOING")
+  end
+ end
  if type(catalog.items)~="table" then return reject("MARKET_ITEMS_MISSING") end
  local totalOurs,totalTheirs=0,0
  for _,record in ipairs({{name="ours",rows=ours},{name="theirs",rows=theirs}}) do
