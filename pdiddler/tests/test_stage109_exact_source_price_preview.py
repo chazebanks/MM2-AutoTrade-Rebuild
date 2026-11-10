@@ -163,9 +163,9 @@ class Stage109StrictPublicValueBridge(unittest.TestCase):
         r=self.evaluate(html=t);self.assertEqual(r["status"],"INCONCLUSIVE")
         self.check_denied(r)
     def test_five_distinct_physical_slots_quantity_zero_and_duplicate_types_rejected(self):
-        c=self.catalogue("Scythe","Emberbow","Harvester","Icepiercer","Gingerscope")
+        c=self.catalogue("Scythe","Emberbow","Harvester","Icepiercer","Icewing","Gingerscope")
         for offer in (
-            [self.offer(x) for x in ("Scythe","Emberbow","Harvester","Icepiercer","Gingerscope")],
+            [self.offer(x) for x in ("Scythe","Emberbow","Harvester","Icepiercer","Icewing")],
             [self.offer("Scythe",0)],
             [self.offer("Scythe",1000001)],
             [self.offer("Scythe",3),self.offer("Scythe",2)],
