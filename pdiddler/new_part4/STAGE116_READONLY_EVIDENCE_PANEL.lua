@@ -244,14 +244,11 @@ if not reposition() then
     return nil
 end
 ui.dismiss.Activated:Connect(stop)
-local last=os.clock()
+-- Check the live trade's actual bounds on EVERY rendered frame. A delayed
+-- 250ms poll can cover Accept/Decline after a mobile layout or trade opens.
 link=runService.RenderStepped:Connect(function()
     if not state.running then return end
-    local now=os.clock()
-    if now-last>=0.25 then
-        last=now
-        reposition() -- Hide immediately if trade GUI moves into every safe area.
-    end
+    reposition()
 end)
 E[KEY]=state
 -- Fixed, privacy-preserving text only; never raw source inventory, user IDs
