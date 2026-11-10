@@ -81,13 +81,27 @@ for _,side in ipairs({"ours","theirs"}) do
  observedFour[side]=deepcopy(four[side])
 end
 assert(guard.evaluate(four,observedFour,marketFour,NOW).projectedListedGain==20)
-for _,side in ipairs({"ours","theirs"}) do
- expected("OFFER_COPY_LIMIT_EXCEEDED",function(p,o)
-  p[side][1].quantity=3
-  p[side][2]={index=2,key="stack",quantity=2}
-  o[side]=deepcopy(p[side])
- end)
-end
+local many,seenMany,marketMany=fixture()
+many.ours={{index=1,key="own",quantity=5}}
+many.theirs={{index=1,key="receive",quantity=6}}
+seenMany.ours=deepcopy(many.ours)
+seenMany.theirs=deepcopy(many.theirs)
+local good=guard.evaluate(many,seenMany,marketMany,NOW)
+assert(good.status=="RESEARCH_CANDIDATE_ONLY" and good.projectedListedGain==130)
+assert(good.valueOffered==500 and good.valueRequested==630)
+assert(good.authorizesTrade==false and good.authorizesAccept==false)
+local twentyOne,readTwentyOne,marketTwentyOne=fixture()
+twentyOne.ours={{index=1,key="stack",quantity=21}}
+twentyOne.theirs={{index=1,key="receive",quantity=13}}
+readTwentyOne.ours=deepcopy(twentyOne.ours)
+readTwentyOne.theirs=deepcopy(twentyOne.theirs)
+local stackResult=guard.evaluate(twentyOne,readTwentyOne,marketTwentyOne,NOW)
+assert(stackResult.status=="RESEARCH_CANDIDATE_ONLY" and stackResult.projectedListedGain==105)
+assert(stackResult.authorizesTrade==false and stackResult.authorizesAccept==false)
+expected("OFFER_SLOTS_UNREADABLE_OR_EMPTY",function(p,o)
+ p.ours[1].quantity=1000001
+ o.ours=deepcopy(p.ours)
+end)
 math.randomseed(6033)
 for i=1,1600 do
  local a,b,m=fixture()
