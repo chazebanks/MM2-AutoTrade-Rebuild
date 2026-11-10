@@ -129,6 +129,23 @@ local function safeJson()
     end
 end
 
+-- A root or partner header is valid only if its ENTIRE chain of GUI
+-- ancestors is actually visible and reaches the current PlayerGui.
+-- Stage9 capture already checks full visibility; verify it before binding.
+local function visibleInPlayerGui(node)
+    local current = node
+    while current and current ~= PlayerGui do
+        if current:IsA("ScreenGui") and current.Enabled ~= true then
+            return false
+        end
+        if current:IsA("GuiObject") and current.Visible ~= true then
+            return false
+        end
+        current = current.Parent
+    end
+    return current == PlayerGui
+end
+
 local function currentTradeRoots()
     local roots = {}
     if not PlayerGui then
@@ -138,7 +155,7 @@ local function currentTradeRoots()
         local gui = PlayerGui:FindFirstChild(guiName)
         local container = gui and gui:FindFirstChild("Container")
         local root = container and container:FindFirstChild("Trade")
-        if root and gui.Enabled ~= false and root.Visible ~= false then
+        if root and visibleInPlayerGui(root) then
             roots[#roots + 1] = root
         end
     end
@@ -159,6 +176,7 @@ local function exactRoot()
     if
         not header
         or not (header:IsA("TextLabel") or header:IsA("TextButton"))
+        or not visibleInPlayerGui(header)
         or type(header.Text) ~= "string"
     then
         return nil, "TRADE_PARTNER_HEADER_UNAVAILABLE"
