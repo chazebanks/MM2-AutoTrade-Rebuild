@@ -37,7 +37,7 @@ class NativeStage100(unittest.TestCase):
             timeout=40,env=os.environ.copy())
         self.assertEqual(r.returncode,0,r.stdout+"\n"+r.stderr)
         passed=[x for x in r.stdout.splitlines() if x.startswith("PASS Stage100 ")]
-        self.assertGreaterEqual(len(passed),15,r.stdout)
+        self.assertGreaterEqual(len(passed),19,r.stdout)
         finals=[x for x in r.stdout.splitlines()
             if x.startswith("STAGE100_NATIVE_TWO_SIDED_MOCK_PASS")]
         self.assertEqual(len(finals),1,r.stdout)
@@ -69,7 +69,10 @@ class NativeStage100(unittest.TestCase):
             'GuideInstruction',
             'onScreenGuideShown=true',
             'ONSCREEN_PROMPT_UPDATE_FAILED',
-            'IN_GAME_PROMPT_PANEL_UNAVAILABLE'
+            'IN_GAME_PROMPT_PANEL_UNAVAILABLE',
+            'source("promptLayout")','placeGuide(',
+            'frame.Draggable=false','screen.IgnoreGuiInset=true',
+            'onScreenGuideNonOverlappingTrade=false'
         ):
             self.assertIn(marker,s,marker)
         for forbidden in (
