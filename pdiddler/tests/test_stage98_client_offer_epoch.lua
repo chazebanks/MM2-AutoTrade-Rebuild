@@ -145,14 +145,32 @@ test("sequential extra slot and four-slot maximum supported, fifth refused",func
  eq(r.reason,"SIDE_OR_ACCEPT_STATE_UNVERIFIED")
  denied(r)
 end)
-test("four-copy conservative limit blocks five copies even in four slots",function()
+test("one physical slot with x5 stacked copies is a valid GUI revision",function()
  local s,c,t=ready()
- local rows={slot(1,"Batwing","x2"),slot(2,"Harvester","x2"),
-             slot(3,"Immortal","")}
+ local rows={slot(1,"Batwing","x5")}
  local r=M.observe(s,snapshot(c,10.8,{},rows))
- eq(r.status,"INCONCLUSIVE")
- eq(r.reason,"FOUR_COPY_CONSERVATIVE_LIMIT_EXCEEDED")
+ eq(r.status,"CLIENT_LOCAL_OFFER_REVISION_CHANGED",r.reason)
+ eq(r.theirSlotCount,1)
+ eq(r.theirCopyCount,5)
  denied(r)
+ eq(M.checkPreview(s,t,10.81).status,"CLIENT_PREVIEW_REVOKED")
+end)
+test("two physical slots with x3 and x4 stacked copies remain valid",function()
+ local s,c,t=ready()
+ local rows={slot(1,"Batwing","x3"),slot(2,"Harvester","x4")}
+ local r=M.observe(s,snapshot(c,10.8,{},rows))
+ eq(r.status,"CLIENT_LOCAL_OFFER_REVISION_CHANGED",r.reason)
+ eq(r.theirSlotCount,2);eq(r.theirCopyCount,7)
+ denied(r)
+ eq(M.checkPreview(s,t,10.81).status,"CLIENT_PREVIEW_REVOKED")
+end)
+test("original Stage9 parser accepts x21 but rejects x1000001",function()
+ local s,c,t=ready()
+ local accepted=M.observe(s,snapshot(c,10.8,{}, {slot(1,"Batwing","x21")}))
+ eq(accepted.status,"CLIENT_LOCAL_OFFER_REVISION_CHANGED",accepted.reason)
+ eq(accepted.theirCopyCount,21);denied(accepted)
+ local rejected=M.observe(s,snapshot(c,10.9,{}, {slot(1,"Batwing","x1000001")}))
+ eq(rejected.status,"INCONCLUSIVE");denied(rejected)
 end)
 test("one client UpdateTrade callback revokes old token without claiming causality",function()
  local s,c,t=ready()
@@ -266,7 +284,7 @@ test("sparse duplicate slot, invalid chroma, invalid key and nil amount rejected
   function(v)v[1].amountText="x0" end,
   function(v)v[1].label=" " end,
   function(v)v[1].label=42 end,
-  function(v)v[1].amountText="x999" end,
+  function(v)v[1].amountText="x1000001" end,
  }
  for i,fn in ipairs(mutate) do
   local s,c,t=ready()
