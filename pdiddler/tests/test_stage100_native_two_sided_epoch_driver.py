@@ -37,7 +37,7 @@ class NativeStage100(unittest.TestCase):
             timeout=40,env=os.environ.copy())
         self.assertEqual(r.returncode,0,r.stdout+"\n"+r.stderr)
         passed=[x for x in r.stdout.splitlines() if x.startswith("PASS Stage100 ")]
-        self.assertGreaterEqual(len(passed),13,r.stdout)
+        self.assertGreaterEqual(len(passed),15,r.stdout)
         finals=[x for x in r.stdout.splitlines()
             if x.startswith("STAGE100_NATIVE_TWO_SIDED_MOCK_PASS")]
         self.assertEqual(len(finals),1,r.stdout)
@@ -61,7 +61,15 @@ class NativeStage100(unittest.TestCase):
             "actualRequestTaps=0,actualOffers=0,actualAccepts=0",
             "maySendDiscordWebhook=false","currentPricesVerified=false",
             "authorizesTrade=false","authorizesAccept=false",
-            "[GINGERSCOPE STAGE100 TWO SIDED EPOCH]"
+            "[GINGERSCOPE STAGE100 TWO SIDED EPOCH]",
+            'Instance.new("ScreenGui")',
+            'Instance.new("Frame")',
+            'Instance.new("TextLabel")',
+            'GuideStep',
+            'GuideInstruction',
+            'onScreenGuideShown=true',
+            'ONSCREEN_PROMPT_UPDATE_FAILED',
+            'IN_GAME_PROMPT_PANEL_UNAVAILABLE'
         ):
             self.assertIn(marker,s,marker)
         for forbidden in (
