@@ -51,6 +51,11 @@ local function fixture()
  function players:FindFirstChild(k)
   if k==p.Name and p.Parent==players then return p end
  end
+ function players:GetPlayers()
+  local list={lp,p}
+  if self.extra then list[#list+1]=self.extra end
+  return list
+ end
  function lp:FindFirstChildOfClass(kind)
   if kind=="PlayerGui" then return pg end
  end
@@ -293,6 +298,83 @@ for _,label in ipairs({"x0","x-1","x?","two","x1.5"," "}) do
  local r=b.capture()
  eq(r.status,"REJECTED","malformed visible count rejected")
  eq(r.reason,"VISIBLE_STACK_TEXT_INVALID","bad count reason stable")
+end
+
+
+-- Exact username should remain the ONLY authorized partner evidence.
+for _,label in ipairs({"TrustedAlt","(TrustedAlt)","@TrustedAlt","trustedALT"}) do
+ local x=fixture()
+ x.name.Text=label
+ local b,reason=x.module.bind(x.scanner,x.p3,x.io,x.players,x.lp,x.ctx)
+ eq(type(b),"table","exact username syntax accepted")
+ eq(reason,nil,"no false header rejection")
+ eq(b.capture().status,"CLIENT_UNPRICED_TWO_SIDED_SNAPSHOT",
+   "username still client bound")
+end
+-- A display name is NOT a unique identity witness. It must remain blocked
+-- even if only one player currently has it; preserve the safe explanation.
+do
+ local x=fixture()
+ x.name.Text="Alt"
+ local b,reason=x.module.bind(x.scanner,x.p3,x.io,x.players,x.lp,x.ctx)
+ eq(b,nil,"display-only header cannot arm")
+ eq(reason.reason,"TRADE_PARTNER_WRONG_OR_AMBIGUOUS","generic guard retained")
+ eq(reason.partnerCheckReason,"PARTNER_LABEL_DISPLAY_ONLY","specific display-only cause")
+ eq(#x.sends,0,"zero outgoing remote with display-only name")
+end
+-- If someone else's display name impersonates the target's *username*,
+-- even a perfectly matching header is ambiguous and must be rejected.
+do
+ local x=fixture()
+ x.players.extra={Name="OtherUser",DisplayName="TrustedAlt",
+   UserId=99,Parent=x.players}
+ local b,reason=x.module.bind(x.scanner,x.p3,x.io,x.players,x.lp,x.ctx)
+ eq(b,nil,"alias collision never authorizes")
+ eq(reason.partnerCheckReason,"PARTNER_LABEL_AMBIGUOUS","collision classified")
+ eq(#x.sends,0,"zero remote for identity collision")
+end
+-- A different player's exact username is not the chosen ALT.
+do
+ local x=fixture()
+ x.players.extra={Name="OtherUser",DisplayName="Else",
+   UserId=99,Parent=x.players}
+ x.name.Text="OtherUser"
+ local b,reason=x.module.bind(x.scanner,x.p3,x.io,x.players,x.lp,x.ctx)
+ eq(b,nil,"different username rejected")
+ eq(reason.partnerCheckReason,"PARTNER_LABEL_OTHER_PLAYER","known other account")
+end
+for _,label in ipairs({"UnknownAccount","TrustedAlt Extra",""}) do
+ local x=fixture()
+ x.name.Text=label
+ local b,reason=x.module.bind(x.scanner,x.p3,x.io,x.players,x.lp,x.ctx)
+ eq(b,nil,"unrecognized header blocked")
+ eq(reason.partnerCheckReason,
+     label=="" and "PARTNER_HEADER_UNAVAILABLE" or "PARTNER_LABEL_UNRECOGNIZED",
+     "empty vs unknown header disambiguated")
+end
+do
+ local x=fixture()
+ x.name.Visible=false
+ local b,reason=x.module.bind(x.scanner,x.p3,x.io,x.players,x.lp,x.ctx)
+ eq(b,nil,"hidden header blocked")
+ eq(reason.partnerCheckReason,"PARTNER_HEADER_UNAVAILABLE","hidden means unavailable")
+end
+do
+ local x=fixture()
+ x.players.GetPlayers=nil
+ local b,reason=x.module.bind(x.scanner,x.p3,x.io,x.players,x.lp,x.ctx)
+ eq(b,nil,"missing player census blocked")
+ eq(reason.partnerCheckReason,"PARTNER_CENSUS_UNAVAILABLE","missing census reason")
+end
+-- If a partner label changes after safe bind, revoke, do not allow a
+-- formerly validated snapshot to authorize the next item.
+do
+ local x=fixture()
+ local b=x.module.bind(x.scanner,x.p3,x.io,x.players,x.lp,x.ctx)
+ x.name.Text="Alt"
+ local r=b.capture()
+ eq(r.status,"REJECTED","revoked after header changes")
+ eq(r.partnerCheckReason,"PARTNER_LABEL_DISPLAY_ONLY","dynamic display-only")
 end
 
 print("[PASS] actual guarded TradeIO + live P3/P4 session bridge:",tests)
