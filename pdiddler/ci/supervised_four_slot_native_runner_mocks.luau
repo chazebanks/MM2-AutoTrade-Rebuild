@@ -135,7 +135,7 @@ local function fakeEnv(options)
      if url:find("a599c31c53d25e6799b9d631f45f282b445dcda0",1,true)
         and url:find("pdiddler4_tradeio_supervised_v2.lua",1,true)
      then return tradeIOSource end
-     if url:find("616f905739ffb7bf70183475a79ec6c278dc9ddb",1,true)
+     if url:find("2f556afac5e5fd9cfdbf9e081eeea01a542d293",1,true)
         and url:find("supervised_p3_p4_handoff.lua",1,true)
      then return bridgeSource end
      if url:find("27e061555321c6a87bdd835ce3d1ff557443a909",1,true)
