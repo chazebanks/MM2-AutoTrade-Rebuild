@@ -1,7 +1,7 @@
 -- Stage91: execute the ACTUAL one-request native wrapper under fake Roblox.
 -- The original 63KB scanner is mocked, actual Stage87 P3/controller loaded.
 -- No real MM2 remote or online game access.
-local SOURCE="pdiddler/new_part4/STAGE91_ONE_TARGET_ONE_REQUEST_DIAGNOSTIC.lua"
+local SOURCE="pdiddler/new_part4/STAGE91_ONE_EMBEDDED_CARD_REQUEST.lua"
 local P3=os.getenv("STAGE91_PINNED_P3") or "/tmp/stage91/p3.lua"
 local CONTROLLER=os.getenv("STAGE91_PINNED_CONTROLLER") or "/tmp/stage91/controller.lua"
 local VIEW=os.getenv("STAGE91_PINNED_VIEW") or "/tmp/stage91/view.lua"
