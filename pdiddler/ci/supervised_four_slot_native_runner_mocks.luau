@@ -1,0 +1,286 @@
+-- Execute the EXACT supervised iPad loader with fake Roblox GUI, RenderStepped,
+-- ORIGINAL protected TradeIO and real pure policy/Stage100 geometry modules.
+-- Tests both physical offer safety and mandatory MAIN/ALT on-screen guidance.
+local fs=require("@lune/fs")
+local luau=require("@lune/luau")
+local serde=require("@lune/serde")
+local runnerSource=fs.readFile("pdiddler/supervised/SUPERVISED_FOUR_SLOT_MANUAL_PILOT.lua")
+local tradeIOSource=fs.readFile("pdiddler/supervised/pdiddler4_tradeio_supervised_v2.lua")
+local bridgeSource=fs.readFile("pdiddler/supervised/supervised_p3_p4_handoff.lua")
+local planSource=fs.readFile("pdiddler/supervised/supervised_four_slot_operator_plan.lua")
+local overlaySource=fs.readFile("pdiddler/new_part4/stage100_screen_prompt_overlay.lua")
+local tests=0
+local function check(value,expected,label)
+ tests+=1
+ assert(value==expected,tostring(label)..": "..tostring(value).." ~= "..tostring(expected))
+end
+local function event()
+ local handlers={}
+ local ev={}
+ function ev:Connect(fn)
+  local h={fn=fn,connected=true}
+  table.insert(handlers,h)
+  return {Disconnect=function()
+    h.connected=false
+  end}
+ end
+ function ev:Fire()
+  for _,h in ipairs(handlers) do if h.connected then h.fn() end end
+ end
+ return ev
+end
+local function vec(x,y)return {X=x,Y=y}end
+local function node(class,name)
+ local o={ClassName=class,Name=name or class,Visible=true,Enabled=true,
+          Active=false,children={},AbsolutePosition=vec(0,0),
+          AbsoluteSize=vec(0,0),Activated=event()}
+ function o:IsA(kind)
+   return kind==self.ClassName or (kind=="GuiObject" and
+       (class=="Frame" or class=="TextLabel" or class=="TextButton"))
+ end
+ function o:FindFirstChild(k)return self.children[k] end
+ function o:GetDescendants()return {} end
+ function o:GetAttribute(k)return nil end
+ function o:GetFullName()return self.Name end
+ function o:put(n)
+    n.Parent=self
+    self.children[n.Name]=n
+    return n
+ end
+ function o:Destroy()self.Parent=nil;self.Visible=false end
+ return o
+end
+local function fakeEnv(options)
+ options=options or {}
+ local pg=node("PlayerGui","PlayerGui")
+ local screen=pg:put(node("ScreenGui","TradeGUI"))
+ local layout=screen:put(node("Frame","Container"))
+ local t=layout:put(node("Frame","Trade"))
+ t.AbsolutePosition=vec(options.x or 370,options.y or 150)
+ t.AbsoluteSize=vec(options.w or 440,options.h or 410)
+ if options.startClosed then screen.Enabled=false end
+ local ours=t:put(node("Frame","YourOffer"))
+ ours:put(node("Frame","Container"))
+ local accepted=ours:put(node("Frame","Accepted"))
+ accepted.Visible=false
+ local theirs=t:put(node("Frame","TheirOffer"))
+ theirs:put(node("Frame","Container"))
+ local theirAccepted=theirs:put(node("Frame","Accepted"))
+ theirAccepted.Visible=false
+ local username=theirs:put(node("TextLabel","Username"))
+ username.Text="TrustedAlt"
+ local players={}
+ local lp={Name="MainAccount",UserId=1,Parent=players}
+ players.LocalPlayer=lp
+ local partner={Name="TrustedAlt",DisplayName="TrustedAlt",UserId=2,Parent=players}
+ function players:FindFirstChild(name)
+   if name=="TrustedAlt" then return partner end
+ end
+ function players:GetPlayers()return {lp,partner} end
+ function lp:FindFirstChildOfClass(kind)
+   if kind=="PlayerGui" then return pg end
+ end
+ local remote=node("RemoteEvent","OfferItem")
+ local calls={}
+ function remote:FireServer(raw,category)
+   table.insert(calls,{raw=raw,category=category})
+   if options.noGuiReplication then return end
+   local index=#calls
+   local slot=ours.children.Container:put(node("Frame","NewItem"..index))
+   slot:put(node("Frame","ItemName")):put(node("TextLabel","Label")).Text=raw
+   slot:put(node("Frame","Container")):put(node("TextLabel","Amount")).Text="x1"
+   if options.mutatePartnerAfterFirst and index==1 then
+     local pslot=theirs.children.Container:put(node("Frame","NewItem1"))
+     pslot:put(node("Frame","ItemName")):put(node("TextLabel","Label")).Text="Emberbow"
+     pslot:put(node("Frame","Container")):put(node("TextLabel","Amount")).Text="x1"
+   end
+ end
+ local tradeFolder=node("Folder","Trade")
+ tradeFolder:put(remote)
+ local RS=node("ReplicatedStorage","ReplicatedStorage")
+ RS:put(tradeFolder)
+ local runService={RenderStepped=event()}
+ local world={CurrentCamera={ViewportSize=vec(options.vw or 1024,options.vh or 768)}}
+ if options.noCamera then world.CurrentCamera=nil end
+ local service={Players=players,ReplicatedStorage=RS,
+       VirtualInputManager={},GuiService={},Workspace=world,
+       RunService=runService,
+       HttpService={JSONEncode=function(_,value)
+          if options.jsonFailure then error("mock JSON unavailable") end
+          return serde.encode("json",value)
+       end}}
+ if options.noRender then service.RunService=nil end
+ local sourceReads={}
+ local game={
+   PlaceId=142823291,JobId="MOCK_JOB_123",
+   GetService=function(_,name)return service[name] end,
+   HttpGet=function(_,url)
+     table.insert(sourceReads,url)
+     if url:find("a599c31c53d25e6799b9d631f45f282b445dcda0",1,true)
+        and url:find("pdiddler4_tradeio_supervised_v2.lua",1,true)
+     then return tradeIOSource end
+     if url:find("616f905739ffb7bf70183475a79ec6c278dc9ddb",1,true)
+        and url:find("supervised_p3_p4_handoff.lua",1,true)
+     then return bridgeSource end
+     if url:find("e0dc690e6bf322e3a43c685547a817d1eda0761f",1,true)
+        and url:find("supervised_four_slot_operator_plan.lua",1,true)
+     then return planSource end
+     if url:find("5b8ee35d7f281c23d9c2181abd97a063e59a0660",1,true)
+        and url:find("stage100_screen_prompt_overlay.lua",1,true)
+     then return overlaySource end
+     error("not immutable audited source: "..url)
+   end
+ }
+ local E={PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT={
+   armed=true,manualOfferOnly=true,
+   noAutomaticAcceptAcknowledged=true,targetName="TrustedAlt",
+   weaponKeys={"Iceblaster","Batwing"}
+ }}
+ local created={}
+ local createIndex=0
+ local instance={}
+ function instance.new(class)
+    createIndex+=1
+    if options.failUI and class=="ScreenGui" then error("cannot create UI") end
+    local n=node(class)
+    table.insert(created,n)
+    return n
+ end
+ local enums={
+   ZIndexBehavior={Sibling="Sibling"},
+   TextXAlignment={Left="Left"},
+   Font={GothamBold="GothamBold"}
+ }
+ local copied={}
+ local stepTexts={}
+ local waitCount=0
+ local env={
+    game=game,getgenv=function()return E end,
+    Instance=instance,Enum=enums,
+    setclipboard=function(txt)
+        if options.clipboardFailure then error("clipboard permission denied") end
+        table.insert(copied,txt)
+    end,
+    UDim={new=function(...)return {...}end},
+    UDim2={fromOffset=function(...)return {...}end},
+    Color3={fromRGB=function(...)return {...}end},
+    warn=function()end,
+    print=function(...)
+       local first=tostring(select(1,...))
+       if first:find("MAIN",1,true) then table.insert(stepTexts,first) end
+    end,
+    task={wait=function()
+       waitCount+=1
+       if options.startClosed and options.openAfter==waitCount then
+         screen.Enabled=true
+       end
+       if options.moveDuringOffer and waitCount==1 then
+         t.AbsolutePosition=vec(0,0)
+         t.AbsoluteSize=vec(1024,768)
+       end
+       if options.shrinkDuringOffer and waitCount==1 then
+         world.CurrentCamera.ViewportSize=vec(240,250)
+       end
+       if options.hideDuringOffer and waitCount==1 then screen.Enabled=false end
+       runService.RenderStepped:Fire()
+    end}
+ }
+ if options.clipboardUnavailable then env.setclipboard=nil end
+ if options.toclipboardOnly then
+    env.toclipboard=env.setclipboard
+    env.setclipboard=nil
+ end
+ env.loadstring=function(source)
+   return luau.load(source,{environment=env,injectGlobals=true})
+ end
+ local function execute()
+   return luau.load(runnerSource,{environment=env,injectGlobals=true})()
+ end
+ return {run=execute,E=E,t=t,screen=screen,partner=partner,
+         username=username,calls=calls,reads=sourceReads,created=created,
+         accepted=accepted,theirAccepted=theirAccepted,world=world,
+         stepTexts=stepTexts,runService=runService,pg=pg,
+         copied=copied}
+end
+local x=fakeEnv()
+local r=x.run()
+check(type(r),"table","actual runner returns")
+check(r.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","two-slot client GUI pass")
+check(r.offerAttempts,2,"two guarded sends attempted")
+check(r.clientVisibleAddedSlots,2,"two GUI slots confirmed")
+check(r.onScreenGuideShown,true,"on-screen guide shown")
+check(r.onScreenGuideFinalShown,true,"terminal guide shown")
+check(r.onScreenGuidePlacementFailures,0,"no guide collision")
+check(r.clipboardCopied,true,"clipboard auto-export")
+check(r.tradeOutcome,"UNKNOWN","no settlement")
+check(r.authorizesAccept,false,"no automatic Accept")
+check(r.mayReportProfit,false,"no profit")
+check(#x.calls,2,"two physical OfferItem sends")
+check(x.calls[1].raw,"Iceblaster","first approved key")
+check(x.calls[2].raw,"Batwing","second approved key")
+check(x.calls[1].category,"Weapons","category Weapons")
+check(#x.reads,4,"four SHA-pinned modules")
+check(x.E.PDIDDLER_SUPERVISED_FOUR_SLOT_SPENT_JOB,"MOCK_JOB_123","job one-shot")
+check(x.E.PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT._consumed,true,"approval spent")
+check(x.run(),nil,"same job no rerun")
+check(#x.calls,2,"no duplicate item")
+local four=fakeEnv()
+four.E.PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT.weaponKeys={
+ "Iceblaster","Batwing","Laser","Luger"
+}
+local r4=four.run()
+check(r4.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","four-slot visible")
+check(r4.clientVisibleAddedSlots,4,"four physical GUI slots")
+check(#four.calls,4,"exact four remote sends")
+local noGui=fakeEnv({noGuiReplication=true})
+local miss=noGui.run()
+check(miss.status,"STOPPED","no GUI proof stops")
+check(miss.offerAttempts,1,"one uncertain send only")
+check(#noGui.calls,1,"never retry unconfirmed send")
+local changed=fakeEnv({mutatePartnerAfterFirst=true})
+local c=changed.run()
+check(c.status,"STOPPED","opponent mutation stops")
+check(#changed.calls,1,"no further offers after opponent change")
+local delayed=fakeEnv({startClosed=true,openAfter=3})
+local d=delayed.run()
+check(d.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","manual open step before trade")
+check(#delayed.calls,2,"two sends after opening")
+local absent=fakeEnv({startClosed=true})
+local n=absent.run()
+check(n.status,"BLOCKED","timeout blocked")
+check(n.reason,"MANUAL_TRADE_OPEN_TIMED_OUT","bounded manual timeout")
+check(#absent.calls,0,"no remote without trade")
+local bad={
+ function(t)t.E.PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT.armed=false end,
+ function(t)t.E.PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT.noAutomaticAcceptAcknowledged=false end,
+ function(t)t.E.PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT.weaponKeys={"Gingerscope"} end,
+ function(t)t.E.PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT.weaponKeys={"Iceblaster","Iceblaster"} end,
+ function(t)t.E.PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT.weaponKeys={"Iceblaster","Batwing","Laser","Luger","Shark"} end,
+ function(t)t.E.PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT.targetName="WrongUser" end,
+ function(t)t.username.Text="WrongUser" end,
+ function(t)t.accepted.Visible=true end,
+ function(t)t.theirAccepted.Visible=true end,
+ function(t)t.E.PDIDDLER_OUTGOING_SESSION=1 end,
+}
+for i,change in ipairs(bad) do
+ local b=fakeEnv()
+ change(b)
+ local result=b.run()
+ if result then
+  check(result.authorizesAccept,false,"never Accept invalid "..i)
+  check(result.tradeOutcome,"UNKNOWN","unknown outcome invalid "..i)
+ end
+ check(#b.calls,0,"no unapproved item "..i)
+end
+for _,options in ipairs({
+ {noCamera=true},{noRender=true},{failUI=true},
+ {vw=240,vh=250},{x=0,y=0,w=1024,h=768}
+}) do
+ local v=fakeEnv(options)
+ local result=v.run()
+ check(type(result),"table","unsafe guide report")
+ check(result.status,"BLOCKED","unsafe guide blocks")
+ check(#v.calls,0,"no remote when UI unsafe")
+end
+print("[PASS] actual supervised 4-slot iPad runner original MM2 mocks:",tests)
+print("[PASS] 1..4 selected OfferItem, mandatory on-screen UI, clipboard; no final Accept")
