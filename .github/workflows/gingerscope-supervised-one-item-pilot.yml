@@ -88,6 +88,14 @@ jobs:
               assert forbidden not in bridge
           plan=Path('pdiddler/supervised/supervised_four_slot_operator_plan.lua').read_text()
           guided=Path('pdiddler/supervised/SUPERVISED_FOUR_SLOT_MANUAL_PILOT.lua').read_text()
+          assert '4f186f3ad1db538512a735e1a18e220f23e8715a' in guided
+          assert 'e0dc690e6bf322e3a43c685547a817d1eda0761f' not in guided
+          assert 'expectedDisplayNames' in plan
+          assert 'expectedChromaFlags' in plan
+          assert 'protected(display)' in plan
+          assert 'candidate.name~=approved.display' in plan
+          assert '98828a6e8505edfd49658e4f8b5b33b88d482d96' == __import__('subprocess').check_output(
+              ['git','hash-object','pdiddler/supervised/supervised_four_slot_operator_plan.lua'],text=True).strip()
           assert 'bridgeModule.bind(' in guided
           assert 'planModule.run' in guided
           assert 'guide:safeForOffer(root)' in guided
@@ -100,7 +108,7 @@ jobs:
               assert forbidden not in guided
           assert 'spentBindings' in plan
           assert 'approval.noAutomaticAcceptAcknowledged~=true' in plan
-          assert 'candidateAdded(expectedOwn,fresh.ours,key)' in plan
+          assert 'candidateAdded(expectedOwn,fresh.ours,approved)' in plan
           assert 'gate.checkOutbound=nil' in plan
           assert 'PROTECTED_GINGERSCOPE_IN_OWN_OFFER' in bridge
           for forbidden in ('AcceptTrade:FireServer(', 'OfferItem:FireServer(', 'DeclineTrade:FireServer(', 'SendRequest:FireServer(', 'PostAsync(', 'TeleportService'):
