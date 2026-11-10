@@ -1,0 +1,89 @@
+name: Gingerscope Stage93 real Part4 client-only offer observer bridge
+on:
+  push:
+    branches:
+      - integration/gingerscope-stage93-p4-offer-observer-bridge
+    paths:
+      - 'pdiddler/new_part4/STAGE93_P4_OFFER_OBSERVER_BRIDGE.lua'
+      - 'pdiddler/tests/test_stage93_p4_bridge_mock.lua'
+      - 'pdiddler/intelligence_lab/STAGE93_P4_BRIDGE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage93-p4-bridge.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE93_P4_OFFER_OBSERVER_BRIDGE.lua'
+      - 'pdiddler/tests/test_stage93_p4_bridge_mock.lua'
+      - 'pdiddler/intelligence_lab/STAGE93_P4_BRIDGE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage93-p4-bridge.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-p3-permit-and-exact-target-ui-mocks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install real Lua 5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Download four IMMUTABLE original source files and verify Git blobs
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/stage93
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/7a289d62ef3f0be0a299506eb451c57435493be3/pdiddler/presentation/pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION.lua' -o /tmp/stage93/scanner.lua
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/a00be9c54825b9b91fcfa394dc11d300fcce3575/pdiddler/presentation/pdiddler3_scanner_view_contact_v1.lua' -o /tmp/stage93/view.lua
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/f1a0492ab5959f31be3544bf04ee8a514e09255f/pdiddler/new_part4/P3_ELIGIBILITY_NO_LEGACY_PROFIT.lua' -o /tmp/stage93/p3.lua
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/f1a0492ab5959f31be3544bf04ee8a514e09255f/pdiddler/pdiddler3_outgoing_eligibility_v2_SCANNER_EVIDENCE.lua' -o /tmp/stage93/controller.lua
+          test "$(git hash-object /tmp/stage93/scanner.lua)" = 582ee3638faf920da30bcc5716c61c455f953da4
+          test "$(git hash-object /tmp/stage93/view.lua)" = 955433501103e8fcd844795e4814d826cdd3bd30
+          test "$(git hash-object /tmp/stage93/p3.lua)" = a4ed1e09636032ba3797cf55ba0177f9b1a3c252
+          test "$(git hash-object /tmp/stage93/controller.lua)" = 2c833de74c5d2779183400e6f15b703e14b41899
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua' -o /tmp/stage93/p4contract.lua
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_native_observer.lua' -o /tmp/stage93/p4native.lua
+          test "$(git hash-object /tmp/stage93/p4contract.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          test "$(git hash-object /tmp/stage93/p4native.lua)" = a6338e946467ad738005bc5cb13cd2d2fbc2a2d0
+      - name: Lua syntax and real Stage87 permit with one-shot native GUI mock
+        env:
+          STAGE93_PINNED_P3: /tmp/stage93/p3.lua
+          STAGE93_PINNED_CONTROLLER: /tmp/stage93/controller.lua
+          STAGE93_PINNED_P4CONTRACT: /tmp/stage93/p4contract.lua
+          STAGE93_PINNED_P4NATIVE: /tmp/stage93/p4native.lua
+        run: |
+          set -euo pipefail
+          luac5.4 -p pdiddler/new_part4/STAGE93_P4_OFFER_OBSERVER_BRIDGE.lua
+          luac5.4 -p pdiddler/tests/test_stage93_p4_bridge_mock.lua
+          lua5.4 pdiddler/tests/test_stage93_p4_bridge_mock.lua
+      - name: Forbid outgoing ROTATOR, offer, auto-decline, Accept, hopper and webhook imports
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('pdiddler/new_part4/STAGE93_P4_OFFER_OBSERVER_BRIDGE.lua').read_text()
+          for required in (
+              'PDIDDLER_STAGE93_TARGET_USERNAME', 'PDIDDLER_STAGE93_ONE_REQUEST_ARMED',
+              'controller:prepare(target,token)', 'trimName(username.Text):lower()~=target.Name:lower()',
+              'ALTERNATIVE_EMBEDDED_CARD', 'stillLayout~=cardLayout',
+              'CLIENT_P4_GUI_OFFER_MUTATION_OBSERVED',
+              'p4native.capture', 'ourGuiOfferStayedUnchanged',
+              'R.requestTapCount=1', 'return finish("UNCERTAIN","NO_CONFIRMED_REQUEST_UI_NO_RETRY")',
+              'actualOffers=0', 'actualAccepts=0', 'actualDeclines=0',
+              'authorizesTrade=false', 'authorizesAccept=false',
+          ):
+              assert required in p, required
+          for forbidden in (
+              'pdiddler3_outgoing_ROTATING', 'P4_REPRICE_ONLY',
+              'PDIDDLER_PART4_REPLACEMENT', 'TradeRequest:FireServer',
+              'TradeRequest:InvokeServer', ':FireServer(', ':InvokeServer(',
+              'AcceptTrade','DeclineRequest','TeleportService', 'HttpPost',
+              'PostAsync', 'getconnections', 'FireTouchInterest',
+              'game:HttpPost(', 'sethiddenproperty',
+          ):
+              assert forbidden not in p, forbidden
+          assert p.count('VIM:SendMouseButtonEvent(')==2, 'Only one possible mouse down/up'
+          assert p.count('R.requestTapCount=1')==1
+          print('STAGE93_POLICY_OK one request attempt, no retry, no player automation')
+          PY
