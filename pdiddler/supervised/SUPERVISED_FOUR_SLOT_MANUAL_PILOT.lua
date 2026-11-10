@@ -12,7 +12,10 @@ if game.PlaceId~=142823291 then
 end
 local cfg=E[KEY]
 if type(cfg)~="table" or cfg.armed~=true or cfg.manualOfferOnly~=true
-    or cfg.noAutomaticAcceptAcknowledged~=true then
+    or cfg.noAutomaticAcceptAcknowledged~=true
+    or type(cfg.targetName)~="string" or
+       #cfg.targetName<3 or #cfg.targetName>32 or
+       not cfg.targetName:match("^[A-Za-z0-9_]+$") then
     warn("[SUPERVISED PILOT] Set targetName, weaponKeys[1..4], armed, manualOfferOnly, noAutomaticAcceptAcknowledged")
     return nil
 end
@@ -122,8 +125,10 @@ local function exportResult(report,guide)
         schema="gingerscope-supervised-four-slot-native-status-v1",
         status=tostring(report.status or "UNKNOWN"),
         reason=tostring(report.reason or "UNKNOWN"),
-        offerAttempts=tonumber(report.offerAttempts) or 0,
-        clientVisibleAddedSlots=tonumber(report.clientVisibleAddedSlots) or 0,
+        offerAttempts=tonumber(report.offerAttempts),
+        offerAttemptsKnown=report.offerAttemptsKnown~=false,
+        clientVisibleAddedSlots=tonumber(report.clientVisibleAddedSlots),
+        clientVisibleAddedSlotsKnown=report.clientVisibleAddedSlotsKnown~=false,
         contactOrigin="MANUAL_CONSENT_CLIENT_ONLY",
         onScreenGuideShown=report.onScreenGuideShown==true,
         onScreenGuideFinalShown=report.onScreenGuideFinalShown==true,
@@ -488,7 +493,14 @@ local ok,result=pcall(planModule.run,
     end})
 gate.checkOutbound=nil
 if not ok or type(result)~="table" then
+    -- A runtime exception could occur AFTER an OfferItem was dispatched.
+    -- Never print a fabricated zero-attempt count or permit a retry.
     result=blocked("SUPERVISED_MULTISLOT_CONTROLLER_ERROR")
+    result.status="INCONCLUSIVE"
+    result.offerAttempts=nil
+    result.offerAttemptsKnown=false
+    result.clientVisibleAddedSlots=nil
+    result.clientVisibleAddedSlotsKnown=false
 end
 if cfg._consumed==true then
     E.PDIDDLER_SUPERVISED_FOUR_SLOT_SPENT_JOB=game.JobId
