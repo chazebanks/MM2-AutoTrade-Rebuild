@@ -300,6 +300,9 @@ local function run()
    local report,err=observe()
    if not report then return nil,err end
    if report.status=="CLIENT_LOCAL_OFFER_REVISION_CHANGED" then
+    if seenChange then
+     return nil,"MORE_THAN_ONE_VISUAL_REVISION_IN_PHASE"
+    end
     if report.theirSlotCount~=expectedCount or
        report.theirCopyCount~=expectedCount then
      return nil,"UNEXPECTED_SLOT_COUNT_OR_STACK_TRANSITION"
@@ -367,7 +370,7 @@ local function run()
  end
  R.observedOneRemoval=true
  if R.revocationsVerified~=2 or
-    R.localOfferEpoch<4 or R.theirMaxSlotCount~=2 then
+    R.localOfferEpoch~=4 or R.theirMaxSlotCount~=2 then
   return finish("INCONCLUSIVE","REVISIONS_OR_REVOCATIONS_NOT_COMPLETELY_OBSERVED")
  end
  return finish("CLIENT_MULTI_SLOT_ADD_REMOVE_EPOCH_OBSERVED",
