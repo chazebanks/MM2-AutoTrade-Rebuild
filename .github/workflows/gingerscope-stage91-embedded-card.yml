@@ -4,15 +4,15 @@ on:
     branches:
       - integration/gingerscope-stage91-single-consented-request
     paths:
-      - 'pdiddler/new_part4/STAGE91_ONE_TARGET_ONE_REQUEST_DIAGNOSTIC.lua'
-      - 'pdiddler/tests/test_stage91_single_request_mock.lua'
-      - 'pdiddler/intelligence_lab/STAGE91_ONE_REQUEST_HANDOFF.md'
+      - 'pdiddler/new_part4/STAGE91_ONE_EMBEDDED_CARD_REQUEST.lua'
+      - 'pdiddler/tests/test_stage91_embedded_card_request_mock.lua'
+      - 'pdiddler/intelligence_lab/STAGE91_EMBEDDED_CARD_HANDOFF.md'
       - '.github/workflows/gingerscope-stage91-one-request.yml'
   pull_request:
     paths:
-      - 'pdiddler/new_part4/STAGE91_ONE_TARGET_ONE_REQUEST_DIAGNOSTIC.lua'
-      - 'pdiddler/tests/test_stage91_single_request_mock.lua'
-      - 'pdiddler/intelligence_lab/STAGE91_ONE_REQUEST_HANDOFF.md'
+      - 'pdiddler/new_part4/STAGE91_ONE_EMBEDDED_CARD_REQUEST.lua'
+      - 'pdiddler/tests/test_stage91_embedded_card_request_mock.lua'
+      - 'pdiddler/intelligence_lab/STAGE91_EMBEDDED_CARD_HANDOFF.md'
       - '.github/workflows/gingerscope-stage91-one-request.yml'
   workflow_dispatch:
 permissions:
@@ -48,15 +48,15 @@ jobs:
           STAGE91_PINNED_CONTROLLER: /tmp/stage91/controller.lua
         run: |
           set -euo pipefail
-          luac5.4 -p pdiddler/new_part4/STAGE91_ONE_TARGET_ONE_REQUEST_DIAGNOSTIC.lua
-          luac5.4 -p pdiddler/tests/test_stage91_single_request_mock.lua
-          lua5.4 pdiddler/tests/test_stage91_single_request_mock.lua
+          luac5.4 -p pdiddler/new_part4/STAGE91_ONE_EMBEDDED_CARD_REQUEST.lua
+          luac5.4 -p pdiddler/tests/test_stage91_embedded_card_request_mock.lua
+          lua5.4 pdiddler/tests/test_stage91_embedded_card_request_mock.lua
       - name: Forbid outgoing ROTATOR, offer, auto-decline, Accept, hopper and webhook imports
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('pdiddler/new_part4/STAGE91_ONE_TARGET_ONE_REQUEST_DIAGNOSTIC.lua').read_text()
+          p=Path('pdiddler/new_part4/STAGE91_ONE_EMBEDDED_CARD_REQUEST.lua').read_text()
           for required in (
               'PDIDDLER_STAGE91_TARGET_USERNAME', 'PDIDDLER_STAGE91_ONE_REQUEST_ARMED',
               'controller:prepare(target,token)', 'trimName(username.Text):lower()~=target.Name:lower()',
