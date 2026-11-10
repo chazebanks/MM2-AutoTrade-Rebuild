@@ -9,6 +9,8 @@ on:
       - 'pdiddler/ci/supervised_one_item_native_runner_mocks.luau'
       - 'pdiddler/supervised/supervised_p3_p4_handoff.lua'
       - 'pdiddler/ci/supervised_p3_p4_handoff_mocks.luau'
+      - 'pdiddler/supervised/supervised_four_slot_operator_plan.lua'
+      - 'pdiddler/ci/supervised_four_slot_operator_plan_mocks.luau'
       - '.github/workflows/gingerscope-supervised-one-item-pilot.yml'
   push:
     branches:
@@ -45,6 +47,10 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_p4_handoff_mocks.luau
+      - name: Exercise approved multi-item four physical-slot plan against real guarded IO
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_four_slot_operator_plan_mocks.luau
       - name: Verify no auto trading, final Accept, market quote or Discord source
         run: |
           set -euo pipefail
@@ -74,6 +80,14 @@ jobs:
           assert 'PROTECTED_GINGERSCOPE_IN_OWN_OFFER' in bridge
           for forbidden in ('OfferItem:FireServer(', 'AcceptTrade:FireServer(', 'DeclineTrade:FireServer(', 'PostAsync('):
               assert forbidden not in bridge
+          plan=Path('pdiddler/supervised/supervised_four_slot_operator_plan.lua').read_text()
+          assert 'spentBindings' in plan
+          assert 'approval.noAutomaticAcceptAcknowledged~=true' in plan
+          assert 'candidateAdded(expectedOwn,fresh.ours,key)' in plan
+          assert 'gate.checkOutbound=nil' in plan
+          assert 'PROTECTED_GINGERSCOPE_IN_OWN_OFFER' in bridge
+          for forbidden in ('AcceptTrade:FireServer(', 'OfferItem:FireServer(', 'DeclineTrade:FireServer(', 'SendRequest:FireServer(', 'PostAsync(', 'TeleportService'):
+              assert forbidden not in plan
           assert runner.count('game:HttpGet(')==1
           assert 'THEIR_ACCEPT_STATE_UNKNOWN' in controller
           assert controller.count('their:FindFirstChild("Accepted")')==1
