@@ -49,7 +49,7 @@ def _time(s):
     _require(type(s) is str and re.fullmatch(
       r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z",s),"TIMESTAMP_MALFORMED")
     return int(datetime.fromisoformat(s.replace("Z","+00:00")).timestamp())
-def join_public_sources(old,updated,*,at_epoch):
+def join_public_sources(old,updated,new_site_slugs,*,at_epoch):
     """Full 189-link historical join; no current ownership or trade authority."""
     try:
         _require(type(at_epoch) is int and 0<at_epoch<9999999999,
@@ -109,6 +109,27 @@ def join_public_sources(old,updated,*,at_epoch):
                  updated.get("coverage",{}).get("finite")==189 and
                  updated.get("coverage",{}).get("unpriced")==1,
                  "NEW_SOURCE_ROW_COUNT_INVALID")
+        # Independently reparse the newer site's *actual detail-link slugs*
+        # using the original reviewed Stage77 structural parser. Matching
+        # only name/page to a fresh value would leave old URLs unproven.
+        _require(type(new_site_slugs) is dict and
+                 set(new_site_slugs)==set(CATEGORY),
+                 "NEW_SITE_SLUG_SOURCE_MISSING")
+        for p in CATEGORY:
+            bucket=new_site_slugs[p]
+            _require(type(bucket) is dict and len(bucket)==EXPECTED[p],
+                     "NEW_SITE_DETAIL_SLUG_COVERAGE_CHANGED")
+            seen_names=set()
+            for slug,detail in bucket.items():
+                _require(type(slug) is str and
+                         re.fullmatch(r"[A-Za-z0-9_'-]+",slug) is not None and
+                         type(detail) in (tuple,list) and len(detail)==2 and
+                         type(detail[0]) is str and
+                         detail[1] in ("Ancient","Godly"),
+                         "NEW_SITE_DETAIL_SLUG_INVALID")
+                _require(detail[0].casefold() not in seen_names,
+                         "NEW_SITE_DUPLICATE_DETAIL_NAME")
+                seen_names.add(detail[0].casefold())
         rowmap={}
         counts=Counter()
         for row in rows:
@@ -164,6 +185,11 @@ def join_public_sources(old,updated,*,at_epoch):
                      (p,slug) not in seen,
                      "SOURCES_NOT_ONE_TO_ONE")
             used.add((p,name.casefold()));seen.add((p,slug))
+            linked=new_site_slugs[p].get(slug)
+            _require(type(linked) in (tuple,list) and len(linked)==2 and
+                     linked[0].casefold()==name.casefold() and
+                     linked[1]==cat["gameRarity"],
+                     "OLD_PUBLIC_SLUG_NOT_RECORROBORATED_ON_NEW_SITE")
             src=rowmap[(p,name.casefold())]
             _require(src["supremeValue"] is not None,
                      "PRICELESS_WITH_PUBLIC_SLUG_INVALID")
@@ -190,6 +216,7 @@ def join_public_sources(old,updated,*,at_epoch):
             "reason":"PUBLIC_ARCHIVE_ONLY_NOT_CURRENT_AUTHENTICATED_GAME_ITEM",
             "sourceResearchFreshAtEvaluation":source_fresh,
             "publisher":PUBLISHER,"sourceExpiry":EXPIRES,
+            "newPublicationDetailSlugsIndependentlyReparsed":True,
             "publicCandidates":len(joined),
             "priceEligiblePublicCandidates":len(joined),
             "publicPricelessWithoutSlug":1,
