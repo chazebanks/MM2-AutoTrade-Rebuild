@@ -2,9 +2,23 @@
 
 ## Status
 
-Standalone read-only research code for the existing task PR178. Implementation commit: `ecf9b54f9faa497b9755f07843373ecc6075f8d6`. The focused Python/Lua tests pass locally, and the original source blobs listed below were fetched and hash-checked. **Do not run the iPad test yet:** all six exact-commit GitHub Actions checks are `action_required` with zero jobs, not green. The stage must remain untested on-device until those checks can run and pass.
+Standalone read-only research code for the existing task PR178. Initial Copilot implementation: `ecf9b54f9faa497b9755f07843373ecc6075f8d6` (SUPERSEDED). **Corrected canonical PR178 implementation:** `0865d92370e6353f5eaac43f6a5c5fa29ad477b8` (the four corrected files are byte-for-byte Git blob equivalent to independently tested PR184 at `c7fa30a3e1392a2d335b896f896b1cd5fa6d89b2`). That independent review branch passed 6/6 GitHub Actions including original Lua native-wrapper integration. The Copilot-origin PR178 initially showed `action_required`, and exact-commit CI on corrected PR178 must still be independently verified. The stage remains untested on-device.
 
 The implementation reuses PR176's matcher; it adds no second identity matcher. It loads the immutable original Stage9 observer, Stage83 archival registry, PR176 corrected matcher, and PR170 Stage100 layout helper at fixed commit URLs. It does not merge or modify those branches.
+
+## Independent TDD review and integration — Nov 10
+
+[PR184](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/184) independently reproduced a **hidden-GUI-root / invisible-partner-header identity gate failure** against the original native wrapper. The RED original-Lua run is [42779889499](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42779889499). A `visibleInPlayerGui` ancestor check now confirms every GuiObject/ScreenGui from trade root and partner Username through the current PlayerGui. Negative tests reject hidden Container, hidden TheirOffer, and hidden Username BEFORE attaching the listener. Two CI defects were also corrected: format-tolerant Lua boolean static scanning and isolating the pinned-source Python/Lua test suite from unrelated broad test discovery.
+
+At reviewed PR184 SHA `c7fa30a3e1392a2d335b896f896b1cd5fa6d89b2`, **all six Actions succeeded**, including [focused native mock 42780252521](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42780252521) and [inherited replay 42780252577](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42780252577). The four corrected files were copied into PR178, each Git blob SHA verified equal to PR184. This is code-equivalence evidence, not automatically a PR178 exact-SHA CI result.
+
+An independent PURE offline comparator exists in [PR183](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/183): empty→stable ALT-only→listener after ALT→one MAIN callback→stable both-sided client snapshots. It has 12 original-Lua groups, 360 adverse mutations, and 6/6 CI PASS at `cbd05ba8d98d9495ade900c5e04ffb4db0552e4e`. The native wrapper already implements this sequence; PR183 is an independent oracle, NOT another native probe or a module to blindly merge.
+
+**Evidence boundary:** no original iPad Stage106 test has been run. No live server event/session authenticity, unique item identity, current prices, or completed trade are proved. Do not use the old pre-review `ecf9b54f` loader or repeat completed Stages97/99/100/103.
+
+## Post-review Actions caveat
+
+GitHub Actions status belongs to an exact commit and PR context. The PR184 green run proves reviewed file blobs, NOT that the updated PR178 was independently executed. Do not request an iPad run until the exact native branch source pin and CI context are verified. No merge to main has been performed.
 
 ## Pinned source compatibility
 
@@ -37,7 +51,7 @@ Stage97's earlier one-sided listener remains a completed, distinct native observ
 ```lua
 getgenv().PDIDDLER_STAGE106_TARGET_USERNAME = "venossgaming90190"
 getgenv().PDIDDLER_STAGE106_READONLY_ARMED = true
-loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/ecf9b54f9faa497b9755f07843373ecc6075f8d6/pdiddler/new_part4/STAGE106_READONLY_TWO_SIDED_UPDATE_TRADE_WITNESS.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/0865d92370e6353f5eaac43f6a5c5fa29ad477b8/pdiddler/new_part4/STAGE106_READONLY_TWO_SIDED_UPDATE_TRADE_WITNESS.lua"))()
 ```
 
 Follow the numbered purple/black on-screen guide; the Delta console is not the only prompt:
