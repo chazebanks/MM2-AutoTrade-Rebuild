@@ -1,0 +1,64 @@
+name: Gingerscope Stage116 unlinked read-only evidence panel (offline)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/stage116_client_evidence_view.lua'
+      - 'pdiddler/new_part4/stage116_safe_panel_geometry.lua'
+      - 'pdiddler/new_part4/STAGE116_READONLY_EVIDENCE_PANEL.lua'
+      - 'pdiddler/ci/stage116_client_evidence_view_tests.luau'
+      - '.github/workflows/gingerscope-stage116-unlinked-evidence-panel.yml'
+      - 'pdiddler/intelligence_lab/STAGE116_EVIDENCE_PANEL_HANDOFF.md'
+  push:
+    branches:
+      - research/gingerscope-stage116-client-evidence-panel
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-lune-model-and-geometry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install official SHA256-pinned Lune v0.11.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 50 'https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip' -o "$RUNNER_TEMP/lune.zip"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/lune-dist"
+          found="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
+          test -n "$found"
+          install -m 0755 "$found" "$RUNNER_TEMP/lune"
+      - name: Run real pure view and screen placement model tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" --version
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage116_client_evidence_view_tests.luau
+      - name: No IO or action authority in view or script
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          for file in (
+            "pdiddler/new_part4/stage116_client_evidence_view.lua",
+            "pdiddler/new_part4/stage116_safe_panel_geometry.lua",
+            "pdiddler/new_part4/STAGE116_READONLY_EVIDENCE_PANEL.lua"
+          ):
+            s=Path(file).read_text()
+            for bad in ("FireServer(", "InvokeServer(", "HttpGet(", "PostAsync(",
+                        "Teleport(", "setclipboard(", "AcceptTrade(", "RequestTrade(",
+                        "http.request(", "request("):
+              assert bad not in s, (file,bad)
+          pure=Path("pdiddler/new_part4/stage116_client_evidence_view.lua").read_text()
+          for flag in ("authorizesAccept=false","authorizesTrade=false",
+                       "mayRecordCompletedTrade=false","mayReportProfit=false",
+                       "serverCompletionProven=false","relationProven=false",
+                       "tradeOutcome=\"UNKNOWN\""):
+            assert flag in pure,flag
+          print("STAGE116_READONLY_NO_SETTLEMENT_OR_IO_PASS")
+          PY
