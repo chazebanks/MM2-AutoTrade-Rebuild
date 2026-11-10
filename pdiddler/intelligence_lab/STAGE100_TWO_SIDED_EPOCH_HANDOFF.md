@@ -1,3 +1,7 @@
+## Source-pinned Stage100 CI verification — no real iPad run yet
+
+**Exact initial full code/test/document HEAD `eeae57d1cdc1978a8c4f3f93083b5ce13fb4a9f4`**. [Focused Actions #42763047986](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42763047986) SUCCESS: **13 genuine Lua5.4 original-source mocked native groups**, executed through **3 Python unittest groups**, strict no-gameplay policy and three immutable original Stage9 native/contract plus Stage98 source Git blobs verified. The later PR-triggered exact-HEAD workflow plus inherited five Luau/Lune/Selene/StyLua/replay/Hypothesis workflows must be checked before a device request. User's real Stage99 native PASS is recorded in main handoff; Stage100 remains untested on iPad.
+
 # Stage100 — two-sided MANUAL offer local epoch witness (native diagnostic, read-only)
 
 ## Previously completed real-device evidence (do not repeat)
@@ -30,7 +34,7 @@ New **DRAFT Stage100 PR** stacked on Stage99 draft PR169, which is stacked on St
 ```lua
 getgenv().PDIDDLER_STAGE100_TARGET_USERNAME = "venossgaming90190"
 getgenv().PDIDDLER_STAGE100_READONLY_ARMED = true
-loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/REPLACE_WITH_TESTED_COMMIT/pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/eeae57d1cdc1978a8c4f3f93083b5ce13fb4a9f4/pdiddler/new_part4/STAGE100_READONLY_TWO_SIDED_EPOCH.lua"))()
 ```
 
 Run this FIRST in a fresh original MM2 server, no previous pdiddler scripts. Both accounts manually open a trade within 30s. ALT adds first; MAIN then adds one test item; ALT withdraws its own, strictly on the displayed prompts. Neither account presses final Accept. If inconclusive, do not retry the one-shot in the same JobId. Send ONE `[GINGERSCOPE STAGE100 TWO SIDED EPOCH]` sanitized JSON.
