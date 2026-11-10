@@ -264,7 +264,7 @@ local function matchSide(gui,event)
   candidates[i]=matches
   if slot.rawText=="" then noId=noId+1 else withId=withId+1 end
  end
- local seenKeys={},solutions=0
+ local seenKeys,solutions={},0
  local taken,assigned={},{ }
  local function visit(i)
   if i>#gui then
