@@ -1,0 +1,104 @@
+name: Gingerscope Stage106 two-sided UpdateTrade read-only witness
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE106_READONLY_TWO_SIDED_UPDATE_TRADE_WITNESS.lua'
+      - 'pdiddler/tests/test_stage106_readonly_witness.lua'
+      - 'pdiddler/intelligence_lab/test_stage106_readonly_witness.py'
+      - 'pdiddler/intelligence_lab/STAGE106_READONLY_UPDATE_TRADE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage106-update-trade-witness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-original-source-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Download pinned StyLua 2.6.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          zip="$RUNNER_TEMP/stylua-2.6.0-linux-x86_64.zip"
+          curl -fLsS --retry 3 --connect-timeout 20 \
+            https://github.com/JohnnyMorganz/StyLua/releases/download/v2.6.0/stylua-linux-x86_64.zip -o "$zip"
+          echo "a485f72bbfa22e4642e77a84b5edc2611a5cab7477b34e2e709dd8f78e919895  $zip" | sha256sum -c
+          unzip -q "$zip" -d "$RUNNER_TEMP/stylua"
+          stylua_bin="$(find "$RUNNER_TEMP/stylua" -type f -name stylua -print -quit)"
+          test -n "$stylua_bin"
+          install -m 0755 "$stylua_bin" "$RUNNER_TEMP/stylua-bin"
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - name: Check Stage106 Lua syntax and formatting
+        run: |
+          set -euo pipefail
+          luac5.4 -p pdiddler/new_part4/STAGE106_READONLY_TWO_SIDED_UPDATE_TRADE_WITNESS.lua pdiddler/tests/test_stage106_readonly_witness.lua
+          "$RUNNER_TEMP/stylua-bin" --check pdiddler/new_part4/STAGE106_READONLY_TWO_SIDED_UPDATE_TRADE_WITNESS.lua pdiddler/tests/test_stage106_readonly_witness.lua
+      - name: Fetch and verify immutable original sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope106
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope106/stage9_contract.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_native_observer.lua" -o /tmp/gingerscope106/stage9_native.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua" -o /tmp/gingerscope106/stage83_registry.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/29889595b5e80c788ade75fbb97880b736fc8cb2/pdiddler/intelligence_lab/stage101_multiweapon_raw_key_match.lua" -o /tmp/gingerscope106/stage101_matcher.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/59d869b7d4d8fbcee3f2709e266b47ffb4a05d78/pdiddler/new_part4/stage100_screen_prompt_overlay.lua" -o /tmp/gingerscope106/stage100_overlay.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/29889595b5e80c788ade75fbb97880b736fc8cb2/pdiddler/tests/test_stage101_multiweapon_raw_key_match.lua" -o /tmp/gingerscope106/stage101_test.lua
+          test "$(git hash-object /tmp/gingerscope106/stage9_contract.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          test "$(git hash-object /tmp/gingerscope106/stage9_native.lua)" = a6338e946467ad738005bc5cb13cd2d2fbc2a2d0
+          test "$(git hash-object /tmp/gingerscope106/stage83_registry.lua)" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          test "$(git hash-object /tmp/gingerscope106/stage101_matcher.lua)" = c15afe8077d544534e0f122ce2f4a5081cb2ac90
+          test "$(git hash-object /tmp/gingerscope106/stage100_overlay.lua)" = e0eac8e039655999bd7bbac1f12da179db7c22ed
+          test "$(git hash-object /tmp/gingerscope106/stage101_test.lua)" = 526b3b0ba45ca7ebdd5e328ba9c37c680c4a797a
+          echo STAGE106_IMMUTABLE_STAGE9_83_PR176_AND_GUIDE_BLOBS_VERIFIED
+      - name: Run inherited matcher and Stage106 actual-wrapper Lua integration tests
+        env:
+          STAGE106_STAGE9_NATIVE: /tmp/gingerscope106/stage9_native.lua
+          STAGE106_STAGE9_CONTRACT: /tmp/gingerscope106/stage9_contract.lua
+          STAGE106_STAGE83_REGISTRY: /tmp/gingerscope106/stage83_registry.lua
+          STAGE106_STAGE101_MATCHER: /tmp/gingerscope106/stage101_matcher.lua
+          STAGE106_STAGE100_OVERLAY: /tmp/gingerscope106/stage100_overlay.lua
+          STAGE106_STAGE101_TEST: /tmp/gingerscope106/stage101_test.lua
+          STAGE106_REQUIRE_PINNED: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 -m unittest -v pdiddler.intelligence_lab.test_stage106_readonly_witness
+      - name: Enforce read-only and sanitized native wrapper
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('pdiddler/new_part4/STAGE106_READONLY_TWO_SIDED_UPDATE_TRADE_WITNESS.lua')
+          import re
+          source = path.read_text()
+          normalized = re.sub(r'\s*=\s*', '=', source)
+          for marker in (
+              'eventSessionAssociationProven=false',
+              'callbackCausalityProven=false',
+              'rawItemIdConfirmed=false',
+              'currentPricesVerified=false',
+              'serverCompletionProven=false',
+              'authorizesTrade=false',
+              'authorizesAccept=false',
+              'mayReportProfit=false',
+              'maySendDiscordWebhook=false',
+              'READY_MAIN_ADD_ONE',
+              'ONSCREEN_GUIDE_NO_SAFE_SPACE_OUTSIDE_TRADE',
+          ):
+              assert marker in normalized, marker
+          for forbidden in (
+              ':FireServer(', ':InvokeServer(', 'VirtualInputManager',
+              'SendMouseButtonEvent(', 'TeleportService', 'HttpPost(',
+              'PostAsync(', 'AcceptTrade(', 'DeclineTrade(',
+              'getconnections(',
+          ):
+              assert forbidden not in source, forbidden
+          print('STAGE106_READ_ONLY_AND_NO_AUTHORITY_POLICY_PASS')
+          PY
