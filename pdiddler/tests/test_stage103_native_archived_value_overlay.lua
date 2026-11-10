@@ -282,7 +282,6 @@ local function scenario(mode)
     end
    end
   end
- end
   if mode.mutateDuringPreview and phase==2 and actions[2] and
      not extraSecondRevisionDone and elapsed-phaseAt>=1.3 then
     extraSecondRevisionDone=true
@@ -291,6 +290,7 @@ local function scenario(mode)
     local label=names and names:FindFirstChild("Label")
     if label then label.Text="OtherAfterPreview" end
   end
+ end
  os.clock=function()return elapsed end
  os.time=function()return mode.preExpiry and 1794300000 or 1794349609 end
  _G.xpcall=function(fn,handler)
