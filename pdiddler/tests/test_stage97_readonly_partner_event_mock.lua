@@ -21,11 +21,13 @@ end
 local function equals(a,b,label)
  assert(a==b,(label or "mismatch").." got="..tostring(a).." expected="..tostring(b))
 end
+local savedPrint=print
 local function scenario(mode)
  mode=mode or {}
  local elapsed=5000
  local readyAt=nil
  local emitted=false
+ local guiPreadded=false
  local receiptCount=0
  local connects,disconnects=0,0
  local sources=0
@@ -177,7 +179,6 @@ local function scenario(mode)
  if mode.preexistingOffer then addVisible(tn,"Scythe",1) end
  local function emit()
   emitted=true
-  if mode.guiFirst then addVisible(tn,"Scythe",1) end
   local ours={}
   local theirs={{itemRaw,mode.eventQuantity or 1,"Weapons"}}
   if mode.ownEventOffer then ours={{"Scythe",1,"Weapons"}} end
@@ -222,6 +223,10 @@ local function scenario(mode)
  function task.spawn(fn) fn() end
  function task.wait(sec)
   elapsed=elapsed+(tonumber(sec) or 0.1)
+  if readyAt and mode.guiFirst and not guiPreadded and elapsed-readyAt>=.08 then
+   guiPreadded=true
+   addVisible(tn,"Scythe",1)
+  end
   if readyAt and not emitted and not mode.noEvent and
       elapsed-readyAt>=.24 then
    if mode.jobChanged then game.JobId="JOB_CHANGED" end
@@ -232,6 +237,7 @@ local function scenario(mode)
  local ok,ret=pcall(function()
   return assert(loadfile(SCRIPT))()
  end)
+ _G.print=savedPrint
  if not ok then error("wrapper error: "..tostring(ret)) end
  local r=ret and ret.report or nil
  return {report=r,connects=connects,disconnects=disconnects,
