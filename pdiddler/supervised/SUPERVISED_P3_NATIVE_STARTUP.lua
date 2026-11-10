@@ -53,9 +53,9 @@ local coordinator=loadFrozen("dfcfc7d52ce5f9cc64390bb5e28ce79512f1c001",
     "supervised/supervised_real_p3_rotation_handoff.lua")
 local outgoingModule=loadFrozen("2036ae5bd937620f21d46600f99550a1b233a654",
     "supervised/pdiddler3_outgoing_START_GATED_v1.lua")
-local bootModule=loadFrozen("5779457dc2024579db3c25a0f0679299751846f4",
+local bootModule=loadFrozen("f34546b446f86d059c6792ffb9da31aea1251eac",
     "supervised/supervised_p3_startup_supervisor.lua")
-local watchdogModule=loadFrozen("dd032dd85d00953404ccb49c45173ef54554d145",
+local watchdogModule=loadFrozen("48c4b0fee594639c74f1bed408581db7a5bc6f1b",
     "supervised/supervised_p3_continuous_watchdog.lua")
 if not geometry or type(geometry.choose)~="function"
     or not ioModule or type(ioModule.new)~="function"
@@ -323,26 +323,61 @@ local watchdogCtx={
     isLive=stillLive,
     onStatus=function(r)
         last=statusRecord(r.status,r.reason)
-        guide:show(last)
+        local ok=pcall(guide.show,guide,last)
+        if not ok then
+            last=statusRecord("BLOCKED","ONSCREEN_P3_GUIDE_UNAVAILABLE")
+            clipboard(last)
+            error("P3 on-screen guide failed")
+        end
         suppressLegacyScannerGUI()
+        if r.status=="BLOCKED" then clipboard(last) end
     end,
 }
 local monitor,whyMonitor=watchdogModule.new(
-    supervisor, -- The watchdog MUST control the same guarded supervisor
-    -- It needs the actual P3 isPaused from the original fork. Capture once
-    -- from the supervisor's injected original outgoing through approved facade.
-    {isPaused=function()
-        local session=E.PDIDDLER_OUTGOING_SESSION
-        return session~=nil and false
-    end},
-    io,watchdogCtx,{
+    supervisor,{
+       isPaused=function()return supervisor.isP3Paused()end,
+    },io,watchdogCtx,{
        spawn=function(fn)task.spawn(fn)end,
        wait=function(seconds)task.wait(seconds)end,
        now=function()return os.clock()end,
     })
--- IMPORTANT: This native runner is INSTALL-ONLY until the real gated P3
--- isPaused facade is exposed by a verified bootstrap API. Never fake the
--- original P3 paused state or silently arm a queue with a broken watchdog.
-if monitor then pcall(monitor.stop) end
-stop("REAL_P3_PAUSED_INTERFACE_NOT_EXPOSED_NO_ARM")
-return last
+if not monitor then
+    stop(type(whyMonitor)=="table" and whyMonitor.reason
+        or "WATCHDOG_CONSTRUCTION_FAILED")
+    return nil
+end
+watcher=monitor
+ui.arm.Activated:Connect(function()
+    if not stillLive() or armed or not watcher.isReady() then return end
+    local safe=ctx.onScreenSafe()
+    if not safe or io.trade()~=nil then return end
+    -- The only transition enabling REAL original P3 outgoing requests:
+    -- one explicit, actual user tap on this safe on-screen ARM button.
+    local success,reason=supervisor.arm({
+        explicitUserAuthorization=true,
+        allowRealP3RequestRotation=true,
+        finalAcceptMustRemainManual=true,
+    })
+    if success==true then
+        armed=true
+        E.PDIDDLER_SUPERVISED_P3_USED_JOB=game.JobId
+        last=statusRecord("P3_ARMED_BY_OPERATOR",
+             "P3_REQUESTS_ENABLED_NO_FINAL_ACCEPT")
+        pcall(guide.show,guide,last)
+    else
+        last=statusRecord("BLOCKED",reason or "P3_ARM_REFUSED")
+        pcall(guide.show,guide,last)
+    end
+end)
+local started,startReason=watcher.start()
+if started~=true then
+    stop(startReason or "WATCHDOG_NOT_SCHEDULED")
+    return nil
+end
+E.PDIDDLER_SUPERVISED_P3_RUNNER={
+    stop=function()return stop("OPERATOR_STOPPED")end,
+    status=function()return statusRecord(last.status,last.reason)end,
+    isArmed=function()return armed and owner.running end,
+}
+print("[P3 NATIVE] Supervisor prepared. Tap ARM P3 on the purple game panel to enable outgoing requests. Final Accept OFF.")
+return E.PDIDDLER_SUPERVISED_P3_RUNNER
