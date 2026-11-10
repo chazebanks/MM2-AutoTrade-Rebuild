@@ -51,7 +51,8 @@ class NativeStage99(unittest.TestCase):
         for marker in (
             "PDIDDLER_STAGE99_READONLY_ARMED",
             "WAIT_FOR_MANUAL_TRADE_WINDOW",
-            "READY_ADD_FIRST","READY_ADD_SECOND_DIFFERENT","READY_REMOVE_ONE",
+            'phase(1,"ADD_FIRST")','phase(2,"ADD_SECOND_DIFFERENT")',
+            'phase(1,"REMOVE_ONE")','"[STAGE99] READY_"..phaseName',
             'source("stage9native")','source("stage98")',
             "epochs.observe(","epochs.checkPreview(","epochs.freezePreview(",
             "CLIENT_MULTI_SLOT_ADD_REMOVE_EPOCH_OBSERVED",
