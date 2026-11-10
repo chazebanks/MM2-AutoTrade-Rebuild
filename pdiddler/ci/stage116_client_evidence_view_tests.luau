@@ -22,6 +22,15 @@ local function stage106()
  }
 end
 local function stage115(tier)
+ local n,changed,unchanged,distinct=1,1,0,1
+ if tier=="NO_TERMINAL_CLIENT_EVIDENCE" or
+    tier=="CLIENT_WINDOW_CLOSED_ONLY" then
+    n,changed,unchanged,distinct=0,0,0,0
+ elseif tier=="CLIENT_POSTCLOSE_NO_CHANGE" then
+    n,changed,unchanged,distinct=1,0,1,1
+ elseif tier=="CLIENT_POSTCLOSE_READBACKS_CONFLICT" then
+    n,changed,unchanged,distinct=2,2,0,2
+ end
  return {
   schema="gingerscope-offline-event-replay-v1",
   status="CLIENT_REPLAY_ONLY",readOnly=true,simulationOnly=true,
@@ -34,11 +43,11 @@ local function stage115(tier)
   mayUseForStrategyLearning=false,authorizesTrade=false,
   authorizesAccept=false,discordWebhookSent=false,
   operatorCorroborationProven=false,
-  postCloseDeltaObservations=1,
-  postCloseChangedReadbacks=1,
-  postCloseUnchangedReadbacks=0,
+  postCloseDeltaObservations=n,
+  postCloseChangedReadbacks=changed,
+  postCloseUnchangedReadbacks=unchanged,
   postCloseReadbackRepeats=0,
-  postCloseDistinctReadbackPatterns=1,
+  postCloseDistinctReadbackPatterns=distinct,
   accountName="SECRET_NEVER_OUTPUT",rawItemId="SECRET_NEVER_OUTPUT",
  }
 end
@@ -118,7 +127,7 @@ for _,bad in ipairs({
  if bad.from=="106" then check(r.offerText,"Stage106 client evidence rejected")
  else check(r.readbackText,"Stage115 replay evidence rejected") end
 end
-for _,bad in ipairs({nil,false,0,"hello",{}}) do
+for _,bad in ipairs({false,0,"hello",{}}) do
  local ok,r=pcall(view.build,bad,bad)
  check(ok,true)
  noAuthority(r)
