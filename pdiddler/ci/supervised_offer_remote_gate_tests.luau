@@ -8,17 +8,22 @@ local function assertEquals(a,b,name)
     assert(a==b,tostring(name)..": "..tostring(a).." != "..tostring(b))
 end
 local fired={}
-local fakeTrade={Name="Trade"}
+local fakeTrade={Name="Trade",Visible=true}
+function fakeTrade:IsA(name) return name=="GuiObject" end
 local screen={Enabled=true}
 function screen:IsA(name) return name=="ScreenGui" end
 function screen:FindFirstChild(name)
     if name=="Container" then return self.Container end
 end
-screen.Container={}
+screen.Container={Visible=true,Parent=screen}
+function screen.Container:IsA(name) return name=="GuiObject" end
 function screen.Container:FindFirstChild(name)
     if name=="Trade" then return fakeTrade end
 end
 local gui={}
+fakeTrade.Parent=screen.Container
+screen.Parent=gui
+function gui:IsA(name) return name=="PlayerGui" end
 function gui:FindFirstChild(name)
     if name=="TradeGUI" then return screen end
 end
