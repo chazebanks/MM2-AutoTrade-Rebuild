@@ -133,7 +133,7 @@ end)
 test("Bad quantity unknown, x0 and missing amount cannot become one",function()
  for _,q in ipairs({"x0","", "x-1","x1.5","x999999999999","x2 knives"}) do
   local x=row(1,"Gingerscope","",false)
-  x.amountText=q=="" and nil or q
+  if q=="" then x.amountText=nil else x.amountText=q end
   local v=inspect(capture({}, {x}))
   eq(v.rejectedSlotCount,1)
   denied(v)
