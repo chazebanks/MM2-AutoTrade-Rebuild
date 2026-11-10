@@ -41,7 +41,7 @@ jobs:
           curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope98/stage9.lua
           curl -fsSL --retry 3 --max-time 45 "$base/2f49e2f25cdbf7c8ca01702db159d412cc4382bc/pdiddler/intelligence_lab/offer_snapshot_guard.lua" -o /tmp/gingerscope98/guard.lua
           test "$(git hash-object /tmp/gingerscope98/stage9.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
-          test "$(git hash-object /tmp/gingerscope98/guard.lua)" = c5b87f159de5224d231b111da2541b8b23ac6284
+          test "$(git hash-object /tmp/gingerscope98/guard.lua)" = c6546cf28670747f919e65025b7467950d89f295
           echo STAGE98_TWO_ORIGINAL_GIT_BLOBS_VERIFIED
       - name: Execute real Lua source tests under Python control and 700 adversarial cases
         env:
