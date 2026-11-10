@@ -466,5 +466,93 @@ do
  eq(#x.sends,0,"no concealed mutation")
 end
 
+
+-- A first physical offer can yield a transient GUI snapshot whose ItemName
+-- label is not yet rendered. Do NOT submit another item; poll read-only for
+-- reconciliation, then accept ONLY a fully verified snapshot.
+do
+ local x=fixture()
+ local b=getBound(x)
+ local calls=0
+ local realCapture=b.capture
+ b.capture=function()
+  calls+=1
+  if #x.sends==1 and calls==5 then
+   return {status="REJECTED",reason="PHYSICAL_GUI_SLOTS_NOT_RECONCILED"}
+  end
+  return realCapture()
+ end
+ simulateOffer(x)
+ local approval=arm({"Iceblaster","Batwing"})
+ local result=x.plan.run(b,x.io,x.gate,approval,{wait=function()end})
+ eq(result.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","transient GUI snapshot reconciles")
+ eq(result.offerAttempts,2,"each verified item sent exactly once")
+ eq(#x.sends,2,"no duplicate dispatch on transient snapshot")
+end
+-- Persistently malformed live GUI must stop with the specific safe reason
+-- and NEVER claim a confirmed slot or issue a second remote.
+do
+ local x=fixture()
+ local b=getBound(x)
+ local orig=b.capture
+ b.capture=function()
+  if #x.sends>0 then
+   return {status="REJECTED",reason="PHYSICAL_GUI_SLOTS_NOT_RECONCILED"}
+  end
+  return orig()
+ end
+ simulateOffer(x)
+ local result=x.plan.run(b,x.io,x.gate,arm({"Iceblaster","Batwing"}),{
+  wait=function()end
+ })
+ eq(result.status,"STOPPED","permanently unreadable GUI stopped")
+ eq(result.reason,"P3_P4_LIVE_SNAPSHOT_REJECTED","preserve status contract")
+ eq(result.snapshotRejectReason,"PHYSICAL_GUI_SLOTS_NOT_RECONCILED","specific sanitized cause survives")
+ eq(result.offerAttempts,1,"one remote attempted")
+ eq(result.clientVisibleAddedSlots,0,"no falsely confirmed slot")
+ eq(#x.sends,1,"never retry first or dispatch second item")
+end
+-- Acceptance/partner changes are NOT render transients. They stop
+-- immediately after the first physical send, even if GUI later looks valid.
+do
+ local x=fixture()
+ local b=getBound(x)
+ local orig=b.capture
+ b.capture=function()
+  if #x.sends>0 then
+   return {status="REJECTED",reason="ACCEPT_ALREADY_SET"}
+  end
+  return orig()
+ end
+ simulateOffer(x)
+ local waits=0
+ local result=x.plan.run(b,x.io,x.gate,arm({"Iceblaster","Batwing"}),{
+  wait=function()waits+=1 end
+ })
+ eq(result.status,"STOPPED","accept flag after send stops")
+ eq(result.snapshotRejectReason,"ACCEPT_ALREADY_SET","precise accept state preserved")
+ eq(waits,1,"fatal acceptance never retried")
+ eq(#x.sends,1,"no second send after accept")
+end
+-- Never serialize arbitrary or identifying text from an untrusted
+-- observer rejection reason.
+do
+ local x=fixture()
+ local b=getBound(x)
+ local orig=b.capture
+ b.capture=function()
+  if #x.sends>0 then
+   return {status="REJECTED",reason="PLAYER=TrustedAlt/Secret"}
+  end
+  return orig()
+ end
+ simulateOffer(x)
+ local result=x.plan.run(b,x.io,x.gate,arm({"Iceblaster"}),{
+  wait=function()end
+ })
+ eq(result.reason,"P3_P4_LIVE_SNAPSHOT_REJECTED","untrusted cause generic")
+ eq(result.snapshotRejectReason,"UNKNOWN_SNAPSHOT_REJECTION","identity not copied")
+end
+
 print("[PASS] P3/P4 guarded physical multi-slot approved plan",tests)
 print("[PASS] four distinct physical slots, no auto Accept, no duplicate sends, Gingerscope protected")
