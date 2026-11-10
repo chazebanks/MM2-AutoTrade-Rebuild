@@ -2,6 +2,8 @@
 -- PURE / READ-ONLY. No Roblox globals, remotes, screen input, pricing refresh,
 -- account inventory, raw weapon identity, profit or final Accept authority.
 -- The 189-row public archive is NOT a current market feed.
+-- Four distinct offer slots per side, NOT four total copies; stack quantity
+-- stays within original Stage9's parser bound (this is not a live-game cap).
 local M={}
 M.schema="gingerscope-stage102-lua-public-name-candidate-preview-v1"
 local SOURCE="gingerscope-stage102-pinned-public-name-value-archive-v1"
@@ -101,17 +103,15 @@ function M.validateArchive(archive)
 end
 local function physical(side)
  if not dense(side,4) then return nil,"CLIENT_OFFER_SIDE_MALFORMED" end
- local out,seen,total={},{},0
+ local out,seen={},{}
  for _,v in ipairs(side) do
   if type(v)~="table" or not int(v[1],1,4) or seen[v[1]]
     or not safeName(v[2]) or type(v[3])~="boolean"
-    or not int(v[4],1,4) or type(v[5])~="string"
+    or not int(v[4],1,1000000) or type(v[5])~="string"
     or #v[5]>128 or v[5]:find("[%c]") then
    return nil,"CLIENT_PHYSICAL_SLOT_UNVERIFIED"
   end
   seen[v[1]]=true
-  total=total+v[4]
-  if total>4 then return nil,"FOUR_COPY_LIMIT_EXCEEDED" end
   out[#out+1]={slot=v[1],label=safeName(v[2]),
     chroma=v[3],quantity=v[4]}
  end
