@@ -8,7 +8,11 @@ local KEY="PDIDDLER_SUPERVISED_P3_NATIVE"
 local cfg=E[KEY]
 if game.PlaceId~=142823291 or type(cfg)~="table"
     or cfg.enableNativeSupervisor~=true
-    or cfg.finalAcceptMustRemainManual~=true then
+    or cfg.finalAcceptMustRemainManual~=true
+    or cfg.altOnlyTest~=true
+    or type(cfg.targetName)~="string" or
+       #cfg.targetName<3 or #cfg.targetName>32 or
+       not cfg.targetName:match("^[A-Za-z0-9_]+$") then
     warn("[P3 NATIVE] Original MM2 and explicit configuration required")
     return nil
 end
@@ -29,6 +33,20 @@ local World=game:GetService("Workspace")
 if not PG or not World or not World.CurrentCamera then
     warn("[P3 NATIVE] GUI and live camera required")
     return nil
+end
+local target=Players:FindFirstChild(cfg.targetName)
+if not target or target==LP or target.Parent~=Players
+   or target.Name~=cfg.targetName or
+   Players:GetPlayerByUserId(target.UserId)~=target then
+    warn("[P3 NATIVE] Exact consenting ALT must be present first")
+    return nil
+end
+local targetUid=target.UserId
+local function targetStillExact()
+    return target.Parent==Players
+       and target.Name==cfg.targetName
+       and Players:FindFirstChild(cfg.targetName)==target
+       and Players:GetPlayerByUserId(targetUid)==target
 end
 local function loadFrozen(rev,path,maxSize)
     local url="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
@@ -226,7 +244,7 @@ function guide:show(r)
     self.phase=status
     if status=="P3_SUPERVISOR_PREPARED_NOT_ARMED" then
         ui.title.Text="1/2 MAIN — ARM REAL P3"
-        ui.body.Text="MAIN: tap ARM to start real outgoing requests. ALT: no action. Final Accept OFF."
+        ui.body.Text="MAIN: tap ARM for one consenting ALT ONLY. ALT: accept request manually. No final Accept."
     elseif status=="P4_TWO_SIDED_CLIENT_SNAPSHOT" then
         ui.title.Text="2/2 MAIN — TRADE WINDOW OPEN"
         ui.body.Text="MAIN: inspect the open trade, manually Decline to continue. ALT: no action."
@@ -269,11 +287,42 @@ local function suppressLegacyScannerGUI()
         if gui and gui:IsA("ScreenGui") then gui.Enabled=false end
     end
 end
-local scanner=loadFrozen("2036ae5bd937620f21d46600f99550a1b233a654",
+local rawScanner=loadFrozen("2036ae5bd937620f21d46600f99550a1b233a654",
      "pdiddler3_scanner_MODULE_v6_5_PART4_STATUS_BRIDGE.lua")
-if not scanner or type(scanner.getRecord)~="function" then
+if not rawScanner or type(rawScanner.getRecord)~="function"
+    or type(rawScanner.getWhitelist)~="function"
+    or type(rawScanner.isWhitelisted)~="function" then
     stop("ORIGINAL_SCANNER_UNAVAILABLE")
     return nil
+end
+-- The original scanner can read server eligibility but the actual P3
+-- outgoing queue receives ONLY the chosen consenting ALT. Even eligible
+-- strangers cannot enter the request queue in this FIRST native test.
+local scanner=setmetatable({},{__index=rawScanner})
+function scanner.isWhitelisted(uid)
+    if uid~=targetUid or not targetStillExact() then return false end
+    local ok,v=pcall(rawScanner.isWhitelisted,uid)
+    return ok and v==true
+end
+function scanner.getRecord(uid)
+    if not scanner.isWhitelisted(uid) then return nil end
+    local ok,record=pcall(rawScanner.getRecord,uid)
+    if not ok or type(record)~="table" or
+       record.player~=target or record.state~="whitelist" then
+        return nil
+    end
+    return record
+end
+function scanner.getWhitelist()
+    if not targetStillExact() then return {} end
+    local ok,list=pcall(rawScanner.getWhitelist)
+    if not ok or type(list)~="table" then return {} end
+    for _,p in ipairs(list) do
+       if p==target and scanner.getRecord(targetUid) then
+           return {target}
+       end
+    end
+    return {}
 end
 suppressLegacyScannerGUI()
 local gate={}
@@ -308,7 +357,8 @@ local ctx={
     end,
     readyCheck=function()
         local ok,a=pcall(scanner.getWhitelist)
-        return ok and type(a)=="table" and stillLive()
+        return ok and type(a)=="table" and
+           targetStillExact() and stillLive()
     end,
 }
 local sup,why=bootModule.new(scanner,outgoingModule,coordinator,
