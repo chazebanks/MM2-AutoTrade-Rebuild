@@ -8,8 +8,10 @@ end
 local modules={
  contract=file(assert(os.getenv("STAGE100_ORIGINAL_STAGE9"))),
  native=file(assert(os.getenv("STAGE100_ORIGINAL_NATIVE"))),
- epoch=file(assert(os.getenv("STAGE100_ORIGINAL_STAGE98")))
+ epoch=file(assert(os.getenv("STAGE100_ORIGINAL_STAGE98"))),
+ layout=file("pdiddler/new_part4/stage100_screen_prompt_overlay.lua")
 }
+local Layout=assert(load(modules.layout))()
 local printOriginal=print
 local clockOriginal=os.clock
 local xpcallOriginal=xpcall
@@ -119,6 +121,16 @@ local function scenario(mode)
  if mode.delayedWindow or mode.noWindow then gui.Enabled=false end
  local container=node("Frame","Container",gui)
  local trade=node("Frame","Trade",container)
+ trade.AbsolutePosition={X=330,Y=190}
+ trade.AbsoluteSize={X=360,Y=385}
+ if mode.tradeRight then
+  trade.AbsolutePosition={X=0,Y=100}
+  trade.AbsoluteSize={X=685,Y=615}
+ end
+ if mode.tradeFullscreen then
+  trade.AbsolutePosition={X=0,Y=0}
+  trade.AbsoluteSize={X=1024,Y=768}
+ end
  local own=node("Frame","YourOffer",trade)
  local their=node("Frame","TheirOffer",trade)
  local ownBox=node("Frame","Container",own)
@@ -145,8 +157,15 @@ local function scenario(mode)
  end
  if mode.preexistingOffer then place(theirBox,1,"Batwing","") end
  local game={PlaceId=mode.wrongPlace and 123 or 142823291,JobId="server-mock"}
+ local workspaceService={CurrentCamera={
+  ViewportSize={X=1024,Y=768}
+ }}
+ if mode.tinyViewport then
+  workspaceService.CurrentCamera.ViewportSize={X=260,Y=240}
+ end
  function game:GetService(k)
   if k=="Players" then return players end
+  if k=="Workspace" then return workspaceService end
   if k=="HttpService" then return {JSONEncode=function(_,r)
     return '{"status":"'..tostring(r.status)..'","reason":"'..tostring(r.reason)..'"}'
    end}
@@ -159,6 +178,9 @@ local function scenario(mode)
   if url:find("p4_observer_contract.lua",1,true) then return modules.contract end
   if url:find("p4_native_observer.lua",1,true) then return modules.native end
   if url:find("stage98_client_offer_epoch.lua",1,true) then return modules.epoch end
+  if url:find("stage100_screen_prompt_overlay.lua",1,true) then
+   return modules.layout
+  end
   error("Unexpected requested module "..url)
  end
  local armed=true
@@ -173,6 +195,8 @@ local function scenario(mode)
  -- These mocks do not expose or click any MM2 TradeGUI controls.
  _G.UDim2={new=function(xs,xo,ys,yo)
   return {X={Scale=xs,Offset=xo},Y={Scale=ys,Offset=yo}}
+ end,fromOffset=function(x,y)
+  return {X={Scale=0,Offset=x},Y={Scale=0,Offset=y}}
  end}
  _G.UDim={new=function(scale,offset)
   return {Scale=scale,Offset=offset}
@@ -307,7 +331,7 @@ test("two-sided real original GUI ALT add→MAIN add→ALT remove",function()
  eq(t.report.finalPartnerSlotCount,0)
  assert(t.report.stage9Frames>=10)
  eq(t.ready,3)
- eq(t.sources,3)
+ eq(t.sources,4)
  eq(t.report.onScreenGuideShown,true)
  eq(t.report.onScreenGuideFinalShown,true)
  eq(t.report.onScreenGuideCurrentStep,"COMPLETE - CLIENT GUI ONLY")
@@ -318,8 +342,9 @@ test("two-sided real original GUI ALT add→MAIN add→ALT remove",function()
  eq(t.guideSteps[4].step,"STEP 4/4: ALT REMOVE")
  assert(t.guideSteps[2].instruction:find("On ALT:",1,true))
  assert(t.guideSteps[3].instruction:find("On MAIN:",1,true))
- eq(t.guidePanel.Draggable,true)
- eq(t.guidePanel.Active,true)
+ eq(t.guidePanel.Draggable,false)
+ eq(t.guidePanel.Active,false)
+ eq(t.report.onScreenGuideNonOverlappingTrade,true)
  eq(t.guideDismiss.Visible,true)
  denied(t)
 end)
@@ -329,7 +354,7 @@ test("on-screen prompt cannot initialize: fail closed rather than console-only",
  eq(t.report.reason,"IN_GAME_PROMPT_PANEL_UNAVAILABLE")
  eq(t.report.onScreenGuideShown,false)
  eq(t.report.observedAltAdd,false)
- eq(t.sources,0)
+ eq(t.sources,1)
  eq(t.ready,0)
  denied(t)
 end)
@@ -343,6 +368,47 @@ test("on-screen guide reports safe timeout visibly and can be dismissed afterwar
  assert(type(t.guideDismiss.closeCallback)=="function")
  t.guideDismiss.closeCallback()
  eq(t.promptGui.destroyed,true)
+ denied(t)
+end)
+test("geometry planner chooses corners outside trade for varied screen layouts",function()
+ local cases={
+  {vp={x=1024,y=768},r={x=330,y=190,w=360,h=385}},
+  {vp={x=1024,y=768},r={x=0,y=100,w=685,h=615}},
+  {vp={x=768,y=1024},r={x=230,y=280,w=385,h=400}},
+  {vp={x=1366,y=1024},r={x=335,y=190,w=705,h=700}}
+ }
+ for i,c in ipairs(cases) do
+  local p,why=Layout.choose(c.vp,c.r,{w=292,h=154})
+  assert(p,"missing free corner: "..tostring(why).." case "..i)
+  assert(p.x>=14 and p.y>=72)
+  assert(p.x+p.w<=c.vp.x-14 and p.y+p.h<=c.vp.y-34)
+  assert(not (
+    p.x<c.r.x+c.r.w+12 and p.x+p.w>c.r.x-12 and
+    p.y<c.r.y+c.r.h+12 and p.y+p.h>c.r.y-12
+  ),"panel overlaps trade GUI: "..i)
+ end
+end)
+test("native overlay repositions to safe right side when trade occupies left",function()
+ local t=scenario({tradeRight=true})
+ eq(t.report.status,"CLIENT_TWO_SIDED_OFFER_WITHDRAWAL_EPOCH_OBSERVED",t.report.reason)
+ assert(t.guidePanel.Position.X.Offset>700,"expected right safe strip")
+ eq(t.report.onScreenGuideNonOverlappingTrade,true)
+ denied(t)
+end)
+test("full-screen trade leaves no safe panel space; fail closed rather than cover",function()
+ local t=scenario({tradeFullscreen=true})
+ eq(t.report.status,"INCONCLUSIVE")
+ eq(t.report.reason,"ONSCREEN_GUIDE_NO_SAFE_SPACE_OUTSIDE_TRADE")
+ eq(t.report.observedAltAdd,false)
+ eq(t.report.onScreenGuideNonOverlappingTrade,false)
+ denied(t)
+end)
+test("tiny viewport cannot fit safe instructions; no manual prompts authorised",function()
+ local t=scenario({tinyViewport=true})
+ eq(t.report.status,"INCONCLUSIVE")
+ eq(t.report.onScreenGuideShown,true)
+ eq(t.report.onScreenGuidePlacementFailures>0,true)
+ eq(t.ready,0)
  denied(t)
 end)
 test("manual trade window appears after startup",function()
