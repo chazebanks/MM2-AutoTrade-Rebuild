@@ -128,6 +128,9 @@ local cases={
  function(x)x.screen.Enabled=false end,
  function(x)x.accepted.Visible=true end,
  function(x)x.t:FindFirstChild("YourOffer").children.Container=nil end,
+ function(x)x.E.PDIDDLER_OUTGOING_SESSION=1 end,
+ function(x)x.E.PDIDDLER_PART4_SESSION=1 end,
+ function(x)x.E.GINGERSCOPE_STAGE106_READONLY_WITNESS={running=true} end,
 }
 for i,alter in ipairs(cases) do
  local x=create()
