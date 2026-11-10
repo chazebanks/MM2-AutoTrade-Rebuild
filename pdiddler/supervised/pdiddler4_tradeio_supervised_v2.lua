@@ -492,7 +492,10 @@ function M.new(scanner,supervisedGate)
             return false,"PROTECTED_GINGERSCOPE_OUTGOING"
         end
         if type(item.id)~="string" or item.id=="" or #item.id>90
-            or item.id:find("[%c]") then
+            or item.id:find("[%c]")
+            or (item.rawKey~=nil and type(item.rawKey)~="string")
+            or (item.key~=nil and type(item.key)~="string")
+            or (item.name~=nil and type(item.name)~="string") then
             return false,"OFFER_ITEM_ID_INVALID"
         end
         if not OfferItem or not OfferItem:IsA("RemoteEvent") then
