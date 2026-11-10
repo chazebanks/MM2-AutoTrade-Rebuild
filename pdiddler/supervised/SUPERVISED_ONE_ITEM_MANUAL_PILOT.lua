@@ -36,7 +36,8 @@ if E.PDIDDLER_PART4_SESSION~=nil
     warn("[SUPERVISED PILOT] other trade/test session owner present; use a fresh server")
     return nil
 end
-if E.PDIDDLER_SUPERVISED_ONE_ITEM_SPENT_JOB==game.JobId then
+if E.PDIDDLER_SUPERVISED_ONE_ITEM_SPENT_JOB==game.JobId
+    or E.PDIDDLER_SUPERVISED_ONE_ITEM_GUIDE_JOB==game.JobId then
     warn("[SUPERVISED PILOT] one offer already attempted in this job")
     return nil
 end
@@ -220,7 +221,9 @@ local function makeGuide(pg)
     end
     function guide:fail(why)
         self.stopped=true
-        self.reason="ONSCREEN_GUIDE_"..tostring(why or "UNAVAILABLE")
+        local raw=tostring(why or "UNAVAILABLE")
+        self.reason=raw:find("^ONSCREEN_GUIDE_") and raw
+            or ("ONSCREEN_GUIDE_"..raw)
         self.layoutFailures+=1
         ui.frame.Visible=false
         return false,self.reason
@@ -314,6 +317,7 @@ if not guide then
     warn("[SUPERVISED PILOT] "..tostring(guideWhy).."; no offer attempted")
     return blocked(guideWhy)
 end
+E.PDIDDLER_SUPERVISED_ONE_ITEM_GUIDE_JOB=game.JobId
 local shown,showWhy=guide:show("OPEN",nil)
 if not shown then
     warn("[SUPERVISED PILOT] "..tostring(showWhy).."; no offer attempted")
@@ -407,6 +411,12 @@ report.mayRecordCompletedTrade=false
 report.mayReportProfit=false
 report.maySendDiscordWebhook=false
 report.mayUseForStrategyLearning=false
+-- Show the third instruction after the actual client offer observation.
+-- It does not authorize a second attempt or any final Accept.
+if not guide.stopped then
+    guide:show("VERIFY",visibleRoot)
+    task.wait(0.15)
+end
 -- Leave final on-screen PASS/STOP visible until the user dismisses it.
 -- These are client-side observations only; never infer settlement/profit.
 report.onScreenGuideShown=true
