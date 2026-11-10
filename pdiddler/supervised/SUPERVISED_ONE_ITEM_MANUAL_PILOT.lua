@@ -62,7 +62,7 @@ local ioModule=loadFrozen(
     "a599c31c53d25e6799b9d631f45f282b445dcda0",
     "supervised/pdiddler4_tradeio_supervised_v2.lua")
 local pilot=loadFrozen(
-    "ee1bb98264963bbfaa9e760f21a613ba4ffe7d77",
+    "9540fc5fc3576729f9dd308d8d8222d848e27063",
     "supervised/supervised_one_item_policy.lua")
 if not ioModule or type(ioModule.new)~="function"
     or not pilot or type(pilot.run)~="function" then
