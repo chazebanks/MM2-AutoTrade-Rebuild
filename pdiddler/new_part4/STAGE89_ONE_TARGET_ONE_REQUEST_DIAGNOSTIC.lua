@@ -197,10 +197,22 @@ local function run()
  if not live() or not game:IsLoaded() or targetName:lower()==LP.Name:lower() then
   return finish("HELD","GAME_OR_TARGET_UNAVAILABLE")
  end
- target=Players:FindFirstChild(targetName)
- if not target or target==LP or target.Name~=targetName or
+ -- Roblox username matching is case-insensitive, but only a unique
+ -- CURRENT Player object is eligible. Never use DisplayName or fuzzy aliases.
+ for _,candidate in ipairs(Players:GetPlayers()) do
+  if candidate~=LP and candidate.Parent==Players
+     and candidate:IsA("Player") and type(candidate.Name)=="string"
+     and candidate.Name:lower()==targetName:lower() then
+   if target~=nil then
+    return finish("HELD","AMBIGUOUS_CURRENT_USERNAME")
+   end
+   target=candidate
+  end
+ end
+ if not target or target==LP or
     not target:IsA("Player") or target.UserId==LP.UserId or
-    target.Parent~=Players then
+    target.Parent~=Players or
+    Players:GetPlayerByUserId(target.UserId)~=target then
   return finish("HELD","EXACT_TARGET_NOT_IN_CURRENT_SERVER")
  end
  R.exactTargetClientBound=true
