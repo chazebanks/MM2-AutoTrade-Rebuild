@@ -45,7 +45,7 @@ local function node(class,name)
  function o:Destroy()self.Parent=nil;self.Visible=false end
  return o
 end
-local scannerCode=String.raw`
+local scannerCode=[[
 local P=game:GetService("Players")
 local api={}
 function api.getWhitelist()return{}end
@@ -58,8 +58,8 @@ function api.isWhitelisted(uid)return P:GetPlayerByUserId(uid)~=nil end
 function api.setStatus()end
 function api.setRequestState()end
 return api
-`
-local outgoingCode=String.raw`
+]]
+local outgoingCode=[[
 local M={}
 function M.run(scanner,opt)
  local E=getgenv()
@@ -91,8 +91,8 @@ function M.run(scanner,opt)
  return obj
 end
 return M
-`
-local watchdogCode=String.raw`
+]]
+local watchdogCode=[[
 local M={}
 function M.new(supervisor,p3,io,ctx,scheduler)
  local E=getgenv()
@@ -128,7 +128,7 @@ function M.new(supervisor,p3,io,ctx,scheduler)
  return obj
 end
 return M
-`
+]]
 local function fakeEnv(options)
  options=options or {}
  local pg=node("PlayerGui","PlayerGui")
