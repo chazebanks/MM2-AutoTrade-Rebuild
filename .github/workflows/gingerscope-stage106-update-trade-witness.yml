@@ -76,7 +76,9 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           path = Path('pdiddler/new_part4/STAGE106_READONLY_TWO_SIDED_UPDATE_TRADE_WITNESS.lua')
+          import re
           source = path.read_text()
+          normalized = re.sub(r'\s*=\s*', '=', source)
           for marker in (
               'eventSessionAssociationProven=false',
               'callbackCausalityProven=false',
@@ -90,7 +92,7 @@ jobs:
               'READY_MAIN_ADD_ONE',
               'ONSCREEN_GUIDE_NO_SAFE_SPACE_OUTSIDE_TRADE',
           ):
-              assert marker in source, marker
+              assert marker in normalized, marker
           for forbidden in (
               ':FireServer(', ':InvokeServer(', 'VirtualInputManager',
               'SendMouseButtonEvent(', 'TeleportService', 'HttpPost(',
