@@ -31,6 +31,19 @@ def run_lua(test, environment):
 
 
 class Stage106ReadOnlyWitnessTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        if os.environ.get("STAGE106_REQUIRE_PINNED") != "1":
+            raise unittest.SkipTest("Stage106 integration only runs with pinned original Lua sources")
+        for key in (
+            "STAGE106_STAGE9_NATIVE", "STAGE106_STAGE9_CONTRACT",
+            "STAGE106_STAGE83_REGISTRY", "STAGE106_STAGE101_MATCHER",
+            "STAGE106_STAGE100_OVERLAY", "STAGE106_STAGE101_TEST",
+        ):
+            path = os.getenv(key)
+            if not path or not Path(path).is_file():
+                raise RuntimeError("Missing pinned Stage106 source: " + key)
+
     def test_pinned_stage101_original_source_regressions(self):
         self.assertTrue(STAGE101_TEST, "Stage101 test must be fetched at its pinned SHA")
         output = run_lua(
