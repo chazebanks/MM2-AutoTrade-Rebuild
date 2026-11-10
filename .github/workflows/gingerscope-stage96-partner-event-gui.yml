@@ -1,0 +1,93 @@
+name: Gingerscope Stage96 partner UpdateTrade-to-GUI source boundary (offline)
+on:
+  push:
+    branches:
+      - research/gingerscope-stage96-partner-event-gui-correlation
+    paths:
+      - 'pdiddler/intelligence_lab/stage96_partner_event_gui_correlation.lua'
+      - 'pdiddler/tests/test_stage96_partner_event_gui_correlation.lua'
+      - 'pdiddler/tests/test_stage96_partner_event_gui_driver.py'
+      - 'pdiddler/intelligence_lab/STAGE96_PARTNER_EVENT_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage96-partner-event-gui.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage96_partner_event_gui_correlation.lua'
+      - 'pdiddler/tests/test_stage96_partner_event_gui_correlation.lua'
+      - 'pdiddler/tests/test_stage96_partner_event_gui_driver.py'
+      - 'pdiddler/intelligence_lab/STAGE96_PARTNER_EVENT_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage96-partner-event-gui.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-p4-and-original-actor-events:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4 for native-language source testing
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Fetch and verify untouched actual Stage9, Stage42/43/44, Stage83 original Git blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope96
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope96/stage9.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/a37660ec0bcb4a7472a3e8f672a1bacc35b2f684/pdiddler/new_part4/p4_stage42_player_orientation.lua" -o /tmp/gingerscope96/stage42.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/a37660ec0bcb4a7472a3e8f672a1bacc35b2f684/pdiddler/new_part4/p4_stage43_dynamic_own_offer.lua" -o /tmp/gingerscope96/stage43.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/a37660ec0bcb4a7472a3e8f672a1bacc35b2f684/pdiddler/new_part4/p4_stage44_client_offer_state.lua" -o /tmp/gingerscope96/stage44.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua" -o /tmp/gingerscope96/stage83.lua
+          test "$(git hash-object /tmp/gingerscope96/stage9.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          test "$(git hash-object /tmp/gingerscope96/stage42.lua)" = 28c7b965bb883e804c2243a551033c327b57d0e5
+          test "$(git hash-object /tmp/gingerscope96/stage43.lua)" = f87f5da359e72ee9db713f1d980bbac9e5ac5608
+          test "$(git hash-object /tmp/gingerscope96/stage44.lua)" = 5bdab71593fe9f707570a9e96d27727f8badbdae
+          test "$(git hash-object /tmp/gingerscope96/stage83.lua)" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          test "$(git hash-object pdiddler/intelligence_lab/stage95_p4_public_slot_boundary.lua)" = e1c75920b0118a5b2a947bb3e01943eb74e65359
+          echo STAGE96_SIX_PINNED_ORIGINAL_GIT_BLOBS_VERIFIED
+      - name: Actual Lua5.4 500-mutant replay through original source, executed by Python
+        env:
+          STAGE96_REQUIRE_PINNED: '1'
+          STAGE96_MODULE: pdiddler/intelligence_lab/stage96_partner_event_gui_correlation.lua
+          STAGE96_STAGE95: pdiddler/intelligence_lab/stage95_p4_public_slot_boundary.lua
+          STAGE96_ORIGINAL_STAGE9: /tmp/gingerscope96/stage9.lua
+          STAGE96_ORIGINAL_STAGE42: /tmp/gingerscope96/stage42.lua
+          STAGE96_ORIGINAL_STAGE43: /tmp/gingerscope96/stage43.lua
+          STAGE96_ORIGINAL_STAGE44: /tmp/gingerscope96/stage44.lua
+          STAGE96_ORIGINAL_STAGE83: /tmp/gingerscope96/stage83.lua
+        run: |
+          set -euo pipefail
+          python3 -m py_compile pdiddler/tests/test_stage96_partner_event_gui_driver.py
+          python3 -m unittest -v pdiddler.tests.test_stage96_partner_event_gui_driver
+      - name: Fail if Stage96 introduces remote input, value or settlement authority
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path("pdiddler/intelligence_lab/stage96_partner_event_gui_correlation.lua").read_text()
+          for required in (
+              "eventSessionAssociationProven=false",
+              "callbackCausalityProven=false",
+              "rawItemIdConfirmed=false",
+              "authorizesTrade=false,authorizesAccept=false",
+              "serverAttestation=false,serverCompletionProven=false",
+              "currentPricesVerified=false",
+              "maySendDiscordWebhook=false,mayUseForStrategyLearning=false",
+              "CLIENT_PARTNER_EVENT_GUI_NAME_QTY_CONSISTENT_UNATTRIBUTED",
+              "CLIENT_PARTNER_EVENT_GUI_RAW_TEXT_CONSISTENT_UNATTRIBUTED",
+              "EVENT_COUNT_NOT_EXACTLY_ONE","CALLBACK_GUI_TIMING_NOT_BOUNDED",
+              "PHYSICAL_PARTNER_GUI_SLOT_UNSTABLE",
+          ):
+              assert required in s,required
+          for forbidden in ("FireServer(", "InvokeServer(", "HttpPost(",
+                            "TeleportService", "VirtualInputManager",
+                            "SendMouseButtonEvent(", "AcceptTrade(", "DeclineTrade(",
+                            "getconnections(", "loadstring(game:HttpGet"):
+              assert forbidden not in s,forbidden
+          print("STAGE96_READ_ONLY_CLIENT_UNATTRIBUTED_POLICY_PASS")
+          PY
