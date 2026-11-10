@@ -123,15 +123,11 @@ local function exportResult(report)
         return false
     end
     E.PDIDDLER_SUPERVISED_ONE_ITEM_LAST_SANITIZED_JSON=json
-    local copyFn=nil
-    for _,fn in ipairs({setclipboard,toclipboard}) do
-        if type(fn)=="function" then copyFn=fn;break end
-    end
-    if not copyFn then
-        for _,fn in ipairs({E.setclipboard,E.toclipboard}) do
-            if type(fn)=="function" then copyFn=fn;break end
-        end
-    end
+    local copyFn=type(setclipboard)=="function" and setclipboard
+        or type(toclipboard)=="function" and toclipboard
+        or type(E.setclipboard)=="function" and E.setclipboard
+        or type(E.toclipboard)=="function" and E.toclipboard
+        or nil
     local copied=false
     if copyFn then
         copied=pcall(copyFn,json)
@@ -373,7 +369,10 @@ E.PDIDDLER_SUPERVISED_ONE_ITEM_GUIDE_JOB=game.JobId
 local shown,showWhy=guide:show("OPEN",nil)
 if not shown then
     warn("[SUPERVISED PILOT] "..tostring(showWhy).."; no offer attempted")
-    return blocked(showWhy)
+    local report=blocked(showWhy)
+    E.PDIDDLER_SUPERVISED_ONE_ITEM_RESULT=report
+    exportResult(report)
+    return report
 end
 local visibleRoot=nil
 for _=1,120 do
