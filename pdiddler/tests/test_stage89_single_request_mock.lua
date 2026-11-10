@@ -55,7 +55,15 @@ local function scenario(mode)
  local lp={Name="test_self",UserId=1,Parent=players}
  function lp:IsA(v)return v=="Player" end
  players.LocalPlayer=lp
- local target={Name="test_partner",UserId=2,Parent=players}
+ local target={Name=mode.actualTargetName or "test_partner",UserId=2,Parent=players}
+ function players:GetPlayers()
+  if mode.ambiguousName then
+   local other={Name=target.Name:upper(),UserId=3,Parent=players}
+   function other:IsA(k)return k=="Player" end
+   return {lp,target,other}
+  end
+  return {lp,target}
+ end
  function lp:FindFirstChildOfClass(k)
   assert(k=="PlayerGui")
   return self.gui
@@ -216,6 +224,22 @@ group("real Stage87 partner and own candidate + exact manual card gives ONE requ
  assert(r.report.ownContactEvidenceReady==true)
  assert(e.clipboard:find("[GINGERSCOPE STAGE89 SINGLE REQUEST]",1,true))
  safe(r,s)
+end)
+group("capitalization variants still bind unique exact Roblox username",function()
+ local r,s=scenario({user="TEST_PARTNER"})
+ assert(r.report.status=="CLIENT_PENDING_OBSERVED" and s.mouseDown==1)
+ safe(r,s)
+ local r2,s2=scenario({user="Venossgaming90190",actualTargetName="venossgaming90190"})
+ assert(r2.report.status=="CLIENT_PENDING_OBSERVED" and s2.mouseDown==1)
+ safe(r2,s2)
+end)
+group("wrong username and ambiguous folded username never tap",function()
+ local r,s=scenario({user="not_the_target"})
+ assert(r.report.status=="HELD" and s.mouseDown==0)
+ safe(r,s)
+ local r2,s2=scenario({ambiguousName=true})
+ assert(r2.report.status=="HELD" and s2.mouseDown==0)
+ safe(r2,s2)
 end)
 group("no pending confirmation never causes a second click",function()
  local r,s=scenario({pendingAfterTap=false})
