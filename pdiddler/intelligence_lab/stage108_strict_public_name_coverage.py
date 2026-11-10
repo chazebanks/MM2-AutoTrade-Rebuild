@@ -173,8 +173,11 @@ def audit(registry_bytes:bytes,html_pages:dict,parse_page)->dict:
         counts=compare_public_names(entries,parsed)
     except (Reject,UnicodeError,ValueError,TypeError,KeyError,AttributeError):
         return _deny("ORIGINAL_PUBLIC_CATALOGUE_NAME_BRIDGE_INCONCLUSIVE")
+    status=("HISTORICAL_SITE_NAME_COVERAGE_ALL_REGISTRY_ENTRIES_UNATTRIBUTED"
+            if counts["unresolvedRegistryNameCount"]==0 else
+            "HISTORICAL_PUBLIC_NAME_COVERAGE_PARTIAL")
     return _deny("HISTORICAL_ONLY_NO_GAME_OR_PRICE_AUTHORITY",
-                 status="HISTORICAL_PUBLIC_NAME_COVERAGE_PARTIAL",
+                 status=status,
                  registryReferencePublisherUtc=REGISTRY_PUBLISHER,
                  officialSourcePublisherUtc=SOURCE_PUBLISHER,
                  **counts)
