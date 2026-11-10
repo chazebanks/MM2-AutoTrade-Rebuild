@@ -78,7 +78,7 @@ jobs:
           path = Path('pdiddler/new_part4/STAGE106_READONLY_TWO_SIDED_UPDATE_TRADE_WITNESS.lua')
           import re
           source = path.read_text()
-          normalized = re.sub(r'\\s*=\\s*', '=', source)
+          normalized = re.sub(r'\s*=\s*', '=', source)
           for marker in (
               'eventSessionAssociationProven=false',
               'callbackCausalityProven=false',
