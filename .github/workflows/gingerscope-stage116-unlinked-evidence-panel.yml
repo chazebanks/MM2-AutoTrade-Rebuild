@@ -6,6 +6,7 @@ on:
       - 'pdiddler/new_part4/stage116_safe_panel_geometry.lua'
       - 'pdiddler/new_part4/STAGE116_READONLY_EVIDENCE_PANEL.lua'
       - 'pdiddler/ci/stage116_client_evidence_view_tests.luau'
+      - 'pdiddler/ci/stage116_native_wrapper_mocks.luau'
       - '.github/workflows/gingerscope-stage116-unlinked-evidence-panel.yml'
       - 'pdiddler/intelligence_lab/STAGE116_EVIDENCE_PANEL_HANDOFF.md'
   push:
@@ -38,6 +39,11 @@ jobs:
           set -euo pipefail
           "$RUNNER_TEMP/lune" --version
           "$RUNNER_TEMP/lune" run pdiddler/ci/stage116_client_evidence_view_tests.luau
+      - name: Execute ACTUAL native wrapper under mocked Roblox GUI/viewport
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage116_native_wrapper_mocks.luau
       - name: No IO or action authority in view or script
         shell: bash
         run: |
