@@ -51,7 +51,15 @@ local function liveStatus(io,actors,localPlayer,target,trade)
     if not accepted or type(accepted.Visible)~="boolean" then
         return false,"OWN_ACCEPT_STATE_UNKNOWN"
     end
-    if accepted.Visible~=false or io.acceptedTheir(trade)~=false then
+    -- Original MM2 TradeModule toggles TheirOffer.Accepted.Visible. If
+    -- that client indicator is missing/unreadable, a fallback scan returning
+    -- false is not proof that the other party has NOT accepted.
+    local theirAccepted=their:FindFirstChild("Accepted")
+    if not theirAccepted or type(theirAccepted.Visible)~="boolean" then
+        return false,"THEIR_ACCEPT_STATE_UNKNOWN"
+    end
+    if accepted.Visible~=false or theirAccepted.Visible~=false
+        or io.acceptedTheir(trade)~=false then
         return false,"ACCEPT_ALREADY_SET"
     end
     local state=io.readSide(trade,"YourOffer")
