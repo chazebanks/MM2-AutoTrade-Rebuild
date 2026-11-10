@@ -92,8 +92,8 @@ local function scene()
  local function execute()
   return luau.load(wrapper,{environment=env,injectGlobals=true})()
  end
- local function tick()
-  current+=0.3
+ local function tick(delta)
+  current+=(delta or 0.3)
   render:Fire()
  end
  return {E=E,pg=pg,world=world,game=game,tick=tick,execute=execute,
@@ -132,7 +132,8 @@ local gui=sim.node("ScreenGui");gui.Name="TradeGUI";gui.Enabled=true;gui.Parent=
 local container=sim.node("Frame");container.Name="Container";container.Parent=gui
 local trade=sim.node("Frame");trade.Name="Main";trade.Parent=container
 trade.AbsolutePosition={X=0,Y=80};trade.AbsoluteSize={X=480,Y=460}
-sim.tick()
+-- The very NEXT frame must be collision-safe, not 250ms later.
+sim.tick(0)
 check(frame.Visible==true,"display repositioned when trade became visible")
 local pos=frame.Position
 local w,h=frame.Size.X,frame.Size.Y
