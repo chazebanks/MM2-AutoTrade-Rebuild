@@ -244,17 +244,42 @@ test("partial event/GUI offer is rejected, not relabeled as fully matched",funct
   eq(p,nil);denied(r)
  end
 end)
-test("four-copy / four-slot bound blocks oversize and dishonest stacks",function()
+test("four physical slots allow five stacked copies without granting trade authority",function()
+ -- MM2 permits four distinct slots, with duplicates stacked within one slot.
  local i=newFixture({ourGui={},ourEvent={},
-  theirGui={slot(1,"Batwing","x3",false),slot(2,"Batwing","x2",false)},
-  theirEvent={{"Scythe",3,"Weapons"},{"Scythe",2,"Weapons"}}})
+   theirGui={slot(1,"Batwing","x5",false)},
+   theirEvent={{"Scythe",5,"Weapons"}}})
+ local r,p=inspect(i)
+ eq(r.status,"CLIENT_MULTISLOT_RAW_KEY_CANDIDATES_MATCH_GUI_UNATTRIBUTED",r.reason)
+ eq(r.theirMatchedSlotCount,1);eq(p.theirs[1].quantity,5)
+ denied(r)
+end)
+test("two physical slots may hold seven stacked copies",function()
+ local i=newFixture({ourGui={},ourEvent={},
+   theirGui={slot(1,"Batwing","x3",false),slot(2,"Batwing","x4",false)},
+   theirEvent={{"Scythe",3,"Weapons"},{"Scythe",4,"Weapons"}}})
+ local r,p=inspect(i)
+ eq(r.status,"CLIENT_MULTISLOT_RAW_KEY_CANDIDATES_MATCH_GUI_UNATTRIBUTED",r.reason)
+ eq(r.theirMatchedSlotCount,2)
+ eq(p.theirs[1].quantity,3);eq(p.theirs[2].quantity,4)
+ denied(r)
+end)
+test("original Stage9 quantity parser still rejects values above one million",function()
+ local i=newFixture({ourGui={},ourEvent={},
+   theirGui={slot(1,"Batwing","x1000001",false)},
+   theirEvent={{"Scythe",1000001,"Weapons"}}})
  local r,p=inspect(i)
  eq(r.status,"INCONCLUSIVE");eq(p,nil);denied(r)
- local j=newFixture()
- j.after1.raw.their.slots[2].amountText="x5"
- j.after2.raw.their.slots[2].amountText="x5"
- r=inspect(j)
- eq(r.status,"INCONCLUSIVE");denied(r)
+end)
+test("five distinct physical slots remain invalid",function()
+ local rows,events={},{}
+ for j=1,5 do
+   rows[j]=slot(j,"Batwing","",false)
+   events[j]={"Scythe",1,"Weapons"}
+ end
+ local i=newFixture({ourGui={},ourEvent={},theirGui=rows,theirEvent=events})
+ local r,p=inspect(i)
+ eq(r.status,"INCONCLUSIVE");eq(p,nil);denied(r)
 end)
 test("client Player, root, job, acceptance and event session mismatch fail closed",function()
  local variants={
