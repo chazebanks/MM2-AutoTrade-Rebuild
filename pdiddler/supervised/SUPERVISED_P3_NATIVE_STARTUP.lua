@@ -53,7 +53,7 @@ local coordinator=loadFrozen("dfcfc7d52ce5f9cc64390bb5e28ce79512f1c001",
     "supervised/supervised_real_p3_rotation_handoff.lua")
 local outgoingModule=loadFrozen("2036ae5bd937620f21d46600f99550a1b233a654",
     "supervised/pdiddler3_outgoing_START_GATED_v1.lua")
-local bootModule=loadFrozen("f34546b446f86d059c6792ffb9da31aea1251eac",
+local bootModule=loadFrozen("eed876c67d916d6acee89bb8fdc450e5e397dd9c",
     "supervised/supervised_p3_startup_supervisor.lua")
 local watchdogModule=loadFrozen("48c4b0fee594639c74f1bed408581db7a5bc6f1b",
     "supervised/supervised_p3_continuous_watchdog.lua")
