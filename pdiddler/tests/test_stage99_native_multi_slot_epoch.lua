@@ -32,6 +32,7 @@ local function scenario(mode)
  local phase=0
  local phaseAt=0
  local actions={}
+ local extraSecondRevisionDone=false
  local errorDetails=nil
  local readyCount=0
  local sources=0
@@ -202,6 +203,14 @@ local function scenario(mode)
     end
    end
   end
+  if mode.extraSecondRevision and phase==2 and actions[2] and
+     not extraSecondRevisionDone and elapsed-phaseAt>=.42 then
+   extraSecondRevisionDone=true
+   local slot=theirBox:FindFirstChild("NewItem2")
+   local label=slot and slot:FindFirstChild("ItemName")
+   label=label and label:FindFirstChild("Label")
+   if label then label.Text="AnotherVisibleItem" end
+  end
  end
  os.clock=function()return elapsed end
  _G.xpcall=function(fn,handler)
@@ -292,6 +301,12 @@ test("duplicate display type or replacing first item fails scoped identity test"
   eq(t.report.reason,"SECOND_ITEM_NOT_DISTINCT_OR_FIRST_REPLACED")
   denied(t)
  end
+end)
+test("two different GUI revisions during one prompted action must refuse a clean pass",function()
+ local t=scenario({extraSecondRevision=true})
+ eq(t.report.status,"INCONCLUSIVE")
+ eq(t.report.reason,"MORE_THAN_ONE_VISUAL_REVISION_IN_PHASE")
+ denied(t)
 end)
 test("removal must preserve one of the two previously observed items",function()
  local t=scenario({wrongRemaining=true})
