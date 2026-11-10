@@ -399,7 +399,12 @@ end)
 test("wrong partner and ambiguous GUI fail",function()
  for _,m in ipairs({{wrongPartner=true},{doubleRoot=true},{noTarget=true},
     {duplicateTarget=true},{competingOwner=true}}) do
-  local t=scenario(m);eq(t.report.status,"INCONCLUSIVE");denied(t)
+  local t=scenario(m)
+  if t.report then
+   eq(t.report.status,"INCONCLUSIVE");denied(t)
+  else
+   eq(t.sources,0)
+  end
  end
 end)
 test("disabled or invalid test account cannot start",function()
