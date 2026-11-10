@@ -42,7 +42,7 @@ local function node(kind,name)
  function o:Destroy()self.Parent=nil;self.Visible=false end
  return o
 end
-local SCANNER_SOURCE=String.raw[[local Players=game:GetService("Players")
+local SCANNER_SOURCE=[[local Players=game:GetService("Players")
 local me=Players.LocalPlayer
 local pg=me:FindFirstChildOfClass("PlayerGui")
 local ui=Instance.new("ScreenGui")
@@ -66,7 +66,7 @@ function M.hasPendingWork()return false end
 function M.setStatus(text)return true end
 function M.setRequestState(target,state,extra)end
 return M]]
-local OUTGOING_SOURCE=String.raw[[local M={}
+local OUTGOING_SOURCE=[[local M={}
 function M.run(scanner,opts)
  local E=getgenv()
  E.PDIDDLER_OUTGOING_SESSION=18
