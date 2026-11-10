@@ -78,7 +78,7 @@ local function create()
      if url:find("a599c31c53d25e6799b9d631f45f282b445dcda0",1,true)
        and url:find("pdiddler4_tradeio_supervised_v2.lua",1,true)
      then return tradeIOSource end
-     if url:find("ee1bb98264963bbfaa9e760f21a613ba4ffe7d77",1,true)
+     if url:find("9540fc5fc3576729f9dd308d8d8222d848e27063",1,true)
        and url:find("supervised_one_item_policy.lua",1,true)
      then return policySource end
      error("not pinned public source")
