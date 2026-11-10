@@ -261,9 +261,9 @@ local function finish(status,reason)
   local detail=isPass and
    "All three manual changes observed. No trade occurred. Copy the sanitized Stage103 report from Delta." or
    ("Stopped safely: "..tostring(reason)..". No final Accept. Copy the Stage103 report from Delta.")
-  if isPass then
-   -- Keep the dated reference values readable until the user dismisses X.
-   -- Do not replace them with a generic success message.
+  if isPass or reason=="PROTECTED_GINGERSCOPE_IN_OUR_OFFER" then
+   -- Keep the dated references OR the explicit protected-item warning
+   -- readable until the user dismisses X, never replace them by generic text.
    R.onScreenGuideFinalShown=true
    pcall(function()guide.close.Visible=true end)
   elseif showGuide(label,detail) then
