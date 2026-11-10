@@ -69,7 +69,7 @@ class OriginalStage102Lua(unittest.TestCase):
         if OUTPUT.exists():
             self.assertEqual(OUTPUT.read_bytes(),self.encoded)
 
-    def test_actual_original_lua_and_full_archive_12_groups(self):
+    def test_actual_original_lua_and_full_archive_15_groups(self):
         with tempfile.TemporaryDirectory() as tmp:
             p=Path(tmp)/"original189.lua"
             p.write_text("return "+as_lua(self.archive)+"\n",encoding="utf-8")
@@ -83,8 +83,8 @@ class OriginalStage102Lua(unittest.TestCase):
                 capture_output=True,text=True,env=env,timeout=45)
             self.assertEqual(t.returncode,0,t.stdout+"\n"+t.stderr)
             lines=[z for z in t.stdout.splitlines() if z.startswith("PASS Stage102 ")]
-            self.assertEqual(len(lines),12,t.stdout)
-            self.assertIn("STAGE102_FULL_ARCHIVE_LUA_TEST_PASS groups=12",t.stdout)
+            self.assertEqual(len(lines),15,t.stdout)
+            self.assertIn("STAGE102_FULL_ARCHIVE_LUA_TEST_PASS groups=15",t.stdout)
 
     def test_no_remote_or_accept_path_in_pure_lua_engine(self):
         s=ENGINE.read_text()

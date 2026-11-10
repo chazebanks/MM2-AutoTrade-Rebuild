@@ -120,9 +120,9 @@ jobs:
           mkdir -p /tmp/gingerscope102
           base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
           curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope102/stage9.lua
-          curl -fsSL --retry 3 --max-time 45 "$base/642768973f5eb560a184119237c44c84697a208f/pdiddler/intelligence_lab/stage98_client_offer_epoch.lua" -o /tmp/gingerscope102/stage98.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/13499756914369620d4f582625d2f22367598959/pdiddler/intelligence_lab/stage98_client_offer_epoch.lua" -o /tmp/gingerscope102/stage98.lua
           test "$(git hash-object /tmp/gingerscope102/stage9.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
-          test "$(git hash-object /tmp/gingerscope102/stage98.lua)" = 748639e88823198fd7cc0dce92fba49ad07e2729
+          test "$(git hash-object /tmp/gingerscope102/stage98.lua)" = 14a39abdcd6e585b96b7b779738f11838cc93183
           python3 -m py_compile pdiddler/intelligence_lab/stage102_export_public_reference.py pdiddler/tests/test_stage102_public_lua_bridge.py
           python3 -m unittest -v pdiddler.tests.test_stage102_public_lua_bridge
           python3 -m pdiddler.intelligence_lab.stage102_export_public_reference --verify-existing --emit
