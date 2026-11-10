@@ -70,7 +70,7 @@ local bridgeModule=loadFrozen(
     "616f905739ffb7bf70183475a79ec6c278dc9ddb",
     "supervised/supervised_p3_p4_handoff.lua")
 local planModule=loadFrozen(
-    "e0dc690e6bf322e3a43c685547a817d1eda0761f",
+    "4f186f3ad1db538512a735e1a18e220f23e8715a",
     "supervised/supervised_four_slot_operator_plan.lua")
 if not ioModule or type(ioModule.new)~="function"
     or not bridgeModule or type(bridgeModule.bind)~="function"
