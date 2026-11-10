@@ -111,6 +111,10 @@ def evaluate(proposal: object, observation: object, catalog: object, *, now: int
         return _reject("OFFER_SLOTS_UNREADABLE_OR_EMPTY")
     if ours != current_ours or theirs != current_theirs:
         return _reject("OFFER_SLOTS_CHANGED")
+    # Stage83's exact public game key: protect Gingerscope on OUR side,
+    # regardless of a favorable research value. Receiving it is allowed.
+    if any(key == "Gingerscope" for _, key, _ in ours):
+        return _reject("PROTECTED_GINGERSCOPE_OUTGOING")
     items = catalog.get("items")
     if not isinstance(items, dict):
         return _reject("MARKET_ITEMS_MISSING")
