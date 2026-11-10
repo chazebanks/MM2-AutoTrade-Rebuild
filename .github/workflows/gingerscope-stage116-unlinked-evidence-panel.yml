@@ -50,10 +50,20 @@ jobs:
             "pdiddler/new_part4/STAGE116_READONLY_EVIDENCE_PANEL.lua"
           ):
             s=Path(file).read_text()
-            for bad in ("FireServer(", "InvokeServer(", "HttpGet(", "PostAsync(",
+            for bad in ("FireServer(", "InvokeServer(", "PostAsync(",
                         "Teleport(", "setclipboard(", "AcceptTrade(", "RequestTrade(",
                         "http.request(", "request("):
               assert bad not in s, (file,bad)
+            if file.endswith("EVIDENCE_PANEL.lua"):
+              # The ONLY network read allowed is fetching two immutably
+              # commit-pinned PUBLIC GitHub Luau modules, never uploading data.
+              assert s.count("game:HttpGet(")==1
+              assert '31cdd660f2d82ab50b548e5c8bc4e179c28312e6' in s
+              assert "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/" in s
+              assert "stage116_client_evidence_view" in s
+              assert "stage116_safe_panel_geometry" in s
+            else:
+              assert "HttpGet(" not in s
           pure=Path("pdiddler/new_part4/stage116_client_evidence_view.lua").read_text()
           for flag in ("authorizesAccept=false","authorizesTrade=false",
                        "mayRecordCompletedTrade=false","mayReportProfit=false",
