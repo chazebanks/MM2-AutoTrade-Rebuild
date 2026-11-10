@@ -336,5 +336,64 @@ do
  eq(#x.sends,0,"no sends for incomplete snapshots")
 end
 
+
+-- Every item needs a separately acknowledged live in-game step; advancing
+-- must occur after the previous item appeared in the actual offer GUI.
+do
+ local x=fixture()
+ simulateOffer(x)
+ local bound=getBound(x)
+ local observed={}
+ local approval=arm({"Iceblaster","Batwing","Laser"})
+ local r=x.plan.run(bound,x.io,x.gate,approval,{
+  wait=function()end,
+  onBeforeItem=function(i,total,visible)
+   table.insert(observed,{i,total,visible,#x.sends})
+   return true
+  end,
+ })
+ eq(r.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","guided 3 items complete")
+ eq(#observed,3,"three distinct mandatory steps")
+ for i,o in ipairs(observed) do
+  eq(o[1],i,"correct item number")
+  eq(o[2],3,"correct total")
+  eq(o[3],i-1,"previous visible slots verified before next step")
+  eq(o[4],i-1,"no send happens before on-screen step")
+ end
+end
+-- If the UI cannot show the next step, no next OfferItem may fire.
+do
+ local x=fixture()
+ simulateOffer(x)
+ local bound=getBound(x)
+ local r=x.plan.run(bound,x.io,x.gate,arm({"Iceblaster","Batwing"}),{
+  wait=function()end,
+  onBeforeItem=function(i)
+   return i==1
+  end,
+ })
+ eq(r.status,"STOPPED","missing second on-screen step blocks")
+ eq(r.reason,"ONSCREEN_STEP_UNAVAILABLE","clear missing-step reason")
+ eq(r.offerAttempts,1,"one attempt only")
+ eq(r.clientVisibleAddedSlots,1,"first item still visible")
+ eq(#x.sends,1,"second remote never fired")
+ eq(x.gate.checkOutbound,nil,"gate cleared")
+end
+-- Throwing from the mandatory GUI callback also fails closed, without
+-- an unhandled error that could induce a subsequent duplicate attempt.
+do
+ local x=fixture()
+ simulateOffer(x)
+ local bound=getBound(x)
+ local ok,r=pcall(x.plan.run,bound,x.io,x.gate,arm({"Iceblaster"}),{
+  wait=function()end,
+  onBeforeItem=function() error("GUI removed") end,
+ })
+ eq(ok,true,"UI callback error handled")
+ eq(r.status,"STOPPED","UI callback error stops")
+ eq(r.offerAttempts,0,"not even first offer attempted")
+ eq(#x.sends,0,"no remote from hidden UI")
+end
+
 print("[PASS] P3/P4 guarded physical multi-slot approved plan",tests)
 print("[PASS] four distinct physical slots, no auto Accept, no duplicate sends, Gingerscope protected")
