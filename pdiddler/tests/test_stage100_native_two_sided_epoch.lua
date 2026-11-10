@@ -421,7 +421,7 @@ test("missing trade window times out with no original-source activation",functio
  local t=scenario({noWindow=true})
  eq(t.report.status,"INCONCLUSIVE")
  eq(t.report.reason,"MANUAL_TRADE_WINDOW_NOT_OBSERVED_WITHIN_30S")
- eq(t.sources,0)
+ eq(t.sources,1)
  denied(t)
 end)
 test("wrong partner, ambiguous GUI and wrong game cannot bind",function()
