@@ -115,7 +115,12 @@ function M.new(scope,stage9)
     rawequal(scope.localPlayer,scope.partnerPlayer) then
   return nil
  end
- return {scope=scope,parse=stage9.parseQuantity,
+ -- The caller may reuse/mutate its scope table. Snapshot references and
+ -- literal binding strings here so an external rebind cannot silently follow
+ -- a different GUI root or player after the research token was created.
+ local frozenScope={session=scope.session,jobId=scope.jobId,root=scope.root,
+   localPlayer=scope.localPlayer,partnerPlayer=scope.partnerPlayer}
+ return {scope=frozenScope,parse=stage9.parseQuantity,
   epoch=0,stable=0,dead=false,pending=false,first=true,
   lastAt=nil,changedAt=nil,our=nil,their=nil,ourSnapshot=nil,
   countO=0,countT=0,copiesO=0,copiesT=0,nameOnly=0}
@@ -128,6 +133,9 @@ function M.observe(s,v)
     not finite(v.at) or v.at<0 or
     (s.lastAt~=nil and v.at<=s.lastAt) then
   return halt(s,"CLIENT_SCOPE_OR_MONOTONIC_CLOCK_CHANGED")
+ end
+ if s.lastAt~=nil and not s.pending and v.at-s.lastAt>2 then
+  return halt(s,"CLIENT_OBSERVATION_GAP_EXCEEDED_2S")
  end
  local raw=v.raw
  if raw.tradeOpen~=true or raw.contextOK~=true or
@@ -189,7 +197,8 @@ end
 local MARKER={}
 function M.freezePreview(s,now)
  if type(s)~="table" or s.dead or s.first or s.pending or
-    not finite(now) or now<s.lastAt or now-s.lastAt>2 or
+    not finite(now) or not finite(s.lastAt) or
+    now<s.lastAt or now-s.lastAt>2 or
     s.stable<2 or s.lastAt==nil or s.changedAt==nil or
     s.lastAt-s.changedAt<.15 or
     s.countO+s.countT==0 then
