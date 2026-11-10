@@ -50,7 +50,7 @@ class Stage98LocalRevision(unittest.TestCase):
             "CLIENT_PREVIEW_REVOKED",
             "CLIENT_CALLBACK_WITHOUT_GUI_REVISION",
             "CLIENT_SCOPE_OR_MONOTONIC_CLOCK_CHANGED",
-            "FOUR_COPY_CONSERVATIVE_LIMIT_EXCEEDED",
+            "PHYSICAL_STACK_QUANTITY_UNVERIFIED",
             "serverTradeRevisionProven=false",
             "eventSessionAssociationProven=false,callbackCausalityProven=false",
             "priceForTradeVerified=false", "authorizesTrade=false",
