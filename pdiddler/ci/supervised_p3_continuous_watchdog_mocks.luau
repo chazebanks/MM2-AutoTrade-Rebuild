@@ -288,6 +288,7 @@ do
  eq(second,false,"double watch disallowed")
  eq(reason,"WATCHDOG_ALREADY_STARTED","stable double-start reason")
  watch.tick()
+ eq(boss.arm(optIn),true,"fully armed before loss of independent monitor readiness")
  flags.monitor=false
  local r=watch.tick()
  eq(r.status,"BLOCKED","external callback cannot forge watchdog readiness")
