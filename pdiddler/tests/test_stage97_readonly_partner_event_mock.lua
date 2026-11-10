@@ -103,6 +103,7 @@ local function scenario(mode)
   return k=="PlayerGui" and pg or nil
  end
  local gui=node("ScreenGui","TradeGUI_Phone",pg)
+ if mode.tradeInitiallyHidden or mode.tradeNeverOpens then gui.Enabled=false end
  local container=node("Frame","Container",gui)
  local trade=node("Frame","Trade",container)
  local own=node("Frame","YourOffer",trade)
@@ -233,6 +234,10 @@ local function scenario(mode)
  function task.spawn(fn) fn() end
  function task.wait(sec)
   elapsed=elapsed+(tonumber(sec) or 0.1)
+  -- Simulate the user manually opening a trade while Stage97 is waiting.
+  if mode.tradeInitiallyHidden and not gui.Enabled and elapsed>=5000.7 then
+   gui.Enabled=true
+  end
   if readyAt and mode.guiFirst and not guiPreadded and elapsed-readyAt>=.08 then
    guiPreadded=true
    addVisible(tn,"Scythe",1)
@@ -290,6 +295,31 @@ test("actual read-only original Stage9/95/96 wrapper observes partner event GUI 
  equals(s.report.clientNameOnlyUnbound,true)
  equals(s.report.eventReceiptCount,1)
  equals(s.connects,1)
+ denied(s)
+end)
+test("manual trade window appears after script starts: same strict observer works",function()
+ local s=scenario({tradeInitiallyHidden=true})
+ equals(s.report.status,"CLIENT_PARTNER_EVENT_GUI_NAME_QTY_CONSISTENT_UNATTRIBUTED",tostring(s.report.reason).." debug="..tostring(s.errorDetails))
+ equals(s.report.exactPartnerGuiObserved,true)
+ assert(s.report.tradeWindowWaitPolls>=5,"did not actually poll for manual trade")
+ equals(s.report.eventReceiptCount,1)
+ equals(s.connects,1)
+ denied(s)
+end)
+test("no manual trade within thirty seconds: no listener or actions",function()
+ local s=scenario({tradeNeverOpens=true})
+ equals(s.report.status,"INCONCLUSIVE")
+ equals(s.report.reason,"MANUAL_TRADE_WINDOW_NOT_OBSERVED_WITHIN_30S")
+ equals(s.report.exactPartnerGuiObserved,false)
+ equals(s.connects,0)
+ assert(s.report.tradeWindowWaitPolls>=200)
+ denied(s)
+end)
+test("wrong partner after manually opened trade fails closed without listener",function()
+ local s=scenario({tradeInitiallyHidden=true,wrongPartner=true})
+ equals(s.report.status,"INCONCLUSIVE")
+ equals(s.report.reason,"TRADE_GUI_WRONG_PARTNER")
+ equals(s.connects,0)
  denied(s)
 end)
 test("GUI raw attribute remains client-only even when exactly equal to event text",function()
