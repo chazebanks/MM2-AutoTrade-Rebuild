@@ -1,0 +1,77 @@
+name: Gingerscope Stage98 client GUI offer revisions research-only
+on:
+  push:
+    branches:
+      - research/gingerscope-stage98-client-offer-epoch
+    paths:
+      - 'pdiddler/intelligence_lab/stage98_client_offer_epoch.lua'
+      - 'pdiddler/tests/test_stage98_client_offer_epoch.lua'
+      - 'pdiddler/tests/test_stage98_client_offer_epoch_driver.py'
+      - 'pdiddler/intelligence_lab/STAGE98_CLIENT_EPOCH_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage98-client-offer-epoch.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage98_client_offer_epoch.lua'
+      - 'pdiddler/tests/test_stage98_client_offer_epoch.lua'
+      - 'pdiddler/tests/test_stage98_client_offer_epoch_driver.py'
+      - 'pdiddler/intelligence_lab/STAGE98_CLIENT_EPOCH_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage98-client-offer-epoch.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-stage9-and-stage105-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Fetch and verify unchanged original Stage9 quantity and Stage105 four-slot guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope98
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope98/stage9.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/2f49e2f25cdbf7c8ca01702db159d412cc4382bc/pdiddler/intelligence_lab/offer_snapshot_guard.lua" -o /tmp/gingerscope98/guard.lua
+          test "$(git hash-object /tmp/gingerscope98/stage9.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          test "$(git hash-object /tmp/gingerscope98/guard.lua)" = c5b87f159de5224d231b111da2541b8b23ac6284
+          echo STAGE98_TWO_ORIGINAL_GIT_BLOBS_VERIFIED
+      - name: Execute real Lua source tests under Python control and 700 adversarial cases
+        env:
+          STAGE98_REQUIRE_PINNED: '1'
+          STAGE98_MODULE: pdiddler/intelligence_lab/stage98_client_offer_epoch.lua
+          STAGE98_ORIGINAL_STAGE9: /tmp/gingerscope98/stage9.lua
+          STAGE98_ORIGINAL_GUARD: /tmp/gingerscope98/guard.lua
+        run: |
+          set -euo pipefail
+          python3 -m py_compile pdiddler/tests/test_stage98_client_offer_epoch_driver.py
+          python3 -m unittest -v pdiddler.tests.test_stage98_client_offer_epoch_driver
+      - name: Static no-remote no-Accept authorization boundary
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('pdiddler/intelligence_lab/stage98_client_offer_epoch.lua').read_text()
+          for term in ('M.observe(', 'M.noteClientCallback(', 'M.freezePreview(',
+                       'M.checkPreview(', 'CLIENT_PREVIEW_REVOKED',
+                       'CLIENT_CALLBACK_INVALIDATED_PRIOR_PREVIEW',
+                       'CLIENT_LOCAL_OFFER_REVISION_CHANGED',
+                       'serverTradeRevisionProven=false',
+                       'eventSessionAssociationProven=false,callbackCausalityProven=false',
+                       'authorizesTrade=false', 'authorizesAccept=false',
+                       'priceForTradeVerified=false', 'serverCompletionProven=false'):
+              assert term in s,term
+          for forbidden in ('FireServer(', 'InvokeServer(', 'VirtualInputManager',
+                            'SendMouseButtonEvent(', 'HttpPost(', 'PostAsync(',
+                            'TeleportService', 'AcceptTrade(', 'DeclineTrade(',
+                            'loadstring(game:HttpGet(', 'getconnections('):
+              assert forbidden not in s,forbidden
+          print('STAGE98_NO_LIVE_INPUT_OR_AUTHORITY_POLICY_PASS')
+          PY
