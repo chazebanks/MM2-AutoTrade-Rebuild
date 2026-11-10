@@ -621,7 +621,7 @@ local function run()
   return finish("INCONCLUSIVE","TWO_SIDED_OFFER_PREVIEW_INCOMPLETE")
  end
  local function render(row)
-  local n=tostring(row.visibleLabel or "?")
+  local n=tostring(row.publicReferenceLabel or row.visibleLabel or "?")
   if #n>16 then n=n:sub(1,15).."…" end
   if row.matchStatus~="UNIQUE_PUBLIC_NAME_VARIANT_CANDIDATE" then
    return n.." | NO EXACT PUBLIC MATCH"
