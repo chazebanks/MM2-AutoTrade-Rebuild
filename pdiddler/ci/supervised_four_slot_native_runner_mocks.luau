@@ -90,7 +90,11 @@ local function fakeEnv(options)
    if options.noGuiReplication then return end
    local index=#calls
    local slot=ours.children.Container:put(node("Frame","NewItem"..index))
-   slot:put(node("Frame","ItemName")):put(node("TextLabel","Label")).Text=raw
+   slot:put(node("Frame","ItemName")):put(node("TextLabel","Label")).Text=
+      (options.aliases and options.aliases[raw]) or raw
+   if options.chromaRaw and options.chromaRaw[raw] then
+     slot:put(node("Frame","Tags")):put(node("Frame","Chroma"))
+   end
    slot:put(node("Frame","Container")):put(node("TextLabel","Amount")).Text="x1"
    if options.mutatePartnerAfterFirst and index==1 then
      local pslot=theirs.children.Container:put(node("Frame","NewItem1"))
@@ -125,7 +129,7 @@ local function fakeEnv(options)
      if url:find("616f905739ffb7bf70183475a79ec6c278dc9ddb",1,true)
         and url:find("supervised_p3_p4_handoff.lua",1,true)
      then return bridgeSource end
-     if url:find("e0dc690e6bf322e3a43c685547a817d1eda0761f",1,true)
+     if url:find("4f186f3ad1db538512a735e1a18e220f23e8715a",1,true)
         and url:find("supervised_four_slot_operator_plan.lua",1,true)
      then return planSource end
      if url:find("5b8ee35d7f281c23d9c2181abd97a063e59a0660",1,true)
@@ -235,6 +239,38 @@ local r4=four.run()
 check(r4.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","four-slot visible")
 check(r4.clientVisibleAddedSlots,4,"four physical GUI slots")
 check(#four.calls,4,"exact four remote sends")
+-- Raw Scythe is historically displayed as Batwing. Pin the NEW REAL
+-- Lua controller source; the old immutable PR200 source must fail this test.
+do
+ local aliased=fakeEnv({aliases={Scythe="Batwing"}})
+ local a=aliased.E.PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT
+ a.weaponKeys={"Iceblaster","Scythe"}
+ a.expectedDisplayNames={"Iceblaster","Batwing"}
+ a.expectedChromaFlags={false,false}
+ local result=aliased.run()
+ check(result.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","native raw/display alias")
+ check(result.clientVisibleAddedSlots,2,"both GUI entries reconciled")
+ check(aliased.calls[2].raw,"Scythe","physical raw key is Scythe, never Batwing")
+end
+do
+ local chroma=fakeEnv({chromaRaw={ChromaFang=true},aliases={ChromaFang="Fang"}})
+ local a=chroma.E.PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT
+ a.weaponKeys={"ChromaFang"}
+ a.expectedDisplayNames={"Fang"}
+ a.expectedChromaFlags={true}
+ local result=chroma.run()
+ check(result.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED","native explicit Chroma-tag match")
+ check(#chroma.calls,1,"one Chroma remote")
+end
+do
+ local protectedName=fakeEnv()
+ local a=protectedName.E.PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT
+ a.weaponKeys={"Iceblaster"}
+ a.expectedDisplayNames={"Gingerscope"}
+ local result=protectedName.run()
+ check(result.status,"BLOCKED","cannot hide Gingerscope as a display alias")
+ check(#protectedName.calls,0,"zero outgoing protected alias")
+end
 local noGui=fakeEnv({noGuiReplication=true})
 local miss=noGui.run()
 check(miss.status,"STOPPED","no GUI proof stops")
