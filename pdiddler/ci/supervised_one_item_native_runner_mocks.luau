@@ -3,6 +3,7 @@
 -- Tests both physical offer safety and mandatory MAIN/ALT on-screen guidance.
 local fs=require("@lune/fs")
 local luau=require("@lune/luau")
+local serde=require("@lune/serde")
 local runnerSource=fs.readFile("pdiddler/supervised/SUPERVISED_ONE_ITEM_MANUAL_PILOT.lua")
 local tradeIOSource=fs.readFile("pdiddler/supervised/pdiddler4_tradeio_supervised_v2.lua")
 local policySource=fs.readFile("pdiddler/supervised/supervised_one_item_policy.lua")
@@ -92,7 +93,11 @@ local function fakeEnv(options)
  if options.noCamera then world.CurrentCamera=nil end
  local service={Players=players,ReplicatedStorage=RS,
        VirtualInputManager={},GuiService={},Workspace=world,
-       RunService=runService}
+       RunService=runService,
+       HttpService={JSONEncode=function(_,value)
+          if options.jsonFailure then error("mock JSON unavailable") end
+          return serde.encode("json",value)
+       end}}
  if options.noRender then service.RunService=nil end
  local sourceReads={}
  local game={
@@ -130,11 +135,16 @@ local function fakeEnv(options)
    TextXAlignment={Left="Left"},
    Font={GothamBold="GothamBold"}
  }
+ local copied={}
  local stepTexts={}
  local waitCount=0
  local env={
     game=game,getgenv=function()return E end,
     Instance=instance,Enum=enums,
+    setclipboard=options.clipboardUnavailable and nil or function(txt)
+        if options.clipboardFailure then error("clipboard permission denied") end
+        table.insert(copied,txt)
+    end,
     UDim={new=function(...)return {...}end},
     UDim2={fromOffset=function(...)return {...}end},
     Color3={fromRGB=function(...)return {...}end},
@@ -168,13 +178,20 @@ local function fakeEnv(options)
  return {run=execute,E=E,t=t,screen=screen,partner=partner,
          username=username,calls=calls,reads=sourceReads,created=created,
          accepted=accepted,theirAccepted=theirAccepted,world=world,
-         stepTexts=stepTexts,runService=runService,pg=pg}
+         stepTexts=stepTexts,runService=runService,pg=pg,
+         copied=copied}
 end
 local success=fakeEnv()
 local report=success.run()
 check(type(report),"table","runner returns sanitized status")
 check(report.status,"OFFER_REMOTE_FIRED_GUI_UNCONFIRMED","no invented proof")
 check(report.tradeOutcome,"UNKNOWN","outcome remains unknown")
+check(report.clipboardCopied,true,"clipboard written automatically")
+check(#success.copied,1,"one sanitized report copy")
+check(success.copied[1]:find("UNKNOWN",1,true)~=nil,true,"client unknown copied")
+for _,secret in ipairs({"Iceblaster","TrustedAlt","MainAccount","MOCK_JOB_123"}) do
+  check(success.copied[1]:find(secret,1,true),nil,"no sensitive "..secret)
+end
 check(report.authorizesAccept,false,"never automatic final Accept")
 check(report.mayReportProfit,false,"no profit")
 check(report.onScreenGuideShown,true,"on-screen guide shown before offer")
@@ -247,6 +264,15 @@ local timeout=silent.run()
 check(timeout.status,"BLOCKED","timeout missing manually opened trade")
 check(timeout.reason,"MANUAL_TRADE_OPEN_TIMED_OUT","bounded wait")
 check(#silent.calls,0,"no offer if trade never opened")
+check(#silent.copied,1,"timeout result copied too")
+local unavail=fakeEnv({clipboardUnavailable=true})
+local unavailReport=unavail.run()
+check(unavailReport.clipboardCopied,false,"missing clipboard detected without fatal error")
+check(unavailReport.offerCount,1,"missing clipboard does not alter OfferItem behavior")
+local failed=fakeEnv({clipboardFailure=true})
+check(failed.run().clipboardCopied,false,"clipboard permission error handled")
+local badJson=fakeEnv({jsonFailure=true})
+check(badJson.run().clipboardCopied,false,"JSON encoding failure handled")
 local cases={
  function(x)x.E.PDIDDLER_SUPERVISED_ONE_ITEM_PILOT.armed=false end,
  function(x)x.E.PDIDDLER_SUPERVISED_ONE_ITEM_PILOT.weaponKey="Gingerscope" end,
