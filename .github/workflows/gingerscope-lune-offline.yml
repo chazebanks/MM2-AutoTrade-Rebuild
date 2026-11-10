@@ -56,6 +56,11 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_four_slot_operator_plan_mocks.luau
+      - name: Execute native supervised four-slot guided runner mock
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_four_slot_native_runner_mocks.luau
       - name: Assert that a failing Luau runtime assertion fails CI
         shell: bash
         run: |
