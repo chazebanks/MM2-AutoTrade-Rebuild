@@ -27,7 +27,7 @@ local function meta(key)
 end
 local catalog={
  Gingerscope=meta("Gingerscope"),
- Batwing=meta("Batwing"),
+ Scythe=meta("Scythe"),
  ImmortalChroma=meta("ImmortalChroma"),
  BattleAxe2=meta("BattleAxe2"),
 }
@@ -82,7 +82,7 @@ test("No GUI raw key never inherits Stage50 proof: only a display candidate",fun
  denied(v)
 end)
 test("Actual Stage12 blank one and x2 quantity parsed by original Stage9",function()
- local v=inspect(capture({row(1,"Batwing","",false)}, {row(4,"Gingerscope","×2",false)}))
+ local v=inspect(capture({row(1,"Scythe","",false)}, {row(4,"Gingerscope","×2",false)}))
  eq(v.ourGuiCopyCount,1)
  eq(v.theirGuiCopyCount,2)
  eq(v.clientRawKeyCandidateCount,2)
