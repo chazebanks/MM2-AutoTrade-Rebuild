@@ -74,6 +74,9 @@ local function fakeEnv(options)
  players.LocalPlayer=lp
  local partner={Name="TrustedAlt",DisplayName="TrustedAlt",UserId=2,Parent=players}
  function players:FindFirstChild(name)
+   if type(name)~="string" then
+     error("Roblox FindFirstChild requires a string")
+   end
    if name=="TrustedAlt" then return partner end
  end
  function players:GetPlayers()return {lp,partner} end
