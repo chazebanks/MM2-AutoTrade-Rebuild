@@ -82,6 +82,11 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_continuous_watchdog_mocks.luau
+      - name: Execute actual guided original MM2 P3 native opt-in runner mock
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_native_runner_mocks.luau
       - name: Assert that a failing Luau runtime assertion fails CI
         shell: bash
         run: |
