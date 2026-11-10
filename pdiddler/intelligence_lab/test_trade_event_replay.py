@@ -109,6 +109,62 @@ class SanitizedReplayTests(unittest.TestCase):
         self.assertEqual(x["clientCallbackObservations"], 0)
         self.assertEqual(x["windowClosures"], 1)
 
+    def test_repeated_open_while_active_must_not_reset_same_session_revision(self):
+        # A distinct delivery ID for OPEN is not proof of a distinct trade.
+        # Resetting revision=0 here could misassociate the old session's
+        # callbacks/offers with a falsely new client session.
+        t = trace([
+            event(1, "OPEN", "s_main"),
+            event(2, "OFFER", "s_main", side="THEIRS", revision=1,
+                  signature="bundle_a"),
+            event(3, "ACCEPT", "s_main", side="OURS", revision=1),
+            event(4, "OPEN", "s_main"),
+            event(5, "CALLBACK", "s_main", signal="END_TRADE"),
+        ])
+        x = R.replay_trace(t)
+        self.safe(x)
+        self.assertEqual(x["status"], "QUARANTINED", x)
+        self.assertEqual(x["reason"], "REUSED_CLIENT_SESSION_TOKEN", x)
+
+    def test_reopening_closed_session_token_must_not_count_another_trade(self):
+        t = trace([
+            event(1, "OPEN", "s_main"),
+            event(2, "CLOSE", "s_main"),
+            event(3, "INVENTORY_DELTA", "s_main", gained=1, lost=0),
+            event(4, "OPEN", "s_main"),
+            event(5, "OFFER", "s_main", side="OURS", revision=1,
+                  signature="bundle_b"),
+        ])
+        x = R.replay_trace(t)
+        self.safe(x)
+        self.assertEqual(x["status"], "QUARANTINED", x)
+        self.assertEqual(x["reason"], "REUSED_CLIENT_SESSION_TOKEN", x)
+        self.assertFalse(x["mayRecordCompletedTrade"])
+
+    def test_old_client_session_token_cannot_be_reintroduced_after_new_open(self):
+        t = trace([
+            event(1, "OPEN", "s_old"),
+            event(2, "OPEN", "s_new"),
+            event(3, "CALLBACK", "s_old", signal="END_TRADE"),
+            event(4, "OPEN", "s_old"),
+        ])
+        x = R.replay_trace(t)
+        self.safe(x)
+        self.assertEqual(x["status"], "QUARANTINED", x)
+        self.assertEqual(x["reason"], "REUSED_CLIENT_SESSION_TOKEN", x)
+
+    def test_exact_duplicate_open_delivery_is_still_idempotent(self):
+        t = trace([event(1, "OPEN", "s_main"),
+                   event(2, "OFFER", "s_main", side="THEIRS",
+                         revision=1, signature="bundle_a"),
+                   event(3, "CLOSE", "s_main")])
+        t["events"].insert(1, deepcopy(t["events"][0]))
+        x = R.replay_trace(t)
+        self.safe(x)
+        self.assertEqual(x["status"], "CLIENT_REPLAY_ONLY", x)
+        self.assertEqual(x["duplicateEvents"], 1)
+        self.assertEqual(x["windowClosures"], 1)
+
     def test_raw_decline_signal_is_not_opponent_rejection(self):
         t = trace([event(1, "OPEN"),
              event(2, "CALLBACK", signal="DECLINE_SIGNAL"), event(3, "CLOSE")])
