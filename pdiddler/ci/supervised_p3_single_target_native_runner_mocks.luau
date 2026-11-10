@@ -253,6 +253,10 @@ do
  check(x.E.PDIDDLER_P3_SUPERVISED_REPORT.tradeOutcome,"UNKNOWN","client-only result")
  check(#x.copied,1,"sanitized result copied")
  check(x.E.TEST_P3_OUTGOING.stopped,true,"P3 stopped by operator at end")
+ check(x.E.PDIDDLER_P3_SUPERVISED_CONTROLLER,nil,
+  "stale supervisor ownership released after stop")
+ check(x.E.PDIDDLER_P3_SUPERVISED_LAST_JSON~=nil,true,
+  "final sanitized JSON retained after releasing controller")
 end
 for _,invalid in ipairs({
  {wrongTarget=true},{wrongPlace=true},{noCamera=true},
