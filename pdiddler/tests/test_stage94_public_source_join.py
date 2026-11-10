@@ -55,7 +55,7 @@ class ActualOriginalPublicSourceJoin(unittest.TestCase):
             assert blob(ROOT/p)==d,(p,"reviewed original Git blob changed")
         for p,d in {
           "ancients.html":"ce8178ab9579e8782d8f72a6dac051756a728506",
-          "godlies.html":"d3cf222a8e10cff3a9fb051b16188192389c4b2",
+          "godlies.html":"d3cf222a8e10cff3a9fb051b16188192389c4b2d",
           "chromas.html":"6c77624cac3df96168b008e9bc8eca68a2d78cf9",
           "source_manifest.json":"7e47985b626d3a6904b1b05aa3dd0474f3f2cdb3",
         }.items():
