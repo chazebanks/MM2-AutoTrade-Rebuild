@@ -53,6 +53,8 @@ local function scenario(mode)
  local env={PDIDDLER_STAGE91_ONE_REQUEST_ARMED=mode.armed~=false,
             PDIDDLER_STAGE91_TARGET_USERNAME=mode.user or "test_partner"}
  if mode.owner then env.PDIDDLER_OUTGOING_CONTROLLER={} end
+ if mode.oldStage89 then env.GINGERSCOPE_STAGE89_SINGLE_REQUEST_DIAGNOSTIC={} end
+ if mode.oldStage90 then env.GINGERSCOPE_STAGE90_CARD_LAYOUT_AUDIT={} end
  _G.getgenv=function()return env end
  _G.warn=function(v)env.lastWarning=tostring(v) end
  _G.setclipboard=function(s)env.clipboard=s end
@@ -245,7 +247,7 @@ local function safe(r,s)
  assert(s.mouseUp<=1,"more than one release")
 end
 group("not armed, wrong game and owner block before download",function()
- for _,m in ipairs({{armed=false},{wrongPlace=true},{owner=true}}) do
+ for _,m in ipairs({{armed=false},{wrongPlace=true},{owner=true},{oldStage89=true},{oldStage90=true}}) do
   local r,s=scenario(m)
   assert(r==nil and s.sourceFetches==0 and s.mouseDown==0)
   safe(r,s)
