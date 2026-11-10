@@ -16,7 +16,7 @@ local function standard()
  local yourContainer={}
  local ourSide={Accepted=ownAccepted,Container=yourContainer}
  function ourSide:FindFirstChild(name) return self[name] end
- local theirs={Container={},Username={Text="TrustedAlt"}}
+ local theirs={Container={},Username={Text="TrustedAlt"},Accepted={Visible=false}}
  function theirs:FindFirstChild(name) return self[name] end
  local t={YourOffer=ourSide,TheirOffer=theirs}
  function t:FindFirstChild(name) return self[name] end
@@ -82,6 +82,15 @@ local cases={
  {edit=function(x)x.ourSide.Accepted=nil end,reason="OWN_ACCEPT_STATE_UNKNOWN"},
  {edit=function(x)x.ourSide.Accepted.Visible=true end,reason="ACCEPT_ALREADY_SET"},
  {edit=function(x)x.io.acceptedTheir=function()return true end end,
+     reason="ACCEPT_ALREADY_SET"},
+ -- Missing/invalid TheirOffer.Accepted must not be interpreted as
+ -- "the opponent definitely has not accepted" just because a fallback
+ -- UI reader returns false. This was the original fail-open gap.
+ {edit=function(x)x.theirs.Accepted=nil end,
+     reason="THEIR_ACCEPT_STATE_UNKNOWN"},
+ {edit=function(x)x.theirs.Accepted.Visible="false" end,
+     reason="THEIR_ACCEPT_STATE_UNKNOWN"},
+ {edit=function(x)x.theirs.Accepted.Visible=true end,
      reason="ACCEPT_ALREADY_SET"},
  {edit=function(x)x.io.readSide=function()return {slots=1,entries={{}}} end end,
      reason="OWN_OFFER_ALREADY_NONEMPTY"},
