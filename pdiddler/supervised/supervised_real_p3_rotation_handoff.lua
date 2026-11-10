@@ -165,6 +165,22 @@ function M.new(scanner,outgoing,bridge,io,players,me,ctx)
     return result("P3_PAUSED_UNATTRIBUTED",
       "P3_TO_P4_BOUND_HANDOFF_REFUSED")
   end
+  -- The original P3/P4 bridge binds a GUI root BEFORE its first accepted
+  -- indicator/offer read. Validate its actual snapshot NOW rather than
+  -- publishing a bound turn which was already unsafe at attachment.
+  local goodInitial,initial=pcall(bound.capture)
+  if not goodInitial or type(initial)~="table" or
+     initial.status~="CLIENT_UNPRICED_TWO_SIDED_SNAPSHOT"
+     or initial.authorizesAccept~=false or
+     initial.authorizesOffer~=false or
+     initial.pricesAuthenticated~=false or
+     initial.tradeOutcome~="UNKNOWN" then
+    -- Quarantine this event, even if the UI later appears safe.
+    -- A consumed flagged outcome must not be recycled as a new request.
+    consumed[tostring(uid)]=true
+    return result("P3_PAUSED_UNATTRIBUTED",
+      "P3_TO_P4_BOUND_HANDOFF_REFUSED")
+  end
   -- Mark this processed event ONCE; original P3 does not clear the
   -- processed map on resume. Never allow a historical stale rebind.
   consumed[tostring(uid)]=true
