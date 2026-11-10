@@ -1,3 +1,18 @@
+## Stage89 exact-head offline verification — 2026-11-09
+
+**VERIFIED:** [DRAFT PR159](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/159), exact code/test/workflow HEAD `17c268ffca19849baa6d70955de6d101f4d0b298`. Dedicated [GitHub Actions 42725065230](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42725065230) **SUCCESS 11/11 native-wrapper Lua5.4 mocked GUI test groups + static no-offer/no-auto-accept/no-Decline/no-retry policy gate**. Four actual immutable source modules downloaded and Git-blob SHA verified (original T4 scanner `582ee363...`, Stage88 view `95543350...`, Stage87 P3 `a4ed1e...`, Stage87 outgoing evidence controller `2c833de...`). Mock runs actual Stage87 P3/controller and real Stage89 full wrapper; the 63KB native T4 scanner and Roblox UI objects are mocked because their Luau/game APIs do not run in standard Lua. Cases: explicit arming, exact target/card/own proof → exactly ONE tap and matching client pending, missing pending no retry, mouse down/up uncertainty no retry, wrong/missing card, incoming/pending hold, bad item quantity, session job change, replaced player object, source fetch error, same-job duplicate run prevention. The five other Luau/Lune/Selene+StyLua/sanitized replay/Hypothesis workflows also **SUCCESS** on exact head (six total).
+
+**CI debugging accounted for:** The first runs revealed missing unmerged static view fixture, a simulated LocalPlayer/ancestor `IsA` omission, late player-object replacement in a test, and a policy-test string that asserted equality instead of the fail-closed inequality present in production code; these test fixtures were repaired, not suppressed. The live source was separately amended once to make *post-send* exact pending observation independent of the *pre-send* no-pending gate. The final exact-head run passed all 11 full mock groups and static boundaries.
+
+**HOLD before actual device action:** A real Stage89 test will **send ONE outgoing trade request** to a real MM2 player if its guards pass. Do NOT run automatically or target a random stranger. Require the user's explicit choice of an exact current-server username (ideally a consenting test account), a fresh MM2 session (old Stage88 scanner listeners persist in their original job), manual opening of that target's MM2 leaderboard Profile/Trade card, and an explicit arming line. The source is capable of one UI request tap but never offers weapons or presses Accept/Decline; server request delivery is NOT proven by mock tests. Any absence of a matching local pending UI is `UNCERTAIN` with NO retry, and user should share only the aggregate `[GINGERSCOPE STAGE89 SINGLE REQUEST]` JSON marker, not a full profile or item list.
+
+**Exact reviewed runnable code URL (do not insert target name in shared repository):**
+`https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/17c268ffca19849baa6d70955de6d101f4d0b298/pdiddler/new_part4/STAGE89_ONE_TARGET_ONE_REQUEST_DIAGNOSTIC.lua`
+
+Do not confuse this with server authentication of request/trade/settlement. All final acceptance, automatic offers, portfolio profit, Discord market learning and numeric Supreme checker-ID trust remain disabled. Stage88 real client 9 reachable / 2 no-items / 0 unknown remains complete; no repeat Stage88 needed.
+
+---
+
 # Stage89 — Single explicitly targeted MM2 request, no automatic trading
 
 **2026-11-09.** The prior **Stage88 actual MAIN iPad result PASSED**: `[GINGERSCOPE STAGE88 CONTACT PREVIEW]` observed `reachable=9`, `unprofitable=2`, `unknown=0`, `observations=66`, `elapsedSeconds=44`, `ownContactEvidenceReady=true` and **ZERO outgoing requests, offers, Accepts, Declines or Teleports**. This resolves the narrow real-client read-only question. Do not repeat Stage88/79/80/83.
