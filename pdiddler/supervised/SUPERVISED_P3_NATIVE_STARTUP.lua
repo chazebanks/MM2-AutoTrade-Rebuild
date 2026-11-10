@@ -91,11 +91,23 @@ if not geometry or type(geometry.choose)~="function"
 end
 local owner={job=game.JobId,running=true}
 E.PDIDDLER_SUPERVISED_P3_NATIVE_OWNER=owner
+-- Client-observed milestones are sticky even after terminal STOP.
+-- These do NOT authenticate a network-delivered request or any settlement.
+local evidence={
+    p3ArmObservedClient=false,
+    clientTradeWindowObserved=false,
+    clientResumeObserved=false,
+    lastObservedStatus="NONE",
+}
 local function statusRecord(status,reason)
     return {
         schema="gingerscope-p3-native-rotation-status-v1",
         status=tostring(status or "UNKNOWN"),
         reason=tostring(reason or "UNKNOWN"),
+        p3ArmObservedClient=evidence.p3ArmObservedClient,
+        clientTradeWindowObserved=evidence.clientTradeWindowObserved,
+        clientResumeObserved=evidence.clientResumeObserved,
+        lastObservedStatus=evidence.lastObservedStatus,
         authorizesOffer=false,authorizesAccept=false,
         serverCompletionProven=false,mayReportProfit=false,
         maySendDiscordWebhook=false,tradeOutcome="UNKNOWN",
@@ -376,6 +388,12 @@ local watchdogCtx={
     getJobId=ctx.getJobId,
     isLive=stillLive,
     onStatus=function(r)
+        if r.status=="P4_TWO_SIDED_CLIENT_SNAPSHOT" then
+            evidence.clientTradeWindowObserved=true
+        elseif r.status=="P3_RESUMED_AFTER_CLIENT_TRADE_CLOSED" then
+            evidence.clientResumeObserved=true
+        end
+        evidence.lastObservedStatus=tostring(r.status or "UNKNOWN")
         last=statusRecord(r.status,r.reason)
         local ok=pcall(guide.show,guide,last)
         if not ok then
@@ -414,6 +432,8 @@ ui.arm.Activated:Connect(function()
     })
     if success==true then
         armed=true
+        evidence.p3ArmObservedClient=true
+        evidence.lastObservedStatus="P3_ARMED_BY_OPERATOR"
         E.PDIDDLER_SUPERVISED_P3_USED_JOB=game.JobId
         last=statusRecord("P3_ARMED_BY_OPERATOR",
              "P3_REQUESTS_ENABLED_NO_FINAL_ACCEPT")
