@@ -1,0 +1,72 @@
+name: Gingerscope Stage106 two-sided client-only phase preflight
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage106_two_sided_phase_preflight.lua'
+      - 'pdiddler/tests/test_stage106_two_sided_phase_preflight.lua'
+      - 'pdiddler/tests/test_stage106_two_sided_phase_preflight_driver.py'
+      - '.github/workflows/gingerscope-stage106-phase-preflight.yml'
+  push:
+    branches:
+      - research/gingerscope-stage106-two-sided-phase-guard
+    paths:
+      - 'pdiddler/intelligence_lab/stage106_two_sided_phase_preflight.lua'
+      - 'pdiddler/tests/test_stage106_two_sided_phase_preflight.lua'
+      - 'pdiddler/tests/test_stage106_two_sided_phase_preflight_driver.py'
+      - '.github/workflows/gingerscope-stage106-phase-preflight.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-stage9-stage83-stage101:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4 for ORIGINAL source execution
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Fetch immutable ORIGINAL Stage9, Stage83 and corrected Stage101 Git blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope106
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope106/stage9.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua" -o /tmp/gingerscope106/stage83.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/29889595b5e80c788ade75fbb97880b736fc8cb2/pdiddler/intelligence_lab/stage101_multiweapon_raw_key_match.lua" -o /tmp/gingerscope106/stage101.lua
+          test "$(git hash-object /tmp/gingerscope106/stage9.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          test "$(git hash-object /tmp/gingerscope106/stage83.lua)" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          test "$(git hash-object /tmp/gingerscope106/stage101.lua)" = c15afe8077d544534e0f122ce2f4a5081cb2ac90
+          echo STAGE106_THREE_IMMUTABLE_ORIGINAL_GIT_BLOBS_VERIFIED
+      - name: Execute original Lua module with Python orchestration and 360 adverse phase transitions
+        env:
+          STAGE106_REQUIRE_PINNED: '1'
+          STAGE106_ORIGINAL_STAGE9: /tmp/gingerscope106/stage9.lua
+          STAGE106_ORIGINAL_STAGE83: /tmp/gingerscope106/stage83.lua
+          STAGE106_ORIGINAL_STAGE101: /tmp/gingerscope106/stage101.lua
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_stage106_two_sided_phase_preflight_driver
+      - name: Static read-only zero-action policy
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('pdiddler/intelligence_lab/stage106_two_sided_phase_preflight.lua').read_text()
+          for k in ('FireServer(', 'InvokeServer(', 'HttpGet(', 'PostAsync(',
+                    'TeleportService', 'AcceptTrade(', 'DeclineTrade(',
+                    'getgenv(', 'getconnections(', 'SendMouseButtonEvent(',
+                    'authorizesTrade=true','authorizesAccept=true'):
+              assert k not in s,k
+          for k in ('eventSessionAssociationProven=false',
+                    'callbackCausalityProven=false',
+                    'serverCompletionProven=false','mayReportProfit=false',
+                    'authorizesTrade=false','authorizesAccept=false'):
+              assert k in s,k
+          print('STAGE106_PURE_PHASE_GUARD_NO_LIVE_ACTIONS_PASS')
+          PY
