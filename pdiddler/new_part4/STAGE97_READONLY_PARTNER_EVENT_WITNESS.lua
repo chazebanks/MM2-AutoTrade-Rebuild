@@ -257,7 +257,7 @@ local function run()
   local raw=capturedRaw
   if not ok or type(o)~="table" or type(diag)~="table"
      or type(raw)~="table" or o.tradeOpen~=true
-     or o.session~=session or o.contextOK~=true
+     or o.session~=session or raw.contextOK~=true
      or o.quoteSafe~=false
      or type(o.ourSig)~="string" or type(o.theirSig)~="string"
      or o.ourSig:sub(1,10)=="unverified"
