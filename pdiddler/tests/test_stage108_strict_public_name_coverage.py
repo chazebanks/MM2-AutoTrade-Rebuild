@@ -76,7 +76,7 @@ class Stage108SourceNameOnly(unittest.TestCase):
         self.assertEqual(r["status"],"HISTORICAL_PUBLIC_NAME_COVERAGE_PARTIAL",r)
         self.assertEqual(r["registryPublicKeyCount"],189)
         self.assertEqual(r["supremeOfficialWeaponRowCount"],190)
-        self.assertEqual(r["caseExactPublicNameCount"],177)
+        self.assertEqual(r["caseExactPublicNameCount"],177,r)
         self.assertEqual(r["caseOnlyDifferences"],2)
         self.assertEqual(r["casefoldExactPublicNameCount"],179)
         self.assertEqual(r["unresolvedRegistryNameCount"],10)
