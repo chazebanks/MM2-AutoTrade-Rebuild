@@ -4,6 +4,7 @@ local MODULE=assert(os.getenv("STAGE98_MODULE"))
 local CONTRACT=assert(os.getenv("STAGE98_ORIGINAL_STAGE9"))
 local M=assert(loadfile(MODULE))()
 local Stage9=assert(loadfile(CONTRACT))()
+local Guard=assert(loadfile(assert(os.getenv("STAGE98_ORIGINAL_GUARD"))))()
 local groups=0
 local function eq(a,b,msg)
  assert(a==b, (msg or "mismatch")..": got="..tostring(a)..", expected="..tostring(b))
@@ -273,6 +274,52 @@ test("nonempty startup is terminal, never retroactively baseline an old trade",f
  eq(r.status,"INCONCLUSIVE")
  eq(r.reason,"INITIAL_CLIENT_GUI_NOT_BOTH_EMPTY")
  denied(r)
+end)
+test("actual prior Stage105 offer guard rejects Stage98 invalidated local revision",function()
+ local c=scope();local state=M.new(c,Stage9)
+ M.observe(state,snapshot(c,10))
+ M.observe(state,snapshot(c,10.2))
+ local same=snapshot(c,10.4,{slot(1,"Batwing")},{slot(1,"Gingerscope")})
+ local changed=M.observe(state,same)
+ eq(changed.status,"CLIENT_LOCAL_OFFER_REVISION_CHANGED")
+ M.observe(state,snapshot(c,10.61,{slot(1,"Batwing")},{slot(1,"Gingerscope")}))
+ local token,tokenReport=M.freezePreview(state,10.7)
+ assert(token);denied(tokenReport)
+ local now=1794159000
+ local proposal={sessionId="test_session",jobId="test_job",
+   partnerKey="test_alt",catalogVersion="synthetic_stage98_catalogue",
+   offerRevision=changed.localObservationRevision,observedAtUnix=now,
+   ours={{index=1,key="test_ours",quantity=1}},
+   theirs={{index=1,key="test_theirs",quantity=1}}}
+ local obs={sessionId=proposal.sessionId,jobId=proposal.jobId,
+   partnerKey=proposal.partnerKey,catalogVersion=proposal.catalogVersion,
+   offerRevision=proposal.offerRevision,observedAtUnix=now,
+   tradeOpen=true,exactPartnerBound=true,ourAccepted=false,
+   theirAccepted=false,offerMutationPending=false,
+   ours={{index=1,key="test_ours",quantity=1}},
+   theirs={{index=1,key="test_theirs",quantity=1}}}
+ local item=function(v)return {value=v,demand=7,stability="Stable",
+   identityLinkEvidence="INDEPENDENT_EXACT"} end
+ local catalog={version=proposal.catalogVersion,
+   source="SUPREME_DISPLAY_RESEARCH_ONLY",
+   publisherUpdatedAtUnix=now-100,retrievedAtUnix=now-3,
+   items={test_ours=item(100),test_theirs=item(105)}}
+ local research=Guard.evaluate(proposal,obs,catalog,now,5,4)
+ eq(research.status,"RESEARCH_CANDIDATE_ONLY")
+ eq(research.authorizesAccept,false)
+ eq(research.authorizesTrade,false)
+ -- A stale +5 research display MUST NOT survive a physical item removal.
+ local removed=M.observe(state,snapshot(c,10.8,{slot(1,"Batwing")},{}))
+ eq(removed.status,"CLIENT_LOCAL_OFFER_REVISION_CHANGED")
+ eq(M.checkPreview(state,token,10.81).status,"CLIENT_PREVIEW_REVOKED")
+ obs.offerRevision=removed.localObservationRevision
+ obs.theirs={}
+ local blocked=Guard.evaluate(proposal,obs,catalog,now,5,4)
+ eq(blocked.status,"REJECTED")
+ eq(blocked.reason,"OFFER_REVISION_CHANGED")
+ eq(blocked.authorizesAccept,false)
+ eq(blocked.mayReportProfit,false)
+ denied(removed)
 end)
 test("700 deterministic adverse changes never create trade or Accept authority",function()
  for i=1,700 do
