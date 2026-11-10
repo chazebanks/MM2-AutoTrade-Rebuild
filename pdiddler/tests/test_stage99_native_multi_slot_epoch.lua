@@ -159,6 +159,7 @@ local function scenario(mode)
   PDIDDLER_STAGE99_READONLY_ARMED=armed
  }
  if mode.competingOwner then env.PDIDDLER_OUTGOING_CONTROLLER={} end
+ if mode.oldStage97 then env.GINGERSCOPE_STAGE97_PARTNER_EVENT_READONLY={} end
  _G.getgenv=function()return env end
  _G.warn=function(msg)printed[#printed+1]="WARN: "..tostring(msg) end
  _G.print=function(msg)
@@ -197,6 +198,10 @@ local function scenario(mode)
       mode.secondStack and "x2" or "")
    elseif phase==3 and not mode.noRemoval then
     remove(theirBox,"NewItem1")
+    if mode.renumberAfterRemoval then
+     remove(theirBox,"NewItem2")
+     place(theirBox,1,"Gingerscope","")
+    end
     if mode.wrongRemaining then
      remove(theirBox,"NewItem2")
      place(theirBox,3,"Unexpected","")
@@ -268,6 +273,13 @@ test("passive manual trade window appears after script starts",function()
  assert(t.report.tradeWindowWaitPolls>=5)
  denied(t)
 end)
+test("native GUI reindexes remaining NewItem2 to NewItem1 after valid removal",function()
+ local t=scenario({renumberAfterRemoval=true})
+ eq(t.report.status,"CLIENT_MULTI_SLOT_ADD_REMOVE_EPOCH_OBSERVED",t.report.reason)
+ eq(t.report.revocationsVerified,2)
+ eq(t.report.localOfferEpoch,4)
+ denied(t)
+end)
 test("never opened trade expires without any GUI mutation",function()
  local t=scenario({noWindow=true})
  eq(t.report.status,"INCONCLUSIVE")
@@ -277,7 +289,7 @@ test("never opened trade expires without any GUI mutation",function()
 end)
 test("wrong visible partner, duplicate trade root and wrong game fail closed",function()
  for _,mode in ipairs({{wrongPartner=true},{doubleRoot=true},{wrongPlace=true},
-   {noTarget=true},{duplicateTarget=true},{competingOwner=true}}) do
+   {noTarget=true},{duplicateTarget=true},{competingOwner=true},{oldStage97=true}}) do
   local t=scenario(mode)
   if t.report then eq(t.report.status,"INCONCLUSIVE",t.report.reason);denied(t) end
  end
