@@ -1,0 +1,67 @@
+name: Supervised MM2 single-item manually armed pilot — real runner mocks
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/supervised/supervised_one_item_policy.lua'
+      - 'pdiddler/supervised/SUPERVISED_ONE_ITEM_MANUAL_PILOT.lua'
+      - 'pdiddler/ci/supervised_one_item_pilot_tests.luau'
+      - 'pdiddler/ci/supervised_one_item_native_runner_mocks.luau'
+      - '.github/workflows/gingerscope-supervised-one-item-pilot.yml'
+  push:
+    branches:
+      - feature/supervised-one-item-manual-pilot
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  one-shot-manual-offer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install checksum-pinned official Lune v0.11.1
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 50 https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip -o "$RUNNER_TEMP/lune.zip"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/dist"
+          f="$(find "$RUNNER_TEMP/dist" -name lune -type f -print -quit)"
+          test -n "$f"
+          install -m 0755 "$f" "$RUNNER_TEMP/lune"
+      - name: Run local manual approval gate and explicit denial cases
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_one_item_pilot_tests.luau
+      - name: Execute actual iPad launcher against mocked TradeGUI + OfferItem
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_one_item_native_runner_mocks.luau
+      - name: Verify no auto trading, final Accept, market quote or Discord source
+        run: |
+          set -euo pipefail
+          test "$(git hash-object pdiddler/supervised/pdiddler4_tradeio_supervised_v2.lua)" = eb4dc6342d1d6dda6292490cd8fa00314199d589
+          test "$(git hash-object pdiddler/supervised/supervised_one_item_policy.lua)" = d67f8addbeb14552a35cded9a55f2c4ddf92dd56
+          python3 - <<'PY'
+          from pathlib import Path
+          controller=Path('pdiddler/supervised/supervised_one_item_policy.lua').read_text()
+          runner=Path('pdiddler/supervised/SUPERVISED_ONE_ITEM_MANUAL_PILOT.lua').read_text()
+          for s in (controller,runner):
+              for forbidden in ('AcceptTrade:FireServer(', 'SendRequest:FireServer(',
+                                'DeclineTrade:FireServer(', 'OfferItem:FireServer(',
+                                'TeleportService', 'PostAsync(', 'GetFullInventory:InvokeServer('):
+                  assert forbidden not in s,forbidden
+          assert runner.count('game:HttpGet(')==1
+          assert 'THEIR_ACCEPT_STATE_UNKNOWN' in controller
+          assert controller.count('their:FindFirstChild("Accepted")')==1
+          assert '9540fc5fc3576729f9dd308d8d8222d848e27063' in runner
+          assert 'a599c31c53d25e6799b9d631f45f282b445dcda0' in runner
+          assert '9540fc5fc3576729f9dd308d8d8222d848e27063' in runner
+          assert 'PDIDDLER_SUPERVISED_ONE_ITEM_SPENT_JOB' in runner
+          assert 'manualOfferOnly' in controller
+          assert 'PROTECTED_GINGERSCOPE_OUTGOING' in controller
+          assert 'authorizesAccept=false' in controller
+          assert 'mayRecordCompletedTrade=false' in controller
+          print('SUPERVISED_ONE_SHOT_OPERATOR_ONLY_NO_ACCEPT_OR_SETTLEMENT_PASS')
+          PY
