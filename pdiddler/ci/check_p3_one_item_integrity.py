@@ -68,14 +68,35 @@ class Contract(unittest.TestCase):
         self.assertIn('approvedChromaFlag', self.native)
 
     def test_only_one_candidate_is_ever_supplied_to_plan(self) -> None:
-        self.assertIn('weaponKeys={cfg.approvedRawKey}', self.op)
-        self.assertIn('expectedDisplayNames={cfg.approvedDisplayName}', self.op)
-        self.assertIn('expectedChromaFlags={cfg.approvedChromaFlag}', self.op)
+        self.assertIn('weaponKeys={selection.approvedRawKey}', self.op)
+        self.assertIn('expectedDisplayNames={selection.approvedDisplayName}', self.op)
+        self.assertIn('expectedChromaFlags={selection.approvedChromaFlag}', self.op)
         self.assertIn('index~=1 or total~=1 or previous~=0', self.op)
         self.assertIn('gate.checkOutbound=nil', self.op)
         self.assertIn('ONE_ITEM_APPROVAL_ALREADY_SPENT', self.op)
         self.assertIn('CURRENT_OWN_WEAPON_IDENTITY_NOT_PROVEN', self.op)
         self.assertIn('NO_SAFE_EXACT_P3_P4_CLIENT_TRADE', self.op)
+
+    def test_mutable_environment_cannot_retarget_approved_weapon(self) -> None:
+        self.assertIn('local selection={', self.op)
+        self.assertIn('approvedRawKey=cfg.approvedRawKey', self.op)
+        self.assertIn('cfg.approvedRawKey==selection.approvedRawKey', self.op)
+        self.assertIn('cfg.approvedDisplayName==selection.approvedDisplayName', self.op)
+        self.assertIn('cfg.approvedChromaFlag==selection.approvedChromaFlag', self.op)
+        self.assertIn('ownedExactlyOne(owned,selection)', self.op)
+        self.assertIn('weaponKeys={selection.approvedRawKey}', self.op)
+
+    def test_new_native_dependencies_pin_current_reviewed_bytes(self) -> None:
+        # Must prove the exact URL revision contains the exact tested source,
+        # rather than merely finding its SHA text in the runnable wrapper.
+        for rev, path in (
+            ("af84b23173620b03e919187b08cd352c101ba4ea", BOOT),
+            ("b124488a7a879b2d6a1bfb21401f497d7bfef677", OP),
+        ):
+            relative = path.relative_to(ROOT)
+            frozen = subprocess.check_output(
+                ["git", "show", f"{rev}:{relative.as_posix()}"])
+            self.assertEqual(frozen, path.read_bytes())
 
     def test_no_legacy_strategy_or_direct_mutation_added(self) -> None:
         forbidden = (
@@ -100,6 +121,7 @@ class Contract(unittest.TestCase):
             "9138751b5a57415939ffa1618ac57811d7c8ec7b",
             "af84b23173620b03e919187b08cd352c101ba4ea",
             "27e061555321c6a87bdd835ce3d1ff557443a909",
+            "b124488a7a879b2d6a1bfb21401f497d7bfef677",
         ):
             self.assertIn(marker, self.native)
         self.assertEqual(self.native.count('game:HttpGet('), 1)
