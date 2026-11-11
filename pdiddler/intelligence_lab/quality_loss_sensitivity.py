@@ -116,8 +116,7 @@ def break_even_exit_probability(
         feasibility = "CONDITIONAL_NO_REAL_PROBABILITY_ESTIMATE"
     return _result(
         "SIMULATED", "ILLUSTRATIVE_TWO_EXIT_BREAK_EVEN_ONLY",
-        requiredHighExitProbability=max("0", format(required, "f")) if required <= 0
-        else format(required, "f"),
+        requiredHighExitProbability=format(max(Decimal(0), required), "f"),
         feasibility=feasibility,
         estimatedActualHighExitProbability=None,
         observedCompletedTradeSampleSize=0,
@@ -126,7 +125,7 @@ def break_even_exit_probability(
 
 def audit_learning_claim(outcome: object, claimed_verification: object = None) -> dict[str, Any]:
     """An untrusted status/boolean does not prove a verified outcome."""
-    if outcome not in {"UNKNOWN", "DECLINED", "CANCELED", "COMPLETED"}:
+    if type(outcome) is not str or outcome not in {"UNKNOWN", "DECLINED", "CANCELED", "COMPLETED"}:
         return _result("BLOCKED", "UNKNOWN_OUTCOME_CLASS")
     # This module has no independent verifiable settlement or partner telemetry.
     return _result(
