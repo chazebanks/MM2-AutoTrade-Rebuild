@@ -1,5 +1,18 @@
 # Gingerscope — ONE prior-approved ALT auto item offer after actual stable P3→P4 client trade
 
+## POST-MERGE RELEASE STATE — PR218 MERGED, 6/6 CI PASS, DEVICE PROOF STILL PENDING
+
+**Merge verified:** [PR218](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/218) history-preserving merge commit `73d5fccecd2aa5af42017b52cfc9a766ba3554b2`. Final exact tested head `1ce22721744168e0d47012e71559ce75bb6795b1`, all 6 workflows green. New physically tested? **NO**: its automatic one-item path has never been run on the actual iPad yet; earlier native item placement PASS required a separate post-open OFFER tap. Original manual scripts unchanged.
+
+**Precise immutable source pins verified after merge:** new selection picker `SUPERVISED_P3_ONE_ITEM_AUTO_OWNED_PICKER.lua` at PR218 merge Git blob `8824ce83a7384821a906a335c655c1ef94908c6b`; this picker loads new auto P3 native runner at `182255295eafcd28102e429cc377d06c8f510c1b` / blob `72f59f77e83fd353d184daf79b7d6a34088170b3`. That native runner loads pure first-trade-only gate at `9a5a3c4db018ed7a00f8eacd6ca988cca3152a33` / blob `bceb8a9097dd2786a9deee5818a84a916527eb61`. Git commit ancestry is preserved. Expiration: only one approved weapon/ALT/JobId and a 180s preauthorization; first observed exact P4 GUI closing or root replacing permanently voids it, no next-trade carryover. User sees explicit auto-offer warning before tapping ARM P3. Current-owned weapon raw key is reverified by original protected operator, no price or server settlement authority.
+
+**First NEW iPad Delta loader (original MM2, fresh MAIN with consenting ALT):**
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/73d5fccecd2aa5af42017b52cfc9a766ba3554b2/pdiddler/supervised/SUPERVISED_P3_ONE_ITEM_AUTO_OWNED_PICKER.lua"))()
+```
+MAIN chooses one low-stakes currently owned non-Gingerscope game weapon, taps **AUTHORIZE 1 AUTO OFFER**; next purple panel shows that chosen weapon WILL AUTO OFFER ONCE, MAIN physically taps **ARM P3**; ALT `venossgaming90190` manually accepts only incoming request; MAIN observes that item being automatically placed into first exact protected client trade window without any further OFFER tap, **NEVER presses final Accept**, manually DECLINES, taps STOP / COPY and pastes status JSON. If blocked, wrong weapon, no contact, trade root moves/changes or GUI collides, STOP and share anonymized status, do not retry same job. Expected client-only `autoOfferPreauthorizedClient=true`, `autoOfferTriggeredClient=true`, `oneItemTapObservedClient=false`, `offerAttempts=1`, `clientVisibleAddedSlots=1`, `tradeOutcome=UNKNOWN`, all Accept/settlement/profit/Discord flags false. **This is a new unproven native test; do not mark it PASS before actual user evidence.**
+
+
 ## Current starting evidence — do not repeat prior native proofs
 
 Real original-MM2 MAIN iPad Delta user report Nov 10, 2026, full JSON in [PR217 comment](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/217#issuecomment-6784585245): `p3ArmObservedClient=true`, `clientTradeWindowObserved=true`, `oneItemTapObservedClient=true`, `offerAttempts=1`, `clientVisibleAddedSlots=1`, `oneItemOfferStatus=CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED`, `clientResumeObserved=true`, `lastObservedStatus=P3_ROTATING`, `tradeOutcome=UNKNOWN`, automatic final Accept/profit/Discord OFF. This **closes** previous PR217 picker→PR216 *manual physical offer after trade opens*. Do not rerun it. Server transaction completion, backend ownership transfer and market value remain unverified.
