@@ -3,6 +3,11 @@ on:
   push:
     branches:
       - research/gingerscope-p1-nov11-canonical-source-archive
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/gingerscope-p1-canonical-archive-research.yml'
   workflow_dispatch:
 permissions:
   contents: read
