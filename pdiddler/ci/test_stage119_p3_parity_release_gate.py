@@ -23,7 +23,7 @@ KNOWN_GOOD=(
     "supervisor.currentBoundReadOnly",
     "supervisor.isP3Paused()",
     "E.PDIDDLER_OUTGOING_SESSION",
-    'observed.status=="P4_TWO_SIDED_CLIENT_SNAPSHOT"',
+    "P4_TWO_SIDED_CLIENT_SNAPSHOT",
     "io.trade()",
     "watcher.isReady()",
     'ui.arm=action("ArmP3","ARM P3"',
