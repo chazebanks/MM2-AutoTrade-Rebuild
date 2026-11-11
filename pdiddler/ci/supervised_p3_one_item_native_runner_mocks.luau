@@ -297,6 +297,11 @@ local function fakeEnv(options)
    if o.Name=="ApproveOneItem" then return o end
   end
  end
+ local function statusPanel()
+  for _,o in ipairs(instances) do
+   if o.Name=="LiveStatus" then return o end
+  end
+ end
  local function stopButton()
   for _,o in ipairs(instances) do
    if o.Name=="StopP3" then return o end
@@ -304,7 +309,7 @@ local function fakeEnv(options)
  end
  return {run=run,E=E,PG=pg,screen=screen,trade=trade,
   readSources=sourceReads,offers=offers,armButton=armButton,
-  stopButton=stopButton,offerButton=offerButton,
+  stopButton=stopButton,offerButton=offerButton,statusPanel=statusPanel,
   copied=copied,world=world,partner=partner,theirs=theirs,
   otherAccepted=otherAccepted,ownAccepted=ownAccepted,uname=uname}
 end
@@ -422,6 +427,79 @@ for _,opts in ipairs({
  eq(x.E.__P3==nil or x.E.__P3.isArmed()==false,true,
    "unsafe panel fails closed")
  eq(#x.offers,0,"no offer when panel overlaps trade")
+end
+do
+ local x=fakeEnv({renderedName="WrongRenderedItem"})
+ x.run()
+ x.armButton().Activated:Fire()
+ x.screen.Enabled=true
+ x.E.__P3.state.processed[2]="trade-open"
+ x.E.__P3.setPaused(true)
+ x.E.__WATCH.tick()
+ x.offerButton().Activated:Fire()
+ eq(#x.offers,1,"one remote allowed before mismatched client GUI read")
+ x.stopButton().Activated:Fire()
+ local r=serde.decode("json",x.copied[#x.copied])
+ eq(r.oneItemOfferStatus,"STOPPED","wrong physical GUI label cannot count as success")
+ eq(r.offerAttempts,1,"one send acknowledged even with failed GUI")
+ eq(r.clientVisibleAddedSlots,0,"wrong physical GUI never counted")
+ eq(r.serverCompletionProven,false,"no settlement even when item was sent")
+end
+do
+ local x=fakeEnv()
+ x.run()
+ x.armButton().Activated:Fire()
+ x.screen.Enabled=true
+ x.E.__P3.state.processed[2]="trade-open"
+ x.E.__P3.setPaused(true)
+ x.E.__WATCH.tick()
+ x.partner.Parent=nil
+ x.offerButton().Activated:Fire()
+ eq(#x.offers,0,"ALT leaves after initial client bind; no item offered")
+end
+-- The actual mutable viewport/trade layout must remain collision-free for
+-- both left and right trade layouts and a repositioned original MM2 trade.
+local function overlap(ax,ay,aw,ah,bx,by,bw,bh)
+ return ax<bx+bw and bx<ax+aw and ay<by+bh and by<ay+ah
+end
+for _,opt in ipairs({
+ {vw=1180,vh=820,x=100,y=150,w=530,h=410},
+ {vw=1180,vh=820,x=600,y=150,w=530,h=410},
+ {vw=1024,vh=768,x=270,y=100,w=484,h=560},
+}) do
+ local x=fakeEnv(opt)
+ x.run()
+ x.armButton().Activated:Fire()
+ x.screen.Enabled=true
+ x.E.__P3.state.processed[2]="trade-open"
+ x.E.__P3.setPaused(true)
+ local ok=pcall(x.E.__WATCH.tick)
+ local panel=x.statusPanel()
+ if ok and panel and panel.Visible and x.offerButton().Visible then
+  local pp=panel.Position
+  local ps=panel.Size
+  local tp=x.trade.AbsolutePosition
+  local ts=x.trade.AbsoluteSize
+  eq(overlap(pp[1],pp[2],ps[1],ps[2],
+    tp.X,tp.Y,ts.X,ts.Y),false,"real native offer prompt outside trade bounds")
+ else
+  eq(#x.offers,0,"any failed layout must not send items")
+ end
+end
+do
+ local x=fakeEnv()
+ x.run()
+ x.armButton().Activated:Fire()
+ x.screen.Enabled=true
+ x.E.__P3.state.processed[2]="trade-open"
+ x.E.__P3.setPaused(true)
+ x.E.__WATCH.tick()
+ x.trade.AbsolutePosition=vec(0,0)
+ x.trade.AbsoluteSize=vec(1024,768)
+ local ok=pcall(x.E.__WATCH.tick)
+ eq(#x.offers,0,"fullscreen trade intersection never triggers automatic offer")
+ x.offerButton().Activated:Fire()
+ eq(#x.offers,0,"outdated approval button cannot offer after fullscreen change")
 end
 print("[PASS] original MM2 P3 + explicit one-item OFFER GUI + protected IO:",tests)
 print("[PASS] no offer before separate tap; wrong inventory, old session, final Accept denied")
