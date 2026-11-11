@@ -1,5 +1,16 @@
 # READ FIRST — CANONICAL NOVEMBER 10, 2026 NEXT-CONVERSATION HANDOFF
 
+## NOV 10 2026 — NEW REAL IPAD PR218 AUTOMATIC ONE-ITEM OFFER CLIENT **PASS**
+
+Operator provided genuine MAIN iPad Delta native `STOP / COPY` after PR218 **single previously selected raw weapon AUTO offers on first exact consenting ALT P3/P4 trade open without post-open OFFER tap**. Exact values: `p3ArmObservedClient=true`, `clientTradeWindowObserved=true`, `autoOfferPreauthorizedClient=true`, `autoOfferTriggeredClient=true`, **`oneItemTapObservedClient=false`**, `offerAttemptsKnown=true`, **`offerAttempts=1`**, **`clientVisibleAddedSlots=1`**, `snapshotRejectReason=NONE`, `oneItemOfferStatus=CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED`, `clientResumeObserved=true`, `lastObservedStatus=P3_ROTATING`, `status=STOPPED`, `reason=OPERATOR_STOPPED`. Critically `serverCompletionProven=false`, `tradeOutcome=UNKNOWN`, `authorizesAccept=false`, `authorizesOffer=false`, `mayReportProfit=false`, `maySendDiscordWebhook=false`. Full exact JSON [PR218 native device receipt comment](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/218#issuecomment-6784936051).
+
+**Milestone CLOSED**: actual client-side auto placement with one original protected OfferItem attempt, one visible client slot, correct P3 safe rotation resume. Not server-signed completion, authenticated raw weapon ownership, economic profit, real seller interest or automatic Accept; none may be claimed. Earlier PR217/PR216 one manually post-open-tapped item and PR214 P3 native tests also closed. **DO NOT REPEAT** any of these purely to re-prove them. User did not provide raw selected weapon ID or server transaction receipt: do not infer these.
+
+Code unchanged from reviewed, history-preserving [merged PR218](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/218) `73d5fccecd2aa5af42017b52cfc9a766ba3554b2`, exact CI head `1ce22721744168e0d47012e71559ce75bb6795b1`, 6/6 official Actions passed. New safe auto picker/runner/gate remain restricted to human-selected ONE non-Gingerscope item, exact ALT `venossgaming90190`, first verified stable bound P4 root, no retry, manual final Accept. New full handoff `pdiddler/supervised/SUPERVISED_P3_ONE_ITEM_AUTO_OFFER_HANDOFF.md` is read after this checkpoint and canonical.
+
+**Next separate question, not yet solved:** choose only ONE genuinely new blocker (authoritative raw weapon/settlement evidence and safe final Accept policy, or independently consented 2–4-item inventory strategy). Do not skip server proof and automatically enable final Accept, fake Discord completed-trade profit or revive old fixed +15/highest opener. No user hardware step required to redo current auto-one-item proof.
+
+
 ## NEWEST VERIFIED PR218 MERGE — ONE PREAUTHORIZED AUTO OFFER WHEN EXACT ALT FIRST TRADE OPENS
 
 The user already passed actual iPad Delta **PR217 picker→PR216 real original P3/P4 manual one-item** (`offerAttempts=1`, `clientVisibleAddedSlots=1`, `clientResumeObserved=true`, `tradeOutcome=UNKNOWN`, all Accept/server-completion/profit/Discord false). Do NOT repeat that client proof, older PR214 P3-only or previous two-item device tests. User then approved one automatically offered previously selected item upon exact ALT trade open (“If u want to”).
