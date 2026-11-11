@@ -10,6 +10,7 @@ OLD=ROOT/"pdiddler/supervised/SUPERVISED_P3_NATIVE_STARTUP.lua"
 CURRENT=ROOT/"pdiddler/supervised/SUPERVISED_P3_STAGE101_IDENTITY_NATIVE.lua"
 WITNESS=ROOT/"pdiddler/supervised/supervised_p3_p4_stage101_identity_witness.lua"
 HANDOFF=ROOT/"pdiddler/supervised/supervised_p3_p4_handoff.lua"
+START=ROOT/"pdiddler/supervised/SUPERVISED_P3_STAGE101_READONLY_START.lua"
 def blob(path):
     return subprocess.check_output(["git","hash-object",str(path)],text=True).strip()
 
@@ -45,6 +46,24 @@ class NativeReadOnly(unittest.TestCase):
         ):
             if token!='Never final Accept':
                 self.assertIn(token,self.code,token)
+
+    def test_one_line_entrypoint_exact_alt_and_exact_reviewed_frozen_native(self):
+        loader=START.read_text(encoding="utf-8")
+        self.assertEqual(blob(CURRENT),"4ad3ca58c302889c4b73c2ccc688ee32639e1965")
+        for token in (
+          'targetName="venossgaming90190"',
+          '"bb065d00a62b904c298cfd08ff1d2a75a4b509b7/"',
+          'stage101IdentityReadOnly=true',
+          'altOnlyTest=true',
+          'finalAcceptMustRemainManual=true',
+          'game.PlaceId~=142823291',
+          'PDIDDLER_SUPERVISED_P3_NATIVE_OWNER~=nil',
+          'loadstring(source)',
+        ):
+            self.assertIn(token,loader)
+        for forbidden in ('OfferItem:FireServer(','AcceptTrade:FireServer(',
+                          'DeclineTrade:FireServer('):
+            self.assertNotIn(forbidden,loader)
 
     def test_no_scripted_weapon_offer_or_final_accept_or_decline(self):
         for source in (self.code,self.witness):
