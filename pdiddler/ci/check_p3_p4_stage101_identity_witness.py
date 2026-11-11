@@ -63,7 +63,7 @@ class WitnessSource(unittest.TestCase):
         self.assertNotIn('print(',self.source)
 
     def test_no_old_price_or_accept_strategy_used(self):
-        for token in ('minProfit','highest','numericCheckerId','SupremeValue','DiscordWebhook','AcceptTrade'):
+        for token in ('minProfit','highest','numericCheckerId','SupremeValue','PostAsync','AcceptTrade'):
             self.assertNotIn(token,self.source)
 
 if __name__=="__main__":
