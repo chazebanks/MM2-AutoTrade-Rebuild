@@ -309,6 +309,11 @@ local function fakeEnv(options)
    if o.Name=="StopP3" then return o end
   end
  end
+ local function named(n)
+  for _,o in ipairs(instances) do
+   if o.Name==n then return o end
+  end
+ end
  local function addWeapon(side,itemName,amountText,chroma)
   local targetSide=side=="MAIN" and ours or theirs
   local container=targetSide:FindFirstChild("Container")
@@ -341,7 +346,8 @@ local function fakeEnv(options)
   stopButton=stopButton,copied=copied,world=world,
   setTime=function(t)clock=t end,now=function()return clock end,
   update=update,addWeapon=addWeapon,currentEvent=currentEvent,
-  partner=partner,our=ours,their=theirs,remote=remote}
+  partner=partner,our=ours,their=theirs,remote=remote,
+  named=named}
 end
 local function start(x)
  local runtime=x.run()
@@ -472,6 +478,57 @@ do
  x.setTime(100.5);x.E.__WATCH.tick()
  eq(x.E.PDIDDLER_STAGE101_IDENTITY_RUNNER.status().identityStatus,
   "INCONCLUSIVE","client offered x2 mismatch denies raw-key candidate")
+end
+-- The prompt must stay on the actual game screen without covering
+-- offered slots, Accept, Decline, or the current physical TradeGUI.
+local function overlaps(panel,trade)
+ local pp,ps=panel.Position,panel.Size
+ local tp,ts=trade.AbsolutePosition,trade.AbsoluteSize
+ local x,y,w,h=pp[1],pp[2],ps[1],ps[2]
+ return x<tp.X+ts.X+12 and x+w>tp.X-12 and
+        y<tp.Y+ts.Y+12 and y+h>tp.Y-12
+end
+for _,geometry in ipairs({
+ {vw=1024,vh=768,x=520,y=155,w=380,h=460},
+ {vw=1024,vh=768,x=15,y=155,w=420,h=460},
+ {vw=1024,vh=768,x=320,y=220,w=380,h=370},
+ {vw=900,vh=600,x=500,y=155,w=320,h=370},
+ {vw=768,vh=1024,x=210,y=305,w=370,h=580},
+})do
+ local x=fakeEnv(geometry)
+ start(x)
+ local p=x.named("LiveStatus")
+ eq(p.Visible,true,"nonoverlap instructions are visible in each layout")
+ eq(overlaps(p,x.trade),false,
+    "instructions avoid actual right, left, center, landscape or portrait trade")
+ eq(x.named("WhatToDo").Text:find("ALT:",1,true)~=nil,true,
+    "physical on-game current step names ALT, not console only")
+ x.stopButton().Activated:Fire()
+end
+do
+ local x=fakeEnv()
+ start(x)
+ x.trade.AbsolutePosition=vec(0,130)
+ x.trade.AbsoluteSize=vec(460,460)
+ x.E.__WATCH.tick()
+ local p=x.named("LiveStatus")
+ eq(p.Visible,true,"moving actual trade root repositions the single step panel")
+ eq(overlaps(p,x.trade),false,
+    "moving trade cannot cause prompt tap interception")
+ x.world.CurrentCamera.ViewportSize=vec(768,1024)
+ x.trade.AbsolutePosition=vec(120,360)
+ x.E.__WATCH.tick()
+ eq(overlaps(p,x.trade),false,
+    "portrait/orientation change rechecks physical trade collision")
+end
+do
+ local x=fakeEnv()
+ start(x)
+ x.trade.AbsoluteSize=vec(0,0)
+ -- No safe current trade bounds: original P3 watchdog should revoke.
+ pcall(x.E.__WATCH.tick)
+ eq(x.E.__P3.stopped,true,"zero-size trade bounds cannot keep P3 running")
+ eq(#x.offers,0,"unsafe geometry never creates a new offer")
 end
 for _,opts in ipairs({
  {invalidPlace=true},{invalidConfig=true},{ownerConflict=true},
