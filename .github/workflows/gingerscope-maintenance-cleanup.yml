@@ -1,0 +1,33 @@
+name: Gingerscope compact recovery and duplicate cleanup
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/START_HERE.md'
+      - 'pdiddler/history/REMOVED_DUPLICATES_2026_11_11.json'
+      - 'pdiddler/pdiddler3_scanner_test_v5.lua'
+      - 'pdiddler/pdiddler3_scanner_test_v6.lua'
+      - 'pdiddler/pdiddler3_scanner_test.lua'
+      - 'pdiddler/ci/test_cleanup_contracts.py'
+      - '.github/workflows/gingerscope-maintenance-cleanup.yml'
+      - 'AGENTS.md'
+      - '.github/copilot-instructions.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cleanup-source-integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify retained blobs, no dangling imports, compact agent entrypoint
+        run: python3 -m unittest pdiddler.ci.test_cleanup_contracts -v
+      - name: Run continuity verify and recovery on exact checkout
+        run: |
+          python3 -m pdiddler.continuity.manager verify
+          python3 -m pdiddler.continuity.manager recover

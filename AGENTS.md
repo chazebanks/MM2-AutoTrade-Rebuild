@@ -1,5 +1,7 @@
 # Gingerscope mandatory code-agent instructions
 
+**First read the compact working index `pdiddler/START_HERE.md`;** then run the existing continuity verify/recover. Fetch the original large stage handoffs only for task-relevant evidence; never skip source checks or claim all stages audited.
+
 Applies to every Gingerscope/MM2 change in this repository. The existing game code is not authorized to change just because this file is read.
 
 1. Start with pdiddler/continuity/README.md and the four manifests there. Execute Python module pdiddler.continuity.manager with commands verify and recover in a checkout. If the gate fails, do not implement affected changes until reconciled.
