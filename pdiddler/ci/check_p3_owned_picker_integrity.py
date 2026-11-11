@@ -68,7 +68,7 @@ class PickerIntegrity(unittest.TestCase):
         self.assertEqual(self.p.count('remote:InvokeServer()'),1)
         self.assertIn('os.clock()-started<8',self.p)
         self.assertIn('OWN_PROFILE_READ_TIMEOUT_NO_RETRY',self.p)
-        self.assertIn('os.clock()-(owner.profileReadAt or 0)>180',self.p)
+        self.assertIn('os.clock()-(profileReadAt or 0)>180',self.p)
         self.assertIn('CURRENT_GAME_WEAPON_CATALOG_UNREADABLE',self.m)
         self.assertIn('OWN_WEAPON_METADATA_UNRESOLVED',self.m)
         self.assertIn('NO_ELIGIBLE_CURRENT_OWN_WEAPONS',self.m)
