@@ -1,0 +1,103 @@
+name: Gingerscope P1 canonical Supreme research archive (no trading)
+on:
+  push:
+    branches:
+      - research/gingerscope-p1-nov11-canonical-source-archive
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify exact continuity anchors, fail closed
+        run: |
+          python3 -m pdiddler.continuity.manager verify
+          python3 -m pdiddler.continuity.manager recover
+      - name: Install HTTPS session dependency
+        run: python3 -m pip install requests==2.32.5
+      - name: Download and Git-blob-verify original Stage111, 110, 104 and Stage69/84 evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          dir='pdiddler/intelligence_lab'
+          mkdir -p /tmp/gingerscope-p1
+          curl -fsSL --retry 3 --max-time 45 "$base/35dff4925869638c1808376ef611c93e414b980c/$dir/stage104_publication_timestamp_gate.py" -o "$dir/stage104_publication_timestamp_gate.py"
+          curl -fsSL --retry 3 --max-time 45 "$base/57ad1c00e775e839fd05f3437c1bdbbfcd7161f6/$dir/stage110_trusted_source_admission.py" -o "$dir/stage110_trusted_source_admission.py"
+          curl -fsSL --retry 3 --max-time 45 "$base/f3dfadb4b90c6a126e19dc4064514f795aea98e9/$dir/stage111_supreme_readonly_capture.py" -o "$dir/stage111_supreme_readonly_capture.py"
+          curl -fsSL --retry 3 --max-time 45 "$base/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/refresh_supreme_snapshot.py" -o /tmp/gingerscope-p1/stage69_parser.py
+          for tier in ancients godlies chromas; do
+            curl -fsSL --retry 3 --max-time 45 "$base/f08ceb35a9ff684ee2cf577ccce7542c436cc68e/pdiddler/research_source_html/stage84_2026_11_09/$tier.html" -o "/tmp/gingerscope-p1/$tier.html"
+          done
+          test "$(git hash-object "$dir/stage104_publication_timestamp_gate.py")" = 14b26009b3494de0994596df7ea2b329adad5e58
+          test "$(git hash-object "$dir/stage110_trusted_source_admission.py")" = b88c7e60cf928cc2c5c67b34e28d34fecd9d9b58
+          test "$(git hash-object "$dir/stage111_supreme_readonly_capture.py")" = 64e49ef680a879010da7f114d3be59413922d6b3
+          test "$(git hash-object /tmp/gingerscope-p1/stage69_parser.py)" = d5843a57f34078cbe7213aa78a4aa12a5775c016
+          test "$(git hash-object /tmp/gingerscope-p1/ancients.html)" = ce8178ab9579e8782d8f72a6dac051756a728506
+          test "$(git hash-object /tmp/gingerscope-p1/godlies.html)" = d3cf222a8e10cff3a9fb051b16188192389c4b2d
+          test "$(git hash-object /tmp/gingerscope-p1/chromas.html)" = 6c77624cac3df96168b008e9bc8eca68a2d78cf9
+          echo ORIGINAL_SOURCE_AND_PREVIOUS_HTML_GIT_BLOBS_VERIFIED
+      - name: Capture real three-page HTTPS via unmodified Stage111 chain
+        id: capture
+        shell: bash
+        run: |
+          mkdir -p /tmp/gingerscope-p1/current
+          set +e
+          python3 -m pdiddler.intelligence_lab.stage111_supreme_readonly_capture --parser /tmp/gingerscope-p1/stage69_parser.py --prior-html-dir /tmp/gingerscope-p1 --output-dir /tmp/gingerscope-p1/current
+          rc=$?
+          set -e
+          echo "$rc" > /tmp/gingerscope-p1/current/original_exit_code.txt
+          echo "original_exit=$rc" >> "$GITHUB_OUTPUT"
+          echo "Stage111 original exit=$rc (3 means new publication requiring manual review, not a live-price pass)"
+      - name: Apply unchanged Stage121 research-only firewall and test all denied authorities
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from datetime import datetime,timezone
+          from pathlib import Path
+          import json
+          from pdiddler.intelligence_lab.stage121_source_to_strategy_firewall import assess,FALSE
+          p=Path('/tmp/gingerscope-p1/current')
+          src=p/'source_audit.json'
+          if not src.exists():
+              print('NO_CAPTURE_MANIFEST; cannot assess source; no authority')
+              raise SystemExit(2)
+          m=json.loads(src.read_text())
+          r=assess(m,evaluated_utc=datetime.now(timezone.utc).isoformat(timespec='seconds').replace('+00:00','Z'))
+          assert all(r.get(k)==v for k,v in FALSE.items())
+          assert m.get('mayUpdatePriceFiles') is False
+          assert m.get('mayUpdateProduction') is False
+          (p/'source_boundary.json').write_text(json.dumps(r,indent=2,sort_keys=True)+'\n')
+          print('STAGE111',m.get('status'),m.get('reason'),'page count',len(m.get('capturedSources',{})))
+          print('STAGE121',r['status'],r['reason'],'market authority false, Accept false')
+          PY
+      - name: Archive raw first-party source and denied-authority receipt; no deploy
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-p1-firstparty-research-only
+          path: /tmp/gingerscope-p1/current/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Preserve original capture exit classification (3 requires review)
+        if: always()
+        shell: bash
+        run: |
+          if [ ! -f /tmp/gingerscope-p1/current/original_exit_code.txt ]; then
+            echo 'No capture receipt: source blocked'
+            exit 2
+          fi
+          rc=$(cat /tmp/gingerscope-p1/current/original_exit_code.txt)
+          if [ "$rc" = "3" ]; then
+            echo 'NEW_PUBLISHER_CANDIDATE_REVIEW_REQUIRED — artifact is research only, not a price authorization'
+          fi
+          exit "$rc"
