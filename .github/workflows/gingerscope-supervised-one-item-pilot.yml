@@ -11,6 +11,8 @@ on:
       - 'pdiddler/ci/supervised_p3_p4_handoff_mocks.luau'
       - 'pdiddler/supervised/supervised_real_p3_rotation_handoff.lua'
       - 'pdiddler/ci/supervised_real_p3_rotation_handoff_mocks.luau'
+      - 'pdiddler/supervised/supervised_p3_one_item_operator.lua'
+      - 'pdiddler/ci/supervised_p3_one_item_operator_mocks.luau'
       - 'pdiddler/supervised/pdiddler3_outgoing_START_GATED_v1.lua'
       - 'pdiddler/ci/supervised_p3_start_barrier_mocks.luau'
       - 'pdiddler/supervised/supervised_p3_startup_supervisor.lua'
@@ -64,6 +66,10 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_real_p3_rotation_handoff_mocks.luau
+      - name: Exercise real P3-bound one-item approval with actual guarded TradeIO and native mocks
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_one_item_operator_mocks.luau
       - name: Exercise approved multi-item four physical-slot plan against real guarded IO
         run: |
           set -euo pipefail
