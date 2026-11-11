@@ -284,5 +284,107 @@ do
  eq(result.status,"BLOCKED","stopped can never bind")
  eq(result.reason,"CONTROLLER_STOPPED","stopped status")
 end
+-- The next integration seam is a REVOCABLE read-only session facade.
+-- No approval, controller, prices, real item remotes or native UI added.
+do
+ local x=fixture()
+ local manager=bind(x)
+ local missing,reason=manager.currentBoundReadOnly()
+ eq(missing,nil,"no facade while P3 rotates without an exact trade")
+ eq(reason.status,"BLOCKED","no capability before verified P4 window")
+ eq(reason.authorizesOffer,false,"no implicit offer authority")
+ acceptP3(x)
+ local lease,receipt=manager.currentBoundReadOnly()
+ eq(type(lease),"table","genuine P3 client-bound lease created")
+ eq(receipt.status,"P3_BOUND_CANDIDATE_READ_ONLY","explicit client-only status")
+ eq(receipt.authorizesOffer,false,"lease receipt cannot authorize offers")
+ eq(receipt.authorizesAccept,false,"lease receipt cannot authorize final Accept")
+ eq(lease.offerItem,nil,"lease has no physical OfferItem entry point")
+ eq(lease.resumeAfterClose,nil,"lease cannot mutate original P3 rotation")
+ eq(lease.accept,nil,"lease has no Accept control")
+ local snap=lease.capture()
+ eq(snap.status,"CLIENT_UNPRICED_TWO_SIDED_SNAPSHOT","original protected GUI capture reused")
+ eq(snap.physicalOwnSlots,0,"initial empty own side")
+ eq(snap.physicalTheirSlots,0,"initial empty their side")
+ eq(snap.pricesAuthenticated,false,"price remains unauthenticated")
+ eq(snap.rawItemIdsAuthenticated,false,"raw keys remain unauthenticated")
+ x.add(x.theirs,1,"Emberbow",8)
+ local updated=lease.capture()
+ eq(updated.status,"CLIENT_UNPRICED_TWO_SIDED_SNAPSHOT","GUI changes observed fresh")
+ eq(updated.physicalTheirSlots,1,"current physical slot not stale cache")
+ eq(#x.sends,0,"read-only bridge never sends a remote")
+ x.theirAccepted.Visible=true
+ local rejected=lease.capture()
+ eq(rejected.status,"REJECTED","already accepted GUI revokes lease")
+ eq(rejected.authorizesOffer,false,"rejected state cannot offer")
+ x.theirAccepted.Visible=false
+ eq(lease.capture().status,"REJECTED","unsafe lease never heals on apparent GUI recovery")
+ eq(#x.sends,0,"no physical actions through revoked lease")
+end
+do
+ local x=fixture()
+ local manager=bind(x)
+ acceptP3(x)
+ local lease=manager.currentBoundReadOnly()
+ x.name.Text="WrongAccount"
+ eq(lease.capture().status,"REJECTED","changed GUI partner revoked")
+ x.name.Text="TrustedAlt"
+ eq(lease.capture().status,"REJECTED","wrong partner lease cannot be reused")
+ eq(#x.sends,0,"partner swap never sends")
+end
+do
+ local x=fixture()
+ local manager=bind(x)
+ acceptP3(x)
+ local lease=manager.currentBoundReadOnly()
+ x.screen.Enabled=false
+ eq(lease.capture().status,"REJECTED","trade close revokes lease")
+ local resumed=manager.resumeAfterClose()
+ eq(resumed,true,"existing original P3 safe resume remains intact")
+ eq(lease.capture().status,"REJECTED","closed lease cannot be revived")
+ x.screen.Enabled=true
+ x.p3.paused=true
+ eq(lease.capture().status,"REJECTED","same old processed outcome cannot rebind")
+ eq(#x.sends,0,"closed session sends nothing")
+end
+do
+ local x=fixture()
+ local manager=bind(x)
+ acceptP3(x)
+ local lease=manager.currentBoundReadOnly()
+ x.ctx.epoch=19
+ eq(lease.capture().status,"REJECTED","P3 epoch drift revokes lease")
+ x.ctx.epoch=18
+ eq(lease.capture().status,"REJECTED","restored epoch cannot revive old lease")
+ eq(#x.sends,0,"epoch drift sends nothing")
+end
+do
+ local x=fixture()
+ local manager=bind(x)
+ acceptP3(x)
+ local lease=manager.currentBoundReadOnly()
+ manager.stop()
+ eq(lease.capture().status,"REJECTED","stopped owner revokes lease")
+ eq(#x.sends,0,"stop sends nothing")
+end
+do
+ local x=fixture()
+ local manager=bind(x)
+ acceptP3(x)
+ local lease=manager.currentBoundReadOnly()
+ x.screen.Enabled=false
+ eq(manager.resumeAfterClose(),true,"original trade closes")
+ x.players.other={Name="SecondAlt",DisplayName="Other",UserId=3,Parent=x.players}
+ x.name.Text="SecondAlt"
+ x.p3.state.processed[3]="trade-open"
+ x.screen.Enabled=true
+ x.p3.paused=true
+ local newer,rc=manager.currentBoundReadOnly()
+ eq(type(newer),"table","new independent bound trade can obtain fresh lease")
+ eq(rc.authorizesOffer,false,"new session also has zero offer permission")
+ eq(lease.capture().status,"REJECTED","prior lease invalid across next trade")
+ eq(newer.capture().status,"CLIENT_UNPRICED_TWO_SIDED_SNAPSHOT","new partner session read only")
+ eq(#x.sends,0,"no remotes during second session")
+end
 print("[PASS] real P3 paused rotation to original P4 GUI observer, ",tests)
 print("[PASS] no offer/request/Accept, exact fresh processed user, safe P3 resumption")
