@@ -86,8 +86,14 @@ function M.new(pilot,consent,env)
  function gate.observe(status)
   if spent or stopped then return receipt("SPENT","AUTO_ONE_SHOT_ALREADY_SPENT") end
   if status~="P4_TWO_SIDED_CLIENT_SNAPSHOT" then
-   firstRoot=nil
-   firstTime=nil
+   -- Once the very first verified bound GUI was seen, its loss voids
+   -- approval forever: never let an unrelated future trade inherit it.
+   if firstRoot~=nil then
+    spent=true
+    firstRoot=nil
+    firstTime=nil
+    return receipt("BLOCKED","FIRST_EXACT_TRADE_CLOSED_BEFORE_AUTO")
+   end
    return receipt("WAITING","WAIT_FOR_EXACT_CLIENT_P4_WINDOW")
   end
   if not live() then
@@ -96,8 +102,10 @@ function M.new(pilot,consent,env)
   end
   local okRoot,root=pcall(env.getTradeRoot)
   if not okRoot or not root then
-   firstRoot=nil
-   firstTime=nil
+   if firstRoot~=nil then
+    spent=true
+    return receipt("BLOCKED","EXACT_TRADE_ROOT_LOST")
+   end
    return receipt("WAITING","CURRENT_TRADE_ROOT_UNREADABLE")
   end
   -- Do not offer on the first possibly transient client GUI frame.
@@ -106,7 +114,11 @@ function M.new(pilot,consent,env)
    spent=true
    return receipt("BLOCKED","AUTO_MONOTONIC_TIME_UNAVAILABLE")
   end
-  if firstRoot~=root or firstTime==nil then
+  if firstRoot~=nil and firstRoot~=root then
+   spent=true
+   return receipt("BLOCKED","EXACT_TRADE_ROOT_REPLACED")
+  end
+  if firstRoot==nil or firstTime==nil then
    firstRoot=root
    firstTime=now
    return receipt("WAITING","VERIFYING_STABLE_TRADE_WINDOW")
