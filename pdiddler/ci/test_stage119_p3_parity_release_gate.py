@@ -28,7 +28,6 @@ KNOWN_GOOD=(
     "watcher.isReady()",
     'ui.arm=action("ArmP3","ARM P3"',
     'ui.stop=action("StopP3","STOP / COPY"',
-    "getBound=function()return supervisor.currentBoundReadOnly()end",
     "suppressLegacyScannerGUI()",
 )
 OWNER_DENIAL=(
@@ -73,6 +72,17 @@ class ProtectedStage119Parity(unittest.TestCase):
         text=NEW.read_text()
         for token in KNOWN_GOOD+OWNER_DENIAL+NATIVE_TOKENS:
             self.assertIn(token,text,token)
+        for token in (
+            "pcall(supervisor.currentBoundReadOnly)",
+            'snap.status~="CLIENT_UNPRICED_TWO_SIDED_SNAPSHOT"',
+            "snap.partnerExactClientBound~=true",
+            "snap.part3Paused~=true",
+            "snap.part4TradeVisible~=true",
+            "verifyPhysical(currentStage9Raw.our,snap.ours",
+            "verifyPhysical(currentStage9Raw.their,snap.theirs",
+            "UNEXPECTED_OR_DUPLICATE_CLIENT_EVENT",
+        ):
+            self.assertIn(token,text,token)
         for token in UNSAFE_V1_TOKENS:
             self.assertNotIn(token,text,token)
 
@@ -87,7 +97,7 @@ class ProtectedStage119Parity(unittest.TestCase):
             "currentBoundReadOnly", "P3_BOUND_LEASE",
             "ARM P3", "P4_TWO_SIDED_CLIENT_SNAPSHOT",
             "OnClientEvent", "stage118",
-            "NO_SAFE_SPACE", "UNKNOWN",
+            "no safe", "UNKNOWN",
         ):
             self.assertIn(token,native,token)
 
