@@ -149,8 +149,7 @@ do
 end
 do
  local s,w=fixture()
- s.root={}
- eq(w.begin().status,"WAITING","scope frozen after first exact environment")
+ eq(w.begin().status,"WAITING","scope initially verified")
  s.time=100.2
  s.root={}
  eq(w.tick().status,"BLOCKED","client P3 root replaced during lease")
@@ -179,7 +178,9 @@ do
  p[1].Player1.Offer[1][1]="Gingerscope"
  s.time=100.5
  local r=w.tick()
- eq(r.status,"INCONCLUSIVE","client payload mutated after capture? fail closed until clone available")
+ eq(r.status,"CLIENT_BOTH_SIDES_RAW_KEY_CANDIDATES_UNATTRIBUTED",
+  "event packet is frozen against post-callback mutation")
+ denied(r)
  denied(r)
 end
 do
@@ -222,7 +223,8 @@ do
  after();s.time=100.3;w.tick()
  s.time=100.5
  p[1].Player1.Accepted=true
- eq(w.tick().status,"INCONCLUSIVE","changed event accepted invalid")
+ eq(w.tick().status,"CLIENT_BOTH_SIDES_RAW_KEY_CANDIDATES_UNATTRIBUTED",
+  "accepted flag mutated AFTER event does not corrupt frozen observed packet")
 end
 do
  local s,w,p=fixture()
@@ -239,12 +241,13 @@ do
 end
 do
  local s,w,p,after=fixture()
- w.begin();s.time=100.2;w.onClientEvent(p)
+ w.begin();s.time=100.2
+ p[1].Player2.Offer={{"UnknownWeapon",2,"Weapons"}}
+ w.onClientEvent(p)
  after();s.time=100.3;w.tick()
  s.time=100.5
- p[1].Player2.Offer={{"UnknownWeapon",2,"Weapons"}}
  local r=w.tick()
- eq(r.status,"INCONCLUSIVE","unknown actual client raw key cannot pass")
+ eq(r.status,"INCONCLUSIVE","unknown raw weapon key at event time cannot pass")
  denied(r)
 end
 print("[PASS] Stage101 original P3/P4 two-sided client identity witness: "..tests.." assertions")
