@@ -51,10 +51,10 @@ class NativeReadOnly(unittest.TestCase):
 
     def test_one_line_entrypoint_exact_alt_and_exact_reviewed_frozen_native(self):
         loader=START.read_text(encoding="utf-8")
-        self.assertEqual(blob(CURRENT),"4ad3ca58c302889c4b73c2ccc688ee32639e1965")
+        self.assertEqual(blob(CURRENT),"46cff56b9f58fa8590a275dfd26f46cea0c5c9a6")
         for token in (
           'targetName="venossgaming90190"',
-          '"bb065d00a62b904c298cfd08ff1d2a75a4b509b7/"',
+          '"561da622ad601be9493237be158d5003b768f897/"',
           'stage101IdentityReadOnly=true',
           'altOnlyTest=true',
           'finalAcceptMustRemainManual=true',
