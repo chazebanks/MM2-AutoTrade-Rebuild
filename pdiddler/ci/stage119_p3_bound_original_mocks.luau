@@ -557,6 +557,7 @@ do
 end
 for _,opts in ipairs({
  {invalidPlace=true},{invalidConfig=true},{ownerConflict=true},
+ {oldStage119Owner=true},{oldStage119Used=true},
  {pilotConflict=true},{noAltTest=true},{badTarget=true},
  {noCamera=true},{failUI=true},{vw=260,vh=260}
 })do
