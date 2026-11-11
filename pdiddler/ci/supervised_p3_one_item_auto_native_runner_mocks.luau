@@ -303,6 +303,11 @@ local function fakeEnv(options)
    if o.Name=="ApproveOneItem" then return o end
   end
  end
+ local function named(wanted)
+  for _,o in ipairs(instances) do
+   if o.Name==wanted then return o end
+  end
+ end
  local function statusPanel()
   for _,o in ipairs(instances) do
    if o.Name=="LiveStatus" then return o end
@@ -315,7 +320,7 @@ local function fakeEnv(options)
  end
  return {run=run,E=E,PG=pg,screen=screen,trade=trade,
   readSources=sourceReads,offers=offers,armButton=armButton,
-  stopButton=stopButton,offerButton=offerButton,statusPanel=statusPanel,
+  stopButton=stopButton,offerButton=offerButton,statusPanel=statusPanel,named=named,
   advance=function(dt)clock+=dt end,
   copied=copied,world=world,partner=partner,theirs=theirs,
   otherAccepted=otherAccepted,ownAccepted=ownAccepted,uname=uname}
