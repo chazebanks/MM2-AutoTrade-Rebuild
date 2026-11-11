@@ -1,0 +1,45 @@
+name: Gingerscope Stage75 13-key client catalogue probe (mock native Lua only)
+on:
+  push:
+    branches:
+      - research/gingerscope-stage75-native-13-key-exact-catalog
+    paths:
+      - 'pdiddler/new_part4/STAGE75_READONLY_13_KEY_CATALOG_PROBE.lua'
+      - 'pdiddler/tests/test_stage75_native_catalog_13_keys.py'
+      - 'pdiddler/intelligence_lab/STAGE75_NATIVE_CATALOGUE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage75-native-catalogue.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE75_READONLY_13_KEY_CATALOG_PROBE.lua'
+      - 'pdiddler/tests/test_stage75_native_catalog_13_keys.py'
+      - 'pdiddler/intelligence_lab/STAGE75_NATIVE_CATALOGUE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage75-native-catalogue.yml'
+permissions:
+  contents: read
+jobs:
+  readonly-native-catalogue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install actual Lua5.4 interpreter and compiler
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Download ONLY pinned public Oct18 game metadata and verify original Git blob
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/mm2scripthub/mm2/0f2715187e7eae36eea4bd97afee809478fc877d/db' \
+            -o /tmp/stage75_oct18_public_db.lua
+          test "$(git hash-object /tmp/stage75_oct18_public_db.lua)" = '2be54c3f5c6b715844728c01a65cc2f24a55c02d'
+      - name: Run exact catalogue provenance, live-script Lua mock, UI and clipboard fail-closed regressions
+        env:
+          STAGE75_PINNED_THIRD_PARTY_DB: /tmp/stage75_oct18_public_db.lua
+          STAGE75_REQUIRE_PINNED_SOURCE: '1'
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_stage75_native_catalog_13_keys
