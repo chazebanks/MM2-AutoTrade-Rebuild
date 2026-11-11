@@ -54,6 +54,9 @@ local function fixture()
  function players:FindFirstChild(k)
   if k==p.Name and p.Parent==players then return p end
  end
+ function players:GetPlayerByUserId(uid)
+  if uid==p.UserId and p.Parent==players then return p end
+ end
  function lp:FindFirstChildOfClass(kind)
   if kind=="PlayerGui" then return pg end
  end
