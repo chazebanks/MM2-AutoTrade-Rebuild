@@ -171,7 +171,9 @@ def begin_job(root: Path, job_id: str, task: str, source_commit: str) -> dict:
             "retryPolicy": "INSPECT_BEFORE_RETRY_NEVER_AUTO_REPLAY_SIDE_EFFECTS"}
     if path.exists():
         old = json.loads(path.read_text())
-        require(old.get("schema") == data["schema"] and old.get("jobId") == job_id, "JOB_COLLISION")
+        require(old.get("schema") == data["schema"] and old.get("jobId") == job_id and
+                old.get("task") == task and old.get("sourceCommit") == source_commit,
+                "JOB_ID_COLLISION_MISMATCH")
         return {"status": "EXISTS_NO_REPLAY", "job": old}
     _atomic_new(path, data)
     return {"status": "CREATED_NOT_EXECUTED", "job": data}

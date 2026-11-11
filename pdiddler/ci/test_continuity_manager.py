@@ -107,6 +107,10 @@ class ContinuityTests(unittest.TestCase):
         self.assertEqual(result["status"], "CREATED_NOT_EXECUTED")
         again = c.begin_job(self.root, job_id, "One safe offline test", sha)
         self.assertEqual(again["status"], "EXISTS_NO_REPLAY")
+        with self.assertRaisesRegex(c.GateError, "JOB_ID_COLLISION_MISMATCH"):
+            c.begin_job(self.root, job_id, "Different unsafe task", sha)
+        with self.assertRaisesRegex(c.GateError, "JOB_ID_COLLISION_MISMATCH"):
+            c.begin_job(self.root, job_id, "One safe offline test", "0" * 40)
         self.assertEqual(c.job_status(self.root, job_id)["status"], "PLANNED")
         with self.assertRaises(c.GateError):
             c.job_status(self.root, "job-unknown")
@@ -159,6 +163,20 @@ class ContinuityTests(unittest.TestCase):
         public = self.root / "logs"; public.mkdir(); (public / ".gingerscope_private").write_text("")
         with self.assertRaisesRegex(c.GateError, "PUBLIC_REPOSITORY_LOG_FORBIDDEN"):
             c.save_client_event(self.root, public, "evt-other0001", obj)
+
+    def test_controlled_policy_content_edit_requires_manifest_review(self):
+        policy = self.data("policy.json")
+        policy["rules"][0]["statement"] += " fabricated suffix"
+        (self.config / "policy.json").write_text(json.dumps(policy))
+        with self.assertRaisesRegex(c.GateError, "CONTROLLED_FILE_CHANGED_REVIEW_REQUIRED"):
+            c.verify(self.root)
+
+    def test_controlled_pr_catalog_edit_requires_manifest_review(self):
+        catalog = self.data("public_pr_catalog.json")
+        catalog["stageIndex"][0]["indexStatus"] = "FULLY_AUDITED"
+        (self.config / "public_pr_catalog.json").write_text(json.dumps(catalog))
+        with self.assertRaisesRegex(c.GateError, "CONTROLLED_FILE_CHANGED_REVIEW_REQUIRED"):
+            c.verify(self.root)
 
     def test_type_confusion_and_invalid_ids(self):
         obj = self.event(); obj["clientCallbacks"] = True
