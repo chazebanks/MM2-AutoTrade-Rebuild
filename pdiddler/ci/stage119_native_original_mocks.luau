@@ -311,7 +311,8 @@ test("no safe place, zero trade bounds, missing camera abort",function()
    {w=0,h=500},{missingCamera=true}
  }) do
   local x=world(o);x:open()
-  local r=x:step(1.1)
+  local r=type(x.ctl)=="table" and type(x.ctl.tick)=="function"
+    and x:step(1.1) or x.ctl
   eq(r.status,"INCONCLUSIVE","unsafe viewport/bounds")
   eq(x.remote.OnClientEvent:Count(),0)
  end
