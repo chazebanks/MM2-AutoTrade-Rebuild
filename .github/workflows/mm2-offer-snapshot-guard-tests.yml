@@ -1,0 +1,50 @@
+name: Gingerscope offer snapshot guard (research only)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/offer_snapshot_guard.lua'
+      - 'pdiddler/intelligence_lab/offer_snapshot_guard.py'
+      - 'pdiddler/intelligence_lab/test_offer_snapshot_guard.lua'
+      - 'pdiddler/intelligence_lab/test_offer_snapshot_guard.py'
+      - 'pdiddler/intelligence_lab/OFFER_SNAPSHOT_GUARD_RESEARCH.md'
+      - 'pdiddler/intelligence_lab/PUBLIC_MARKET_DISAGREEMENT_2026_11_08.json'
+      - 'pdiddler/intelligence_lab/test_public_market_disagreement.py'
+      - 'pdiddler/intelligence_lab/dual_source_sensitivity.py'
+      - 'pdiddler/intelligence_lab/test_dual_source_sensitivity.py'
+      - '.github/workflows/mm2-offer-snapshot-guard-tests.yml'
+  push:
+    branches:
+      - feature/gingerscope-offer-snapshot-guard-offline
+    paths:
+      - 'pdiddler/intelligence_lab/offer_snapshot_guard.lua'
+      - 'pdiddler/intelligence_lab/offer_snapshot_guard.py'
+      - 'pdiddler/intelligence_lab/test_offer_snapshot_guard.lua'
+      - 'pdiddler/intelligence_lab/test_offer_snapshot_guard.py'
+      - 'pdiddler/intelligence_lab/OFFER_SNAPSHOT_GUARD_RESEARCH.md'
+      - 'pdiddler/intelligence_lab/PUBLIC_MARKET_DISAGREEMENT_2026_11_08.json'
+      - 'pdiddler/intelligence_lab/test_public_market_disagreement.py'
+      - 'pdiddler/intelligence_lab/dual_source_sensitivity.py'
+      - 'pdiddler/intelligence_lab/test_dual_source_sensitivity.py'
+      - '.github/workflows/mm2-offer-snapshot-guard-tests.yml'
+permissions:
+  contents: read
+jobs:
+  offline-snapshot-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install actual Lua interpreter
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lua5.4
+      - name: Run full inherited research-only intelligence Python regressions
+        run: python -m unittest discover -s pdiddler/intelligence_lab -p 'test_*.py' -v
+      - name: Execute real Lua guard with 1600 mutation cases
+        run: lua5.4 pdiddler/intelligence_lab/test_offer_snapshot_guard.lua pdiddler/intelligence_lab/offer_snapshot_guard.lua
+      - name: Confirm no trading or clipboard runtime is required
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -E '(FireServer|InvokeServer|HttpGet|setclipboard|AcceptTrade|Webhook|TeleportToPlaceInstance)' pdiddler/intelligence_lab/offer_snapshot_guard.lua
