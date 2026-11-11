@@ -95,7 +95,7 @@ local watchdogModule=loadFrozen("48c4b0fee594639c74f1bed408581db7a5bc6f1b",
     "supervised/supervised_p3_continuous_watchdog.lua")
 local planModule=loadFrozen("27e061555321c6a87bdd835ce3d1ff557443a909",
     "supervised/supervised_four_slot_operator_plan.lua")
-local operatorModule=loadFrozen("af84b23173620b03e919187b08cd352c101ba4ea",
+local operatorModule=loadFrozen("b124488a7a879b2d6a1bfb21401f497d7bfef677",
     "supervised/supervised_p3_one_item_operator.lua")
 if not geometry or type(geometry.choose)~="function"
     or not ioModule or type(ioModule.new)~="function"
