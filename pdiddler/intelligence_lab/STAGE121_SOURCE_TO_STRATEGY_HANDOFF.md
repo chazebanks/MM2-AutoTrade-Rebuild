@@ -1,0 +1,29 @@
+# Stage121 — original Supreme research receipt cannot become a live strategy market quote
+
+## Distinct issue after Stage120
+
+**User authorized next progress after [MERGED PR227 Stage120](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/227).** Stage120 *already* integrated original PR106 portfolio growth ranking with the corrected PR182 FOUR-PHYSICAL-slot outgoing-Gingerscope-ban guard. Its only market is `SYNTHETIC-STAGE120-V1` with fake test weapons. Do NOT repeat Stage120 synthetic planner, Stage119 actual two-client-event LastOffer, original P3/P4 binding, one-item placement, or inject chat features (user cancelled that idea).
+
+**New actual source observation Nov11, 2026:** first-party Supreme home, `/mm2/ancients`, `/mm2/godlies`, `/mm2/chromas` **still display Nov9 at 1:58 PM**, with no newer publisher publication in publicly visible page text. MM2Values' OWN publisher site `https://www.mm2values.com/` displays **Nov6, 2026 08:00:50 EST**. Third-party `mm2values.app` displays **Nov10 source-list rebuild**, NOT a new publisher update; its counts of POSTED offers and requests are NOT validated executed trade fills, price realizations, or a liquidity probability. Do not import or restamp from those metadata fields.
+
+Prior first-party Nov9 immutable capture: publisher `2026-11-09T18:58:33Z`, **fixed approval expiry `2026-11-10T22:26:48Z`**. Stage104 source time gate, Stage110 source hash-locked original parser/prior HTML, Stage111 original canonical HTTPS capture and archive, and Stage109 original public raw-key/price preview already exist on historical review branches. Don't rewrite them, or confuse exact public name coverage with independently authenticated checker-ID game weapons.
+
+## The one new implementation gap
+
+There was no STRICT **interface between Stage111's research-only publisher receipt and Stage120's synthetic strategy renderer**. A future implementer might accidentally pass source-list rebuild time or `admission.status` to the planner as if it were an independently current, verified market quote, or use posted trade activity as actual liquidity. Stage121 `pdiddler/intelligence_lab/stage121_source_to_strategy_firewall.py` enforces denial.
+
+- Consume Stage111/110 **existing** receipt and verify original full three canonical-page statuses, SHA metadata, original exact hash-locked parser + prior HTML flags, earliest complete capture, identical publisher UTC stamps, fixed prior capture expiry, and all upstream authority gates remain FALSE. **Standalone manifest is still untrusted:** SHA metadata is not actual verified body bytes, `externalCaptureAuthenticated` is always FALSE.
+- On real Nov9 archived publisher observed Nov11: `BLOCKED / OLD_PUBLICATION_FIXED_EXPIRY_PASSED`. Re-downloading without a new original publisher does not create a new price publication or extend expiry. Before expiry it can be `RESEARCH_ONLY` but still cannot feed a live market quote.
+- A NEW date can at most classify as `RESEARCH_ONLY / NEW_PUBLISHER_REQUIRES_INDEPENDENT_REVIEW`, never automatic price publication. Forged status, wrong categories, prior date mismatches, weakened original authority flags and expiry extensions hard block.
+- If a caller passes any `candidate_market` with prices, reject `UNVERIFIED_PRICE_INPUT_CANNOT_PROMOTE_RESEARCH`. If they pass any trade postings, reject `TRADE_POSTINGS_ARE_NOT_VERIFIED_COMPLETED_FILLS`. Proper independent actual executed/liquid trading evidence would require a separate, independently reviewed source and aggregation design.
+- Every output has `mayFeedStage120AsVerifiedMarket=false`, `verifiedMarketQuote=false`, `publishedCurrentPriceAuthenticated=false`, `observedCompletedTradeLiquidityVerified=false`, `authorizesTrade=false`, `authorizesOffer=false`, `authorizesAccept=false`, `mayReportProfit=false`, `maySendDiscordWebhook=false`, `mayUseForStrategyLearning=false`, `tradeOutcome=UNKNOWN`. Never affects original P3/P4/Delta scripts.
+
+### Source-and-test integrity
+
+A separate dedicated CI workflow retrieves the ACTUAL original Stage104/110/111 Python modules from exact immutable PR branches and Git-blob checks them, plus original Stage69 parser bytes and ALL THREE original Stage84 archived HTML sources. It runs the real original `stage111.collect_and_admit` using a controlled local HTTPS session stub (no fake source-admission logic), then the new firewall in Python. It covers Nov9 archived source pre-expiry and post-expiry, forged new publisher date still manual-research, aggregator rebuilt-date spoof, posted requests as fake fills, invalid/missing SHA/category/HTTPS URLs, contradictory publisher clocks/statuses, mutation of original false authority flags, 400 modified receipts and no accidental Stage120 market promotion.
+
+The frozen historical source pipelines are unmerged draft research; the dedicated CI stages exact original copies in temporary workspace and does not merge or change them. No new real Supreme raw capture is falsely claimed: public web page viewing confirms the visible Nov9 display, CI replay is explicitly archived raw source and fake HTTPS transport. **No live game action, live market quote or native iPad test authorized.**
+
+### Next distinct engineering blocker
+
+If Supreme actually publishes a NEW independently verifiable set, collect a new three-canonical-page raw HTML/SHA/TLS source record through original Stage111, independently review publisher change/item identity, prove market freshness WITHOUT restamping the Nov9 archive, and separately gather actual counterparty willingness/retradability evidence rather than treating demand ordinal or listings as completed fills. Only after market/source and genuine item identity, revised portfolio preview can be connected to P3/P4; final automatic Accept still not authorized by client-only receipts.
