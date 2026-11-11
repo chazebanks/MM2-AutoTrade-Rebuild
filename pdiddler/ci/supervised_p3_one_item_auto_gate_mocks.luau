@@ -80,9 +80,9 @@ do
  g.observe("P4_TWO_SIDED_CLIENT_SNAPSHOT")
  st.time+=0.4
  g.observe("P3_ROTATING")
- eq(g.observe("P4_TWO_SIDED_CLIENT_SNAPSHOT").status,"WAITING",
-  "non-P4 transition resets candidate")
- eq(st.callback,0,"no stale open-time after P3 rotation")
+ eq(g.observe("P4_TWO_SIDED_CLIENT_SNAPSHOT").status,"SPENT",
+  "first observed trade ended: new trade cannot inherit preapproval")
+ eq(st.callback,0,"no stale open-time or later-trade item send")
 end
 do
  local st,g=fixture()
@@ -90,9 +90,25 @@ do
  g.observe("P4_TWO_SIDED_CLIENT_SNAPSHOT")
  st.root={}
  st.time+=0.3
+ eq(g.observe("P4_TWO_SIDED_CLIENT_SNAPSHOT").status,"BLOCKED",
+  "first verified trade root replacement permanently revokes prior consent")
+ eq(st.callback,0,"root replacement never launches item")
+ eq(g.observe("P4_TWO_SIDED_CLIENT_SNAPSHOT").status,"SPENT",
+  "replacement cannot become the next auto-offer candidate")
+end
+do
+ local st,g=fixture()
+ st.armed=true
  eq(g.observe("P4_TWO_SIDED_CLIENT_SNAPSHOT").status,"WAITING",
-  "root replacement restarts stable window")
- eq(st.callback,0,"root replacement does not authorize old slot")
+   "first exact trade was seen but not yet stable")
+ st.root=nil
+ st.time+=0.3
+ eq(g.observe("P4_TWO_SIDED_CLIENT_SNAPSHOT").status,"BLOCKED",
+  "lost first GUI root voids preapproval permanently")
+ st.root={}
+ eq(g.observe("P4_TWO_SIDED_CLIENT_SNAPSHOT").status,"SPENT",
+  "later GUI cannot revive a closed first trade")
+ eq(st.callback,0,"lost first trade no offer")
 end
 do
  local st,g=fixture()
