@@ -1,5 +1,20 @@
 # Stage220 / Project Gingerscope — original-MM2 iPad P3→P4 two-sided raw weapon identity native pilot
 
+## FINAL RELEASE NOTE — PR220 MERGED, OFFLINE CI GREEN, NEXT REAL iPAD TEST UNPROVEN
+
+[PR220](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/220) history-preserving merge **`1070745412ca2aa8acbacf1b87318c48d06c9f6d`**, exact reviewed branch head **`24e9b35074819526137cfbc8512918a64707266a`**. All **7/7 GitHub workflows PASS** including [native full original-code CI](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42949515659): **190** Lua Luau actual protected P3 coordinator/TradeIO/Stage9/Stage101 native GUI mocks; **588** actual frozen original Stage101/Stage9/Stage83 Lua5.4 witness assertions; 5 Python new loader/current source and 4 prior PR219 immutable source/authority audits. All known-good PR214 P3 native and PR218 one-shot auto-offer runtime blobs unchanged. **There is no real iPad native PR220 evidence yet**. Do not mistake offline tests or previous PR218 auto-offer proof for this new Stage101 identity proof.
+
+**New actual MAIN iPad Delta loader:**
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/1070745412ca2aa8acbacf1b87318c48d06c9f6d/pdiddler/supervised/SUPERVISED_P3_STAGE101_READONLY_START.lua"))()
+```
+Verified loader blob `95583a89ee2b4f06d274a2a6021ff7ceb83697f8` pins exact reviewed native runner commit `bb065d00a62b904c298cfd08ff1d2a75a4b509b7` blob `4ad3ca58c302889c4b73c2ccc688ee32639e1965` with exact ALT `venossgaming90190`. Native runner pins new 45sec baseline updated per-side protected witness commit `fd00161e4a309935d66b7a32ec057ac17a20d855` blob `49f3ab58e2ff9e547d14256e2d17a44600952a42`. The source SHA checks are in CI and preserved through merge ancestry.
+
+**ONE new unique native proof procedure**, fresh original MM2 MAIN iPad + consenting ALT in same server, no old scripts or pre-open trade: MAIN physical **1/4 ARM P3** (this starts real ALT-only trade REQUEST only); ALT manually accepts REQUEST and manually adds ONE eligible inexpensive Godly/Ancient/Chroma weapon while MAIN offer remains EMPTY; wait until MAIN purple overlay explicitly says **3/4 MAIN ADD ONE WEAPON**, then MAIN manually adds ONE own inexpensive eligible non-Gingerscope weapon; ALT leaves its slot untouched; wait for **4/4 CLIENT IDENTITY MATCHED** or INCONCLUSIVE; MAIN manually DECLINES the open trade, presses **STOP/COPY**, sends anonymized JSON. NO final Accept on either account, no automatic offers. If blocked/unsafe/no matching prompt, stop, send status, don't retry that server job. Completion flags remain UNKNOWN/false and server raw IDs unauthenticated regardless of successful client candidate comparison.
+
+This is a **client identity correspondence test**, not a completed trade, live publisher price, true market profit or permission to enable automatic final Accept. Finish this FIRST before starting a new distinct causality or economics issue. Protect Gingerscope and preserve original future full-auto product goal with present failclosed safety.
+
+
 ## Status, scope and proof limits
 
 User's long-term goal is **fully automatic** attractive, market-aware trades including eventual final Accept, but current proven source does **not** authorize automatic acceptance. Real physical MAIN iPad Delta previous pass is merged PR218 single selected own weapon automatically offered once in exact ALT P3/P4 trade: `autoOfferTriggeredClient=true`, `oneItemTapObservedClient=false`, one physical GUI slot, P3 resumed, `tradeOutcome=UNKNOWN`. PR214 P3, PR206 two slots, PR216/217 human one-item and PR218 auto one-item client-device milestones are CLOSED; do NOT repeat them.
