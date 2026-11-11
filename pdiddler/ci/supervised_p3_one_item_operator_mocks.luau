@@ -172,6 +172,7 @@ local function fixturePilot(options)
   approvedDisplayName="Iceblaster",approvedChromaFlag=false,
  }
  for k,v in pairs(options.cfg or {}) do cfg[k]=v end
+ x.cfg=cfg
  local ctx={
   isSafe=function()return x.safe end,
   altStillExact=function()return x.altExact end,
@@ -263,6 +264,27 @@ do
  eq(pilot.preview().status,"WAITING","accepted GUI not ready for operator")
  eq(pilot.execute(true).status,"BLOCKED","accepted GUI never offered")
  eq(#x.sends,0,"no send while accepted")
+end
+do
+ local x,pilot=fixturePilot({beforeInventory=function(y)
+  y.cfg.approvedRawKey="Gingerscope"
+ end})
+ simulateOffer(x)
+ local r=pilot.execute(true)
+ eq(r.reason,"CURRENT_OWN_WEAPON_IDENTITY_NOT_PROVEN",
+  "getgenv raw key swap during own RPC blocks current approval")
+ eq(#x.sends,0,"mutated config can never retarget physical OfferItem")
+ eq(pilot.execute(true).reason,"ONE_ITEM_APPROVAL_ALREADY_SPENT",
+  "unsafe mutation consumes one shot")
+end
+do
+ local x,pilot=fixturePilot({beforeInventory=function(y)
+  y.cfg.approvedDisplayName="OtherName"
+ end})
+ simulateOffer(x)
+ eq(pilot.execute(true).status,"BLOCKED",
+  "display-name swap invalidates approval")
+ eq(#x.sends,0,"no send after human-approved display changes")
 end
 do
  local x,pilot=fixturePilot({beforeInventory=function(y)
