@@ -19,6 +19,7 @@ ALLOWED = {
     "pdiddler/continuity/manifest.json",
     "pdiddler/RELEASE_READINESS.json",
     "pdiddler/ci/test_next_conversation_handoff.py",
+    "pdiddler/ci/test_release_readiness.py",
     ".github/workflows/gingerscope-next-conversation-handoff.yml",
 }
 
