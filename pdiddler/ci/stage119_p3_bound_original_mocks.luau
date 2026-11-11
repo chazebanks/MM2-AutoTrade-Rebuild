@@ -230,6 +230,8 @@ local function fakeEnv(options)
   E.PDIDDLER_P3_STAGE119_LASTOFFER_NATIVE.targetName="MissingAlt"
  end
  if options.ownerConflict then E.PDIDDLER_PART4_SESSION=99 end
+ if options.oldStage119Owner then E.PDIDDLER_STAGE119_LASTOFFER_OWNER={} end
+ if options.oldStage119Used then E.PDIDDLER_STAGE119_LASTOFFER_USED_JOB="FAKE_JOB_P3" end
  if options.pilotConflict then
    E.PDIDDLER_SUPERVISED_FOUR_SLOT_GUIDE_JOB="FAKE_JOB_P3"
  end
