@@ -37,14 +37,16 @@ OWNER_DENIAL=(
     "E.PDIDDLER_PART4_CONTROLLER_ACTIVE",
     "E.PDIDDLER_OUTGOING_CONTROLLER_ACTIVE",
     "E.PDIDDLER_AUTOTRADE_ACTIVE",
-    "E.PDIDDLER_STAGE119_LASTOFFER_OWNER",
-    "E.PDIDDLER_STAGE119_LASTOFFER_USED_JOB",
 )
 NATIVE_TOKENS=(
     "stage118_lastoffer_gui_correlation.lua",
     "trade_lastoffer_client_audit.lua",
     "CLIENT_LASTOFFER_CHANGED_WITH_DIFFERENT_OFFER",
     "CLIENT_LASTOFFER_UNCHANGED_WITH_DIFFERENT_OFFER",
+)
+NEW_OWNER_DENIAL=(
+    "E.PDIDDLER_STAGE119_LASTOFFER_OWNER",
+    "E.PDIDDLER_STAGE119_LASTOFFER_USED_JOB",
 )
 UNSAFE_V1_TOKENS=(
     "MAIN manually opens trade with consenting ALT",
@@ -72,7 +74,7 @@ class ProtectedStage119Parity(unittest.TestCase):
         self.assertTrue(NEW.is_file(),
                         "RED: PR225 manual-open witness has no protected P3 replacement")
         text=NEW.read_text()
-        for token in KNOWN_GOOD+OWNER_DENIAL+NATIVE_TOKENS:
+        for token in KNOWN_GOOD+OWNER_DENIAL+NEW_OWNER_DENIAL+NATIVE_TOKENS:
             self.assertIn(token,text,token)
         for token in (
             "pcall(supervisor.currentBoundReadOnly)",
