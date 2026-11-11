@@ -1,4 +1,4 @@
-name: Gingerscope Stage119 replacement STRICT original P3 P4 parity (RED until fixed)
+name: Gingerscope Stage119 strict original P3 P4 parity release gate
 on:
   pull_request:
     paths:
