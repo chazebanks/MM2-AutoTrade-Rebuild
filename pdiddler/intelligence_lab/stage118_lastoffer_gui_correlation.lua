@@ -10,7 +10,8 @@ local function output(status,reason,s)
   callbackCount=s and s.events or 0,
   localGuiTransitions=s and s.transitions or 0,
   lastOfferEqualityClass=s and s.equality or "NONE",
-  clientGuiCrossChecked=s and s.complete or false,
+  clientGuiCrossChecked=false, -- full GUI weapon identity NOT verified here
+  clientGuiQuantityCrossChecked=s and s.complete or false,
   rawItemIdConfirmed=false,uniqueWeaponInstanceProven=false,
   eventSessionAssociationProven=false,callbackCausalityProven=false,
   serverTradeRevisionProven=false,serverCompletionProven=false,
