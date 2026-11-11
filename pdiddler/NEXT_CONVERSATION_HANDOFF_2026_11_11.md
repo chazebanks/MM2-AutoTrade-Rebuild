@@ -26,6 +26,8 @@ Starting point for the historical research is **merged Stage 121 / PR #228**, no
 - Only separately corroborated outcomes belong in a training dataset; no webhook claim, "COMPLETED" text, screenshot or synthetic sample automatically proves settlement.
 - No unattended live trading, automatic final Accept, profit webhook, or loss trading authorized by anything in these documents. Protect personal data; public repo source/tests only.
 
+**Part3/Part4 settlement warning:** the independent server outcome remains `UNKNOWN`; client-side callbacks or apparent GUI success cannot authorize automatic final Accept or confirmed-profit learning.
+
 ## Next exact issue — ONE ISSUE AT A TIME
 
 **First research task in the next conversation:** verify the first-party **November 11, 2026 12:30 PM** Supreme publication using the **original** Stage111 → Stage110 → Stage104 → Stage69 canonical source chain. A visible public-page timestamp is **not** the authenticated archival capture. Inspect frozen original source and rejected variants, acquire raw Ancients/Godlies/Chromas HTTPS bodies and status/URL/publisher clock evidence, SHA-hash them, compare with immutable original archive and policy. Reject partial, inconsistent, duplicate, future-dated, or merely re-downloaded old editions. Output a **research-only** receipt; do not change the live price authority or trade engine. Before collecting, revalidate source publication on the day of actual work; if a newer publication exists, test the newer true version rather than stale November 11 text.
