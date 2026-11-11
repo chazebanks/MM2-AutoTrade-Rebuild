@@ -451,6 +451,257 @@ if not sup then
     return nil
 end
 supervisor=sup
+
+-- Separate observational state machine. The only outgoing P3 operation is
+-- the existing explicitly ARM-ed request to the exact consenting ALT.
+-- No OfferItem/Accept/Decline method is reachable from this observer.
+local function completeIdentity(status,reason,report)
+    if terminalResult then return end
+    terminalResult=true
+    identityPhase=status=="CLIENT_BOTH_SIDES_RAW_KEY_CANDIDATES_UNATTRIBUTED"
+        and "RESULT" or "FAILED"
+    evidence.identityStatus=status
+    evidence.identityReason=reason or "UNVERIFIED_CLIENT_EVENT"
+    if type(report)=="table" then
+        evidence.clientBothSidesCandidateConsistent=
+            report.clientBothSidesCandidateConsistent==true
+        evidence.clientGuiCrossChecked=
+            report.physicalGuiCrossChecked==true
+        evidence.matchedOwnSlots=type(report.matchedOwnSlots)=="number"
+            and math.clamp(report.matchedOwnSlots,0,4) or 0
+        evidence.matchedTheirSlots=type(report.matchedTheirSlots)=="number"
+            and math.clamp(report.matchedTheirSlots,0,4) or 0
+    end
+    if eventConnection then
+        pcall(function()eventConnection:Disconnect()end)
+        eventConnection=nil
+    end
+    if identityWitness then pcall(identityWitness.stop) end
+    -- Stop outgoing P3 and the live poll after this ONE identity window.
+    -- Never accept or decline the still-open game trade.
+    if watcher then pcall(watcher.stop) end
+    last=statusRecord("IDENTITY_RESULT",evidence.identityReason)
+    clipboard(last)
+end
+
+local function exactUpdateTradeRemote()
+    local RS=game:GetService("ReplicatedStorage")
+    local trade=RS:FindFirstChild("Trade")
+    if not trade then return nil end
+    local good,nodes=pcall(function()return trade:GetDescendants()end)
+    if not good or type(nodes)~="table" or #nodes>12000 then return nil end
+    local match,count=nil,0
+    for _,node in ipairs(nodes) do
+        if node.Name=="UpdateTrade" and node:IsA("RemoteEvent") then
+            match=node
+            count+=1
+        end
+    end
+    return count==1 and match or nil
+end
+
+local function currentCatalogue()
+    local good,w=pcall(function()
+        local RS=game:GetService("ReplicatedStorage")
+        local DB=RS:FindFirstChild("Database")
+        local mod=DB and DB:FindFirstChild("Sync")
+        assert(mod and mod:IsA("ModuleScript"))
+        local sync=require(mod)
+        assert(type(sync)=="table")
+        local weapons=rawget(sync,"Weapons")
+        assert(type(weapons)=="table" and getmetatable(weapons)==nil)
+        return weapons
+    end)
+    return good and w or nil
+end
+
+local function prepareWitness(root)
+    if not owner.running or not watcher or not watcher.isReady()
+       or not armed or io.trade()~=root or
+       supervisor.isP3Paused()~=true or not targetStillExact() then
+        return false,"P3_EXACT_PAUSED_TRADE_UNAVAILABLE"
+    end
+    local epoch=E.PDIDDLER_OUTGOING_SESSION
+    if type(epoch)~="number" or epoch~=math.floor(epoch) or epoch<1 then
+        return false,"P3_NATIVE_EPOCH_UNAVAILABLE"
+    end
+    local catalog=currentCatalogue()
+    local remote=exactUpdateTradeRemote()
+    if not catalog or not remote then
+        return false,"ORIGINAL_SYNC_OR_UNIQUE_UPDATE_TRADE_UNAVAILABLE"
+    end
+    local exactJob=tostring(game.JobId)
+    boundScope={
+        jobId=exactJob,session="p3stage101:"..tostring(epoch),
+        root=root,localPlayer=LP,partnerPlayer=target
+    }
+    local proxy={
+        normalize=function(raw,_)
+            currentStage9Raw=raw
+            return stage9Contract.normalize(raw,{marketFresh=false})
+        end
+    }
+    local good,handle=pcall(stage9Native.new,{
+        game=game,players=Players,root=root,session=boundScope.session,
+        jobId=exactJob,partnerUserId=targetUid,localUserId=LP.UserId,
+        contract=proxy,ownInventory=nil,opponentInventory=nil,
+        marketFresh=function()return false end
+    })
+    if not good or type(handle)~="table" then
+        return false,"ORIGINAL_STAGE9_NATIVE_OBSERVER_UNAVAILABLE"
+    end
+    stage9Handle=handle
+    local function readStage9()
+        if not stillLive() or not targetStillExact()
+          or io.trade()~=root then return nil end
+        currentStage9Raw=nil
+        local ok,out,diag=pcall(stage9Native.capture,stage9Handle)
+        if not ok or type(out)~="table" or
+           type(diag)~="table" or out.tradeOpen~=true or
+           out.session~=boundScope.session or
+           out.contextOK~=true or out.quoteSafe~=false or
+           diag.authorizesTrade~=false or
+           diag.authorizesAccept~=false or
+           type(currentStage9Raw)~="table" or
+           currentStage9Raw.tradeOpen~=true or
+           currentStage9Raw.contextOK~=true then return nil end
+        return currentStage9Raw
+    end
+    local witness,why=identityModule.new(boundScope,{
+        getScope=function()
+            return {
+                jobId=tostring(game.JobId),
+                session=E.PDIDDLER_OUTGOING_SESSION==epoch
+                    and boundScope.session or "INVALID_EPOCH",
+                root=io.trade(),localPlayer=LP,partnerPlayer=target,
+            }
+        end,
+        getBound=function()return supervisor.currentBoundReadOnly()end,
+        captureStage9Raw=readStage9,
+        isLive=function()
+            return stillLive() and targetStillExact()
+                and armed and watcher.isReady()==true
+                and supervisor.isP3Paused()==true and io.trade()==root
+        end,
+        now=function()return os.clock()end,
+        stage101=stage101,stage9=stage9Contract,
+        catalogue=catalog,registry=stage83,
+    })
+    if not witness then
+        return false,type(why)=="table" and why.reason
+            or "CLIENT_IDENTITY_WITNESS_UNAVAILABLE"
+    end
+    identityWitness=witness
+    local began=witness.begin()
+    if type(began)~="table" or began.status~="WAITING" or
+       began.physicalGuiCrossChecked~=true then
+        return false,"PROTECTED_STAGE101_BASELINE_REFUSED"
+    end
+    -- Subscribe only AFTER Stage9 and protected P4 independently verified
+    -- one ALT baseline weapon + empty MAIN. A callback for ALT's earlier
+    -- item addition is intentionally not reinterpreted as a MAIN add.
+    local connected,conn=pcall(function()
+        return remote.OnClientEvent:Connect(function(...)
+            if identityPhase~="WAIT_MAIN"
+               and identityPhase~="WAIT_AFTER" then return end
+            evidence.callbackCount=math.min(evidence.callbackCount+1,2)
+            local okEvent,r=pcall(identityWitness.onClientEvent,
+                 table.pack(...))
+            if not okEvent or type(r)~="table" or
+                r.status=="BLOCKED" then
+                completeIdentity("INCONCLUSIVE",
+                   "CLIENT_UPDATE_TRADE_CALLBACK_REJECTED")
+            else
+                identityPhase="WAIT_AFTER"
+                evidence.identityStatus="WAITING"
+                evidence.identityReason="ONE_CALLBACK_AWAITING_STABLE_GUI"
+            end
+        end)
+    end)
+    if not connected or not conn or
+       type(conn.Disconnect)~="function" then
+        return false,"UPDATE_TRADE_LISTENER_NOT_ATTACHED"
+    end
+    eventConnection=conn
+    identityPhase="WAIT_MAIN"
+    evidence.identityStatus="WAITING"
+    evidence.identityReason="MAIN_MANUALLY_ADD_ONE_NOW"
+    return true,"EXACT_TWO_SIDED_CLIENT_WITNESS_ARMED"
+end
+
+local function witnessTick(observed)
+    if terminalResult or not armed then return end
+    if observed.status=="P3_RESUMED_AFTER_CLIENT_TRADE_CLOSED"
+       or observed.status=="BLOCKED" then
+        completeIdentity("INCONCLUSIVE",
+           "PROTECTED_P3_TRADE_CLOSED_OR_INVALIDATED")
+        return
+    end
+    if observed.status~="P4_TWO_SIDED_CLIENT_SNAPSHOT" then
+        -- It is normal to wait for ALT to accept the outgoing request.
+        -- A confirmed P4 window, once seen, cannot disappear unnoticed.
+        if identityPhase=="WAIT_MAIN" or identityPhase=="WAIT_AFTER" then
+            completeIdentity("INCONCLUSIVE","VERIFIED_P4_TRADE_LOST")
+        end
+        return
+    end
+    local root=io.trade()
+    if not root or not targetStillExact() then
+        completeIdentity("INCONCLUSIVE","EXACT_P4_ROOT_OR_ALT_UNAVAILABLE")
+        return
+    end
+    if identityPhase=="WAIT_ALT" then
+        local own=observed.ownPhysicalSlots
+        local their=observed.theirPhysicalSlots
+        if type(own)~="number" or type(their)~="number"
+           or own~=0 or their>1 then
+            completeIdentity("INCONCLUSIVE","ALT_BASELINE_SHAPE_CHANGED")
+            return
+        end
+        if their==0 then
+            baselineSig=nil
+            baselineAt=nil
+            return
+        end
+        local okSide,side=pcall(io.readSide,root,"TheirOffer")
+        if not okSide or type(side)~="table" or
+            type(side.entries)~="table" or #side.entries~=1 then
+            completeIdentity("INCONCLUSIVE","ALT_PHYSICAL_SLOT_UNREADABLE")
+            return
+        end
+        local okSig,sig=pcall(io.sideSignature,side)
+        if not okSig or type(sig)~="string" then
+            completeIdentity("INCONCLUSIVE","ALT_SLOT_SIGNATURE_UNREADABLE")
+            return
+        end
+        local now=os.clock()
+        if baselineSig~=sig or baselineAt==nil then
+            baselineSig=sig;baselineAt=now
+            return
+        end
+        if now-baselineAt<.15 then return end
+        local ok,why=prepareWitness(root)
+        if not ok then completeIdentity("INCONCLUSIVE",why) end
+        return
+    end
+    if identityPhase=="WAIT_MAIN" or identityPhase=="WAIT_AFTER" then
+        if not identityWitness then
+            completeIdentity("INCONCLUSIVE","IDENTITY_OBSERVER_MISSING")
+            return
+        end
+        local ok,result=pcall(identityWitness.tick)
+        if not ok or type(result)~="table" then
+            completeIdentity("INCONCLUSIVE","STAGE101_CLIENT_IDENTITY_RUNTIME_ERROR")
+            return
+        end
+        if result.status=="CLIENT_BOTH_SIDES_RAW_KEY_CANDIDATES_UNATTRIBUTED" then
+            completeIdentity(result.status,result.reason,result)
+        elseif result.status=="BLOCKED" or result.status=="INCONCLUSIVE" then
+            completeIdentity("INCONCLUSIVE",result.reason or "STAGE101_MATCH_REFUSED")
+        end
+    end
+end
+
 local watchdogCtx={
     getJobId=ctx.getJobId,
     isLive=stillLive,
@@ -461,6 +712,12 @@ local watchdogCtx={
             evidence.clientResumeObserved=true
         end
         evidence.lastObservedStatus=tostring(r.status or "UNKNOWN")
+        -- Read-only Stage101 identity comparisons are performed after the
+        -- protected P3/P4 poll and before presenting the next exact step.
+        local okIdentity=pcall(witnessTick,r)
+        if not okIdentity then
+            completeIdentity("INCONCLUSIVE","STAGE101_WATCHDOG_ADAPTER_FAILURE")
+        end
         last=statusRecord(r.status,r.reason)
         local ok=pcall(guide.show,guide,last)
         if not ok then
