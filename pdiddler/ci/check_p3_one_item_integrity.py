@@ -87,16 +87,16 @@ class Contract(unittest.TestCase):
         self.assertIn('weaponKeys={selection.approvedRawKey}', self.op)
 
     def test_new_native_dependencies_pin_current_reviewed_bytes(self) -> None:
-        # Must prove the exact URL revision contains the exact tested source,
-        # rather than merely finding its SHA text in the runnable wrapper.
-        for rev, path in (
-            ("af84b23173620b03e919187b08cd352c101ba4ea", BOOT),
-            ("b124488a7a879b2d6a1bfb21401f497d7bfef677", OP),
-        ):
-            relative = path.relative_to(ROOT)
-            frozen = subprocess.check_output(
-                ["git", "show", f"{rev}:{relative.as_posix()}"])
-            self.assertEqual(frozen, path.read_bytes())
+        # GitHub Actions checkout is intentionally shallow (fetch-depth=1).
+        # The named frozen commits' bytes were read independently through
+        # GitHub and are checked here by their Git blob SHA, without network
+        # or a costly deep history checkout. The runtime URLs pin commits.
+        pinned_blob = (
+            (BOOT, "881713c2abe644c0823f46c4007a80815608ea05"),
+            (OP, "d295fbb7eb4bc366e553b0750bdb0dd40792376d"),
+        )
+        for path, expected in pinned_blob:
+            self.assertEqual(blob(path), expected)
 
     def test_no_legacy_strategy_or_direct_mutation_added(self) -> None:
         forbidden = (
