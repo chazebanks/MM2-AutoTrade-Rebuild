@@ -50,6 +50,23 @@ jobs:
           code=$?
           set -e
           echo "Original Stage111 exit code: $code (0 unchanged, 3 review, 2 inconclusive)"
+          if [ "$code" -eq 2 ]; then
+            python3 - <<'PY'
+          import requests
+          url='https://supremevalues.com/mm2/ancients'
+          with requests.Session() as session:
+              session.trust_env=False
+              for label,agent in (
+                  ('original_archive','MM2SourceResearchArchive/1.0'),
+                  ('standard_browser','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36')
+              ):
+                  try:
+                      with session.get(url,headers={'Accept':'text/html','Cache-Control':'no-cache, no-store','Pragma':'no-cache','User-Agent':agent},timeout=(8,20),allow_redirects=False,verify=True,stream=True) as response:
+                          print('P1_CANONICAL_DIAGNOSTIC',label,'http_status',response.status_code,'redirect',response.is_redirect,'media_type',response.headers.get('Content-Type','').split(';')[0])
+                  except requests.RequestException:
+                      print('P1_CANONICAL_DIAGNOSTIC',label,'TRANSPORT_ERROR')
+          PY
+          fi
           test "$code" -eq 0 -o "$code" -eq 2 -o "$code" -eq 3
       - name: Independently inspect capture bytes and enforce Stage121 research-only authority
         shell: bash
