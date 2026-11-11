@@ -230,6 +230,15 @@ function M.new(scanner,outgoing,bridge,io,players,me,ctx)
       snapshot.authorizesOffer~=false or
       snapshot.authorizesAccept~=false or
       snapshot.pricesAuthenticated~=false or
+      snapshot.rawItemIdsAuthenticated~=false or
+      snapshot.offerRevisionAuthenticated~=false or
+      snapshot.serverCompletionProven~=false or
+      snapshot.mayReportProfit~=false or
+      snapshot.maySendDiscordWebhook~=false or
+      snapshot.requestOriginBound~=false or
+      snapshot.partnerExactClientBound~=true or
+      snapshot.part3Paused~=true or
+      snapshot.part4TradeVisible~=true or
       snapshot.tradeOutcome~="UNKNOWN" then
     revoked=true
     return denyCapture("P4_BOUND_SNAPSHOT_UNSAFE")
