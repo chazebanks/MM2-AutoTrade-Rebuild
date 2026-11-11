@@ -1,0 +1,30 @@
+# Project Gingerscope — Stage118 read-only LastOffer vs two Stage9 GUI transitions (Nov 11, 2026)
+
+## Why this is genuinely new
+
+**Real corrected Stage101 PR221 main-iPad PASS already CLOSED**: original protected P3/P4 + Stage9 matched one MAIN/one ALT raw game weapon candidate and one UpdateTrade callback; [device receipt](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/221#issuecomment-6788471060). No re-run.
+
+**Merged PR222 already solved the previous OFFLINE LastOffer question**: [PR222](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/222) proved only from an archived historical v1456 client that UpdateTrade.LastOffer is copied into a local variable passed to AcceptTrade. Its original 6,921-byte pure Lua equality classifier was merged, six exact-head workflows passed, and it never authenticated a server transaction. A redundant draft PR223 was CLOSED unmerged. Do not use or merge its duplicate file. The precise next problem: can *two consecutive client-visible LastOffer field observations* be correlated with *two consecutive independently sampled Stage9 physical GUI transitions* under the same local trade window? This is NOT solved by one Stage101 callback or PR222's raw-event-only equality audit.
+
+## This draft's one narrow OFFLINE integration
+
+`pdiddler/intelligence_lab/stage118_lastoffer_gui_correlation.lua` is a pure injected state machine, WITHOUT a Roblox listener or any game actions. It calls the unchanged **merged PR222** `trade_lastoffer_client_audit.lua` and original **Stage9** `p4_observer_contract.lua` amount parser. Requires exactly one exact client-only frozen job/session/root/localPlayer/partnerPlayer and the following bounded sequence:
+1. Original Stage9 raw GUI **both sides empty** and unchanged at two captures >=0.15s apart.
+2. Exactly one `UpdateTrade` callback while GUI is still empty; private frozen packet says **ALT offers one weapon**, MAIN empty. Stage9 independently observes one ALT physical slot, quantities agree with frozen packet, and gets two stable GUI reads >=0.15s apart.
+3. Exactly one second `UpdateTrade` callback while unchanged ALT-only GUI is visible; frozen packet says **ALT removed the offered weapon**, both sides empty. Stage9 observes both GUI sides empty twice with >=0.15s stability.
+4. On strict local consistency, sanitized output `CLIENT_TWO_EVENT_LASTOFFER_GUI_UNATTRIBUTED` with `lastOfferEqualityClass` = original PR222's `CLIENT_LASTOFFER_CHANGED_WITH_DIFFERENT_OFFER` OR `CLIENT_LASTOFFER_UNCHANGED_WITH_DIFFERENT_OFFER`, `callbackCount=2`, `localGuiTransitions=2`, `clientGuiQuantityCrossChecked=true` while **`clientGuiCrossChecked=false` for full weapon identity**.
+
+The private `LastOffer` values, players, offers and raw weapon IDs are NEVER emitted. Compare only packet quantity multisets against GUI quantity multisets; this **does not independently validate item identity or packet origin**. Original Stage101 already separately demonstrated a one-event raw-key client candidate matching, not this two-event token behavior.
+
+**All statuses**: `serverTradeRevisionProven=false`, `eventSessionAssociationProven=false`, `callbackCausalityProven=false`, `rawItemIdConfirmed=false`, `serverCompletionProven=false`, `authorizesTrade=false`, `authorizesOffer=false`, `authorizesAccept=false`, `mayReportProfit=false`, `maySendDiscordWebhook=false`, `mayUseForStrategyLearning=false`, `tradeOutcome=UNKNOWN`. Even a matched LastOffer change is NOT an authenticated server revision. Two indistinguishable delayed/same-window client callback histories remain possible.
+
+**Strict invalidations**: GUI mutates before expected callback, extra or duplicate event, wrong exact scope/partner/root, missing or bad packet, accepted/locked state, wrong quantities/stacks, GUI quantity no longer matches packet, missing first/second post-GUI stabilization, nonmonotone clock, 3s callback→GUI timeout or 90s total window. Never restore a terminal failure in the same client observation.
+
+## Verification and safety
+
+- `pdiddler/tests/test_stage118_lastoffer_gui_correlation.lua`: 10 named Lua tests and 200 repeated 2-event client histories, both LastOffer equality classes, extra callbacks, malformed/late packets, mutable payload after callback, changing GUI before callback, stack/amount discrepancies, session/root drift, accepted state, timeout, stale clock and all authority-denial fields.
+- `pdiddler/ci/test_stage118_lastoffer_source.py` and dedicated `.github/workflows/gingerscope-stage118-lastoffer-gui.yml`: verify byte-identical **PR222 LastOffer blob** `fba6f02c7287e2afd7ad3ea9e75cc221854a17b9`, original **Stage9 contract** `7c84456006bd684dacb0217d0ae092d6d67575a4`, **PR221 main-iPad runner** `46cff56b9f58fa8590a275dfd26f46cea0c5c9a6`, **PR221 loader** `a1430dc26fc3d85fe2268a84a5fea475812b5002`. Execute true Lua5.4 real source-bound behavior (not synthetic replacement module) and strict Python no-network/no-trading audits. Local Lua passed using a narrow mock Stage9 amount parser; **local pass is not GitHub exact original Stage9 CI**. Check exact PR HEAD CI before any merge.
+- **No device loader, no iPad instructions, no market integration, no automatic trade/accept/Discord** in this draft. It does not modify PR221 Stage101 or PR218 live modules.
+- A later real iPad adapter, if technically justified, needs mandatory safe purple nonoverlapping numbered MAIN/ALT GUI: human manual trade open, ALT adds then removes one inexpensive eligible weapon, MAIN offers nothing; neither final Accept; MAIN manually Declines and STOP/COPY sanitized report. Do not give any script until original Stage9/PR222 source-bound Luau integration & layout mocks have passed.
+
+**Next after exact-head CI**: assess whether live 2026 MM2 produces the two callbacks and how `LastOffer` equality behaves. Whether token equality is useful for *client invalidation* must be kept separate from an authenticated transaction/revision/settlement. Then market desirability/liquidity, compounding inventory, four-slot rebalancing, Gingerscope outgoing protection and safe autonomous trade remain on roadmap. No old +15 or forced highest opener.

@@ -1,0 +1,52 @@
+name: Gingerscope Stage118 LastOffer two-event physical GUI source-bound offline
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage118_lastoffer_gui_correlation.lua'
+      - 'pdiddler/tests/test_stage118_lastoffer_gui_correlation.lua'
+      - 'pdiddler/ci/test_stage118_lastoffer_source.py'
+      - 'pdiddler/intelligence_lab/STAGE118_LASTOFFER_GUI_TWO_EVENT_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage118-lastoffer-gui.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-original-stage9-and-lastoffer-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Verify original archived source-bound runtime dependencies and proven native runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua)" = 'fba6f02c7287e2afd7ad3ea9e75cc221854a17b9'
+          mkdir -p /tmp/gingerscope-stage118
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua' -o /tmp/gingerscope-stage118/stage9.lua
+          test "$(git hash-object /tmp/gingerscope-stage118/stage9.lua)" = '7c84456006bd684dacb0217d0ae092d6d67575a4'
+          test "$(git hash-object pdiddler/supervised/SUPERVISED_P3_STAGE101_IDENTITY_NATIVE.lua)" = '46cff56b9f58fa8590a275dfd26f46cea0c5c9a6'
+          test "$(git hash-object pdiddler/supervised/SUPERVISED_P3_STAGE101_READONLY_START.lua)" = 'a1430dc26fc3d85fe2268a84a5fea475812b5002'
+          echo ORIGINAL_PR222_STAGE9_PR221_BLOBS_UNCHANGED
+      - name: Real Lua5.4 source-bound two-event Stage9/LastOffer mock assertions
+        env:
+          STAGE118_BRIDGE: pdiddler/intelligence_lab/stage118_lastoffer_gui_correlation.lua
+          STAGE118_AUDIT: pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua
+          STAGE118_STAGE9: /tmp/gingerscope-stage118/stage9.lua
+        run: |
+          set -euo pipefail
+          luac5.4 -p pdiddler/intelligence_lab/stage118_lastoffer_gui_correlation.lua
+          luac5.4 -p pdiddler/tests/test_stage118_lastoffer_gui_correlation.lua
+          lua5.4 pdiddler/tests/test_stage118_lastoffer_gui_correlation.lua
+      - name: Python strict unchanged-native/no-authority and actual Lua proof
+        env:
+          STAGE118_STAGE9: /tmp/gingerscope-stage118/stage9.lua
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_stage118_lastoffer_source
