@@ -187,6 +187,67 @@ function M.new(scanner,outgoing,bridge,io,players,me,ctx)
   active={bound=bound,userId=uid}
   return controller.poll()
  end
+ -- Read-only future manual-plan bridge: never dispatches or approves offers.
+ -- One facade is tied to exactly ONE active original client P3/P4 session.
+ -- It is revoked after closure, stop, replacement or any unsafe capture.
+ local function denyCapture(reason)
+  return {
+   schema="pdiddler-supervised-handoff-v1",
+   status="REJECTED",reason=reason,
+   authorizesOffer=false,authorizesAccept=false,
+   rawItemIdsAuthenticated=false,pricesAuthenticated=false,
+   serverCompletionProven=false,mayReportProfit=false,
+   maySendDiscordWebhook=false,tradeOutcome="UNKNOWN",
+  }
+ end
+ function controller.currentBoundReadOnly()
+  local observed=controller.poll()
+  if type(observed)~="table" or
+     observed.status~="P4_TWO_SIDED_CLIENT_SNAPSHOT" or
+     active==nil or not running then
+   return nil,result("BLOCKED","P3_NO_CURRENT_EXACT_BOUND_TRADE")
+  end
+  local session=active
+  local facade={}
+  local revoked=false
+  function facade.capture()
+   if revoked or not running or active~=session then
+    revoked=true
+    return denyCapture("HANDOFF_RELEASED")
+   end
+   -- The ORIGINAL coordinator and protected GUI observer must re-pass
+   -- on every capture. A prior snapshot or matching username is not enough.
+   local current=controller.poll()
+   if type(current)~="table" or
+      current.status~="P4_TWO_SIDED_CLIENT_SNAPSHOT" or
+      active~=session then
+    revoked=true
+    return denyCapture("P3_CURRENT_BOUND_TRADE_UNSAFE")
+   end
+   local ok,snapshot=pcall(session.bound.capture)
+   if not ok or type(snapshot)~="table" or
+      snapshot.status~="CLIENT_UNPRICED_TWO_SIDED_SNAPSHOT" or
+      snapshot.authorizesOffer~=false or
+      snapshot.authorizesAccept~=false or
+      snapshot.pricesAuthenticated~=false or
+      snapshot.rawItemIdsAuthenticated~=false or
+      snapshot.offerRevisionAuthenticated~=false or
+      snapshot.serverCompletionProven~=false or
+      snapshot.mayReportProfit~=false or
+      snapshot.maySendDiscordWebhook~=false or
+      snapshot.requestOriginBound~=false or
+      snapshot.partnerExactClientBound~=true or
+      snapshot.part3Paused~=true or
+      snapshot.part4TradeVisible~=true or
+      snapshot.tradeOutcome~="UNKNOWN" then
+    revoked=true
+    return denyCapture("P4_BOUND_SNAPSHOT_UNSAFE")
+   end
+   return snapshot
+  end
+  return facade,result("P3_BOUND_CANDIDATE_READ_ONLY",
+    "NOT_AN_OFFER_OR_TRADE_AUTHORIZATION")
+ end
  function controller.resumeAfterClose()
   local ok,reason=live()
   if not ok then return false,reason end
