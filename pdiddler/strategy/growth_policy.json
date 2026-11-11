@@ -17,7 +17,7 @@
     "approvalStatus": "NOT_SPECIFIED_NOT_APPROVED"
   },
   "requiredEvidence": [
-    "Exact own/counterparty item identities and quantities validated for the active session and offer revision",
+    "Exact own/counterparty item identity and quantities validated for the active session and offer revision",
     "Fresh publisher-authenticated value data with item-key provenance and explicit expiry",
     "Independent liquidity and retradability evidence rather than demand labels or posted offers alone",
     "Conservative inventory value/attractiveness improvement versus feasible no-loss alternatives",
