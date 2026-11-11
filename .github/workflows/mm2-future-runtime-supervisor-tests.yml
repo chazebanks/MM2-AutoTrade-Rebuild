@@ -1,0 +1,35 @@
+name: MM2 future runtime supervisor (offline)
+on:
+  push:
+    branches:
+      - feature/gingerscope-future-runtime-supervisor-offline
+    paths:
+      - 'pdiddler/intelligence_lab/future_runtime_supervisor.lua'
+      - 'pdiddler/intelligence_lab/test_future_runtime_supervisor.lua'
+      - 'pdiddler/intelligence_lab/test_future_runtime_supervisor.py'
+      - 'pdiddler/intelligence_lab/FUTURE_RUNTIME_SUPERVISOR_RESEARCH.md'
+      - '.github/workflows/mm2-future-runtime-supervisor-tests.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/future_runtime_supervisor.lua'
+      - 'pdiddler/intelligence_lab/test_future_runtime_supervisor.lua'
+      - 'pdiddler/intelligence_lab/test_future_runtime_supervisor.py'
+      - 'pdiddler/intelligence_lab/FUTURE_RUNTIME_SUPERVISOR_RESEARCH.md'
+      - '.github/workflows/mm2-future-runtime-supervisor-tests.yml'
+permissions:
+  contents: read
+jobs:
+  future-runtime-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install actual Lua
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lua5.4
+      - name: Full inherited intelligence Python test suite
+        run: python -m unittest discover -s pdiddler/intelligence_lab -p 'test_*.py' -v
+      - name: Run actual Lua state machine fuzz independently
+        run: lua5.4 pdiddler/intelligence_lab/test_future_runtime_supervisor.lua pdiddler/intelligence_lab/future_runtime_supervisor.lua
