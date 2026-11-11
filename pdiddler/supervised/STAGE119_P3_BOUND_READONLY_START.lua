@@ -26,7 +26,7 @@ E.PDIDDLER_P3_STAGE119_LASTOFFER_NATIVE={
     targetName="venossgaming90190"
 }
 local ok,source=pcall(function()
- return game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/2333718e96ed8be72ff2526822a9ec9086d97a1d/pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua")
+ return game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/4953f3d500f4e7a25d279f6247c0050ad9c08840/pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua")
 end)
 if not ok or type(source)~="string" or #source<30000 or
    #source>90000 then
