@@ -1,0 +1,35 @@
+name: Stage67 native Stage66 client evidence and replay quarantine
+on:
+  pull_request:
+    paths:
+      - 'scripts/stage67_native_private_raw_client_evidence.py'
+      - 'pdiddler/intelligence_lab/test_stage67_native_private_raw_client_evidence.py'
+      - 'pdiddler/intelligence_lab/STAGE67_NATIVE_EVIDENCE_REPLAY_POLICY.md'
+      - '.github/workflows/mm2-stage67-native-evidence-replay.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage67-native-receipt-replay-gate
+    paths:
+      - 'scripts/stage67_native_private_raw_client_evidence.py'
+      - 'pdiddler/intelligence_lab/test_stage67_native_private_raw_client_evidence.py'
+      - 'pdiddler/intelligence_lab/STAGE67_NATIVE_EVIDENCE_REPLAY_POLICY.md'
+      - '.github/workflows/mm2-stage67-native-evidence-replay.yml'
+permissions:
+  contents: read
+jobs:
+  client-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Stage67 strict native-shaped evidence test suite
+        run: |
+          set -euo pipefail
+          python3 -m compileall -q scripts/stage67_native_private_raw_client_evidence.py
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage67*.py'
+      - name: All mainline intelligence tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
