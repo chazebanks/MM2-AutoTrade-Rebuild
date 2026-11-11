@@ -194,10 +194,14 @@ function M.new(context,deps)
   local okG,raw=pcall(deps.captureStage9Raw)
   if not okG or type(raw)~="table" or
      raw.tradeOpen~=true or raw.contextOK~=true or
-     raw.session~=scope.session or
-     not verifyPhysical(raw.our,snap.ours,deps.stage9.parseQuantity) or
-     not verifyPhysical(raw.their,snap.theirs,deps.stage9.parseQuantity) then
-   return nil,"ORIGINAL_STAGE9_AND_PROTECTED_P4_GUI_DISAGREE"
+     raw.session~=scope.session then
+   return nil,"ORIGINAL_STAGE9_RAW_CAPTURE_UNAVAILABLE"
+  end
+  if not verifyPhysical(raw.our,snap.ours,deps.stage9.parseQuantity) then
+   return nil,"ORIGINAL_STAGE9_AND_PROTECTED_P4_GUI_DISAGREE_OWN"
+  end
+  if not verifyPhysical(raw.their,snap.theirs,deps.stage9.parseQuantity) then
+   return nil,"ORIGINAL_STAGE9_AND_PROTECTED_P4_GUI_DISAGREE_ALT"
   end
   return {
    at=t,jobId=scope.jobId,session=scope.session,
