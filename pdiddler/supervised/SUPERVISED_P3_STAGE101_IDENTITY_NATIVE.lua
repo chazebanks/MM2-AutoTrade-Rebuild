@@ -556,10 +556,14 @@ local function prepareWitness(root)
           or io.trade()~=root then return nil end
         currentStage9Raw=nil
         local ok,out,diag=pcall(stage9Native.capture,stage9Handle)
+        -- Stage9 intentionally marks normalized quote/context unsafe
+        -- without independently trusted own inventory. That must REMAIN
+        -- untrusted. Only its raw, exact-root physical capture is used as
+        -- input to the separate protected P3/P4 comparison.
         if not ok or type(out)~="table" or
            type(diag)~="table" or out.tradeOpen~=true or
            out.session~=boundScope.session or
-           out.contextOK~=true or out.quoteSafe~=false or
+           out.quoteSafe~=false or
            diag.authorizesTrade~=false or
            diag.authorizesAccept~=false or
            type(currentStage9Raw)~="table" or
