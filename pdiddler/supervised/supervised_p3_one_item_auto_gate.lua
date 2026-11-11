@@ -124,7 +124,8 @@ function M.new(pilot,consent,env)
    spent=true
    return receipt("BLOCKED","PROTECTED_P3_P4_PREVIEW_REFUSED")
   end
-  if not live() or env.getTradeRoot()~=root then
+  local okAgain,stillRoot=pcall(env.getTradeRoot)
+  if not live() or not okAgain or stillRoot~=root then
    spent=true
    return receipt("BLOCKED","AUTO_TRADE_CHANGED_AFTER_PREVIEW")
   end
