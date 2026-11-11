@@ -83,35 +83,34 @@ end
 local function indexCatalog(sync)
  if type(sync)~="table" or
     type(sync.Weapons)~="table" then return nil end
- local meta={}
+ local meta,all={},{}
  for _,part in ipairs({sync.Weapons,sync.Item}) do
   if type(part)=="table" then
    for k,d in pairs(part) do
     local id=tostring(k)
-    if not rawValid(id) then return nil end
-    local record=metaShape(d)
-    local prev=meta[id]
-    if prev and record and
-      (prev.display~=record.display or prev.chroma~=record.chroma or
-       prev.kind~=record.kind or prev.rarity~=record.rarity) then
-      return nil
+    if type(d)=="table" then
+     all[id]=true
+     local record=metaShape(d)
+     local prev=meta[id]
+     if prev and record and
+       (prev.display~=record.display or prev.chroma~=record.chroma or
+        prev.kind~=record.kind or prev.rarity~=record.rarity) then
+       return nil
+     end
+     if record then meta[id]=record end
     end
-    -- A non-tradable / missing-metadata entry cannot erase a documented
-    -- tradable entry from the other catalog; final user selection still
-    -- requires the live PR216 scanner's own independent current check.
-    if record then meta[id]=record end
    end
   end
  end
- return meta
+ return meta,all
 end
 function M.build(rawProfile,sync)
  local profile=ownedProfile(rawProfile,0)
  if not profile then
   return result("BLOCKED","CURRENT_OWN_PROFILE_UNREADABLE")
  end
- local meta=indexCatalog(sync)
- if not meta then
+ local meta,all=indexCatalog(sync)
+ if not meta or not all then
   return result("BLOCKED","CURRENT_GAME_WEAPON_CATALOG_UNREADABLE")
  end
  local choices={}
@@ -122,22 +121,22 @@ function M.build(rawProfile,sync)
   if seenCount>4000 then
    return result("BLOCKED","OWN_PROFILE_TOO_LARGE")
   end
-  if type(raw)~="string" or not rawValid(raw) or
-     protected(raw) then
-   return result("BLOCKED","OWN_WEAPON_RAW_KEY_INVALID_OR_PROTECTED")
-  end
+  local id=tostring(raw)
   local qty=integerQty(count)
   if qty==nil then
    return result("BLOCKED","OWN_WEAPON_QUANTITY_INVALID")
   end
   -- An unmapped key will also make immutable scanner's own-inventory
   -- exact validation fail. Refuse to present a misleading selectable list.
-  if qty>0 and not meta[raw] then
-   -- Do not allow unknown/game-only keys to be offered under this pilot.
+  if qty>0 and not all[id] then
+   -- The real original scanner would fail exact unknown owned-key checks.
    return result("BLOCKED","OWN_WEAPON_METADATA_UNRESOLVED")
   end
-  if qty>0 and meta[raw] then
-   local m=meta[raw]
+  -- Common/uncommon inventory is legitimately owned but is not a pilot
+  -- candidate. Gingerscope is protected and must NEVER appear in choices.
+  if qty>0 and type(raw)=="string" and rawValid(raw) and
+     not protected(raw) and meta[id] then
+   local m=meta[id]
    choices[#choices+1]={
     raw=raw,display=m.display,
     chroma=m.chroma,kind=m.kind,qty=qty,
