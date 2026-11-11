@@ -95,6 +95,7 @@ class ProtectedStage119Parity(unittest.TestCase):
         self.assertTrue(NEW_MOCK.is_file(), "RED: no actual P3/P4 Stage119 native Lune suite")
         loader=NEW_LOADER.read_text()
         self.assertIn("stage119LastOfferReadOnly=true",loader)
+        self.assertIn("0e8e88fba07d72a7e1fb51178e0b105c3a647568",loader)
         self.assertIn("finalAcceptMustRemainManual=true",loader)
         native=NEW_MOCK.read_text()
         for token in (
