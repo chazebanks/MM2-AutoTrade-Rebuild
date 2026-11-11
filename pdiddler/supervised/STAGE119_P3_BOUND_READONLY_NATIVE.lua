@@ -1,10 +1,10 @@
--- Original MM2 native PR219 Stage101 raw weapon candidate witness.
--- Separate from the PROVEN P3-only and auto-offer runners; originals unchanged.
--- ARM P3 may send ONE ALT-only trade REQUEST after physical human approval.
--- MAIN & ALT must MANUALLY add one low-value eligible weapon each.
--- This diagnostic NEVER sends OfferItem/Accept/Decline, no price or Discord.
--- Display names and raw client UpdateTrade are NOT server-authenticated.
--- Does not prove item transfer, transaction nonce or completed trade.
+-- Stage119 V2 ORIGINAL MM2 protected P3/P4 dual-UpdateTrade LastOffer witness.
+-- Retains the PROVEN real-iPad PR221 supervisor, ALT-only P3 request after
+-- MAIN physically taps ARM P3, revocable bound P4 lease, and original Stage9.
+-- ALT manually accepts REQUEST, adds then removes ONE inexpensive weapon;
+-- MAIN offers NOTHING. Never automated OfferItem, final Accept or Decline.
+-- Opaque LastOffer equality remains client-only, NOT server revision proof.
+-- No price, trading profit, completed-trade, Discord or item identity claims.
 local E=(type(getgenv)=="function" and getgenv()) or _G
 local KEY="PDIDDLER_P3_STAGE119_LASTOFFER_NATIVE"
 local cfg=E[KEY]
