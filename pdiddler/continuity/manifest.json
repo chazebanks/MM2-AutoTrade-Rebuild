@@ -1,0 +1,19 @@
+{
+  "schema": "gingerscope-continuity-manifest-v1",
+  "repository": "chazebanks/MM2-AutoTrade-Rebuild",
+  "baselineCommit": "7216c4db84a5a7c95227ff09fb97b27106f44406",
+  "sourceBlobs": {
+    "pdiddler/GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md": "581754630150b4d5ee0bd1be288ed48e34fb907f",
+    "pdiddler/GINGERSCOPE_LATEST_CHECKPOINT.md": "c503b3a2eb3a97ef417813fd83105fccdb70de35",
+    "pdiddler/GINGERSCOPE_STRATEGY_AND_RESEARCH_PLAYBOOK.md": "cd888dff4ef8bbd8d7ffc14b4194a3b3f69170bc",
+    "pdiddler/GINGERSCOPE_ONSCREEN_MANUAL_TEST_POLICY.md": "212b60d47d62e0ede704cf554f6b9dcb5976ba97",
+    "pdiddler/supervised/SUPERVISED_ONE_ITEM_PILOT_HANDOFF.md": "5f5b39d1a454285484fcbac845752c27a748efda",
+    "pdiddler/intelligence_lab/STAGE121_SOURCE_TO_STRATEGY_HANDOFF.md": "ee3dadaa50919bf029205a2679bbbd11064e5ae6"
+  },
+  "controlledBlobs": {
+    "pdiddler/continuity/policy.json": "af1f7b4e54b454e002ea74d8b1ffb0fac88dea1b",
+    "pdiddler/continuity/current_state.json": "03e2d6b69441773707a5970bc8e036a81949b332",
+    "pdiddler/continuity/history_index.json": "c96d9d95df6e7e32a4eeee401c5b83ecafa28f8f",
+    "pdiddler/continuity/public_pr_catalog.json": "0ba23db3cabedcdb68e3c620b3d573c404088b04"
+  }
+}

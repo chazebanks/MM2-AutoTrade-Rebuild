@@ -1,0 +1,2899 @@
+{
+  "schema": "gingerscope-public-pr-catalog-v1",
+  "source": "GitHub public PR metadata",
+  "totalPRs": 215,
+  "coverage": "TITLE_INDEX_ONLY_NOT_FULL_HISTORY_AUDIT",
+  "stageRange": [
+    1,
+    121
+  ],
+  "prs": [
+    {
+      "pr": 2,
+      "title": "fix(pdiddler): repair bot rejection in separate V3 test build",
+      "reviewState": "OPEN",
+      "headSha": "59b8d6ee6d476182633ed7d126565fd9bd74ef5a",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/2",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 3,
+      "title": "Add isolated Supreme +15 trading test build with guarded negotiation",
+      "reviewState": "OPEN",
+      "headSha": "ab84df87f58f516d525f0ec96e734cf987bfcfd2",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/3",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 5,
+      "title": "Issue #4: adaptive trader with bounded negotiation and gated native verification",
+      "reviewState": "OPEN",
+      "headSha": "4b5c6d9095d21643349cee32d43719e515e294d1",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/5",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 7,
+      "title": "V6: fix negotiation final window and add read-only native trade evidence probe",
+      "reviewState": "OPEN",
+      "headSha": "adfe238d542c407424ddd897eb4153eda9cc6e51",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/7",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 8,
+      "title": "V7: delay sweetening until after observed Accept cooldown",
+      "reviewState": "OPEN",
+      "headSha": "03170ee26db04cc5cbc2b9a2d4699454fd502c82",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/8",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 9,
+      "title": "V8: observe real MM2 Accept countdown before offer sweetening",
+      "reviewState": "OPEN",
+      "headSha": "4842de0ad157ba5358c0ed83a398604d53d80eeb",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/9",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 10,
+      "title": "V9: market-aware one-shot early counteroffer planner (test-first)",
+      "reviewState": "OPEN",
+      "headSha": "316247200a9a7d9bd959e7775d822001e0698263",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/10",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 11,
+      "title": "V10: cap early and late offer concessions from verified live value",
+      "reviewState": "OPEN",
+      "headSha": "58c9aede108b60278b9baa9dd7da73f7a4d95ac5",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/11",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 12,
+      "title": "V10: teleport auto-reentry bootstrap with duplicate-JobId guard",
+      "reviewState": "OPEN",
+      "headSha": "ca09aaddd7982fcfd794d4aa8cecea79a91c41f7",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/12",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 13,
+      "title": "Issue #6: MM2 market research and current V11 strategy optimization review",
+      "reviewState": "OPEN",
+      "headSha": "b91b6a8f238627cbc3a4b449478d6786d5149445",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/13",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 14,
+      "title": "V11: verified trading concessions, valid bot evidence and bounded loading readiness",
+      "reviewState": "OPEN",
+      "headSha": "b92348125372026393c3815ecabbc8f3be1df32b",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/14",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 15,
+      "title": "V12: implement researched inventory-aware quotes and trade-wide concession control",
+      "reviewState": "OPEN",
+      "headSha": "b473b55c7f0514134eaaced0824cc396876916a6",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/15",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 16,
+      "title": "V12.1: unblock Delta startup on large MM2 PlayerGui trees",
+      "reviewState": "OPEN",
+      "headSha": "6b7e3d50aad876d161b560f73eb9c67f6ef87d64",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/16",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 17,
+      "title": "V14: consistent nonmatching offers and verified trading workflow",
+      "reviewState": "OPEN",
+      "headSha": "49c56d19de23d5c3bf15fe11bdf6742cc899cbae",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/17",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 18,
+      "title": "V15: opponent net-additions trigger all offer increases (no timed sweetening)",
+      "reviewState": "OPEN",
+      "headSha": "9d46606dec4dcf50d8b5fc013012cd9b4ee43fa3",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/18",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 20,
+      "title": "Issue19 QA: close V15 net-addition bypass and verify real controller integration",
+      "reviewState": "OPEN",
+      "headSha": "df1cb3b751d541a7513d1721088df25d4dd99f63",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/20",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 21,
+      "title": "Refresh expired Supreme prices in isolated V15.1 test build",
+      "reviewState": "OPEN",
+      "headSha": "70467328ee164f20af7cb0a6e956e36428e078a8",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/21",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 22,
+      "title": "V15.2: remove Fast Gate bot HUD; preserve 10s detector and current V15.1 prices",
+      "reviewState": "OPEN",
+      "headSha": "d81a90c350bf90153d82616f540450ab6d23f769",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/22",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 23,
+      "title": "V15.3: fix startup GUI visibility while preserving PR22 headless detector",
+      "reviewState": "OPEN",
+      "headSha": "a4d68f5b6a4dd7b4bd20bc99660a5600d04a0311",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/23",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 25,
+      "title": "V15.4: skip unreachable outgoing targets and bound unknown verification",
+      "reviewState": "OPEN",
+      "headSha": "cf69d7e82f81f2867a39ede6e18d64b97a9d8fcb",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/25",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 26,
+      "title": "V15.5: separate scanner evidence and display current Supreme prices",
+      "reviewState": "OPEN",
+      "headSha": "6652869abc6461d11d919f836f05e2fd1e57c568",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/26",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 29,
+      "title": "V15.6: protect unsafe physical quotes before debounce (#27)",
+      "reviewState": "OPEN",
+      "headSha": "1d1130b6517ce5656fdd8e5dfe025a8eb780e054",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/29",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 30,
+      "title": "V15.7: attainable profits and bounded inventory-growth preferences (#28)",
+      "reviewState": "OPEN",
+      "headSha": "9b4d78572cec606885e8f1d72f13cf277bc226f3",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/30",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 31,
+      "title": "V15.8: add selected high-value contributions before filler items",
+      "reviewState": "OPEN",
+      "headSha": "15bc3a29c3f1f0dc298b8171924082050c5e5f06",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/31",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 33,
+      "title": "Issue32: read-only Delta UI accessibility audit before unchanged V15.8 startup",
+      "reviewState": "OPEN",
+      "headSha": "bc9e6ea1fbb5eeb0d32192da97257ba08d1701e8",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/33",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 34,
+      "title": "Issue32: repair Delta audit encoding and recover same-server native evidence",
+      "reviewState": "OPEN",
+      "headSha": "56b525f3e0bc632fbfbe3dafb5347cb9fceff651",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/34",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 35,
+      "title": "V15.8: retain successful Delta Exit tap across every server hop",
+      "reviewState": "OPEN",
+      "headSha": "5d54ee680eb436ba854c0e7a90085d6ffeadda00",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/35",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 36,
+      "title": "V15.8 Delta Exit: try late-GATE tap per hop with one-shot diagnostics",
+      "reviewState": "OPEN",
+      "headSha": "66aa49a22d6d27fd47a2c76870a15a2d966e26b7",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/36",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 38,
+      "title": "Stage 1: isolated Gingerscope trading intelligence Python lab",
+      "reviewState": "OPEN",
+      "headSha": "790b86e0c34277378c8d0a3879c1cb048be488dd",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/38",
+      "stagesFromTitle": [
+        1
+      ]
+    },
+    {
+      "pr": 39,
+      "title": "Gingerscope Intelligence Stage 2: exact-ID Supreme market and inventory bridge",
+      "reviewState": "OPEN",
+      "headSha": "768888c85b5a978ca9491699a17767a038ef6bc7",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/39",
+      "stagesFromTitle": [
+        2
+      ]
+    },
+    {
+      "pr": 40,
+      "title": "Stage 3: reconcile native scanner identities with pinned Supreme quotes",
+      "reviewState": "OPEN",
+      "headSha": "e399b65361c3540679186df6077c2a3b3bad282c",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/40",
+      "stagesFromTitle": [
+        3
+      ]
+    },
+    {
+      "pr": 41,
+      "title": "Stage 4: offline Gingerscope offer ranking with four-copy and value-coverage gates",
+      "reviewState": "OPEN",
+      "headSha": "c8cfea459c2cc3f0146bbf2d8374941813aa8b07",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/41",
+      "stagesFromTitle": [
+        4
+      ]
+    },
+    {
+      "pr": 42,
+      "title": "Stage 5: offline inventory growth and Gingerscope progression planner",
+      "reviewState": "OPEN",
+      "headSha": "163107927f00dbc27ec9165142699b66adf7cbe3",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/42",
+      "stagesFromTitle": [
+        5
+      ]
+    },
+    {
+      "pr": 43,
+      "title": "Stage 6: read-only cached opponent evidence for inventory growth research",
+      "reviewState": "OPEN",
+      "headSha": "e2a83bf6574de814198848de08ea6cbe18d67d33",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/43",
+      "stagesFromTitle": [
+        6
+      ]
+    },
+    {
+      "pr": 44,
+      "title": "Stage 7: bounded seller-side attractiveness and strategic upgrade-cost research",
+      "reviewState": "OPEN",
+      "headSha": "12da510c319084b45355ae58e6118902e45748be",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/44",
+      "stagesFromTitle": [
+        7
+      ]
+    },
+    {
+      "pr": 45,
+      "title": "V15.8: clear stale verified-profit UI on physical offer changes",
+      "reviewState": "OPEN",
+      "headSha": "249e01c7567cc99a5608cbd145f18fd89668115d",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/45",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 46,
+      "title": "Stage 8: isolated new Part 4 safety state machine with verified multi-slot withdrawal",
+      "reviewState": "OPEN",
+      "headSha": "78871acf3b3ec2a1d2d0c36c96cd0e47401d5684",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/46",
+      "stagesFromTitle": [
+        8
+      ]
+    },
+    {
+      "pr": 47,
+      "title": "Stage 9: read-only MM2 trade observer for replacement Part 4",
+      "reviewState": "OPEN",
+      "headSha": "251b38c622aed1be4545653aa173bc45cfb80fc9",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/47",
+      "stagesFromTitle": [
+        9
+      ]
+    },
+    {
+      "pr": 48,
+      "title": "Stage 10: isolated one-shot physical removal with independently verified acknowledgement",
+      "reviewState": "OPEN",
+      "headSha": "0e01da80ebc95c7b39a4ba6fd7672b252c24012d",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/48",
+      "stagesFromTitle": [
+        10
+      ]
+    },
+    {
+      "pr": 49,
+      "title": "Stage 11: defensive-only integrated Part 4 coordinator",
+      "reviewState": "OPEN",
+      "headSha": "13611c240a508ab1ee11a0689e767236d8af58e3",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/49",
+      "stagesFromTitle": [
+        11
+      ]
+    },
+    {
+      "pr": 50,
+      "title": "Stage 12: standalone read-only Delta trade UI diagnostic",
+      "reviewState": "OPEN",
+      "headSha": "dead39852ebd8e48e499d06b9a9eb3a396296aad",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/50",
+      "stagesFromTitle": [
+        12
+      ]
+    },
+    {
+      "pr": 51,
+      "title": "Stage 12b: read-only native single-vs-stack quantity audit",
+      "reviewState": "OPEN",
+      "headSha": "146736e0ed1c36a2b3b1937cc5fdbb9c044e696d",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/51",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 52,
+      "title": "Stage 13: verify native single-copy blank quantity from live Delta stack",
+      "reviewState": "OPEN",
+      "headSha": "ecb3f1d4283a460d2fd2fb3c20a1a93ef7cc20c8",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/52",
+      "stagesFromTitle": [
+        13
+      ]
+    },
+    {
+      "pr": 53,
+      "title": "Stage 14: require stable identity-matched native snapshots before defensive withdrawal",
+      "reviewState": "OPEN",
+      "headSha": "12cc37603fb9ce38371e63ef1ccb814f55597c6c",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/53",
+      "stagesFromTitle": [
+        14
+      ]
+    },
+    {
+      "pr": 54,
+      "title": "Stage 15: prevent Vintage/Godly Laser identity collision in no-ID trade slots",
+      "reviewState": "OPEN",
+      "headSha": "508755ac1bc8a9984341982316bc54ca5364b55a",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/54",
+      "stagesFromTitle": [
+        15
+      ]
+    },
+    {
+      "pr": 55,
+      "title": "Stage 16: source-bounded risk-adjusted offer research, no live trading",
+      "reviewState": "OPEN",
+      "headSha": "c262e7940dc955b06d98123be5d420383f118326",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/55",
+      "stagesFromTitle": [
+        16
+      ]
+    },
+    {
+      "pr": 56,
+      "title": "Stage 17: bilateral counterparty benefit research, no native actions",
+      "reviewState": "OPEN",
+      "headSha": "12cb4ba39519e4cde4ae7c249de325fddbe434d7",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/56",
+      "stagesFromTitle": [
+        17
+      ]
+    },
+    {
+      "pr": 57,
+      "title": "Stage 18: connect existing Stage 7, Stage 5 and Stage 17 research offline",
+      "reviewState": "OPEN",
+      "headSha": "927cea66855ac5741e38a86999c737c87254471c",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/57",
+      "stagesFromTitle": [
+        5,
+        7,
+        17,
+        18
+      ]
+    },
+    {
+      "pr": 58,
+      "title": "Stage 19: Python dual-account Gingerscope progression and value attribution",
+      "reviewState": "OPEN",
+      "headSha": "03255c017d2c694b26a3389c07f0bf3cdc4b5c97",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/58",
+      "stagesFromTitle": [
+        19
+      ]
+    },
+    {
+      "pr": 59,
+      "title": "Stage 20: Python client-outcome evidence audit, no completion claims",
+      "reviewState": "OPEN",
+      "headSha": "1971b93d324f0275e6a9affb472ac3e804439ed8",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/59",
+      "stagesFromTitle": [
+        20
+      ]
+    },
+    {
+      "pr": 60,
+      "title": "Stage 21: replacement-only Part 4 bootstrap without legacy +15 trading policy",
+      "reviewState": "OPEN",
+      "headSha": "77913ae9b7f5638c94f2b31ccff719ff4497cd3f",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/60",
+      "stagesFromTitle": [
+        21
+      ]
+    },
+    {
+      "pr": 61,
+      "title": "Stage 22: permit-gated offer insertion + independent GUI proof in replacement Part 4",
+      "reviewState": "OPEN",
+      "headSha": "5295a2e25eff13a65bf2711e9a450ecbc9c12983",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/61",
+      "stagesFromTitle": [
+        22
+      ]
+    },
+    {
+      "pr": 62,
+      "title": "Stage 23: Stage17-to-offer permit and Stage11 recovery in replacement Part 4",
+      "reviewState": "OPEN",
+      "headSha": "3a14baf8099489534ba5c2d7ed8d0228ec3acfc6",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/62",
+      "stagesFromTitle": [
+        11,
+        17,
+        23
+      ]
+    },
+    {
+      "pr": 63,
+      "title": "Stage 24: timestamp existing Part 3 scans and build strict Stage17 native evidence",
+      "reviewState": "OPEN",
+      "headSha": "574aca34ac114b8ed2d91f2039f4cf79a865ea69",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/63",
+      "stagesFromTitle": [
+        17,
+        24
+      ]
+    },
+    {
+      "pr": 64,
+      "title": "Stage 25: live Supreme source preflight and read-only Delta scanner-evidence probe",
+      "reviewState": "OPEN",
+      "headSha": "cfe62e1468dd272ac543a9f94c90798095cae3db",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/64",
+      "stagesFromTitle": [
+        25
+      ]
+    },
+    {
+      "pr": 65,
+      "title": "Stage 26: pin verified Nov 6 Supreme profile with immutable source expiry",
+      "reviewState": "OPEN",
+      "headSha": "a2a2e601be864f970da0a69c436ab3b12efd8112",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/65",
+      "stagesFromTitle": [
+        26
+      ]
+    },
+    {
+      "pr": 66,
+      "title": "Stage 27: manually controlled one-item Delta offer and removal probe",
+      "reviewState": "OPEN",
+      "headSha": "28db0db7f5a711411e893bb9e17d64210b75c380",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/66",
+      "stagesFromTitle": [
+        27
+      ]
+    },
+    {
+      "pr": 67,
+      "title": "Stage 28: passive Stage9 Accept-state timeline and close-is-not-completion fence",
+      "reviewState": "OPEN",
+      "headSha": "9a54216ed38b0033908c42bb518df0fcbff7c675",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/67",
+      "stagesFromTitle": [
+        9,
+        28
+      ]
+    },
+    {
+      "pr": 68,
+      "title": "Stage 29: read-only post-close own-inventory evidence without completion claims",
+      "reviewState": "OPEN",
+      "headSha": "ba79f2082c37820a9ebc9476200562ede31d18bb",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/68",
+      "stagesFromTitle": [
+        29
+      ]
+    },
+    {
+      "pr": 69,
+      "title": "Stage 30: read-only native MM2 trade client-signal census",
+      "reviewState": "OPEN",
+      "headSha": "84edfff652bcc3614092214fdd155efd9101be30",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/69",
+      "stagesFromTitle": [
+        30
+      ]
+    },
+    {
+      "pr": 70,
+      "title": "Stage 31: controlled local-vs-partner decline signal comparison",
+      "reviewState": "OPEN",
+      "headSha": "152c8d0ed4c8ce0df3bc7f7fefb8d7af5808d985",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/70",
+      "stagesFromTitle": [
+        31
+      ]
+    },
+    {
+      "pr": 71,
+      "title": "Stage 32: passive result-named trade events plus post-close own-inventory correlation",
+      "reviewState": "OPEN",
+      "headSha": "6637a25ec69e96f6cc4215b86a97cecba56cd0e8",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/71",
+      "stagesFromTitle": [
+        32
+      ]
+    },
+    {
+      "pr": 72,
+      "title": "Stage 33: read-only 16-event MM2 success transport census",
+      "reviewState": "OPEN",
+      "headSha": "6b6a668ef213e70cebb2d5fc82e6402f075d9093",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/72",
+      "stagesFromTitle": [
+        33
+      ]
+    },
+    {
+      "pr": 73,
+      "title": "Stage34: fail-closed canonical trade offer vs inventory delta reconciliation",
+      "reviewState": "OPEN",
+      "headSha": "3045dc2924679e23bc970b5fdc90e0ef3e6cf6d2",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/73",
+      "stagesFromTitle": [
+        34
+      ]
+    },
+    {
+      "pr": 74,
+      "title": "Stage35: read-only MM2 trade-slot metadata shape census, no item transfer",
+      "reviewState": "OPEN",
+      "headSha": "79444860a7d105e5245eed624c6fad10fd512739",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/74",
+      "stagesFromTitle": [
+        35
+      ]
+    },
+    {
+      "pr": 75,
+      "title": "Stage36: investigate image writer and prepare passive relationship measurement",
+      "reviewState": "OPEN",
+      "headSha": "35ec2d9a47048910a464a2ef6eb9b9f52ae306b1",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/75",
+      "stagesFromTitle": [
+        36
+      ]
+    },
+    {
+      "pr": 76,
+      "title": "Direct-key: passive UpdateTrade payload shape; slot binding remains unproven",
+      "reviewState": "OPEN",
+      "headSha": "cddf2762e0eaac506262515106153f3c47776240",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/76",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 77,
+      "title": "Direct-key: read-only offer-mutation / UpdateTrade temporal correlation",
+      "reviewState": "OPEN",
+      "headSha": "1998b3d69121e643af9d00b334dba48cf064b2ee",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/77",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 78,
+      "title": "Stage39: read-only Batwing raw Sync key literal presence in one nearby UpdateTrade",
+      "reviewState": "OPEN",
+      "headSha": "08097bfcc7bd6e4421c5466cb011bd1b1b86bea8",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/78",
+      "stagesFromTitle": [
+        39
+      ]
+    },
+    {
+      "pr": 79,
+      "title": "Stage40: privately test candidate trade-table/owner/offer schema from untrusted source",
+      "reviewState": "OPEN",
+      "headSha": "335474fabfe4d5ae42f99bda478f584fde049e0d",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/79",
+      "stagesFromTitle": [
+        40
+      ]
+    },
+    {
+      "pr": 80,
+      "title": "Stage41: diagnose numeric Batwing key and first failed schema check (read-only)",
+      "reviewState": "OPEN",
+      "headSha": "fc3b4230b672d531c6a168e17f05ec4f5c833f6e",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/80",
+      "stagesFromTitle": [
+        41
+      ]
+    },
+    {
+      "pr": 81,
+      "title": "Stage42: passive both-order UpdateTrade player-reference orientation check",
+      "reviewState": "OPEN",
+      "headSha": "35e972349dd69c126dfc112fd86eccf27e194510",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/81",
+      "stagesFromTitle": [
+        42
+      ]
+    },
+    {
+      "pr": 82,
+      "title": "Stage43: passive owner-relative Batwing offer tuple on either Player1 or Player2",
+      "reviewState": "OPEN",
+      "headSha": "8d5fd833945712c363d2fe0a60cb1f1cdf28be92",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/82",
+      "stagesFromTitle": [
+        43
+      ]
+    },
+    {
+      "pr": 83,
+      "title": "Stage44: passive two-event Batwing add→remove client snapshot correlation",
+      "reviewState": "OPEN",
+      "headSha": "a37660ec0bcb4a7472a3e8f672a1bacc35b2f684",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/83",
+      "stagesFromTitle": [
+        44
+      ]
+    },
+    {
+      "pr": 84,
+      "title": "Stage45: StartTrade argument types — verified both GUI callback orders, fail closed",
+      "reviewState": "OPEN",
+      "headSha": "35dcc0d6d204f4b8d002377a2dbda041235b4c28",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/84",
+      "stagesFromTitle": [
+        45
+      ]
+    },
+    {
+      "pr": 85,
+      "title": "Stage46: StartTrade TABLE+STRING partner hypothesis — Python/Lua CI verified, read-only",
+      "reviewState": "OPEN",
+      "headSha": "0267734ac08221e0cfbde241afae0e1b6ec71181",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/85",
+      "stagesFromTitle": [
+        46
+      ]
+    },
+    {
+      "pr": 86,
+      "title": "Stage47: fix one-sided and same-item-type offline outcome audit (342 Python tests)",
+      "reviewState": "OPEN",
+      "headSha": "123b1e9d8c0b085047e732eb9ee2857e366bda75",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/86",
+      "stagesFromTitle": [
+        47
+      ]
+    },
+    {
+      "pr": 87,
+      "title": "Stage48: prevent impossible outgoing-copy offer netting in offline audit (353 Python tests)",
+      "reviewState": "OPEN",
+      "headSha": "eac4c61c44f9f20ffab907291baa8876ff621a3f",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/87",
+      "stagesFromTitle": [
+        48
+      ]
+    },
+    {
+      "pr": 88,
+      "title": "Stage49: raw Sync/Owned/scanner key bridge — 38 Lua + 359 Python tests verified",
+      "reviewState": "OPEN",
+      "headSha": "a63cbd1b9221a7b5c0f9abdb9b75d2ee7e10e837",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/88",
+      "stagesFromTitle": [
+        49
+      ]
+    },
+    {
+      "pr": 89,
+      "title": "Stage50: bounded read-only same-GUI raw offer/preprofile key — 34 native + 366 Python green",
+      "reviewState": "OPEN",
+      "headSha": "b55f03b47a7e22e7b04760870eb787ff8333f794",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/89",
+      "stagesFromTitle": [
+        50
+      ]
+    },
+    {
+      "pr": 90,
+      "title": "Stage51: preserve raw-to-checker mapping provenance through cache (371 Python tests)",
+      "reviewState": "OPEN",
+      "headSha": "7a289d62ef3f0be0a299506eb451c57435493be3",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/90",
+      "stagesFromTitle": [
+        51
+      ]
+    },
+    {
+      "pr": 91,
+      "title": "Stage52: preserve gated daily MM2Values research refresh (392 Python tests)",
+      "reviewState": "OPEN",
+      "headSha": "9c952c20f9b08495cfd3ff7190a4bd93771429f0",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/91",
+      "stagesFromTitle": [
+        52
+      ]
+    },
+    {
+      "pr": 93,
+      "title": "Discord research: manual read-only bot/channel history permission probe",
+      "reviewState": "MERGED",
+      "headSha": "c289c30a476eb4edd04085cf189105fe33923a7e",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/93",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 94,
+      "title": "Discord research: bounded embed-history audit + exclude test-alt (no storage)",
+      "reviewState": "MERGED",
+      "headSha": "8849df26b40a8eba5d06d93697eb71b4395c2e09",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/94",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 95,
+      "title": "Discord learning: private-only historical evidence ledger foundation (no live import)",
+      "reviewState": "MERGED",
+      "headSha": "7f483cfb3e76be2c7d06db51641cae155d39ad40",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/95",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 96,
+      "title": "Stage52 mainline: gated research-only daily MM2Values with current prices preserved",
+      "reviewState": "MERGED",
+      "headSha": "7e56cf97b8c446f26b9e1484f6f91709a49a221d",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/96",
+      "stagesFromTitle": [
+        52
+      ]
+    },
+    {
+      "pr": 98,
+      "title": "Stage53: read-only live Sync catalog overwrite / variant consistency probe",
+      "reviewState": "OPEN",
+      "headSha": "ca795e94e58f2065aa5d061b1dbf1abfeaa4d797",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/98",
+      "stagesFromTitle": [
+        53
+      ]
+    },
+    {
+      "pr": 99,
+      "title": "Stage54: read-only MM2 raw→checker mapping coverage census (no price/trade authority)",
+      "reviewState": "OPEN",
+      "headSha": "f99f8732054f7daddaa9ccfec21bd6bbbce50cf7",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/99",
+      "stagesFromTitle": [
+        54
+      ]
+    },
+    {
+      "pr": 100,
+      "title": "Stage55: quantify exact-vs-transformed fuzzy mappings and runner-up gaps (read-only)",
+      "reviewState": "OPEN",
+      "headSha": "c67772a77fe3df9365fe9f41f460e16c1d67059a",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/100",
+      "stagesFromTitle": [
+        55
+      ]
+    },
+    {
+      "pr": 101,
+      "title": "Stage56: read-only breakdown of transformed MM2 checker matches (no trade authority)",
+      "reviewState": "OPEN",
+      "headSha": "c051d90779f8dcc6a7559a5c996832e96d7db83e",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/101",
+      "stagesFromTitle": [
+        56
+      ]
+    },
+    {
+      "pr": 102,
+      "title": "Stage57: read-only bounded MM2 weapon catalogue candidates for source-backed identity review",
+      "reviewState": "OPEN",
+      "headSha": "871279fc2ec5180c409a990d9cd537ceae8edd92",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/102",
+      "stagesFromTitle": [
+        57
+      ]
+    },
+    {
+      "pr": 103,
+      "title": "Stage58: versioned review-only MM2 weapon display identity provenance ledger",
+      "reviewState": "OPEN",
+      "headSha": "c2b74501fd19f461a85c0134e4a367690b138609",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/103",
+      "stagesFromTitle": [
+        58
+      ]
+    },
+    {
+      "pr": 104,
+      "title": "Stage59: guided manual two-client readback witness, never settlement authority",
+      "reviewState": "OPEN",
+      "headSha": "d6f4657101db8e9b42d0f27ad112d646f15faffb",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/104",
+      "stagesFromTitle": [
+        59
+      ]
+    },
+    {
+      "pr": 105,
+      "title": "Offline research: fail-closed four-slot offer revision and liquidity guard",
+      "reviewState": "OPEN",
+      "headSha": "2f49e2f25cdbf7c8ca01702db159d412cc4382bc",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/105",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 106,
+      "title": "Future inventory compounding planner — offline bounded upgrade/downgrade search",
+      "reviewState": "OPEN",
+      "headSha": "6ed48e084bd58fab38e3bf061ac36fb295ecf103",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/106",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 107,
+      "title": "Future MM2 runtime supervisor: pure Lua world/UI/trade/hop state safety",
+      "reviewState": "OPEN",
+      "headSha": "ff2f2750234ad91d4bed87f3d7e05f370373cbb0",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/107",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 108,
+      "title": "Future server navigation: bounded bot-like signal classifier and safe candidate rankings",
+      "reviewState": "OPEN",
+      "headSha": "4799138c580b36e891d892182e98427525af8a46",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/108",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 109,
+      "title": "Future Discord report formatter: safe hypothetical MM2 trade previews only",
+      "reviewState": "OPEN",
+      "headSha": "4640d4fe7aa8e3b0efb670131533d0f31e3abbef",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/109",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 110,
+      "title": "Future MM2 inventory-scale shortlist: 500-type offline preselection for bounded planner",
+      "reviewState": "OPEN",
+      "headSha": "48c825f1a14f10e6a8498e0a60e12e26fb196265",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/110",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 111,
+      "title": "Cross-PR offline compatibility: shortlist → planner → offer guard → unsent preview",
+      "reviewState": "OPEN",
+      "headSha": "5fee7cf56b0c871236a811e5dc76eb49eb2bdd34",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/111",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 112,
+      "title": "Stage60: read-only MM2 Trade surface census for settlement evidence leads",
+      "reviewState": "OPEN",
+      "headSha": "c6142c01cf6642d17df7b073917f6aefed6fc127",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/112",
+      "stagesFromTitle": [
+        60
+      ]
+    },
+    {
+      "pr": 113,
+      "title": "Stage61: read-only AcceptTrade callback argument-shape evidence (not settlement)",
+      "reviewState": "OPEN",
+      "headSha": "a487199dd76b44ef1405f3b04604ed3315355dd2",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/113",
+      "stagesFromTitle": [
+        61
+      ]
+    },
+    {
+      "pr": 114,
+      "title": "Stage62: conservative single-client AcceptTrade evidence classifier (offline, no learning)",
+      "reviewState": "OPEN",
+      "headSha": "fdaebac73d2376a7e5335793aab41997adcd81c6",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/114",
+      "stagesFromTitle": [
+        62
+      ]
+    },
+    {
+      "pr": 115,
+      "title": "Stage63: read-only SAME-WINDOW AcceptTrade and fresh own-inventory correlation",
+      "reviewState": "OPEN",
+      "headSha": "a36be9676d8f9246bc731f0e01cad45b51a423a4",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/115",
+      "stagesFromTitle": [
+        63
+      ]
+    },
+    {
+      "pr": 116,
+      "title": "Stage64: audit real Stage63 client evidence and quarantine unverified completed-trade learning",
+      "reviewState": "OPEN",
+      "headSha": "da52a04beaecab9cf7de1d8de1fa07064eef37a1",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/116",
+      "stagesFromTitle": [
+        63,
+        64
+      ]
+    },
+    {
+      "pr": 117,
+      "title": "Stage65: offline privacy-safe raw receipt key versus own inventory primitive equality",
+      "reviewState": "OPEN",
+      "headSha": "27263d7e2fe44a0da842b7062eff7c91c6ea3b65",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/117",
+      "stagesFromTitle": [
+        65
+      ]
+    },
+    {
+      "pr": 118,
+      "title": "Stage66: private raw weapon key equality in same passive MM2 trade window",
+      "reviewState": "OPEN",
+      "headSha": "262292e483dc9f812840fa5de7f34d79791eeaef",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/118",
+      "stagesFromTitle": [
+        66
+      ]
+    },
+    {
+      "pr": 119,
+      "title": "Stage67: validate real Stage66 raw-key observation without promoting Discord learning",
+      "reviewState": "OPEN",
+      "headSha": "6645ecf4ba9a97e896ca8fe48e33fc1d4b373032",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/119",
+      "stagesFromTitle": [
+        66,
+        67
+      ]
+    },
+    {
+      "pr": 120,
+      "title": "Stage67: strict native Stage66 evidence auditor and duplicate receipt learner quarantine",
+      "reviewState": "OPEN",
+      "headSha": "fe5dcae651e6a53508da1ac3b24d9a1dc60dae03",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/120",
+      "stagesFromTitle": [
+        66,
+        67
+      ]
+    },
+    {
+      "pr": 121,
+      "title": "Stage68: client-only run GUID and offline replay-safe shadow observation ledger",
+      "reviewState": "OPEN",
+      "headSha": "33b309d8b2e202c407f573edad7af2b1d0be1861",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/121",
+      "stagesFromTitle": [
+        68
+      ]
+    },
+    {
+      "pr": 123,
+      "title": "Stage69: quarantine refreshed Supreme first-party prices and 190-item canonical diff before repricing",
+      "reviewState": "OPEN",
+      "headSha": "bea126d7ef65e33ad7d2ca109f1a42b6ed78aa70",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/123",
+      "stagesFromTitle": [
+        69
+      ]
+    },
+    {
+      "pr": 124,
+      "title": "Stage69: live three-page Supreme source parser and 190-item diff, research only",
+      "reviewState": "OPEN",
+      "headSha": "af4fee60ab9db45f9f018bc0fc691f025e2fbd5f",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/124",
+      "stagesFromTitle": [
+        69
+      ]
+    },
+    {
+      "pr": 125,
+      "title": "Stage70: fail-closed raw MM2 weapon → Supreme checker-ID proof boundary",
+      "reviewState": "OPEN",
+      "headSha": "185be12143558c18726c70d2d559dd9130f65ba6",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/125",
+      "stagesFromTitle": [
+        70
+      ]
+    },
+    {
+      "pr": 126,
+      "title": "Stage71: separate observed MM2 inventory from unverified Supreme price in read-only UI",
+      "reviewState": "OPEN",
+      "headSha": "a81ae61d15103a0eb9c03de46a33c6c25b62750a",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/126",
+      "stagesFromTitle": [
+        71
+      ]
+    },
+    {
+      "pr": 127,
+      "title": "Stage72: pinned original MM2 scanner-only GUI with separate inventory and Supreme confidence labels",
+      "reviewState": "OPEN",
+      "headSha": "d26f1ed64a9b95ab5995bf4c3d080ceb6058fc1c",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/127",
+      "stagesFromTitle": [
+        72
+      ]
+    },
+    {
+      "pr": 128,
+      "title": "Stage71: archival MM2 raw catalogue to Supreme source-name variant evidence (not price authority)",
+      "reviewState": "OPEN",
+      "headSha": "715010c9ec09b1411f4252d9e665c0052caa5f43",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/128",
+      "stagesFromTitle": [
+        71
+      ]
+    },
+    {
+      "pr": 129,
+      "title": "Stage72: honest UNVERIFIED historical Supreme reference preview, trading paused",
+      "reviewState": "OPEN",
+      "headSha": "8704828742dbe7cf9dce6d546313fe85626dd0c0",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/129",
+      "stagesFromTitle": [
+        72
+      ]
+    },
+    {
+      "pr": 130,
+      "title": "Keep unverified inventory prices fail-closed",
+      "reviewState": "OPEN",
+      "headSha": "d58b4feae67a26aa2fa3f13a50e4bb9f27bf2943",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/130",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 131,
+      "title": "CI: official Luau 0.746 compiler and analyzer gate (scoped, fail-closed)",
+      "reviewState": "MERGED",
+      "headSha": "e0ddd71248d683f44c1f25f602047a7831e15c9a",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/131",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 132,
+      "title": "CI: pinned Lune runtime test of existing pure MM2 modules (offline only)",
+      "reviewState": "MERGED",
+      "headSha": "a663272aac6fd46175bc7e361be94461a8447ac5",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/132",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 133,
+      "title": "CI: pinned Selene and StyLua with narrow, fail-closed formatting rollout",
+      "reviewState": "MERGED",
+      "headSha": "2d1d5f2f5274b98c95ed4f4ad24ccdc9f4605af8",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/133",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 134,
+      "title": "Research: deterministic sanitized client-event replay with no settlement authority",
+      "reviewState": "MERGED",
+      "headSha": "d5f2c6951a80db86a6e847e92f79a44714f4aedc",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/134",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 135,
+      "title": "Research: Hypothesis property and state-machine tests for sanitized event replay",
+      "reviewState": "MERGED",
+      "headSha": "875da4154c68e3334d09644b6ea5857102a239cf",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/135",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 136,
+      "title": "Research: TestEZ evaluation and nonduplicate adoption criteria",
+      "reviewState": "OPEN",
+      "headSha": "4f6c51fda3faafa98e271893137e9138af1c7ae4",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/136",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 137,
+      "title": "Research: audit main branch protection and proposed CI requirements (no enforcement)",
+      "reviewState": "OPEN",
+      "headSha": "2f0547ce6dd1f254c91696331b784cc721901d65",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/137",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 139,
+      "title": "CI audit: classify transient MM2Values refresh failure",
+      "reviewState": "OPEN",
+      "headSha": "6091052306acf11378ccc82900aea27027eaa8b9",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/139",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 140,
+      "title": "Docs: preserve verified Copilot CI-agent delegation checkpoint",
+      "reviewState": "OPEN",
+      "headSha": "8bb2903dfe7e90f2a18fd3142b4db219c47f95e9",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/140",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 141,
+      "title": "Research: Gingerscope Discord learner evidence gates and MM2 trading signals",
+      "reviewState": "OPEN",
+      "headSha": "709dd6229e268a3c15fe7dbbcbd095a6cd0114f0",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/141",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 142,
+      "title": "Stage74: full pinned public MM2 catalogue ↔ Supreme historical name audit (research-only)",
+      "reviewState": "OPEN",
+      "headSha": "f9a6a1b52c7f53afe58a655dee9f4ef3478f1c61",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/142",
+      "stagesFromTitle": [
+        74
+      ]
+    },
+    {
+      "pr": 143,
+      "title": "Stage75: strict native current-client catalogue ↔ historical public-name probe (no trades)",
+      "reviewState": "OPEN",
+      "headSha": "c72ddc8203bf5243323f10d0f79ad161e87d9c52",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/143",
+      "stagesFromTitle": [
+        75
+      ]
+    },
+    {
+      "pr": 144,
+      "title": "Stage75: 12 read-only live MM2 client catalogue equalities (in-game guide; no prices)",
+      "reviewState": "OPEN",
+      "headSha": "e2931b59ae52b95a9bc1add6a4cf91f504f0fbc7",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/144",
+      "stagesFromTitle": [
+        75
+      ]
+    },
+    {
+      "pr": 145,
+      "title": "Stage75: targeted 13-key native client catalogue proof (read-only, no inventory)",
+      "reviewState": "OPEN",
+      "headSha": "3d167d9fdce248ca43596dddb55151ef9b40bfe0",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/145",
+      "stagesFromTitle": [
+        75
+      ]
+    },
+    {
+      "pr": 146,
+      "title": "Stage76: first-party Supreme market slug vs MM2 game-key identity (research only)",
+      "reviewState": "OPEN",
+      "headSha": "3af5701c36c5d21edbe8637bfa4aaed4ce65cce2",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/146",
+      "stagesFromTitle": [
+        76
+      ]
+    },
+    {
+      "pr": 147,
+      "title": "Stage77: compare immutable Supreme HTML and MM2 catalogue sources (research only)",
+      "reviewState": "OPEN",
+      "headSha": "1c38aafcb1a4736989c955c7355c9d40d05ef147",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/147",
+      "stagesFromTitle": [
+        77
+      ]
+    },
+    {
+      "pr": 148,
+      "title": "Stage78: strict typed Weapons.Owned → Sync.Weapons join (offline only)",
+      "reviewState": "OPEN",
+      "headSha": "e1c79028addbddf68e4e3eb677ffba46e5c4efdb",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/148",
+      "stagesFromTitle": [
+        78
+      ]
+    },
+    {
+      "pr": 149,
+      "title": "Stage79: one read-only native Weapons.Owned raw key-type + catalogue census",
+      "reviewState": "OPEN",
+      "headSha": "52bc5afa2e704d9395e09c1a5e6d949bfe140fb3",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/149",
+      "stagesFromTitle": [
+        79
+      ]
+    },
+    {
+      "pr": 150,
+      "title": "Stage80: identify one valid Misc vs malformed Owned catalogue entry (read-only)",
+      "reviewState": "OPEN",
+      "headSha": "d8fa428bae1b6b3c1206be712c02fc2971725faa",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/150",
+      "stagesFromTitle": [
+        80
+      ]
+    },
+    {
+      "pr": 151,
+      "title": "Stage81: all 190 Supreme roster rows vs 189 official website slugs (research only)",
+      "reviewState": "OPEN",
+      "headSha": "252a3336c7d3e10b01df1bf0aad10a25755b3477",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/151",
+      "stagesFromTitle": [
+        81
+      ]
+    },
+    {
+      "pr": 152,
+      "title": "Stage82: public MM2 key → official Supreme slug candidate resolver (research only)",
+      "reviewState": "OPEN",
+      "headSha": "e96944c715bddcebc5cf133de1e0ff7d1b2054f4",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/152",
+      "stagesFromTitle": [
+        82
+      ]
+    },
+    {
+      "pr": 153,
+      "title": "Stage83: private aggregate client coverage against 189 historical public Supreme slugs",
+      "reviewState": "OPEN",
+      "headSha": "25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/153",
+      "stagesFromTitle": [
+        83
+      ]
+    },
+    {
+      "pr": 154,
+      "title": "Stage84: verify actual Nov 9 Supreme publication and refresh research-only 190-row snapshot",
+      "reviewState": "OPEN",
+      "headSha": "f08ceb35a9ff684ee2cf577ccce7542c436cc68e",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/154",
+      "stagesFromTitle": [
+        84
+      ]
+    },
+    {
+      "pr": 155,
+      "title": "Stage85: quarantine reused trade-session tokens in actual sanitized replay",
+      "reviewState": "OPEN",
+      "headSha": "b22e81c6d55128505a42a767f58e4e159d4c44ca",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/155",
+      "stagesFromTitle": [
+        85
+      ]
+    },
+    {
+      "pr": 156,
+      "title": "Stage86: integrate actual portfolio planner + four-slot offer guard in manual-only dry-run",
+      "reviewState": "OPEN",
+      "headSha": "7319e03e96bb76a336bcfff0cfa7f680f77f493d",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/156",
+      "stagesFromTitle": [
+        86
+      ]
+    },
+    {
+      "pr": 157,
+      "title": "Stage87: separate price-independent P3 contact eligibility from offer authorization",
+      "reviewState": "OPEN",
+      "headSha": "f1a0492ab5959f31be3544bf04ee8a514e09255f",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/157",
+      "stagesFromTitle": [
+        87
+      ]
+    },
+    {
+      "pr": 158,
+      "title": "Stage88: one-shot native contact-only scanner preview, no market authority or trade actions",
+      "reviewState": "OPEN",
+      "headSha": "4d2633b1451a34a31342ab61ce3c86480e70bd9e",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/158",
+      "stagesFromTitle": [
+        88
+      ]
+    },
+    {
+      "pr": 159,
+      "title": "Stage89: one exact-target, manually armed MM2 trade request (no auto offer or Accept)",
+      "reviewState": "OPEN",
+      "headSha": "e080db988e1dd4f0563a40433da9676270bb7b03",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/159",
+      "stagesFromTitle": [
+        89
+      ]
+    },
+    {
+      "pr": 160,
+      "title": "Stage90: diagnose actual MM2 player-card layout read-only after zero-tap Stage89 report",
+      "reviewState": "OPEN",
+      "headSha": "ddc4f6c9e373f9333824149e876a5633594a5f09",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/160",
+      "stagesFromTitle": [
+        89,
+        90
+      ]
+    },
+    {
+      "pr": 161,
+      "title": "Stage91: bind Stage90-proven embedded Profile/Trade card for one exact-target request",
+      "reviewState": "OPEN",
+      "headSha": "28858d1d0694f806376667e2107ad5997a988a39",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/161",
+      "stagesFromTitle": [
+        90,
+        91
+      ]
+    },
+    {
+      "pr": 162,
+      "title": "Stage92: observe exact MM2 trade partner after one user-consented request",
+      "reviewState": "OPEN",
+      "headSha": "e404f127f70c25f55a2b6c96af3ea3f897074aa0",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/162",
+      "stagesFromTitle": [
+        92
+      ]
+    },
+    {
+      "pr": 163,
+      "title": "Stage93: bridge verified exact trade into original Part4 read-only GUI offer observer",
+      "reviewState": "OPEN",
+      "headSha": "bb5bef0523d9cd189a90d41cf3256a4f9ec7c584",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/163",
+      "stagesFromTitle": [
+        93
+      ]
+    },
+    {
+      "pr": 164,
+      "title": "Stage94: join original public MM2 key/slug references to Nov9 Supreme publication — research only",
+      "reviewState": "OPEN",
+      "headSha": "98441d065fcaaa02fa09367a5639f8abd4fb4bb8",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/164",
+      "stagesFromTitle": [
+        94
+      ]
+    },
+    {
+      "pr": 165,
+      "title": "Stage95: preserve Stage9 raw GUI slot evidence without requiring unverified Supreme checker IDs",
+      "reviewState": "OPEN",
+      "headSha": "cf2dbba6244a276955be9fca3d5e9789fd8449b0",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/165",
+      "stagesFromTitle": [
+        9,
+        95
+      ]
+    },
+    {
+      "pr": 166,
+      "title": "Stage96: strict client-only opponent UpdateTrade tuple ↔ current Part4 GUI correlation",
+      "reviewState": "OPEN",
+      "headSha": "f04776820ae213b91be60aab8415a9bdb26834ea",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/166",
+      "stagesFromTitle": [
+        96
+      ]
+    },
+    {
+      "pr": 167,
+      "title": "Stage97: one read-only native partner UpdateTrade callback witness in manually opened MM2 trade",
+      "reviewState": "OPEN",
+      "headSha": "c9646d74977e58a9599ce0034eab03e3b8474b4a",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/167",
+      "stagesFromTitle": [
+        97
+      ]
+    },
+    {
+      "pr": 168,
+      "title": "Stage98: client-only offer revision invalidation with original Stage9 parser and Stage105 guard",
+      "reviewState": "OPEN",
+      "headSha": "642768973f5eb560a184119237c44c84697a208f",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/168",
+      "stagesFromTitle": [
+        9,
+        98,
+        105
+      ]
+    },
+    {
+      "pr": 169,
+      "title": "Stage99: read-only native Part4 GUI 0→1→2→1 offer epoch + preview revocation",
+      "reviewState": "OPEN",
+      "headSha": "3cfb21b74ce02f4146b3caf1a5fa0ef3d7a3d1a9",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/169",
+      "stagesFromTitle": [
+        99
+      ]
+    },
+    {
+      "pr": 170,
+      "title": "Stage100: original Part4 read-only two-sided offer revision witness, ALT→MAIN→ALT",
+      "reviewState": "OPEN",
+      "headSha": "59d869b7d4d8fbcee3f2709e266b47ffb4a05d78",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/170",
+      "stagesFromTitle": [
+        100
+      ]
+    },
+    {
+      "pr": 171,
+      "title": "Stage101: identify all client offer weapons by reconciling raw UpdateTrade keys with Stage9 GUI slots",
+      "reviewState": "OPEN",
+      "headSha": "15f762a27a968373ed82809345f1869e1f688b26",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/171",
+      "stagesFromTitle": [
+        9,
+        101
+      ]
+    },
+    {
+      "pr": 172,
+      "title": "Stage101: read-only two-sided visible weapon name → Supreme historical value/demand/stability candidate",
+      "reviewState": "OPEN",
+      "headSha": "ae74795fd46a38aba6d6f59f8e3a6cbc9e15ddc8",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/172",
+      "stagesFromTitle": [
+        101
+      ]
+    },
+    {
+      "pr": 173,
+      "title": "Stage102: deterministic original 189 Supreme archival references to read-only Lua offered-weapon preview",
+      "reviewState": "OPEN",
+      "headSha": "c9e6646487ca0c673a0edc3423046d1412c52e02",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/173",
+      "stagesFromTitle": [
+        102
+      ]
+    },
+    {
+      "pr": 174,
+      "title": "Stage103: read-only in-game two-sided historical weapon values, demand/stability and protected Gingerscope",
+      "reviewState": "OPEN",
+      "headSha": "cb7554441052fa78255fb46592100ebbd355491b",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/174",
+      "stagesFromTitle": [
+        103
+      ]
+    },
+    {
+      "pr": 175,
+      "title": "Stage104: canonical Supreme publisher timestamp gate; reject stale Chroma .php alias and unchanged-date refresh",
+      "reviewState": "OPEN",
+      "headSha": "35dff4925869638c1808376ef611c93e414b980c",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/175",
+      "stagesFromTitle": [
+        104
+      ]
+    },
+    {
+      "pr": 176,
+      "title": "Fix Stage101 four-slot identity matcher rejecting legitimate stacked copy counts",
+      "reviewState": "OPEN",
+      "headSha": "29889595b5e80c788ade75fbb97880b736fc8cb2",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/176",
+      "stagesFromTitle": [
+        101
+      ]
+    },
+    {
+      "pr": 178,
+      "title": "SUPERSEDED original Stage106 Copilot draft — use consolidated PR184",
+      "reviewState": "OPEN",
+      "headSha": "1a9617fb96a70e552dea7ccf63a1510843bb3eea",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/178",
+      "stagesFromTitle": [
+        106
+      ]
+    },
+    {
+      "pr": 179,
+      "title": "Fix Stage98 GUI revision invalidation for legitimate stacked item quantities",
+      "reviewState": "OPEN",
+      "headSha": "13499756914369620d4f582625d2f22367598959",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/179",
+      "stagesFromTitle": [
+        98
+      ]
+    },
+    {
+      "pr": 180,
+      "title": "Fix Stage102 archived offer preview when a physical slot contains >4 copies",
+      "reviewState": "OPEN",
+      "headSha": "c996a293e6bf18dd4124ee38866877df6d34a931",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/180",
+      "stagesFromTitle": [
+        102
+      ]
+    },
+    {
+      "pr": 181,
+      "title": "Correct Stage105 Python/Lua offer guard: four physical slots, not four total copies",
+      "reviewState": "OPEN",
+      "headSha": "e29a0fbbb4edc01b53ea47cbcce2f57dee3ae2b0",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/181",
+      "stagesFromTitle": [
+        105
+      ]
+    },
+    {
+      "pr": 182,
+      "title": "Reject outgoing protected Gingerscope in Stage105 research-only offer guard",
+      "reviewState": "OPEN",
+      "headSha": "94ecefee86fd36293dcac58d0c24d9f379e719e5",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/182",
+      "stagesFromTitle": [
+        105
+      ]
+    },
+    {
+      "pr": 183,
+      "title": "Stage106 preflight: verify ALT-only stable baseline and one MAIN UpdateTrade callback before raw-key match",
+      "reviewState": "OPEN",
+      "headSha": "cbd05ba8d98d9495ade900c5e04ffb4db0552e4e",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/183",
+      "stagesFromTitle": [
+        106
+      ]
+    },
+    {
+      "pr": 184,
+      "title": "Stage106 native CLIENT-ONLY witness passed — no server/instance identity; draft research",
+      "reviewState": "OPEN",
+      "headSha": "b8ffb2af9c50123173e584954a418282e144dab6",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/184",
+      "stagesFromTitle": [
+        106
+      ]
+    },
+    {
+      "pr": 185,
+      "title": "Stage107: reject same-count Supreme weapon substitutions and Priceless-label drift",
+      "reviewState": "OPEN",
+      "headSha": "b9261c025afaf3d6615b4c73f761c8bfcfc228bd",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/185",
+      "stagesFromTitle": [
+        107
+      ]
+    },
+    {
+      "pr": 186,
+      "title": "Stage108: all 189 historical MM2 public names match original Nov9 Supreme roster (read-only)",
+      "reviewState": "OPEN",
+      "headSha": "274bf8a0bea99b639d41263a4e3ca47bed4e0fc6",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/186",
+      "stagesFromTitle": [
+        108
+      ]
+    },
+    {
+      "pr": 187,
+      "title": "Stage109: exact raw-key → public-name → pinned Supreme indicative values (no trade authority)",
+      "reviewState": "OPEN",
+      "headSha": "e1c9f3c93311f3688bbb780efce4a2a81e0a1b7c",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/187",
+      "stagesFromTitle": [
+        109
+      ]
+    },
+    {
+      "pr": 188,
+      "title": "Stage110: original Supreme parser/prior-HTML admission gate (6/6 CI, no new publication)",
+      "reviewState": "OPEN",
+      "headSha": "57ad1c00e775e839fd05f3437c1bdbbfcd7161f6",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/188",
+      "stagesFromTitle": [
+        110
+      ]
+    },
+    {
+      "pr": 189,
+      "title": "Stage111: preserve complete Supreme HTTPS captures and SHA evidence — manual research review only",
+      "reviewState": "OPEN",
+      "headSha": "f3dfadb4b90c6a126e19dc4064514f795aea98e9",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/189",
+      "stagesFromTitle": [
+        111
+      ]
+    },
+    {
+      "pr": 190,
+      "title": "SUPERSEDED by merged PR192 — Stage112 session reuse historical draft",
+      "reviewState": "OPEN",
+      "headSha": "675e9904e7ef9afeabc46bfb359d3ee4f4335581",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/190",
+      "stagesFromTitle": [
+        112
+      ]
+    },
+    {
+      "pr": 191,
+      "title": "SUPERSEDED by merged PR192 — Stage113 acceptance dedupe historical draft",
+      "reviewState": "OPEN",
+      "headSha": "fc7e72f2141288e624957280ba30a55a8ce36982",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/191",
+      "stagesFromTitle": [
+        113
+      ]
+    },
+    {
+      "pr": 192,
+      "title": "Stage114: consolidate verified Stage112/113 replay fixes directly on main (no settlement authority)",
+      "reviewState": "MERGED",
+      "headSha": "89f021875bbffaa5457acc9dfe808eb831a998a0",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/192",
+      "stagesFromTitle": [
+        112,
+        114
+      ]
+    },
+    {
+      "pr": 193,
+      "title": "Stage115: classify client post-close readbacks without treating them as MM2 settlement (6/6 code CI)",
+      "reviewState": "MERGED",
+      "headSha": "d66e62ff17b62cd2e48887d5eb4d7f7d1639b379",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/193",
+      "stagesFromTitle": [
+        115
+      ]
+    },
+    {
+      "pr": 194,
+      "title": "Stage116 native iPad IDLE panel visible; active TradeGUI collision untested (draft)",
+      "reviewState": "OPEN",
+      "headSha": "ec3e346a9c3668c6a598fb939f6f02d8ed791407",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/194",
+      "stagesFromTitle": [
+        116
+      ]
+    },
+    {
+      "pr": 195,
+      "title": "Supervised trade: Gingerscope-protected OfferItem remote boundary (98 Lune, 6/6 CI)",
+      "reviewState": "MERGED",
+      "headSha": "b63552f1ff34bde34e633e8248b061fdebbc8bd2",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/195",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 196,
+      "title": "Supervised trading pilot: one manually armed nonprotected item in one exact open trade",
+      "reviewState": "MERGED",
+      "headSha": "52a1a3f4c48b8c51ca997f6282f702ab5f7c1f61",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/196",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 197,
+      "title": "Fix supervised one-item pilot: mandatory collision-safe on-screen MAIN/ALT steps",
+      "reviewState": "MERGED",
+      "headSha": "1a73c5196960802075a8ef86ff13d1a495d159ff",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/197",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 198,
+      "title": "Fix supervised pilot auto-copy: sanitized result to Delta clipboard",
+      "reviewState": "MERGED",
+      "headSha": "af30ac44aa76fb65daf5adca0136772d4057da41",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/198",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 199,
+      "title": "Integrate existing paused Part3 session with guarded Part4 live offer snapshot",
+      "reviewState": "MERGED",
+      "headSha": "185d94089b49f904000bac2822cfbd2d9f9a8d92",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/199",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 200,
+      "title": "Integrate protected P3/P4 supervised operator-approved 1–4-slot offer executor",
+      "reviewState": "MERGED",
+      "headSha": "e9cd45446e8bb3a76667e84a1733712e11ec3a91",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/200",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 201,
+      "title": "Live Delta runner for supervised 1–4 items with mandatory screen guide and clipboard",
+      "reviewState": "MERGED",
+      "headSha": "a6d0c83d914717a839d5ab6c977409b1e628b78e",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/201",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 202,
+      "title": "Fix raw weapon key versus visible name in guarded four-slot offers",
+      "reviewState": "MERGED",
+      "headSha": "1f30d1e761de263215244cc6ca1e785507a383ca",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/202",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 203,
+      "title": "Fix mandatory per-item in-game guidance for supervised four-slot Delta pilot",
+      "reviewState": "CLOSED_UNMERGED",
+      "headSha": "c6c178d390700038f3c4b29ca2e4fd5cfeebd9eb",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/203",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 204,
+      "title": "Preserve raw/display binding and add verified per-item in-game steps",
+      "reviewState": "MERGED",
+      "headSha": "6bcc058a1df69343af4c51b8ce6d23355e790a5a",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/204",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 205,
+      "title": "Fix first-slot transient GUI snapshot failure and export exact safe rejection reason",
+      "reviewState": "MERGED",
+      "headSha": "c499a0768e17155f07d39223c752e40ce74cbdad",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/205",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 206,
+      "title": "Fix MM2 singleton blank Amount.Text rejected after first supervised offer",
+      "reviewState": "MERGED",
+      "headSha": "7e2c034208d6e957b6c810674402f18d8d87585a",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/206",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 207,
+      "title": "Connect actual Part3 processed rotation to protected Part4 read-only session and safe resume",
+      "reviewState": "MERGED",
+      "headSha": "4678364dad70b4cdb13ff7fbfb78970323f819b3",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/207",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 208,
+      "title": "Add fail-closed startup barrier to real Part3 outgoing before P4 supervisor attaches",
+      "reviewState": "MERGED",
+      "headSha": "b72b94713d35755a48a7ded08e216b3d22225657",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/208",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 209,
+      "title": "Start real Part3 outgoing only after exact guarded Part4 observer and live on-screen/watchdog admission",
+      "reviewState": "MERGED",
+      "headSha": "1c8f6da9d2139b6e62cf0e483514d457f4f6eda5",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/209",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 210,
+      "title": "Add original MM2 native single-target P3 request rotation with protected P4 read-only observer",
+      "reviewState": "CLOSED_UNMERGED",
+      "headSha": "90989ea7bf2821a3f14b75435553a33ac429900d",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/210",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 211,
+      "title": "Continuously supervise real Part3 rotation and safely resume after closed Part4 trade",
+      "reviewState": "MERGED",
+      "headSha": "c4282222e9152c1b5a65a6db2c3e8ad9832ae572",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/211",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 212,
+      "title": "FINAL CI: supervised exact-ALT P3 request launcher to protected P4 read-only observer",
+      "reviewState": "CLOSED_UNMERGED",
+      "headSha": "90989ea7bf2821a3f14b75435553a33ac429900d",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/212",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 213,
+      "title": "Native MM2 guided P3 ARM/STOP runner with real protected P4 observer and watchdog",
+      "reviewState": "MERGED",
+      "headSha": "b78568261ffc33f9acef0b51128c306106a43282",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/213",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 214,
+      "title": "Preserve client-only P3 ARM, exact trade window and resume milestones in STOP clipboard",
+      "reviewState": "MERGED",
+      "headSha": "cf0b76038d56840f04405dcb6dfb85883913812b",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/214",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 215,
+      "title": "Read-only revocable P3→P4 bound client lease after verified native rotation",
+      "reviewState": "MERGED",
+      "headSha": "92a1a1335b8b84e7016865c4891e77c86795c319",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/215",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 216,
+      "title": "Supervised P3→P4 one-item offer: require a separate human approval and fresh own-key proof",
+      "reviewState": "MERGED",
+      "headSha": "d72dd60c3b44f1d29167c08258e4b820d8befb41",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/216",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 217,
+      "title": "MAIN iPad: choose currently owned eligible non-Gingerscope item before guarded P3 ARM",
+      "reviewState": "MERGED",
+      "headSha": "6e7efce5a9ef13572ad3e8b531a26c27fce4ec2a",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/217",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 218,
+      "title": "First ALT-only one-item AUTO OFFER after explicit picker consent and stable P3/P4 GUI",
+      "reviewState": "MERGED",
+      "headSha": "1ce22721744168e0d47012e71559ce75bb6795b1",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/218",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 219,
+      "title": "Guard Stage101 two-sided raw weapon candidates with original live P3/P4 lease and Stage9 GUI",
+      "reviewState": "MERGED",
+      "headSha": "ffec7f9e488144229c5687d1bcbe65ce5f587884",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/219",
+      "stagesFromTitle": [
+        9,
+        101
+      ]
+    },
+    {
+      "pr": 220,
+      "title": "Native original-MM2 Stage101 two-sided raw weapon witness under protected ALT P3/P4 (no item auto Accept)",
+      "reviewState": "MERGED",
+      "headSha": "24e9b35074819526137cfbc8512918a64707266a",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/220",
+      "stagesFromTitle": [
+        101
+      ]
+    },
+    {
+      "pr": 221,
+      "title": "Fix PR220 iPad Stage101 blocked lease: pin actual PR215 P3 supervisor/coordinator frozen sources",
+      "reviewState": "MERGED",
+      "headSha": "e02e675989cbb1c30c342f13594b9d7166cc6364",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/221",
+      "stagesFromTitle": [
+        101
+      ]
+    },
+    {
+      "pr": 222,
+      "title": "Research: LastOffer client token equality vs changing MM2 offers (no Accept authority)",
+      "reviewState": "MERGED",
+      "headSha": "387a91e1e72f2c237ff833408c02d85b79d6fcc3",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/222",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 223,
+      "title": "Research LastOffer client revision semantics without inventing server causality",
+      "reviewState": "CLOSED_UNMERGED",
+      "headSha": "b442b798873efed76764840fe442261b444e12f3",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/223",
+      "stagesFromTitle": []
+    },
+    {
+      "pr": 224,
+      "title": "Stage118: correlate two client LastOffer events with two Stage9 GUI changes (read-only)",
+      "reviewState": "MERGED",
+      "headSha": "c0f0fa20f0a905a662183980d2297058568d061e",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/224",
+      "stagesFromTitle": [
+        9,
+        118
+      ]
+    },
+    {
+      "pr": 225,
+      "title": "Stage119: first read-only original-MM2 LastOffer dual-callback native iPad witness",
+      "reviewState": "MERGED",
+      "headSha": "bf4bb943a1d75059fe2c0567fc797b98b0f57d2f",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/225",
+      "stagesFromTitle": [
+        119
+      ]
+    },
+    {
+      "pr": 226,
+      "title": "Stage119 correction: block manual-open V1, require real P3/P4 native parity before device test",
+      "reviewState": "MERGED",
+      "headSha": "0c24bcdb08419394cb863f9b10eba5e505a281ae",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/226",
+      "stagesFromTitle": [
+        119
+      ]
+    },
+    {
+      "pr": 227,
+      "title": "Stage120: reuse planner with corrected physical-slot/Gingerscope guard and source-expiry gate",
+      "reviewState": "MERGED",
+      "headSha": "f980415a87b824310610110ccdbae3eaedea01fd",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/227",
+      "stagesFromTitle": [
+        120
+      ]
+    },
+    {
+      "pr": 228,
+      "title": "Stage121: source-bound Supreme research-to-portfolio firewall (no stale market or fake liquidity promotion)",
+      "reviewState": "MERGED",
+      "headSha": "b2ecb04c810c3fb4a309c726d3372ff0c09cc9c2",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/228",
+      "stagesFromTitle": [
+        121
+      ]
+    },
+    {
+      "pr": 229,
+      "title": "Gingerscope continuity v1: verified memory recovery, crash-safe job metadata, private evidence boundary",
+      "reviewState": "OPEN",
+      "headSha": "befd695d5ffc560ffc94ce51579f9c94a1f041a4",
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/229",
+      "stagesFromTitle": []
+    }
+  ],
+  "stageIndex": [
+    {
+      "stage": 1,
+      "prsByTitle": [
+        38
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 2,
+      "prsByTitle": [
+        39
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 3,
+      "prsByTitle": [
+        40
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 4,
+      "prsByTitle": [
+        41
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 5,
+      "prsByTitle": [
+        42,
+        57
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 6,
+      "prsByTitle": [
+        43
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 7,
+      "prsByTitle": [
+        44,
+        57
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 8,
+      "prsByTitle": [
+        46
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 9,
+      "prsByTitle": [
+        47,
+        67,
+        165,
+        168,
+        171,
+        219,
+        224
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 10,
+      "prsByTitle": [
+        48
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 11,
+      "prsByTitle": [
+        49,
+        62
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 12,
+      "prsByTitle": [
+        50
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 13,
+      "prsByTitle": [
+        52
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 14,
+      "prsByTitle": [
+        53
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 15,
+      "prsByTitle": [
+        54
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 16,
+      "prsByTitle": [
+        55
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 17,
+      "prsByTitle": [
+        56,
+        57,
+        62,
+        63
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 18,
+      "prsByTitle": [
+        57
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 19,
+      "prsByTitle": [
+        58
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 20,
+      "prsByTitle": [
+        59
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 21,
+      "prsByTitle": [
+        60
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 22,
+      "prsByTitle": [
+        61
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 23,
+      "prsByTitle": [
+        62
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 24,
+      "prsByTitle": [
+        63
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 25,
+      "prsByTitle": [
+        64
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 26,
+      "prsByTitle": [
+        65
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 27,
+      "prsByTitle": [
+        66
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 28,
+      "prsByTitle": [
+        67
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 29,
+      "prsByTitle": [
+        68
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 30,
+      "prsByTitle": [
+        69
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 31,
+      "prsByTitle": [
+        70
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 32,
+      "prsByTitle": [
+        71
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 33,
+      "prsByTitle": [
+        72
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 34,
+      "prsByTitle": [
+        73
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 35,
+      "prsByTitle": [
+        74
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 36,
+      "prsByTitle": [
+        75
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 37,
+      "prsByTitle": [],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 38,
+      "prsByTitle": [],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 39,
+      "prsByTitle": [
+        78
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 40,
+      "prsByTitle": [
+        79
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 41,
+      "prsByTitle": [
+        80
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 42,
+      "prsByTitle": [
+        81
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 43,
+      "prsByTitle": [
+        82
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 44,
+      "prsByTitle": [
+        83
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 45,
+      "prsByTitle": [
+        84
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 46,
+      "prsByTitle": [
+        85
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 47,
+      "prsByTitle": [
+        86
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 48,
+      "prsByTitle": [
+        87
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 49,
+      "prsByTitle": [
+        88
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 50,
+      "prsByTitle": [
+        89
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 51,
+      "prsByTitle": [
+        90
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 52,
+      "prsByTitle": [
+        91,
+        96
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 53,
+      "prsByTitle": [
+        98
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 54,
+      "prsByTitle": [
+        99
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 55,
+      "prsByTitle": [
+        100
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 56,
+      "prsByTitle": [
+        101
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 57,
+      "prsByTitle": [
+        102
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 58,
+      "prsByTitle": [
+        103
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 59,
+      "prsByTitle": [
+        104
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 60,
+      "prsByTitle": [
+        112
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 61,
+      "prsByTitle": [
+        113
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 62,
+      "prsByTitle": [
+        114
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 63,
+      "prsByTitle": [
+        115,
+        116
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 64,
+      "prsByTitle": [
+        116
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 65,
+      "prsByTitle": [
+        117
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 66,
+      "prsByTitle": [
+        118,
+        119,
+        120
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 67,
+      "prsByTitle": [
+        119,
+        120
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 68,
+      "prsByTitle": [
+        121
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 69,
+      "prsByTitle": [
+        123,
+        124
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 70,
+      "prsByTitle": [
+        125
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 71,
+      "prsByTitle": [
+        126,
+        128
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 72,
+      "prsByTitle": [
+        127,
+        129
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 73,
+      "prsByTitle": [],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 74,
+      "prsByTitle": [
+        142
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 75,
+      "prsByTitle": [
+        143,
+        144,
+        145
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 76,
+      "prsByTitle": [
+        146
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 77,
+      "prsByTitle": [
+        147
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 78,
+      "prsByTitle": [
+        148
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 79,
+      "prsByTitle": [
+        149
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 80,
+      "prsByTitle": [
+        150
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 81,
+      "prsByTitle": [
+        151
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 82,
+      "prsByTitle": [
+        152
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 83,
+      "prsByTitle": [
+        153
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 84,
+      "prsByTitle": [
+        154
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 85,
+      "prsByTitle": [
+        155
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 86,
+      "prsByTitle": [
+        156
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 87,
+      "prsByTitle": [
+        157
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 88,
+      "prsByTitle": [
+        158
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 89,
+      "prsByTitle": [
+        159,
+        160
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 90,
+      "prsByTitle": [
+        160,
+        161
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 91,
+      "prsByTitle": [
+        161
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 92,
+      "prsByTitle": [
+        162
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 93,
+      "prsByTitle": [
+        163
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 94,
+      "prsByTitle": [
+        164
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 95,
+      "prsByTitle": [
+        165
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 96,
+      "prsByTitle": [
+        166
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 97,
+      "prsByTitle": [
+        167
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 98,
+      "prsByTitle": [
+        168,
+        179
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 99,
+      "prsByTitle": [
+        169
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 100,
+      "prsByTitle": [
+        170
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 101,
+      "prsByTitle": [
+        171,
+        172,
+        176,
+        219,
+        220,
+        221
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 102,
+      "prsByTitle": [
+        173,
+        180
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 103,
+      "prsByTitle": [
+        174
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 104,
+      "prsByTitle": [
+        175
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 105,
+      "prsByTitle": [
+        168,
+        181,
+        182
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 106,
+      "prsByTitle": [
+        178,
+        183,
+        184
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 107,
+      "prsByTitle": [
+        185
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 108,
+      "prsByTitle": [
+        186
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 109,
+      "prsByTitle": [
+        187
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 110,
+      "prsByTitle": [
+        188
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 111,
+      "prsByTitle": [
+        189
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 112,
+      "prsByTitle": [
+        190,
+        192
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 113,
+      "prsByTitle": [
+        191
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 114,
+      "prsByTitle": [
+        192
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 115,
+      "prsByTitle": [
+        193
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 116,
+      "prsByTitle": [
+        194
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 117,
+      "prsByTitle": [],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 118,
+      "prsByTitle": [
+        224
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 119,
+      "prsByTitle": [
+        225,
+        226
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 120,
+      "prsByTitle": [
+        227
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    },
+    {
+      "stage": 121,
+      "prsByTitle": [
+        228
+      ],
+      "indexStatus": "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT"
+    }
+  ]
+}
