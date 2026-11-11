@@ -8,7 +8,7 @@ import unittest
 ROOT=Path(__file__).resolve().parents[2]
 BRIDGE=ROOT/'pdiddler/intelligence_lab/stage118_lastoffer_gui_correlation.lua'
 AUDIT=ROOT/'pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua'
-STAGE9=ROOT/'pdiddler/new_part4/p4_observer_contract.lua'
+STAGE9=Path(os.environ.get('STAGE118_STAGE9') or ROOT/'pdiddler/new_part4/p4_observer_contract.lua')
 TEST=ROOT/'pdiddler/tests/test_stage118_lastoffer_gui_correlation.lua'
 NATIVE=ROOT/'pdiddler/supervised/SUPERVISED_P3_STAGE101_IDENTITY_NATIVE.lua'
 LOADER=ROOT/'pdiddler/supervised/SUPERVISED_P3_STAGE101_READONLY_START.lua'
