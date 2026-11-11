@@ -595,7 +595,9 @@ local function prepareWitness(root)
     local began=witness.begin()
     if type(began)~="table" or began.status~="WAITING" or
        began.physicalGuiCrossChecked~=true then
-        return false,"PROTECTED_STAGE101_BASELINE_REFUSED"
+        return false,type(began)=="table" and
+          ("PROTECTED_STAGE101_"..tostring(began.reason or "BASELINE_REFUSED"))
+          or "PROTECTED_STAGE101_BASELINE_REFUSED"
     end
     -- Subscribe only AFTER Stage9 and protected P4 independently verified
     -- one ALT baseline weapon + empty MAIN. A callback for ALT's earlier
