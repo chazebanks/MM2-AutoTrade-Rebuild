@@ -116,6 +116,7 @@ E.PDIDDLER_SUPERVISED_P3_NATIVE_OWNER=owner
 local evidence={
     oneItemTapObservedClient=false,
     oneItemOfferStatus="NOT_ATTEMPTED",
+    oneItemSnapshotRejectReason="NONE",
     oneItemOfferAttempts=0,
     clientVisibleAddedSlots=0,
     offerAttemptsKnown=true,
@@ -131,6 +132,7 @@ local function statusRecord(status,reason)
         reason=tostring(reason or "UNKNOWN"),
         oneItemTapObservedClient=evidence.oneItemTapObservedClient,
         oneItemOfferStatus=evidence.oneItemOfferStatus,
+        snapshotRejectReason=evidence.oneItemSnapshotRejectReason,
         offerAttempts=evidence.oneItemOfferAttempts,
         offerAttemptsKnown=evidence.offerAttemptsKnown,
         clientVisibleAddedSlots=evidence.clientVisibleAddedSlots,
@@ -298,6 +300,7 @@ function guide:show(r)
         ui.body.Text="MAIN: tap ARM for one consenting ALT ONLY. ALT: accept request manually. No final Accept."
     elseif status=="P4_TWO_SIDED_CLIENT_SNAPSHOT" then
         ui.title.Text="2/2 MAIN — APPROVE ONE ITEM"
+        ui.body.TextSize=11
         if offerSpent then
             ui.body.Text="Offer step finished. MAIN: manually Decline. NEVER final Accept."
         elseif offerBusy then
@@ -518,6 +521,11 @@ ui.offer.Activated:Connect(function()
             and tostring(receipt.status or "INCONCLUSIVE") or
             "INCONCLUSIVE"
         if good and type(receipt)=="table" then
+            if type(receipt.snapshotRejectReason)=="string" and
+                receipt.snapshotRejectReason:match("^[A-Z_]+$") and
+                #receipt.snapshotRejectReason<=72 then
+                evidence.oneItemSnapshotRejectReason=receipt.snapshotRejectReason
+            end
             if type(receipt.offerAttempts)=="number" then
                 evidence.oneItemOfferAttempts=receipt.offerAttempts
             else
