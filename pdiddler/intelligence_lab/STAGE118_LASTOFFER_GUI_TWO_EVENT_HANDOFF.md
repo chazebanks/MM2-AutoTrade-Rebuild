@@ -12,7 +12,7 @@
 1. Original Stage9 raw GUI **both sides empty** and unchanged at two captures >=0.15s apart.
 2. Exactly one `UpdateTrade` callback while GUI is still empty; private frozen packet says **ALT offers one weapon**, MAIN empty. Stage9 independently observes one ALT physical slot, quantities agree with frozen packet, and gets two stable GUI reads >=0.15s apart.
 3. Exactly one second `UpdateTrade` callback while unchanged ALT-only GUI is visible; frozen packet says **ALT removed the offered weapon**, both sides empty. Stage9 observes both GUI sides empty twice with >=0.15s stability.
-4. On strict local consistency, sanitized output `CLIENT_TWO_EVENT_LASTOFFER_GUI_UNATTRIBUTED` with `lastOfferEqualityClass` = original PR222's `CLIENT_LASTOFFER_CHANGED_WITH_DIFFERENT_OFFER` OR `CLIENT_LASTOFFER_UNCHANGED_WITH_DIFFERENT_OFFER`, `callbackCount=2`, `localGuiTransitions=2`, `clientGuiCrossChecked=true`.
+4. On strict local consistency, sanitized output `CLIENT_TWO_EVENT_LASTOFFER_GUI_UNATTRIBUTED` with `lastOfferEqualityClass` = original PR222's `CLIENT_LASTOFFER_CHANGED_WITH_DIFFERENT_OFFER` OR `CLIENT_LASTOFFER_UNCHANGED_WITH_DIFFERENT_OFFER`, `callbackCount=2`, `localGuiTransitions=2`, `clientGuiQuantityCrossChecked=true` while **`clientGuiCrossChecked=false` for full weapon identity**.
 
 The private `LastOffer` values, players, offers and raw weapon IDs are NEVER emitted. Compare only packet quantity multisets against GUI quantity multisets; this **does not independently validate item identity or packet origin**. Original Stage101 already separately demonstrated a one-event raw-key client candidate matching, not this two-event token behavior.
 
