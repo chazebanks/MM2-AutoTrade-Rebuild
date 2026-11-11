@@ -1,5 +1,14 @@
 # GINGERSCOPE / PDIDDLER — CANONICAL NEXT-CONVERSATION HANDOFF
 
+## NEWEST PRODUCT REQUIREMENT (NOV 10 2026): USER WANTS **FULLY AUTOMATIC** FINAL TRADE ACCEPTANCE EVENTUALLY
+
+After real PR218 iPad ALT-only auto one-item placement PASS, user explicitly chose **"I want it automatic"**, when asked whether future Gingerscope trading should automatically final-Accept when verified conditions pass or require their approval on every deal. Interpret as **long-term goal: self-operating offer selection/negotiation/acceptance** without manual review of each trade. Do **NOT** misinterpret as authorizing immediate unguarded final Accept in currently client-only-proven PR218! Existing runner remains **no auto final Accept**, `authorizesAccept=false`, `tradeOutcome=UNKNOWN`, and exact consenting ALT only; code was NOT modified by this requirement update. No old fixed +15 or forced highest-valued opener. Item attractiveness, true market-source freshness, stability/demand and independent liquidity, inventory compounding and protected Gingerscope remain strategic requirements.
+
+**Order of work — ONE issue at a time:** (1) inspect the existing open draft [PR171 Stage101 raw weapon ↔ multi-slot GUI matcher](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/171) against original P3/P4; resolve two-sided exact raw game weapon key/Chroma/stack ambiguity and event-to-GUI causality as strictly client-only evidence; (2) trade-session/revision stability and offer-change invalidation, with fail-closed session protection; (3) current independently checked market values, liquidity/demand/desirability and balanced 4-slot deal decisions with no forced +15, protected items and value/risk constraints; (4) design one-shot final acceptance only for a fully validated frozen live offer, with cancellation/disconnect/replay/unknown-settlement handling and hard stop controls; (5) distinguish server-completed trades from client GUI close before inventory/profit/webhook updates. All offline tests and consenting-ALT bounded device tests BEFORE broader autonomous operation. Server settlement and authenticated item identity currently unproven and must not be invented.
+
+**New user intent is a REQUIREMENT, not a current implementation or tested native capability.** No need to reconfirm manual-vs-auto in another conversation. Do NOT repeat already completed PR214/206/217/218 device item placement tests. Continue from current canonical and latest checkpoint.
+
+
 ## NOVEMBER 10, 2026 — NEWEST ACTUAL ORIGINAL MM2 IPAD DELTA: PR218 AUTO ONE-ITEM P3→P4 NATIVE CLIENT **PASS**
 
 **This is genuine user-supplied first native device evidence**, not an offline test. New PR218 automatic first-trade item placement is now **client verified** following the earlier already-closed PR217/PR216 MANUAL one-item offer test. The actual MAIN iPad Delta `STOP / COPY` JSON was:
