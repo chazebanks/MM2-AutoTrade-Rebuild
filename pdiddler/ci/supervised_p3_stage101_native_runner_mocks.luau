@@ -491,7 +491,7 @@ end
 for _,geometry in ipairs({
  {vw=1024,vh=768,x=520,y=155,w=380,h=460},
  {vw=1024,vh=768,x=15,y=155,w=420,h=460},
- {vw=1024,vh=768,x=320,y=220,w=380,h=370},
+ {vw=1024,vh=768,x=320,y=280,w=380,h=300},
  {vw=900,vh=600,x=500,y=155,w=320,h=370},
  {vw=768,vh=1024,x=210,y=305,w=370,h=580},
 })do
@@ -520,6 +520,19 @@ do
  x.E.__WATCH.tick()
  eq(overlaps(p,x.trade),false,
     "portrait/orientation change rechecks physical trade collision")
+end
+do
+ local x=fakeEnv({x=320,y=220,w=380,h=370})
+ x.run()
+ x.armButton().Activated:Fire()
+ x.E.__P3.state.processed[2]="trade-open"
+ x.E.__P3.setPaused(true)
+ x.screen.Enabled=true
+ -- The centered trade leaves no region with 12px collision clearance.
+ local ok=pcall(x.E.__WATCH.tick)
+ eq(ok,false,"on-screen prompt fails closed when no safe space exists")
+ eq(x.E.__P3.stopped,true,"unsafe layout stops original P3 queue")
+ eq(#x.offers,0,"no weapon is ever offered on geometry failure")
 end
 do
  local x=fakeEnv()
