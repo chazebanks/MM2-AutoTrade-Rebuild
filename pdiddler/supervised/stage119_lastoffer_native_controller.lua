@@ -35,7 +35,7 @@ local function depsOK(d)
   type(d.bridge.new)=="function" and type(d.audit)=="table" and
   type(d.audit.new)=="function" and type(d.stage9)=="table" and
   type(d.stage9.parseQuantity)=="function" and
-  type(d.scope)=="table"
+  type(d.scope)=="function"
 end
 function M.new(d)
  if not depsOK(d) then return nil end
