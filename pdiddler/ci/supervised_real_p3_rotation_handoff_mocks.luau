@@ -386,5 +386,44 @@ do
  eq(newer.capture().status,"CLIENT_UNPRICED_TWO_SIDED_SNAPSHOT","new partner session read only")
  eq(#x.sends,0,"no remotes during second session")
 end
+-- Contract hardening: even a forged future bridge field must not
+-- be promoted from CLIENT snapshot to trusted session/price authority.
+for _,bad in ipairs({
+ {key="rawItemIdsAuthenticated",value=true},
+ {key="offerRevisionAuthenticated",value=true},
+ {key="serverCompletionProven",value=true},
+ {key="mayReportProfit",value=true},
+ {key="maySendDiscordWebhook",value=true},
+ {key="requestOriginBound",value=true},
+ {key="partnerExactClientBound",value=false},
+ {key="part3Paused",value=false},
+ {key="part4TradeVisible",value=false},
+}) do
+ local x=fixture()
+ local realBridge=x.module
+ local corrupted=false
+ x.module={bind=function(...)
+  local bound,reason=realBridge.bind(...)
+  if bound then
+   local originalCapture=bound.capture
+   function bound.capture()
+    local shot=originalCapture()
+    if corrupted and shot.status=="CLIENT_UNPRICED_TWO_SIDED_SNAPSHOT" then
+     shot[bad.key]=bad.value
+    end
+    return shot
+   end
+  end
+  return bound,reason
+ end}
+ local manager=bind(x)
+ acceptP3(x)
+ local lease=manager.currentBoundReadOnly()
+ eq(type(lease),"table","genuine initial clean lease before future spoof")
+ corrupted=true
+ eq(lease.capture().status,"REJECTED","reject forged "..bad.key)
+ eq(lease.capture().status,"REJECTED","permanent revoke after "..bad.key)
+ eq(#x.sends,0,"no remote after forged "..bad.key)
+end
 print("[PASS] real P3 paused rotation to original P4 GUI observer, ",tests)
 print("[PASS] no offer/request/Accept, exact fresh processed user, safe P3 resumption")
