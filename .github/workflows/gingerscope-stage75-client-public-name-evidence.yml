@@ -1,0 +1,57 @@
+name: Stage75 current-client strict public-name evidence, no trading
+on:
+  push:
+    branches:
+      - research/gingerscope-stage75-native-exact-public-names
+    paths:
+      - 'pdiddler/intelligence_lab/stage75_historical_public_name_index.lua'
+      - 'pdiddler/intelligence_lab/stage75_strict_live_public_name_comparison.lua'
+      - 'pdiddler/new_part4/STAGE75_NATIVE_STRICT_PUBLIC_NAME_BOOT.lua'
+      - 'pdiddler/intelligence_lab/test_stage75_strict_live_public_name.py'
+      - 'pdiddler/intelligence_lab/STAGE75_NATIVE_STRICT_NAME_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage75-client-public-name-evidence.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage75_historical_public_name_index.lua'
+      - 'pdiddler/intelligence_lab/stage75_strict_live_public_name_comparison.lua'
+      - 'pdiddler/new_part4/STAGE75_NATIVE_STRICT_PUBLIC_NAME_BOOT.lua'
+      - 'pdiddler/intelligence_lab/test_stage75_strict_live_public_name.py'
+      - 'pdiddler/intelligence_lab/STAGE75_NATIVE_STRICT_NAME_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage75-client-public-name-evidence.yml'
+permissions:
+  contents: read
+jobs:
+  native-name-only-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install actual Lua5.4 runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Verify every generated historical source name against exact public snapshot
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/715010c9ec09b1411f4252d9e665c0052caa5f43/pdiddler/snapshots/supreme_snapshot_2026_11_04.json' \
+            -o /tmp/stage75_public_history.json
+          test "$(git hash-object /tmp/stage75_public_history.json)" = '955e3fb7cd25999fc4f0aad4a77378b9a7bb9ba3'
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          p=Path('pdiddler/intelligence_lab/stage75_historical_public_name_index.lua').read_text()
+          m=re.compile(r'\{page=("(?:\\.|[^"])*"),name=("(?:\\.|[^"])*")\}')
+          rows={(json.loads(a),json.loads(b)) for a,b in m.findall(p)}
+          original=json.loads(Path('/tmp/stage75_public_history.json').read_text())
+          expected={(x['page'],x['sourceName']) for x in original['rows']}
+          assert len(rows)==190==len(expected) and rows==expected
+          print('Stage75 historical public-name-only index EXACT: 190/190')
+          PY
+      - name: Execute pinned public-name-only Lua logic and mocked original client/GUI
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.intelligence_lab.test_stage75_strict_live_public_name
