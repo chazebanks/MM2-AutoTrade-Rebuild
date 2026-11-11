@@ -178,6 +178,12 @@ function M.new(d)
   return receipt(s,"WAITING","CLIENT_EVENT_RECEIVED_WAIT_STAGE9_GUI")
  end
  function self.stop()
+  -- A cleanup STOP following a terminal failure must never relabel that
+  -- failure as an operator stop or silently erase the first diagnostic.
+  if s.phase=="FAILED" then
+   disconnect()
+   return receipt(s,"INCONCLUSIVE","ALREADY_INCONCLUSIVE")
+  end
   local wasPass=s.phase=="PASS"
   disconnect()
   if s.core and not wasPass then pcall(function()s.core.stop()end) end
