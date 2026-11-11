@@ -1,0 +1,63 @@
+name: Gingerscope Stage80 owned catalogue metadata reason (read-only)
+on:
+  push:
+    branches:
+      - research/gingerscope-stage80-owned-metadata-reason
+    paths:
+      - 'pdiddler/intelligence_lab/stage80_owned_metadata_reason.lua'
+      - 'pdiddler/new_part4/STAGE80_READONLY_OWNED_METADATA_REASON.lua'
+      - 'pdiddler/tests/test_stage80_owned_metadata_reason.lua'
+      - 'pdiddler/tests/test_stage80_native_probe_mock.lua'
+      - 'pdiddler/tests/test_stage80_pinned_metadata_sources.py'
+      - 'pdiddler/intelligence_lab/STAGE80_METADATA_REASON_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage80-owned-metadata-reason.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage80_owned_metadata_reason.lua'
+      - 'pdiddler/new_part4/STAGE80_READONLY_OWNED_METADATA_REASON.lua'
+      - 'pdiddler/tests/test_stage80_owned_metadata_reason.lua'
+      - 'pdiddler/tests/test_stage80_native_probe_mock.lua'
+      - 'pdiddler/tests/test_stage80_pinned_metadata_sources.py'
+      - 'pdiddler/intelligence_lab/STAGE80_METADATA_REASON_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage80-owned-metadata-reason.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage80-research-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install actual Lua5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Download and verify both pinned ORIGINAL public source artifacts
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/mm2scripthub/mm2/0f2715187e7eae36eea4bd97afee809478fc877d/db' \
+            -o /tmp/stage80-public-game-db.lua
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/a2da4d53b7ee92b289b9c58a34ac08e7ded6731a/pdiddler/intelligence_lab/stage79_typed_owned_census.lua' \
+            -o /tmp/stage80-original-stage79.lua
+          test "$(git hash-object /tmp/stage80-public-game-db.lua)" = '2be54c3f5c6b715844728c01a65cc2f24a55c02d'
+          test "$(git hash-object /tmp/stage80-original-stage79.lua)" = '7431604ed060bbaf815d359c38c64b0fe82c8fa8'
+      - name: Run raw-source audit, simulated 183-key reproduction and native mocks
+        env:
+          STAGE80_PINNED_GAME: /tmp/stage80-public-game-db.lua
+          STAGE80_PINNED_STAGE79: /tmp/stage80-original-stage79.lua
+          STAGE80_REQUIRE_PINNED: '1'
+        run: |
+          set -euo pipefail
+          lua5.4 -e 'assert(loadfile("pdiddler/intelligence_lab/stage80_owned_metadata_reason.lua"))'
+          lua5.4 -e 'assert(loadfile("pdiddler/new_part4/STAGE80_READONLY_OWNED_METADATA_REASON.lua"))'
+          lua5.4 -e 'assert(loadfile("pdiddler/tests/test_stage80_owned_metadata_reason.lua"))'
+          lua5.4 -e 'assert(loadfile("pdiddler/tests/test_stage80_native_probe_mock.lua"))'
+          lua5.4 pdiddler/tests/test_stage80_owned_metadata_reason.lua
+          lua5.4 pdiddler/tests/test_stage80_native_probe_mock.lua
+          python3 -m unittest -v pdiddler.tests.test_stage80_pinned_metadata_sources
