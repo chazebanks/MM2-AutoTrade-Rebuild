@@ -29,7 +29,7 @@ class NativeReadOnly(unittest.TestCase):
           "15f762a27a968373ed82809345f1869e1f688b26",
           "1971b93d324f0275e6a9affb472ac3e804439ed8",
           "25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae",
-          "f2a32eb9d538f4f376f41ecff7fc546584c415de",
+          "fd00161e4a309935d66b7a32ec057ac17a20d855",
           'identityModule.new(boundScope',
           'supervisor.currentBoundReadOnly()',
           'stage9Native.capture',
