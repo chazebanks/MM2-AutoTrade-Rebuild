@@ -1,0 +1,58 @@
+name: Gingerscope Stage74 full public archive name coverage (research only)
+on:
+  push:
+    branches:
+      - research/gingerscope-stage74-full-archive-name-coverage
+    paths:
+      - 'scripts/stage74_full_archive_name_coverage.py'
+      - 'pdiddler/intelligence_lab/test_stage74_full_archive_name_coverage.py'
+      - 'pdiddler/intelligence_lab/test_stage74_newer_public_name_comparison.py'
+      - 'pdiddler/intelligence_lab/STAGE74_FULL_ARCHIVE_NAME_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage74-full-public-archive-coverage.yml'
+  pull_request:
+    paths:
+      - 'scripts/stage74_full_archive_name_coverage.py'
+      - 'pdiddler/intelligence_lab/test_stage74_full_archive_name_coverage.py'
+      - 'pdiddler/intelligence_lab/test_stage74_newer_public_name_comparison.py'
+      - 'pdiddler/intelligence_lab/STAGE74_FULL_ARCHIVE_NAME_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage74-full-public-archive-coverage.yml'
+permissions:
+  contents: read
+jobs:
+  full-public-archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Fetch only immutable public inputs and verify exact Git blobs
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/tlredz/decompiledGames/0552a0f3502217a1cf89df66be9bd0f153e47fa4/murder-mystery-2/v1456/ReplicatedStorage/Database/Sync/Item.lua' \
+            -o /tmp/stage74_pinned_game.lua
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/715010c9ec09b1411f4252d9e665c0052caa5f43/pdiddler/snapshots/supreme_snapshot_2026_11_04.json' \
+            -o /tmp/stage74_pinned_supreme.json
+          test "$(git hash-object /tmp/stage74_pinned_game.lua)" = 'b0661d54893f681777ebd3eae50d0a4ebe9a46e3'
+          test "$(git hash-object /tmp/stage74_pinned_supreme.json)" = '955e3fb7cd25999fc4f0aad4a77378b9a7bb9ba3'
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/mm2scripthub/mm2/0f2715187e7eae36eea4bd97afee809478fc877d/db' \
+            -o /tmp/stage74_oct18_public_db.lua
+          test "$(git hash-object /tmp/stage74_oct18_public_db.lua)" = '2be54c3f5c6b715844728c01a65cc2f24a55c02d'
+      - name: Run full public catalog comparison and 240 deliberate corruptions
+        env:
+          STAGE74_PINNED_GAME: /tmp/stage74_pinned_game.lua
+          STAGE74_PINNED_SOURCE: /tmp/stage74_pinned_supreme.json
+          STAGE74_PINNED_NEWER: /tmp/stage74_oct18_public_db.lua
+          STAGE74_REQUIRE_PINNED_FIXTURES: '1'
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v \
+            pdiddler.intelligence_lab.test_stage74_full_archive_name_coverage \
+            pdiddler.intelligence_lab.test_stage74_newer_public_name_comparison
+          python3 scripts/stage74_full_archive_name_coverage.py \
+            --game-archive /tmp/stage74_pinned_game.lua \
+            --supreme-archive /tmp/stage74_pinned_supreme.json \
+            --newer-public-catalog /tmp/stage74_oct18_public_db.lua
