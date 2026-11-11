@@ -214,8 +214,24 @@ do
 end
 do
  local s,w=fixture()
- w.begin();s.time=104.5
- eq(w.tick().status,"BLOCKED","first event window has 3s bound")
+ w.begin();s.time=146
+ eq(w.tick().status,"BLOCKED","human MAIN add bounded to 45 seconds")
+end
+do
+ local s,w,p,after=fixture()
+ w.begin()
+ for k=1,10 do
+  s.time=100+k*3
+  eq(w.tick().status,"WAITING","unchanged ALT baseline refreshes before human MAIN tap")
+ end
+ s.time=130.2
+ eq(w.onClientEvent(p).status,"WAITING",
+  "one real callback after long human latency remains bounded to fresh baseline")
+ after();s.time=130.3;w.tick();s.time=130.5
+ local r=w.tick()
+ eq(r.status,"CLIENT_BOTH_SIDES_RAW_KEY_CANDIDATES_UNATTRIBUTED",
+  "late iPad human action matched actual frozen Stage101")
+ denied(r)
 end
 do
  local s,w,p,after=fixture()

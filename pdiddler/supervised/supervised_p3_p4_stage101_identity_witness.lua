@@ -143,6 +143,7 @@ function M.new(context,deps)
  }
  local phase="NOT_STARTED"
  local before,receipt,after1=nil,nil,nil
+ local begunAt=nil
  local callbackCount=0
  local last=result("WAITING","NOT_STARTED")
  local stopped=false
@@ -193,10 +194,14 @@ function M.new(context,deps)
   local okG,raw=pcall(deps.captureStage9Raw)
   if not okG or type(raw)~="table" or
      raw.tradeOpen~=true or raw.contextOK~=true or
-     raw.session~=scope.session or
-     not verifyPhysical(raw.our,snap.ours,deps.stage9.parseQuantity) or
-     not verifyPhysical(raw.their,snap.theirs,deps.stage9.parseQuantity) then
-   return nil,"ORIGINAL_STAGE9_AND_PROTECTED_P4_GUI_DISAGREE"
+     raw.session~=scope.session then
+   return nil,"ORIGINAL_STAGE9_RAW_CAPTURE_UNAVAILABLE"
+  end
+  if not verifyPhysical(raw.our,snap.ours,deps.stage9.parseQuantity) then
+   return nil,"ORIGINAL_STAGE9_AND_PROTECTED_P4_GUI_DISAGREE_OWN"
+  end
+  if not verifyPhysical(raw.their,snap.theirs,deps.stage9.parseQuantity) then
+   return nil,"ORIGINAL_STAGE9_AND_PROTECTED_P4_GUI_DISAGREE_ALT"
   end
   return {
    at=t,jobId=scope.jobId,session=scope.session,
@@ -225,6 +230,7 @@ function M.new(context,deps)
    return fail("REQUIRES_ONE_STABLE_ALT_SLOT_AND_EMPTY_MAIN_AT_START")
   end
   before=v
+  begunAt=v.at
   phase="WAIT_EVENT"
   last=result("WAITING","ALT_BASELINE_OBSERVED_WAIT_MAIN_MANUAL_ADD")
   last.p3P4LeaseChecked=true
@@ -277,7 +283,14 @@ function M.new(context,deps)
    if not guiSame(before,v) then
     return fail("GUI_CHANGED_BEFORE_CURRENT_EVENT_WITNESS")
    end
-   if v.at-before.at>3 then return fail("EVENT_WINDOW_EXPIRED") end
+   if not begunAt or v.at-begunAt>45 then
+    return fail("HUMAN_MAIN_ADD_WINDOW_EXPIRED")
+   end
+   -- The previous implementation expired 3 seconds after begin(), even
+   -- when the human had not yet reached the MAIN offer button on an iPad.
+   -- Refresh a strictly unchanged protected+Stage9 baseline on each tick,
+   -- but keep a 3s bound between the LAST fresh baseline and the callback.
+   before=v
    return last
   end
   if not receipt or v.at<receipt.at or v.at-receipt.at>3 then
