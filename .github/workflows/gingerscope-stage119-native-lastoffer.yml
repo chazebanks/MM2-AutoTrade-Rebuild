@@ -1,0 +1,61 @@
+name: Gingerscope Stage119 original MM2 native LastOffer read-only dual-event
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/supervised/STAGE119_LASTOFFER_NATIVE.lua'
+      - 'pdiddler/supervised/stage119_lastoffer_native_controller.lua'
+      - 'pdiddler/ci/stage119_native_original_mocks.luau'
+      - 'pdiddler/ci/test_stage119_native_integrity.py'
+      - 'pdiddler/supervised/STAGE119_LASTOFFER_NATIVE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage119-native-lastoffer.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-original-mm2-stage9-native-two-event-readonly:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Fetch immutable source-pinned original MM2 Stage9 parser, native observer and safe iPad layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope-stage119
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 50 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope-stage119/stage9.lua
+          curl -fsSL --retry 3 --max-time 50 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_native_observer.lua" -o /tmp/gingerscope-stage119/native_stage9.lua
+          curl -fsSL --retry 3 --max-time 50 "$base/59d869b7d4d8fbcee3f2709e266b47ffb4a05d78/pdiddler/new_part4/stage100_screen_prompt_overlay.lua" -o /tmp/gingerscope-stage119/geometry.lua
+          test "$(git hash-object /tmp/gingerscope-stage119/stage9.lua)" = '7c84456006bd684dacb0217d0ae092d6d67575a4'
+          test "$(git hash-object /tmp/gingerscope-stage119/native_stage9.lua)" = 'a6338e946467ad738005bc5cb13cd2d2fbc2a2d0'
+          test "$(git hash-object /tmp/gingerscope-stage119/geometry.lua)" = 'e0eac8e039655999bd7bbac1f12da179db7c22ed'
+          test "$(git hash-object pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua)" = 'fba6f02c7287e2afd7ad3ea9e75cc221854a17b9'
+          test "$(git hash-object pdiddler/intelligence_lab/stage118_lastoffer_gui_correlation.lua)" = 'bfabdae261017bac3b591f72c15ca9baa58c5e70'
+          test "$(git hash-object pdiddler/supervised/SUPERVISED_P3_STAGE101_IDENTITY_NATIVE.lua)" = '46cff56b9f58fa8590a275dfd26f46cea0c5c9a6'
+          echo IMMUTABLE_ORIGINAL_STAGE9_PR221_PR222_PR224_SOURCE_PASS
+      - name: Install verified Lune 0.11.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 50 https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip -o "$RUNNER_TEMP/lune.zip"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/lunedist"
+          bin="$(find "$RUNNER_TEMP/lunedist" -type f -name lune -print -quit)"
+          test -n "$bin"
+          install -m 0755 "$bin" "$RUNNER_TEMP/lune"
+      - name: Execute ACTUAL Stage119 runtime and original Stage9 native physical GUI Lune integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_native_original_mocks.luau
+      - name: Python exact frozen source and no-trade/no-server-promotion audit
+        env:
+          STAGE119_STAGE9: /tmp/gingerscope-stage119/stage9.lua
+          STAGE119_STAGE9_NATIVE: /tmp/gingerscope-stage119/native_stage9.lua
+          STAGE119_GEOMETRY: /tmp/gingerscope-stage119/geometry.lua
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_stage119_native_integrity
