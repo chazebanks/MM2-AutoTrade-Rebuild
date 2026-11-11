@@ -1,0 +1,35 @@
+{
+  "schema": "gingerscope-history-index-v1",
+  "coverage": "PARTIAL_NOT_ALL_STAGES_AUDITED",
+  "missingHistoricalAudit": "Full original Stage1-118 and all relevant unmerged PR branch contents have not yet been individually indexed or independently reaudited; read original stage evidence before changing related components.",
+  "entries": [
+    {
+      "stage": 119,
+      "evidenceTier": "CLIENT_ONLY",
+      "summary": "Protected P3/P4 LastOffer two-event iPad client observation passed, no server attribution or completion.",
+      "references": [
+        "pdiddler/supervised/STAGE119_P3_REPLACEMENT_HANDOFF.md",
+        "pdiddler/GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md",
+        "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/226"
+      ]
+    },
+    {
+      "stage": 120,
+      "evidenceTier": "SYNTHETIC_OFFLINE",
+      "summary": "Existing PR106 planner plus PR182 corrected physical-slot guard only exercised offline with synthetic sources.",
+      "references": [
+        "pdiddler/intelligence_lab/STAGE120_CORRECTED_GUARD_PREVIEW_HANDOFF.md",
+        "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/227"
+      ]
+    },
+    {
+      "stage": 121,
+      "evidenceTier": "RESEARCH_ONLY",
+      "summary": "Original source-to-strategy firewall blocked expired Nov9 publisher data; no live verified quote.",
+      "references": [
+        "pdiddler/intelligence_lab/STAGE121_SOURCE_TO_STRATEGY_HANDOFF.md",
+        "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/228"
+      ]
+    }
+  ]
+}

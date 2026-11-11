@@ -1,0 +1,30 @@
+{
+  "schema": "gingerscope-current-state-v1",
+  "sourceCommit": "7216c4db84a5a7c95227ff09fb97b27106f44406",
+  "latestStage": 121,
+  "latestMergedPR": 228,
+  "tradeOutcome": "UNKNOWN",
+  "blockers": [
+    "A genuinely newly published first-party Supreme source version needs independent canonical capture and review; the Nov 9 source expired.",
+    "Completed-trade liquidity remains unverified; postings are not fills.",
+    "Live server-settlement and unique item-instance authentication are not proven for automatic acceptance."
+  ],
+  "nextAction": "Acquire newly published first-party publisher evidence when available and independently verify completed-trade liquidity; do not repeat Stage119 device tests or activate live offer policy.",
+  "authority": {
+    "authorizesTrade": false,
+    "authorizesOffer": false,
+    "authorizesAccept": false,
+    "serverCompletionProven": false,
+    "mayReportProfit": false,
+    "maySendDiscordWebhook": false,
+    "mayUseForStrategyLearning": false,
+    "verifiedMarketQuote": false
+  },
+  "readBeforeCodeChange": [
+    "pdiddler/GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md",
+    "pdiddler/GINGERSCOPE_LATEST_CHECKPOINT.md",
+    "pdiddler/GINGERSCOPE_ONSCREEN_MANUAL_TEST_POLICY.md",
+    "pdiddler/GINGERSCOPE_STRATEGY_AND_RESEARCH_PLAYBOOK.md",
+    "pdiddler/supervised/SUPERVISED_ONE_ITEM_PILOT_HANDOFF.md"
+  ]
+}
