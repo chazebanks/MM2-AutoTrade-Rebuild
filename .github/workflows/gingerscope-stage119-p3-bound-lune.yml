@@ -39,7 +39,7 @@ jobs:
           test "$(git hash-object /tmp/gingerscope-stage220/frozen_coordinator.lua)" = '1d4decbc30378a3f83df7c6b83449c6ac5252899'
           test "$(git hash-object pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua)" = 'fba6f02c7287e2afd7ad3ea9e75cc221854a17b9'
           test "$(git hash-object pdiddler/intelligence_lab/stage118_lastoffer_gui_correlation.lua)" = 'bfabdae261017bac3b591f72c15ca9baa58c5e70'
-          test "$(git hash-object pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua)" = '8668fc51cd662266a12e86770eb7ca146001c6bb'
+          test "$(git hash-object pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua)" = '392aae810e5d7bb76a523264f4fae292453441f9'
           curl -fsSL --retry 3 --max-time 50 "$base/2333718e96ed8be72ff2526822a9ec9086d97a1d/pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua" -o /tmp/gingerscope-stage220/stage119.lua
           test "$(git hash-object /tmp/gingerscope-stage220/stage119.lua)" = '8668fc51cd662266a12e86770eb7ca146001c6bb'
           cmp -s pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua /tmp/gingerscope-stage220/stage119.lua
