@@ -1,0 +1,33 @@
+{
+  "schema": "gingerscope-deleted-duplicate-aliases-v1",
+  "reviewDate": "2026-11-11",
+  "sourceCommit": "32baf12980cf2d5394668f0f728375cf95f2f417",
+  "deletionScope": "IDENTICAL_UNREFERENCED_TEST_ALIASES_ONLY",
+  "preservation": "Original identical bytes remain in retained canonical paths and in immutable source Git commit; historical loads pinned to that commit continue to work.",
+  "deleted": [
+    {
+      "path": "pdiddler/pdiddler3_scanner_test_v5.lua",
+      "canonicalRetained": "pdiddler/pdiddler3_scanner_KNOWN_GOOD_v5.lua",
+      "gitBlob": "e05b3e2e98df9964e084a6b33d5872838cc6fa55"
+    },
+    {
+      "path": "pdiddler/pdiddler3_scanner_test.lua",
+      "canonicalRetained": "pdiddler/pdiddler3_scanner_KNOWN_GOOD_v6.lua",
+      "gitBlob": "56c6e4f7fad40fec63bb9e1334221893bdf53f00"
+    },
+    {
+      "path": "pdiddler/pdiddler3_scanner_test_v6.lua",
+      "canonicalRetained": "pdiddler/pdiddler3_scanner_KNOWN_GOOD_v6.lua",
+      "gitBlob": "56c6e4f7fad40fec63bb9e1334221893bdf53f00"
+    }
+  ],
+  "checks": "GitHub code search showed no live-tree cross-file references to these three exact aliases at review; CI must check current checkout for late references.",
+  "notDeleted": [
+    "pdiddler/pdiddler1_KNOWN_GOOD.lua",
+    "pdiddler/pdiddler2_KNOWN_GOOD.lua",
+    "pdiddler/pdiddler3_outgoing_test_v5.lua",
+    "pdiddler/pdiddler3_scanner_MODULE_v6_3_PURPLE.lua",
+    "pdiddler/pdiddler4_balancer_ROTATING_v2_3_EXTREME_GUARD.lua"
+  ],
+  "nextStep": "Check branch references and old test stacks before other deletions. Do not remove pinned handoffs or script versions without an exact dependency and restore test."
+}
