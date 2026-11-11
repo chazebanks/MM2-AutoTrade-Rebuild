@@ -331,6 +331,8 @@ do
  local runtime=x.run()
  eq(type(runtime),"table","auto native runner instantiated with exact prior picker consent")
  eq(#x.readSources,11,"all original ten frozen modules plus pure auto gate loaded")
+ eq(x.named("WhatToDo").Text:find("AUTO OFFER ONCE",1,true)~=nil,true,
+  "exact one-item automation is visibly disclosed before human ARM")
  eq(x.E.__P3.armCalls,0,"no outgoing P3 before ARM")
  eq(#x.offers,0,"no automatic offer on loading")
  eq(x.offerButton(),nil,"no old post-trade manual OFFER button")
@@ -419,6 +421,23 @@ do
  local r=serde.decode("json",x.copied[#x.copied])
  eq(r.oneItemOfferStatus,"STOPPED","wrong client GUI never counted")
  eq(r.clientVisibleAddedSlots,0,"bad item no confirmed slot")
+end
+do
+ local x=fakeEnv()
+ x.run();x.armButton().Activated:Fire();attach(x)
+ x.E.PDIDDLER_SUPERVISED_P3_ONE_ITEM_AUTO_NATIVE.approvedRawKey="DifferentWeapon"
+ x.advance(0.2);x.E.__WATCH.tick()
+ eq(#x.offers,0,"mutated selected getgenv raw item cannot redirect original preapproval")
+end
+do
+ local x=fakeEnv()
+ x.run();x.armButton().Activated:Fire();attach(x)
+ x.E.PDIDDLER_SUPERVISED_P3_ONE_ITEM_AUTO_NATIVE.autoConsent.altUserId=99
+ x.advance(0.2);x.E.__WATCH.tick()
+ -- The pure gate has already frozen the first exact ALT ID; changes to
+ -- the public autoConsent field cannot grant a different account.
+ eq(#x.offers,1,"mutating a discarded consent table cannot change frozen ALT authority")
+ eq(x.offers[1][1],"Iceblaster","frozen originally approved raw key")
 end
 for _,opts in ipairs({
  {invalidPlace=true},{invalidConfig=true},{ownerConflict=true},
