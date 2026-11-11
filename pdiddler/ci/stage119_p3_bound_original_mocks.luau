@@ -221,13 +221,13 @@ local function fakeEnv(options)
    stage119LastOfferReadOnly=true,
  }}
  if options.invalidConfig then
-  E.PDIDDLER_P3_STAGE101_IDENTITY_NATIVE.enableNativeSupervisor=false
+  E.PDIDDLER_P3_STAGE119_LASTOFFER_NATIVE.enableNativeSupervisor=false
  end
  if options.noAltTest then
-  E.PDIDDLER_P3_STAGE101_IDENTITY_NATIVE.altOnlyTest=false
+  E.PDIDDLER_P3_STAGE119_LASTOFFER_NATIVE.altOnlyTest=false
  end
  if options.badTarget then
-  E.PDIDDLER_P3_STAGE101_IDENTITY_NATIVE.targetName="MissingAlt"
+  E.PDIDDLER_P3_STAGE119_LASTOFFER_NATIVE.targetName="MissingAlt"
  end
  if options.ownerConflict then E.PDIDDLER_PART4_SESSION=99 end
  if options.pilotConflict then
