@@ -1,0 +1,47 @@
+name: Gingerscope historical LastOffer client-only causality audit
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua'
+      - 'pdiddler/tests/test_trade_lastoffer_client_audit.lua'
+      - 'pdiddler/ci/test_lastoffer_client_integrity.py'
+      - 'pdiddler/intelligence_lab/LASTOFFER_CLIENT_CAUSALITY_HANDOFF.md'
+      - '.github/workflows/gingerscope-lastoffer-client-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-historical-client-only-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Verify immutable archived MM2 client LastOffer call sites (NOT current game authority)
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive='https://raw.githubusercontent.com/tlredz/decompiledGames/0552a0f3502217a1cf89df66be9bd0f153e47fa4/murder-mystery-2/v1456/ReplicatedStorage/Modules/TradeModule.lua'
+          curl -fsSL --retry 3 --max-time 45 "$archive" -o "$RUNNER_TEMP/archived_TradeModule.lua"
+          test "$(git hash-object "$RUNNER_TEMP/archived_TradeModule.lua")" = '2785b13c0deb4ddd37942a5e85a5f5c35897d0f6'
+          grep -Fq 'lastOffer = data.LastOffer' "$RUNNER_TEMP/archived_TradeModule.lua"
+          grep -Fq 'trade.AcceptTrade:FireServer(game.PlaceId * 3, lastOffer)' "$RUNNER_TEMP/archived_TradeModule.lua"
+          echo ARCHIVED_LASTOFFER_IS_CLIENT_ACCEPT_ARGUMENT_NOT_SERVER_PROOF
+      - name: Compile and test research-only real Lua plus 1000 synthetic adversarial sequences
+        shell: bash
+        run: |
+          set -euo pipefail
+          luac5.4 -p pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua
+          luac5.4 -p pdiddler/tests/test_trade_lastoffer_client_audit.lua
+          LASTOFFER_MODULE=pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua lua5.4 pdiddler/tests/test_trade_lastoffer_client_audit.lua
+      - name: Python check exact original PR221 native code and reject live trade authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_lastoffer_client_integrity
