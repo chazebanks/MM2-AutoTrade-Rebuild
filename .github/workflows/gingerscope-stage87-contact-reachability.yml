@@ -1,0 +1,70 @@
+name: Gingerscope Stage87 P3 contact readiness without price authority
+on:
+  push:
+    branches:
+      - fix/gingerscope-stage87-contact-reachability-unpriced
+    paths:
+      - 'pdiddler/new_part4/P3_ELIGIBILITY_NO_LEGACY_PROFIT.lua'
+      - 'pdiddler/pdiddler3_outgoing_eligibility_v2_SCANNER_EVIDENCE.lua'
+      - 'pdiddler/tests/test_stage87_contact_reachability.lua'
+      - 'pdiddler/intelligence_lab/STAGE87_CONTACT_READINESS_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage87-contact-reachability.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/P3_ELIGIBILITY_NO_LEGACY_PROFIT.lua'
+      - 'pdiddler/pdiddler3_outgoing_eligibility_v2_SCANNER_EVIDENCE.lua'
+      - 'pdiddler/tests/test_stage87_contact_reachability.lua'
+      - 'pdiddler/intelligence_lab/STAGE87_CONTACT_READINESS_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage87-contact-reachability.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-unpriced-contact-path:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Execute ACTUAL Lua5.4 P3 + outgoing evidence with no fake trading API
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+          luac5.4 -p pdiddler/new_part4/P3_ELIGIBILITY_NO_LEGACY_PROFIT.lua
+          luac5.4 -p pdiddler/pdiddler3_outgoing_eligibility_v2_SCANNER_EVIDENCE.lua
+          luac5.4 -p pdiddler/tests/test_stage87_contact_reachability.lua
+          lua5.4 pdiddler/tests/test_stage87_contact_reachability.lua
+      - name: Ensure original P4 permit/old priced gate not quietly changed
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope87
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/7a289d62ef3f0be0a299506eb451c57435493be3/pdiddler/new_part4/P3_ELIGIBILITY_NO_LEGACY_PROFIT.lua' \
+            -o /tmp/gingerscope87/old_p3.lua
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/7a289d62ef3f0be0a299506eb451c57435493be3/pdiddler/new_part4/p4_strategy_permit.lua' \
+            -o /tmp/gingerscope87/p4_strategy_permit.lua
+          test "$(git hash-object /tmp/gingerscope87/old_p3.lua)" = 'b781beb27743788c8d3f522d47dd8116199add54'
+          test "$(git hash-object /tmp/gingerscope87/p4_strategy_permit.lua)" = '9316e344b9d81c2eb5c7514181ca1c80ea9155f9'
+          python3 - <<'PY'
+          from pathlib import Path
+          original=Path('/tmp/gingerscope87/old_p3.lua').read_text()
+          new=Path('pdiddler/new_part4/P3_ELIGIBILITY_NO_LEGACY_PROFIT.lua').read_text()
+          old_priced=original.split('return M\n')[0]
+          assert new.startswith(old_priced), 'Legacy priced validator was altered'
+          assert 'function M.evaluateContact(own,opponent)' in new
+          assert 'authorizesTrade=false' in new
+          assert 'authorizesAccept=false' in new
+          controller=Path('pdiddler/pdiddler3_outgoing_eligibility_v2_SCANNER_EVIDENCE.lua').read_text()
+          assert 'o.feasibility.validateContactInventory' in controller
+          assert 'o.feasibility.evaluateContact' in controller
+          assert 'validateInventory(rec.inv' not in controller
+          assert 'not fresh()' not in controller
+          for code in (new,controller):
+              for forbidden in (':FireServer(', ':InvokeServer(', ':HttpGet(', 'PostAsync(', 'AcceptTrade', 'setclipboard('):
+                  assert forbidden not in code, forbidden
+          print('STAGE87_SOURCE_BOUNDARY_OK old priced contract unchanged, P4 untouched')
+          PY
