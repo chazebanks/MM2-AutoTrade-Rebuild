@@ -1,0 +1,35 @@
+name: Stage62 conservative AcceptTrade client evidence gate
+on:
+  pull_request:
+    paths:
+      - 'scripts/stage62_client_accept_evidence.py'
+      - 'pdiddler/intelligence_lab/test_stage62_client_accept_evidence.py'
+      - 'pdiddler/intelligence_lab/STAGE62_CLIENT_SIGNAL_EVIDENCE_GATE.md'
+      - '.github/workflows/mm2-stage62-client-evidence-gate.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage62-client-event-evidence-gate
+    paths:
+      - 'scripts/stage62_client_accept_evidence.py'
+      - 'pdiddler/intelligence_lab/test_stage62_client_accept_evidence.py'
+      - 'pdiddler/intelligence_lab/STAGE62_CLIENT_SIGNAL_EVIDENCE_GATE.md'
+      - '.github/workflows/mm2-stage62-client-evidence-gate.yml'
+permissions:
+  contents: read
+jobs:
+  conservative-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Compile and exercise native-shaped Stage61 evidence
+        run: |
+          set -euo pipefail
+          python3 -m compileall -q scripts/stage62_client_accept_evidence.py
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage62*.py'
+      - name: Inherited intelligence regressions
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
