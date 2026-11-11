@@ -1,5 +1,14 @@
 # READ FIRST — CANONICAL NOVEMBER 10, 2026 NEXT-CONVERSATION HANDOFF
 
+## CURRENT VERIFIED — native P3 ALT-only ARM→P4 GUI→resume PASS; PR215 MERGED
+
+User's original-MM2 iPad Delta **PR214 native report**: `p3ArmObservedClient=true`, `clientTradeWindowObserved=true`, `clientResumeObserved=true`, `lastObservedStatus="P3_ROTATING"`, `status="STOPPED"`, `reason="OPERATOR_STOPPED"`; every offer/Accept/settlement/profit/Discord authority flag false and `tradeOutcome="UNKNOWN"`. The scoped P3 contact→P4 window→manual close→P3 resume client integration is COMPLETED; **do not request repetition**. This is not server-authenticated request delivery, ownership, settlement, pricing, or autonomous trading.
+
+**[PR215 merged](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/215)** at main `9138751b5a57415939ffa1618ac57811d7c8ec7b`; exact reviewed source head `92a1a1335b8b84e7016865c4891e77c86795c319`; **6/6 exact-head CI green**, including original-source Lune P3/P4, guarded offer tests, P3 runner mocks, and new negative cases. Adds **only** `supervised_real_p3_rotation_handoff.lua::controller.currentBoundReadOnly()` per-trade revocable *read-only* `capture()` facade. Every capture rechecks the original exact GUI root, partner, epoch, paused P3, acceptance state and client-only trust flags; stale/unsafe lease permanently revokes. No `offerItem`, request, Accept, decline, resume or trading permission exported. Existing pinned PR214 native runner STILL loads original PR207 coordinator and has not been updated or Delta-tested with this new method. New full source/handoff: `pdiddler/supervised/SUPERVISED_P3_BOUND_CLIENT_LEASE_HANDOFF.md`.
+
+**Next distinct offline engineering issue:** Separate ALT-only, explicit on-screen human approval for actually owned non-Gingerscope 1–4-item guarded Part4 manual plan, using this read-only real P3 lease, original protected IO and existing four-slot planner. No offer until explicit separate operator approval; no old +15, highest opener, auto-final Accept, price/profit/Discord. CI and on-screen collision/replay/identity negative tests FIRST; only then new native iPad action. Do not repeat closed PR206 two-slot or PR214 P3 tests.
+
+
 ## NOV10 LATEST MERGED: REAL ALT-ONLY NATIVE PART3 ARM RUNNER — PR211 + PR213 + PR214
 
 **Actual user manual device proof ALREADY COMPLETE**: two approved raw OfferItem sends, two exact client-visible physically distinct slots in original MM2 on iPad Delta, safe nonoverlapping purple screen guide and zero layout failures. Last user output was `status=CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED`, `offerAttempts=2`, `clientVisibleAddedSlots=2`, `tradeOutcome=UNKNOWN`; this is NOT authenticated ownership/settlement/profit. Do NOT repeat one-/two-item pilot or return to Stage100/106/116 diagnostics.
