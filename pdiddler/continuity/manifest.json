@@ -1,7 +1,7 @@
 {
   "schema": "gingerscope-continuity-manifest-v1",
   "repository": "chazebanks/MM2-AutoTrade-Rebuild",
-  "baselineCommit": "5fe40041462fcc52ba34cd5b1377a8e159aa26fc",
+  "baselineCommit": "f27002118363a544321bb7f0f1af00c2f2124d1a",
   "sourceBlobs": {
     "pdiddler/GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md": "47a546cc5ec8e7b58b6bcafa1697be0acec112e0",
     "pdiddler/GINGERSCOPE_LATEST_CHECKPOINT.md": "c503b3a2eb3a97ef417813fd83105fccdb70de35",
@@ -9,14 +9,18 @@
     "pdiddler/GINGERSCOPE_ONSCREEN_MANUAL_TEST_POLICY.md": "212b60d47d62e0ede704cf554f6b9dcb5976ba97",
     "pdiddler/supervised/SUPERVISED_ONE_ITEM_PILOT_HANDOFF.md": "5f5b39d1a454285484fcbac845752c27a748efda",
     "pdiddler/intelligence_lab/STAGE121_SOURCE_TO_STRATEGY_HANDOFF.md": "ee3dadaa50919bf029205a2679bbbd11064e5ae6",
-    "pdiddler/RELEASE_READINESS.json": "dea56cd08eb83dec8c803a19ef3b2804e326fef2",
-    "pdiddler/START_HERE.md": "0e3319a81ab9828ed538142848dcb465d336375b",
+    "pdiddler/RELEASE_READINESS.json": "3fcefdcb9349e4dd1f1eb8e2e09c20e938a91dca",
+    "pdiddler/START_HERE.md": "e99b244bc076729c6f84a514f462571d2bd0a726",
     "pdiddler/strategy/growth_policy.json": "cc8caa119af6faf160cff94729ed1cf49395dd4e",
-    "pdiddler/strategy/GROWTH_POLICY_DECISION_2026_11_11.md": "fc8bb0d9bd708b59f705bdd1a12f1fc2d781a6aa"
+    "pdiddler/strategy/GROWTH_POLICY_DECISION_2026_11_11.md": "fc8bb0d9bd708b59f705bdd1a12f1fc2d781a6aa",
+    "pdiddler/NEXT_CONVERSATION_HANDOFF_2026_11_11.md": "cef055d49b57fce9313d14a561fe45fc651e1b1a",
+    "pdiddler/continuity/NEXT_WORKPLAN_2026_11_11.json": "41a33e273411e1e2a7f49f19d38c6443b6851bcc",
+    "pdiddler/continuity/LEGACY_CLEANUP_AUDIT_2026_11_11.md": "e3581abeb6d86c7cefcc5fb5072ddbdae53be443",
+    "pdiddler/continuity/README.md": "b36cc18765790972042c9a1a66ede112e019732b"
   },
   "controlledBlobs": {
     "pdiddler/continuity/policy.json": "af1f7b4e54b454e002ea74d8b1ffb0fac88dea1b",
-    "pdiddler/continuity/current_state.json": "9c468e80043bb24e508d2aa78c4ec5b711ad9447",
+    "pdiddler/continuity/current_state.json": "98dcd675f2f12bf0cb71e984ceabe0cf4495a862",
     "pdiddler/continuity/history_index.json": "c96d9d95df6e7e32a4eeee401c5b83ecafa28f8f",
     "pdiddler/continuity/public_pr_catalog.json": "0ba23db3cabedcdb68e3c620b3d573c404088b04"
   }

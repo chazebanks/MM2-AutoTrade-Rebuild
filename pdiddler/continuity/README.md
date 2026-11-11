@@ -1,6 +1,6 @@
 # Gingerscope Black Box / Execution Manager / Memory Recovery (v1)
 
-**Start every new conversation at this path.** This directory is a **metadata-only control plane**. It does not change MM2 scripts, perform trades, authenticate server settlement, contact Discord, auto-retry a job, or provide automatic iPad runtime uploads.
+**Start new conversations at `pdiddler/START_HERE.md`, then the pinned `pdiddler/NEXT_CONVERSATION_HANDOFF_2026_11_11.md` and this continuity contract.** This directory is a **metadata-only control plane**. It does not change MM2 scripts, perform trades, authenticate server settlement, contact Discord, auto-retry a job, or provide automatic iPad runtime uploads.
 
 ## Startup contract
 

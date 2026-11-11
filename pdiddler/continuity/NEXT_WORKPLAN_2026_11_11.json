@@ -1,0 +1,157 @@
+{
+  "schema": "gingerscope-sequential-workplan-v1",
+  "asOf": "2026-11-11",
+  "reviewedMainCommit": "f27002118363a544321bb7f0f1af00c2f2124d1a",
+  "latestReviewedMergedPR": 233,
+  "latestProvenStage": 121,
+  "scope": "CLEANUP_PLANNING_AND_NEXT_CONVERSATION_HANDOFF_ONLY",
+  "currentTask": "P1",
+  "executionPolicy": "STRICTLY_SEQUENTIAL_ONE_DISTINCT_ISSUE_AT_A_TIME",
+  "noLiveScriptChangesAuthorized": true,
+  "tradeActionsAuthorized": false,
+  "automaticAcceptAuthorized": false,
+  "lossTradingAuthorized": false,
+  "learningEligibleVerifiedRealTradeRows": 0,
+  "privateArchiveAggregate": {
+    "total": 50,
+    "testExcluded": 30,
+    "unverifiedClaims": 17,
+    "quarantined": 3
+  },
+  "permanentRules": [
+    "Never offer Gingerscope outbound",
+    "Do not restore blanket +15",
+    "Do not force highest-valued opener",
+    "Do not auto-negotiate chat",
+    "Four physical slots, distinct from stacked copies",
+    "Unknown market/session/settlement remains blocked"
+  ],
+  "historicalCoverage": "PARTIAL_NOT_ALL_121_STAGES_INDIVIDUALLY_AUDITED",
+  "phases": [
+    {
+      "id": "P1",
+      "name": "Authenticate fresh first-party market source",
+      "status": "NEXT_RESEARCH_ONLY",
+      "needs": [
+        "Stage111 original collector, Stage110/104/69 raw provenance",
+        "Three canonical first-party source pages",
+        "Independent publication date/version review"
+      ],
+      "deliverables": [
+        "Raw HTTPS archive hashes and first-party publication receipt",
+        "Price-source expiry and consistency report",
+        "Explicit quarantine if any source is stale/incomplete"
+      ],
+      "acceptance": [
+        "Original pinned source chain executed or independently verified with actual original code",
+        "All three canonical page URL/status/body digests and publisher metadata agree",
+        "No publication time inferred from crawl date; no authority flags enabled"
+      ],
+      "changesAllowed": "RESEARCH_ONLY_NO_TRADER"
+    },
+    {
+      "id": "P2",
+      "name": "Verify item mapping, stacks and candidate semantics",
+      "status": "BLOCKED_BY_P1_AND_INDEPENDENT_ITEM_EVIDENCE",
+      "needs": [
+        "P1 source authenticity",
+        "Actual raw key/checker year/variant provenance",
+        "PR106 vs PR182 distinct constraints"
+      ],
+      "deliverables": [
+        "Verified crosswalk coverage and explicit unknown mappings",
+        "Isolated four-physical-slot versus four-total-copy planner regression plan"
+      ],
+      "acceptance": [
+        "Unknown variants or quantities do not receive current prices",
+        "Stack-copy planner limitation addressed in a separate reviewed source/test change when authorized",
+        "Protected Gingerscope outbound rejected"
+      ],
+      "changesAllowed": "FUTURE_OFFLINE_PLANNER_AFTER_REVIEW"
+    },
+    {
+      "id": "P3",
+      "name": "Improve growth and bilateral attractiveness offline",
+      "status": "PLANNED_NOT_STARTED",
+      "needs": [
+        "Authenticated item/value inputs",
+        "Independent demand, actual exit-liquidity evidence or UNKNOWN labels",
+        "P2 identity binding"
+      ],
+      "deliverables": [
+        "Deterministic upgrade, downgrade, sidegrade and target-purchasing-power scorecard",
+        "Separate our-benefit and their-appeal estimates with confidence",
+        "Compare no-loss alternatives before 0–3% hypothetical quality losses"
+      ],
+      "acceptance": [
+        "Reject concentration/unstable/weak bundle hidden losses",
+        "Never turn synthetic demand scores into measured acceptance odds",
+        "Regression on offer revisions, source expiry and change invalidation"
+      ],
+      "changesAllowed": "FUTURE_OFFLINE_ONLY"
+    },
+    {
+      "id": "P4",
+      "name": "Build private verified-outcome learning dataset",
+      "status": "BLOCKED_NO_VERIFIED_COMPLETED_TRADE_LABELS",
+      "needs": [
+        "Private repo historical self-report quarantine",
+        "Independent settlement corroboration and exact session/item association",
+        "Attempt and rejection denominators"
+      ],
+      "deliverables": [
+        "Redacted private schema for proposals and outcomes",
+        "Chronological train/holdout evaluation plan",
+        "Uncertainty/selection-bias reports and opt-in rollout"
+      ],
+      "acceptance": [
+        "17 historical webhook claims and 30 test records never become success labels",
+        "UNKNOWN/CANCELED/DECLINED are distinct; no fabricated completed trade",
+        "Any future model change evaluated on unseen time windows before deployment"
+      ],
+      "changesAllowed": "PRIVATE_RESEARCH_ONLY"
+    },
+    {
+      "id": "P5",
+      "name": "Integrate observational shadow decisions",
+      "status": "BLOCKED_BY_P2_P3_P4_AND_SAFE_EVIDENCE",
+      "needs": [
+        "Existing verified P3/P4 observer and tested snapshot contracts",
+        "Source and session identity checks",
+        "Deterministic planner/learning boundaries"
+      ],
+      "deliverables": [
+        "Read-only actual-module shadow decision traces",
+        "No physical action runtime and interruption recovery matrix",
+        "Consenting supervised test protocol"
+      ],
+      "acceptance": [
+        "No live offer/Accept/Decline/teleport during shadow runs",
+        "Changed offer or stale source yields REPLAN_REQUIRED/BLOCKED",
+        "No re-running closed Stage119 device experiments without a distinct new question"
+      ],
+      "changesAllowed": "SEPARATELY_REVIEWED_TEST_PLAN"
+    },
+    {
+      "id": "P6",
+      "name": "Consider unattended operation only after verified gates",
+      "status": "BLOCKED_NINE_RELEASE_GATES",
+      "needs": [
+        "All nine RELEASE_READINESS.json gates verified",
+        "Proven independent settlement and state freshness",
+        "Separately approved tested risk budget and deployment"
+      ],
+      "deliverables": [
+        "Exact CI, user-device and live-safety acceptance evidence",
+        "Emergency stop and fail-closed behavior; no duplicate side effects",
+        "Go/no-go release report"
+      ],
+      "acceptance": [
+        "Gingerscope never outbound; automatic Accept cannot activate with UNKNOWN state",
+        "No listing or client-only observation used to assert profit or completed transaction",
+        "Explicit separate approval before final Accept or value-loss policy deployment"
+      ],
+      "changesAllowed": "NOT_AUTHORIZED_NOW"
+    }
+  ]
+}
