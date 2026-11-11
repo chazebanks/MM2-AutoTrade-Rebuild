@@ -290,6 +290,7 @@ local function fakeEnv(options)
  local enums={ZIndexBehavior={Sibling="Sibling"},
   TextXAlignment={Left="Left"},Font={GothamBold="GothamBold"}}
  local copied={}
+ local taskFns={}
  local env={game=game,getgenv=function()return E end,
   Instance=instance,Enum=enums,
   UDim={new=function(...)return{...}end},
@@ -297,7 +298,7 @@ local function fakeEnv(options)
   Color3={fromRGB=function(...)return{...}end},
   setclipboard=function(s)copied[#copied+1]=s end,
   print=function()end,warn=function()end,
-  task={spawn=function()end,wait=function()end},
+  task={spawn=function(fn)taskFns[#taskFns+1]=fn end,wait=function()end},
   os={clock=function()return clock end},
   require=function(mod)
    if mod==sync then return {Weapons=syncWeapons}end
@@ -365,7 +366,18 @@ local function fakeEnv(options)
   setTime=function(t)clock=t end,now=function()return clock end,
   update=update,addWeapon=addWeapon,removeAltWeapon=removeAltWeapon,currentEvent=currentEvent,
   partner=partner,our=ours,their=theirs,remote=remote,
-  named=named}
+  named=named,
+  -- Run exactly one tick of the *real* post-positive background geometry
+  -- coroutine; the test intentionally breaks at the first task.wait.
+  resumeFinalPanelOnce=function()
+    local fn=taskFns[#taskFns]
+    assert(type(fn)=="function","terminal panel refresh task absent")
+    local original=env.task.wait
+    env.task.wait=function()error("TEST_STOP_AFTER_ONE_TERMINAL_GEOMETRY_POLL")end
+    local ok,why=pcall(fn)
+    env.task.wait=original
+    return ok,why
+  end}
 end
 
 -- This suite uses the EXACT ORIGINAL PR221 P3/TradeIO/coordinator/boot and
@@ -402,7 +414,7 @@ local function start(x)
  eq(x.stopButton().Visible,true,"STOP/COPY remains visible in stage 3")
  return runtime
 end
-local function conclude(x,lastToken)
+local function conclude(x,lastToken,holdOpen)
  x.update.OnClientEvent:Fire(x.currentEvent("ADD",12))
  x.addWeapon("ALT","Immortal","x2",true)
  x.setTime(100.3);x.E.__WATCH.tick()
@@ -431,6 +443,7 @@ local function conclude(x,lastToken)
  eq(#x.offers,0,"no OfferItem FireServer calls")
  eq(x.E.__P3.stopped,true,"P3 stopped on one bounded client-only result")
  eq(x.stopButton().Visible,true,"STOP/COPY still shown at positive result")
+ if holdOpen then return r end
  x.stopButton().Activated:Fire()
  local decoded=serde.decode("json",x.copied[#x.copied])
  eq(decoded.clientLastOfferStatus,"CLIENT_TWO_EVENT_LASTOFFER_GUI_UNATTRIBUTED",
@@ -527,6 +540,36 @@ local function overlaps(panel,trade)
  local t,w=trade.AbsolutePosition,trade.AbsoluteSize
  return p[1]<t.X+w.X+12 and p[1]+z[1]>t.X-12 and
   p[2]<t.Y+w.Y+12 and p[2]+z[2]>t.Y-12
+end
+-- After the positive client observation the original P3 watchdog stops,
+-- but the purple STOP/COPY panel must *still* re-evaluate physical geometry.
+do
+ local x=fakeEnv()
+ start(x)
+ conclude(x,13,true)
+ x.trade.AbsolutePosition=vec(0,130)
+ x.trade.AbsoluteSize=vec(460,460)
+ local ok,why=x.resumeFinalPanelOnce()
+ eq(ok,false,"test intentionally halts the background loop after one geometry refresh")
+ local p=x.named("LiveStatus")
+ eq(p.Visible,true,"terminal STOP/COPY remains on-screen")
+ eq(overlaps(p,x.trade),false,
+    "terminal moving TradeGUI must not be covered by STOP/COPY")
+ eq(x.stopButton().Visible,true,"terminal STOP stays clickable")
+ x.stopButton().Activated:Fire()
+end
+do
+ local x=fakeEnv()
+ start(x)
+ conclude(x,13,true)
+ x.trade.AbsolutePosition=vec(0,0)
+ x.trade.AbsoluteSize=vec(1024,768)
+ x.resumeFinalPanelOnce()
+ eq(x.named("LiveStatus").Visible,false,
+    "no safe region after PASS must hide instructions rather than cover Accept/Decline")
+ local last=x.copied[#x.copied]
+ eq(last:find("FINAL_GUIDE_NO_SAFE_SPACE",1,true)~=nil,true,
+    "unsafe post-pass geometry preserves sanitized failure evidence")
 end
 for _,geo in ipairs({
  {vw=1024,vh=768,x=520,y=155,w=380,h=460},
