@@ -1,0 +1,87 @@
+name: Gingerscope original MM2 Stage101 real P3/P4 native read-only identity
+on:
+  push:
+    branches:
+      - feature/p3p4-stage101-actual-native-readonly-adapter
+    paths:
+      - 'pdiddler/supervised/SUPERVISED_P3_STAGE101_IDENTITY_NATIVE.lua'
+      - 'pdiddler/supervised/SUPERVISED_P3_STAGE101_READONLY_START.lua'
+      - 'pdiddler/supervised/supervised_p3_p4_stage101_identity_witness.lua'
+      - 'pdiddler/ci/supervised_p3_stage101_native_runner_mocks.luau'
+      - 'pdiddler/ci/supervised_p3_p4_stage101_identity_witness_tests.lua'
+      - 'pdiddler/ci/check_p3_stage101_native_integrity.py'
+      - '.github/workflows/gingerscope-p3-stage101-native-identity.yml'
+      - 'pdiddler/supervised/SUPERVISED_P3_STAGE101_NATIVE_HANDOFF.md'
+  pull_request:
+    paths:
+      - 'pdiddler/supervised/SUPERVISED_P3_STAGE101_IDENTITY_NATIVE.lua'
+      - 'pdiddler/supervised/SUPERVISED_P3_STAGE101_READONLY_START.lua'
+      - 'pdiddler/supervised/supervised_p3_p4_stage101_identity_witness.lua'
+      - 'pdiddler/ci/supervised_p3_stage101_native_runner_mocks.luau'
+      - 'pdiddler/ci/supervised_p3_p4_stage101_identity_witness_tests.lua'
+      - 'pdiddler/ci/check_p3_stage101_native_integrity.py'
+      - '.github/workflows/gingerscope-p3-stage101-native-identity.yml'
+      - 'pdiddler/supervised/SUPERVISED_P3_STAGE101_NATIVE_HANDOFF.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-mm2-native-candidate-identity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install checksum-pinned Lune v0.11.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 50 https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip -o "$RUNNER_TEMP/lune.zip"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/dist"
+          f="$(find "$RUNNER_TEMP/dist" -name lune -type f -print -quit)"
+          test -n "$f"
+          install -m 0755 "$f" "$RUNNER_TEMP/lune"
+      - name: Install Lua 5.4
+        shell: bash
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Fetch immutable original Stage101 game-raw matcher, original Stage9 physical capture/contract, Stage83 names
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope-stage220
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/15f762a27a968373ed82809345f1869e1f688b26/pdiddler/intelligence_lab/stage101_multiweapon_raw_key_match.lua" -o /tmp/gingerscope-stage220/stage101.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope-stage220/stage9.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_native_observer.lua" -o /tmp/gingerscope-stage220/native_stage9.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua" -o /tmp/gingerscope-stage220/stage83.lua
+          test "$(git hash-object /tmp/gingerscope-stage220/stage101.lua)" = 137585d778c3c08b8b6960013fa34a7b3fb7b463
+          test "$(git hash-object /tmp/gingerscope-stage220/stage9.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          test "$(git hash-object /tmp/gingerscope-stage220/native_stage9.lua)" = a6338e946467ad738005bc5cb13cd2d2fbc2a2d0
+          test "$(git hash-object /tmp/gingerscope-stage220/stage83.lua)" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          echo ORIGINAL_ALL_FOUR_SOURCE_GIT_BLOBS_VERIFIED
+      - name: Test native actual P3 coordinator + protected IO + frozen Stage9 & Stage101
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_stage101_native_runner_mocks.luau
+      - name: Test refreshed protected source-bound witness with 45s manual window
+        env:
+          STAGE117_WITNESS: pdiddler/supervised/supervised_p3_p4_stage101_identity_witness.lua
+          STAGE117_STAGE101: /tmp/gingerscope-stage220/stage101.lua
+          STAGE117_STAGE9: /tmp/gingerscope-stage220/stage9.lua
+          STAGE117_STAGE83: /tmp/gingerscope-stage220/stage83.lua
+        shell: bash
+        run: |
+          set -euo pipefail
+          luac5.4 -p pdiddler/supervised/supervised_p3_p4_stage101_identity_witness.lua
+          lua5.4 pdiddler/ci/supervised_p3_p4_stage101_identity_witness_tests.lua
+      - name: Enforce byte-identical historical live P3 and offer runners, read-only client report
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.check_p3_stage101_native_integrity
+          python3 -m unittest -v pdiddler.ci.check_p3_p4_stage101_identity_witness
