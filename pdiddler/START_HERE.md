@@ -1,5 +1,9 @@
 # Gingerscope — compact working entrypoint
 
+## NOV 11 2026 — VERIFIED PLAN/HANDOFF ENTRYPOINT
+
+For the **next conversation**, read `pdiddler/NEXT_CONVERSATION_HANDOFF_2026_11_11.md`, `pdiddler/continuity/NEXT_WORKPLAN_2026_11_11.json`, and `pdiddler/continuity/LEGACY_CLEANUP_AUDIT_2026_11_11.md` after the continuity `verify`/`recover` gate. This is the **planning-only** update anchored at reviewed main `f27002118363a544321bb7f0f1af00c2f2124d1a`. No Part3/Part4/Delta, gameplay, market-priced trading or automatic final Accept code was changed. Check GitHub's current HEAD before assuming this PR is merged. Continue exactly one distinct task: independently verify a genuinely new first-party publisher source version with original Stage111→110→104→69 raw provenance. Keep market, trade, learning and settlement authority disabled until separately proven. Long-term growth/attractiveness, one-side-versus-partner appeal, learner verification and conditional listed-value-loss direction remain intact.
+
 **Purpose:** get the current verified state and task-specific source evidence without preloading megabytes of repeated handoffs. This is an index, not a replacement for source records.
 
 ## The required first checks

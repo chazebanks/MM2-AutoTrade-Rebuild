@@ -1,0 +1,39 @@
+name: Gingerscope next-conversation plan integrity (docs only)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/NEXT_CONVERSATION_HANDOFF_2026_11_11.md'
+      - 'pdiddler/continuity/NEXT_WORKPLAN_2026_11_11.json'
+      - 'pdiddler/continuity/LEGACY_CLEANUP_AUDIT_2026_11_11.md'
+      - 'pdiddler/START_HERE.md'
+      - 'pdiddler/continuity/README.md'
+      - 'pdiddler/continuity/current_state.json'
+      - 'pdiddler/continuity/manifest.json'
+      - 'pdiddler/RELEASE_READINESS.json'
+      - 'pdiddler/ci/test_next_conversation_handoff.py'
+      - '.github/workflows/gingerscope-next-conversation-handoff.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  handoff-integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify source-pinned continuation and no Lua/Part4 changes
+        run: |
+          python3 -m unittest pdiddler.ci.test_next_conversation_handoff -v
+      - name: Run source manifests and fail-closed recovery
+        run: |
+          python3 -m pdiddler.continuity.manager verify
+          python3 -m pdiddler.continuity.manager recover
+      - name: Preserve previously approved growth policy denials
+        run: |
+          python3 -m unittest pdiddler.ci.test_growth_policy_decision pdiddler.ci.test_release_readiness -v

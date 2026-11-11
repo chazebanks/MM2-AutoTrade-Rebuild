@@ -29,7 +29,12 @@ class ReleaseReadinessTests(unittest.TestCase):
         p=get("pdiddler/RELEASE_READINESS.json")
         state=get("pdiddler/continuity/current_state.json")
         manifest=get("pdiddler/continuity/manifest.json")
-        self.assertEqual(state["latestMergedPR"],232)
+        self.assertGreaterEqual(state["latestMergedPR"], 232)
+        milestones=state.get("integratedDevelopmentMilestones", [])
+        reviewed=[entry["pr"] for entry in milestones]
+        self.assertTrue(reviewed)
+        self.assertEqual(reviewed, sorted(set(reviewed)))
+        self.assertEqual(state["latestMergedPR"], reviewed[-1])
         self.assertEqual(state["sourceCommit"],p["checkpointSourceCommit"])
         self.assertEqual(manifest["baselineCommit"],state["sourceCommit"])
         self.assertEqual(state["tradeOutcome"],"UNKNOWN")
