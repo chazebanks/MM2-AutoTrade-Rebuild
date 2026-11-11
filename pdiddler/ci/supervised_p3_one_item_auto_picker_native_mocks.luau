@@ -205,7 +205,7 @@ do
  eq(#x.sources,2,"choosing item STILL does not start P3")
  x.named("ConfirmOwnedOne").Activated:Fire()
  eq(#x.sources,3,"one downstream immutable runner loads after physical selection confirm")
- eq(x.sources[3]:find("d76183cbeca4ec696ba2fe2ca20c01b437461aaf",1,true)~=nil,
+ eq(x.sources[3]:find("182255295eafcd28102e429cc377d06c8f510c1b",1,true)~=nil,
   true,"tested PR216 runner exact SHA source loaded")
  local cfg=x.gen.PDIDDLER_SUPERVISED_P3_ONE_ITEM_AUTO_NATIVE
  eq(type(cfg),"table","exact approved selection sent to original runner")
