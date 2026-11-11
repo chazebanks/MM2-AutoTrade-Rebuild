@@ -46,6 +46,16 @@ python3 -m pdiddler.continuity.manager event-save \
 
 An event requires exactly stage, status, reason, clientCallbacks, guiTransitions, scriptOffers, scriptAccepts, scriptDeclines, tradeOutcome. All numeric counters are nonnegative integers; reason is an uppercase code; tradeOutcome must be UNKNOWN. Exact-id duplicates are idempotent and differing payloads fail closed. Source is marked SANITIZED_CLIENT_OBSERVATION, never settled/verified. This is **not yet automatically connected to iPad/Delta** and not a full event stream. Automation requires separate verified private collection infrastructure and real-device permissions.
 
+## Public PR navigation snapshot
+
+The read-only public GitHub pull-request catalog at pdiddler/continuity/public_pr_catalog.json was fetched from the project PR API on November 11, 2026. It contains **215 PR entries** (41 merged as of capture) and title-based pointers for **117 of 121 numbered stages**. Stages **37, 38, 73, and 117** have no exact Stage-number reference in PR titles. A PR title does not verify its code, tests, merge safety, device outcome or stage completion. Entries include OPEN and CLOSED_UNMERGED records; do not treat them as merged.
+
+The catalog is blob-pinned in manifest.json alongside critical rules, current state and the narrow historical evidence index. Its counts are a snapshot, not a live PR tracker. New conversations use it to locate original PRs and then read the relevant evidence, not to claim all stages were reread.
+
+## Agent startup hooks
+
+The repository root AGENTS.md and .github/copilot-instructions.md direct source-aware agents to run verify/recover before Gingerscope changes. This applies when those agents actually load the repository. It cannot force a completely new ordinary ChatGPT chat to fetch GitHub without being instructed or having tools available.
+
 ## Known limitations and non-negotiable follow-up
 
 - No platform can guarantee ChatGPT request latency or eliminate server-side retries. This design makes job *state* recoverable; it does not remotely execute pending jobs in the background.

@@ -63,6 +63,17 @@ def verify(root: Path = BASE) -> dict:
         "manifest.json", "policy.json", "current_state.json", "history_index.json"))
     require(manifest.get("schema") == "gingerscope-continuity-manifest-v1", "MANIFEST_SCHEMA")
     require(manifest.get("repository") == "chazebanks/MM2-AutoTrade-Rebuild", "REPOSITORY_MISMATCH")
+    controlled = manifest.get("controlledBlobs")
+    tracked = {
+        "pdiddler/continuity/policy.json", "pdiddler/continuity/current_state.json",
+        "pdiddler/continuity/history_index.json", "pdiddler/continuity/public_pr_catalog.json",
+    }
+    require(type(controlled) is dict and set(controlled) == tracked, "CONTROLLED_BLOB_LIST_INVALID")
+    for relative, expected in controlled.items():
+        require(type(expected) is str and COMMIT.fullmatch(expected) is not None, "CONTROLLED_SHA_INVALID")
+        target = root / relative
+        require(target.is_file() and not target.is_symlink(), "CONTROLLED_FILE_MISSING")
+        require(blob_sha(target.read_bytes()) == expected, "CONTROLLED_FILE_CHANGED_REVIEW_REQUIRED_" + relative)
     sources = manifest.get("sourceBlobs")
     require(type(sources) is dict and len(sources) >= 5, "MISSING_SOURCE_ANCHORS")
     for relative, expected in sources.items():
@@ -100,7 +111,21 @@ def verify(root: Path = BASE) -> dict:
     for entry in entries:
         require(type(entry.get("references")) is list and bool(entry["references"]), "STAGE_EVIDENCE_REF_MISSING")
         require(entry.get("evidenceTier") in {"CLIENT_ONLY", "SYNTHETIC_OFFLINE", "RESEARCH_ONLY"}, "STAGE_EVIDENCE_TIER_INVALID")
+    catalog = _read(root, "public_pr_catalog.json")
+    require(catalog.get("schema") == "gingerscope-public-pr-catalog-v1", "PR_CATALOG_SCHEMA")
+    prs, ci = catalog.get("prs"), catalog.get("stageIndex")
+    require(type(prs) is list and len(prs) >= 200 and len(prs) == catalog.get("totalPRs"), "PR_CATALOG_INCOMPLETE")
+    require(type(ci) is list and len(ci) == 121, "STAGE_TITLE_INDEX_INCOMPLETE")
+    numbers = [p.get("pr") for p in prs if type(p) is dict]
+    require(len(numbers) == len(prs) and len(set(numbers)) == len(prs), "PR_CATALOG_DUPLICATE")
+    for i, item in enumerate(ci, 1):
+        require(type(item) is dict and item.get("stage") == i and
+                item.get("indexStatus") == "TITLE_REFERENCE_ONLY_NOT_SOURCE_AUDIT", "STAGE_TITLE_INDEX_FALSE_CLAIM")
+        refs = item.get("prsByTitle")
+        require(type(refs) is list and all(n in numbers for n in refs), "STAGE_INDEX_PR_REFERENCE_INVALID")
     return {"status": "PASS", "criticalRuleCount": len(rules), "verifiedSourceBlobs": len(sources),
+            "controlledFiles": len(controlled), "publicPRRecords": len(prs),
+            "stageTitleIndexCount": sum(bool(x["prsByTitle"]) for x in ci),
             "indexedStageCount": len(entries), "coverage": index["coverage"],
             "latestStage": state["latestStage"], "latestMergedPR": state["latestMergedPR"]}
 
@@ -116,7 +141,8 @@ def recover(root: Path = BASE) -> dict:
             "mandatoryRules": [x["id"] for x in policy["rules"]],
             "evidence": index["entries"],
             "readBeforeCodeChange": state["readBeforeCodeChange"],
-            "missingHistoricalAudit": index["missingHistoricalAudit"]}
+            "missingHistoricalAudit": index["missingHistoricalAudit"],
+            "publicPRCatalog": "pdiddler/continuity/public_pr_catalog.json"}
 
 
 def _atomic_new(path: Path, data: dict) -> None:

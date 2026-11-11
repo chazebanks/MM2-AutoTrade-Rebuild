@@ -17,7 +17,7 @@ class ContinuityTests(unittest.TestCase):
         self.config = self.root / "pdiddler" / "continuity"
         self.config.mkdir(parents=True)
         source = Path(__file__).resolve().parents[1] / "continuity"
-        for name in ("manifest.json", "policy.json", "current_state.json", "history_index.json"):
+        for name in ("manifest.json", "policy.json", "current_state.json", "history_index.json", "public_pr_catalog.json"):
             (self.config / name).write_bytes((source / name).read_bytes())
         manifest = self.data("manifest.json")
         for i, relative in enumerate(manifest["sourceBlobs"]):
@@ -25,6 +25,8 @@ class ContinuityTests(unittest.TestCase):
             file.parent.mkdir(parents=True, exist_ok=True)
             file.write_text(f"verified fixture anchor {i}\n", encoding="utf-8")
             manifest["sourceBlobs"][relative] = c.blob_sha(file.read_bytes())
+        for relative in ("pdiddler/continuity/policy.json", "pdiddler/continuity/current_state.json", "pdiddler/continuity/history_index.json", "pdiddler/continuity/public_pr_catalog.json"):
+            manifest["controlledBlobs"][relative] = c.blob_sha((self.root / relative).read_bytes())
         self.write("manifest.json", manifest)
         self.private = Path(self.temp.name) / "private"
         self.private.mkdir()
@@ -35,6 +37,12 @@ class ContinuityTests(unittest.TestCase):
 
     def write(self, name, data):
         (self.config / name).write_text(json.dumps(data), encoding="utf-8")
+        if name != "manifest.json" and (self.config / "manifest.json").exists():
+            manifest = self.data("manifest.json")
+            relative = "pdiddler/continuity/" + name
+            if relative in manifest.get("controlledBlobs", {}):
+                manifest["controlledBlobs"][relative] = c.blob_sha((self.config / name).read_bytes())
+                (self.config / "manifest.json").write_text(json.dumps(manifest))
 
     def event(self):
         return dict(stage=119, status="STOPPED", reason="OPERATOR_STOPPED",
