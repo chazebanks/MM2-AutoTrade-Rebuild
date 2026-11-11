@@ -78,6 +78,49 @@ local function verifyPhysical(side,entries,parser)
  end
  return true
 end
+-- Freeze the complete packet at callback time. A later mutation of a
+-- client-side event table MUST NOT change which raw keys Stage101 inspected.
+-- Malformed/extraneous fields reject; never silently strip unknown metadata.
+local function fields(t,allowed,n)
+ if type(t)~="table" or getmetatable(t)~=nil then return false end
+ local count=0
+ for k in pairs(t) do
+  if not allowed[k] then return false end
+  count=count+1
+ end
+ return count==n
+end
+local PACK={n=true,[1]=true}
+local ROOT={LastOffer=true,Locked=true,Player1=true,Player2=true}
+local PLAYER={Player=true,Accepted=true,Offer=true}
+local TRIPLE={[1]=true,[2]=true,[3]=true}
+local function clonePacket(packed)
+ if not fields(packed,PACK,2) or packed.n~=1 or
+    not fields(packed[1],ROOT,4) then return nil end
+ local root=packed[1]
+ local out={n=1,[1]={LastOffer=root.LastOffer,Locked=root.Locked}}
+ for _,k in ipairs({"Player1","Player2"}) do
+  local player=root[k]
+  if not fields(player,PLAYER,3) or type(player.Offer)~="table"
+      or getmetatable(player.Offer)~=nil or
+      #player.Offer>4 then return nil end
+  local offers={}
+  local count=0
+  for i,row in ipairs(player.Offer) do
+   if not fields(row,TRIPLE,3) then return nil end
+   offers[i]={row[1],row[2],row[3]}
+   count=count+1
+  end
+  local actual=0
+  for i in pairs(player.Offer) do
+   if not natural(i,1,4) then return nil end
+   actual=actual+1
+  end
+  if count~=actual then return nil end
+  out[1][k]={Player=player.Player,Accepted=player.Accepted,Offer=offers}
+ end
+ return out
+end
 function M.new(context,deps)
  if not scopeOK(context) or type(deps)~="table" or
    type(deps.getScope)~="function" or
@@ -206,9 +249,13 @@ function M.new(context,deps)
      type(packed)~="table" then
    return fail("EVENT_NOT_WITHIN_CURRENT_CLIENT_WINDOW")
   end
+  local immutablePacket=clonePacket(packed)
+  if not immutablePacket then
+   return fail("CLIENT_EVENT_PACKET_SHAPE_OR_QUANTITY_INVALID")
+  end
   callbackCount=1
   receipt={
-   packed=packed,at=at,jobId=scope.jobId,
+   packed=immutablePacket,at=at,jobId=scope.jobId,
    session=scope.session,root=scope.root,
    localPlayer=scope.localPlayer,partnerPlayer=scope.partnerPlayer
   }
