@@ -21,6 +21,13 @@ on:
       - 'pdiddler/ci/p3_one_item_owned_selection_mocks.luau'
       - 'pdiddler/ci/p3_one_item_owned_picker_native_mocks.luau'
       - 'pdiddler/ci/check_p3_owned_picker_integrity.py'
+      - 'pdiddler/supervised/supervised_p3_one_item_auto_gate.lua'
+      - 'pdiddler/supervised/SUPERVISED_P3_ONE_ITEM_AUTO_OFFER_NATIVE.lua'
+      - 'pdiddler/supervised/SUPERVISED_P3_ONE_ITEM_AUTO_OWNED_PICKER.lua'
+      - 'pdiddler/ci/supervised_p3_one_item_auto_gate_mocks.luau'
+      - 'pdiddler/ci/supervised_p3_one_item_auto_native_runner_mocks.luau'
+      - 'pdiddler/ci/supervised_p3_one_item_auto_picker_native_mocks.luau'
+      - 'pdiddler/ci/check_p3_one_item_auto_integrity.py'
       - 'pdiddler/supervised/pdiddler3_outgoing_START_GATED_v1.lua'
       - 'pdiddler/ci/supervised_p3_start_barrier_mocks.luau'
       - 'pdiddler/supervised/supervised_p3_startup_supervisor.lua'
@@ -118,6 +125,22 @@ jobs:
         run: |
           set -euo pipefail
           python3 pdiddler/ci/check_p3_owned_picker_integrity.py
+      - name: Test pure exact-ALT preauthorized stable P4 one-shot gate
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_one_item_auto_gate_mocks.luau
+      - name: Test new original-MM2 native preauthorized one-item auto-placement runner
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_one_item_auto_native_runner_mocks.luau
+      - name: Test current-owned preauthorization iPad picker GUI and frozen selection
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_one_item_auto_picker_native_mocks.luau
+      - name: Verify focused Python no-final-Accept and exact frozen dependency integrity
+        run: |
+          set -euo pipefail
+          python3 pdiddler/ci/check_p3_one_item_auto_integrity.py
       - name: Verify P3 one-item explicit consent and immutable guarded sources using Python
         run: |
           set -euo pipefail
