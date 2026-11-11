@@ -1,0 +1,575 @@
+{
+  "schema": "gingerscope-stage58-review-only-crosswalk-ledger-v1",
+  "reviewAsOfUtc": "2026-11-08",
+  "source": {
+    "nativeProbe": "gingerscope-stage57-crosswalk-candidates-v1",
+    "nativeReportSource": "user-provided iPad Delta local replicated Sync.Weapons",
+    "nativeProbeGitCommit": "871279fc2ec5180c409a990d9cd537ceae8edd92",
+    "nativePR": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/102#issuecomment-6718604313",
+    "catalogueCandidateCount": 10,
+    "gameMetadataAuthority": "CLIENT_REPLICATED_UNATTESTED"
+  },
+  "safety": {
+    "readOnly": true,
+    "lookupOnly": true,
+    "usesLivePrices": false,
+    "marketValueFieldsIncluded": false,
+    "externalCheckerIdAuthenticated": false,
+    "rawKeyAuthenticatedByExternalSource": false,
+    "sourceItemIdInstanceAuthenticated": false,
+    "serverCompletionProven": false,
+    "mayRecordCompletedTrade": false,
+    "mayReportProfit": false,
+    "authorizesTrade": false,
+    "authorizesAccept": false,
+    "tradeOutcome": "UNKNOWN"
+  },
+  "reviewPolicy": {
+    "publicDisplayMetadataEvidence": "Two public site domains mm2wiki.org and supremevalues.com per entry; these corroborate display name, weapon class, type, and public origin year only.",
+    "sourceEventNumericOne": "Generic season/event sentinel, NOT an event name or year.",
+    "itemIdHint": "Client Sync.Weapons.ItemID metadata only. Do NOT treat as a server-assigned unique weapon copy/instance identifier.",
+    "checkerId": "Provisional ID from the old frozen checker reference, NOT independently attested by MM2 or Supreme API.",
+    "yearNull": "Year missing in local client catalogue; independently corroborated public year must not be written back as a game field.",
+    "allItemsReleaseState": "REVIEW_ONLY; never used as trader's live price or offer authority"
+  },
+  "candidates": [
+    {
+      "rawKey": "Bloom",
+      "client": {
+        "displayName": "Bloom",
+        "rarity": "Godly",
+        "weaponType": "Knife",
+        "sourceYear": null,
+        "sourceEventRaw": "1",
+        "itemIdHint": "128553215441980"
+      },
+      "provisionalChecker": {
+        "tier": "godly",
+        "id": "890",
+        "image": "Bloom_Knife.png",
+        "mappingMethod": "match:355",
+        "selectionReason": "LEVEL2_NORMALIZATION"
+      },
+      "publicDisplay": {
+        "name": "Bloom",
+        "rarity": "Godly",
+        "type": "Knife",
+        "originEvent": "Easter",
+        "originYear": 2025,
+        "sources": [
+          {
+            "url": "https://mm2wiki.org/wiki/bloom/",
+            "kind": "COMMUNITY_WIKI"
+          },
+          {
+            "url": "https://supremevalues.com/mm2/godlies",
+            "kind": "COMMUNITY_VALUE_LIST"
+          }
+        ]
+      },
+      "review": {
+        "status": "DISPLAY_METADATA_CORROBORATED_RAW_TO_CHECKER_ID_UNATTESTED",
+        "flags": [
+          "LEVEL2_NORMALIZATION",
+          "GAME_YEAR_MISSING",
+          "SOURCE_EVENT_GENERIC_MARKER"
+        ],
+        "displayNameCorroborated": true,
+        "rarityAndTypeCorroborated": true,
+        "publicOriginYearCorroborated": true,
+        "clientYearAgreement": "NOT_COMPARABLE_GAME_YEAR_MISSING",
+        "sourceItemIdIndependentlyAttested": false,
+        "rawKeyToPublicNameIndependentlyAttested": false,
+        "checkerNumericIdIndependentlyAttested": false,
+        "uniqueItemInstanceProven": false,
+        "mayAutoTrade": false,
+        "mayFinalizeAccept": false,
+        "mayReportProfit": false
+      }
+    },
+    {
+      "rawKey": "Blossom_G",
+      "client": {
+        "displayName": "Blossom",
+        "rarity": "Godly",
+        "weaponType": "Gun",
+        "sourceYear": null,
+        "sourceEventRaw": "1",
+        "itemIdHint": "12339377105"
+      },
+      "provisionalChecker": {
+        "tier": "godly",
+        "id": "696",
+        "image": "BlossomGun.png",
+        "mappingMethod": "match:355",
+        "selectionReason": "LEVEL2_NORMALIZATION"
+      },
+      "publicDisplay": {
+        "name": "Blossom",
+        "rarity": "Godly",
+        "type": "Gun",
+        "originEvent": "Valentine's",
+        "originYear": 2023,
+        "sources": [
+          {
+            "url": "https://mm2wiki.org/wiki/blossom/",
+            "kind": "COMMUNITY_WIKI"
+          },
+          {
+            "url": "https://supremevalues.com/mm2/godlies",
+            "kind": "COMMUNITY_VALUE_LIST"
+          }
+        ]
+      },
+      "review": {
+        "status": "DISPLAY_METADATA_CORROBORATED_RAW_TO_CHECKER_ID_UNATTESTED",
+        "flags": [
+          "LEVEL2_NORMALIZATION",
+          "GAME_YEAR_MISSING",
+          "SOURCE_EVENT_GENERIC_MARKER"
+        ],
+        "displayNameCorroborated": true,
+        "rarityAndTypeCorroborated": true,
+        "publicOriginYearCorroborated": true,
+        "clientYearAgreement": "NOT_COMPARABLE_GAME_YEAR_MISSING",
+        "sourceItemIdIndependentlyAttested": false,
+        "rawKeyToPublicNameIndependentlyAttested": false,
+        "checkerNumericIdIndependentlyAttested": false,
+        "uniqueItemInstanceProven": false,
+        "mayAutoTrade": false,
+        "mayFinalizeAccept": false,
+        "mayReportProfit": false
+      }
+    },
+    {
+      "rawKey": "Flora",
+      "client": {
+        "displayName": "Flora",
+        "rarity": "Godly",
+        "weaponType": "Gun",
+        "sourceYear": null,
+        "sourceEventRaw": "1",
+        "itemIdHint": "138204709945147"
+      },
+      "provisionalChecker": {
+        "tier": "godly",
+        "id": "891",
+        "image": "Flora_Gun.png",
+        "mappingMethod": "match:355",
+        "selectionReason": "LEVEL2_NORMALIZATION"
+      },
+      "publicDisplay": {
+        "name": "Flora",
+        "rarity": "Godly",
+        "type": "Gun",
+        "originEvent": "Easter",
+        "originYear": 2025,
+        "sources": [
+          {
+            "url": "https://mm2wiki.org/wiki/flora/",
+            "kind": "COMMUNITY_WIKI"
+          },
+          {
+            "url": "https://supremevalues.com/mm2/godlies",
+            "kind": "COMMUNITY_VALUE_LIST"
+          }
+        ]
+      },
+      "review": {
+        "status": "DISPLAY_METADATA_CORROBORATED_RAW_TO_CHECKER_ID_UNATTESTED",
+        "flags": [
+          "LEVEL2_NORMALIZATION",
+          "GAME_YEAR_MISSING",
+          "SOURCE_EVENT_GENERIC_MARKER"
+        ],
+        "displayNameCorroborated": true,
+        "rarityAndTypeCorroborated": true,
+        "publicOriginYearCorroborated": true,
+        "clientYearAgreement": "NOT_COMPARABLE_GAME_YEAR_MISSING",
+        "sourceItemIdIndependentlyAttested": false,
+        "rawKeyToPublicNameIndependentlyAttested": false,
+        "checkerNumericIdIndependentlyAttested": false,
+        "uniqueItemInstanceProven": false,
+        "mayAutoTrade": false,
+        "mayFinalizeAccept": false,
+        "mayReportProfit": false
+      }
+    },
+    {
+      "rawKey": "Gingermint_K",
+      "client": {
+        "displayName": "Cookiecane",
+        "rarity": "Godly",
+        "weaponType": "Knife",
+        "sourceYear": "2022",
+        "sourceEventRaw": "Christmas",
+        "itemIdHint": "11855306927"
+      },
+      "provisionalChecker": {
+        "tier": "godly",
+        "id": "660",
+        "image": "Cookiecane.png",
+        "mappingMethod": "match:405",
+        "selectionReason": "NEAR_RUNNER"
+      },
+      "publicDisplay": {
+        "name": "Cookiecane",
+        "rarity": "Godly",
+        "type": "Knife",
+        "originEvent": "Christmas",
+        "originYear": 2022,
+        "sources": [
+          {
+            "url": "https://mm2wiki.org/wiki/cookiecane/",
+            "kind": "COMMUNITY_WIKI"
+          },
+          {
+            "url": "https://supremevalues.com/mm2/godlies",
+            "kind": "COMMUNITY_VALUE_LIST"
+          },
+          {
+            "url": "https://mm2wiki.org/wiki/gingermint/",
+            "kind": "COUNTEREXAMPLE_DISTINCT_ITEM"
+          }
+        ]
+      },
+      "review": {
+        "status": "DISPLAY_METADATA_CORROBORATED_RAW_TO_CHECKER_ID_UNATTESTED",
+        "flags": [
+          "LEGACY_INTERNAL_KEY_NAME_DISAGREES_WITH_DISPLAY",
+          "NEAR_RUNNER_SCORE",
+          "DIFFERENT_ITEM_GINGERMINT_IS_GUN"
+        ],
+        "displayNameCorroborated": true,
+        "rarityAndTypeCorroborated": true,
+        "publicOriginYearCorroborated": true,
+        "clientYearAgreement": "MATCH",
+        "sourceItemIdIndependentlyAttested": false,
+        "rawKeyToPublicNameIndependentlyAttested": false,
+        "checkerNumericIdIndependentlyAttested": false,
+        "uniqueItemInstanceProven": false,
+        "mayAutoTrade": false,
+        "mayFinalizeAccept": false,
+        "mayReportProfit": false
+      }
+    },
+    {
+      "rawKey": "Icecream",
+      "client": {
+        "displayName": "Icecream",
+        "rarity": "Godly",
+        "weaponType": "Knife",
+        "sourceYear": "2026",
+        "sourceEventRaw": "Summer",
+        "itemIdHint": "87189663191639"
+      },
+      "provisionalChecker": {
+        "tier": "godly",
+        "id": "1005",
+        "image": "Icecream_knife.png",
+        "mappingMethod": "match:355",
+        "selectionReason": "LEVEL2_NORMALIZATION"
+      },
+      "publicDisplay": {
+        "name": "Icecream",
+        "rarity": "Godly",
+        "type": "Knife",
+        "originEvent": "Summer",
+        "originYear": 2026,
+        "sources": [
+          {
+            "url": "https://mm2wiki.org/wiki/icecream/",
+            "kind": "COMMUNITY_WIKI"
+          },
+          {
+            "url": "https://supremevalues.com/mm2/godlies",
+            "kind": "COMMUNITY_VALUE_LIST"
+          }
+        ]
+      },
+      "review": {
+        "status": "DISPLAY_METADATA_CORROBORATED_RAW_TO_CHECKER_ID_UNATTESTED",
+        "flags": [
+          "LEVEL2_NORMALIZATION"
+        ],
+        "displayNameCorroborated": true,
+        "rarityAndTypeCorroborated": true,
+        "publicOriginYearCorroborated": true,
+        "clientYearAgreement": "MATCH",
+        "sourceItemIdIndependentlyAttested": false,
+        "rawKeyToPublicNameIndependentlyAttested": false,
+        "checkerNumericIdIndependentlyAttested": false,
+        "uniqueItemInstanceProven": false,
+        "mayAutoTrade": false,
+        "mayFinalizeAccept": false,
+        "mayReportProfit": false
+      }
+    },
+    {
+      "rawKey": "Icewing",
+      "client": {
+        "displayName": "Icewing",
+        "rarity": "Ancient",
+        "weaponType": "Knife",
+        "sourceYear": "2018",
+        "sourceEventRaw": "Christmas",
+        "itemIdHint": "3183085102"
+      },
+      "provisionalChecker": {
+        "tier": "ancient",
+        "id": "4",
+        "image": "IcewingknifeUp.png",
+        "mappingMethod": "match:355",
+        "selectionReason": "LEVEL2_NORMALIZATION"
+      },
+      "publicDisplay": {
+        "name": "Icewing",
+        "rarity": "Ancient",
+        "type": "Knife",
+        "originEvent": "Christmas",
+        "originYear": 2018,
+        "sources": [
+          {
+            "url": "https://mm2wiki.org/wiki/ancient-weapons/",
+            "kind": "COMMUNITY_WIKI"
+          },
+          {
+            "url": "https://supremevalues.com/mm2/ancients",
+            "kind": "COMMUNITY_VALUE_LIST"
+          }
+        ]
+      },
+      "review": {
+        "status": "DISPLAY_METADATA_CORROBORATED_RAW_TO_CHECKER_ID_UNATTESTED",
+        "flags": [
+          "LEVEL2_NORMALIZATION"
+        ],
+        "displayNameCorroborated": true,
+        "rarityAndTypeCorroborated": true,
+        "publicOriginYearCorroborated": true,
+        "clientYearAgreement": "MATCH",
+        "sourceItemIdIndependentlyAttested": false,
+        "rawKeyToPublicNameIndependentlyAttested": false,
+        "checkerNumericIdIndependentlyAttested": false,
+        "uniqueItemInstanceProven": false,
+        "mayAutoTrade": false,
+        "mayFinalizeAccept": false,
+        "mayReportProfit": false
+      }
+    },
+    {
+      "rawKey": "ImmortalChroma",
+      "client": {
+        "displayName": "Chroma Immortal",
+        "rarity": "Godly",
+        "weaponType": "Gun",
+        "sourceYear": "2026",
+        "sourceEventRaw": "Halloween",
+        "itemIdHint": "112675577042738"
+      },
+      "provisionalChecker": {
+        "tier": "chroma",
+        "id": "1034",
+        "image": "coming.png",
+        "mappingMethod": "alias",
+        "selectionReason": "PLACEHOLDER_ARTWORK"
+      },
+      "publicDisplay": {
+        "name": "Chroma Immortal",
+        "rarity": "Godly",
+        "type": "Gun",
+        "originEvent": "Halloween",
+        "originYear": 2026,
+        "sources": [
+          {
+            "url": "https://mm2wiki.org/wiki/chroma-immortal/",
+            "kind": "COMMUNITY_WIKI"
+          },
+          {
+            "url": "https://supremevalues.com/mm2/chromas.php",
+            "kind": "COMMUNITY_VALUE_LIST"
+          }
+        ]
+      },
+      "review": {
+        "status": "DISPLAY_METADATA_CORROBORATED_RAW_TO_CHECKER_ID_UNATTESTED",
+        "flags": [
+          "PLACEHOLDER_ARTWORK",
+          "EXPLICIT_ALIAS_REQUIRES_ID_PROOF"
+        ],
+        "displayNameCorroborated": true,
+        "rarityAndTypeCorroborated": true,
+        "publicOriginYearCorroborated": true,
+        "clientYearAgreement": "MATCH",
+        "sourceItemIdIndependentlyAttested": false,
+        "rawKeyToPublicNameIndependentlyAttested": false,
+        "checkerNumericIdIndependentlyAttested": false,
+        "uniqueItemInstanceProven": false,
+        "mayAutoTrade": false,
+        "mayFinalizeAccept": false,
+        "mayReportProfit": false
+      }
+    },
+    {
+      "rawKey": "MortalChroma",
+      "client": {
+        "displayName": "Chroma Mortal",
+        "rarity": "Godly",
+        "weaponType": "Knife",
+        "sourceYear": "2026",
+        "sourceEventRaw": "Halloween",
+        "itemIdHint": "72199828838672"
+      },
+      "provisionalChecker": {
+        "tier": "chroma",
+        "id": "1033",
+        "image": "coming.png",
+        "mappingMethod": "alias",
+        "selectionReason": "PLACEHOLDER_ARTWORK"
+      },
+      "publicDisplay": {
+        "name": "Chroma Mortal",
+        "rarity": "Godly",
+        "type": "Knife",
+        "originEvent": "Halloween",
+        "originYear": 2026,
+        "sources": [
+          {
+            "url": "https://mm2wiki.org/wiki/chroma-mortal/",
+            "kind": "COMMUNITY_WIKI"
+          },
+          {
+            "url": "https://supremevalues.com/mm2/chromas.php",
+            "kind": "COMMUNITY_VALUE_LIST"
+          }
+        ]
+      },
+      "review": {
+        "status": "DISPLAY_METADATA_CORROBORATED_RAW_TO_CHECKER_ID_UNATTESTED",
+        "flags": [
+          "PLACEHOLDER_ARTWORK",
+          "EXPLICIT_ALIAS_REQUIRES_ID_PROOF"
+        ],
+        "displayNameCorroborated": true,
+        "rarityAndTypeCorroborated": true,
+        "publicOriginYearCorroborated": true,
+        "clientYearAgreement": "MATCH",
+        "sourceItemIdIndependentlyAttested": false,
+        "rawKeyToPublicNameIndependentlyAttested": false,
+        "checkerNumericIdIndependentlyAttested": false,
+        "uniqueItemInstanceProven": false,
+        "mayAutoTrade": false,
+        "mayFinalizeAccept": false,
+        "mayReportProfit": false
+      }
+    },
+    {
+      "rawKey": "Ocean_G",
+      "client": {
+        "displayName": "Ocean",
+        "rarity": "Godly",
+        "weaponType": "Gun",
+        "sourceYear": null,
+        "sourceEventRaw": "1",
+        "itemIdHint": "13945898892"
+      },
+      "provisionalChecker": {
+        "tier": "godly",
+        "id": "728",
+        "image": "Ocean_gun.png",
+        "mappingMethod": "match:355",
+        "selectionReason": "LEVEL2_NORMALIZATION"
+      },
+      "publicDisplay": {
+        "name": "Ocean",
+        "rarity": "Godly",
+        "type": "Gun",
+        "originEvent": "Summer",
+        "originYear": 2023,
+        "sources": [
+          {
+            "url": "https://mm2wiki.org/wiki/ocean/",
+            "kind": "COMMUNITY_WIKI"
+          },
+          {
+            "url": "https://supremevalues.com/mm2/godlies",
+            "kind": "COMMUNITY_VALUE_LIST"
+          }
+        ]
+      },
+      "review": {
+        "status": "DISPLAY_METADATA_CORROBORATED_RAW_TO_CHECKER_ID_UNATTESTED",
+        "flags": [
+          "LEVEL2_NORMALIZATION",
+          "GAME_YEAR_MISSING",
+          "SOURCE_EVENT_GENERIC_MARKER"
+        ],
+        "displayNameCorroborated": true,
+        "rarityAndTypeCorroborated": true,
+        "publicOriginYearCorroborated": true,
+        "clientYearAgreement": "NOT_COMPARABLE_GAME_YEAR_MISSING",
+        "sourceItemIdIndependentlyAttested": false,
+        "rawKeyToPublicNameIndependentlyAttested": false,
+        "checkerNumericIdIndependentlyAttested": false,
+        "uniqueItemInstanceProven": false,
+        "mayAutoTrade": false,
+        "mayFinalizeAccept": false,
+        "mayReportProfit": false
+      }
+    },
+    {
+      "rawKey": "Waves_K",
+      "client": {
+        "displayName": "Waves",
+        "rarity": "Godly",
+        "weaponType": "Knife",
+        "sourceYear": null,
+        "sourceEventRaw": "1",
+        "itemIdHint": "13945892398"
+      },
+      "provisionalChecker": {
+        "tier": "godly",
+        "id": "727",
+        "image": "Waves_knife.png",
+        "mappingMethod": "match:355",
+        "selectionReason": "LEVEL2_NORMALIZATION"
+      },
+      "publicDisplay": {
+        "name": "Waves",
+        "rarity": "Godly",
+        "type": "Knife",
+        "originEvent": "Summer",
+        "originYear": 2023,
+        "sources": [
+          {
+            "url": "https://mm2wiki.org/wiki/waves/",
+            "kind": "COMMUNITY_WIKI"
+          },
+          {
+            "url": "https://supremevalues.com/mm2/godlies",
+            "kind": "COMMUNITY_VALUE_LIST"
+          }
+        ]
+      },
+      "review": {
+        "status": "DISPLAY_METADATA_CORROBORATED_RAW_TO_CHECKER_ID_UNATTESTED",
+        "flags": [
+          "LEVEL2_NORMALIZATION",
+          "GAME_YEAR_MISSING",
+          "SOURCE_EVENT_GENERIC_MARKER"
+        ],
+        "displayNameCorroborated": true,
+        "rarityAndTypeCorroborated": true,
+        "publicOriginYearCorroborated": true,
+        "clientYearAgreement": "NOT_COMPARABLE_GAME_YEAR_MISSING",
+        "sourceItemIdIndependentlyAttested": false,
+        "rawKeyToPublicNameIndependentlyAttested": false,
+        "checkerNumericIdIndependentlyAttested": false,
+        "uniqueItemInstanceProven": false,
+        "mayAutoTrade": false,
+        "mayFinalizeAccept": false,
+        "mayReportProfit": false
+      }
+    }
+  ]
+}
