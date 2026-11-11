@@ -1,5 +1,12 @@
 # Gingerscope — real P3 → real protected P4, one separate human-approved physical item
 
+## ACTUAL ORIGINAL MM2 iPad SUPERVISED DEVICE RESULT (2026-11-10 EST): **PASS**
+
+Following merged PR216/217, user supplied **actual native** result: `p3ArmObservedClient=true`, `clientTradeWindowObserved=true`, `oneItemTapObservedClient=true`, `oneItemOfferStatus=CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED`, `offerAttemptsKnown=true`, `offerAttempts=1`, `clientVisibleAddedSlots=1`, `snapshotRejectReason=NONE`, `clientResumeObserved=true`, `lastObservedStatus=P3_ROTATING`, `status=STOPPED`, `reason=OPERATOR_STOPPED`, `serverCompletionProven=false`, `tradeOutcome=UNKNOWN`; every authorization/profit/Discord flag false. This finally **closes the previous NEW combined item picker → real P3 → guarded P4 one item → P3 resume client-only proof**, which the below original handoff had described as pending. Do not retest it solely to repeat earlier proof. The raw selected weapon ID and actual server-side transfer are NOT in the report. Preserve these limitations; do not call the client GUI slot a completed trade. [Full exact JSON in PR217 comment](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/217#issuecomment-6784585245).
+
+The current correctly implemented user interaction remains three separate human actions: choose/confirm current weapon, ARM P3 request, then tap OFFER 1 ITEM after verified partner trade opens. A shift to automatically offering on trade-open requires a NEW distinct consent/safety and idempotence specification, not just this PASS. No auto Accept, server settlement, profit/market strategy, Discord, public unsupervised trade or obsolete +15. Later historical language saying 'not yet tested on iPad' documents the state *before* this user report; superseded by this section.
+
+
 ## Why this is the NEXT distinct milestone
 
 The operator's previous original-MM2 MAIN iPad Delta result from merged PR214 conclusively established the narrow **client-side** milestones: explicit P3 ARM, the correct protected P4 client trade GUI opened, the P3 queue resumed after manual trade closure and later reported `P3_ROTATING`. Real two-distinct-slot manual placement from PR206 already passed earlier. **Do not repeat these completed tests.** Neither proof is server settlement, trade completion, authenticated ownership, a live value or permission for final Accept.
