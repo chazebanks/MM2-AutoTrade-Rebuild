@@ -111,6 +111,13 @@ function M.new(supervisor,io,gate,plan,scanner,cfg,ctx)
     protected(cfg.approvedDisplayName) then
   return nil,out("BLOCKED","OPERATOR_SELECTION_INVALID_OR_PROTECTED")
  end
+ -- Freeze the exact user-visible selection at construction. A mutable
+ -- getgenv configuration must NEVER retarget an already approved GUI tap.
+ local selection={
+  approvedRawKey=cfg.approvedRawKey,
+  approvedDisplayName=cfg.approvedDisplayName,
+  approvedChromaFlag=cfg.approvedChromaFlag,
+ }
  local spent=false
  local busy=false
  local last=out("WAITING","HUMAN_ITEM_APPROVAL_NOT_RECEIVED")
@@ -118,7 +125,13 @@ function M.new(supervisor,io,gate,plan,scanner,cfg,ctx)
  local function safe()
   local ok,a=pcall(ctx.isSafe)
   local ob,b=pcall(ctx.altStillExact)
-  return ok and ob and a==true and b==true
+  return ok and ob and a==true and b==true and
+    cfg.approvedRawKey==selection.approvedRawKey and
+    cfg.approvedDisplayName==selection.approvedDisplayName and
+    cfg.approvedChromaFlag==selection.approvedChromaFlag and
+    cfg.allowOneItemPilot==true and
+    cfg.manualOfferOnly==true and
+    cfg.noAutomaticAcceptAcknowledged==true
  end
  local function lease()
   if not safe() then return nil end
@@ -151,7 +164,7 @@ function M.new(supervisor,io,gate,plan,scanner,cfg,ctx)
    return last
   end
   local ownOK,owned=pcall(scanner.getOwnInventory)
-  if not ownOK or not ownedExactlyOne(owned,cfg) or not safe() then
+  if not ownOK or not ownedExactlyOne(owned,selection) or not safe() then
    last=out("BLOCKED","CURRENT_OWN_WEAPON_IDENTITY_NOT_PROVEN")
    busy=false
    return last
@@ -172,9 +185,9 @@ function M.new(supervisor,io,gate,plan,scanner,cfg,ctx)
   end
   local approval={
    armed=true,manualOfferOnly=true,noAutomaticAcceptAcknowledged=true,
-   weaponKeys={cfg.approvedRawKey},
-   expectedDisplayNames={cfg.approvedDisplayName},
-   expectedChromaFlags={cfg.approvedChromaFlag},
+   weaponKeys={selection.approvedRawKey},
+   expectedDisplayNames={selection.approvedDisplayName},
+   expectedChromaFlags={selection.approvedChromaFlag},
   }
   local called,result=pcall(plan.run,bound,io,gate,approval,{
    wait=function(seconds)
@@ -190,8 +203,8 @@ function M.new(supervisor,io,gate,plan,scanner,cfg,ctx)
     if index~=1 or total~=1 or previous~=0 or
        not safe() or io.trade()~=root then return false end
     local good,shown=pcall(ctx.showItemStep,
-       cfg.approvedRawKey,cfg.approvedDisplayName,
-       cfg.approvedChromaFlag)
+       selection.approvedRawKey,selection.approvedDisplayName,
+       selection.approvedChromaFlag)
     return good and shown==true and safe() and io.trade()==root
    end,
   })
