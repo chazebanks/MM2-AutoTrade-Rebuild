@@ -469,6 +469,14 @@ local function completeIdentity(status,reason,report)
     evidence.clientLastOfferStatus=status
     evidence.clientLastOfferReason=reason or "CLIENT_EVIDENCE_UNATTRIBUTED"
     if type(report)=="table" then
+        if status=="CLIENT_TWO_EVENT_LASTOFFER_GUI_UNATTRIBUTED" and
+           report.lastOfferEqualityClass~="CLIENT_LASTOFFER_CHANGED_WITH_DIFFERENT_OFFER" and
+           report.lastOfferEqualityClass~="CLIENT_LASTOFFER_UNCHANGED_WITH_DIFFERENT_OFFER" then
+           status="INCONCLUSIVE"
+           identityPhase="FAILED"
+           evidence.clientLastOfferStatus="INCONCLUSIVE"
+           evidence.clientLastOfferReason="CLIENT_LASTOFFER_EQUALITY_CLASS_INVALID"
+        end
         evidence.lastOfferEqualityClass=tostring(report.lastOfferEqualityClass or "NONE")
         evidence.callbackCount=math.min(2,tonumber(report.callbackCount) or 0)
         evidence.guiQuantityTransitions=math.min(2,tonumber(report.localGuiTransitions) or 0)
@@ -589,7 +597,8 @@ local function prepareWitness(root)
   if not ok or type(lease)~="table" or type(lease.capture)~="function" or
      type(meta)~="table" or
      meta.status~="P3_BOUND_CANDIDATE_READ_ONLY" or
-     meta.authorizesOffer~=false or meta.authorizesAccept~=false then
+     meta.authorizesOffer~=false or meta.authorizesAccept~=false or
+     meta.serverCompletionProven~=false then
    return nil,"PROTECTED_P3_P4_BOUND_LEASE_UNAVAILABLE"
   end
   local yes,snap=pcall(lease.capture)
@@ -599,6 +608,11 @@ local function prepareWitness(root)
     snap.part3Paused~=true or snap.part4TradeVisible~=true or
     snap.authorizesOffer~=false or snap.authorizesAccept~=false or
     snap.rawItemIdsAuthenticated~=false or
+    snap.offerRevisionAuthenticated~=false or
+    snap.pricesAuthenticated~=false or
+    snap.mayReportProfit~=false or
+    snap.maySendDiscordWebhook~=false or
+    snap.requestOriginBound~=false or
     snap.serverCompletionProven~=false or
     snap.tradeOutcome~="UNKNOWN" or
     type(snap.ours)~="table" or type(snap.theirs)~="table" then
@@ -691,6 +705,7 @@ local function prepareWitness(root)
  return true,"PROTECTED_STAGE119_EMPTY_TRADE_WITNESS_READY",attachWhenReady
 end
 
+local stage119Attach=nil
 local function witnessTick(observed)
  if terminalResult or not armed then return end
  if observed.status=="P3_RESUMED_AFTER_CLIENT_TRADE_CLOSED" or
