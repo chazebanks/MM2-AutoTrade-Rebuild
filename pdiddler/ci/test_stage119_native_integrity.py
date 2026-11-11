@@ -36,6 +36,20 @@ class Stage119SourceTests(unittest.TestCase):
         ):
             self.assertEqual(blob(path),sha,str(path))
 
+    def test_native_runner_pins_reviewed_frozen_controller(self):
+        self.assertEqual(blob(CONTROLLER),
+                         "bd9174a69d4c18c75a17ce0e84fb54a877242f12")
+        runner=RUNNER.read_text()
+        self.assertIn('"58f0bb357f467fb6764b077ec70c787fe1e059cf"',runner)
+        self.assertIn('pdiddler/supervised/stage119_lastoffer_native_controller.lua',runner)
+        for commit in (
+            "1971b93d324f0275e6a9affb472ac3e804439ed8",
+            "59d869b7d4d8fbcee3f2709e266b47ffb4a05d78",
+            "7c12a2e9768ef294b411086deef9ddaf2bee8d21",
+            "891d548d2ef77763e9f7e3a679984a646bb9d4b4"
+        ):
+            self.assertIn(commit,runner)
+
     def test_client_only_and_no_game_side_effects(self):
         runner=RUNNER.read_text()
         control=CONTROLLER.read_text()
