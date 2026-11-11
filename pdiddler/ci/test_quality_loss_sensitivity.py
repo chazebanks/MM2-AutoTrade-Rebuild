@@ -67,6 +67,12 @@ class LossSensitivityTests(unittest.TestCase):
             self.assertIsNone(r["approvedTrainingLabel"])
             self.assertFalse(r["mayUseForStrategyLearning"])
 
+    def test_malformed_learning_outcome_fails_closed(self):
+        for malformed in (None, False, [], {}, 4):
+            result=audit_learning_claim(malformed, True)
+            self.assertEqual(result["status"], "BLOCKED")
+            self.assertFalse(result["mayUseForStrategyLearning"])
+
     def test_no_simulation_ever_authorizes_trade(self):
         r=study_candidate(self.out,self.inc,self.market)
         for key in ("authorizesTrade","authorizesOffer","authorizesAccept",
