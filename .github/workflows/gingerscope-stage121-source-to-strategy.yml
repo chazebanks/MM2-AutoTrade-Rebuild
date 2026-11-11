@@ -65,8 +65,8 @@ jobs:
                       'setclipboard(', 'os.replace(', 'subprocess.run(', 'authorizesAccept":True',
                       'authorizesOffer":True','mayFeedStage120AsVerifiedMarket":True'):
               assert bad not in src,bad
-          assert 'contents: write' not in wf
-          assert 'git push' not in wf
+          assert ('contents:'+' write') not in wf
+          assert ('git'+' push') not in wf
           for must in ('OLD_PUBLICATION_FIXED_EXPIRY_PASSED',
                        'TRADE_POSTINGS_ARE_NOT_VERIFIED_COMPLETED_FILLS',
                        'NEW_PUBLISHER_REQUIRES_INDEPENDENT_REVIEW'):
