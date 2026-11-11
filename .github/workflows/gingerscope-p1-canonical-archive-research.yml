@@ -1,13 +1,12 @@
 name: Gingerscope P1 canonical Supreme research archive (no trading)
 on:
-  push:
-    branches:
-      - research/gingerscope-p1-nov11-canonical-source-archive
   pull_request:
     branches:
       - main
     paths:
       - '.github/workflows/gingerscope-p1-canonical-archive-research.yml'
+      - 'pdiddler/ci/p1_supreme_transport_probe.py'
+      - 'pdiddler/ci/test_p1_supreme_transport_probe.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -50,6 +49,8 @@ jobs:
           test "$(git hash-object /tmp/gingerscope-p1/godlies.html)" = d3cf222a8e10cff3a9fb051b16188192389c4b2d
           test "$(git hash-object /tmp/gingerscope-p1/chromas.html)" = 6c77624cac3df96168b008e9bc8eca68a2d78cf9
           echo ORIGINAL_SOURCE_AND_PREVIOUS_HTML_GIT_BLOBS_VERIFIED
+      - name: Test body-free transport diagnosis and zero authority
+        run: python3 -m unittest -v pdiddler.ci.test_p1_supreme_transport_probe
       - name: Capture real three-page HTTPS via unmodified Stage111 chain
         id: capture
         shell: bash
@@ -62,6 +63,10 @@ jobs:
           echo "$rc" > /tmp/gingerscope-p1/current/original_exit_code.txt
           echo "original_exit=$rc" >> "$GITHUB_OUTPUT"
           echo "Stage111 original exit=$rc (3 means new publication requiring manual review, not a live-price pass)"
+      - name: Diagnose numeric HTTP status after original inconclusive source capture
+        if: ${{ always() && steps.capture.outputs.original_exit == '2' }}
+        run: |
+          python3 -m pdiddler.ci.p1_supreme_transport_probe --output /tmp/gingerscope-p1/current/transport_headers_only.json
       - name: Apply unchanged Stage121 research-only firewall and test all denied authorities
         if: always()
         shell: bash
