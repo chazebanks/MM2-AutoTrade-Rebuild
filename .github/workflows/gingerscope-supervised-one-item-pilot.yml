@@ -16,6 +16,11 @@ on:
       - 'pdiddler/supervised/SUPERVISED_P3_ONE_ITEM_OFFER_NATIVE.lua'
       - 'pdiddler/ci/supervised_p3_one_item_native_runner_mocks.luau'
       - 'pdiddler/ci/check_p3_one_item_integrity.py'
+      - 'pdiddler/supervised/p3_one_item_owned_selection.lua'
+      - 'pdiddler/supervised/SUPERVISED_P3_ONE_ITEM_OWNED_PICKER.lua'
+      - 'pdiddler/ci/p3_one_item_owned_selection_mocks.luau'
+      - 'pdiddler/ci/p3_one_item_owned_picker_native_mocks.luau'
+      - 'pdiddler/ci/check_p3_owned_picker_integrity.py'
       - 'pdiddler/supervised/pdiddler3_outgoing_START_GATED_v1.lua'
       - 'pdiddler/ci/supervised_p3_start_barrier_mocks.luau'
       - 'pdiddler/supervised/supervised_p3_startup_supervisor.lua'
@@ -101,6 +106,18 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_one_item_native_runner_mocks.luau
+      - name: Test strict current owned/Sync weapon picker without trading permissions
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/p3_one_item_owned_selection_mocks.luau
+      - name: Test actual preflight iPad owned picker, human choice and immutable PR216 delegation
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/p3_one_item_owned_picker_native_mocks.luau
+      - name: Verify Python audited source pins and no preflight trading remote authority
+        run: |
+          set -euo pipefail
+          python3 pdiddler/ci/check_p3_owned_picker_integrity.py
       - name: Verify P3 one-item explicit consent and immutable guarded sources using Python
         run: |
           set -euo pipefail
