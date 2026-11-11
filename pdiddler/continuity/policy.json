@@ -1,0 +1,89 @@
+{
+  "schema": "gingerscope-critical-policy-v1",
+  "rules": [
+    {
+      "id": "GOAL_ACQUIRE_HOLD_GINGERSCOPE",
+      "statement": "Acquire Gingerscope by intelligent trading; protect and keep building inventory after acquisition.",
+      "locked": true,
+      "source": "pdiddler/GINGERSCOPE_STRATEGY_AND_RESEARCH_PLAYBOOK.md"
+    },
+    {
+      "id": "PROTECT_OUTGOING_GINGERSCOPE",
+      "statement": "Never select or offer Gingerscope outbound; treat it as permanently protected inventory.",
+      "locked": true,
+      "source": "pdiddler/GINGERSCOPE_STRATEGY_AND_RESEARCH_PLAYBOOK.md"
+    },
+    {
+      "id": "NO_LEGACY_MIN_PLUS15",
+      "statement": "Do not restore the obsolete blanket +15-value profit requirement.",
+      "locked": true,
+      "source": "pdiddler/GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md"
+    },
+    {
+      "id": "NO_FORCED_HIGHEST_OPENER",
+      "statement": "Do not force a highest-valued weapon to open every trade.",
+      "locked": true,
+      "source": "pdiddler/GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md"
+    },
+    {
+      "id": "NO_CHAT_AUTONEGOTIATION",
+      "statement": "User canceled automated chat negotiation; do not implement it without a new explicit request.",
+      "locked": true,
+      "source": "pdiddler/GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md"
+    },
+    {
+      "id": "FULL_AUTO_IS_FUTURE_GOAL_NOT_APPROVAL",
+      "statement": "Fully automatic trading is a future product goal, never evidence of current authorization.",
+      "locked": true,
+      "source": "pdiddler/GINGERSCOPE_LATEST_CHECKPOINT.md"
+    },
+    {
+      "id": "NO_CLIENT_AS_SERVER_SETTLEMENT",
+      "statement": "Never infer server-authenticated settlement from client callbacks, GUI changes, LastOffer or inventory deltas.",
+      "locked": true,
+      "source": "pdiddler/GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md"
+    },
+    {
+      "id": "NO_AUTO_ACCEPT_UNPROVEN",
+      "statement": "Automatic final Accept, completed profit and Discord completion notices remain unauthorized without separate proofs.",
+      "locked": true,
+      "source": "pdiddler/GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md"
+    },
+    {
+      "id": "ONSCREEN_MANUAL_TEST_INSTRUCTIONS",
+      "statement": "Future manual iPad tests require in-game numbered safe-geometry prompts, not overlaying the TradeGUI.",
+      "locked": true,
+      "source": "pdiddler/GINGERSCOPE_ONSCREEN_MANUAL_TEST_POLICY.md"
+    },
+    {
+      "id": "PRESERVE_WORKING_P3_P4",
+      "statement": "Preserve verified Part3 and Part4 work and independently test any proposed changes before deployment.",
+      "locked": true,
+      "source": "pdiddler/GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md"
+    },
+    {
+      "id": "NO_REPEAT_CLOSED_DEVICE_TEST",
+      "statement": "Do not repeat closed Stage119, Stage101 or prior iPad tests absent a separately justified new issue.",
+      "locked": true,
+      "source": "pdiddler/GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md"
+    },
+    {
+      "id": "SOURCE_FRESHNESS_REQUIRED",
+      "statement": "Expired Supreme data cannot be promoted to current market prices by redownloading or restamping.",
+      "locked": true,
+      "source": "pdiddler/intelligence_lab/STAGE121_SOURCE_TO_STRATEGY_HANDOFF.md"
+    },
+    {
+      "id": "ONE_DISTINCT_ISSUE_TESTED",
+      "statement": "Solve and test one distinct blocker at a time; preserve failed historical attempts and evidence links.",
+      "locked": true,
+      "source": "pdiddler/GINGERSCOPE_STRATEGY_AND_RESEARCH_PLAYBOOK.md"
+    },
+    {
+      "id": "PRIVATE_EVIDENCE_NOT_PUBLIC",
+      "statement": "Never commit Discord records, trade identifiers, private usernames or sensitive runtime logs to public GitHub.",
+      "locked": true,
+      "source": "pdiddler/GINGERSCOPE_STRATEGY_AND_RESEARCH_PLAYBOOK.md"
+    }
+  ]
+}

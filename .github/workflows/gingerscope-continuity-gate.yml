@@ -1,0 +1,36 @@
+name: Gingerscope continuity recovery gate
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/continuity/**'
+      - 'pdiddler/ci/test_continuity_manager.py'
+      - '.github/workflows/gingerscope-continuity-gate.yml'
+      - 'pdiddler/GINGERSCOPE_*'
+      - 'pdiddler/supervised/SUPERVISED_ONE_ITEM_PILOT_HANDOFF.md'
+      - 'pdiddler/intelligence_lab/STAGE121_SOURCE_TO_STRATEGY_HANDOFF.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  continuity-integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify immutable anchors, critical rules and current checkpoint
+        run: python3 -m pdiddler.continuity.manager verify
+      - name: Restore compact cross-conversation briefing without inventing full-history audit
+        run: python3 -m pdiddler.continuity.manager recover
+      - name: Run interruption, privacy, idempotency and tamper regressions
+        run: python3 -m unittest -v pdiddler.ci.test_continuity_manager
+      - name: Confirm no production game or network execution logic was added to manager
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('pdiddler/continuity/manager.py').read_text()
+          for forbidden in ['FireServer(', 'AcceptTrade(', 'HttpGet(', 'requests.post(', 'urllib.request']:
+              assert forbidden not in s, forbidden
+          print('CONTINUITY_ONLY_NO_GAME_ACTIONS_PASS')
+          PY

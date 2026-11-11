@@ -1,5 +1,9 @@
 # GINGERSCOPE / PDIDDLER — CANONICAL NEXT-CONVERSATION HANDOFF
 
+## NOV 11 2026 — NEW CONTINUITY RECOVERY ENTRYPOINT (PR229)
+
+Before relying on this large historical handoff for a new conversation or agent code change, open **pdiddler/continuity/README.md**, **manifest.json**, **policy.json**, **current_state.json**, **history_index.json**, and the pinned **public_pr_catalog.json**. For an actual source checkout, run **python3 -m pdiddler.continuity.manager verify** and **recover**. Read root **AGENTS.md** for code-agent instructions. The new manifest pins this document's exact Git blob. If the gate fails, reconcile changed evidence; do not silently use stale summaries. The new index navigates 215 public pull requests, but PR titles and a PASS do **not** constitute full individual Stage1–121 source review. Read original relevant branches, source, tests and CI before modifications. No game, market quote, trading or auto-Accept behavior is authorized by the continuity tools. PR229 must pass its actual GitHub CI before it is treated as verified or merged.
+
 ## NOV 11 2026 — USER-APPROVED LONG-TERM STRATEGY DIRECTION (NOT DEPLOYMENT)
 
 **NEW READ-FIRST POLICY:** `pdiddler/strategy/GROWTH_POLICY_DECISION_2026_11_11.md` + `pdiddler/strategy/growth_policy.json`. The user wants eventual **autonomous controlled listed-value-loss quality upgrades**, but explicitly **only after verification, a tested risk budget, and a separate deployment authorization**. This is approval to develop/test the strategy, NOT to take real losses, authorize trade or final Accept, or treat proposed 3%/other research formulas as approved. Preserve Gingerscope outgoing protection, four physical slots, source freshness, independently validated liquidity, goal-directed compounding, upgrades/downgrades, and no obsolete blanket +15/highest opener. Read this decision before changing P4 or learner policy. Existing Stage120 remains synthetic offline.
