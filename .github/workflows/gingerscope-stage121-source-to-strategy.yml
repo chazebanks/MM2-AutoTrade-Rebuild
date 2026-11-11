@@ -1,0 +1,75 @@
+name: Gingerscope Stage121 actual Stage111 to strategy price firewall
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage121_source_to_strategy_firewall.py'
+      - 'pdiddler/ci/test_stage121_source_to_strategy_firewall.py'
+      - 'pdiddler/intelligence_lab/STAGE121_SOURCE_TO_STRATEGY_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage121-source-to-strategy.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-stage111-capture-to-stage120-firewall:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Fetch and byte-verify original immutable Stage104, Stage110, Stage111 source code
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          dir='pdiddler/intelligence_lab'
+          curl -fsSL --retry 3 --max-time 45 "$base/35dff4925869638c1808376ef611c93e414b980c/$dir/stage104_publication_timestamp_gate.py" -o "$dir/stage104_publication_timestamp_gate.py"
+          curl -fsSL --retry 3 --max-time 45 "$base/57ad1c00e775e839fd05f3437c1bdbbfcd7161f6/$dir/stage110_trusted_source_admission.py" -o "$dir/stage110_trusted_source_admission.py"
+          curl -fsSL --retry 3 --max-time 45 "$base/f3dfadb4b90c6a126e19dc4064514f795aea98e9/$dir/stage111_supreme_readonly_capture.py" -o "$dir/stage111_supreme_readonly_capture.py"
+          test "$(git hash-object "$dir/stage104_publication_timestamp_gate.py")" = 14b26009b3494de0994596df7ea2b329adad5e58
+          test "$(git hash-object "$dir/stage110_trusted_source_admission.py")" = b88c7e60cf928cc2c5c67b34e28d34fecd9d9b58
+          test "$(git hash-object "$dir/stage111_supreme_readonly_capture.py")" = 64e49ef680a879010da7f114d3be59413922d6b3
+          echo EXACT_ORIGINAL_STAGE104_110_111_MODULES_VERIFIED
+      - name: Download and Git-blob-pin original Stage69 parser plus all three actual Stage84 Nov9 Supreme HTML pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope121
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/refresh_supreme_snapshot.py" -o /tmp/gingerscope121/stage69_parser.py
+          for tier in ancients godlies chromas; do
+            curl -fsSL --retry 3 --max-time 45 "$base/f08ceb35a9ff684ee2cf577ccce7542c436cc68e/pdiddler/research_source_html/stage84_2026_11_09/$tier.html" -o "/tmp/gingerscope121/$tier.html"
+          done
+          test "$(git hash-object /tmp/gingerscope121/stage69_parser.py)" = d5843a57f34078cbe7213aa78a4aa12a5775c016
+          test "$(git hash-object /tmp/gingerscope121/ancients.html)" = ce8178ab9579e8782d8f72a6dac051756a728506
+          test "$(git hash-object /tmp/gingerscope121/godlies.html)" = d3cf222a8e10cff3a9fb051b16188192389c4b2d
+          test "$(git hash-object /tmp/gingerscope121/chromas.html)" = 6c77624cac3df96168b008e9bc8eca68a2d78cf9
+          echo EXACT_ORIGINAL_SUPREME_ARCHIVED_PARSER_AND_HTML_VERIFIED
+      - name: Execute original Stage111 capture plus actual Stage110/104/69 pipeline and Stage121 hostile receipt tests
+        env:
+          STAGE121_REQUIRE_ORIGINAL: '1'
+          STAGE121_ORIGINAL_ROOT: /tmp/gingerscope121
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_stage121_source_to_strategy_firewall
+      - name: Audit no game, Discord, market file write or false trade authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          src=Path('pdiddler/intelligence_lab/stage121_source_to_strategy_firewall.py').read_text()
+          wf=Path('.github/workflows/gingerscope-stage121-source-to-strategy.yml').read_text()
+          for bad in ('requests.get(', 'urlopen(', 'FireServer(', 'AcceptTrade(', 'HttpGet(',
+                      'setclipboard(', 'os.replace(', 'subprocess.run(', 'authorizesAccept":True',
+                      'authorizesOffer":True','mayFeedStage120AsVerifiedMarket":True'):
+              assert bad not in src,bad
+          assert 'contents: write' not in wf
+          assert 'git push' not in wf
+          for must in ('OLD_PUBLICATION_FIXED_EXPIRY_PASSED',
+                       'TRADE_POSTINGS_ARE_NOT_VERIFIED_COMPLETED_FILLS',
+                       'NEW_PUBLISHER_REQUIRES_INDEPENDENT_REVIEW'):
+              assert must in src,must
+          print('STAGE121_NO_LIVE_MARKET_AUTHORITY_OR_PRODUCTION_WRITES_PASS')
+          PY
