@@ -1,0 +1,30 @@
+name: Gingerscope offline quality loss sensitivity
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/quality_loss_sensitivity.py'
+      - 'pdiddler/intelligence_lab/QUALITY_LOSS_SENSITIVITY_README.md'
+      - 'pdiddler/ci/test_quality_loss_sensitivity.py'
+      - '.github/workflows/gingerscope-quality-loss-sensitivity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deterministic-economics-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run 8 deterministic tests for loss caps, stacks, target protection and learning quarantine
+        run: python3 -m unittest pdiddler.ci.test_quality_loss_sensitivity -v
+      - name: Static boundary check against real trading calls and network fetches
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          source=Path('pdiddler/intelligence_lab/quality_loss_sensitivity.py').read_text()
+          for token in ('FireServer(', 'AcceptTrade(', 'HttpGet(', 'requests.get(', 'urlopen(', 'DiscordWebhook'):
+              assert token not in source, f'Unsupported live action: {token}'
+          PY
