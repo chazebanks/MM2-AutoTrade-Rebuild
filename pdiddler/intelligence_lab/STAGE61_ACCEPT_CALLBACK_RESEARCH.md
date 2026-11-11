@@ -1,0 +1,41 @@
+# Stage61 — passive client AcceptTrade callback shape census
+
+**One question:** In the current original MM2 client, when an ordinary trade is manually completed, do incoming `ReplicatedStorage.Trade.AcceptTrade.OnClientEvent` callbacks carry first-argument `boolean false` and `boolean true` in the same order as a **historical decompiled client UI**? Is a second argument present as a table? These are **client UI semantics hypotheses**, not authoritative server transaction/settlement/profit receipts.
+
+## Preceding real observations
+
+- Stage59, manually completed ALT→MAIN eligible transfer, real independent ALT -1 and MAIN +1 eligible post-close client readbacks, operator says the transfer visibly completed. These are reciprocal client observations, not a verified session/transaction ID. Do not repeat this exact limited proof objective.
+- Stage33, one independently operator-confirmed manual exchange with two inbound `AcceptTrade` receipts (about 1.253 seconds apart), `UpdateTrade`, and later a Claim display; prior diagnostic intentionally attached zero-parameter callbacks and discarded all `AcceptTrade` arguments. Neither CompleteTrade nor EndTrade was seen.
+- Stage60 one-shot original MM2 native direct-child census: 16 RemoteEvents unchanged; 2 RemoteFunctions, `GetTradeStatus` and `SendRequest`; no result-specific function. Research evidence: [PR112 native result](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/112#issuecomment-6730130335).
+
+## Independent archival source audit (not current server documentation)
+
+The archived and possibly incomplete/decompiler-imperfect MM2 client snapshot, [decompiled v1456 TradeModule.lua](https://github.com/tlredz/decompiledGames/blob/0552a0f3502217a1cf89df66be9bd0f153e47fa4/murder-mystery-2/v1456/ReplicatedStorage/Modules/TradeModule.lua), registers an `AcceptTrade.OnClientEvent` callback with **two formal parameters**. Its first truthy argument causes the client to close the trade GUI and, if an optional list of items is present, show a received-item popup; the falsy case instead displays the partner Accepted indicator. Older [Trade.lua](https://github.com/tlredz/decompiledGames/blob/0552a0f3502217a1cf89df66be9bd0f153e47fa4/murder-mystery-2/v1456/Trade.lua) also branches on the first argument, closing the local trade UI on truthy and showing partner accepted on falsy.
+
+The same snapshot [Trading.lua](https://github.com/tlredz/decompiledGames/blob/0552a0f3502217a1cf89df66be9bd0f153e47fa4/murder-mystery-2/v1456/Trading.lua), [Trading_Phone.lua](https://github.com/tlredz/decompiledGames/blob/0552a0f3502217a1cf89df66be9bd0f153e47fa4/murder-mystery-2/v1456/Trading_Phone.lua), and [Trade.lua](https://github.com/tlredz/decompiledGames/blob/0552a0f3502217a1cf89df66be9bd0f153e47fa4/murder-mystery-2/v1456/Trade.lua) use `GetTradeStatus:InvokeServer()` for the CURRENT trade/request UI state. `StartTrade` / `ShowRequest` / `SendRequest` are handled as UI restoration branches. A contemporaneous third-party MM2 public script independently checks `GetTradeStatus()=="StartTrade"` or `!="None"` for currently in a trade. Such scripts are untrusted and should not be run, copied, or used as official modern MM2 server truth.
+
+**Roblox official API semantics:** [Roblox Remote events and callbacks](https://create.roblox.com/docs/scripting/events/remote) establishes that a RemoteEvent `OnClientEvent` callback receives server-sent arguments, but delivery is not proof that the server completed a particular atomic inventory exchange, and user-side callbacks have no cryptographic server attestation or unique transaction nonce by default. The source above is a reverse-engineered historical snapshot, NOT an independently authenticated current-game protocol.
+
+## Stage61 proof boundary and source design
+
+`pdiddler/new_part4/STAGE61_READONLY_ACCEPT_CALLBACK_TYPES.lua`:
+
+- One isolated, bounded passive listener to **only** `Trade.AcceptTrade.OnClientEvent`. Does not call `GetTradeStatus` or ANY RemoteFunction and never sends or calls any trade RPC, accepts, offers, declines, moves, or scans inventory.
+- Same original MM2 place, fresh stable GUI, unique `TradeGUI` or `TradeGUI_Phone` root, stable minimum 0.2sec; 90sec to open; 120sec to close; maximum 12 callback samples; bounded 2.5sec post-close grace; disconnect listener on every result. Fail closed for replaced GUI, concurrent visible roots, server hopping, timeouts and excess callbacks.
+- Callback samples record **only** relative local time (0.1sec precision), pre-bound/within-client-GUI/post-close phase, argument count bounded to 16, first argument `BOOLEAN_TRUE`, `BOOLEAN_FALSE`, `NIL`, `NO_ARGS` or `OTHER`, second argument `TABLE`, `NIL` or `OTHER`, and optional bounded array **length shape**. Never record actual item names, keys, quantities, identities, actor names, payload tables, inventory or JobId.
+- `historicalClientFlagHypothesisCompatible=true` only if an actual **false-before-true** pattern appears in the scoped GUI window without event truncation. It is a CLIENT code/GUI compatibility hint, not confirmed settlement or an observed per-trade session identifier. `tradeOutcome=UNKNOWN` and all automatic Accept, trade, completed/declined journal, profit and Discord strategy-learning permission flags remain **FALSE even when this hint is true**.
+- Small purple panel displays READY, GUI BOUND, CLOSED, FINISHED. An explicit button copies the final report on the **local device only**; no automatic clipboard copy. Original report also printed into Delta console. No ALT requirement for this particular receive-side event test.
+
+### When an actual iPad test is genuinely needed
+
+Only after **exact-head CI passes** (Lua5.4 whole-launcher mock, 200 seeded adversarial callbacks, full inherited intelligence regression). This is a *new protocol shape question*, separate from the already completed Stage59 reciprocal transfer. The next real observation has to include an ordinary **manually completed trade**, because a no-offer/no-Accept baseline test cannot generate the success-like first-argument path. It can be collected **during a naturally occurring voluntary low-value trade**, rather than deliberately sacrificing another item just to repeat Stage59. If no voluntary trade is available, leave the draft in research mode rather than fake success.
+
+Procedure for user (only after CI): fresh original MM2 join on MAIN iPad, choose Tablet, run one immutable SHA-pinned Stage61 read-only collector, wait READY, manually open a normal consensual trade within 90 seconds, wait panel says TRADE GUI BOUND before proceeding, and complete manually only if the user's terms make sense; the code will never touch or validate the offer. Let the window close, wait 2.5sec, tap COPY REPORT or copy single console marker, paste. If unwilling to complete a trade, manually decline; the result remains a decline control and no completion inference. Do **not** repeat Stage59 donor-to-receiver test or provide ALT report.
+
+**Next independent engineering issue after native observation:** If first BOOLEAN_TRUE correlates with a visibly completed transfer, combine this with existing Stage59 independent own-inventory client evidence and exact offer revision to design a **bounded per-session observational confidence model**, still not server-authenticated. To unlock the Discord completed/rejected learner, additional actor/partner/server session attribution must be proven and separately reviewed. Never treat remote name/boolean alone as an authenticated, idempotent completed-trade journal entry.
+
+## Tests
+
+- `pdiddler/intelligence_lab/test_stage61_accept_callback_types.py` executes the **real Lua5.4 source** in a fake Roblox client with scripted incoming callbacks and GUI state, tests false→true, reverse true→false, missing callbacks, delayed callbacks, overflow, malformed game, replaced GUI, source hard bans, no item-name leakage, plus 200 seeded repeats. These are mocks, not evidence of current MM2 behavior.
+- `.github/workflows/mm2-stage61-accept-callback-tests.yml` runs targeted suite and all inherited intelligent Python tests. CI must be exact HEAD green before any native loader.
+- Branch directly on post-Stage52 `main`, **DRAFT** research, not merged, does not reactivate legacy trading or Discord learner.

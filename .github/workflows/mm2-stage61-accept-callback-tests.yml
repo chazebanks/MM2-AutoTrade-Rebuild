@@ -1,0 +1,38 @@
+name: Stage61 passive AcceptTrade callback shape tests
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE61_READONLY_ACCEPT_CALLBACK_TYPES.lua'
+      - 'pdiddler/intelligence_lab/test_stage61_accept_callback_types.py'
+      - 'pdiddler/intelligence_lab/STAGE61_ACCEPT_CALLBACK_RESEARCH.md'
+      - '.github/workflows/mm2-stage61-accept-callback-tests.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage61-accept-client-callback-shapes
+    paths:
+      - 'pdiddler/new_part4/STAGE61_READONLY_ACCEPT_CALLBACK_TYPES.lua'
+      - 'pdiddler/intelligence_lab/test_stage61_accept_callback_types.py'
+      - 'pdiddler/intelligence_lab/STAGE61_ACCEPT_CALLBACK_RESEARCH.md'
+      - '.github/workflows/mm2-stage61-accept-callback-tests.yml'
+permissions:
+  contents: read
+jobs:
+  native-lua-client-receipt-types:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Execute real Lua source under privacy-safe native mock
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage61*.py'
+      - name: Run inherited intelligence suite
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
