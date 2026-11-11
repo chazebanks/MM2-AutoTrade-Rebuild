@@ -1,5 +1,27 @@
 # Project Gingerscope Stage119 — FIRST ORIGINAL MM2 read-only two-UpdateTrade LastOffer native diagnostic
 
+## NOVEMBER 11 2026 — MERGED PR225: NEW FIRST ORIGINAL MM2 STAGE119 READ-ONLY NATIVE LASTOFFER 2-CALLBACK DIAGNOSTIC (NOT YET TESTED ON IPAD)
+
+**Newest code milestone:** [PR225 merged](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/225) with history-preserving merge SHA `4241b0ea12ef3ddf51d0f97d282c9790a6a5b749`, reviewed exact PR head `bf4bb943a1d75059fe2c0567fc797b98b0f57d2f`. Original reviewed frozen native entrypoint `pdiddler/supervised/STAGE119_LASTOFFER_NATIVE.lua` Git blob `7cb6e0391599149e3271b51c80c21bb3559885f2`; actual native runner **imports frozen controller** commit `58f0bb357f467fb6764b077ec70c787fe1e059cf` / blob `bd9174a69d4c18c75a17ce0e84fb54a877242f12`. Workflow downloaded this precise controller and confirmed byte-for-byte identity with local tested source, preventing old PR220 lease pin mistakes. **SIX/SIX exact-head GitHub Actions SUCCESS** incl original-source real Lune native [run 42976486555](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/42976486555), **11 actual original Stage9 GUI Lune scenarios, 62 assertions, 4 Python integrity tests**; inherited official Luau/Lune, quality, sanitized replay and Hypothesis all GREEN. Real previous PR221 native and PR218 one-item offer scripts byte-identical; six additions only: native runner, pure controller, Lune mock, Python audit, CI, handoff.
+
+**NEW NATIVE GAME-READ-ONLY test now BUILT but NOT RUN on actual physical MAIN iPad.** It uses exact original MM2 PlaceId 142823291, MAIN iPad Delta, unique consenting ALT `venossgaming90190`, a fresh JobId and no other running pdiddler scripts, source-pinned original Stage9 physical GUI observer/contract, PR222 opaque LastOffer audit, PR224 2-event Stage9 quantity correlation and original Stage100 geometry with 12px collision margin + iPad safe areas. Fully noninteractive purple numbered current instructions, dynamically outside TradeGUI, UI failclosed if unsafe, user STOP/COPY after success. **NO scripted trade request, OfferItem, final Accept, Decline, teleport, pricing, Discord or result learning.**
+
+**ONE-LINE FROZEN MAIN Delta launcher (reviewed exact PR head):**
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/bf4bb943a1d75059fe2c0567fc797b98b0f57d2f/pdiddler/supervised/STAGE119_LASTOFFER_NATIVE.lua"))().start()
+```
+
+**ONE NEW MANUAL HUMAN ACTION SEQUENCE:**
+1. Fresh original MM2 server with trusted ALT already present. MAIN runs loader alone. Step 1: MAIN MANUALLY opens an EMPTY trade with ALT (neither offers anything).
+2. When purple step 2/3 actually appears (the real original Stage9 empty GUI baseline plus UpdateTrade subscription are ready), ALT MANUALLY adds exactly one cheap eligible weapon. MAIN offers nothing. Hold unchanged until GUI first quantity transition is stable.
+3. When step 3/3 appears, ALT MANUALLY removes that one weapon. MAIN remains empty. NO FINAL ACCEPT ON EITHER ACCOUNT. Keep window open until client result.
+4. After `DONE - MAIN MANUAL DECLINE` is displayed, MAIN manually Declines then taps purple `STOP / COPY`. Paste ONLY the sanitized JSON. If startup/GUI/event fails, test auto stops and copies INCONCLUSIVE; user supplies that JSON, does NOT rerun within same JobId. If no purple panel, consult clipboard/Delta console; do NOT manually act without visible step.
+
+**Client-only successful `STOP/COPY` target:** `status=STOPPED`, `reason=OPERATOR_STOPPED_AFTER_CLIENT_PASS`, `nativeStage118Status=CLIENT_TWO_EVENT_LASTOFFER_GUI_UNATTRIBUTED`, `callbackCount=2`, `guiQuantityTransitions=2`, `clientGuiQuantityCrossChecked=true`, `clientGuiCrossChecked=false` (no full item ID verification in this test). LastOffer equality class may be `CLIENT_LASTOFFER_CHANGED_WITH_DIFFERENT_OFFER` or `CLIENT_LASTOFFER_UNCHANGED_WITH_DIFFERENT_OFFER`. Both are **only client observations**, no authenticated server revision/nonce/settlement/unique item/profit. ALL `eventSessionAssociationProven`, `callbackCausalityProven`, `serverTradeRevisionProven`, `serverCompletionProven`, `rawItemIdConfirmed`, `authorizesTrade`, `authorizesOffer`, `authorizesAccept`, `mayReportProfit`, `maySendDiscordWebhook`, `mayUseForStrategyLearning` FALSE, `tradeOutcome=UNKNOWN`. Source/failclosed runner auto-denies no safe panel, wrong root/partner, duplicated callbacks, missing LastOffer, stale offer or accepted state. Hardware behavior is not yet known.
+
+**DO NOT REPEAT** real PR221 Stage101 two-sided weapon match, prior PR218 offer placement, PR222 historical source audit or PR224 offline two-event bridge. Once actual Stage119 iPad JSON arrives, analyze ONLY live LastOffer semantics and exact failure if inconclusive. Then advance independently to authenticated outcome constraints and market source/attractiveness/demand/liquidity/four-slot compounding/Gingerscope protection; no old +15 or forced highest-valued opener.
+
+
 ## Proven prior steps, not repeated
 
 - Original PR221 MAIN iPad/Delta Stage101 client ONLY 1/1 own+ALT game-key candidates and GUI cross-check PASSED ([real STOP/COPY](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/221#issuecomment-6788471060)); not an authenticated trade.
