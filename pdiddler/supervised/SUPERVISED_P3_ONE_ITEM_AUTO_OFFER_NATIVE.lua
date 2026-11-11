@@ -107,7 +107,7 @@ local planModule=loadFrozen("27e061555321c6a87bdd835ce3d1ff557443a909",
     "supervised/supervised_four_slot_operator_plan.lua")
 local operatorModule=loadFrozen("b124488a7a879b2d6a1bfb21401f497d7bfef677",
     "supervised/supervised_p3_one_item_operator.lua")
-local autoModule=loadFrozen("b23419685fb8d91c1845143804aed636cbc64dd9",
+local autoModule=loadFrozen("9a5a3c4db018ed7a00f8eacd6ca988cca3152a33",
     "supervised/supervised_p3_one_item_auto_gate.lua")
 if not geometry or type(geometry.choose)~="function"
     or not ioModule or type(ioModule.new)~="function"
