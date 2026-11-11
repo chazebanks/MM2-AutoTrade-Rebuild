@@ -1,0 +1,66 @@
+name: Gingerscope original P3 P4 Stage101 read-only identity witness
+on:
+  push:
+    branches:
+      - research/p3p4-stage101-live-lease-correlation
+    paths:
+      - 'pdiddler/supervised/supervised_p3_p4_stage101_identity_witness.lua'
+      - 'pdiddler/ci/supervised_p3_p4_stage101_identity_witness_tests.lua'
+      - 'pdiddler/ci/check_p3_p4_stage101_identity_witness.py'
+      - '.github/workflows/gingerscope-supervised-stage101-identity-witness.yml'
+      - 'pdiddler/supervised/SUPERVISED_P3_P4_STAGE101_IDENTITY_HANDOFF.md'
+  pull_request:
+    paths:
+      - 'pdiddler/supervised/supervised_p3_p4_stage101_identity_witness.lua'
+      - 'pdiddler/ci/supervised_p3_p4_stage101_identity_witness_tests.lua'
+      - 'pdiddler/ci/check_p3_p4_stage101_identity_witness.py'
+      - '.github/workflows/gingerscope-supervised-stage101-identity-witness.yml'
+      - 'pdiddler/supervised/SUPERVISED_P3_P4_STAGE101_IDENTITY_HANDOFF.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-stage101-original-p3p4-read-only-correlation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Fetch immutable original Stage101, original Stage9 physical GUI parser, Stage83 public names
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope-p3p4-identity
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/15f762a27a968373ed82809345f1869e1f688b26/pdiddler/intelligence_lab/stage101_multiweapon_raw_key_match.lua" -o /tmp/gingerscope-p3p4-identity/stage101.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope-p3p4-identity/stage9.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua" -o /tmp/gingerscope-p3p4-identity/stage83.lua
+          test "$(git hash-object /tmp/gingerscope-p3p4-identity/stage101.lua)" = 137585d778c3c08b8b6960013fa34a7b3fb7b463
+          test "$(git hash-object /tmp/gingerscope-p3p4-identity/stage9.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          test "$(git hash-object /tmp/gingerscope-p3p4-identity/stage83.lua)" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          echo ORIGINAL_STAGE101_STAGE9_STAGE83_EXACT_GIT_BLOBS_VERIFIED
+      - name: Compile true original frozen matcher and new protected read-only bridge
+        run: |
+          set -euo pipefail
+          luac5.4 -p pdiddler/supervised/supervised_p3_p4_stage101_identity_witness.lua
+          luac5.4 -p pdiddler/ci/supervised_p3_p4_stage101_identity_witness_tests.lua
+          luac5.4 -p /tmp/gingerscope-p3p4-identity/stage101.lua
+      - name: Run actual frozen Stage101 two-sided item and current P3/P4 bound GUI interaction tests
+        env:
+          STAGE117_WITNESS: pdiddler/supervised/supervised_p3_p4_stage101_identity_witness.lua
+          STAGE117_STAGE101: /tmp/gingerscope-p3p4-identity/stage101.lua
+          STAGE117_STAGE9: /tmp/gingerscope-p3p4-identity/stage9.lua
+          STAGE117_STAGE83: /tmp/gingerscope-p3p4-identity/stage83.lua
+        run: |
+          set -euo pipefail
+          lua5.4 pdiddler/ci/supervised_p3_p4_stage101_identity_witness_tests.lua
+      - name: Validate unchanged native P3 P4 auto offer with Python and deny trade authority
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.check_p3_p4_stage101_identity_witness
