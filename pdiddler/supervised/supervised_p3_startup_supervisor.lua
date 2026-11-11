@@ -212,6 +212,34 @@ function M.new(scanner,outgoingFactory,coordinatorModule,bridge,io,
   if not ok or type(v)~="boolean" then return nil end
   return v
  end
+ -- Expose only the PR215 revocable read-only client P4 lease.
+ -- No request, offer, Accept, Decline or mutable coordinator is returned.
+ function supervisor.currentBoundReadOnly()
+  if state~="ARMED" or not epochLive() then
+   return nil,result("BLOCKED","P3_BOUND_LEASE_NOT_ARMED_OR_STALE")
+  end
+  if not trueCall(ctx.onScreenSafe) or
+     not trueCall(ctx.watchdogReady) or
+     not trueCall(ctx.noOtherTransactionOwner) or
+     not trueCall(ctx.readyCheck) then
+   supervisor.stop()
+   return nil,result("BLOCKED","P3_BOUND_LEASE_SUPERVISION_UNSAFE")
+  end
+  if type(coordinator.currentBoundReadOnly)~="function" then
+   return nil,result("BLOCKED","P3_BOUND_LEASE_INTERFACE_UNAVAILABLE")
+  end
+  local ok,lease,info=pcall(coordinator.currentBoundReadOnly)
+  if not ok or type(lease)~="table" or
+     type(lease.capture)~="function" or
+     type(info)~="table" or
+     info.status~="P3_BOUND_CANDIDATE_READ_ONLY" or
+     info.authorizesOffer~=false or
+     info.authorizesAccept~=false or
+     info.serverCompletionProven~=false then
+   return nil,result("BLOCKED","P3_BOUND_LEASE_NOT_VERIFIED")
+  end
+  return lease,info
+ end
  function supervisor.resumeAfterClose()
   if state~="ARMED" then return false,"SUPERVISOR_NOT_ARMED" end
   if not epochLive() then return false,"P3_JOB_OR_EPOCH_CHANGED" end
