@@ -1,0 +1,56 @@
+name: Gingerscope archived LastOffer client-token provenance (offline)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua'
+      - 'pdiddler/ci/test_trade_lastoffer_client_audit.lua'
+      - 'pdiddler/ci/test_trade_lastoffer_source_audit.py'
+      - 'pdiddler/intelligence_lab/LASTOFFER_CLIENT_PROVENANCE_HANDOFF.md'
+      - '.github/workflows/gingerscope-lastoffer-client-provenance.yml'
+  push:
+    branches:
+      - research/gingerscope-lastoffer-client-provenance
+    paths:
+      - 'pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua'
+      - 'pdiddler/ci/test_trade_lastoffer_client_audit.lua'
+      - 'pdiddler/ci/test_trade_lastoffer_source_audit.py'
+      - 'pdiddler/intelligence_lab/LASTOFFER_CLIENT_PROVENANCE_HANDOFF.md'
+      - '.github/workflows/gingerscope-lastoffer-client-provenance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-source-lastoffer-research-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install real Lua 5.4
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Pin independent historical MM2 v1456 client (NOT current server semantics)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/tlredz/decompiledGames/0552a0f3502217a1cf89df66be9bd0f153e47fa4/murder-mystery-2/v1456/ReplicatedStorage/Modules/TradeModule.lua' -o "$RUNNER_TEMP/mm2_historical_trade.lua"
+          test "$(git hash-object "$RUNNER_TEMP/mm2_historical_trade.lua")" = '2785b13c0deb4ddd37942a5e85a5f5c35897d0f6'
+          grep -Fq 'lastOffer = data.LastOffer' "$RUNNER_TEMP/mm2_historical_trade.lua"
+          grep -Fq 'trade.AcceptTrade:FireServer(game.PlaceId * 3, lastOffer)' "$RUNNER_TEMP/mm2_historical_trade.lua"
+          echo HISTORICAL_CLIENT_LASTOFFER_FORWARDED_TO_ACCEPT_CONFIRMED_NOT_SERVER_AUTHORITY
+      - name: Parse current new research source and 11 Lua adversarial groups
+        env:
+          LASTOFFER_MODULE: pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua
+        run: |
+          set -euo pipefail
+          luac5.4 -p pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua
+          luac5.4 -p pdiddler/ci/test_trade_lastoffer_client_audit.lua
+          lua5.4 pdiddler/ci/test_trade_lastoffer_client_audit.lua
+      - name: Python original-source integrity, privacy and deny-authority checks
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_trade_lastoffer_source_audit
