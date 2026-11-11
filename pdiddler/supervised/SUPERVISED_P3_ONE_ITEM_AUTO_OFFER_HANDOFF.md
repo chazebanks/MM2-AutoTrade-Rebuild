@@ -1,5 +1,12 @@
 # Gingerscope — ONE prior-approved ALT auto item offer after actual stable P3→P4 client trade
 
+## POST TEST STATUS — FIRST ACTUAL MAIN iPAD DELTA AUTO-PLACEMENT **PASS** (2026-11-10 EST)
+
+**Supersedes older text below saying “not yet physically tested.”** Actual user supplied the expected **new** PR218 iPad `STOP / COPY` status, now archived in [PR218 evidence comment](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/218#issuecomment-6784936051). The report states `p3ArmObservedClient=true`, `clientTradeWindowObserved=true`, `autoOfferPreauthorizedClient=true`, `autoOfferTriggeredClient=true`, `oneItemTapObservedClient=false`, `offerAttemptsKnown=true`, `offerAttempts=1`, `clientVisibleAddedSlots=1`, `snapshotRejectReason=NONE`, `oneItemOfferStatus=CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED`, `clientResumeObserved=true`, `lastObservedStatus=P3_ROTATING`, `status=STOPPED`, `reason=OPERATOR_STOPPED`. This **closes the NEW first client auto-offer integration with no post-open tap**, not just its offline mocks. User did not provide selected weapon raw ID. No extra auto-offer implementation or native retest necessary from this receipt.
+
+**Completion flags remain FALSE:** `serverCompletionProven=false`, `authorizesAccept=false`, `authorizesOffer=false`, `mayReportProfit=false`, `maySendDiscordWebhook=false`, `tradeOutcome=UNKNOWN`. One client-visible physical slot is NOT an authenticated real MM2 trade completion, confirmed weapon transfer or value/profit. NO automatic final Accept or completed Discord webhook. Preserve exact original source from merged PR218; no changes were made to the runtime because this is a device success. Do not repeat older completed PR214, PR216, PR217 device proofs. Next step is an independently scoped server outcome/identity or strategy/consent issue, one at a time.
+
+
 ## POST-MERGE RELEASE STATE — PR218 MERGED, 6/6 CI PASS, DEVICE PROOF STILL PENDING
 
 **Merge verified:** [PR218](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/218) history-preserving merge commit `73d5fccecd2aa5af42017b52cfc9a766ba3554b2`. Final exact tested head `1ce22721744168e0d47012e71559ce75bb6795b1`, all 6 workflows green. New physically tested? **NO**: its automatic one-item path has never been run on the actual iPad yet; earlier native item placement PASS required a separate post-open OFFER tap. Original manual scripts unchanged.
