@@ -227,7 +227,7 @@ local function healthy(x)
  eq(#x.copied,1,"sanitized STOP/COPY")
  eq(x.copied[1]:find("Scythe",1,true),nil,"no raw weapon key")
  eq(x.copied[1]:find("venossgaming",1,true),nil,"no account identity")
- eq(x.E.PDIDDLER_STAGE119_LAST_JOB,"TEST_JOB_119","one-shot");
+ eq(x.E.PDIDDLER_STAGE119_LASTOFFER_USED_JOB,"TEST_JOB_119","one-shot");
  return r
 end
 local cases=0
