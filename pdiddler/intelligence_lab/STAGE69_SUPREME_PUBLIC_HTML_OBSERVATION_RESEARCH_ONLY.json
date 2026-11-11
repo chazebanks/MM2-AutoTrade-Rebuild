@@ -1,0 +1,1787 @@
+{
+  "schema": "gingerscope-stage69-research-only-site-html-reconciliation-v1",
+  "status": "SOURCE_OBSERVED_REVIEW_REQUIRED_NOT_LIVE_PRICING",
+  "gatheredAtUtc": "2026-11-09T04:38:35.341Z",
+  "sitePublisherTimestampClaimUtc": "2026-11-06T15:56:07.000Z",
+  "sourceRetrievalMethod": "Firecrawl public first-party rawHtml maxAge=0, exact metadata/display comparison",
+  "sourceByteHashAvailable": false,
+  "oldSnapshotCommit": "d9d7970f281f725ff21d1a409495fcc197e3d2dc",
+  "oldSnapshotBlobSha": "a85af4f6137278540e1fed0c27e7e801553e4111",
+  "parserPath": "pdiddler/intelligence_lab/stage69_supreme_parser_reference.py",
+  "parserRunAgainstTheseLiveBytes": false,
+  "githubActionsDirectSourceFetchBlockedHttp403": true,
+  "sourcePages": [
+    {
+      "source": "https://supremevalues.com/mm2/ancients",
+      "sitePublisherClaimUtc": "2026-11-06T15:56:07.000Z",
+      "httpContentLengthObserved": 76358,
+      "rawHtmlSha256": null,
+      "rawHtmlHashStatus": "NOT_OBTAINED_FROM_CONNECTOR",
+      "rawHtmlScrapeId": "01a1be99-ceea-7758-baac-4946cb9ffae2",
+      "structuredItemColumns": 16,
+      "eligibleItems": 16,
+      "knownExcludedNonWeaponOrHidden": []
+    },
+    {
+      "source": "https://supremevalues.com/mm2/chromas",
+      "sitePublisherClaimUtc": "2026-11-06T15:56:07.000Z",
+      "httpContentLengthObserved": 159756,
+      "rawHtmlSha256": null,
+      "rawHtmlHashStatus": "NOT_OBTAINED_FROM_CONNECTOR",
+      "rawHtmlScrapeId": "01a1be99-ced3-7129-83d0-66aae92342df",
+      "structuredItemColumns": 53,
+      "eligibleItems": 46,
+      "knownExcludedNonWeaponOrHidden": [
+        "Chroma Fire Bat",
+        "Chroma Fire Bear",
+        "Chroma Fire Bunny",
+        "Chroma Fire Cat",
+        "Chroma Fire Dog",
+        "Chroma Fire Fox",
+        "Chroma Fire Pig"
+      ]
+    },
+    {
+      "source": "https://supremevalues.com/mm2/godlies",
+      "sitePublisherClaimUtc": "2026-11-06T15:56:07.000Z",
+      "httpContentLengthObserved": 328791,
+      "rawHtmlSha256": null,
+      "rawHtmlHashStatus": "NOT_OBTAINED_FROM_CONNECTOR",
+      "rawHtmlScrapeId": "01a1be99-d054-738f-aeae-e42c934b528e",
+      "structuredItemColumns": 130,
+      "eligibleItems": 128,
+      "knownExcludedNonWeaponOrHidden": [
+        "Batwing",
+        "Black Luger"
+      ]
+    }
+  ],
+  "itemCoverage": {
+    "ancient": 16,
+    "chroma": 46,
+    "godly": 128,
+    "total": 190
+  },
+  "exactOldNameAndPageSetMatched": true,
+  "displayVsAttributeDisagreementCount": 0,
+  "changes": [
+    {
+      "page": "ancient",
+      "name": "Traveler's Axe",
+      "oldCheckerIdNotIndependentlyVerified": "743",
+      "field": "supremeValue",
+      "old": 7300,
+      "observed": 7100
+    },
+    {
+      "page": "ancient",
+      "name": "Emberbow",
+      "oldCheckerIdNotIndependentlyVerified": "1026",
+      "field": "supremeValue",
+      "old": 400,
+      "observed": 525
+    },
+    {
+      "page": "ancient",
+      "name": "Emberscythe",
+      "oldCheckerIdNotIndependentlyVerified": "1027",
+      "field": "supremeValue",
+      "old": 400,
+      "observed": 500
+    },
+    {
+      "page": "chroma",
+      "name": "Chroma Alienbeam",
+      "oldCheckerIdNotIndependentlyVerified": "927",
+      "field": "supremeValue",
+      "old": 23000,
+      "observed": 22000
+    },
+    {
+      "page": "chroma",
+      "name": "Chroma Alienbeam",
+      "oldCheckerIdNotIndependentlyVerified": "927",
+      "field": "stability",
+      "old": "Stable",
+      "observed": "Underpaid For"
+    },
+    {
+      "page": "chroma",
+      "name": "Chroma Emberscythe",
+      "oldCheckerIdNotIndependentlyVerified": "1036",
+      "field": "supremeValue",
+      "old": 11000,
+      "observed": 16000
+    },
+    {
+      "page": "chroma",
+      "name": "Chroma Emberbow",
+      "oldCheckerIdNotIndependentlyVerified": "1030",
+      "field": "supremeValue",
+      "old": 5000,
+      "observed": 6000
+    },
+    {
+      "page": "chroma",
+      "name": "Chroma Icecream",
+      "oldCheckerIdNotIndependentlyVerified": "1006",
+      "field": "supremeValue",
+      "old": 1850,
+      "observed": 1825
+    },
+    {
+      "page": "chroma",
+      "name": "Chroma Sands",
+      "oldCheckerIdNotIndependentlyVerified": "1007",
+      "field": "supremeValue",
+      "old": 1200,
+      "observed": 1150
+    },
+    {
+      "page": "chroma",
+      "name": "Chroma Beachy",
+      "oldCheckerIdNotIndependentlyVerified": "1008",
+      "field": "supremeValue",
+      "old": 1150,
+      "observed": 1100
+    },
+    {
+      "page": "chroma",
+      "name": "Chroma Embersickle",
+      "oldCheckerIdNotIndependentlyVerified": "1029",
+      "field": "supremeValue",
+      "old": 1300,
+      "observed": 1950
+    },
+    {
+      "page": "godly",
+      "name": "Traveler's Gun",
+      "oldCheckerIdNotIndependentlyVerified": "740",
+      "field": "supremeValue",
+      "old": 5200,
+      "observed": 5100
+    },
+    {
+      "page": "godly",
+      "name": "Darkshot",
+      "oldCheckerIdNotIndependentlyVerified": "741",
+      "field": "supremeValue",
+      "old": 1475,
+      "observed": 1450
+    },
+    {
+      "page": "godly",
+      "name": "Darksword",
+      "oldCheckerIdNotIndependentlyVerified": "742",
+      "field": "supremeValue",
+      "old": 1450,
+      "observed": 1425
+    },
+    {
+      "page": "godly",
+      "name": "Soul",
+      "oldCheckerIdNotIndependentlyVerified": "833",
+      "field": "supremeValue",
+      "old": 595,
+      "observed": 580
+    },
+    {
+      "page": "godly",
+      "name": "Spirit",
+      "oldCheckerIdNotIndependentlyVerified": "832",
+      "field": "supremeValue",
+      "old": 585,
+      "observed": 570
+    },
+    {
+      "page": "godly",
+      "name": "Xenoshot",
+      "oldCheckerIdNotIndependentlyVerified": "924",
+      "field": "supremeValue",
+      "old": 410,
+      "observed": 400
+    },
+    {
+      "page": "godly",
+      "name": "Xenoknife",
+      "oldCheckerIdNotIndependentlyVerified": "923",
+      "field": "supremeValue",
+      "old": 410,
+      "observed": 400
+    },
+    {
+      "page": "godly",
+      "name": "Icecream",
+      "oldCheckerIdNotIndependentlyVerified": "1005",
+      "field": "supremeValue",
+      "old": 140,
+      "observed": 135
+    },
+    {
+      "page": "godly",
+      "name": "Mortal",
+      "oldCheckerIdNotIndependentlyVerified": "1031",
+      "field": "supremeValue",
+      "old": 135,
+      "observed": 130
+    },
+    {
+      "page": "godly",
+      "name": "Immortal",
+      "oldCheckerIdNotIndependentlyVerified": "1032",
+      "field": "supremeValue",
+      "old": 135,
+      "observed": 130
+    },
+    {
+      "page": "godly",
+      "name": "Embersickle",
+      "oldCheckerIdNotIndependentlyVerified": "1028",
+      "field": "supremeValue",
+      "old": 95,
+      "observed": 130
+    },
+    {
+      "page": "godly",
+      "name": "Embersickle",
+      "oldCheckerIdNotIndependentlyVerified": "1028",
+      "field": "demand",
+      "old": 2,
+      "observed": 3
+    }
+  ],
+  "observedItemsFromSite": [
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "1",
+      "name": "Nik's Scythe",
+      "observedSupremeValue": null,
+      "observedDemand": 11,
+      "observedStability": "Overpaid For"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "771",
+      "name": "Gingerscope",
+      "observedSupremeValue": 16000,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "743",
+      "name": "Traveler's Axe",
+      "observedSupremeValue": 7100,
+      "observedDemand": 5,
+      "observedStability": "Underpaid For"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "860",
+      "name": "Celestial",
+      "observedSupremeValue": 1950,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "829",
+      "name": "Vampire's Axe",
+      "observedSupremeValue": 1425,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "1026",
+      "name": "Emberbow",
+      "observedSupremeValue": 525,
+      "observedDemand": 5,
+      "observedStability": "Fluctuating"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "1027",
+      "name": "Emberscythe",
+      "observedSupremeValue": 500,
+      "observedDemand": 5,
+      "observedStability": "Fluctuating"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "526",
+      "name": "Harvester",
+      "observedSupremeValue": 250,
+      "observedDemand": 3,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "661",
+      "name": "Icepiercer",
+      "observedSupremeValue": 160,
+      "observedDemand": 3,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "480",
+      "name": "Icebreaker",
+      "observedSupremeValue": 65,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "3",
+      "name": "Batwing",
+      "observedSupremeValue": 42,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "2",
+      "name": "Elderwood Scythe",
+      "observedSupremeValue": 38,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "529",
+      "name": "Swirly Axe",
+      "observedSupremeValue": 38,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "471",
+      "name": "Hallowscythe",
+      "observedSupremeValue": 30,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "404",
+      "name": "Logchopper",
+      "observedSupremeValue": 18,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "ancient",
+      "oldCheckerIdNotIndependentlyVerified": "4",
+      "name": "Icewing",
+      "observedSupremeValue": 13,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "739",
+      "name": "Chroma Traveler's Gun",
+      "observedSupremeValue": 140000,
+      "observedDemand": 8,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "772",
+      "name": "Chroma Evergun",
+      "observedSupremeValue": 47000,
+      "observedDemand": 7,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "773",
+      "name": "Chroma Evergreen",
+      "observedSupremeValue": 33000,
+      "observedDemand": 7,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "855",
+      "name": "Chroma Bauble",
+      "observedSupremeValue": 29000,
+      "observedDemand": 7,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "857",
+      "name": "Chroma Constellation",
+      "observedSupremeValue": 27000,
+      "observedDemand": 6,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "831",
+      "name": "Chroma Vampire's Gun",
+      "observedSupremeValue": 24500,
+      "observedDemand": 6,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "927",
+      "name": "Chroma Alienbeam",
+      "observedSupremeValue": 22000,
+      "observedDemand": 6,
+      "observedStability": "Underpaid For"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "1036",
+      "name": "Chroma Emberscythe",
+      "observedSupremeValue": 16000,
+      "observedDemand": 6,
+      "observedStability": "Fluctuating"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "928",
+      "name": "Chroma Raygun",
+      "observedSupremeValue": 12500,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "899",
+      "name": "Chroma Sunrise",
+      "observedSupremeValue": 8500,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "962",
+      "name": "Chroma Snowcannon",
+      "observedSupremeValue": 7750,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "1030",
+      "name": "Chroma Emberbow",
+      "observedSupremeValue": 6000,
+      "observedDemand": 6,
+      "observedStability": "Fluctuating"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "900",
+      "name": "Chroma Sunset",
+      "observedSupremeValue": 5500,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "957",
+      "name": "Chroma Blizzard",
+      "observedSupremeValue": 5500,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "958",
+      "name": "Chroma Snowstorm",
+      "observedSupremeValue": 4250,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "990",
+      "name": "Chroma Heart Wand",
+      "observedSupremeValue": 3500,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "960",
+      "name": "Chroma Snow Dagger",
+      "observedSupremeValue": 2350,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "810",
+      "name": "Chroma Watergun",
+      "observedSupremeValue": 2300,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "1006",
+      "name": "Chroma Icecream",
+      "observedSupremeValue": 1825,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "1033",
+      "name": "Chroma Mortal",
+      "observedSupremeValue": 1600,
+      "observedDemand": 5,
+      "observedStability": "Doing Well"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "1034",
+      "name": "Chroma Immortal",
+      "observedSupremeValue": 1600,
+      "observedDemand": 5,
+      "observedStability": "Doing Well"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "985",
+      "name": "Chroma Ornament",
+      "observedSupremeValue": 1825,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "992",
+      "name": "Chroma Treat",
+      "observedSupremeValue": 1775,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "991",
+      "name": "Chroma Sweet",
+      "observedSupremeValue": 1725,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "1007",
+      "name": "Chroma Sands",
+      "observedSupremeValue": 1150,
+      "observedDemand": 5,
+      "observedStability": "Underpaid For"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "1008",
+      "name": "Chroma Beachy",
+      "observedSupremeValue": 1100,
+      "observedDemand": 5,
+      "observedStability": "Underpaid For"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "1029",
+      "name": "Chroma Embersickle",
+      "observedSupremeValue": 1950,
+      "observedDemand": 5,
+      "observedStability": "Fluctuating"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "447",
+      "name": "Chroma Darkbringer",
+      "observedSupremeValue": 65,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "446",
+      "name": "Chroma Lightbringer",
+      "observedSupremeValue": 60,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "6",
+      "name": "Chroma Luger",
+      "observedSupremeValue": 50,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "8",
+      "name": "Chroma Laser",
+      "observedSupremeValue": 40,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "525",
+      "name": "Chroma Candleflame",
+      "observedSupremeValue": 40,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "13",
+      "name": "Chroma Deathshard",
+      "observedSupremeValue": 35,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "527",
+      "name": "Chroma Swirly Gun",
+      "observedSupremeValue": 35,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "616",
+      "name": "Chroma Elderwood Blade",
+      "observedSupremeValue": 37,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "7",
+      "name": "Chroma Shark",
+      "observedSupremeValue": 32,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "9",
+      "name": "Chroma Slasher",
+      "observedSupremeValue": 32,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "10",
+      "name": "Chroma Fang",
+      "observedSupremeValue": 32,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "439",
+      "name": "Chroma Gemstone",
+      "observedSupremeValue": 32,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "11",
+      "name": "Chroma Heat",
+      "observedSupremeValue": 28,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "659",
+      "name": "Chroma Cookiecane",
+      "observedSupremeValue": 32,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "14",
+      "name": "Chroma Tides",
+      "observedSupremeValue": 27,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "15",
+      "name": "Chroma Seer",
+      "observedSupremeValue": 28,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "17",
+      "name": "Chroma Gingerblade",
+      "observedSupremeValue": 27,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "12",
+      "name": "Chroma Saw",
+      "observedSupremeValue": 23,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "chroma",
+      "oldCheckerIdNotIndependentlyVerified": "16",
+      "name": "Chroma Boneblade",
+      "observedSupremeValue": 22,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "740",
+      "name": "Traveler's Gun",
+      "observedSupremeValue": 5100,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "770",
+      "name": "Evergun",
+      "observedSupremeValue": 3450,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "769",
+      "name": "Evergreen",
+      "observedSupremeValue": 2700,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "856",
+      "name": "Constellation",
+      "observedSupremeValue": 2500,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "830",
+      "name": "Vampire's Gun",
+      "observedSupremeValue": 1900,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "762",
+      "name": "Turkey",
+      "observedSupremeValue": 1850,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "926",
+      "name": "Alienbeam",
+      "observedSupremeValue": 1900,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "925",
+      "name": "Raygun",
+      "observedSupremeValue": 1875,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "741",
+      "name": "Darkshot",
+      "observedSupremeValue": 1450,
+      "observedDemand": 5,
+      "observedStability": "Underpaid For"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "742",
+      "name": "Darksword",
+      "observedSupremeValue": 1425,
+      "observedDemand": 5,
+      "observedStability": "Underpaid For"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "696",
+      "name": "Blossom",
+      "observedSupremeValue": 1160,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "697",
+      "name": "Sakura",
+      "observedSupremeValue": 1150,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "901",
+      "name": "Sunrise",
+      "observedSupremeValue": 800,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "961",
+      "name": "Snowcannon",
+      "observedSupremeValue": 675,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "854",
+      "name": "Bauble",
+      "observedSupremeValue": 675,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "902",
+      "name": "Sunset",
+      "observedSupremeValue": 650,
+      "observedDemand": 5,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "833",
+      "name": "Soul",
+      "observedSupremeValue": 580,
+      "observedDemand": 5,
+      "observedStability": "Underpaid For"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "832",
+      "name": "Spirit",
+      "observedSupremeValue": 570,
+      "observedDemand": 5,
+      "observedStability": "Underpaid For"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "924",
+      "name": "Xenoshot",
+      "observedSupremeValue": 400,
+      "observedDemand": 4,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "923",
+      "name": "Xenoknife",
+      "observedSupremeValue": 400,
+      "observedDemand": 4,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "715",
+      "name": "Rainbow Gun",
+      "observedSupremeValue": 405,
+      "observedDemand": 4,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "891",
+      "name": "Flora",
+      "observedSupremeValue": 400,
+      "observedDemand": 4,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "714",
+      "name": "Rainbow",
+      "observedSupremeValue": 400,
+      "observedDemand": 4,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "890",
+      "name": "Bloom",
+      "observedSupremeValue": 395,
+      "observedDemand": 4,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "989",
+      "name": "Heart Wand",
+      "observedSupremeValue": 340,
+      "observedDemand": 4,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "955",
+      "name": "Blizzard",
+      "observedSupremeValue": 250,
+      "observedDemand": 3,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "956",
+      "name": "Snowstorm",
+      "observedSupremeValue": 250,
+      "observedDemand": 3,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "728",
+      "name": "Ocean",
+      "observedSupremeValue": 245,
+      "observedDemand": 3,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "795",
+      "name": "Flowerwood Gun",
+      "observedSupremeValue": 240,
+      "observedDemand": 3,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "727",
+      "name": "Waves",
+      "observedSupremeValue": 240,
+      "observedDemand": 3,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "794",
+      "name": "Flowerwood",
+      "observedSupremeValue": 235,
+      "observedDemand": 3,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "959",
+      "name": "Snow Dagger",
+      "observedSupremeValue": 175,
+      "observedDemand": 3,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "988",
+      "name": "Treat",
+      "observedSupremeValue": 155,
+      "observedDemand": 3,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "1005",
+      "name": "Icecream",
+      "observedSupremeValue": 135,
+      "observedDemand": 2,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "811",
+      "name": "Watergun",
+      "observedSupremeValue": 140,
+      "observedDemand": 2,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "987",
+      "name": "Sweet",
+      "observedSupremeValue": 150,
+      "observedDemand": 3,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "1031",
+      "name": "Mortal",
+      "observedSupremeValue": 130,
+      "observedDemand": 3,
+      "observedStability": "Fluctuating"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "1032",
+      "name": "Immortal",
+      "observedSupremeValue": 130,
+      "observedDemand": 3,
+      "observedStability": "Fluctuating"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "859",
+      "name": "Borealis",
+      "observedSupremeValue": 135,
+      "observedDemand": 2,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "858",
+      "name": "Australis",
+      "observedSupremeValue": 130,
+      "observedDemand": 2,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "618",
+      "name": "Bat",
+      "observedSupremeValue": 125,
+      "observedDemand": 2,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "23",
+      "name": "Candy",
+      "observedSupremeValue": 80,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "1028",
+      "name": "Embersickle",
+      "observedSupremeValue": 130,
+      "observedDemand": 3,
+      "observedStability": "Fluctuating"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "813",
+      "name": "Pearlshine",
+      "observedSupremeValue": 80,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "1003",
+      "name": "Beachy",
+      "observedSupremeValue": 75,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "1004",
+      "name": "Sands",
+      "observedSupremeValue": 75,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "812",
+      "name": "Pearl",
+      "observedSupremeValue": 75,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "512",
+      "name": "Heartblade",
+      "observedSupremeValue": 65,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "984",
+      "name": "Ornament",
+      "observedSupremeValue": 65,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "20",
+      "name": "Red Luger",
+      "observedSupremeValue": 35,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "620",
+      "name": "Phantom",
+      "observedSupremeValue": 35,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "621",
+      "name": "Spectre",
+      "observedSupremeValue": 35,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "524",
+      "name": "Candleflame",
+      "observedSupremeValue": 33,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "18",
+      "name": "Elderwood Revolver",
+      "observedSupremeValue": 33,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "448",
+      "name": "Darkbringer",
+      "observedSupremeValue": 33,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "481",
+      "name": "Iceblaster",
+      "observedSupremeValue": 33,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "22",
+      "name": "Sugar",
+      "observedSupremeValue": 32,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "617",
+      "name": "Makeshift",
+      "observedSupremeValue": 33,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "445",
+      "name": "Lightbringer",
+      "observedSupremeValue": 32,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "619",
+      "name": "Elderwood Blade",
+      "observedSupremeValue": 33,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "21",
+      "name": "Green Luger",
+      "observedSupremeValue": 23,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "30",
+      "name": "Amerilaser",
+      "observedSupremeValue": 22,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "46",
+      "name": "Laser",
+      "observedSupremeValue": 22,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "472",
+      "name": "Hallowgun",
+      "observedSupremeValue": 20,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "532",
+      "name": "Icebeam",
+      "observedSupremeValue": 18,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "48",
+      "name": "Shark",
+      "observedSupremeValue": 20,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "572",
+      "name": "Plasmabeam",
+      "observedSupremeValue": 18,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "63",
+      "name": "Nightblade",
+      "observedSupremeValue": 20,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "528",
+      "name": "Swirly Gun",
+      "observedSupremeValue": 18,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "531",
+      "name": "Iceflake",
+      "observedSupremeValue": 15,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "32",
+      "name": "BattleAxe II",
+      "observedSupremeValue": 17,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "34",
+      "name": "Pixel",
+      "observedSupremeValue": 17,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "36",
+      "name": "Ginger Luger",
+      "observedSupremeValue": 17,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "31",
+      "name": "Old Glory",
+      "observedSupremeValue": 15,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "35",
+      "name": "Blaster",
+      "observedSupremeValue": 17,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "39",
+      "name": "Luger",
+      "observedSupremeValue": 18,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "573",
+      "name": "Plasmablade",
+      "observedSupremeValue": 15,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "37",
+      "name": "Virtual",
+      "observedSupremeValue": 13,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "43",
+      "name": "Slasher",
+      "observedSupremeValue": 15,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "405",
+      "name": "Minty",
+      "observedSupremeValue": 13,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "408",
+      "name": "Lugercane",
+      "observedSupremeValue": 13,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "473",
+      "name": "Vampire's Edge",
+      "observedSupremeValue": 15,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "482",
+      "name": "Jinglegun",
+      "observedSupremeValue": 13,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "660",
+      "name": "Cookiecane",
+      "observedSupremeValue": 13,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "662",
+      "name": "Gingermint",
+      "observedSupremeValue": 12,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "522",
+      "name": "Nebula",
+      "observedSupremeValue": 13,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "530",
+      "name": "Swirly Blade",
+      "observedSupremeValue": 12,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "49",
+      "name": "Deathshard",
+      "observedSupremeValue": 13,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "57",
+      "name": "BattleAxe",
+      "observedSupremeValue": 12,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "60",
+      "name": "Gingerblade",
+      "observedSupremeValue": 13,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "379",
+      "name": "Eternalcane",
+      "observedSupremeValue": 13,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "440",
+      "name": "Gemstone",
+      "observedSupremeValue": 15,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "24",
+      "name": "Chill",
+      "observedSupremeValue": 10,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "28",
+      "name": "Clockwork",
+      "observedSupremeValue": 10,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "33",
+      "name": "Spider",
+      "observedSupremeValue": 10,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "40",
+      "name": "Heat",
+      "observedSupremeValue": 10,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "42",
+      "name": "Tides",
+      "observedSupremeValue": 10,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "47",
+      "name": "Fang",
+      "observedSupremeValue": 10,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "26",
+      "name": "Eternal",
+      "observedSupremeValue": 7,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "41",
+      "name": "Xmas",
+      "observedSupremeValue": 7,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "58",
+      "name": "Frostsaber",
+      "observedSupremeValue": 10,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "441",
+      "name": "Eternal III",
+      "observedSupremeValue": 8,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "444",
+      "name": "Bioblade",
+      "observedSupremeValue": 8,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "467",
+      "name": "Eternal IV",
+      "observedSupremeValue": 8,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "25",
+      "name": "Handsaw",
+      "observedSupremeValue": 8,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "29",
+      "name": "Hallow's Edge",
+      "observedSupremeValue": 8,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "59",
+      "name": "Ice Shard",
+      "observedSupremeValue": 7,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "19",
+      "name": "Eternal II",
+      "observedSupremeValue": 7,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "27",
+      "name": "Boneblade",
+      "observedSupremeValue": 7,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "44",
+      "name": "Pumpking",
+      "observedSupremeValue": 7,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "45",
+      "name": "Saw",
+      "observedSupremeValue": 7,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "62",
+      "name": "Ghostblade",
+      "observedSupremeValue": 7,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "38",
+      "name": "Flames",
+      "observedSupremeValue": 5,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "50",
+      "name": "Winter's Edge",
+      "observedSupremeValue": 5,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "51",
+      "name": "Ice Dragon",
+      "observedSupremeValue": 7,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "64",
+      "name": "Hallow's Blade",
+      "observedSupremeValue": 8,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "407",
+      "name": "Frostbite",
+      "observedSupremeValue": 7,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "521",
+      "name": "Eggblade",
+      "observedSupremeValue": 5,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "61",
+      "name": "Snowflake",
+      "observedSupremeValue": 5,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "468",
+      "name": "Prismatic",
+      "observedSupremeValue": 7,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "479",
+      "name": "Peppermint",
+      "observedSupremeValue": 4,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "483",
+      "name": "Cookieblade",
+      "observedSupremeValue": 3,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "52",
+      "name": "Red Seer",
+      "observedSupremeValue": 3,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "53",
+      "name": "Blue Seer",
+      "observedSupremeValue": 3,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "54",
+      "name": "Purple Seer",
+      "observedSupremeValue": 3,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "889",
+      "name": "Seer",
+      "observedSupremeValue": 3,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "55",
+      "name": "Orange Seer",
+      "observedSupremeValue": 2,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    },
+    {
+      "page": "godly",
+      "oldCheckerIdNotIndependentlyVerified": "56",
+      "name": "Yellow Seer",
+      "observedSupremeValue": 2,
+      "observedDemand": 1,
+      "observedStability": "Stable"
+    }
+  ],
+  "approval": {
+    "sitePublisherTimestampIndependentlyAuthenticated": false,
+    "oldCheckerIdsIndependentlyMappedToMm2RawWeaponKeys": false,
+    "fullLiveParserExecuted": false,
+    "sourceByteShaVerified": false,
+    "canPublishSnapshot": false,
+    "livePriceReady": false,
+    "canSendTrades": false,
+    "canAcceptTrades": false,
+    "canReportProfit": false,
+    "canTrainDiscordLearner": false
+  }
+}

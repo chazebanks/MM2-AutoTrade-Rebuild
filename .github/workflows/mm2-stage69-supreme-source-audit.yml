@@ -1,0 +1,69 @@
+name: Stage69 first-party Supreme source identity and valuation audit
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage69_supreme_parser_reference.py'
+      - 'scripts/stage69_supreme_source_audit.py'
+      - 'pdiddler/intelligence_lab/test_stage69*.py'
+      - 'pdiddler/intelligence_lab/STAGE69_SUPREME_PUBLIC_HTML_OBSERVATION_RESEARCH_ONLY.json'
+      - 'pdiddler/intelligence_lab/STAGE69_SUPREME_SOURCE_REFRESH_RESEARCH.md'
+      - '.github/workflows/mm2-stage69-supreme-source-audit.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage69-supreme-source-audit
+    paths:
+      - 'pdiddler/intelligence_lab/stage69_supreme_parser_reference.py'
+      - 'scripts/stage69_supreme_source_audit.py'
+      - 'pdiddler/intelligence_lab/test_stage69*.py'
+      - 'pdiddler/intelligence_lab/STAGE69_SUPREME_PUBLIC_HTML_OBSERVATION_RESEARCH_ONLY.json'
+      - 'pdiddler/intelligence_lab/STAGE69_SUPREME_SOURCE_REFRESH_RESEARCH.md'
+      - '.github/workflows/mm2-stage69-supreme-source-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-safe-auditor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Compile the research-only parser and audit
+        run: |
+          python3 -m compileall -q scripts/stage69_supreme_source_audit.py pdiddler/intelligence_lab/stage69_supreme_parser_reference.py
+      - name: Focused complete, changed, missing, malformed and 400 seed tests
+        run: |
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage69*.py'
+      - name: Full mainline intelligence regression suite
+        run: |
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
+  research-only-live-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Obtain immutable Stage26 reference baseline (does not refresh trading quotes)
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 2 --max-time 30 \
+            'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/d9d7970f281f725ff21d1a409495fcc197e3d2dc/pdiddler/snapshots/supreme_snapshot_2026_11_06.json' \
+            -o /tmp/stage69_baseline.json
+          test "$(git hash-object /tmp/stage69_baseline.json)" = 'a85af4f6137278540e1fed0c27e7e801553e4111'
+      - name: Read original Supreme pages and generate quarantined audit only
+        run: |
+          set -euo pipefail
+          python3 scripts/stage69_supreme_source_audit.py \
+            --baseline /tmp/stage69_baseline.json \
+            --fetch-live \
+            --output /tmp/stage69_supreme_source_research_only.json
+      - name: Preserve review-only source hash and item drift report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage69_supreme_source_research_audit
+          path: /tmp/stage69_supreme_source_research_only.json
+          if-no-files-found: warn
+          retention-days: 7
