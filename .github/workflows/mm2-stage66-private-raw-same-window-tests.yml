@@ -1,0 +1,56 @@
+name: Stage66 one-window private raw receipt equality
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE66_READONLY_ACCEPT_PRIVATE_RAW_EQUALITY.lua'
+      - 'pdiddler/new_part4/STAGE66_ROLE_NEUTRAL_PRIVATE_RAW_SNAPSHOTS.lua'
+      - 'pdiddler/intelligence_lab/test_stage66_private_raw_receipt_same_window.py'
+      - 'pdiddler/intelligence_lab/STAGE66_PRIVATE_RAW_SAME_WINDOW_HANDOFF.md'
+      - '.github/workflows/mm2-stage66-private-raw-same-window-tests.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage66-private-raw-receipt-same-window
+    paths:
+      - 'pdiddler/new_part4/STAGE66_READONLY_ACCEPT_PRIVATE_RAW_EQUALITY.lua'
+      - 'pdiddler/new_part4/STAGE66_ROLE_NEUTRAL_PRIVATE_RAW_SNAPSHOTS.lua'
+      - 'pdiddler/intelligence_lab/test_stage66_private_raw_receipt_same_window.py'
+      - 'pdiddler/intelligence_lab/STAGE66_PRIVATE_RAW_SAME_WINDOW_HANDOFF.md'
+      - '.github/workflows/mm2-stage66-private-raw-same-window-tests.yml'
+permissions:
+  contents: read
+jobs:
+  private-raw-equality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install native Lua5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Retrieve and independently verify immutable dependent source bytes
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 2 --max-time 30 \
+            "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/d8af380dfb951609ad52cba138c7856914baabd9/pdiddler/new_part4/STAGE66_ROLE_NEUTRAL_PRIVATE_RAW_SNAPSHOTS.lua" \
+            -o /tmp/stage66_pinned_raw_core.lua
+          test "$(git hash-object /tmp/stage66_pinned_raw_core.lua)" = "1579a2a70047783e8579f91540ff03037e13ba59"
+          curl -fsSL --retry 2 --max-time 30 \
+            "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/27263d7e2fe44a0da842b7062eff7c91c6ea3b65/pdiddler/intelligence_lab/p4_stage65_private_raw_receipt_equality.lua" \
+            -o /tmp/stage66_pinned_helper.lua
+          test "$(git hash-object /tmp/stage66_pinned_helper.lua)" = "31cb7b1e1dce90c5360cddf2d5a65317d1ab01d0"
+          luac5.4 -p /tmp/stage66_pinned_raw_core.lua
+          luac5.4 -p /tmp/stage66_pinned_helper.lua
+          luac5.4 -p pdiddler/new_part4/STAGE66_READONLY_ACCEPT_PRIVATE_RAW_EQUALITY.lua
+      - name: Test actual Lua privacy wrapper and raw parser against adversarial game mocks
+        env:
+          STAGE66_HELPER_PATH: /tmp/stage66_pinned_helper.lua
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage66*.py'
+      - name: Entire inherited mainline intelligence Python regression suite
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
