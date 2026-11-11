@@ -288,7 +288,16 @@ function M.start(test)
     root=scope.root,localPlayer=lp,partnerPlayer=target,raw=observerCache}
   end,
   connect=function(callback)
-   return remote.OnClientEvent:Connect(callback)
+   return remote.OnClientEvent:Connect(function(...)
+    local ok,r=pcall(callback,...)
+    if not ok then
+     fail("CLIENT_CALLBACK_HANDLER_FAILED")
+    elseif type(r)~="table" then
+     fail("CLIENT_CALLBACK_RECEIPT_UNAVAILABLE")
+    elseif r.status=="INCONCLUSIVE" or r.status=="STOPPED" then
+     fail(r.reason or "CLIENT_CALLBACK_INVALID")
+    end
+   end)
   end,
   bridge=src.stage118,audit=src.lastoffer,stage9=src.stage9,
   show=uiShow,hide=function()if ui then ui.panel.Visible=false end end
