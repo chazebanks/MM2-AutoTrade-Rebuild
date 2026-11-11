@@ -1,0 +1,79 @@
+name: Gingerscope Stage88 standalone contact-only preview
+on:
+  push:
+    branches:
+      - integration/gingerscope-stage88-contact-only-preview
+    paths:
+      - 'pdiddler/new_part4/STAGE88_CONTACT_READONLY_PREVIEW.lua'
+      - 'pdiddler/presentation/pdiddler3_scanner_view_contact_v1.lua'
+      - 'pdiddler/tests/test_stage88_contact_readonly_preview.lua'
+      - 'pdiddler/intelligence_lab/STAGE88_CONTACT_ONLY_PREVIEW_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage88-contact-preview.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE88_CONTACT_READONLY_PREVIEW.lua'
+      - 'pdiddler/presentation/pdiddler3_scanner_view_contact_v1.lua'
+      - 'pdiddler/tests/test_stage88_contact_readonly_preview.lua'
+      - 'pdiddler/intelligence_lab/STAGE88_CONTACT_ONLY_PREVIEW_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage88-contact-preview.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-contact-sources-no-physical-actions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install actual Lua5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Verify FOUR original source Git blobs and stage-specific code
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/stage88
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/7a289d62ef3f0be0a299506eb451c57435493be3/pdiddler/presentation/pdiddler3_scanner_MODULE_v6_10_CURRENT_PRESENTATION.lua' -o /tmp/stage88/scanner.lua
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/a00be9c54825b9b91fcfa394dc11d300fcce3575/pdiddler/presentation/pdiddler3_scanner_view_contact_v1.lua' -o /tmp/stage88/view.lua
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/f1a0492ab5959f31be3544bf04ee8a514e09255f/pdiddler/new_part4/P3_ELIGIBILITY_NO_LEGACY_PROFIT.lua' -o /tmp/stage88/p3.lua
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/f1a0492ab5959f31be3544bf04ee8a514e09255f/pdiddler/pdiddler3_outgoing_eligibility_v2_SCANNER_EVIDENCE.lua' -o /tmp/stage88/outgoing_eligibility.lua
+          test "$(git hash-object /tmp/stage88/scanner.lua)" = '582ee3638faf920da30bcc5716c61c455f953da4'
+          test "$(git hash-object /tmp/stage88/view.lua)" = '955433501103e8fcd844795e4814d826cdd3bd30'
+          test "$(git hash-object /tmp/stage88/p3.lua)" = 'a4ed1e09636032ba3797cf55ba0177f9b1a3c252'
+          test "$(git hash-object /tmp/stage88/outgoing_eligibility.lua)" = '2c833de74c5d2779183400e6f15b703e14b41899'
+          cmp /tmp/stage88/view.lua pdiddler/presentation/pdiddler3_scanner_view_contact_v1.lua
+      - name: Run actual standalone preview against synthetic scanner and real Stage87 Lua
+        run: |
+          set -euo pipefail
+          luac5.4 -p pdiddler/new_part4/STAGE88_CONTACT_READONLY_PREVIEW.lua
+          luac5.4 -p pdiddler/presentation/pdiddler3_scanner_view_contact_v1.lua
+          luac5.4 -p pdiddler/tests/test_stage88_contact_readonly_preview.lua
+          lua5.4 pdiddler/tests/test_stage88_contact_readonly_preview.lua
+      - name: Check forbidden physical interfaces are absent in actual loader
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("pdiddler/new_part4/STAGE88_CONTACT_READONLY_PREVIEW.lua").read_text()
+          assert 'PDIDDLER_STAGE88_CONTACT_READONLY_ARMED' in p
+          assert 'currentPricesVerified=false' in p
+          assert 'sourcePublisherFresh=false' in p
+          assert 'authorizesAccept=false' in p
+          assert 'authorizesTrade=false' in p
+          assert 'maySendDiscordWebhook=false' in p
+          assert 'readOnly=true' in p
+          assert 'game.PlaceId~=142823291' in p
+          assert 'STAGE88_NO_VERIFIED_QUOTE' in p
+          assert 'PRICES_UNVERIFIED_CONTACT_ONLY' in p
+          assert 'return scanner.setOutgoingState(player,state,reason2)' in p
+          for s in (':FireServer(',':InvokeServer(',':Teleport(',':TeleportToPlaceInstance(',
+                    'AcceptTrade','TradeRequest:','StartTrade(',':HttpPost(',':PostAsync(',
+                    'P4_REPRICE_ONLY.lua','PDIDDLER_PART4_REPLACEMENT.lua',
+                    'pdiddler3_outgoing_ROTATING_v18'):
+              assert s not in p, f'Physical or old price path imported: {s}'
+          assert p.count('game:HttpGet(')==1, 'unexpected mutable fetches'
+          print("STAGE88_POLICY_PASS no physical trading, request, hop, Discord or verified price path")
+          PY
