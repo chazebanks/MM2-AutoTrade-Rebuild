@@ -1,0 +1,67 @@
+name: Gingerscope Stage84 new-publisher Supreme research-only validation
+on:
+  push:
+    branches:
+      - research/gingerscope-stage84-nov9-publisher-refresh
+    paths:
+      - 'pdiddler/research_source_html/stage84_2026_11_09/**'
+      - 'pdiddler/intelligence_lab/stage84_nov9_publisher_refresh.py'
+      - 'pdiddler/intelligence_lab/STAGE84_NEW_PUBLISHER_HANDOFF.md'
+      - 'pdiddler/tests/test_stage84_nov9_publisher_refresh.py'
+      - '.github/workflows/gingerscope-stage84-nov9-new-publisher.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/research_source_html/stage84_2026_11_09/**'
+      - 'pdiddler/intelligence_lab/stage84_nov9_publisher_refresh.py'
+      - 'pdiddler/intelligence_lab/STAGE84_NEW_PUBLISHER_HANDOFF.md'
+      - 'pdiddler/tests/test_stage84_nov9_publisher_refresh.py'
+      - '.github/workflows/gingerscope-stage84-nov9-new-publisher.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-publisher-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Fetch exact reviewed Stage69 parser and original baseline
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope84
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/refresh_supreme_snapshot.py' -o /tmp/gingerscope84/refresh_supreme_snapshot.py
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/stage69_manifest_provenance.py' -o /tmp/gingerscope84/stage69_manifest_provenance.py
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/snapshots/supreme_snapshot_2026_11_06.json' -o /tmp/gingerscope84/baseline_190.json
+          test "$(git hash-object /tmp/gingerscope84/refresh_supreme_snapshot.py)" = 'd5843a57f34078cbe7213aa78a4aa12a5775c016'
+          test "$(git hash-object /tmp/gingerscope84/stage69_manifest_provenance.py)" = '9b6faa9f7a9890d69635542529703fedc8e4d55f'
+          test "$(git hash-object /tmp/gingerscope84/baseline_190.json)" = 'a85af4f6137278540e1fed0c27e7e801553e4111'
+          test "$(git hash-object pdiddler/research_source_html/stage84_2026_11_09/ancients.html)" = 'ce8178ab9579e8782d8f72a6dac051756a728506'
+          test "$(git hash-object pdiddler/research_source_html/stage84_2026_11_09/godlies.html)" = 'd3cf222a8e10cff3a9fb051b16188192389c4b2d'
+          test "$(git hash-object pdiddler/research_source_html/stage84_2026_11_09/chromas.html)" = '6c77624cac3df96168b008e9bc8eca68a2d78cf9'
+      - name: Run real first-party publication/190-identity tests and 400 mutation cases
+        env:
+          STAGE84_REQUIRE_PINNED: '1'
+          STAGE84_REVIEWED_PARSER: /tmp/gingerscope84/refresh_supreme_snapshot.py
+          STAGE84_MANIFEST_READER: /tmp/gingerscope84/stage69_manifest_provenance.py
+          STAGE84_ROSTER: /tmp/gingerscope84/baseline_190.json
+        run: |
+          set -euo pipefail
+          python3 -m py_compile pdiddler/intelligence_lab/stage84_nov9_publisher_refresh.py pdiddler/tests/test_stage84_nov9_publisher_refresh.py
+          python3 -m unittest -v pdiddler.tests.test_stage84_nov9_publisher_refresh
+      - name: Generate new research-only candidate WITHOUT promoting trade authority
+        run: |
+          set -euo pipefail
+          python3 pdiddler/intelligence_lab/stage84_nov9_publisher_refresh.py \
+            --source-dir pdiddler/research_source_html/stage84_2026_11_09 \
+            --manifest pdiddler/research_source_html/stage84_2026_11_09/source_manifest.json \
+            --parser /tmp/gingerscope84/refresh_supreme_snapshot.py \
+            --manifest-reader /tmp/gingerscope84/stage69_manifest_provenance.py \
+            --roster /tmp/gingerscope84/baseline_190.json \
+            --output /tmp/gingerscope84/stage84_nov9_research_only.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-stage84-nov9-research-only
+          path: /tmp/gingerscope84/stage84_nov9_research_only.json
+          retention-days: 14
