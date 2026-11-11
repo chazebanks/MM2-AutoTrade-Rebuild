@@ -1,0 +1,82 @@
+name: Gingerscope Stage95 real P4 raw-slot evidence boundary (offline)
+on:
+  push:
+    branches:
+      - research/gingerscope-stage95-p4-identity-boundary
+    paths:
+      - 'pdiddler/intelligence_lab/stage95_p4_public_slot_boundary.lua'
+      - 'pdiddler/tests/test_stage95_p4_public_slot_boundary.lua'
+      - 'pdiddler/intelligence_lab/STAGE95_P4_IDENTITY_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage95-p4-identity-boundary.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage95_p4_public_slot_boundary.lua'
+      - 'pdiddler/tests/test_stage95_p4_public_slot_boundary.lua'
+      - 'pdiddler/intelligence_lab/STAGE95_P4_IDENTITY_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage95-p4-identity-boundary.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-stage9-and-public-registry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install original Lua 5.4 runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Download and verify original Stage9 native+contract and Stage83 public registry
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope95
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_native_observer.lua" -o /tmp/gingerscope95/native.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope95/contract.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua" -o /tmp/gingerscope95/registry.lua
+          test "$(git hash-object /tmp/gingerscope95/native.lua)" = a6338e946467ad738005bc5cb13cd2d2fbc2a2d0
+          test "$(git hash-object /tmp/gingerscope95/contract.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          test "$(git hash-object /tmp/gingerscope95/registry.lua)" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          echo STAGE95_ORIGINAL_THREE_GIT_BLOBS_VERIFIED
+      - name: Run actual original Stage9 adapter with Stage95 wrapper; 400 negative cases
+        env:
+          STAGE95_MODULE: pdiddler/intelligence_lab/stage95_p4_public_slot_boundary.lua
+          STAGE95_ORIGINAL_NATIVE: /tmp/gingerscope95/native.lua
+          STAGE95_ORIGINAL_CONTRACT: /tmp/gingerscope95/contract.lua
+          STAGE95_ORIGINAL_REGISTRY: /tmp/gingerscope95/registry.lua
+        run: |
+          set -euo pipefail
+          luac5.4 -p pdiddler/intelligence_lab/stage95_p4_public_slot_boundary.lua
+          luac5.4 -p pdiddler/tests/test_stage95_p4_public_slot_boundary.lua
+          lua5.4 pdiddler/tests/test_stage95_p4_public_slot_boundary.lua
+      - name: Enforce no live trade path or price promotion
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('pdiddler/intelligence_lab/stage95_p4_public_slot_boundary.lua').read_text()
+          for value in (
+           'M.wrapOriginalContract', 'original.normalize(raw,{marketFresh=false})',
+           'NAME_ONLY_UNBOUND_NO_GUI_RAW_KEY',
+           'GUI_RAW_TEXT_EQUALS_CURRENT_CLIENT_PUBLIC_REFERENCE_ONLY',
+           'rawOfferKeyBoundToPreprofile=false',
+           'numericSupremeCheckerIdVerified=false',
+           'marketValueAuthority=false,authorizesTrade=false',
+           'authorizesAccept=false',
+           'serverCompletionProven=false',
+           'currentPricesVerified=false,priceForTradeVerified=false',
+          ):
+           assert value in s,value
+          for forbidden in (
+           ':FireServer(', ':InvokeServer(', 'HttpPost', 'PostAsync',
+           'TeleportService', 'VirtualInputManager', 'SendMouseButtonEvent',
+           'AcceptTrade(', 'DeclineTrade(', 'GetProfileData:InvokeServer',
+           'getconnections', 'loadstring(game:HttpGet(',
+          ):
+           assert forbidden not in s,forbidden
+          print('STAGE95_POLICY_PASS read-only; no market/trading promotion')
+          PY
