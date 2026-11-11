@@ -130,6 +130,7 @@ local function fixtures(options)
  end
  local instances={}
  local builtin=type(require)=="function" and require
+ local scheduledSpawns=0
  local env={
   game=gameEnv,require=function(x)
    if x==syncModule then return sync end
@@ -151,7 +152,10 @@ local function fixtures(options)
   },
   task={
    spawn=function(fn)
-    if not options.mockHungSpawn then fn() end
+    scheduledSpawns+=1
+    -- The first spawn is the picker bootstrap itself; only the nested
+    -- GetProfileData RPC simulates a hung/uncancellable remote.
+    if not options.mockHungSpawn or scheduledSpawns==1 then fn() end
    end,
    wait=function(seconds)clock+=(seconds or 0.05)end,
   },
