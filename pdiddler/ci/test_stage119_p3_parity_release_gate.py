@@ -11,6 +11,7 @@ import unittest
 ROOT=Path(__file__).resolve().parents[2]
 OLD=ROOT/"pdiddler/supervised/SUPERVISED_P3_STAGE101_IDENTITY_NATIVE.lua"
 INVALID=ROOT/"pdiddler/supervised/STAGE119_LASTOFFER_NATIVE.lua"
+INVALID_CONTROLLER=ROOT/"pdiddler/supervised/stage119_lastoffer_native_controller.lua"
 NEW=ROOT/"pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua"
 NEW_LOADER=ROOT/"pdiddler/supervised/STAGE119_P3_BOUND_READONLY_START.lua"
 NEW_MOCK=ROOT/"pdiddler/ci/stage119_p3_bound_original_mocks.luau"
@@ -59,10 +60,10 @@ class ProtectedStage119Parity(unittest.TestCase):
 
     def test_old_stage119_is_not_equivalent(self):
         old=INVALID.read_text()
+        old_controller=INVALID_CONTROLLER.read_text()
         # Affirm the precise design defect this correction is for.
-        for token in ("MAIN manually opens trade with consenting ALT",
-                      "p3ArmObservedClient=false"):
-            self.assertIn(token,old)
+        self.assertIn("MAIN manually opens trade with consenting ALT",old_controller)
+        self.assertIn("p3ArmObservedClient=false",old_controller)
         self.assertNotIn("supervisor.currentBoundReadOnly()",old)
         self.assertNotIn("supervisor.arm({",old)
 
