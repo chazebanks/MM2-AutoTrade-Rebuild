@@ -31,7 +31,8 @@ class Stage118Audit(unittest.TestCase):
                           'loadstring(', 'Teleport(', 'authorizesAccept=true',
                           'serverTradeRevisionProven=true'):
             self.assertNotIn(forbidden,s)
-        for required in ('lastOfferEqualityClass=', 'clientGuiCrossChecked=',
+        for required in ('lastOfferEqualityClass=', 'clientGuiCrossChecked=false',
+                         'clientGuiQuantityCrossChecked=',
                          'eventSessionAssociationProven=false',
                          'serverTradeRevisionProven=false',
                          'callbackCausalityProven=false',
