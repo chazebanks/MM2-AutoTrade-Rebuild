@@ -1,0 +1,50 @@
+name: Gingerscope Stage77 pinned independent public sources (research only)
+on:
+  push:
+    branches:
+      - research/gingerscope-stage77-pinned-source-identity
+    paths:
+      - 'pdiddler/intelligence_lab/stage77_pinned_public_identity_audit.py'
+      - 'pdiddler/tests/test_stage77_pinned_public_identity_audit.py'
+      - 'pdiddler/intelligence_lab/STAGE77_PINNED_PUBLIC_SOURCE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage77-pinned-public-sources.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage77_pinned_public_identity_audit.py'
+      - 'pdiddler/tests/test_stage77_pinned_public_identity_audit.py'
+      - 'pdiddler/intelligence_lab/STAGE77_PINNED_PUBLIC_SOURCE_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage77-pinned-public-sources.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-source-identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download exactly four archived public input Git blobs
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope77
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/mm2scripthub/mm2/0f2715187e7eae36eea4bd97afee809478fc877d/db' -o /tmp/gingerscope77/game.lua
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/research_source_html/stage69_2026_11_09/ancients.html' -o /tmp/gingerscope77/ancients.html
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/research_source_html/stage69_2026_11_09/godlies.html' -o /tmp/gingerscope77/godlies.html
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/research_source_html/stage69_2026_11_09/chromas.html' -o /tmp/gingerscope77/chromas.html
+          test "$(git hash-object /tmp/gingerscope77/game.lua)" = '2be54c3f5c6b715844728c01a65cc2f24a55c02d'
+          test "$(git hash-object /tmp/gingerscope77/ancients.html)" = '7e11a2d835eadbb522d351bdabe393a7c9688f4b'
+          test "$(git hash-object /tmp/gingerscope77/godlies.html)" = '2e4a0c1b8df894f9037e737ba80919b9b2d0c9ae'
+          test "$(git hash-object /tmp/gingerscope77/chromas.html)" = '0d2d156d9d9c499ef0e1213376796c1a916e6ce1'
+      - name: Run real Python parser with required pinned sources and adversarial tests
+        env:
+          STAGE77_REQUIRE_PINNED: '1'
+          STAGE77_PINNED_GAME: /tmp/gingerscope77/game.lua
+          STAGE77_PINNED_ANCIENTS: /tmp/gingerscope77/ancients.html
+          STAGE77_PINNED_GODLIES: /tmp/gingerscope77/godlies.html
+          STAGE77_PINNED_CHROMAS: /tmp/gingerscope77/chromas.html
+        run: |
+          set -euo pipefail
+          python3 -m py_compile pdiddler/intelligence_lab/stage77_pinned_public_identity_audit.py pdiddler/tests/test_stage77_pinned_public_identity_audit.py
+          python3 -m unittest -v pdiddler.tests.test_stage77_pinned_public_identity_audit
