@@ -1,0 +1,33 @@
+name: Gingerscope growth policy decision gate
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/strategy/growth_policy.json'
+      - 'pdiddler/strategy/GROWTH_POLICY_DECISION_2026_11_11.md'
+      - 'pdiddler/ci/test_growth_policy_decision.py'
+      - '.github/workflows/gingerscope-growth-policy-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  controlled-loss-direction-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify user direction cannot authorize live losses or reuse old budgets
+        run: python3 -m unittest -v pdiddler.ci.test_growth_policy_decision
+      - name: Check policy does not grant execution permissions
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path("pdiddler/strategy/growth_policy.json").read_text())
+          assert data["deploymentAuthorized"] is False
+          assert data["autonomousLossTradesAuthorized"] is False
+          assert data["riskBudget"]["approvalStatus"] == "NOT_SPECIFIED_NOT_APPROVED"
+          assert data["separateExplicitDeploymentAuthorizationRequired"] is True
+          print("DIRECTION_ONLY_NO_TRADE_AUTHORITY")
+          PY
