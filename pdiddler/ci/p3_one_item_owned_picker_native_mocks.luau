@@ -178,6 +178,7 @@ local function fixtures(options)
   named=named,sources=sources,pg=pg,rs=RS,
   me=me,alt=alt,server=server,profileCalls=function()return ownCalls end,
   clock=function()return clock end,
+  advance=function(seconds)clock+=seconds end,
   remotes=remotes}
 end
 
@@ -295,6 +296,46 @@ do
  x.named("OwnedOption_1").Activated:Fire()
  x.named("ConfirmOwnedOne").Activated:Fire()
  eq(s.status(),"CONSUMED","cannot re-use old confirmed picker")
+end
+do
+ local x=fixtures()
+ x.run()
+ x.named("OwnedOption_1").Activated:Fire()
+ local public=x.gen.PDIDDLER_P3_OWNED_PICKER_OWNER
+ public.selected=2
+ public.choiceResult={choices={{raw="Gingerscope",
+   display="Gingerscope",chroma=false}}}
+ x.named("ConfirmOwnedOne").Activated:Fire()
+ eq(x.gen.PDIDDLER_SUPERVISED_P3_ONE_ITEM_NATIVE.approvedRawKey,
+  "ChromaFang","public mutable owner cannot swap the human selection")
+ eq(x.gen.PDIDDLER_SUPERVISED_P3_ONE_ITEM_NATIVE.approvedChromaFlag,
+  true,"protected forged Gingerscope never becomes approved")
+end
+do
+ local x=fixtures()
+ local s=x.run()
+ x.named("OwnedOption_1").Activated:Fire()
+ x.advance(181)
+ x.named("ConfirmOwnedOne").Activated:Fire()
+ eq(s.status(),"BLOCKED","stale selection expires after three minutes")
+ eq(#x.sources,2,"expired profile never starts PR216 native runner")
+ eq(x.gen.PDIDDLER_SUPERVISED_P3_ONE_ITEM_NATIVE,nil,
+  "expired selection cannot authorize P3 setup")
+end
+do
+ local x=fixtures()
+ local s=x.run()
+ x.named("OwnedOption_1").Activated:Fire()
+ local activeGUI=node("ScreenGui","TradeGUI")
+ activeGUI.Enabled=true
+ activeGUI.Parent=x.pg
+ local container=node("Frame","Container")
+ container.Parent=activeGUI
+ local trade=node("Frame","Trade")
+ trade.Parent=container
+ x.named("ConfirmOwnedOne").Activated:Fire()
+ eq(s.status(),"BLOCKED","picker aborts if a trade unexpectedly opens")
+ eq(#x.sources,2,"never boot PR216 over an existing trade")
 end
 print("[PASS] original MM2 iPad owned-choice / confirm / immutable P3 handoff:",pass)
 print("[PASS] no request, OfferItem, Accept, or default selection in picker")
