@@ -1,0 +1,26 @@
+name: Gingerscope Stage76 first-party slug research guard
+on:
+  push:
+    branches:
+      - research/gingerscope-stage76-first-party-market-slug-audit
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage76_first_party_slug_audit.py'
+      - 'pdiddler/tests/test_stage76_first_party_slug_audit.py'
+      - 'pdiddler/intelligence_lab/STAGE76_FIRST_PARTY_SLUG_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage76-first-party-slug.yml'
+  workflow_dispatch:
+jobs:
+  stage76-research-only:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile exact source and tests
+        run: python -m py_compile pdiddler/intelligence_lab/stage76_first_party_slug_audit.py pdiddler/tests/test_stage76_first_party_slug_audit.py
+      - name: Execute strict public-identity mock tests (no live trade)
+        run: python -m unittest discover -v -s pdiddler/tests -p 'test_stage76_first_party_slug_audit.py'
