@@ -94,7 +94,7 @@ local stage83=loadFrozen("25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae",
     "intelligence_lab/stage83_public_slug_registry.lua")
 local stage101=loadFrozen("15f762a27a968373ed82809345f1869e1f688b26",
     "intelligence_lab/stage101_multiweapon_raw_key_match.lua")
-local identityModule=loadFrozen("f2a32eb9d538f4f376f41ecff7fc546584c415de",
+local identityModule=loadFrozen("fd00161e4a309935d66b7a32ec057ac17a20d855",
     "supervised/supervised_p3_p4_stage101_identity_witness.lua")
 if not geometry or type(geometry.choose)~="function"
     or not ioModule or type(ioModule.new)~="function"
