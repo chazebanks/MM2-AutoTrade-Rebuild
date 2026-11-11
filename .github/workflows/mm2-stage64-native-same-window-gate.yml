@@ -1,0 +1,35 @@
+name: Stage64 native-shaped same-window evidence validator
+on:
+  pull_request:
+    paths:
+      - 'scripts/stage64_same_window_client_evidence.py'
+      - 'pdiddler/intelligence_lab/test_stage64_native_same_window_evidence.py'
+      - 'pdiddler/intelligence_lab/STAGE64_NATIVE_EVIDENCE_AND_NEXT_GAP.md'
+      - '.github/workflows/mm2-stage64-native-same-window-gate.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage64-native-same-window-gate
+    paths:
+      - 'scripts/stage64_same_window_client_evidence.py'
+      - 'pdiddler/intelligence_lab/test_stage64_native_same_window_evidence.py'
+      - 'pdiddler/intelligence_lab/STAGE64_NATIVE_EVIDENCE_AND_NEXT_GAP.md'
+      - '.github/workflows/mm2-stage64-native-same-window-gate.yml'
+permissions:
+  contents: read
+jobs:
+  offline-native-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check exact report-type gate and 1000 adversarial samples
+        run: |
+          set -euo pipefail
+          python3 -m compileall -q scripts/stage64_same_window_client_evidence.py
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage64*.py'
+      - name: Execute all inherited intelligence regressions
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
