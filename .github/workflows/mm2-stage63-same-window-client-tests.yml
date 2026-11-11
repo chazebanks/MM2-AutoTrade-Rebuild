@@ -1,0 +1,47 @@
+name: Stage63 read-only same-window AcceptTrade and own inventory tests
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/new_part4/STAGE63_READONLY_CLIENT_ACCEPT_AND_DELTA.lua'
+      - 'pdiddler/intelligence_lab/test_stage63_same_window_client.py'
+      - 'pdiddler/intelligence_lab/STAGE63_SAME_WINDOW_READONLY_EVIDENCE.md'
+      - '.github/workflows/mm2-stage63-same-window-client-tests.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage63-single-window-client-correlation
+    paths:
+      - 'pdiddler/new_part4/STAGE63_READONLY_CLIENT_ACCEPT_AND_DELTA.lua'
+      - 'pdiddler/intelligence_lab/test_stage63_same_window_client.py'
+      - 'pdiddler/intelligence_lab/STAGE63_SAME_WINDOW_READONLY_EVIDENCE.md'
+      - '.github/workflows/mm2-stage63-same-window-client-tests.yml'
+permissions:
+  contents: read
+jobs:
+  client-correlated-readback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install actual Lua 5.4 interpreter
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Verify immutable Stage59 source identity pinned by this adapter
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 2 --max-time 30 \
+            "https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/54b97f65290ce038910436e27600be6a2c4a005e/pdiddler/new_part4/STAGE59_RESULT_DELTA_ROLE_NEUTRAL_BASELINE.lua" \
+            -o /tmp/stage63_pinned_stage59.lua
+          test "$(git hash-object /tmp/stage63_pinned_stage59.lua)" = "e1324b157126ff3cdc2928595b262e7a64e2150e"
+          luac5.4 -p /tmp/stage63_pinned_stage59.lua
+          luac5.4 -p pdiddler/new_part4/STAGE63_READONLY_CLIENT_ACCEPT_AND_DELTA.lua
+      - name: Run actual Stage63 Lua under bounded coroutine mocks
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage63*.py'
+      - name: Run all inherited intelligence regressions
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
