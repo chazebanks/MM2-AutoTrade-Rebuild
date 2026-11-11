@@ -34,7 +34,11 @@ jobs:
           test "$(git hash-object pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua)" = 'fba6f02c7287e2afd7ad3ea9e75cc221854a17b9'
           test "$(git hash-object pdiddler/intelligence_lab/stage118_lastoffer_gui_correlation.lua)" = 'bfabdae261017bac3b591f72c15ca9baa58c5e70'
           test "$(git hash-object pdiddler/supervised/SUPERVISED_P3_STAGE101_IDENTITY_NATIVE.lua)" = '46cff56b9f58fa8590a275dfd26f46cea0c5c9a6'
-          echo IMMUTABLE_ORIGINAL_STAGE9_PR221_PR222_PR224_SOURCE_PASS
+          curl -fsSL --retry 3 --max-time 50 "$base/58f0bb357f467fb6764b077ec70c787fe1e059cf/pdiddler/supervised/stage119_lastoffer_native_controller.lua" -o /tmp/gingerscope-stage119/frozen_controller.lua
+          test "$(git hash-object /tmp/gingerscope-stage119/frozen_controller.lua)" = 'bd9174a69d4c18c75a17ce0e84fb54a877242f12'
+          test "$(git hash-object pdiddler/supervised/stage119_lastoffer_native_controller.lua)" = 'bd9174a69d4c18c75a17ce0e84fb54a877242f12'
+          cmp -s /tmp/gingerscope-stage119/frozen_controller.lua pdiddler/supervised/stage119_lastoffer_native_controller.lua
+          echo IMMUTABLE_ORIGINAL_STAGE9_PR221_PR222_PR224_FROZEN_STAGE119_SOURCE_PASS
       - name: Install verified Lune 0.11.1
         shell: bash
         run: |
