@@ -78,11 +78,11 @@ local ioModule=loadFrozen("a599c31c53d25e6799b9d631f45f282b445dcda0",
     "supervised/pdiddler4_tradeio_supervised_v2.lua")
 local bridge=loadFrozen("2f556afac5e5fd9cfdbf9e081eeea01a542d293",
     "supervised/supervised_p3_p4_handoff.lua")
-local coordinator=loadFrozen("dfcfc7d52ce5f9cc64390bb5e28ce79512f1c001",
+local coordinator=loadFrozen("9138751b5a57415939ffa1618ac57811d7c8ec7b",
     "supervised/supervised_real_p3_rotation_handoff.lua")
 local outgoingModule=loadFrozen("2036ae5bd937620f21d46600f99550a1b233a654",
     "supervised/pdiddler3_outgoing_START_GATED_v1.lua")
-local bootModule=loadFrozen("eed876c67d916d6acee89bb8fdc450e5e397dd9c",
+local bootModule=loadFrozen("af84b23173620b03e919187b08cd352c101ba4ea",
     "supervised/supervised_p3_startup_supervisor.lua")
 local watchdogModule=loadFrozen("48c4b0fee594639c74f1bed408581db7a5bc6f1b",
     "supervised/supervised_p3_continuous_watchdog.lua")
@@ -451,6 +451,15 @@ if not sup then
     return nil
 end
 supervisor=sup
+-- All identity tests need the PR215 read-only lease. The previous pinned
+-- frozen P3 supervisor did not expose currentBoundReadOnly() at all,
+-- while offline mocks silently used the newer local source. Refuse at
+-- STARTUP rather than letting MAIN/ALT manually reach the trade window
+-- and fail after placing their real weapons.
+if type(supervisor.currentBoundReadOnly)~="function" then
+    stop("FROZEN_P3_BOUND_LEASE_INTERFACE_MISSING")
+    return nil
+end
 
 -- Separate observational state machine. The only outgoing P3 operation is
 -- the existing explicitly ARM-ed request to the exact consenting ALT.

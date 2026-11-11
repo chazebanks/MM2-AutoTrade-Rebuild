@@ -58,11 +58,17 @@ jobs:
           curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope-stage220/stage9.lua
           curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_native_observer.lua" -o /tmp/gingerscope-stage220/native_stage9.lua
           curl -fsSL --retry 3 --max-time 45 "$base/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua" -o /tmp/gingerscope-stage220/stage83.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/af84b23173620b03e919187b08cd352c101ba4ea/pdiddler/supervised/supervised_p3_startup_supervisor.lua" -o /tmp/gingerscope-stage220/frozen_boot.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/9138751b5a57415939ffa1618ac57811d7c8ec7b/pdiddler/supervised/supervised_real_p3_rotation_handoff.lua" -o /tmp/gingerscope-stage220/frozen_coordinator.lua
           test "$(git hash-object /tmp/gingerscope-stage220/stage101.lua)" = 137585d778c3c08b8b6960013fa34a7b3fb7b463
           test "$(git hash-object /tmp/gingerscope-stage220/stage9.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
           test "$(git hash-object /tmp/gingerscope-stage220/native_stage9.lua)" = a6338e946467ad738005bc5cb13cd2d2fbc2a2d0
           test "$(git hash-object /tmp/gingerscope-stage220/stage83.lua)" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
-          echo ORIGINAL_ALL_FOUR_SOURCE_GIT_BLOBS_VERIFIED
+          test "$(git hash-object /tmp/gingerscope-stage220/frozen_boot.lua)" = 881713c2abe644c0823f46c4007a80815608ea05
+          test "$(git hash-object /tmp/gingerscope-stage220/frozen_coordinator.lua)" = 1d4decbc30378a3f83df7c6b83449c6ac5252899
+          grep -Fq 'function supervisor.currentBoundReadOnly()' /tmp/gingerscope-stage220/frozen_boot.lua
+          grep -Fq 'function controller.currentBoundReadOnly()' /tmp/gingerscope-stage220/frozen_coordinator.lua
+          echo ORIGINAL_SIX_SOURCE_GIT_BLOBS_VERIFIED_WITH_BOUND_LEASE
       - name: Test native actual P3 coordinator + protected IO + frozen Stage9 & Stage101
         shell: bash
         run: |

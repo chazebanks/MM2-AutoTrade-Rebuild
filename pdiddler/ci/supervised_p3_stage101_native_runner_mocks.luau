@@ -8,8 +8,8 @@ local serde=require("@lune/serde")
 local runner=fs.readFile("pdiddler/supervised/SUPERVISED_P3_STAGE101_IDENTITY_NATIVE.lua")
 local ioCode=fs.readFile("pdiddler/supervised/pdiddler4_tradeio_supervised_v2.lua")
 local bridgeCode=fs.readFile("pdiddler/supervised/supervised_p3_p4_handoff.lua")
-local coordinatorCode=fs.readFile("pdiddler/supervised/supervised_real_p3_rotation_handoff.lua")
-local bootCode=fs.readFile("pdiddler/supervised/supervised_p3_startup_supervisor.lua")
+local coordinatorCode=fs.readFile("/tmp/gingerscope-stage220/frozen_coordinator.lua")
+local bootCode=fs.readFile("/tmp/gingerscope-stage220/frozen_boot.lua")
 local geometryCode=fs.readFile("pdiddler/new_part4/stage100_screen_prompt_overlay.lua")
 local identityCode=fs.readFile("pdiddler/supervised/supervised_p3_p4_stage101_identity_witness.lua")
 local contractCode=fs.readFile("/tmp/gingerscope-stage220/stage9.lua")
@@ -249,6 +249,10 @@ local function fakeEnv(options)
    elseif url:find("pdiddler3_outgoing_START_GATED_v1.lua",1,true) then
      return outgoingCode
    elseif url:find("supervised_p3_startup_supervisor.lua",1,true) then
+     if options.oldBootWithoutLease then
+       return bootCode:gsub("return supervisor,nil\nend\nreturn M",
+         "supervisor.currentBoundReadOnly=nil\n return supervisor,nil\nend\nreturn M")
+     end
      return bootCode
    elseif url:find("supervised_p3_continuous_watchdog.lua",1,true) then
      return watchdogCode
@@ -353,6 +357,10 @@ local function start(x)
  local runtime=x.run()
  eq(type(runtime),"table","native Stage101 adapter prepared")
  eq(#x.readSources,13,"frozen original P3, Stage9, 83, 101, 219 modules loaded")
+ eq(x.readSources[4]:find("9138751b5a57415939ffa1618ac57811d7c8ec7b",1,true)~=nil,true,
+  "native runner loads exact frozen lease-capable P3/P4 coordinator")
+ eq(x.readSources[6]:find("af84b23173620b03e919187b08cd352c101ba4ea",1,true)~=nil,true,
+  "native runner loads exact frozen lease-capable P3 startup supervisor")
  eq(#x.offers,0,"no offers sent on load")
  eq(x.E.__P3.armCalls,0,"original P3 request queue closed")
  eq(x.E.__SCANNER_P3_SEES.getWhitelist()[1].Name,"TrustedAlt",
@@ -542,6 +550,17 @@ do
  pcall(x.E.__WATCH.tick)
  eq(x.E.__P3.stopped,true,"zero-size trade bounds cannot keep P3 running")
  eq(#x.offers,0,"unsafe geometry never creates a new offer")
+end
+do
+ local x=fakeEnv({oldBootWithoutLease=true})
+ eq(x.run(),nil,"deliberate frozen old supervisor missing lease fails at startup")
+ eq(x.E.__P3.armCalls,0,"no P3 request armed when frozen source lacks required lease")
+ eq(x.E.__P3.stopped,true,"old lease-less P3 fork actively stopped")
+ eq(#x.offers,0,"lease-less dependency never offers weapon")
+ eq(x.E.PDIDDLER_SUPERVISED_P3_NATIVE_OWNER,nil,
+  "failed frozen lease interface releases P3 owner")
+ eq(x.copied[#x.copied]:find("FROZEN_P3_BOUND_LEASE_INTERFACE_MISSING",1,true)~=nil,true,
+  "one-shot STOP receipt names unavailable immutable lease")
 end
 for _,opts in ipairs({
  {invalidPlace=true},{invalidConfig=true},{ownerConflict=true},
