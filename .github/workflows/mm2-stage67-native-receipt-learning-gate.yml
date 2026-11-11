@@ -1,0 +1,35 @@
+name: Stage67 native raw receipt learner isolation
+on:
+  pull_request:
+    paths:
+      - 'scripts/stage67_native_raw_receipt_learning_gate.py'
+      - 'pdiddler/intelligence_lab/test_stage67_native_receipt_learning_gate.py'
+      - 'pdiddler/intelligence_lab/STAGE67_NATIVE_RECEIPT_LEARNER_BOUNDARY.md'
+      - '.github/workflows/mm2-stage67-native-receipt-learning-gate.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage67-native-receipt-learning-gate
+    paths:
+      - 'scripts/stage67_native_raw_receipt_learning_gate.py'
+      - 'pdiddler/intelligence_lab/test_stage67_native_receipt_learning_gate.py'
+      - 'pdiddler/intelligence_lab/STAGE67_NATIVE_RECEIPT_LEARNER_BOUNDARY.md'
+      - '.github/workflows/mm2-stage67-native-receipt-learning-gate.yml'
+permissions:
+  contents: read
+jobs:
+  quarantined-client-outcome:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Compile and validate native-shape Stage66 evidence
+        run: |
+          set -euo pipefail
+          python3 -m compileall -q scripts/stage67_native_raw_receipt_learning_gate.py
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage67*.py'
+      - name: Run inherited mainline intelligence tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
