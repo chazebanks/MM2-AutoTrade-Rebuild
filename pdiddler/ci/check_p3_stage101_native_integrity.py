@@ -27,6 +27,8 @@ class NativeReadOnly(unittest.TestCase):
 
     def test_new_runner_uses_exact_frozen_history_and_identity_module(self):
         for token in (
+          "9138751b5a57415939ffa1618ac57811d7c8ec7b",
+          "af84b23173620b03e919187b08cd352c101ba4ea",
           "15f762a27a968373ed82809345f1869e1f688b26",
           "1971b93d324f0275e6a9affb472ac3e804439ed8",
           "25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae",
@@ -64,6 +66,19 @@ class NativeReadOnly(unittest.TestCase):
         for forbidden in ('OfferItem:FireServer(','AcceptTrade:FireServer(',
                           'DeclineTrade:FireServer('):
             self.assertNotIn(forbidden,loader)
+
+    def test_old_prelease_frozen_revisions_are_rejected_by_new_source(self):
+        for bad in (
+            "eed876c67d916d6acee89bb8fdc450e5e397dd9c",
+            "dfcfc7d52ce5f9cc64390bb5e28ce79512f1c001",
+        ):
+            self.assertNotIn(bad,self.code)
+        self.assertIn('type(supervisor.currentBoundReadOnly)~="function"',self.code)
+        self.assertIn('FROZEN_P3_BOUND_LEASE_INTERFACE_MISSING',self.code)
+        test_code=(ROOT/"pdiddler/ci/supervised_p3_stage101_native_runner_mocks.luau").read_text()
+        self.assertIn('fs.readFile("/tmp/gingerscope-stage220/frozen_boot.lua")',test_code)
+        self.assertIn('fs.readFile("/tmp/gingerscope-stage220/frozen_coordinator.lua")',test_code)
+        self.assertIn('oldBootWithoutLease=true',test_code)
 
     def test_no_scripted_weapon_offer_or_final_accept_or_decline(self):
         for source in (self.code,self.witness):
