@@ -209,8 +209,10 @@ function M.new(scanner,outgoing,bridge,io,players,me,ctx)
   end
   local session=active
   local facade={}
+  local revoked=false
   function facade.capture()
-   if not running or active~=session then
+   if revoked or not running or active~=session then
+    revoked=true
     return denyCapture("HANDOFF_RELEASED")
    end
    -- The ORIGINAL coordinator and protected GUI observer must re-pass
@@ -219,6 +221,7 @@ function M.new(scanner,outgoing,bridge,io,players,me,ctx)
    if type(current)~="table" or
       current.status~="P4_TWO_SIDED_CLIENT_SNAPSHOT" or
       active~=session then
+    revoked=true
     return denyCapture("P3_CURRENT_BOUND_TRADE_UNSAFE")
    end
    local ok,snapshot=pcall(session.bound.capture)
@@ -228,6 +231,7 @@ function M.new(scanner,outgoing,bridge,io,players,me,ctx)
       snapshot.authorizesAccept~=false or
       snapshot.pricesAuthenticated~=false or
       snapshot.tradeOutcome~="UNKNOWN" then
+    revoked=true
     return denyCapture("P4_BOUND_SNAPSHOT_UNSAFE")
    end
    return snapshot
