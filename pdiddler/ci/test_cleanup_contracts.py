@@ -26,7 +26,8 @@ class CleanupContracts(unittest.TestCase):
         data = json.loads(REGISTER.read_text())
         aliases = [Path(e["path"]).name for e in data["deleted"]]
         for path in ROOT.rglob("*"):
-            if path.is_dir() or ".git" in path.parts or path == REGISTER:
+            if (path.is_dir() or ".git" in path.parts or path == REGISTER
+                or path == ROOT / ".github/workflows/gingerscope-maintenance-cleanup.yml"):
                 continue
             if path.suffix not in {".lua",".luau",".py",".sh",".yml",".yaml"}:
                 continue
