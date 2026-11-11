@@ -1,0 +1,43 @@
+name: Gingerscope Stage120 corrected four-slot guard portfolio preview
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage120_corrected_guard_preview.py'
+      - 'pdiddler/ci/test_stage120_corrected_guard_preview.py'
+      - 'pdiddler/intelligence_lab/STAGE120_CORRECTED_GUARD_PREVIEW_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage120-corrected-guard.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-planner-corrected-guard-synthetic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Retrieve and SHA-pin actual original PR106 portfolio planner and corrected PR182 physical-slot Gingerscope protection
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope-stage120
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 60 "$base/6ed48e084bd58fab38e3bf061ac36fb295ecf103/pdiddler/intelligence_lab/future_portfolio_planner.py" -o /tmp/gingerscope-stage120/planner.py
+          curl -fsSL --retry 3 --max-time 60 "$base/94ecefee86fd36293dcac58d0c24d9f379e719e5/pdiddler/intelligence_lab/offer_snapshot_guard.py" -o /tmp/gingerscope-stage120/guard.py
+          test "$(git hash-object /tmp/gingerscope-stage120/planner.py)" = '78948cdacd2a760db5b888fce242d598fc6f14b6'
+          test "$(git hash-object /tmp/gingerscope-stage120/guard.py)" = '11db895622d053ddced4fba9666135bf97bd615b'
+          test "$(git hash-object /tmp/gingerscope-stage120/guard.py)" != 'c5b87f159de5224d231b111da2541b8b23ac6284'
+          grep -Fq 'PROTECTED_GINGERSCOPE_OUTGOING' /tmp/gingerscope-stage120/guard.py
+          grep -Fq 'MAX_SLOTS = 4' /tmp/gingerscope-stage120/guard.py
+          grep -Fq 'MAX_QUANTITY = 1_000_000' /tmp/gingerscope-stage120/guard.py
+          echo ACTUAL_CORRECTED_PR182_GUARD_PR106_PLANNER_SOURCE_PASS
+      - name: Run REAL pinned planner-to-PR182 guard 900 mutation Python regressions
+        env:
+          STAGE120_REQUIRE_PINNED: '1'
+          STAGE120_PLANNER: /tmp/gingerscope-stage120/planner.py
+          STAGE120_CORRECTED_GUARD: /tmp/gingerscope-stage120/guard.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_stage120_corrected_guard_preview
