@@ -81,8 +81,11 @@ if not model or type(model.build)~="function" or
  warn("[P3 PICKER] Immutable read-only choice source unavailable")
  return nil
 end
-local owner={job=game.JobId,live=true,state="LOADING",selected=nil,
- startedAt=os.clock(),choiceResult=nil}
+local owner={job=game.JobId,live=true,state="LOADING",startedAt=os.clock()}
+-- Keep the user's exact selected raw weapon in private closure memory.
+-- Global owner/status object must not be able to retarget a physical tap.
+local selected=nil
+local profileReadAt=nil
 E[OWNER]=owner
 local ui={}
 local made=pcall(function()
@@ -256,9 +259,8 @@ local function parseCurrent()
 end
 local function showChoices(r)
  if not active() then return fail("PICKER_SESSION_OR_ALT_CHANGED") end
- owner.choiceResult=r
  owner.state="READY"
- owner.profileReadAt=os.clock()
+ profileReadAt=os.clock()
  ui.status.Text=tostring(#r.choices)..
   " current eligible types. Tap one, then USE SELECTED ITEM."
  for i,item in ipairs(r.choices) do
@@ -276,9 +278,8 @@ local function showChoices(r)
   b.Size=UDim2.fromOffset(315,27)
   b.Parent=ui.scroll
   b.Activated:Connect(function()
-   if not active() or owner.state~="READY" or
-      owner.choiceResult~=r then return end
-   owner.selected=i
+   if not active() or owner.state~="READY" then return end
+   selected={raw=item.raw,display=item.display,chroma=item.chroma}
    ui.detail.Text="SELECTED: "..item.display..
       (item.chroma and " [CHROMA]" or "")..
       " | raw "..item.raw.." | ONE COPY"
@@ -290,14 +291,13 @@ local function showChoices(r)
 end
 ui.confirm.Activated:Connect(function()
  if not active() or owner.state~="READY" or
-    type(owner.selected)~="number" or
-    not owner.choiceResult or
-    os.clock()-(owner.profileReadAt or 0)>180 or
+    type(selected)~="table" or
+    os.clock()-(profileReadAt or 0)>180 or
     not place() then
   fail("SELECTION_EXPIRED_OR_LIVE_CONTEXT_CHANGED")
   return
  end
- local item=owner.choiceResult.choices[owner.selected]
+ local item=selected
  if not item or type(item.raw)~="string" or
     type(item.display)~="string" or
     type(item.chroma)~="boolean" then
