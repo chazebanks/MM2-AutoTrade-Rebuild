@@ -1,15 +1,16 @@
 {
   "schema": "gingerscope-current-state-v1",
-  "sourceCommit": "7216c4db84a5a7c95227ff09fb97b27106f44406",
+  "sourceCommit": "5fe40041462fcc52ba34cd5b1377a8e159aa26fc",
   "latestStage": 121,
-  "latestMergedPR": 228,
+  "latestMergedPR": 232,
   "tradeOutcome": "UNKNOWN",
   "blockers": [
-    "A genuinely newly published first-party Supreme source version needs independent canonical capture and review; the Nov 9 source expired.",
-    "Completed-trade liquidity remains unverified; postings are not fills.",
-    "Live server-settlement and unique item-instance authentication are not proven for automatic acceptance."
+    "Nov 11 2026 12:30 PM first-party Supreme publication is visible on canonical pages; exact original Stage111 three-page raw capture, publisher hash, expiry and item mapping have NOT been independently admitted for a live market strategy.",
+    "Real practical liquidity, partner offer attractiveness and retradeability are not established from completed verified transactions; online listings and private Discord webhook claims are NOT fills.",
+    "Part3/Part4 exact client identity, revision and independent server-settlement proof remain inadequate for unattended automatic final Accept.",
+    "Research-only growth loss caps 0, 0.5, 1, 2, 3 percent remain simulation scenarios; no per-trade or cumulative risk budget has been approved."
   ],
-  "nextAction": "Acquire newly published first-party publisher evidence when available and independently verify completed-trade liquidity; do not repeat Stage119 device tests or activate live offer policy.",
+  "nextAction": "Run source-authenticated capture and review of the November 11 first-party Supreme publication using original Stage111/110/104/69 provenance; separately collect independently verifiable completed trade exits and rejection denominators, then connect existing Stage120 planner to read-only shadow decisions. Do not repeat Stage119 hardware, enable live listed-value losses, or authorize auto final Accept.",
   "authority": {
     "authorizesTrade": false,
     "authorizesOffer": false,
@@ -21,10 +22,33 @@
     "verifiedMarketQuote": false
   },
   "readBeforeCodeChange": [
-    "pdiddler/GINGERSCOPE_NEXT_CONVERSATION_CANONICAL_2026_11_10.md",
-    "pdiddler/GINGERSCOPE_LATEST_CHECKPOINT.md",
-    "pdiddler/GINGERSCOPE_ONSCREEN_MANUAL_TEST_POLICY.md",
-    "pdiddler/GINGERSCOPE_STRATEGY_AND_RESEARCH_PLAYBOOK.md",
-    "pdiddler/supervised/SUPERVISED_ONE_ITEM_PILOT_HANDOFF.md"
+    "pdiddler/START_HERE.md",
+    "pdiddler/continuity/README.md",
+    "pdiddler/continuity/manifest.json",
+    "pdiddler/strategy/growth_policy.json",
+    "pdiddler/RELEASE_READINESS.json",
+    "Read only original task-relevant historical stages, sources, PRs and test receipts; do not blindly load all huge handoffs."
+  ],
+  "integratedDevelopmentMilestones": [
+    {
+      "pr": 229,
+      "capability": "metadata continuity and critical source pinning",
+      "result": "MERGED_CI_PASS_NOT_TRADING_RUNTIME"
+    },
+    {
+      "pr": 230,
+      "capability": "conditional future value-loss policy",
+      "result": "MERGED_DEVELOPMENT_ONLY_NO_DEPLOYMENT_APPROVAL"
+    },
+    {
+      "pr": 231,
+      "capability": "short code-agent entrypoint and three exact duplicate scanner aliases removed",
+      "result": "MERGED_CI_PASS"
+    },
+    {
+      "pr": 232,
+      "capability": "hypothetical loss compounding and learner-status quarantine",
+      "result": "MERGED_SYNTHETIC_OFFLINE_ONLY"
+    }
   ]
 }

@@ -1,0 +1,29 @@
+name: Gingerscope release readiness evidence gate
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/continuity/current_state.json'
+      - 'pdiddler/continuity/manifest.json'
+      - 'pdiddler/RELEASE_READINESS.json'
+      - 'pdiddler/ci/test_release_readiness.py'
+      - '.github/workflows/gingerscope-release-readiness.yml'
+      - 'pdiddler/strategy/growth_policy.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  read-only-release-truth:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify continuity anchors and release status fail-closed
+        run: |
+          python3 -m pdiddler.continuity.manager verify
+          python3 -m pdiddler.continuity.manager recover
+          python3 -m unittest pdiddler.ci.test_release_readiness -v
