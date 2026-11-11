@@ -1,0 +1,47 @@
+{
+  "schema": "gingerscope-controlled-quality-loss-policy-v1",
+  "decisionDate": "2026-11-11",
+  "decisionType": "LONG_TERM_STRATEGY_DIRECTION_ONLY",
+  "desiredFutureBehavior": "Autonomous controlled listed-value-loss upgrades for independently verified improvements in inventory quality and Gingerscope acquisition prospects",
+  "developmentPermitted": true,
+  "deploymentAuthorized": false,
+  "autonomousLossTradesAuthorized": false,
+  "separateExplicitDeploymentAuthorizationRequired": true,
+  "independentlyVerifiedEvidenceRequired": true,
+  "validatedRiskBudgetRequired": true,
+  "riskBudget": {
+    "maxLossPerTrade": null,
+    "maxCumulativeLoss": null,
+    "maxLossFractionPerTrade": null,
+    "maximumFrequency": null,
+    "approvalStatus": "NOT_SPECIFIED_NOT_APPROVED"
+  },
+  "requiredEvidence": [
+    "Exact own/counterparty item identities and quantities validated for the active session and offer revision",
+    "Fresh publisher-authenticated value data with item-key provenance and explicit expiry",
+    "Independent liquidity and retradability evidence rather than demand labels or posted offers alone",
+    "Conservative inventory value/attractiveness improvement versus feasible no-loss alternatives",
+    "Offline adversarial and replay regression tests plus bounded supervised verification",
+    "Separate explicit user authorization of the concrete risk budget and deployment"
+  ],
+  "neverAuthorizedByThisDecision": [
+    "Any live listed-value-loss execution",
+    "Automatic final Accept",
+    "Unproven profit or settled-trade claims",
+    "Offering protected Gingerscope outbound",
+    "Using unverified Discord self-reports as completed-trade learning",
+    "Reinstating superseded blanket +15 or mandatory highest-value opener"
+  ],
+  "prohibitedSilentAssumptions": [
+    "Historical 3 percent quality-loss exception is an approved budget",
+    "Any historical proposed min(25,2 percent outgoing,0.5 percent portfolio) formula is approved",
+    "Higher listed demand by itself proves higher resale liquidity",
+    "A synthetic Stage120 research result permits live trading"
+  ],
+  "sourceReferences": [
+    "pdiddler/CHATGPT_CONTINUITY_2026-11-08_USER_RULES_AND_CHECKPOINT.md",
+    "pdiddler/GINGERSCOPE_STRATEGY_AND_RESEARCH_PLAYBOOK.md",
+    "pdiddler/intelligence_lab/STAGE120_CORRECTED_GUARD_PREVIEW_HANDOFF.md",
+    "docs/superpowers/specs/2026-11-02-mm2-market-aware-planner-design.md"
+  ]
+}
