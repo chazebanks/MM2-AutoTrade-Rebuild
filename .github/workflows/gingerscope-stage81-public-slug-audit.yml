@@ -1,0 +1,53 @@
+name: Gingerscope Stage81 full first-party slug coverage (read-only)
+on:
+  push:
+    branches:
+      - research/gingerscope-stage81-public-slug-coverage
+    paths:
+      - 'pdiddler/intelligence_lab/stage81_pinned_website_slug_coverage.py'
+      - 'pdiddler/tests/test_stage81_pinned_website_slug_coverage.py'
+      - 'pdiddler/intelligence_lab/STAGE81_PUBLIC_SLUG_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage81-public-slug-audit.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage81_pinned_website_slug_coverage.py'
+      - 'pdiddler/tests/test_stage81_pinned_website_slug_coverage.py'
+      - 'pdiddler/intelligence_lab/STAGE81_PUBLIC_SLUG_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage81-public-slug-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  archived-source-identity-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download original immutable historical source material
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope81
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/snapshots/supreme_snapshot_2026_11_06.json' -o /tmp/gingerscope81/roster.json
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/6775e10a8266da43b8b316cddaa3a8042c0f3dda/pdiddler/intelligence_lab/stage77_pinned_public_identity_audit.py' -o /tmp/gingerscope81/stage77_parser.py
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/research_source_html/stage69_2026_11_09/ancients.html' -o /tmp/gingerscope81/ancients.html
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/research_source_html/stage69_2026_11_09/godlies.html' -o /tmp/gingerscope81/godlies.html
+          curl -fsSL --retry 3 --max-time 45 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/research_source_html/stage69_2026_11_09/chromas.html' -o /tmp/gingerscope81/chromas.html
+          test "$(git hash-object /tmp/gingerscope81/roster.json)" = a85af4f6137278540e1fed0c27e7e801553e4111
+          test "$(git hash-object /tmp/gingerscope81/stage77_parser.py)" = 754fbe3189d5108272c32a27fc52bf3834011d38
+          test "$(git hash-object /tmp/gingerscope81/ancients.html)" = 7e11a2d835eadbb522d351bdabe393a7c9688f4b
+          test "$(git hash-object /tmp/gingerscope81/godlies.html)" = 2e4a0c1b8df894f9037e737ba80919b9b2d0c9ae
+          test "$(git hash-object /tmp/gingerscope81/chromas.html)" = 0d2d156d9d9c499ef0e1213376796c1a916e6ce1
+      - name: Run pinned actual first-party metadata and expiry boundary tests
+        env:
+          STAGE81_REQUIRE_PINNED: '1'
+          STAGE81_HISTORICAL_ROSTER: /tmp/gingerscope81/roster.json
+          STAGE81_REVIEWED_STAGE77: /tmp/gingerscope81/stage77_parser.py
+          STAGE81_ANCIENTS: /tmp/gingerscope81/ancients.html
+          STAGE81_GODLIES: /tmp/gingerscope81/godlies.html
+          STAGE81_CHROMAS: /tmp/gingerscope81/chromas.html
+        run: |
+          set -euo pipefail
+          python3 -m py_compile pdiddler/intelligence_lab/stage81_pinned_website_slug_coverage.py pdiddler/tests/test_stage81_pinned_website_slug_coverage.py
+          python3 -m unittest -v pdiddler.tests.test_stage81_pinned_website_slug_coverage
