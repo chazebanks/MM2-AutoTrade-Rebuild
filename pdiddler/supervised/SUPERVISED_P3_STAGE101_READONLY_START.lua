@@ -19,7 +19,7 @@ E.PDIDDLER_P3_STAGE101_IDENTITY_NATIVE={
     targetName="venossgaming90190",
 }
 local url="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
- "bb065d00a62b904c298cfd08ff1d2a75a4b509b7/"..
+ "561da622ad601be9493237be158d5003b768f897/"..
  "pdiddler/supervised/SUPERVISED_P3_STAGE101_IDENTITY_NATIVE.lua"
 local ok,runner=pcall(function()
     local source=game:HttpGet(url)
