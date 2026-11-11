@@ -53,7 +53,9 @@ class PickerIntegrity(unittest.TestCase):
     def test_physical_choice_then_confirm_before_runner(self):
         self.assertIn('b.Activated:Connect(function()',self.p)
         self.assertIn('ui.confirm.Activated:Connect(function()',self.p)
-        self.assertIn('owner.selected=i',self.p)
+        self.assertIn('selected={raw=item.raw,display=item.display,chroma=item.chroma}',self.p)
+        self.assertNotIn('owner.choiceResult',self.p)
+        self.assertNotIn('owner.selected=',self.p)
         self.assertIn('if not item or type(item.raw)',self.p)
         self.assertIn('E.PDIDDLER_SUPERVISED_P3_ONE_ITEM_NATIVE={',self.p)
         self.assertIn('approvedRawKey=item.raw',self.p)
