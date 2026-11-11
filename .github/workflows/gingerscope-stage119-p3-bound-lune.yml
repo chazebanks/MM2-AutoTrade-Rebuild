@@ -1,0 +1,89 @@
+name: Gingerscope Stage119 V2 real protected P3 P4 lastoffer native mock
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua'
+      - 'pdiddler/supervised/STAGE119_P3_BOUND_READONLY_START.lua'
+      - 'pdiddler/ci/stage119_p3_bound_original_mocks.luau'
+      - 'pdiddler/ci/test_stage119_p3_parity_release_gate.py'
+      - '.github/workflows/gingerscope-stage119-p3-bound-lune.yml'
+      - 'pdiddler/supervised/STAGE119_P3_REPLACEMENT_HANDOFF.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  protected-original-p3-stage119:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Fetch original PR221 frozen dependencies exact source and verify SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope-stage220
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 50 "$base/15f762a27a968373ed82809345f1869e1f688b26/pdiddler/intelligence_lab/stage101_multiweapon_raw_key_match.lua" -o /tmp/gingerscope-stage220/stage101.lua
+          curl -fsSL --retry 3 --max-time 50 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope-stage220/stage9.lua
+          curl -fsSL --retry 3 --max-time 50 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_native_observer.lua" -o /tmp/gingerscope-stage220/native_stage9.lua
+          curl -fsSL --retry 3 --max-time 50 "$base/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua" -o /tmp/gingerscope-stage220/stage83.lua
+          curl -fsSL --retry 3 --max-time 50 "$base/af84b23173620b03e919187b08cd352c101ba4ea/pdiddler/supervised/supervised_p3_startup_supervisor.lua" -o /tmp/gingerscope-stage220/frozen_boot.lua
+          curl -fsSL --retry 3 --max-time 50 "$base/9138751b5a57415939ffa1618ac57811d7c8ec7b/pdiddler/supervised/supervised_real_p3_rotation_handoff.lua" -o /tmp/gingerscope-stage220/frozen_coordinator.lua
+          test "$(git hash-object /tmp/gingerscope-stage220/stage101.lua)" = '137585d778c3c08b8b6960013fa34a7b3fb7b463'
+          test "$(git hash-object /tmp/gingerscope-stage220/stage9.lua)" = '7c84456006bd684dacb0217d0ae092d6d67575a4'
+          test "$(git hash-object /tmp/gingerscope-stage220/native_stage9.lua)" = 'a6338e946467ad738005bc5cb13cd2d2fbc2a2d0'
+          test "$(git hash-object /tmp/gingerscope-stage220/stage83.lua)" = '40e2a0ff01b70b2d0181c62cae347a08da82bcb8'
+          test "$(git hash-object /tmp/gingerscope-stage220/frozen_boot.lua)" = '881713c2abe644c0823f46c4007a80815608ea05'
+          test "$(git hash-object /tmp/gingerscope-stage220/frozen_coordinator.lua)" = '1d4decbc30378a3f83df7c6b83449c6ac5252899'
+          # Validate every original runtime module the mock loads locally.
+          # Scanner and P3 outbound queue are explicit test doubles, so we
+          # separately verify their original frozen source hashes.
+          curl -fsSL --retry 3 --max-time 50 "$base/5b8ee35d7f281c23d9c2181abd97a063e59a0660/pdiddler/new_part4/stage100_screen_prompt_overlay.lua" -o /tmp/gingerscope-stage220/geometry.lua
+          curl -fsSL --retry 3 --max-time 50 "$base/a599c31c53d25e6799b9d631f45f282b445dcda0/pdiddler/supervised/pdiddler4_tradeio_supervised_v2.lua" -o /tmp/gingerscope-stage220/io.lua
+          curl -fsSL --retry 3 --max-time 50 "$base/2f556afac5e5fd9cfdbf9e081eeea01a542d293/pdiddler/supervised/supervised_p3_p4_handoff.lua" -o /tmp/gingerscope-stage220/bridge.lua
+          curl -fsSL --retry 3 --max-time 50 "$base/48c4b0fee594639c74f1bed408581db7a5bc6f1b/pdiddler/supervised/supervised_p3_continuous_watchdog.lua" -o /tmp/gingerscope-stage220/watchdog.lua
+          curl -fsSL --retry 3 --max-time 50 "$base/2036ae5bd937620f21d46600f99550a1b233a654/pdiddler/pdiddler3_scanner_MODULE_v6_5_PART4_STATUS_BRIDGE.lua" -o /tmp/gingerscope-stage220/scanner.lua
+          curl -fsSL --retry 3 --max-time 50 "$base/2036ae5bd937620f21d46600f99550a1b233a654/pdiddler/supervised/pdiddler3_outgoing_START_GATED_v1.lua" -o /tmp/gingerscope-stage220/outgoing.lua
+          test "$(git hash-object /tmp/gingerscope-stage220/geometry.lua)" = 'e0eac8e039655999bd7bbac1f12da179db7c22ed'
+          test "$(git hash-object /tmp/gingerscope-stage220/io.lua)" = 'eb4dc6342d1d6dda6292490cd8fa00314199d589'
+          test "$(git hash-object /tmp/gingerscope-stage220/bridge.lua)" = 'd496d6311dc6c5e24e059fcd71014e274a4be76b'
+          test "$(git hash-object /tmp/gingerscope-stage220/watchdog.lua)" = '9520f93b9bb210cd4bb23050d8667c845a1cf018'
+          test "$(git hash-object /tmp/gingerscope-stage220/scanner.lua)" = 'f7190538cbc882e23b22f723f3af0b6140a98bcd'
+          test "$(git hash-object /tmp/gingerscope-stage220/outgoing.lua)" = 'c6180a16bb55cbbf853040c9825dd10a44f97756'
+          cmp -s pdiddler/new_part4/stage100_screen_prompt_overlay.lua /tmp/gingerscope-stage220/geometry.lua
+          cmp -s pdiddler/supervised/pdiddler4_tradeio_supervised_v2.lua /tmp/gingerscope-stage220/io.lua
+          cmp -s pdiddler/supervised/supervised_p3_p4_handoff.lua /tmp/gingerscope-stage220/bridge.lua
+          cmp -s pdiddler/supervised/supervised_p3_continuous_watchdog.lua /tmp/gingerscope-stage220/watchdog.lua
+          test "$(git hash-object pdiddler/pdiddler3_scanner_MODULE_v6_5_PART4_STATUS_BRIDGE.lua)" = 'f7190538cbc882e23b22f723f3af0b6140a98bcd'
+          test "$(git hash-object pdiddler/supervised/pdiddler3_outgoing_START_GATED_v1.lua)" = 'c6180a16bb55cbbf853040c9825dd10a44f97756'
+          test "$(git hash-object pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua)" = 'fba6f02c7287e2afd7ad3ea9e75cc221854a17b9'
+          test "$(git hash-object pdiddler/intelligence_lab/stage118_lastoffer_gui_correlation.lua)" = 'bfabdae261017bac3b591f72c15ca9baa58c5e70'
+          test "$(git hash-object pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua)" = 'fc25514564e78d390b089742eb4e7da7508c12fa'
+          curl -fsSL --retry 3 --max-time 50 "$base/0e8e88fba07d72a7e1fb51178e0b105c3a647568/pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua" -o /tmp/gingerscope-stage220/stage119.lua
+          test "$(git hash-object /tmp/gingerscope-stage220/stage119.lua)" = 'fc25514564e78d390b089742eb4e7da7508c12fa'
+          cmp -s pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua /tmp/gingerscope-stage220/stage119.lua
+          grep -Fq 'function supervisor.currentBoundReadOnly()' /tmp/gingerscope-stage220/frozen_boot.lua
+          grep -Fq 'function controller.currentBoundReadOnly()' /tmp/gingerscope-stage220/frozen_coordinator.lua
+          echo ACTUAL_FROZEN_PR221_P3_P4_STAGE119_SOURCE_BLOBS_VERIFIED
+      - name: Install checksum-pinned Lune v0.11.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 50 https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip -o "$RUNNER_TEMP/lune.zip"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/lunedist"
+          bin="$(find "$RUNNER_TEMP/lunedist" -type f -name lune -print -quit)"
+          test -n "$bin"
+          install -m 0755 "$bin" "$RUNNER_TEMP/lune"
+      - name: Test ACTUAL original P3 ARM P4 bound lease and two-event LastOffer in native Lune
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_p3_bound_original_mocks.luau
+      - name: Enforce strict RED-to-GREEN original P3 Stage119 parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_stage119_p3_parity_release_gate

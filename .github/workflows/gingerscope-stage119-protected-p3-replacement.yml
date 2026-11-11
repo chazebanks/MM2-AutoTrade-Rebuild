@@ -1,0 +1,30 @@
+name: Gingerscope Stage119 strict original P3 P4 parity release gate
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua'
+      - 'pdiddler/supervised/STAGE119_P3_BOUND_READONLY_START.lua'
+      - 'pdiddler/ci/stage119_p3_bound_original_mocks.luau'
+      - 'pdiddler/ci/test_stage119_p3_parity_release_gate.py'
+      - '.github/workflows/gingerscope-stage119-protected-p3-replacement.yml'
+      - 'pdiddler/supervised/STAGE119_P3_REPLACEMENT_HANDOFF.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-p3-p4-real-device-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python contract regression — original PR221 vs withdrawn manual Stage119
+        run: python3 -m unittest -v pdiddler.ci.test_stage119_p3_parity_release_gate
+      - name: Mark no native release until actual original P3/P4 Lune tests are added
+        run: |
+          set -eu
+          test -f pdiddler/ci/stage119_p3_bound_original_mocks.luau
+          test -f pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua
+          test -f pdiddler/supervised/STAGE119_P3_BOUND_READONLY_START.lua
+          echo P3_P4_STAGE119_PARITY_RELEASE_CANDIDATE_PRESENT
