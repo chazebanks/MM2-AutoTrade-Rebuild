@@ -41,6 +41,8 @@ class SourceAudit(unittest.TestCase):
         self.assertEqual(blob(IO),"eb4dc6342d1d6dda6292490cd8fa00314199d589")
 
     def test_new_gate_exact_sha_frozen_and_loaded(self):
+        self.assertEqual(blob(AUTO),"72f59f77e83fd353d184daf79b7d6a34088170b3")
+        self.assertIn('local AUTORUNNER="182255295eafcd28102e429cc377d06c8f510c1b"',self.autopicker)
         self.assertEqual(blob(GATE),"bceb8a9097dd2786a9deee5818a84a916527eb61")
         self.assertIn('loadFrozen("9a5a3c4db018ed7a00f8eacd6ca988cca3152a33"',self.auto)
         self.assertIn('"supervised/supervised_p3_one_item_auto_gate.lua"',self.auto)
