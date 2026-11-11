@@ -10,7 +10,7 @@ local PINS={
  geometry={"59d869b7d4d8fbcee3f2709e266b47ffb4a05d78","pdiddler/new_part4/stage100_screen_prompt_overlay.lua"},
  lastoffer={"7c12a2e9768ef294b411086deef9ddaf2bee8d21","pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua"},
  stage118={"891d548d2ef77763e9f7e3a679984a646bb9d4b4","pdiddler/intelligence_lab/stage118_lastoffer_gui_correlation.lua"},
- controller={"65f38f15d83878285ecc12f3d6b072f131681a14","pdiddler/supervised/stage119_lastoffer_native_controller.lua"}
+ controller={"88bdfa53a8d68d329ad30d6c37e25b100da97460","pdiddler/supervised/stage119_lastoffer_native_controller.lua"}
 }
 local function result(status,reason)
  return {schema="gingerscope-stage119-native-lastoffer-v1",
