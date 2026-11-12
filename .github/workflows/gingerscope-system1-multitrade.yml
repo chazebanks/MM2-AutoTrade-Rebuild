@@ -1,4 +1,4 @@
-name: Gingerscope System1 supervised multi-trade GUI integration (manual ALT, no remotes)
+name: Gingerscope System1 MAIN auto 4-trade fail-stop + ALT guided (offline)
 on:
   pull_request:
     paths:
