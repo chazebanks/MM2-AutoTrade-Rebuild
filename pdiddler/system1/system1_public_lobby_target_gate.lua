@@ -5,8 +5,10 @@
 -- Explicit ARM and stable exact Player-object identity required.
 local M={}
 local function userid(p)
- local n=type(p)=="table" and p.UserId
- return type(n)=="number" and n==math.floor(n) and n>0 and n or nil
+ -- Roblox Player Instances are userdata, while Lune mocks are tables.
+ if type(p)~="userdata" and type(p)~="table" then return nil end
+ local ok,n=pcall(function()return p.UserId end)
+ return ok and type(n)=="number" and n==math.floor(n) and n>0 and n or nil
 end
 function M.new(scanner,players,me,options)
  if type(scanner)~="table" or type(players)~="table"
@@ -29,7 +31,7 @@ function M.new(scanner,players,me,options)
  local armed=false
  local unsafe=nil
  local function exact(p)
-  if type(p)~="table" or not userid(p) or p==me or
+  if not userid(p) or p==me or
    p.UserId==me.UserId or p.Parent~=players then return false end
   local ok,a=pcall(players.GetPlayerByUserId,players,p.UserId)
   if not ok or a~=p then return false end
