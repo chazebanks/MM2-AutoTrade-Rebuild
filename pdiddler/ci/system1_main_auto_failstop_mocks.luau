@@ -264,6 +264,11 @@ end
 do
  local f=fixture({adaptive=true})
  local r=f.drive()
+ if r.status~="CLIENT_TEST_SEQUENCE_COMPLETE" then
+  print("SYSTEM1_ADAPTIVE_DEBUG",r.phase,r.reason,r.round,r.lastAction,
+   r.actions.altRevisionsObserved,r.actions.adaptiveReoffersAttempted,
+   r.actions.offersAttempted,r.actions.removalsAttempted)
+ end
  eq(r.status,"CLIENT_TEST_SEQUENCE_COMPLETE","adaptive five-round success")
  eq(r.phase,"DONE","adaptive terminal")
  eq(r.maxRounds,5,"five rounds explicitly approved")
