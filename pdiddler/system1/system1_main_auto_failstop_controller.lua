@@ -98,6 +98,30 @@ local function uniqueSurvivor(before,after)
    "CLIENT_SLOT_STABLE"
 end
 
+-- GUI NewItem indexes may compact during MAIN's guarded withdrawals as
+-- well as ALT's changes. Match every survivor uniquely by visible fields,
+-- never using a slot ordinal as an authenticated weapon-instance ID.
+local function uniqueAfterOwnRemoval(before,after)
+ if type(before)~="table" or type(after)~="table" or
+   #before<1 or #before>4 or #after~=#before-1 then
+  return false,"INVALID_OWN_WITHDRAW_COUNTS"
+ end
+ local used={};local reindexed=false
+ for _,current in ipairs(after) do
+  local count=0;local found=nil
+  for i,old in ipairs(before) do
+   if sameVisibleCandidate(old,current) then count+=1;found=i end
+  end
+  if count~=1 or used[found] then
+   return false,count>1 and "AMBIGUOUS_OWN_VISIBLE_CANDIDATE"
+     or "OWN_SURVIVOR_MISMATCH"
+  end
+  used[found]=true
+  if before[found].slot~=current.slot then reindexed=true end
+ end
+ return true,reindexed and "CLIENT_SLOT_REINDEXED" or "CLIENT_SLOT_STABLE"
+end
+
 local function protected(s)
  return type(s)=="string" and
    s:lower():gsub("[^%w]",""):find("gingerscope",1,true)~=nil
@@ -184,6 +208,7 @@ function M.new(api,options)
   removalsAttempted=0,declinesAttempted=0,clientClosedWindows=0,
   altRevisionsObserved=0,adaptiveReoffersAttempted=0,
   altRemovalSlotReindexesObserved=0,
+   ownRemovalSlotReindexesObserved=0,
  }
  local root=nil
  local boundEpoch=nil
@@ -217,6 +242,7 @@ function M.new(api,options)
     altRevisionsObserved=actions.altRevisionsObserved,
     adaptiveReoffersAttempted=actions.adaptiveReoffersAttempted,
     altRemovalSlotReindexesObserved=actions.altRemovalSlotReindexesObserved,
+     ownRemovalSlotReindexesObserved=actions.ownRemovalSlotReindexesObserved,
   })
   r.maxRounds=maxRounds
   r.adaptiveRoundAuthorized=maxRounds==5
@@ -577,15 +603,16 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
     if #ob.ours > #oursPrev then return stop("OWN_OFFER_GREW_DURING_REMOVAL") end
     return receipt()
    end
-   -- Confirm surviving physical slot really is the previous own slot.
-   for _,current in ipairs(ob.ours) do
-    local retained=false
-    for _,old in ipairs(oursPrev) do
-     if current.slot==old.slot and sameSide({current},{old}) then
-      retained=true;break
-     end
-    end
-    if not retained then return stop("OWN_SLOT_REPLACED_DURING_REMOVAL") end
+   -- Keep only uniquely matched visible survivors after the guarded click.
+   -- A valid GUI compaction is not a new weapon; ambiguous substitutions STOP.
+   local keep,kind=uniqueAfterOwnRemoval(oursPrev,ob.ours)
+   if not keep then
+    return stop(kind=="AMBIGUOUS_OWN_VISIBLE_CANDIDATE" and
+      "OWN_WITHDRAW_SURVIVOR_AMBIGUOUS" or
+      "OWN_SLOT_REPLACED_DURING_REMOVAL")
+   end
+   if kind=="CLIENT_SLOT_REINDEXED" then
+    actions.ownRemovalSlotReindexesObserved+=1
    end
    -- An adaptive withdrawal preserves the already stable ALT offer;
    -- ordinary withdrawal still requires ALT's side to remain empty.
