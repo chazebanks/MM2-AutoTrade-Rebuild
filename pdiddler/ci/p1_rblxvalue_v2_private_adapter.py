@@ -10,6 +10,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import socket
 import ssl
 import urllib.error
@@ -39,56 +40,51 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 def _no_redirect_get(path: str, api_key: str) -> tuple[int, bytes]:
-    """Single authenticated request, no redirects, retries, persistence or printing."""
+    """Single authenticated HTTPS request via curl, no redirects or retries.
+
+    curl config is supplied through stdin, not argv or disk. Never emit stderr,
+    headers, response bodies, or credentials into CI logs.
+    """
     if path not in ALLOWED_PATHS:
         raise ValueError("ENDPOINT_NOT_ALLOWED")
     if not isinstance(api_key, str) or not 12 <= len(api_key) <= 256:
         raise ValueError("PRIVATE_KEY_REQUIRED")
-    # urllib's HTTP header encoder can fail on invisible Unicode characters.
-    # Never normalize, strip, echo or repair a supplied credential silently.
     if not api_key.isascii() or re.fullmatch(r"[A-Za-z0-9_-]{12,256}", api_key) is None:
         raise ValueError("PRIVATE_KEY_FORMAT_INVALID")
-    request = urllib.request.Request(
-        BASE + path,
-        headers={"X-Api-Key": api_key, "Accept": "application/json"},
-        method="GET",
+    config = (
+        'url = "' + BASE + path + '"\\n'
+        'request = "GET"\\n'
+        'header = "Accept: application/json"\\n'
+        'header = "X-Api-Key: ' + api_key + '"\\n'
+        'silent\\n'
+        'show-error = no\\n'
+        'max-time = 8\\n'
     )
-    opener = urllib.request.build_opener(_NoRedirect())
     try:
-        with opener.open(request, timeout=8) as response:
-            status = response.getcode()
-            raw = response.read(MAX_BYTES + 1)
-        if len(raw) > MAX_BYTES:
-            return 413, b""
-        return status, raw
-    except urllib.error.HTTPError as ex:
-        # Only HTTP 403 gets a bounded, transient read. The classifier below
-        # emits fixed labels, NEVER the error body, headers, URL or API key.
-        if ex.code == 403:
-            try:
-                raw = ex.read(MAX_ERROR_BYTES + 1)
-                return 403, raw if len(raw) <= MAX_ERROR_BYTES else b""
-            except (OSError, ValueError, AttributeError):
-                return 403, b""
-            finally:
-                ex.close()
-        return ex.code, b""
-    except urllib.error.URLError as ex:
-        # Error *types* only; never serialize exception messages, URLs,
-        # response bodies or credential-bearing diagnostic strings.
-        if isinstance(ex.reason, socket.gaierror):
-            return 590, b""
-        if isinstance(ex.reason, ssl.SSLError):
-            return 591, b""
-        if isinstance(ex.reason, (socket.timeout, TimeoutError)):
-            return 593, b""
+        completed = subprocess.run(
+            ["curl", "--config", "-", "--proto", "=https",
+             "--max-redirs", "0", "--max-time", "8",
+             "--write-out", "\\n%{http_code}"],
+            input=config.encode("ascii"), capture_output=True,
+            timeout=12, check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
         return 599, b""
-    except ssl.SSLError:
-        return 591, b""
-    except (socket.timeout, TimeoutError):
-        return 593, b""
-    except OSError:
+    if completed.returncode != 0:
         return 599, b""
+    raw = completed.stdout
+    # The last line is a fixed-format status code emitted by curl.
+    if b"\\n" not in raw:
+        return 599, b""
+    body, code = raw.rsplit(b"\\n", 1)
+    if len(code) != 3 or not code.isdigit():
+        return 599, b""
+    status = int(code)
+    if len(body) > (MAX_ERROR_BYTES if status == 403 else MAX_BYTES):
+        return (403 if status == 403 else 413), b""
+    if status != 200 and status != 403:
+        return status, b""
+    return status, body
 
 def _denied(status: str, reason: str, **safe_fields):
     # Never serialize API keys, raw items, original IDs or full data bodies.
