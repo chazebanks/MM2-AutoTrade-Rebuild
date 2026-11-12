@@ -75,5 +75,111 @@ class SourceRightsGateTests(unittest.TestCase):
         self.assertFalse(gate.receipt()["sourceCaptureAuthorized"])
 
 
+    # These are synthetic metadata inputs resembling public candidates; they
+    # are NEVER permissions, fresh quotations, or a real source-data import.
+    @staticmethod
+    def candidate(**changes):
+        obj = {
+            "provider": "synthetic-independent",
+            "declaredRights": "CC_BY_4_DECLARED",
+            "upstreamProvenance": "INDEPENDENT_CLAIM",
+            "timestampMeaning": "PUBLISHER_TIMESTAMP",
+            "publisherUpdatedUtc": "2026-11-11T20:00:00Z",
+            "identityEvidence": "EXACT_GAME_RAW_KEY_CLAIM",
+        }
+        obj.update(changes)
+        return obj
+
+    def screen(self, **changes):
+        return gate.screen_public_candidate(
+            self.candidate(**changes), observed_utc="2026-11-11T23:59:00Z")
+
+    def assert_all_authorities_denied(self, result):
+        self.assertFalse(result["permissionEvidenceVerified"])
+        self.assertFalse(result["providerIndependentProvenanceVerified"])
+        self.assertFalse(result["serverSettledTradeEvidenceVerified"])
+        self.assertFalse(result["mayAdvanceP2"])
+        self.assertEqual(result["tradeOutcome"], "UNKNOWN")
+        self.assertTrue(all(result[k] is False for k in gate.DENIED))
+
+    def test_research_candidate_even_with_all_claims_stays_unapproved(self):
+        res = self.screen()
+        self.assertEqual(res["status"], "RESEARCH_REVIEW_ONLY")
+        self.assertEqual(res["blockers"], [])
+        self.assert_all_authorities_denied(res)
+
+    def test_explicit_restricted_publisher_is_blocked(self):
+        res = self.screen(declaredRights="RESTRICTED")
+        self.assertIn("PUBLISHER_RESTRICTS_REUSE", res["blockers"])
+        self.assert_all_authorities_denied(res)
+
+    def test_derivative_site_current_display_date_does_not_qualify(self):
+        res = self.screen(
+            provider="synthetic-derivative-calculator",
+            declaredRights="UNKNOWN",
+            upstreamProvenance="SUPREME_DERIVED",
+            timestampMeaning="DISPLAY_DATE_ONLY",
+            publisherUpdatedUtc=None,
+            identityEvidence="UNKNOWN")
+        self.assertIn("SUPREME_DERIVED_SOURCE_REUSE_NOT_CLEARED", res["blockers"])
+        self.assertIn("PUBLISHER_CLOCK_NOT_PROVEN", res["blockers"])
+        self.assertIsNone(res["publisherAgeDaysIfProven"])
+        self.assert_all_authorities_denied(res)
+
+    def test_api_access_is_not_permission_to_republish_upstream(self):
+        res = self.screen(
+            declaredRights="API_ACCESS_ONLY", upstreamProvenance="MIXED_DERIVED",
+            timestampMeaning="AGGREGATOR_REFRESH",
+            identityEvidence="UNKNOWN")
+        self.assertIn("UPSTREAM_DATA_REUSE_RIGHTS_NOT_PROVEN", res["blockers"])
+        self.assertIn("SUPREME_DERIVED_SOURCE_REUSE_NOT_CLEARED", res["blockers"])
+        self.assertIn("PUBLISHER_CLOCK_NOT_PROVEN", res["blockers"])
+        self.assert_all_authorities_denied(res)
+
+    def test_declared_cc_by_but_october_version_is_stale(self):
+        res = self.screen(
+            provider="synthetic-independent-CC-BY",
+            publisherUpdatedUtc="2026-10-12T00:42:14Z", identityEvidence="UNKNOWN")
+        self.assertIn("RESEARCH_DATA_STALE", res["blockers"])
+        self.assertGreater(res["publisherAgeDaysIfProven"], 30)
+        self.assert_all_authorities_denied(res)
+
+    def test_same_item_canonical_key_collision_forces_rejection(self):
+        res = self.screen(
+            provider="synthetic-web-value-list",
+            declaredRights="UNKNOWN", identityEvidence="AMBIGUOUS_COLLISION")
+        self.assertIn("ITEM_IDENTITY_COLLISION", res["blockers"])
+        self.assert_all_authorities_denied(res)
+
+    def test_provider_with_unknown_original_source_never_qualifies(self):
+        res = self.screen(
+            declaredRights="UNKNOWN", upstreamProvenance="UNKNOWN",
+            timestampMeaning="DISPLAY_DATE_ONLY", publisherUpdatedUtc="2026-11-12")
+        self.assertIn("REUSE_RIGHTS_NOT_DECLARED", res["blockers"])
+        self.assertIn("ORIGINAL_SOURCE_PROVENANCE_UNKNOWN", res["blockers"])
+        self.assertIn("PUBLISHER_CLOCK_NOT_PROVEN", res["blockers"])
+        self.assert_all_authorities_denied(res)
+
+    def test_future_or_malformed_publisher_time_rejected(self):
+        future = self.screen(publisherUpdatedUtc="2026-11-12T06:00:00Z")
+        self.assertIn("FUTURE_PUBLISHER_TIME", future["blockers"])
+        self.assert_all_authorities_denied(future)
+        wrong = self.screen(publisherUpdatedUtc="2026-11-11")
+        self.assertIn("PUBLISHER_CLOCK_NOT_PROVEN", wrong["blockers"])
+        self.assert_all_authorities_denied(wrong)
+
+    def test_immutably_reject_invalid_metadata_and_observation_clock(self):
+        with self.assertRaisesRegex(ValueError, "INVALID_CANDIDATE_OBJECT"):
+            gate.screen_public_candidate([], observed_utc="2026-11-11T23:59:00Z")
+        with self.assertRaisesRegex(ValueError, "INVALID_CANDIDATE_FIELDS"):
+            gate.screen_public_candidate(
+                {**self.candidate(), "auth": True}, observed_utc="2026-11-11T23:59:00Z")
+        with self.assertRaisesRegex(ValueError, "INVALID_DECLAREDRIGHTS"):
+            self.screen(declaredRights="WRITTEN_PERMISSION_PROVEN")
+        with self.assertRaisesRegex(ValueError, "INVALID_OBSERVATION_CLOCK"):
+            gate.screen_public_candidate(self.candidate(), observed_utc="2026-11-11")
+
+
+
 if __name__ == "__main__":
     unittest.main()
