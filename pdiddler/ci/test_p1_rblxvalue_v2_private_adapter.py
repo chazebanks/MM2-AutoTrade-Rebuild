@@ -221,6 +221,51 @@ class RblxV2PrivateAdapterTests(unittest.TestCase):
                 self.assertEqual(result["reason"], expected)
                 self.assertNotIn(message, str(result))
 
+    def test_403_exact_detail_claims_are_categorized_without_exposing_content(self):
+        examples = {
+            "Invalid API key.": "HTTP_403_DETAIL_KEY_INVALID_CLAIM",
+            "Invalid or inactive API key.": "HTTP_403_DETAIL_KEY_INVALID_OR_INACTIVE_CLAIM",
+            "API key is inactive": "HTTP_403_DETAIL_KEY_INACTIVE_CLAIM",
+            "API key has expired!": "HTTP_403_DETAIL_KEY_EXPIRED_CLAIM",
+            "API key is suspended": "HTTP_403_DETAIL_KEY_SUSPENDED_CLAIM",
+            "API key revoked": "HTTP_403_DETAIL_KEY_REVOKED_CLAIM",
+            "API key disabled": "HTTP_403_DETAIL_KEY_DISABLED_CLAIM",
+            "missing api key": "HTTP_403_DETAIL_KEY_MISSING_CLAIM",
+            "account temporarily banned": "HTTP_403_DETAIL_ACCOUNT_BANNED_CLAIM",
+            "account is suspended": "HTTP_403_DETAIL_ACCOUNT_SUSPENDED_CLAIM",
+            "access denied": "HTTP_403_DETAIL_ACCESS_DENIED_CLAIM",
+        }
+        for detail, expected in examples.items():
+            with self.subTest(detail=detail):
+                r = self.safe(api.classify_meta(403, encode({"detail":detail})))
+                self.assertEqual(r["status"],"ACCESS_RESTRICTED")
+                self.assertEqual(r["reason"],expected)
+                self.assertNotIn(detail,str(r))
+                self.assertFalse(r["authorizesTrade"])
+                self.assertFalse(r["marketFeedReadyForProduction"])
+
+    def test_403_detail_unknown_is_not_logged_or_assumed_key_failure(self):
+        examples = [
+            "User-specific reason: " + FAKE_SECRET,
+            "Access denied for " + FAKE_SECRET,
+            "Invalid API key: " + FAKE_SECRET,
+            "Account for " + FAKE_SECRET + " is banned",
+            "request blocked because of proxy 8a" + FAKE_SECRET,
+            "not a supported provider response",
+            " " * 513,
+            "",
+        ]
+        for detail in examples:
+            with self.subTest(detailLen=len(detail)):
+                r = self.safe(api.classify_meta(403, encode({
+                    "error":True,"detail":detail
+                })))
+                self.assertEqual(r["reason"],"HTTP_403_JSON_STRING_DETAIL_NO_MESSAGE")
+                self.assertNotIn(detail,str(r)) if detail.strip() else None
+                self.assertNotIn(FAKE_SECRET,str(r))
+                self.assertFalse(r["upstreamRightsApproved"])
+                self.assertFalse(r["confirmedMarketQuote"])
+
     def test_http_403_html_or_empty_cannot_prove_key_inactive(self):
         for body, expected in (
             (b"", "HTTP_403_EMPTY_OR_UNAVAILABLE_BODY"),
