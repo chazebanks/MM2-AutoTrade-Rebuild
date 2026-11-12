@@ -346,12 +346,14 @@ local okayUI=pcall(function()
   b.Parent=panel
   return b
  end
- screen.stop=button("StopAuto","STOP",10,45)
- screen.copy=button("CopyAuto","COPY",59,45)
- screen.reset=button("ResetChoices","RESET",108,47)
- screen.arm=button("ArmAllFour","ARM 4",158,50)
- screen.armAdaptive=button("ArmFiveAdaptive","ARM 5",212,50)
- screen.armBatch=button("ArmEightScenarios","ARM 8",266,64)
+ -- Historical ARM4/ARM5 controls stay non-visible for inherited mock tests.
+ -- Only ARM8 is displayed to the operator in this supervised pilot.
+ screen.stop=button("StopAuto","STOP",10,57)
+ screen.copy=button("CopyAuto","COPY",73,57)
+ screen.reset=button("ResetChoices","RESET",136,66)
+ screen.arm=button("ArmAllFour","ARM 4",208,1)
+ screen.armAdaptive=button("ArmFiveAdaptive","ARM 5",208,1)
+ screen.armBatch=button("ArmEightScenarios","PICK 4 MORE",209,121)
  screen.armBatch.Visible=false
  screen.armBatch.Active=false
  screen.armAdaptive.Visible=false
@@ -369,10 +371,10 @@ if not safe then
  earlyStop(layoutReason or "GUI_LAYOUT_UNAVAILABLE")
  return nil
 end
-screen.title.Text="SYSTEM 1 AUTO | SELECT 2 OR 4"
+screen.title.Text="SYSTEM 1 | ARM 8 ONLY"
 screen.warning.Visible=false
 screen.status.Position=UDim2.fromOffset(10,83)
-screen.body.Text="Select TWO cheap OWNED weapons for ARM4/5, or FOUR distinct cheap OWNED weapons for ARM8. NEVER final Accept."
+screen.body.Text="Select FOUR different cheap OWNED weapons. ARM 8 tests eight separate trade windows; no final Accept."
 screen.status.Text="Reading current owned MM2 inventory..."
 -- The original scanner may draw its old full-screen inventory GUI; hide it
 -- so this safety panel never obscures original MM2 trade controls.
@@ -477,27 +479,34 @@ local function refreshSelection()
  local available=availableForArm()
  screen.status.Text="Chosen: "..tostring(count).."/4 | ALT eligible: "..
    (available and "YES" or "WAITING")
- screen.arm.Visible=count==2 and available
- screen.arm.Active=screen.arm.Visible
- screen.armAdaptive.Visible=screen.arm.Visible
- screen.armAdaptive.Active=screen.arm.Visible
- screen.armBatch.Visible=count==4 and available
- screen.armBatch.Active=screen.armBatch.Visible
- if count==2 then
-  screen.body.Text="ARM 4: 4 automatic requests; 3 offers/removals; 4 declines. ARM 5: 5 requests; 5 offers/removals/declines; ALT swap. NEVER final Accept."
- elseif count==4 then
-  screen.body.Text="ARM 8: EIGHT fresh exact-ALT trades; one feature per trade; 10 approved offer slots, 7 MAIN declines + 1 ALT cancel. NO final Accept."
+ -- ARM4 and ARM5 are never visible in the current operator GUI.
+ screen.arm.Visible=false
+ screen.arm.Active=false
+ screen.armAdaptive.Visible=false
+ screen.armAdaptive.Active=false
+ -- ARM8 stays visible; it cannot initiate requests before four selections.
+ local canArm=count==4 and available
+ screen.armBatch.Visible=true
+ screen.armBatch.Active=canArm
+ screen.armBatch.AutoButtonColor=canArm
+ screen.armBatch.BackgroundColor3=canArm and
+   Color3.fromRGB(89,53,132) or Color3.fromRGB(60,58,69)
+ screen.armBatch.Text=canArm and "ARM 8" or
+   (count<4 and "PICK "..tostring(4-count).." MORE" or "WAIT ALT")
+ if count==4 then
+  screen.body.Text="ARM 8: EIGHT fresh ALT trade windows, one feature per trade. MAIN withdraws/declines; ALT cancels trade 7. NEVER final Accept."
  else
-  screen.body.Text="Select TWO cheap distinct own items for ARM4/5 or FOUR for ARM8. No requests before ARM."
+  screen.body.Text="Select FOUR different cheap weapons below. "..
+   tostring(4-count).." more to pick. Only ARM 8 is available. No final Accept."
  end
 end
 local function showOwned(choices)
  if not owner.running then return end
- if type(choices)~="table" or #choices<2 then
-  earlyStop("FEWER_THAN_TWO_ELIGIBLE_OWN_WEAPON_TYPES")
+ if type(choices)~="table" or #choices<4 then
+  earlyStop("FEWER_THAN_FOUR_ELIGIBLE_OWN_WEAPON_TYPES")
   return
  end
- screen.status.Text="Choose 2 for ARM4/5 or 4 for ARM8. Never Gingerscope."
+ screen.status.Text="Choose FOUR different cheap owned weapons. Never Gingerscope."
  for index,choice in ipairs(choices) do
   if approvedKey(choice.raw) and
      type(choice.display)=="string" and #choice.display>0 and
@@ -958,7 +967,7 @@ screen.copy.Activated:Connect(function()
     authorizesAccept=false,tradeOutcome="UNKNOWN"})
  else
   copyPayload({status="PREPARING",phase="SETUP",
-    reason="CHOOSING_TWO_TEST_ITEMS",tradeOutcome="UNKNOWN",
+    reason="CHOOSING_FOUR_TEST_ITEMS",tradeOutcome="UNKNOWN",
     authorizesAccept=false})
  end
 end)
@@ -1066,7 +1075,7 @@ E.PDIDDLER_SYSTEM1_MAIN_AUTO_RUNNER={
  end,
  status=function()
   return controller and controller.status() or {
-   status="PREPARING",phase="SELECT_TWO_OWN_ITEMS",
+   status="PREPARING",phase="SELECT_FOUR_OWN_ITEMS",
    reason=haltReason or "NO_REQUESTS_UNTIL_ARM_BUTTON",
    authorizesAccept=false,
    serverCompletionProven=false,tradeOutcome="UNKNOWN",
@@ -1078,5 +1087,5 @@ E.PDIDDLER_SYSTEM1_MAIN_AUTO_RUNNER={
    reason=haltReason or "NOT_ARMED",authorizesAccept=false})
  end,
 }
-print("[SYSTEM1 MAIN AUTO] Select 2 cheap items for ARM4/5 or 4 distinct for ARM8; one test scenario per trade window and no final Accept.")
+print("[SYSTEM1 MAIN AUTO] ARM8-only panel: select FOUR distinct cheap own weapons to enable ARM 8. One scenario per trade window; no final Accept.")
 return E.PDIDDLER_SYSTEM1_MAIN_AUTO_RUNNER
