@@ -424,6 +424,7 @@ local function fixture(opts)
  end
  e.task=taskApi
  local abaPhase=0
+ local round6MutationPhase=0
  local function tickTasks()
   now+=0.12
   -- Adversarial R4 ONLY: ALT A->B->A between first and second approved
@@ -442,6 +443,34 @@ local function fixture(opts)
     else
      their.children["NewItem1"]=nil
      abaPhase=2
+    end
+   end
+  end
+  -- Live-flow mirror: an ALT mutation after the first of FOUR guarded
+  -- MAIN offer sends in round6 must invalidate the remaining three.
+  -- This is an isolated fake-GUI fault, NEVER an authorized live trade.
+  if opts.injectRound6Mutation and round6MutationPhase<2 then
+   local runner=e.E.PDIDDLER_SYSTEM1_MAIN_AUTO_RUNNER
+   local progress=runner and runner.status()
+   if progress and progress.round==6 and
+      progress.phase=="MAIN_OFFERING" and #sent==5 and #tasks>=2 then
+    if round6MutationPhase==0 then
+     add(their,1,"ALT_MUTATION_A",1,false)
+     round6MutationPhase=1; injectionTick=true
+    else
+     if opts.injectRound6Mutation=="ABA" then
+      their.children["NewItem1"]=nil
+     elseif opts.injectRound6Mutation=="REPLACED" then
+      their.children["NewItem1"]=nil
+      add(their,1,"ALT_MUTATION_B",1,false)
+     elseif opts.injectRound6Mutation=="QUANTITY" then
+      their:FindFirstChild("NewItem1"):FindFirstChild("Container"):
+       FindFirstChild("Amount").Text="x2"
+     elseif opts.injectRound6Mutation=="CHROMA" then
+      their:FindFirstChild("NewItem1"):put(node("Frame","Tags")):
+       put(node("Frame","Chroma"))
+     end
+     round6MutationPhase=2; injectionTick=true
     end
    end
   end
@@ -1369,6 +1398,67 @@ do
  end
  eq(named,true,"static failed module alias in user console")
  eq(general,true,"general existing SOURCE_UNAVAILABLE retained")
+end
+
+-- Distinct System1 P4 four-physical-slot mutation verification. Each
+-- variant runs in its own isolated fake-MM2 session, since hard STOP is
+-- terminal, with the five PRIOR safe controlled rounds to prove ledger.
+for _,mutation in ipairs({"ABA","REPLACED","QUANTITY","CHROMA"}) do
+ local x=fixture({injectRound6Mutation=mutation})
+ for _=1,20 do x.tick()end
+ for i=1,4 do x.named("OwnedChoice_"..i).Activated:Fire()end
+ x.tick();x.named("ArmEightScenarios").Activated:Fire()
+ local delayed=0
+ for n=1,5 do
+  eq(untilRound(x,n,"WAIT_OPEN",240),true,"new P3 epoch "..n.." "..mutation)
+  x.open()
+  local done=false
+  for _=1,800 do
+   local st=x.state()
+   if st.phase=="STOPPED" then
+    error("unexpected early STOP "..mutation.." "..st.reason)
+   end
+   if st.completedRounds>=n then done=true;break end
+   if st.phase=="ALT_ADD" then
+    if n==1 then x.setAlt(1,2,false)
+    elseif n==2 then x.setAlt(1,1,true)
+    elseif n==3 then
+     delayed+=1
+     if delayed>=54 then x.setAlt(1,1,false)end
+    elseif n==4 then x.setAlt(2,1,false)
+    else x.setAlt(1,1,false)end
+   elseif st.phase=="ALT_REMOVE_ONE" then x.setAlt(1)
+   elseif st.phase=="ALT_REMOVE_ALL" then x.setAlt(0)
+   end
+   x.tick()
+  end
+  eq(done,true,"precursor client window closed "..n.." "..mutation)
+ end
+ eq(untilRound(x,6,"WAIT_OPEN",240),true,
+  "active four-slot request starts fresh original P3 lease "..mutation)
+ x.open()
+ eq(untilRound(x,6,"MAIN_OFFERING",180),true,
+  "MAIN four-physical-slot protected plan armed "..mutation)
+ eq(untilState(x,"STOPPED",400),true,
+  "mutation invalidates remaining 4-slot sends "..mutation)
+ local st=x.state()
+ eq(st.completedRounds,5,"no sixth completed window "..mutation)
+ eq(st.round,6,"specific failed sixth round "..mutation)
+ eq(st.reason=="SHADOW_OBSERVER_STALE_DURING_PLACEMENT" or
+    st.reason=="GUARDED_OFFER_FAILED_OR_UNCONFIRMED",true,
+   "guarded 4-slot mid-placement invalidated "..mutation)
+ eq(x.requests(),6,"no seventh P3 request after STOP "..mutation)
+ eq(#x.sent,5,"only first of four attempted R6 items was sent "..mutation)
+ eq(x.declines(),5,"no decline after first-fault R6 "..mutation)
+ eq(#st.rounds,5,"five prior windows retained in ledger "..mutation)
+ eq(st.actions.offersClientVisible,4,
+  "partial plan does not count as full confirmed offer "..mutation)
+ eq(#x.copies>0,true,"terminal sanitized receipt copied "..mutation)
+ local report=serde.decode("json",x.copies[#x.copies])
+ eq(report.serverCompletionProven,false,"no fake settlement "..mutation)
+ eq(report.finalAcceptEverAttempted,false,"no auto final Accept "..mutation)
+ eq(report.possibleSideEffect,true,
+  "partially sent offer remains explicitly uncertain "..mutation)
 end
 
 print("SYSTEM1_MAIN_AUTO_NATIVE_ORIGINAL_PASS",tests)
