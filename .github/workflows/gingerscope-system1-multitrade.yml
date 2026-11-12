@@ -1,0 +1,44 @@
+name: Gingerscope System1 supervised multi-trade GUI integration (manual ALT, no remotes)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system1/**'
+      - 'pdiddler/ci/system1_*'
+      - '.github/workflows/gingerscope-system1-multitrade.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-protected-client-four-rounds:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install SHA-256 pinned official Lune v0.11.1
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 50 https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip -o "$RUNNER_TEMP/lune.zip"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/dist"
+          f="$(find "$RUNNER_TEMP/dist" -name lune -type f -print -quit)"
+          test -n "$f"
+          install -m 0755 "$f" "$RUNNER_TEMP/lune"
+      - name: Pure four-round MAIN ALT guided client FSM
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_multitrade_walkthrough_mocks.luau
+      - name: Original protected P3 P4 bridge unit regressions
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_p4_handoff_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_four_slot_operator_plan_mocks.luau
+      - name: Native original IO GUI multi-trade adapter integration test
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_multitrade_native_original_mocks.luau
+      - name: Python source integrity, safety and original source checks
+        run: |
+          set -euo pipefail
+          python3 pdiddler/ci/check_system1_multitrade_integration.py
