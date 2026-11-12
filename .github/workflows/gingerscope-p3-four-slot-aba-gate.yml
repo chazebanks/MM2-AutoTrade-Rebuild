@@ -1,0 +1,44 @@
+name: Gingerscope original P3/P4 four-slot shadow ABA pre-send guard (OFFLINE)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/supervised/supervised_four_slot_operator_plan.lua'
+      - 'pdiddler/ci/p3_four_slot_aba_guard_real_mocks.luau'
+      - 'pdiddler/ci/check_p3_four_slot_aba_guard.py'
+      - 'pdiddler/supervised/P3_FOUR_SLOT_SHADOW_ABA_GUARD_HANDOFF.md'
+      - '.github/workflows/gingerscope-p3-four-slot-aba-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tested-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install SHA-256 pinned official Lune v0.11.1
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 50 https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip -o "$RUNNER_TEMP/lune.zip"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/dist"
+          f="$(find "$RUNNER_TEMP/dist" -name lune -type f -print -quit)"
+          test -n "$f"
+          install -m 0755 "$f" "$RUNNER_TEMP/lune"
+      - name: Actual original guarded TradeIO and P3/P4 with shadow ABA pre-send contract
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/p3_four_slot_aba_guard_real_mocks.luau
+      - name: Re-run original guarded multi-slot and shadow-only lease regressions
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_four_slot_operator_plan_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/p3_shadow_aba_offer_lease_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/p3_shadow_aba_native_bound_mocks.luau
+      - name: Python code boundary and no new privilege check
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_p3_shadow_aba_integrity
+          python3 pdiddler/ci/check_p3_four_slot_aba_guard.py
