@@ -101,7 +101,11 @@ function M.setRequestState()end
 function M.hasPendingWork()return false end
 return M
 ]]
-local COORD="return {new=function()return {}end}"
+local COORD=[[-- Transport intentionally mocked; authoritative source
+-- integration path is covered by the separate original P3 source tests.
+-- This placeholder must exceed native loader min-length as a real module.
+return {new=function()return {}end}
+]]
 local tests=0
 local function eq(a,b,why)
  tests+=1
