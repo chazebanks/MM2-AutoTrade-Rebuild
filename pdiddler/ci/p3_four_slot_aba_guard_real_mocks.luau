@@ -146,6 +146,7 @@ local function fixtureGuard(two)
  local built=0
  local opts={
   wait=function()end,experimentalABAShadowRequired=true,
+  onShadowPrepared=function()return true end,
   makeShadowWitness=function(realBound)
    eq(realBound==b,true,"witness uses the exact P3/P4 bound lease")
    built+=1
@@ -240,6 +241,48 @@ do
  eq(r.status,"BLOCKED","missing ABA witness denies approval")
  eq(r.reason,"ABA_SHADOW_REQUIRED_FOR_MULTI_ITEM","no silent fallback")
  eq(#z.x.sends,0,"zero items sent without required source")
+end
+
+-- Shadow opt-in also requires an attached observer contract; a factory
+-- alone cannot catch event history without active pumping of client snapshots.
+do
+ local z=fixtureGuard()
+ z.opts.onShadowPrepared=nil
+ local r=z.run()
+ eq(r.status,"BLOCKED","required client observer attachment unavailable")
+ eq(r.reason,"ABA_SHADOW_REQUIRED_FOR_MULTI_ITEM","preflight refuses missing observer hook")
+ eq(#z.x.sends,0,"nothing offered when event observation is not attached")
+end
+
+-- If ALT mutates DURING observer attachment, the prepared shadow is revoked
+-- before the second item guide is ever displayed.
+do
+ local z=fixtureGuard()
+ z.opts.onShadowPrepared=function(w,index)
+  eq(index,1,"first item already confirmed before shadow")
+  local x=z.x
+  x.add(x.theirs,1,"ALTTransient",1)
+  eq(w.poll().status,"STALE","ABA intermediate state observed in attachment callback")
+  x.theirs.children["NewItem1"]=nil
+  return true
+ end
+ local r=z.run()
+ eq(r.status,"STOPPED","stale at witness-preparation boundary")
+ eq(r.reason,"ABA_SHADOW_PREPARATION_FAILED","first observed B permanently revokes intent")
+ eq(r.offerAttempts,1,"at most first item attempted")
+ eq(#z.x.sends,1,"at most first protected remote sent")
+end
+
+-- Four human-approved physical slots require a freshly prepared witness
+-- after each known placement (never reuse a stale pre-own-offer witness).
+do
+ local z=fixtureGuard({"Iceblaster","Batwing","Laser","Luger"})
+ local r=z.run()
+ eq(r.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED",
+  "4 slots from new guarded candidate only after 3 fresh stable witnesses")
+ eq(z.built(),3,"new protected P3/P4 shadow rearmed after item 1/2/3")
+ eq(#z.x.sends,4,"4 user-approved distinct physical items only")
+ eq(r.authorizesAccept,false,"4-item guided code still does not auto Accept")
 end
 
 -- Rejection of false/forged authority flags, malformed schema and source
