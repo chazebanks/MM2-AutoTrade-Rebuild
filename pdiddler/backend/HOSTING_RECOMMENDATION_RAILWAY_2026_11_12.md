@@ -1,6 +1,8 @@
 # Hosting recommendation for months-long Gingerscope backend — Nov 12, 2026
 
-**Decision status:** RECOMMENDATION, not provisioning, purchase, credentials access, deployment, or runtime verification. User explicitly rejected Supabase; do not deploy one. Use the existing SQLite-only private backend in draft PR #242. No live RBLXValue price feed is authorized; latest HTTP403, unclear source reuse rights and exact item mapping still block market trading.
+**Current status:** Railway app now connected; created private empty Railway project `Gingerscope Market Backend` (project `00a6acf6-c0d3-44e2-b317-e683c3775c98`; production environment `e722fde0-642d-48ec-b9c2-994bc0479543`). Railway environment inspection confirmed **0 services, 0 volumes, 0 buckets, 0 staged changes, 0 deployments** immediately after creation. **No paid service, credentials, volume or production process provisioned.** User explicit approval of paid hosting is required before launch.
+
+User explicitly rejected Supabase; do not deploy one. Use the existing SQLite-only private backend in draft PR #242. No live RBLXValue price feed is authorized; latest HTTP403, unclear source reuse rights and exact item mapping still block market trading.
 
 ## Primary recommendation: Railway Hobby, managed persistent-service hosting
 
@@ -28,7 +30,15 @@ Official evidence checked Nov12:
 
 Source links: https://www.digitalocean.com/pricing/droplets ; https://docs.digitalocean.com/products/backups/details/pricing/ ; https://fly.io/pricing-update/ ; https://render.com/pricing ; https://render.com/docs/disks . Recheck prices at checkout, including taxes and billing settings; no service/account was purchased.
 
-## Operational plan — only AFTER user chooses and connects Railway
+## Deployment preparation already tested offline
+
+- `pdiddler/backend/runtime.py worker --db /data/gingerscope.sqlite`: no-port headless private worker, default 5-minute local heartbeat wakeups, restart-safe SQLite journal, no network or price jobs, no API key.
+- `pdiddler/backend/Dockerfile`: minimal Python container, copies backend only (no P3/P4 code), runs the headless worker. Must build with **repository root as Docker context** and Dockerfile path `pdiddler/backend/Dockerfile`.
+- Offline [GitHub Actions backend run #43251932772](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/43251932772): **38/38 Python tests, Docker build, no-network read-only container smoke test, six overall PR CI checks passed** at code commit `8b541fe78ddca169129ef96cf4ef9312534a2955`. No real Railway deployment or mounted persistent volume tested.
+- The user has no need to supply API keys here. The secret previously saved in GitHub Actions **is not available to this private Railway project**; do not duplicate it until a provider fetch is independently authorized.
+- The service must NOT be started with an ephemeral `/data` directory: it would appear to function but lose state on redeploy.
+
+## Operational plan — after explicit approval of paid hosting
 
 1. Connect the Railway app via ChatGPT or create a Railway account through https://railway.com ; **connection/installation requires explicit user action**. Do not assume access to account or charge.
 2. Review draft PR #242 and prepare a minimal service build/start for a stdlib Python monorepo; configure no public domain initially. Current `pdiddler.backend.runtime` binds **127.0.0.1 only**; this is intentionally **not** reachable through Railway public routing. Until a separately reviewed authenticated/TLS bridge exists, do not expose a port or inject a bearer token into public Delta script.
