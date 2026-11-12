@@ -117,11 +117,13 @@ def serve_local(db_path, *, port: int, read_token: str):
 def main(argv=None):
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="command", required=True)
-    for cmd in ("init","once","serve"):
+    for cmd in ("init","once","serve","backup"):
         p = sub.add_parser(cmd)
         p.add_argument("--db",required=True)
         if cmd == "serve":
             p.add_argument("--port",type=int,default=8787)
+        if cmd == "backup":
+            p.add_argument("--to",required=True)
     args = ap.parse_args(argv)
     dbpath = Path(args.db)
     if not dbpath.parent.is_dir():
@@ -129,6 +131,10 @@ def main(argv=None):
     if args.command == "init":
         with Store(dbpath) as store:
             status = store.safe_status(now=current_time())
+    elif args.command == "backup":
+        with Store(dbpath) as store:
+            result = store.backup_to(args.to)
+        status = {"backup":result,"contentsExposed":False}
     elif args.command == "once":
         status = run_once(dbpath)
     else:
