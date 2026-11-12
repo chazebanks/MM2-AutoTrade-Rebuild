@@ -456,7 +456,7 @@ local function refreshSelection()
  screen.armAdaptive.Visible=screen.arm.Visible
  screen.armAdaptive.Active=screen.arm.Visible
  if count==2 then
-  screen.body.Text="ARM 4: 4 automatic requests, 3 MAIN offers, 3 removals, 4 declines. ARM 5: 5 requests, 5 offers, 5 removals, 5 declines, ALT replacement. NEVER final Accept."
+  screen.body.Text="ARM 4: 4 automatic requests; 3 offers/removals; 4 declines. ARM 5: 5 requests; 5 offers/removals/declines; ALT swap. NEVER final Accept."
  end
 end
 local function showOwned(choices)
