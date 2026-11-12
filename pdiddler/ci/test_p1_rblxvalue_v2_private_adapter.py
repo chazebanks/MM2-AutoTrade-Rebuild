@@ -115,6 +115,28 @@ class RblxV2PrivateAdapterTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "PRIVATE_KEY_FORMAT_INVALID"):
                 api._no_redirect_get("/meta", "rbx_" + "a" * 40 + "\u200b")
 
+    def test_curl_transport_uses_stdin_and_parses_200(self):
+        fake = mock.Mock(returncode=0, stdout=encode(meta()) + b"\\n200", stderr=b"")
+        with mock.patch("subprocess.run", return_value=fake) as run:
+            status, body = api._no_redirect_get("/meta", FAKE_SECRET)
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(body), meta())
+        args, kwargs = run.call_args
+        self.assertNotIn(FAKE_SECRET, str(args))
+        self.assertIn(FAKE_SECRET.encode(), kwargs["input"])
+        self.assertTrue(kwargs["capture_output"])
+        self.assertFalse(kwargs["check"])
+
+    def test_curl_transport_403_and_fail_closed(self):
+        with mock.patch("subprocess.run", return_value=mock.Mock(
+                returncode=0, stdout=b'{"detail":"forbidden"}\\n403')):
+            self.assertEqual(api._no_redirect_get("/meta", FAKE_SECRET)[0], 403)
+        for raw, returncode in ((b"invalid", 0), (b"body\\n9999", 0),
+                                (b"\\n200", 28)):
+            with mock.patch("subprocess.run", return_value=mock.Mock(
+                    returncode=returncode, stdout=raw)):
+                self.assertEqual(api._no_redirect_get("/meta", FAKE_SECRET)[0], 599)
+
     def test_explicit_private_one_shot_meta_success_is_still_not_authority(self):
         calls = []
         def transport(path, key):
