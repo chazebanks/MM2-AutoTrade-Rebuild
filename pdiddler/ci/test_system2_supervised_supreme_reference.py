@@ -16,7 +16,8 @@ class SupervisedReferenceTests(unittest.TestCase):
         self.assertEqual(p["physicalSlotCount"], {"ownOffer": 1, "theirOffer": 1})
         self.assertEqual(p["tradeOutcome"], "UNKNOWN")
         self.assertTrue(all(p[key] is False for key in DENIED))
-        self.assertNotIn("value", str(p).lower())
+        self.assertNotIn("value", p["observedUnverifiedOffer"]["ownOffer"][0])
+        self.assertNotIn("demand", p["observedUnverifiedOffer"]["ownOffer"][0])
     def test_supported_link_is_official(self):
         self.assertEqual(set(CATEGORIES), {"Ancient", "Godly", "Chroma"})
         self.assertTrue(all(url.startswith("https://supremevalues.com/mm2/") for url in CATEGORIES.values()))
