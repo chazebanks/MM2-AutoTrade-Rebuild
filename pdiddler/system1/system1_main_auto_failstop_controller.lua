@@ -430,10 +430,7 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
    local n=round==4 and not reoffer and 2 or 1
    if #ob.ours~=n or #ob.theirs~=0 then
     return stop("MAIN_OFFER_GUI_NOT_RECONCILED") end
-   -- During an explicitly authorized ALT replacement, the withdrawn
-   -- MAIN item must disappear while ALT's DIFFERENT item remains exactly
-   -- stable. Do not mistakenly require ALT to be empty yet.
-   local yes=stepStable(ob,nil,expectedTheir)
+   local yes=stepStable(ob,nil,{})
    if not yes then return receipt() end
    oursPrev=ob.ours;theirPrev=ob.theirs
    if reoffer then
@@ -554,7 +551,9 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
     end
     if not retained then return stop("OWN_SLOT_REPLACED_DURING_REMOVAL") end
    end
-   local yes=stepStable(ob,nil,{})
+   -- An adaptive withdrawal preserves the already stable ALT offer;
+   -- ordinary withdrawal still requires ALT's side to remain empty.
+   local yes=stepStable(ob,nil,expectedTheir)
    if not yes then return receipt() end
    oursPrev=ob.ours
    if #ob.ours>0 then
