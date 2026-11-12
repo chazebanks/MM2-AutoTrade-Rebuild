@@ -46,6 +46,10 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/system1_multitrade_native_original_mocks.luau
+      - name: Full automatic MAIN native four-window original P4 plus frozen ABA modules
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_main_auto_native_original_mocks.luau
       - name: Python source integrity, safety and original source checks
         run: |
           set -euo pipefail
