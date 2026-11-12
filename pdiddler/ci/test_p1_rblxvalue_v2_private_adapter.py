@@ -75,6 +75,46 @@ class RblxV2PrivateAdapterTests(unittest.TestCase):
             self.assertEqual(self.safe(r)["status"], "KEY_REQUIRED")
         f.assert_not_called()
 
+    def test_invisible_unicode_api_key_cannot_reach_network(self):
+        # A GitHub secret with a copied U+200B or NBSP can make urllib's
+        # request header throw UnicodeEncodeError instead of API HTTP 401.
+        blocked = [
+            "rbx_" + "a" * 40 + "\u200b",
+            "rbx_" + "a" * 40 + "\u00a0",
+            "rbx_" + "a" * 40 + "\u201d",
+            "\u201c" + "rbx_" + "a" * 40,
+        ]
+        transport = mock.Mock(side_effect=AssertionError("NETWORK MUST NOT RUN"))
+        for secret in blocked:
+            with self.subTest(kind="nonascii"):
+                result = self.safe(api.probe_private_meta(
+                    enabled=True, secret=secret, transport=transport))
+                self.assertEqual(result["status"], "KEY_FORMAT_INVALID")
+                self.assertEqual(result["reason"], "PRIVATE_KEY_NON_ASCII_CHARACTERS")
+        transport.assert_not_called()
+
+    def test_pasted_key_with_quotes_spaces_newlines_or_assignment_denied(self):
+        blocked = [
+            "rbx_" + "a" * 40 + " ",
+            "rbx_" + "a" * 40 + "\n",
+            '"rbx_' + "a" * 40 + '"',
+            "RBLXVALUE_API_KEY=rbx_" + "a" * 40,
+        ]
+        transport = mock.Mock(side_effect=AssertionError("NETWORK MUST NOT RUN"))
+        for secret in blocked:
+            with self.subTest(kind="ascii_header_invalid"):
+                result = self.safe(api.probe_private_meta(
+                    enabled=True, secret=secret, transport=transport))
+                self.assertEqual(result["status"], "KEY_FORMAT_INVALID")
+                self.assertEqual(result["reason"],
+                                 "PRIVATE_KEY_FORMAT_UNEXPECTED_CHARACTERS")
+        transport.assert_not_called()
+
+    def test_private_transport_rejects_unicode_before_header_encoding(self):
+        with mock.patch("urllib.request.build_opener", side_effect=AssertionError("NETWORK")):
+            with self.assertRaisesRegex(ValueError, "PRIVATE_KEY_FORMAT_INVALID"):
+                api._no_redirect_get("/meta", "rbx_" + "a" * 40 + "\u200b")
+
     def test_explicit_private_one_shot_meta_success_is_still_not_authority(self):
         calls = []
         def transport(path, key):
