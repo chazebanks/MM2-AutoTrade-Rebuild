@@ -35,12 +35,35 @@ original=read("pdiddler/supervised/pdiddler3_outgoing_START_GATED_v1.lua")
 fork=read("pdiddler/system1/pdiddler3_outgoing_single_send_epoch.lua")
 preamble=fork.split("-- SUPERVISED P3 START-BARRIER FORK.",1)[0]
 assert "System1 supervised" in preamble and "fresh epoch" in preamble
-assert fork[len(preamble):]==original.replace(
-  "        SendAttempts=3,",
-  "        SendAttempts=1, -- System1 bounded test: NEVER retry uncertain first send"
-), "P3 fork must be original plus exactly ONE bounded send-attempt setting"
+# Preserve the previously reviewed exact original+single-attempt fork.
+# Current P3 adds only a narrowly reviewed timeout fail-closed correction.
+previous_fork_blob="88a6ddd684d8614ab1ac0095bbe7adc346f3650a"
+previous=subprocess.check_output(
+    ["git","cat-file","-p",previous_fork_blob],text=True
+)
+assert previous[len(preamble):]==original.replace(
+    "        SendAttempts=3,",
+    "        SendAttempts=1, -- System1 bounded test: NEVER retry uncertain first send"
+), "Baseline P3 fork no longer matches protected original"
+assert fork.startswith(preamble)
+assert sha("pdiddler/system1/pdiddler3_outgoing_single_send_epoch.lua")==(
+    "10fddb110f5f054e88bb9be475f5c8191a3b8abb"
+), "P3 cancellation fix has not passed exact-content review"
+for needle in (
+    "function M.ignoredTimeoutCancellationVerified(cancelled,stillPending,tradeWindowOpen)",
+    "M.ignoredTimeoutCancellationVerified(",
+    "S.failStop=true",
+    "S.startGateOpen=false",
+    "S.paused=true",
+    '"P3_CANCEL_UNVERIFIED_STOP"',
+    'return "cancel-unverified"',
+    'return "ignored"',
+):
+    assert needle in fork, f"P3 cancel fail-closed contract missing: {needle}"
 assert fork.count("        SendAttempts=1,")==1
 assert "        SendAttempts=3," not in fork
+for banned in ("AcceptTrade:FireServer(", "OfferItem:FireServer(", "PostAsync("):
+    assert banned not in fork
 
 native=read("pdiddler/system1/SYSTEM1_MAIN_AUTO_FOUR_TRADES_NATIVE.lua")
 fsm=read("pdiddler/system1/system1_main_auto_failstop_controller.lua")
@@ -55,7 +78,7 @@ for text in (native,fsm):
         assert forbidden not in text,forbidden
 
 for requirement in (
- "ba76adb21ffe4124c44d6d9a256683861eceb61d",
+ "96f6c577cee996266dc8af664a20af445200edff",
  "be8d8c5b77c0c7c345639c53e6a04959728d01a8",
  # Controller pin is checked by current exact Git blob below, not stale SHA.
  'ALT_NAME="venossgaming90190"',
