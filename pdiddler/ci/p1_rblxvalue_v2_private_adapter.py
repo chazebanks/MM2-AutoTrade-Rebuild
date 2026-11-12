@@ -136,6 +136,8 @@ def classify_meta(status: int, body: bytes):
         datasetItemsReported=totals["items"],
         aggregatorRefreshHours=interval,
         aggregatorClockTimeZone="UNSPECIFIED",
+        aggregatorLastUpdatedUnzoned=last_updated,
+        aggregatorLastRunUnzoned=last_run["run_time"],
         knownSupremeDerivedData=True,
         creditRequired=doc["credit"] is not None,
     )
