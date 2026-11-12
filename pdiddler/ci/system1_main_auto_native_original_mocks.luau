@@ -512,7 +512,7 @@ do
  local x=fixture()
  eq(type(x.runner),"table","native auto runner starts with no trading")
  eq(#x.gameRead,12,"12 frozen dependency modules loaded")
- eq(x.state().phase,"SELECT_TWO_OWN_ITEMS","default closed until selection")
+ eq(x.state().phase,"SELECT_FOUR_OWN_ITEMS","default closed until selection")
  eq(x.requests(),0,"no P3 before physical ARM")
  eq(#x.sent,0,"no offers before physical ARM")
  eq(x.declines(),0,"no declines before physical ARM")
@@ -525,11 +525,21 @@ do
  two.Activated:Fire()
  x.tick()
  local arm=x.named("ArmAllFour")
- eq(arm.Visible,true,"ARM four button only with two distinct selected items")
- eq(x.named("AutoInstructions").Text:find("4 automatic requests",1,true)~=nil,true,
-  "MAIN GUI discloses budget of automatic requests before ARM")
- eq(x.named("AutoInstructions").Text:find("NEVER final Accept",1,true)~=nil,true,
-  "GUI discloses automatic operation cannot final Accept")
+ eq(arm.Visible,false,"ARM4 is hidden in ARM8-only operator interface")
+ eq(x.named("ArmFiveAdaptive").Visible,false,
+  "ARM5 is hidden in ARM8-only operator interface")
+ local onlyEight=x.named("ArmEightScenarios")
+ eq(onlyEight.Visible,true,"ARM8 is visible even after only two choices")
+ eq(onlyEight.Active,false,"ARM8 is disabled until four distinct choices")
+ eq(onlyEight.Text,"PICK 2 MORE","counter clearly requests two more weapons")
+ eq(x.named("AutoInstructions").Text:find("Select FOUR",1,true)~=nil,true,
+  "GUI discloses four-weapon approval requirement")
+ eq(x.named("AutoInstructions").Text:find("No final Accept",1,true)~=nil,true,
+  "GUI clearly prohibits final Accept")
+ onlyEight.Activated:Fire()
+ eq(x.requests(),0,"ARM8 refuses a click with only two selected")
+ -- Hidden historical controller paths remain tested internally against the
+ -- exact original 4/5-round cases, but are no longer operator-clickable.
  arm.Activated:Fire()
  local function waitRound(n)
   local seen=false
@@ -726,8 +736,8 @@ local function armedTest(opts)
  b.Activated:Fire()
  x.tick()
  if opts and opts.adaptive then
-  eq(x.named("ArmFiveAdaptive").Visible,true,
-    "fifth-round ARM shown only after two preapproved own items")
+  eq(x.named("ArmFiveAdaptive").Visible,false,
+    "historical ARM5 is no longer shown in operator-only ARM8 GUI")
   x.named("ArmFiveAdaptive").Activated:Fire()
  else
   x.named("ArmAllFour").Activated:Fire()
@@ -1162,8 +1172,11 @@ do
  x.tick()
  local arm=x.named("ArmEightScenarios")
  eq(type(arm),"table","eight-trade explicitly approved ARM GUI exists")
- eq(arm.Visible,true,"ARM8 enabled only after four distinct approved choices")
- eq(x.named("ArmAllFour").Visible,false,"ARM4 not on four-choice approval")
+ eq(arm.Visible,true,"ARM8 displayed after four distinct approved choices")
+ eq(arm.Active,true,"ARM8 enabled only after four distinct approved choices")
+ eq(arm.Text,"ARM 8","ARM8 CTA is unambiguously labeled")
+ eq(x.named("ArmAllFour").Visible,false,"ARM4 never shown in operator GUI")
+ eq(x.named("ArmFiveAdaptive").Visible,false,"ARM5 never shown in operator GUI")
  arm.Activated:Fire()
  eq(x.requests(),0,"no P3 request until ARM8 worker advances")
  local delayTicks=0
