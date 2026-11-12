@@ -1,0 +1,58 @@
+name: Gingerscope P1 source rights checkpoint (NO COLLECTION)
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/gingerscope-p1-canonical-archive-research.yml'
+      - 'pdiddler/ci/p1_supreme_transport_probe.py'
+      - 'pdiddler/ci/test_p1_supreme_transport_probe.py'
+      - 'pdiddler/ci/p1_source_rights_gate.py'
+      - 'pdiddler/ci/test_p1_source_rights_gate.py'
+      - 'pdiddler/ci/p1_market_feed_v1.py'
+      - 'pdiddler/ci/test_p1_market_feed_v1.py'
+      - 'pdiddler/ci/p1_rblxvalue_v2_private_adapter.py'
+      - 'pdiddler/ci/test_p1_rblxvalue_v2_private_adapter.py'
+      - 'pdiddler/ci/p1_mm2index_research_audit.py'
+      - 'pdiddler/ci/test_p1_mm2index_research_audit.py'
+      - 'pdiddler/ci/test_p1_independent_market_feasibility.py'
+      - 'pdiddler/intelligence_lab/p1_independent_market_feasibility.py'
+      - 'pdiddler/intelligence_lab/P1_INDEPENDENT_EVIDENCE_FEASIBILITY_2026_11_11.md'
+      - 'pdiddler/intelligence_lab/p1_dual_client_inventory_reconciliation.py'
+      - 'pdiddler/ci/test_p1_dual_client_inventory_reconciliation.py'
+      - 'pdiddler/intelligence_lab/P1_DUAL_CLIENT_INVENTORY_RECONCILIATION_2026_11_11.md'
+      - 'pdiddler/intelligence_lab/P1_SOURCE_RIGHTS_DISCOVERY_2026_11_11.md'
+      - 'pdiddler/intelligence_lab/P1_MM2INDEX_RESEARCH_AUDIT_2026_11_11.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-rights:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify project continuity without source or trading requests
+        run: |
+          python3 -m pdiddler.continuity.manager verify
+          python3 -m pdiddler.continuity.manager recover
+      - name: Verify historic HTTP, source rights and MM2 Index audit OFFLINE
+        run: |
+          python3 -m unittest -v pdiddler.ci.test_p1_supreme_transport_probe pdiddler.ci.test_p1_source_rights_gate pdiddler.ci.test_p1_mm2index_research_audit pdiddler.ci.test_p1_independent_market_feasibility pdiddler.ci.test_p1_dual_client_inventory_reconciliation pdiddler.ci.test_p1_market_feed_v1 pdiddler.ci.test_p1_rblxvalue_v2_private_adapter
+      - name: Write source permission BLOCKED receipt; never access publisher
+        run: |
+          python3 -m pdiddler.ci.p1_source_rights_gate --output /tmp/gingerscope-p1-rights/source_access_receipt.json
+          echo '## P1 source data: BLOCKED — rights NOT VERIFIED' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Offline continuity and guard tests ran successfully; this is NOT a publisher-data capture, quote, or trade approval.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve denied-source research receipt only
+        uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-p1-source-rights-blocked
+          path: /tmp/gingerscope-p1-rights/source_access_receipt.json
+          if-no-files-found: error
+          retention-days: 14
