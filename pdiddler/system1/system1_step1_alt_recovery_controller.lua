@@ -735,6 +735,22 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
        (recoveryMode and round==2 and
         recoveryClearLastQuantity~=nil and current and
         current.quantity>recoveryClearLastQuantity) then
+     -- Only bounded booleans/quantities; no weapon labels, raw IDs,
+     -- player names, or partner identity enter the clipboard.
+     firstFailureEvidence={
+      observedPhysicalSlots=#ob.theirs,
+      expectedQuantity=expected and expected.quantity or 0,
+      observedQuantity=current and current.quantity or 0,
+      lastClearQuantity=recoveryClearLastQuantity or 0,
+      sameVisibleName=expected~=nil and current~=nil and
+          expected.name==current.name,
+      sameChroma=expected~=nil and current~=nil and
+          expected.chroma==current.chroma,
+      sameSlot=expected~=nil and current~=nil and
+          expected.slot==current.slot,
+      sameClientIdCandidate=expected~=nil and current~=nil and
+          expected.id==current.id,
+     }
      return stop("ALT_CHANGED_WHILE_CLEARING_FOR_REOFFER") end
     stable=0;lastFull=nil;return receipt()
    end
