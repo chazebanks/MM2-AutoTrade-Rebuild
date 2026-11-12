@@ -57,7 +57,7 @@ for text in (native,fsm):
 for requirement in (
  "ba76adb21ffe4124c44d6d9a256683861eceb61d",
  "be8d8c5b77c0c7c345639c53e6a04959728d01a8",
- "bd92654a14a477522a3b07375096a4e42209554c",
+ # Controller pin is checked by current exact Git blob below, not stale SHA.
  'ALT_NAME="venossgaming90190"',
  'function adapters.startEpoch(round,nonce)',
  'function adapters.inspect(round,epoch)',
@@ -115,6 +115,15 @@ for requirement in (
     if requirement=="OFFER_FAILED_OR_UNCONFIRMED":
         continue
     assert requirement in fsm,requirement
+assert f'local CTRL="{sha("pdiddler/system1/system1_main_auto_failstop_controller.lua")}"' in native, "Loaded controller must match exact current tested Git blob"
+assert 'screen.armBatch.Activated:Connect(function()armRounds(8)end)' in native
+assert 'explicitEightBatchConsent=requestedRounds==8' in native
+assert 'approvedFourDistinctOwnedItems=requestedRounds==8 and #selected==4' in native
+assert 'includeEightTradeBatch=requestedRounds==8' in native
+assert 'ALT_REVISE_SECOND' in fsm
+assert 'WAIT_ALT_CANCEL' in fsm
+assert 'ALL_EIGHT_CLIENT_SCENARIOS_VERIFIED' in fsm
+assert 'ownRemovalSlotReindexesObserved' in fsm
 assert 'noAutomaticAcceptAcknowledged=true' in native
 assert native.count("owner.armed=true")==1
 assert 'screen.armAdaptive.Activated:Connect' in native
