@@ -1,0 +1,46 @@
+name: Gingerscope persistent backend offline safety
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/backend/**'
+      - 'pdiddler/ci/test_persistent_backend.py'
+      - '.github/workflows/gingerscope-persistent-backend-offline.yml'
+  push:
+    branches:
+      - 'infra/gingerscope-persistent-backend-v1'
+    paths:
+      - 'pdiddler/backend/**'
+      - 'pdiddler/ci/test_persistent_backend.py'
+      - '.github/workflows/gingerscope-persistent-backend-offline.yml'
+permissions:
+  contents: read
+jobs:
+  offline-persistent-state:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Syntax and local pure Python regressions — NO NETWORK
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python3 -m py_compile pdiddler/backend/persistent_store.py pdiddler/backend/runtime.py pdiddler/ci/test_persistent_backend.py
+          python3 -m unittest -v pdiddler.ci.test_persistent_backend
+      - name: No unsafe provider, Discord or trade-action integration
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          sources = [Path('pdiddler/backend/persistent_store.py'),
+                     Path('pdiddler/backend/runtime.py')]
+          text = '\n'.join(f.read_text(encoding='utf-8') for f in sources)
+          for forbidden in ('OfferItem:FireServer', 'AcceptTrade:FireServer',
+                            'PostAsync(', 'RBLXVALUE_API_KEY', 'discord.com/api/webhooks',
+                            'https://api.rblxvalue.com', 'requests.get('):
+              assert forbidden not in text, forbidden
+          print('BACKEND_NO_PROVIDER_HTTP_OR_TRADE_OR_DISCORD_PASS')
+          PY
