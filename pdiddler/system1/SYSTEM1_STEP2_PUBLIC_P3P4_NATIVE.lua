@@ -155,7 +155,10 @@ local function statusBeforeArm()
   if type(uid)=="number" and uid>0 and
     p~=LP and p.Parent==Players and not distinct[uid] and
     Players:GetPlayerByUserId(uid)==p then
-   distinct[uid]=true;n+=1
+   local verified,found=pcall(Players.GetPlayerByUserId,Players,uid)
+   if verified and found==p then
+    distinct[uid]=true;n+=1
+   end
   end
  end
  return n
@@ -289,8 +292,15 @@ local function updatePanel()
    screen.warning.Text="MAIN AUTO P3 REQUESTS; P4 BOUND DECLINE ONLY"
   end
  else
-  screen.status.Text="Whitelisted visible targets: "..tostring(statusBeforeArm())
-  screen.warning.Text="ARM only in a suitable public lobby; max 3 players"
+  local eligible=statusBeforeArm()
+  screen.status.Text="Whitelisted visible targets: "..tostring(eligible)
+  local ready=eligible>=2
+  screen.arm.Active=ready
+  screen.arm.AutoButtonColor=ready
+  screen.arm.BackgroundColor3=ready and
+    Color3.fromRGB(89,53,132) or Color3.fromRGB(60,58,69)
+  screen.arm.Text=ready and "ARM MAX 3" or "NEED 2 ELIGIBLE"
+  screen.warning.Text="One ARM / max 3 / same public lobby; no item trades"
  end
 end
 local function setupStart()
@@ -517,7 +527,8 @@ if not engine then
 end
 controller=engine
 screen.arm.Activated:Connect(function()
- if owner.armed or not owner.running then return end
+ if owner.armed or not owner.running or
+   statusBeforeArm()<2 then return end
  owner.armed=true
  screen.arm.Visible=false
  local began=controller.arm(os.clock())
