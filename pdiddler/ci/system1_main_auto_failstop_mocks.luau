@@ -165,6 +165,25 @@ do
  eq(r.automaticMain,true,"automatic MAIN, ALT guided")
  eq(f.ctrl.tick(f.state.clock+1).phase,"DONE","no second run after completion")
 end
+-- RED: nested tick can trigger emergency STOP inside a P3 callback, but the
+-- enclosing request callback must NEVER reopen WAIT_OPEN afterward.
+do
+ local f=fixture()
+ local real=f.api.startEpoch
+ f.api.startEpoch=function(round,nonce)
+  local nested=f.ctrl.tick(f.state.clock)
+  eq(nested.phase,"STOPPED","nested tick triggers fail-stop")
+  return real(round,nonce)
+ end
+ local r=f.tick()
+ eq(r.phase,"STOPPED","outer callback cannot revive STOPPED into WAIT_OPEN")
+ eq(r.reason,"CONCURRENT_AUTO_ENGINE_TICK","original failure remains terminal")
+ eq(f.ctrl.status().phase,"STOPPED","subsequent status never recovers")
+ eq(f.state.stopCalls,1,"P3 stopAll called once for reentrant fault")
+ eq(#f.state.copy,1,"STOP failure copied once")
+ eq(f.ctrl.tick(f.state.clock+1).phase,"STOPPED","later ticks never restart")
+end
+
 -- Every step can fail terminally; receipt includes round + phase + error.
 for _,which in ipairs({
  "REJECT_EPOCH","INSPECT_THROW","WRONG_PARTNER","STALE_EPOCH",
