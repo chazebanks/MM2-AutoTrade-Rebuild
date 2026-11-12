@@ -274,7 +274,16 @@ if not uiOk or not screen.arm or not layoutSafe() then
  warn("[SYSTEM1 STEP2] GUI_NO_SAFE_LAYOUT; no outgoing requests")
  return nil
 end
+local function hideScannerOverlay()
+ -- The original scanner's own listing can obscure MM2 Trade controls.
+ -- Hide presentation only; do not disable the scanner's classification.
+ pcall(function()
+  local old=PG:FindFirstChild("MM2EligibilityScannerT41")
+  if old and old:IsA("ScreenGui") then old.Enabled=false end
+ end)
+end
 local function updatePanel()
+ hideScannerOverlay()
  if not screen.gui or screen.gui.Parent~=PG then return end
  if controller then
   local r=controller.status()
@@ -557,6 +566,7 @@ screen.copy.Activated:Connect(function()
 end)
 task.spawn(function()
  while owner.running and not owner.armed do
+  hideScannerOverlay()
   if not layoutSafe() then
    shutdown()
    warn("[SYSTEM1 STEP2] UI_LAYOUT_UNSAFE_BEFORE_ARM")
