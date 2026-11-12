@@ -33,6 +33,10 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/system1_main_auto_failstop_mocks.luau
+      - name: Compile native automatic MAIN runner and one-send P3 fork
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_main_auto_native_compile.luau
       - name: Original protected P3 P4 bridge unit regressions
         run: |
           set -euo pipefail
@@ -46,3 +50,4 @@ jobs:
         run: |
           set -euo pipefail
           python3 pdiddler/ci/check_system1_multitrade_integration.py
+          python3 pdiddler/ci/check_system1_main_auto_integration.py
