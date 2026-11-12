@@ -744,7 +744,7 @@ do
  eq(untilRound(x,1,"CHECK_EMPTY",20),true,"fresh P4 GUI read is armed")
  x.root:FindFirstChild("TheirOffer"):FindFirstChild("Accepted").Visible=true
  eq(untilState(x,"STOPPED",30),true,"unsafe accepted state stops MAIN")
- copiedStop(x,"ORIGINAL_P3_P4_CLIENT_SNAPSHOT_REJECTED",1)
+ copiedStop(x,"UNEXPECTED_ACCEPTED_STATE",1)
  eq(x.requests(),1,"no second P3 request after accepted ambiguity")
  eq(x.declines(),0,"no script decline with unsafe accepted GUI")
 end
