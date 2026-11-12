@@ -198,7 +198,11 @@ local function node(class,name)
   self.Activated:Fire()
   if self.Name=="ActionButton" and self.Parent and
     self.Parent.Parent then
-   self.Parent.Parent.Visible=false
+   local slot=self.Parent.Parent
+   slot.Visible=false
+   if slot.Parent and type(slot.Parent.onTestItemRemoval)=="function" then
+    slot.Parent:onTestItemRemoval(slot)
+   end
   end
   return true
  end
@@ -224,6 +228,34 @@ local function fixture(opts)
  local altPanel=root:put(node("Frame","TheirOffer"))
  local their=altPanel:put(node("Frame","Container"))
  altPanel:put(node("Frame","Accepted")).Visible=false
+ -- Native-only witness: emulate MM2 compacting MAIN NewItem2 to NewItem1
+ -- after a valid own withdraw. Original protected P4 IO remains unchanged.
+ if opts.ownRemovalMutation then
+  function own:onTestItemRemoval(removed)
+   self.children[removed.Name]=nil
+   local survivors={}
+   for _,v in pairs(self.children) do
+    if v.Visible and v.Name:match("^NewItem%d$") then
+     survivors[#survivors+1]=v
+    end
+   end
+   table.sort(survivors,function(a,b)return a.Name<b.Name end)
+   for _,v in ipairs(survivors) do self.children[v.Name]=nil end
+   for i,v in ipairs(survivors) do
+    v.Name="NewItem"..i;self.children[v.Name]=v
+   end
+   if #survivors==1 and opts.ownRemovalMutation~="reindex" then
+    local slot=survivors[1]
+    if opts.ownRemovalMutation=="replacement" then
+     slot:FindFirstChild("ItemName"):FindFirstChild("Label").Text="UNAUTHORIZED_SWAP"
+    elseif opts.ownRemovalMutation=="quantity" then
+     slot:FindFirstChild("Container"):FindFirstChild("Amount").Text="x2"
+    elseif opts.ownRemovalMutation=="chroma" then
+     slot:put(node("Frame","Tags")):put(node("Frame","Chroma"))
+    end
+   end
+  end
+ end
  local partner=altPanel:put(node("TextLabel","Username"))
  partner.Text="venossgaming90190"
  local players={}
@@ -1047,6 +1079,53 @@ for _,kind in ipairs({
  "quantity","chroma","duplicate"
 }) do
  testAltRemovalSurvivor(kind)
+end
+
+-- MAIN withdrawal GUI slot-index compaction: independent of ALT correction.
+local function testOwnRemovalIndex(kind)
+ local x=fixture({ownRemovalMutation=kind})
+ for _=1,20 do x.tick()end
+ x.named("OwnedChoice_1").Activated:Fire()
+ x.named("OwnedChoice_2").Activated:Fire()
+ x.tick()
+ x.named("ArmAllFour").Activated:Fire()
+ for n=1,4 do
+  eq(untilRound(x,n,"WAIT_OPEN",180),true,"own compaction request "..n.." "..kind)
+  x.open()
+  local endRound=false
+  for _=1,330 do
+   local st=x.state()
+   if st.phase=="STOPPED" then break end
+   if st.completedRounds>=n then endRound=true;break end
+   if st.phase=="ALT_ADD" then
+    x.setAlt(n==4 and 2 or 1)
+   elseif st.phase=="ALT_REMOVE_ONE" then
+    x.setAlt(1)
+   elseif st.phase=="ALT_REMOVE_ALL" then
+    x.setAlt(0)
+   end
+   x.tick()
+  end
+  if kind~="reindex" and n==4 then
+   local st=x.state()
+   eq(st.status,"STOPPED","unsafe own survivor must terminal STOP "..kind)
+   eq(st.reason,"OWN_SLOT_REPLACED_DURING_REMOVAL",
+     "specific own removal error "..kind)
+   eq(st.completedRounds,3,"preserve earlier 3 clean windows "..kind)
+   eq(st.actions.requestsStarted,4,"no fifth request "..kind)
+   eq(st.authorizesAccept,false,"zero accept authority "..kind)
+   return
+  end
+  eq(endRound,true,"valid MAIN withdrawal completes trade "..n.." "..kind)
+ end
+ local result=x.state()
+ eq(result.status,"CLIENT_TEST_SEQUENCE_COMPLETE",
+   "valid compacted GUI survive full ARM4")
+ eq(result.actions.ownRemovalSlotReindexesObserved>=1,true,
+   "own valid GUI renumber independently counted")
+end
+for _,kind in ipairs({"reindex","replacement","quantity","chroma"}) do
+ testOwnRemovalIndex(kind)
 end
 
 print("SYSTEM1_MAIN_AUTO_NATIVE_ORIGINAL_PASS",tests)
