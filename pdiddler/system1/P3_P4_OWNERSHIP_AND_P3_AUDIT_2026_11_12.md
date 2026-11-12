@@ -1,6 +1,9 @@
 # System1 — Part 3 versus Part 4, verified code audit (2026-11-12 ET)
 
-**Status:** Draft PR #241, not merged. This is an audit of actual branch source + CI, not a claim of full native open-server reliability. The user's instruction supersedes the prior proposal to redo P3 functionality as new P4 work. **Pause the new P4 mid-offer-mutation hardware runner until the P3 interface is accurately mapped.**
+**Status:** Draft PR #241, not merged. This is an audit of actual branch source + CI, not a claim of full native open-server reliability.
+
+**IMPORTANT FULL-SCOPE CORRECTION:** P4 is **not only** the item-placement state machine. It also owns integrating the Gingerscope inventory-growth planner, counterparty attractiveness, upgrade/downgrade/recycling decisions, trade telemetry, private Discord notifications after independently verified settlements, and the verified evidence stream for System3 learning. Read **[P4_GINGERSCOPE_FULL_SCOPE_2026_11_12.md](P4_GINGERSCOPE_FULL_SCOPE_2026_11_12.md)** before making P4 plans or tests. System2 supplies portfolio scoring and System3 supplies learning, but P4 orchestrates both; P3 stays separate as player/contact/request owner. The old standalone P4 section below describes mechanics, NOT the entire desired system.
+ The user's instruction supersedes the prior proposal to redo P3 functionality as new P4 work. **Pause the new P4 mid-offer-mutation hardware runner until the P3 interface is accurately mapped.**
 
 ## Part 3 — own these behaviors; don't rebuild them in Part 4
 
