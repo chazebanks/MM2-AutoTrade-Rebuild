@@ -159,11 +159,35 @@ class FuturePortfolioPlannerTests(unittest.TestCase):
             m["items"][f"b{i}"]=entry(55+i*5)
         x=self.run_plan((a,b,m))
         self.assertEqual(x["status"],"CANDIDATES_PREPARED")
-        self.assertLessEqual(x["candidatePairsConsidered"],9025)
+        self.assertLessEqual(x["candidatePairsConsidered"],44100)
         self.assertEqual(len(x["candidates"]),5)
         for candidate in x["candidates"]:
             for side in ("offer","receive"):
-                self.assertLessEqual(sum(row["quantity"] for row in candidate[side]),4)
+                self.assertLessEqual(len(candidate[side]),4)
+                self.assertLessEqual(sum(row["quantity"] for row in candidate[side]),8)
+
+    def test_five_types_cannot_occupy_five_physical_slots(self):
+        inventory={"k"+str(i):2 for i in range(5)}
+        offered=list(MOD._offers(inventory))
+        self.assertEqual(len(offered),210)
+        self.assertTrue(all(1 <= len(offer) <= 4 for offer in offered))
+        self.assertTrue(all(sum(q for _,q in offer) <= 8 for offer in offered))
+        self.assertFalse(any(len(offer)==5 for offer in offered))
+        self.assertIn([("k0",2),("k1",2),("k2",2),("k3",2)],offered)
+
+    def test_stack_research_bounds_do_not_claim_unlimited_game_capacity(self):
+        a,b,m=sample()
+        a[0]["quantity"]=3  # Research type cap is separate from physical slots.
+        x=self.run_plan((a,b,m))
+        self.assertEqual(x["status"],"BLOCKED")
+        self.assertFalse(x["enumerationCompleteForProvidedShortlists"])
+        a,b,m=sample()
+        a=[{"key":f"w{i}","quantity":2} for i in range(5)]
+        b=[{"key":"theirs","quantity":1}]
+        for i in range(5):
+            m["items"][f"w{i}"]=entry(5)
+        x=self.run_plan((a,b,m))
+        self.assertLessEqual(x["searchCap"]["maxSlotsPerSide"],4) if x["status"]=="CANDIDATES_PREPARED" else self.assertFalse(x["authorizesTrade"])
 
     def test_600_adversarial_inputs_never_authorize(self):
         rng=random.Random(6084)
