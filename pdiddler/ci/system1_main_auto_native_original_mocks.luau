@@ -468,6 +468,10 @@ do
  x.tick()
  local arm=x.named("ArmAllFour")
  eq(arm.Visible,true,"ARM four button only with two distinct selected items")
+ eq(x.named("AutoInstructions").Text:find("4 automatic requests",1,true)~=nil,true,
+  "MAIN GUI discloses budget of automatic requests before ARM")
+ eq(x.named("AutoInstructions").Text:find("NEVER final Accept",1,true)~=nil,true,
+  "GUI discloses automatic operation cannot final Accept")
  arm.Activated:Fire()
  local function waitRound(n)
   local seen=false
