@@ -114,10 +114,25 @@ def serve_local(db_path, *, port: int, read_token: str):
         stop.set()
         worker.join(timeout=2)
 
+def run_private_worker(db_path, *, stop_event=None, interval_seconds=300):
+    """Railway-style headless worker; no network port or API credentials.
+
+    A failed integrity/heartbeat write aborts the process so the host can
+    report/restart a crash. This NEVER polls an external market source.
+    """
+    if (type(interval_seconds) is not int or
+            not 30 <= interval_seconds <= 3600):
+        raise ValueError("INVALID_WORKER_INTERVAL")
+    event = stop_event if stop_event is not None else threading.Event()
+    run_once(db_path)
+    while not event.wait(interval_seconds):
+        run_once(db_path)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="command", required=True)
-    for cmd in ("init","once","serve","backup"):
+    for cmd in ("init","once","serve","backup","worker"):
         p = sub.add_parser(cmd)
         p.add_argument("--db",required=True)
         if cmd == "serve":
@@ -137,6 +152,9 @@ def main(argv=None):
         status = {"backup":result,"contentsExposed":False}
     elif args.command == "once":
         status = run_once(dbpath)
+    elif args.command == "worker":
+        run_private_worker(dbpath)
+        return 0
     else:
         token = os.environ.get("GINGERSCOPE_BACKEND_READ_TOKEN","")
         serve_local(dbpath,port=args.port,read_token=token)
