@@ -341,16 +341,16 @@ function guide:show(r)
     local ap=altGuide.current().phase
     if ap=="WAIT_ALT_ADD" then
         ui.title.Text="3/5 ALT — ADD ONE WEAPON"
-        ui.body.Text="ALT: manually ADD exactly ONE inexpensive weapon to THEIR offer. MAIN leaves its one offered item unchanged. Wait for 4/5. NEVER final Accept."
+        ui.body.Text="ALT: manually ADD 1 cheap weapon. MAIN: do nothing. Wait for step 4/5. NO final Accept."
     elseif ap=="WAIT_ALT_REMOVE" then
         ui.title.Text="4/5 ALT — REMOVE SAME WEAPON"
-        ui.body.Text="ALT: manually REMOVE the SAME weapon from THEIR offer. MAIN must not tap Offer or final Accept. Wait for 5/5."
+        ui.body.Text="ALT: manually REMOVE the same weapon. MAIN: do nothing. Wait for step 5/5. NO final Accept."
     elseif ap=="READY_MANUAL_DECLINE" then
         ui.title.Text="5/5 MAIN — MANUALLY DECLINE"
-        ui.body.Text="ALT add and remove observed on CLIENT only. MAIN manually DECLINE, then STOP / COPY. NEVER final Accept."
+        ui.body.Text="MAIN: manually DECLINE trade, then STOP / COPY. NEVER final Accept."
     elseif ap=="BLOCKED" then
         ui.title.Text="ALT TEST STOPPED — INCONCLUSIVE"
-        ui.body.Text="ALT sequence was not proven. MAIN: manually DECLINE if needed, then STOP / COPY. Do not retry in same server."
+        ui.body.Text="Test incomplete. MAIN: manually DECLINE if safe, then STOP / COPY. No retry in this server."
     elseif status=="P3_SUPERVISOR_PREPARED_NOT_ARMED" then
         ui.title.Text="1/5 MAIN — ARM REAL P3"
         ui.body.Text="MAIN: "..cfg.approvedDisplayName..
