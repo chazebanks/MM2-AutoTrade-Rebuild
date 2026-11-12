@@ -188,8 +188,13 @@ def _evaluate(envelope, observed_utc):
     # previous is a caller-supplied *comparison*, not proof of price truth.
     previous = envelope["previous"]
     if previous is not None:
-        exact_fields(previous, ("version", "publishedAtUtc", "items"),
+        exact_fields(previous, ("provider", "units", "version",
+                                "publishedAtUtc", "items"),
                      "INVALID_PREVIOUS_FIELDS")
+        fixed_id(previous["provider"], "PREVIOUS_PROVIDER_INVALID", synthetic=synthetic)
+        fixed_id(previous["units"], "PREVIOUS_UNITS_INVALID", synthetic=synthetic)
+        require(previous["provider"] == provider["name"], "CROSS_PROVIDER_PRICE_COMPARISON")
+        require(previous["units"] == snap["units"], "CROSS_UNIT_PRICE_COMPARISON")
         fixed_id(previous["version"], "PREVIOUS_VERSION_INVALID", synthetic=synthetic)
         before = when(previous["publishedAtUtc"], "PREVIOUS_PUBLISHER_CLOCK_INVALID")
         require(before < pub and previous["version"] != snap["version"],
