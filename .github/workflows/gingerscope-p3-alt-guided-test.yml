@@ -7,6 +7,7 @@ on:
       - 'pdiddler/supervised/SUPERVISED_P3_AUTO_ALT_GUIDED_PICKER.lua'
       - 'pdiddler/ci/supervised_p3_postoffer_alt_guide_mocks.luau'
       - 'pdiddler/ci/supervised_p3_postoffer_alt_guided_native_mocks.luau'
+      - 'pdiddler/supervised/P3_ALT_GUIDED_TEST_HANDOFF_2026_11_11.md'
       - '.github/workflows/gingerscope-p3-alt-guided-test.yml'
   workflow_dispatch:
 permissions:
