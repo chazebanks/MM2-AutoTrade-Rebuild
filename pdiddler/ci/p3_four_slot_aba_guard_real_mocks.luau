@@ -6,7 +6,7 @@ local fs=require("@lune/fs")
 local luau=require("@lune/luau")
 local handoffText=fs.readFile("pdiddler/supervised/supervised_p3_p4_handoff.lua")
 local ioText=fs.readFile("pdiddler/supervised/pdiddler4_tradeio_supervised_v2.lua")
-local planText=fs.readFile("pdiddler/supervised/supervised_four_slot_operator_plan.lua")
+local planText=fs.readFile("pdiddler/supervised/supervised_four_slot_operator_plan_aba_draft.lua")
 local tests=0
 local function eq(x,w,tag)
  tests+=1
