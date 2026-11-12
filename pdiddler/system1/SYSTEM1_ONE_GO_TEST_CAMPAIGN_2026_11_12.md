@@ -57,3 +57,12 @@
 5. At DONE, one sanitized ledger and compare actual distinct attempted player count against original P3 counters. This proves only client request rotation; no trade settlement, bot detection, full unattended hop reliability, or autonomous strategy.
 
 **Next engineering step:** original P3 **public-lobby request-only runner integration** and negative CI using the new candidate gate. This is not yet done by adding the pure gate. Preserve PR #241 DRAFT and request no hardware run until reviewed CI has tested the runner against actual original P3 source.
+
+
+## LATEST operator-priority correction — automated ALT settlement before public integration
+
+**Supersedes the earlier public-lobby 'immediate next engineering step' wording in this same document.** Full architecture and test policies are in [SYSTEM1_OWNERSHIP_AUTONOMY_AND_ALT_SETTLEMENT_DECISION_2026_11_12.md](SYSTEM1_OWNERSHIP_AUTONOMY_AND_ALT_SETTLEMENT_DECISION_2026_11_12.md).
+
+The operator directs that the system's **end goal is fully autonomous operation**. One operator ARM should authorize bounded automatic testing of mechanics. Current `authorizesAccept=false` means *this already-tested version has intentionally not implemented safe automatic final confirmation*; it is **not a permanent ban on developing/testing final Accept**. First establish real completed-trade observation on a consenting ALT with inexpensive inventory and persistent post-rejoin dual-account deltas, then separately authorize/test a bounded **automatic final-accept ALT pilot** after offline fault coverage. Public-server player-rotation pilot is postponed until the Parts and settlement workflow have been reviewed; no second ALT is required to test eventual P3 player rotation. Actual hop execution is not present in the current Part1 classifier nor verified in reviewed P3 sender. Keep separate subsystem ownership and avoid forcing P4 to own P3 contact/hop.
+
+**State:** architectural/test-order correction, not a live trading-script update; do not ask the operator to execute the old fixed-ALT ARM8 to verify completed trades. No public test loader or automatic final Accept produced.
