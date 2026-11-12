@@ -39,7 +39,7 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None
 
-def _no_redirect_get(path: str, api_key: str) -> tuple[int, bytes]:
+def _curl_get(path: str, api_key: str) -> tuple[int, bytes]:
     """Single authenticated HTTPS request via curl, no redirects or retries.
 
     curl config is supplied through stdin, not argv or disk. Never emit stderr,
@@ -85,6 +85,58 @@ def _no_redirect_get(path: str, api_key: str) -> tuple[int, bytes]:
     if status != 200 and status != 403:
         return status, b""
     return status, body
+
+def _no_redirect_get(path: str, api_key: str) -> tuple[int, bytes]:
+    """Single authenticated request, no redirects, retries, persistence or printing."""
+    if path not in ALLOWED_PATHS:
+        raise ValueError("ENDPOINT_NOT_ALLOWED")
+    if not isinstance(api_key, str) or not 12 <= len(api_key) <= 256:
+        raise ValueError("PRIVATE_KEY_REQUIRED")
+    # urllib's HTTP header encoder can fail on invisible Unicode characters.
+    # Never normalize, strip, echo or repair a supplied credential silently.
+    if not api_key.isascii() or re.fullmatch(r"[A-Za-z0-9_-]{12,256}", api_key) is None:
+        raise ValueError("PRIVATE_KEY_FORMAT_INVALID")
+    request = urllib.request.Request(
+        BASE + path,
+        headers={"X-Api-Key": api_key, "Accept": "application/json"},
+        method="GET",
+    )
+    opener = urllib.request.build_opener(_NoRedirect())
+    try:
+        with opener.open(request, timeout=8) as response:
+            status = response.getcode()
+            raw = response.read(MAX_BYTES + 1)
+        if len(raw) > MAX_BYTES:
+            return 413, b""
+        return status, raw
+    except urllib.error.HTTPError as ex:
+        # Only HTTP 403 gets a bounded, transient read. The classifier below
+        # emits fixed labels, NEVER the error body, headers, URL or API key.
+        if ex.code == 403:
+            try:
+                raw = ex.read(MAX_ERROR_BYTES + 1)
+                return 403, raw if len(raw) <= MAX_ERROR_BYTES else b""
+            except (OSError, ValueError, AttributeError):
+                return 403, b""
+            finally:
+                ex.close()
+        return ex.code, b""
+    except urllib.error.URLError as ex:
+        # Error *types* only; never serialize exception messages, URLs,
+        # response bodies or credential-bearing diagnostic strings.
+        if isinstance(ex.reason, socket.gaierror):
+            return 590, b""
+        if isinstance(ex.reason, ssl.SSLError):
+            return 591, b""
+        if isinstance(ex.reason, (socket.timeout, TimeoutError)):
+            return 593, b""
+        return 599, b""
+    except ssl.SSLError:
+        return 591, b""
+    except (socket.timeout, TimeoutError):
+        return 593, b""
+    except OSError:
+        return 599, b""
 
 def _denied(status: str, reason: str, **safe_fields):
     # Never serialize API keys, raw items, original IDs or full data bodies.
@@ -336,7 +388,7 @@ def classify_item_page(status: int, body: bytes, *, requested_limit=ITEM_LIMIT, 
     )
 
 def probe_private_meta(*, enabled: bool, secret: str | None,
-                       transport: Callable[[str, str], tuple[int, bytes]] = _no_redirect_get):
+                       transport: Callable[[str, str], tuple[int, bytes]] = _curl_get):
     """Single one-shot metadata probe. Runs NOTHING unless *explicitly enabled*."""
     if enabled is not True:
         return _denied("DISABLED", "PRIVATE_PROBE_NOT_ARMED")
