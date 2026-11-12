@@ -246,14 +246,30 @@ def probe_private_meta(*, enabled: bool, secret: str | None,
         return _denied("DISABLED", "PRIVATE_PROBE_NOT_ARMED")
     if type(secret) is not str or not 12 <= len(secret) <= 256:
         return _denied("KEY_REQUIRED", "PRIVATE_ENVIRONMENT_KEY_MISSING")
+    # Distinguish an unexpected transport bug from an unexpected metadata
+    # parser bug. Do not emit exception messages, tracebacks or request URLs.
+    # These fixed categories cannot leak the X-Api-Key or private proxy values.
+    def error_class(exc):
+        if isinstance(exc, (TypeError, ValueError, AttributeError, KeyError)):
+            return type(exc).__name__.upper()
+        if isinstance(exc, ssl.SSLError):
+            return "TLS"
+        if isinstance(exc, (OSError, TimeoutError)):
+            return "OS_OR_NETWORK"
+        return "UNCLASSIFIED"
     try:
         status, body = transport("/meta", secret)
+    except Exception as exc:
+        return _denied("SOURCE_UNAVAILABLE",
+                       "TRANSPORT_EXCEPTION_" + error_class(exc))
+    try:
         result = classify_meta(status, body)
         # This flag means only that the single API request was attempted.
         result["providerApiContacted"] = True
         return result
-    except Exception:
-        return _denied("SOURCE_UNAVAILABLE", "SANITIZED_PRIVATE_PROBE_ERROR")
+    except Exception as exc:
+        return _denied("BLOCKED",
+                       "PARSER_EXCEPTION_" + error_class(exc))
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="One-shot private RBLXValue metadata research probe")
