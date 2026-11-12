@@ -368,7 +368,7 @@ local function fixture(opts)
     then return sources.shadow end
    if url:find("system1_main_auto_failstop_controller.lua",1,true) then
     assert(url=="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
-     "845d537babeef3e71d2f627b48721794ba264119/pdiddler/"..
+     "e0f0259ff116b0618c3d3504251294302d2e37a2/pdiddler/"..
      "system1/system1_main_auto_failstop_controller.lua",
      "exact controller raw URL must use reviewed COMMIT, not blob hash")
     if opts.simulateControllerFetch404 then error("MOCK_CONTROLLER_404") end
