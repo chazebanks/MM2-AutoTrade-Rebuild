@@ -10,6 +10,8 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
+import tempfile
 import re
 import sqlite3
 from pathlib import Path
@@ -141,6 +143,52 @@ class Store:
             self.db.execute("INSERT INTO schema_metadata(version) VALUES (1)")
         elif row["version"] != 1:
             raise InvalidEvidence("UNKNOWN_DATABASE_SCHEMA_VERSION")
+
+    def backup_to(self, destination: str | Path) -> str:
+        """Online consistent SQLite backup to a NEW private file, never overwrite.
+
+        Backup remains private and client-only. Never upload or commit it to Git.
+        A host must use a persistent encrypted directory and offsite retention.
+        """
+        if self.filename == ":memory:":
+            raise InvalidEvidence("FILE_BACKUP_REQUIRES_DURABLE_SOURCE")
+        target = Path(destination).resolve()
+        source = Path(self.filename).resolve()
+        if target == source or target.exists() or not target.parent.is_dir():
+            raise InvalidEvidence("BACKUP_PATH_UNSAFE_OR_EXISTS")
+        fd, tmpname = tempfile.mkstemp(
+            prefix=".gingerscope-backup-", suffix=".part", dir=target.parent)
+        os.close(fd)
+        try:
+            os.chmod(tmpname, 0o600)
+            with sqlite3.connect(tmpname) as out:
+                self.db.backup(out)
+                check = out.execute("PRAGMA integrity_check").fetchone()[0]
+                if check != "ok":
+                    raise InvalidEvidence("BACKUP_INTEGRITY_FAILED")
+            with open(tmpname, "rb") as checkfile:
+                os.fsync(checkfile.fileno())
+            # Hard-link exclusive create: never replace an existing backup,
+            # even if another process writes the name while we were copying.
+            os.link(tmpname, target)
+            # Persist directory entry on POSIX hosts.
+            try:
+                directory_fd = os.open(str(target.parent), os.O_RDONLY)
+                try:
+                    os.fsync(directory_fd)
+                finally:
+                    os.close(directory_fd)
+            except OSError:
+                # FS behavior varies; host must separately verify durability.
+                pass
+            return "PRIVATE_BACKUP_CREATED_AND_INTEGRITY_CHECKED"
+        except FileExistsError:
+            raise InvalidEvidence("BACKUP_PATH_UNSAFE_OR_EXISTS") from None
+        finally:
+            try:
+                os.unlink(tmpname)
+            except FileNotFoundError:
+                pass
 
     def record_market_receipt(self, data: dict, *, now: str) -> str:
         """Research metadata only. No raw prices, quote promotion or keys."""
