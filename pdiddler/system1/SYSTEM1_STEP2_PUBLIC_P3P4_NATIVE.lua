@@ -153,8 +153,7 @@ local function statusBeforeArm()
   local uid=type(p)=="userdata" and p.UserId or
     (type(p)=="table" and p.UserId or nil)
   if type(uid)=="number" and uid>0 and
-    p~=LP and p.Parent==Players and not distinct[uid] and
-    Players:GetPlayerByUserId(uid)==p then
+    p~=LP and p.Parent==Players and not distinct[uid] then
    local verified,found=pcall(Players.GetPlayerByUserId,Players,uid)
    if verified and found==p then
     distinct[uid]=true;n+=1
