@@ -68,7 +68,11 @@ local M={}
 function M.run(scanner,options)
  local E=getgenv()
  local state={processed={},paused=false,accepted=0,ignored=0,
-  declined=0,incomingDeclined=0,sent=0,failStop=false}
+  declined=0,incomingDeclined=0,sent=0,failStop=false,
+  preTradeCardSkipped=0,requestTargetsAttempted=0,
+  pendingRequestUiEverConfirmed=false,lastRequestStage="NOT_STARTED",
+  lastOutcomeCode="NONE",tradeButtonTapAttempted=false,
+  tradeButtonTapReturnedTrue=false}
  return {
   state=state,session=E.PDIDDLER_OUTGOING_SESSION,
   isPaused=function()return state.paused end,
