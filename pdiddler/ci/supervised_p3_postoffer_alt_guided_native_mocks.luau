@@ -359,7 +359,8 @@ do
  eq(x.offers[1][1],"Iceblaster","exact human-approved raw key")
  eq(x.offers[1][2],"Weapons","original protected item category")
  eq(x.E.__OWN_READS,1,"current own inventory verified immediately before offer")
- eq(x.named("CurrentStep").Text,"3/5 ALT — ADD ONE WEAPON",
+ x.advance(0.2);x.E.__WATCH.tick()
+eq(x.named("CurrentStep").Text,"3/5 ALT — ADD ONE WEAPON",
   "ALT ADD instruction must replace early decline after one own offer")
 eq(x.named("WhatToDo").Text:find("ALT: manually ADD",1,true)~=nil,true,
   "ALT add instructions clearly visible on MAIN")
