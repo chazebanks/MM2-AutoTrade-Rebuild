@@ -49,20 +49,23 @@ local function fixture(changes)
     p3Status=changes.p3Status or "P3_ROTATING",
     root=state.root,snapshot=status}
   end,
-  offerApproved=function(round,count,epoch)
-   state.offers[#state.offers+1]={round=round,count=count}
+  offerApproved=function(round,count,epoch,choiceIndex)
+   state.offers[#state.offers+1]={round=round,count=count,choiceIndex=choiceIndex}
    if state.failOffer then return {status="STOPPED",offerAttempts=1} end
    state.ours={}
    for i=1,count do
-    state.ours[i]=item(i,"MAIN_"..tostring(i))
+    state.ours[i]=item(i,"MAIN_"..tostring(choiceIndex+i-1))
    end
    return {status="CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED",
     offerAttempts=count,clientVisibleAddedSlots=count,
     authorizesAccept=false,serverCompletionProven=false,
     tradeOutcome="UNKNOWN"}
   end,
-  removeOwnOne=function(round,root,epoch)
+  removeOwnOne=function(round,root,epoch,allowTheirItem)
    state.remove+=1
+   if #state.theirs~=0 and (not allowTheirItem or round~=5) then
+    return false
+   end
    if changes.failRemoval then return false end
    table.remove(state.ours,#state.ours)
    return true
@@ -85,6 +88,8 @@ local function fixture(changes)
  }
  local cfg={explicitFourRoundConsent=true,finalAcceptDisabled=true,
   exactConsentingAlt=true,approvedTwoDistinctOwnedItems=true,
+   includeAdaptiveRound=changes.adaptive==true,
+   explicitAdaptiveRevisionConsent=changes.adaptive==true,
   requestTimeout=30,altStepTimeout=90,actionTimeout=8}
  local ctrl=M.new(api,cfg)
  local function tick(dt)
@@ -107,7 +112,13 @@ local function fixture(changes)
     local n=ctrl.status().round==4 and 2 or 1
     state.theirs={}
     for i=1,n do state.theirs[i]=item(i,"ALT_"..tostring(i)) end
-   elseif phase=="ALT_REMOVE_ONE" then
+   elseif phase=="ALT_REVISE" then
+     state.theirs={item(1,"ALT_REPLACEMENT")}
+    elseif phase=="ALT_CLEAR_FOR_REOFFER" then
+     state.theirs={}
+    elseif phase=="ALT_READD" then
+     state.theirs={item(1,"ALT_NEW_RESPONSE")}
+    elseif phase=="ALT_REMOVE_ONE" then
     state.theirs={item(2,"ALT_2")}
    elseif phase=="ALT_REMOVE_ALL" then
     state.theirs={}
@@ -247,4 +258,41 @@ do
  eq(c,nil,"no engine without operator-wide consent")
  eq(r.status,"BLOCKED","default closed")
 end
+-- Adaptive optional fifth test: replace ALT offer while MAIN holds first
+-- preapproved item; MAIN withdraws with exact unchanged ALT offer, waits
+-- empty, then reoffers a different preapproved item and completes.
+do
+ local f=fixture({adaptive=true})
+ local r=f.drive()
+ eq(r.status,"CLIENT_TEST_SEQUENCE_COMPLETE","adaptive five-round success")
+ eq(r.phase,"DONE","adaptive terminal")
+ eq(r.maxRounds,5,"five rounds explicitly approved")
+ eq(r.adaptiveRoundAuthorized,true,"adaptive consent recorded")
+ eq(r.completedRounds,5,"five distinct client trade windows")
+ eq(r.reason,"ALL_FIVE_CLIENT_ROUNDS_VERIFIED","fifth-round receipt")
+ eq(r.actions.requestsStarted,5,"five fresh epochs")
+ eq(r.actions.offersAttempted,5,"3 base + 2 dynamic offers")
+ eq(r.actions.offersClientVisible,5,"5 visible MAIN offer slots total")
+ eq(r.actions.removalsAttempted,5,"3 base + 2 dynamic removals")
+ eq(r.actions.declinesAttempted,5,"five auto declines")
+ eq(r.actions.clientClosedWindows,5,"five closed client windows")
+ eq(r.actions.altRevisionsObserved,1,"one stable ALT replacement")
+ eq(r.actions.adaptiveReoffersAttempted,1,"one different MAIN reoffer")
+ eq(#f.state.offers,4,"four outgoing batches")
+ eq(f.state.offers[3].choiceIndex,1,"adaptive first preapproved weapon")
+ eq(f.state.offers[4].choiceIndex,2,"adaptive SECOND preapproved weapon")
+ eq(f.state.endCalls,5,"all P3 epochs closed")
+ eq(#f.state.copy,1,"copy after all five")
+ eq(f.state.copy[1].authorizesAccept,false,"no final accept permission")
+ eq(f.state.copy[1].tradeOutcome,"UNKNOWN","no server settlement")
+end
+do
+ local f=fixture()
+ f.cfg.includeAdaptiveRound=true
+ f.cfg.explicitAdaptiveRevisionConsent=false
+ local c,r=M.new(f.api,f.cfg)
+ eq(c,nil,"four-round consent does not authorize fifth round")
+ eq(r.status,"BLOCKED","no implicit extended authority")
+end
+
 print("SYSTEM1_MAIN_AUTO_FAILSTOP_PURE_PASS",tests)
