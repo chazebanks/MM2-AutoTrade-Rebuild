@@ -324,7 +324,30 @@ class RblxV2PrivateAdapterTests(unittest.TestCase):
         r = self.safe(api.probe_private_meta(
             enabled=True, secret=FAKE_SECRET, transport=err))
         self.assertEqual(r["status"], "SOURCE_UNAVAILABLE")
-        self.assertEqual(r["reason"], "SANITIZED_PRIVATE_PROBE_ERROR")
+        self.assertEqual(r["reason"], "TRANSPORT_EXCEPTION_UNCLASSIFIED")
+
+    def test_unexpected_transport_failures_are_stage_specific_and_secret_free(self):
+        for problem, expected in (
+            (TypeError(FAKE_SECRET), "TRANSPORT_EXCEPTION_TYPEERROR"),
+            (ValueError(FAKE_SECRET), "TRANSPORT_EXCEPTION_VALUEERROR"),
+            (KeyError(FAKE_SECRET), "TRANSPORT_EXCEPTION_KEYERROR"),
+            (AttributeError(FAKE_SECRET), "TRANSPORT_EXCEPTION_ATTRIBUTEERROR"),
+        ):
+            with self.subTest(error_type=type(problem).__name__):
+                def throw(_path, _key):
+                    raise problem
+                result = self.safe(api.probe_private_meta(
+                    enabled=True, secret=FAKE_SECRET, transport=throw))
+                self.assertEqual(result["reason"], expected)
+
+    def test_unexpected_meta_parser_exception_is_separately_diagnosed(self):
+        with mock.patch.object(api, "classify_meta",
+                               side_effect=TypeError(FAKE_SECRET)):
+            result = self.safe(api.probe_private_meta(
+                enabled=True, secret=FAKE_SECRET,
+                transport=lambda _path, _key: (200, encode(meta()))))
+        self.assertEqual(result["status"], "BLOCKED")
+        self.assertEqual(result["reason"], "PARSER_EXCEPTION_TYPEERROR")
 
     def test_cli_defaults_to_off_and_ignores_env_key(self):
         with mock.patch.dict(os.environ, {"RBLXVALUE_API_KEY": FAKE_SECRET},
