@@ -114,6 +114,22 @@ def serve_local(db_path, *, port: int, read_token: str):
         stop.set()
         worker.join(timeout=2)
 
+def _require_railway_persistent_volume(db_path):
+    """Fail shut when production /data path is not a real mounted volume.
+
+    Runtime on an ephemeral container filesystem is NOT meaningful persistence.
+    Non-/data private development paths remain legal in offline tests.
+    """
+    raw = Path(db_path).absolute()
+    if raw.parts[:2] != ("/", "data"):
+        return
+    resolved = raw.resolve()
+    if resolved.parts[:2] != ("/", "data"):
+        raise RuntimeError("PRODUCTION_DB_PATH_ESCAPE_BLOCKED")
+    if not os.path.ismount("/data"):
+        raise RuntimeError("PRODUCTION_SQLITE_VOLUME_NOT_MOUNTED")
+
+
 def run_private_worker(db_path, *, stop_event=None, interval_seconds=300):
     """Railway-style headless worker; no network port or API credentials.
 
@@ -123,6 +139,7 @@ def run_private_worker(db_path, *, stop_event=None, interval_seconds=300):
     if (type(interval_seconds) is not int or
             not 30 <= interval_seconds <= 3600):
         raise ValueError("INVALID_WORKER_INTERVAL")
+    _require_railway_persistent_volume(db_path)
     event = stop_event if stop_event is not None else threading.Event()
     run_once(db_path)
     while not event.wait(interval_seconds):
