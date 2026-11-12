@@ -368,7 +368,7 @@ local function fixture(opts)
     then return sources.shadow end
    if url:find("system1_step1_alt_recovery_controller.lua",1,true) then
     assert(url=="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
-     "b7ba49cbdd73ef4ea08bbe8ef653ab095c487fbc/pdiddler/"..
+     "96458e472fb1e23b8cc2773cd3c7d49a5d7d5c7c/pdiddler/"..
      "system1/system1_step1_alt_recovery_controller.lua",
      "exact controller raw URL must use reviewed COMMIT, not blob hash")
     if opts.simulateControllerFetch404 then error("MOCK_CONTROLLER_404") end
@@ -553,6 +553,8 @@ local function scenario(x,n,mode)
  eq(untilPhase(x,"WAIT_OPEN",250),true,"P3 fresh epoch "..n)
  x.open()
  local done=false
+ local stackPartiallyCleared=false
+ local stackPartialObserveTicks=0
  for _=1,950 do
   local st=x.state()
   if st.phase=="STOPPED" then
@@ -566,13 +568,25 @@ local function scenario(x,n,mode)
    else error("unexpected REVISION phase")end
   elseif st.phase=="ALT_CLEAR_FOR_NEW_ALT" then x.setAlt(0)
   elseif st.phase=="ALT_REVISE_READD" then x.setAltNamed("ALT_B",1,false)
-  elseif st.phase=="ALT_CLEAR_FOR_REOFFER" then x.setAlt(0)
+  elseif st.phase=="ALT_CLEAR_FOR_REOFFER" then
+   if n==2 and not stackPartiallyCleared then
+    -- Real iPad failure: quantity x2 may visibly decrement x1 before
+    -- empty. The old instant x2->empty fixture missed this transition.
+    x.setAltNamed("ALT_A",1,false)
+    stackPartiallyCleared=true
+   elseif n==2 and stackPartialObserveTicks<2 then
+    stackPartialObserveTicks+=1
+   else x.setAlt(0) end
   elseif st.phase=="ALT_READD" then x.setAltNamed("ALT_FINAL",1,false)
   elseif st.phase=="ALT_REMOVE_ALL" then x.setAlt(0)
   end
   x.tick()
  end
  eq(done,true,"one client-only closed recovery trade "..n)
+ if n==2 then
+  eq(stackPartiallyCleared,true,"R2 visibly unwound x2->x1 on way to empty")
+  eq(stackPartialObserveTicks,2,"R2 x1 was observed during clear before empty")
+ end
  eq(x.state().completedRounds,n,"all preceding rounds retained")
 end
 do
@@ -639,4 +653,71 @@ do
  eq(x.declines(),2,"only two earlier windows declined")
  eq(x.state().completedRounds,2,"two earlier windows retained")
 end
+
+-- Recreate actual iPad first-fault point: R2 already validated x1->x2,
+-- MAIN has independently withdrawn its first approved item, and the
+-- purple instruction now tells ALT to CLEAR its remaining stack.
+local function reachRound2Clear(x)
+ arm(x)
+ scenario(x,1,"replace")
+ eq(untilPhase(x,"WAIT_OPEN",250),true,"R2 fresh P3 request")
+ x.open()
+ eq(untilPhase(x,"ALT_ADD",150),true,"R2 initial x1 offer")
+ x.setAltNamed("ALT_A",1,false)
+ eq(untilPhase(x,"ALT_REVISE",100),true,"R2 wait for stack x2")
+ x.setAltNamed("ALT_A",2,false)
+ eq(untilPhase(x,"ALT_CLEAR_FOR_REOFFER",160),true,
+  "R2 MAIN withdrawal complete and awaiting ALT stack removal")
+ eq(x.state().actions.altRevisionsObserved,2,
+  "R1 replacement and R2 stack revision recognized separately")
+ eq(x.state().actions.removalsAttempted,3,
+  "R1 2 removals and R2 initial removal reproduced")
+ eq(#x.sent,3,"R2 second own item not placed yet")
+end
+
+-- After the permitted x2->x1 step, a rebound x1->x2 indicates ALT
+-- re-added a copy. This must STOP rather than silently recovering.
+do
+ local x=fixture()
+ reachRound2Clear(x)
+ x.setAltNamed("ALT_A",1,false)
+ for _=1,3 do x.tick()end
+ eq(x.state().phase,"ALT_CLEAR_FOR_REOFFER",
+   "monotonic same-weapon x2 to x1 is normal during clearing")
+ x.setAltNamed("ALT_A",2,false)
+ eq(untilPhase(x,"STOPPED",30),true,
+   "quantity rebound x1 to x2 is not an authorized clear")
+ eq(x.state().reason,"ALT_CHANGED_WHILE_CLEARING_FOR_REOFFER",
+   "rebound keeps existing STOP classification")
+ eq(x.requests(),2,"never request a third trade after clear rebound")
+ eq(#x.sent,3,"no unsafe second item sent during rebound")
+ eq(x.declines(),1,"no blind Decline on modified ALT offer")
+ eq(x.state().completedRounds,1,"R1 only remains complete")
+end
+
+-- Replacing the item or the chroma variant while clearing a stack
+-- isn't an expected decrement, even though the slot and qty look valid.
+for _,changeKind in ipairs({"NAME_SWAP","CHROMA_SWAP","QTY_INCREASE","TWO_SLOTS"}) do
+ local x=fixture()
+ reachRound2Clear(x)
+ if changeKind=="NAME_SWAP" then
+  x.setAltNamed("ALT_B",1,false)
+ elseif changeKind=="CHROMA_SWAP" then
+  x.setAltNamed("ALT_A",1,true)
+ elseif changeKind=="QTY_INCREASE" then
+  x.setAltNamed("ALT_A",3,false)
+ else
+  x.setAlt(2,1,false)
+ end
+ eq(untilPhase(x,"STOPPED",30),true,
+   "unsafe clear state terminates "..changeKind)
+ eq(x.state().reason,
+   changeKind=="TWO_SLOTS" and "ALT_ADDED_UNEXPECTED_EXTRA_SLOTS" or
+     "ALT_CHANGED_WHILE_CLEARING_FOR_REOFFER",
+   "exact first fault classified "..changeKind)
+ eq(x.requests(),2,"no next request "..changeKind)
+ eq(#x.sent,3,"no reoffer on invalid clear "..changeKind)
+ eq(x.declines(),1,"no blind decline "..changeKind)
+end
+
 print("SYSTEM1_STEP1_ALT_RECOVERY_NATIVE_PASS",tests)
