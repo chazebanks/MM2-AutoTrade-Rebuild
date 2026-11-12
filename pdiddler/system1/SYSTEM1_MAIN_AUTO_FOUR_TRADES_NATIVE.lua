@@ -11,7 +11,7 @@ local ORIGINAL_MM2=142823291
 local MAIN="a3c209659942e8b45eec5da3555f7cfb83059c59"
 local P3_EPOCH="ba76adb21ffe4124c44d6d9a256683861eceb61d"
 local SHADOW_PLAN="be8d8c5b77c0c7c345639c53e6a04959728d01a8"
-local CTRL="dfa278462006a81895a64898207c5423c5260d60"
+local CTRL="6cd8dd4347d37efa8bd6f425b8303fa67d62cea5"
 local BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local isTrue=function(x)return x==true end
 local conflictNames={
@@ -204,6 +204,21 @@ local function exactTrade()
  end
  if #seen>1 then return nil,"MULTIPLE_VISIBLE_TRADE_ROOTS" end
  local root=seen[1]
+ -- An Accepted flag can coincide with loss of the active protected
+ -- trade root. Surface this exact unsafe client condition instead of
+ -- mislabeling it as an ordinary unexpected closed trade window.
+ -- This does NOT prove that the MM2 server accepted or settled anything.
+ if root then
+  local our=root:FindFirstChild("YourOffer")
+  local their=root:FindFirstChild("TheirOffer")
+  local a=our and our:FindFirstChild("Accepted")
+  local b=their and their:FindFirstChild("Accepted")
+  if not a or not b or type(a.Visible)~="boolean" or
+     type(b.Visible)~="boolean" or
+     a.Visible~=false or b.Visible~=false then
+   return nil,"UNEXPECTED_ACCEPTED_STATE"
+  end
+ end
  if root and io.trade()~=root then
   return nil,"ORIGINAL_P4_ROOT_CHANGED"
  end
