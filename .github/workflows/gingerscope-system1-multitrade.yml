@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0 # Check that raw.githubusercontent.com pins are commits, not blobs
       - name: Install SHA-256 pinned official Lune v0.11.1
         run: |
           set -euo pipefail
