@@ -1,3 +1,4 @@
+-- Nov12 Step2: distinguish pre-Trade card skips from uncertain Trade sends.
 -- STEP2 public-server P3 request-only fork: one physical send attempt per
 -- target, no retries after ambiguous Trade tap, no offers, no final Accept.
 -- Original default-closed P3 source retained for unrelated behavior.
@@ -107,6 +108,13 @@ function M.run(scanner,options)
         unavailableCount={},
         declineSignalAt=0,
         declineSignalUid=nil,
+        lastRequestStage="NOT_STARTED",
+        lastOutcomeCode="NONE",
+        tradeButtonTapAttempted=false,
+        tradeButtonTapReturnedTrue=false,
+        pendingRequestUiEverConfirmed=false,
+        preTradeCardSkipped=0,
+        requestTargetsAttempted=0,
     }
 
     for _,p in ipairs(Players:GetPlayers()) do
@@ -1202,6 +1210,12 @@ function M.run(scanner,options)
         end
 
         S.active=target
+        S.lastRequestStage="PRECHECK"
+        S.lastOutcomeCode="NONE"
+        S.tradeButtonTapAttempted=false
+        S.tradeButtonTapReturnedTrue=false
+        S.pendingRequestUiEverConfirmed=false
+        S.requestTargetsAttempted+=1
         S.declineSignalAt=0
         S.declineSignalUid=nil
 
@@ -1281,6 +1295,7 @@ function M.run(scanner,options)
                 )
             )
 
+            S.lastRequestStage="CARD_LOOKUP_AND_PLAYER_LABEL_TAP"
             local opened,tradeButtonOrWhy=openTargetCard(target)
 
             if not opened then
@@ -1295,16 +1310,31 @@ function M.run(scanner,options)
                     continue
                 end
 
-                S.failed=S.failed+1
+                -- A failed card lookup is PRE-TRADE: no Trade button
+                -- has been tapped by this P3 session. Confirm no pending
+                -- request or open trade after bounded GUI settling.
+                task.wait(0.30)
+                if pendingVisible() or tradeOpen() then
+                    S.lastRequestStage="UNEXPECTED_REQUEST_OR_TRADE_DURING_CARD_FAILURE"
+                    S.lastOutcomeCode="CARD_FAILURE_WITH_ACTIVE_TRADE_UI"
+                    S.failStop=true
+                    S.startGateOpen=false
+                    S.paused=true
+                    return "failed"
+                end
+                S.preTradeCardSkipped+=1
+                S.lastRequestStage="TRADE_BUTTON_NOT_TAPPED"
+                S.lastOutcomeCode="CARD_NOT_VERIFIED_PRE_TRADE"
                 scanner.setRequestState(
                     target,
-                    "sendfailed",
-                    "Could not verify correct fresh Profile/Trade card after 3 attempts"
+                    "unavailable",
+                    "Step2: unverified player-card identity; skipped before Trade button"
                 )
-                return "failed"
+                return "card-unavailable"
             end
 
             local tradeButton=tradeButtonOrWhy
+            S.lastRequestStage="CARD_TARGET_IDENTITY_VERIFIED"
 
             if incomingVisible() then
                 local cleared=declineIncoming(
@@ -1326,10 +1356,16 @@ function M.run(scanner,options)
                 "Correct player card verified | physically tapping Trade"
             )
 
-            if not physicalTap(
+            -- Even a failed physical tap can have unknown effects.
+            -- No resend until new fresh authorized session.
+            S.tradeButtonTapAttempted=true
+            S.lastRequestStage="TRADE_BUTTON_TAP_ATTEMPTED"
+            local clicked=physicalTap(
                 tradeButton,
                 "Trade for "..target.Name
-            ) then
+            )
+            S.tradeButtonTapReturnedTrue=(clicked==true)
+            if not clicked then
                 if attempt<C.SendAttempts then
                     task.wait(0.8)
                     continue
@@ -1339,11 +1375,13 @@ function M.run(scanner,options)
                 scanner.setRequestState(
                     target,
                     "sendfailed",
-                    "Trade button physical tap failed after 3 attempts"
+                    "Step2: Trade-button click unconfirmed; no retry"
                 )
+                S.lastOutcomeCode="TRADE_TAP_RETURNED_UNCONFIRMED"
                 return "failed"
             end
 
+            S.lastRequestStage="PENDING_UI_OR_TRADE_OPEN_PROOF"
             local proofDeadline=os.clock()+C.PendingProofTimeout
 
             while alive() and os.clock()<proofDeadline do
@@ -1386,6 +1424,8 @@ function M.run(scanner,options)
 
                 if pendingVisible() then
                     delivered=true
+                    S.pendingRequestUiEverConfirmed=true
+                    S.lastRequestStage="PENDING_UI_PROVEN"
                     break
                 end
 
@@ -1419,6 +1459,8 @@ function M.run(scanner,options)
                 S.failStop=true
                 S.startGateOpen=false
                 S.paused=true
+                S.lastRequestStage="POST_TAP_PENDING_UI_NOT_SEEN"
+                S.lastOutcomeCode="PENDING_UI_MISSING_AFTER_TRADE_TAP"
                 scanner.setRequestState(
                     target,
                     "unavailable",
@@ -1566,8 +1608,10 @@ function M.run(scanner,options)
                     scanner.setRequestState(
                         target,
                         "sendfailed",
-                        "Request channel closed without verifiable decline or trade-open"
+                        "Step2: pending request vanished without verified decline/open"
                     )
+                    S.lastRequestStage="POST_PENDING_UI_VANISHED"
+                    S.lastOutcomeCode="PENDING_DISAPPEARED_UNCLASSIFIED"
                     return "failed"
                 end
             end
@@ -1620,6 +1664,8 @@ function M.run(scanner,options)
             S.failStop=true
             S.startGateOpen=false
             S.paused=true
+            S.lastRequestStage="POST_PENDING_CANCEL_UNVERIFIED"
+            S.lastOutcomeCode="CANCEL_UNVERIFIED"
             S.failed=S.failed+1
             scanner.setRequestState(
                 target,
@@ -1787,11 +1833,21 @@ function M.run(scanner,options)
                 S.failStop=true
                 S.startGateOpen=false
                 S.paused=true
+                if S.lastOutcomeCode=="NONE" then
+                    S.lastOutcomeCode="UNKNOWN_POST_REQUEST_FAILURE"
+                end
                 scanner.setStatus(
                     "SYSTEM1 STEP2 STOP — request side effect not proven safe"
                 )
                 warn("[SYSTEM1 STEP2] request state ambiguous; STOPPED")
                 break
+            end
+
+            if result=="card-unavailable" then
+                -- No verified request was sent, do not count as contact.
+                -- Processing this UserId still prevents future resends.
+                task.wait(0.25)
+                continue
             end
 
             if result=="trade-open" then
