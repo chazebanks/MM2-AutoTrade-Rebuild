@@ -83,6 +83,23 @@ class FuturePortfolioPlannerTests(unittest.TestCase):
             self.assertTrue(all(1<=z["quantity"]<=2 for z in proposed["offer"]))
         self.assertEqual(a[0]["quantity"],2)
 
+    def test_regression_four_physical_slots_can_hold_eight_stacked_copies(self):
+        # Exactly four occupied trade slots, two copies per slot; the old
+        # total-copy <=4 cap wrongly rejects this unique positive proposal.
+        ours=[{"key":k,"quantity":2} for k in ("a","b","c","d")]
+        theirs=[{"key":"target","quantity":1}]
+        market=sample()[2]
+        market["items"]={k:entry(5) for k in ("a","b","c","d")}
+        market["items"]["target"]=entry(60)
+        x=self.run_plan((ours,theirs,market))
+        self.assertEqual(x["status"],"CANDIDATES_PREPARED")
+        c=x["candidates"][0]
+        self.assertEqual(len(c["offer"]),4)
+        self.assertEqual(sum(z["quantity"] for z in c["offer"]),8)
+        self.assertEqual(c["projectedListedGain"],20)
+        self.assertEqual(c["type"],"UPGRADE")
+        self.assertTrue(x["enumerationCompleteForProvidedShortlists"])
+
     def test_no_silent_top_five_from_full_inventory(self):
         a,b,m=sample()
         a=[{"key":f"item-{i}","quantity":1} for i in range(6)]
