@@ -1,0 +1,9 @@
+# Never commit private backend state or credentials
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.env
+.env*
+__pycache__/
+*.py[cod]

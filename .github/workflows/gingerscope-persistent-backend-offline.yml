@@ -1,0 +1,65 @@
+name: Gingerscope persistent backend offline safety
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/backend/**'
+      - 'pdiddler/ci/test_persistent_backend.py'
+      - '.github/workflows/gingerscope-persistent-backend-offline.yml'
+  push:
+    branches:
+      - 'infra/gingerscope-persistent-backend-v1'
+    paths:
+      - 'pdiddler/backend/**'
+      - 'pdiddler/ci/test_persistent_backend.py'
+      - '.github/workflows/gingerscope-persistent-backend-offline.yml'
+permissions:
+  contents: read
+jobs:
+  offline-persistent-state:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Syntax and local pure Python regressions — NO NETWORK
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python3 -m py_compile pdiddler/backend/persistent_store.py pdiddler/backend/runtime.py pdiddler/ci/test_persistent_backend.py
+          python3 -m unittest -v pdiddler.ci.test_persistent_backend
+      - name: Build minimal private-worker container and smoke-test offline
+        run: |
+          docker build --file pdiddler/backend/Dockerfile --tag gingerscope-backend-ci .
+          docker run --rm --network none --read-only --tmpfs /data:rw,size=32m \
+            gingerscope-backend-ci \
+            python -m pdiddler.backend.runtime once --db /data/test.sqlite \
+            | python -c "import sys,json; x=json.load(sys.stdin); assert x['healthJobStatus']=='OK_PRIVATE_LOCAL'; assert x['authorizesTrade'] is False; assert x['maySendDiscordWebhook'] is False; print('RAILWAY_WORKER_CONTAINER_OFFLINE_PASS')"
+      - name: Production worker refuses ephemeral /data without mounted volume
+        run: |
+          set -euo pipefail
+          if docker run --rm --network none --read-only \
+              gingerscope-backend-ci \
+              python -m pdiddler.backend.runtime worker --db /data/gingerscope.sqlite \
+              > "$RUNNER_TEMP/worker-no-volume.log" 2>&1; then
+            echo "PRODUCTION_WORKER_SILENT_EPHEMERAL_DATA_FAILURE"
+            exit 1
+          fi
+          grep -q "PRODUCTION_SQLITE_VOLUME_NOT_MOUNTED" "$RUNNER_TEMP/worker-no-volume.log"
+          echo "PRODUCTION_WORKER_EPHEMERAL_VOLUME_REFUSED_PASS"
+      - name: No unsafe provider, Discord or trade-action integration
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          sources = [Path('pdiddler/backend/persistent_store.py'),
+                     Path('pdiddler/backend/runtime.py')]
+          text = '\n'.join(f.read_text(encoding='utf-8') for f in sources)
+          for forbidden in ('OfferItem:FireServer', 'AcceptTrade:FireServer',
+                            'PostAsync(', 'RBLXVALUE_API_KEY', 'discord.com/api/webhooks',
+                            'https://api.rblxvalue.com', 'requests.get('):
+              assert forbidden not in text, forbidden
+          print('BACKEND_NO_PROVIDER_HTTP_OR_TRADE_OR_DISCORD_PASS')
+          PY
