@@ -11,7 +11,7 @@ local ORIGINAL_MM2=142823291
 local MAIN="a3c209659942e8b45eec5da3555f7cfb83059c59"
 local P3_EPOCH="ba76adb21ffe4124c44d6d9a256683861eceb61d"
 local SHADOW_PLAN="be8d8c5b77c0c7c345639c53e6a04959728d01a8"
-local CTRL="6cd8dd4347d37efa8bd6f425b8303fa67d62cea5"
+local CTRL="91a3c27a166d580f0194cccd94d8e50c4743f2c6"
 local BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local isTrue=function(x)return x==true end
 local conflictNames={
@@ -324,14 +324,18 @@ local okayUI=pcall(function()
   b.Parent=panel
   return b
  end
- screen.stop=button("StopAuto","STOP",10,69)
- screen.copy=button("CopyAuto","COPY",84,64)
- screen.reset=button("ResetChoices","RESET",155,64)
- screen.arm=button("ArmAllFour","ARM 4 TRADES",224,106)
+ screen.stop=button("StopAuto","STOP",10,56)
+ screen.copy=button("CopyAuto","COPY",72,56)
+ screen.reset=button("ResetChoices","RESET",134,59)
+ screen.arm=button("ArmAllFour","ARM 4",198,61)
+ screen.armAdaptive=button("ArmFiveAdaptive","ARM 5",264,66)
+ screen.armAdaptive.Visible=false
+ screen.armAdaptive.Active=false
  screen.arm.Visible=false
  screen.arm.Active=false
 end)
-if not okayUI or not screen.gui or not screen.arm or not screen.copy then
+if not okayUI or not screen.gui or not screen.arm or
+   not screen.armAdaptive or not screen.copy then
  earlyStop("AUTO_GUI_CREATION_FAILED")
  return nil
 end
@@ -449,8 +453,10 @@ local function refreshSelection()
    (availableForArm() and "YES" or "WAITING")
  screen.arm.Visible=count==2 and availableForArm()
  screen.arm.Active=screen.arm.Visible
+ screen.armAdaptive.Visible=screen.arm.Visible
+ screen.armAdaptive.Active=screen.arm.Visible
  if count==2 then
-  screen.body.Text="ARM authorizes EXACT ALT: 4 automatic requests, 3 approved MAIN item offers, up to 3 removals, 4 automatic Declines. NEVER final Accept. ALT follows instructions."
+  screen.body.Text="ARM 4: 4 automatic requests, 3 MAIN offers, 3 removals, 4 declines. ARM 5: 5 requests, 5 offers, 5 removals, 5 declines, ALT replacement. NEVER final Accept."
  end
 end
 local function showOwned(choices)
@@ -716,11 +722,12 @@ function adapters.inspect(round,epoch)
   p3Status=latestP3,root=nil,snapshot=nil,
  }
 end
-function adapters.offerApproved(round,count,epoch)
+function adapters.offerApproved(round,count,epoch,choiceIndex)
  if actionBusy or epochRound~=round or
     not liveBeforeAction() or
-    not ((round==3 and count==1) or
-         (round==4 and count==2)) then
+    not ((round==3 and count==1 and choiceIndex==1) or
+         (round==4 and count==2 and choiceIndex==1) or
+         (round==5 and count==1 and (choiceIndex==1 or choiceIndex==2))) then
   return nil
  end
  local b=currentClientSnapshot()
@@ -734,9 +741,9 @@ function adapters.offerApproved(round,count,epoch)
   weaponKeys={},expectedDisplayNames={},expectedChromaFlags={},
  }
  for i=1,count do
-  approval.weaponKeys[i]=selected[i].raw
-  approval.expectedDisplayNames[i]=selected[i].display
-  approval.expectedChromaFlags[i]=selected[i].chroma
+  approval.weaponKeys[i]=selected[choiceIndex+i-1].raw
+  approval.expectedDisplayNames[i]=selected[choiceIndex+i-1].display
+  approval.expectedChromaFlags[i]=selected[choiceIndex+i-1].chroma
  end
  local shadowLive=false
  local opts={
@@ -817,12 +824,13 @@ function adapters.offerApproved(round,count,epoch)
  -- This is client-visible placement only, not settled transfer authority.
  return receipt
 end
-function adapters.removeOwnOne(round,root,epoch)
+function adapters.removeOwnOne(round,root,epoch,allowAltItem)
  if actionBusy or not liveBeforeAction() or
     io.trade()~=root then return false end
  local b=currentClientSnapshot()
  if not b or b.snap.physicalOwnSlots<1 or
-   b.snap.physicalTheirSlots~=0 then return false end
+   ((allowAltItem==true and (round~=5 or b.snap.physicalTheirSlots~=1)) or
+    (allowAltItem~=true and b.snap.physicalTheirSlots~=0)) then return false end
  actionBusy=true
  local ok,clicked=pcall(io.removeOne,root)
  actionBusy=false
@@ -879,7 +887,7 @@ local function showRuntime()
   return
  end
  local r=controller.status()
- screen.title.Text="SYSTEM 1 MAIN AUTO | TRADE "..r.round.."/4"
+ screen.title.Text="SYSTEM 1 MAIN AUTO | TRADE "..r.round.."/"..tostring(r.maxRounds or 4)
  screen.body.Text=r.instruction
  screen.status.Text="Phase: "..r.phase..
    " | Completed: "..tostring(r.completedRounds)..
@@ -893,6 +901,7 @@ local function showRuntime()
   screen.warning.Text="MAIN AUTOMATIC | ALT FOLLOW PANEL | NO FINAL ACCEPT"
  end
  screen.arm.Visible=false
+ screen.armAdaptive.Visible=false
  screen.choices.Visible=false
  screen.reset.Visible=false
 end
@@ -915,7 +924,8 @@ screen.copy.Activated:Connect(function()
     authorizesAccept=false})
  end
 end)
-screen.arm.Activated:Connect(function()
+local function armRounds(requestedRounds)
+ if requestedRounds~=4 and requestedRounds~=5 then return end
  if not owner.running or owner.armed or
     #selected~=2 or not availableForArm() or
     not profileReadAt or os.clock()-profileReadAt>180 or
@@ -928,6 +938,8 @@ screen.arm.Activated:Connect(function()
  local engine,why=controllerModule.new(adapters,{
   explicitFourRoundConsent=true,finalAcceptDisabled=true,
   exactConsentingAlt=true,approvedTwoDistinctOwnedItems=true,
+  includeAdaptiveRound=requestedRounds==5,
+  explicitAdaptiveRevisionConsent=requestedRounds==5,
   requestTimeout=30,altStepTimeout=90,actionTimeout=12,
  })
  if not engine then
@@ -940,8 +952,10 @@ screen.arm.Activated:Connect(function()
  screen.warning.Visible=true
  screen.status.Position=UDim2.fromOffset(10,93)
  screen.arm.Visible=false
+ screen.armAdaptive.Visible=false
  screen.title.Text="SYSTEM1 AUTO ARMED"
- screen.body.Text="MAIN now automatically requests and manages 4 client test trades. ALT follows panel."
+ screen.body.Text="MAIN automatically manages "..tostring(requestedRounds)..
+   " test trades. ALT follows panel. NEVER final Accept."
  local started=pcall(function()
   task.spawn(function()
    while owner.running and controller and
@@ -966,7 +980,9 @@ screen.arm.Activated:Connect(function()
   end)
  end)
  if not started then controller.abort("AUTO_LOOP_SCHEDULE_FAILED") end
-end)
+end
+screen.arm.Activated:Connect(function()armRounds(4)end)
+screen.armAdaptive.Activated:Connect(function()armRounds(5)end)
 local profileWorker=pcall(function()
  task.spawn(function()
   local choices,reason=parseOwned()
