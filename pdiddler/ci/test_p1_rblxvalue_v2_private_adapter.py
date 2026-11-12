@@ -204,6 +204,66 @@ class RblxV2PrivateAdapterTests(unittest.TestCase):
         self.assertFalse(r["itemPricesReturned"])
         self.assertEqual(r["itemClockTimeZone"], "UNSPECIFIED")
 
+    def test_bounded_403_json_diagnostics_do_not_leak_sensitive_body(self):
+        examples = {
+            "Please activate your key": "HTTP_403_JSON_KEY_ACTIVATION_CLAIM",
+            "API key expired": "HTTP_403_JSON_KEY_EXPIRED_CLAIM",
+            "Key was suspended": "HTTP_403_JSON_KEY_SUSPENDED_CLAIM",
+            "Invalid API key": "HTTP_403_JSON_KEY_INVALID_CLAIM",
+            "Forbidden access": "HTTP_403_JSON_ACCESS_DENIED_CLAIM",
+            "Unexpected private problem": "HTTP_403_JSON_UNCLASSIFIED",
+        }
+        for message, expected in examples.items():
+            body = encode({"error": True, "message": message + " " + FAKE_SECRET})
+            result = self.safe(api.classify_meta(403, body))
+            with self.subTest(expected=expected):
+                self.assertEqual(result["status"], "ACCESS_RESTRICTED")
+                self.assertEqual(result["reason"], expected)
+                self.assertNotIn(message, str(result))
+
+    def test_http_403_html_or_empty_cannot_prove_key_inactive(self):
+        for body, expected in (
+            (b"", "HTTP_403_EMPTY_OR_UNAVAILABLE_BODY"),
+            (b"<html><title>Forbidden Cloud Proxy</title></html>",
+             "HTTP_403_NON_JSON_POSSIBLE_EDGE_BLOCK"),
+            (b"\xff", "HTTP_403_NON_JSON_POSSIBLE_EDGE_BLOCK"),
+            (b"[]", "HTTP_403_UNRECOGNIZED_JSON"),
+            (encode({"error": True}), "HTTP_403_UNRECOGNIZED_JSON"),
+            (b"x" * (api.MAX_ERROR_BYTES + 1), "HTTP_403_OVERSIZED_BODY"),
+        ):
+            result = self.safe(api.classify_meta(403, body))
+            self.assertEqual(result["status"], "ACCESS_RESTRICTED")
+            self.assertEqual(result["reason"], expected)
+
+    def test_transport_bounded_403_error_read_only_and_secret_not_logged(self):
+        import io
+        import urllib.error
+        payload = encode({"error": True, "message": "Key suspended: " + FAKE_SECRET})
+        def forbidden(*_args, **_kwargs):
+            raise urllib.error.HTTPError(api.BASE + "/meta", 403,
+                                         "Forbidden", {}, io.BytesIO(payload))
+        with mock.patch("urllib.request.build_opener") as build:
+            build.return_value.open.side_effect = forbidden
+            status, body = api._no_redirect_get("/meta", FAKE_SECRET)
+            self.assertEqual(build.return_value.open.call_count, 1)
+        self.assertEqual(status, 403)
+        self.assertEqual(body, payload)
+        result = self.safe(api.classify_meta(status, body))
+        self.assertEqual(result["reason"], "HTTP_403_JSON_KEY_SUSPENDED_CLAIM")
+
+    def test_403_html_transport_never_follows_redirect_or_secrets(self):
+        import io
+        import urllib.error
+        payload = b"<html>Cloud protection</html>"
+        with mock.patch("urllib.request.build_opener") as build:
+            build.return_value.open.side_effect = urllib.error.HTTPError(
+                api.BASE + "/meta", 403, "Forbidden", {}, io.BytesIO(payload))
+            code, body = api._no_redirect_get("/meta", FAKE_SECRET)
+        self.assertEqual(code, 403)
+        self.assertEqual(body, payload)
+        result = self.safe(api.classify_meta(code, body))
+        self.assertEqual(result["reason"], "HTTP_403_NON_JSON_POSSIBLE_EDGE_BLOCK")
+
     def test_item_page_error_statuses_same_boundary(self):
         for status in (401, 403, 429, 503):
             r = self.safe(api.classify_item_page(status, b"SECRET_NEVER_ECHO"))
