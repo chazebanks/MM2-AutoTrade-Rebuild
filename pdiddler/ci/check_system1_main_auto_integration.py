@@ -57,7 +57,7 @@ for text in (native,fsm):
 for requirement in (
  "ba76adb21ffe4124c44d6d9a256683861eceb61d",
  "be8d8c5b77c0c7c345639c53e6a04959728d01a8",
- "6cd8dd4347d37efa8bd6f425b8303fa67d62cea5",
+ "91a3c27a166d580f0194cccd94d8e50c4743f2c6",
  'ALT_NAME="venossgaming90190"',
  'function adapters.startEpoch(round,nonce)',
  'function adapters.inspect(round,epoch)',
@@ -117,9 +117,17 @@ for requirement in (
     assert requirement in fsm,requirement
 assert 'noAutomaticAcceptAcknowledged=true' in native
 assert native.count("owner.armed=true")==1
+assert 'screen.armAdaptive.Activated:Connect' in native
+assert 'MAIN_REOFFERING' in fsm
+assert 'ALT_REVISE' in fsm
+assert 'ALT_CLEAR_FOR_REOFFER' in fsm
+assert 'adaptiveReoffersAttempted' in fsm
 assert 'requestedNonce' not in native
 assert "SYSTEM1_MAIN_AUTO_FAILSTOP_PURE_PASS" in tests
-assert "4 automatic requests, 3 approved MAIN item offers" in native
+assert "ARM 4: 4 automatic requests" in native
+assert "ARM 5: 5 requests, 5 offers, 5 removals, 5 declines" in native
+assert 'includeAdaptiveRound=requestedRounds==5' in native
+assert 'explicitAdaptiveRevisionConsent=requestedRounds==5' in native
 assert "NEVER final Accept" in native
 assert 'system1_main_auto_native_original_mocks.luau' in (ROOT/".github/workflows/gingerscope-system1-multitrade.yml").read_text()
 assert 'SHADOW_OBSERVER_STALE_DURING_PLACEMENT' in native
