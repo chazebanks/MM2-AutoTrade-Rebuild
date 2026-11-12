@@ -42,7 +42,7 @@ for important in (
     assert important in draft,important
 
 for must in (
-    'experimentalABAShadowRequired==true',
+    'experimentalABAShadowRequired~=true',
     'ABA_SHADOW_REQUIRED_FOR_MULTI_ITEM',
     'ABA_SHADOW_STALE_BEFORE_NEXT_OFFER',
     'ABA_SHADOW_PREPARATION_FAILED',
