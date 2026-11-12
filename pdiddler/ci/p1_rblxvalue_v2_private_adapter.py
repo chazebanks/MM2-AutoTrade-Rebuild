@@ -52,18 +52,18 @@ def _curl_get(path: str, api_key: str) -> tuple[int, bytes]:
     if not api_key.isascii() or re.fullmatch(r"[A-Za-z0-9_-]{12,256}", api_key) is None:
         raise ValueError("PRIVATE_KEY_FORMAT_INVALID")
     config = (
-        'url = "' + BASE + path + '"\\n'
-        'request = "GET"\\n'
-        'header = "Accept: application/json"\\n'
-        'header = "X-Api-Key: ' + api_key + '"\\n'
-        'silent\\n'
-        'max-time = 8\\n'
+        'url = "' + BASE + path + '"\n'
+        'request = "GET"\n'
+        'header = "Accept: application/json"\n'
+        'header = "X-Api-Key: ' + api_key + '"\n'
+        'silent\n'
+        'max-time = 8\n'
     )
     try:
         completed = subprocess.run(
             ["curl", "--config", "-", "--proto", "=https",
              "--max-redirs", "0", "--max-time", "8",
-             "--write-out", "\\n%{http_code}"],
+             "--write-out", "\n%{http_code}"],
             input=config.encode("ascii"), capture_output=True,
             timeout=12, check=False,
         )
@@ -73,9 +73,9 @@ def _curl_get(path: str, api_key: str) -> tuple[int, bytes]:
         return 599, b""
     raw = completed.stdout
     # The last line is a fixed-format status code emitted by curl.
-    if b"\\n" not in raw:
+    if b"\n" not in raw:
         return 599, b""
-    body, code = raw.rsplit(b"\\n", 1)
+    body, code = raw.rsplit(b"\n", 1)
     if len(code) != 3 or not code.isdigit():
         return 599, b""
     status = int(code)

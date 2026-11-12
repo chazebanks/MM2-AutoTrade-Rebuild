@@ -116,7 +116,7 @@ class RblxV2PrivateAdapterTests(unittest.TestCase):
                 api._no_redirect_get("/meta", "rbx_" + "a" * 40 + "\u200b")
 
     def test_curl_transport_uses_stdin_and_parses_200(self):
-        fake = mock.Mock(returncode=0, stdout=encode(meta()) + b"\\n200", stderr=b"")
+        fake = mock.Mock(returncode=0, stdout=encode(meta()) + b"\n200", stderr=b"")
         with mock.patch("subprocess.run", return_value=fake) as run:
             status, body = api._curl_get("/meta", FAKE_SECRET)
         self.assertEqual(status, 200)
@@ -125,18 +125,28 @@ class RblxV2PrivateAdapterTests(unittest.TestCase):
         self.assertNotIn(FAKE_SECRET, str(args))
         self.assertIn(FAKE_SECRET.encode(), kwargs["input"])
         self.assertNotIn(b"show-error = no", kwargs["input"])
+        self.assertEqual(kwargs["input"].count(bytes([10])), 6)
+        self.assertNotIn(bytes([92, 110]), kwargs["input"])
+        self.assertIn("--write-out", args[0])
+        self.assertEqual(args[0][args[0].index("--write-out") + 1], "\n%{http_code}")
         self.assertTrue(kwargs["capture_output"])
         self.assertFalse(kwargs["check"])
 
     def test_curl_transport_403_and_fail_closed(self):
         with mock.patch("subprocess.run", return_value=mock.Mock(
-                returncode=0, stdout=b'{"detail":"forbidden"}\\n403')):
+                returncode=0, stdout=b'{"detail":"forbidden"}\n403')):
             self.assertEqual(api._curl_get("/meta", FAKE_SECRET)[0], 403)
-        for raw, returncode in ((b"invalid", 0), (b"body\\n9999", 0),
-                                (b"\\n200", 28)):
+        for raw, returncode in ((b"invalid", 0), (b"body\n9999", 0),
+                                (b"\n200", 28)):
             with mock.patch("subprocess.run", return_value=mock.Mock(
                     returncode=returncode, stdout=raw)):
                 self.assertEqual(api._curl_get("/meta", FAKE_SECRET)[0], 599)
+
+    def test_curl_rejects_literal_backslash_n_delimiter(self):
+        bogus = encode(meta()) + bytes([92, 110]) + b"200"
+        with mock.patch("subprocess.run", return_value=mock.Mock(
+                returncode=0, stdout=bogus)):
+            self.assertEqual(api._curl_get("/meta", FAKE_SECRET)[0], 599)
 
     def test_explicit_private_one_shot_meta_success_is_still_not_authority(self):
         calls = []
