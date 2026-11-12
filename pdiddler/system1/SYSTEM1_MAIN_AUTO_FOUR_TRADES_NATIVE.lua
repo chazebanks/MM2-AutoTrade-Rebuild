@@ -11,7 +11,7 @@ local ORIGINAL_MM2=142823291
 local MAIN="a3c209659942e8b45eec5da3555f7cfb83059c59"
 local P3_EPOCH="ba76adb21ffe4124c44d6d9a256683861eceb61d"
 local SHADOW_PLAN="be8d8c5b77c0c7c345639c53e6a04959728d01a8"
-local CTRL="e27ce2e1a7b9d8e634fe1344365524ed0f3af535"
+local CTRL="dfa278462006a81895a64898207c5423c5260d60"
 local BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local isTrue=function(x)return x==true end
 local conflictNames={
@@ -202,8 +202,11 @@ local function exactTrade()
  end
  if #seen>1 then return nil,"MULTIPLE_VISIBLE_TRADE_ROOTS" end
  local root=seen[1]
- if root and (io.trade()~=root or io.partnerName(root)~=ALT_NAME) then
-  return nil,"TRADE_ROOT_OR_PARTNER_WRONG"
+ if root and io.trade()~=root then
+  return nil,"ORIGINAL_P4_ROOT_CHANGED"
+ end
+ if root and io.partnerName(root)~=ALT_NAME then
+  return nil,"TRADE_PARTNER_NOT_CONSENTING_ALT"
  end
  return root,nil
 end
@@ -609,23 +612,41 @@ function adapters.startEpoch(round,nonce)
  end
  return true,"CLIENT_EPOCH_"..tostring(round)
 end
+local function blockedInspection(staticCode)
+ return {
+   sessionFresh=false,exactPartner=false,
+   noOtherController=false,p3Status="BLOCKED",
+   errorCode=staticCode,
+ }
+end
 function adapters.inspect(round,epoch)
- if not targetStillSafe() or not currentSupervisor or
-    not currentWatchdog or currentWatchdog.isReady()~=true or
-    epochRound~=round or conflicts() or haltReason then
-  return {sessionFresh=false,exactPartner=false,
-     noOtherController=false,p3Status="BLOCKED"}
+ if game.JobId~=owner.job then
+  return blockedInspection("JOB_CHANGED")
+ end
+ if not altExact() then
+  return blockedInspection("ALT_LEFT_OR_REPLACED")
+ end
+ if conflicts() then
+  return blockedInspection("COMPETING_CONTROLLER_ACTIVE")
+ end
+ if not currentWatchdog or
+     currentWatchdog.isReady()~=true then
+  return blockedInspection("P3_WATCHDOG_LOST")
+ end
+ if epochRound~=round or not currentSupervisor then
+  return blockedInspection("P3_SESSION_EPOCH_MISMATCH")
+ end
+ if not targetStillSafe() or haltReason then
+  return blockedInspection("CLIENT_GUI_OR_OPERATOR_SESSION_LOST")
  end
  local root,why=exactTrade()
  if why then
-  return {sessionFresh=false,exactPartner=false,
-     noOtherController=false,p3Status="BLOCKED"}
+  return blockedInspection(why)
  end
  if root then
   local b,whyClient=currentClientSnapshot()
   if not b then
-   return {sessionFresh=false,exactPartner=false,
-     noOtherController=false,p3Status="BLOCKED"}
+   return blockedInspection("ORIGINAL_P3_P4_CLIENT_SNAPSHOT_REJECTED")
   end
   -- Use the original protected P3/P4 read-only lease, never caller GUI claim.
   currentBound=b.bound;boundRoot=root
