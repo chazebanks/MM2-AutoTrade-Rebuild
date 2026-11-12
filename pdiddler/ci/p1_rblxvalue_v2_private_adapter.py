@@ -115,6 +115,44 @@ def _valid_naive_clock(value):
     except ValueError:
         return False
 
+def _safe_detail_claim(value):
+    """Recognize exact, bounded HTTP 403 detail phrases without logging text.
+
+    A detail can be emitted by a proxy instead of RBLXValue; each code
+    describes a *claim*, NOT authenticated publisher evidence. Anything not
+    explicitly recognized stays generic, including URLs, tokens and usernames.
+    """
+    if type(value) is not str or not 1 <= len(value) <= 512:
+        return "HTTP_403_JSON_STRING_DETAIL_NO_MESSAGE"
+    phrase = " ".join(value.casefold().split()).rstrip(".!")
+    messages = {
+        "invalid api key": "HTTP_403_DETAIL_KEY_INVALID_CLAIM",
+        "api key invalid": "HTTP_403_DETAIL_KEY_INVALID_CLAIM",
+        "api key is invalid": "HTTP_403_DETAIL_KEY_INVALID_CLAIM",
+        "invalid or inactive api key": "HTTP_403_DETAIL_KEY_INVALID_OR_INACTIVE_CLAIM",
+        "inactive api key": "HTTP_403_DETAIL_KEY_INACTIVE_CLAIM",
+        "api key inactive": "HTTP_403_DETAIL_KEY_INACTIVE_CLAIM",
+        "api key is inactive": "HTTP_403_DETAIL_KEY_INACTIVE_CLAIM",
+        "expired api key": "HTTP_403_DETAIL_KEY_EXPIRED_CLAIM",
+        "api key expired": "HTTP_403_DETAIL_KEY_EXPIRED_CLAIM",
+        "api key has expired": "HTTP_403_DETAIL_KEY_EXPIRED_CLAIM",
+        "suspended api key": "HTTP_403_DETAIL_KEY_SUSPENDED_CLAIM",
+        "api key suspended": "HTTP_403_DETAIL_KEY_SUSPENDED_CLAIM",
+        "api key is suspended": "HTTP_403_DETAIL_KEY_SUSPENDED_CLAIM",
+        "api key revoked": "HTTP_403_DETAIL_KEY_REVOKED_CLAIM",
+        "api key disabled": "HTTP_403_DETAIL_KEY_DISABLED_CLAIM",
+        "missing api key": "HTTP_403_DETAIL_KEY_MISSING_CLAIM",
+        "account banned": "HTTP_403_DETAIL_ACCOUNT_BANNED_CLAIM",
+        "account is banned": "HTTP_403_DETAIL_ACCOUNT_BANNED_CLAIM",
+        "account temporarily banned": "HTTP_403_DETAIL_ACCOUNT_BANNED_CLAIM",
+        "account suspended": "HTTP_403_DETAIL_ACCOUNT_SUSPENDED_CLAIM",
+        "account is suspended": "HTTP_403_DETAIL_ACCOUNT_SUSPENDED_CLAIM",
+        "forbidden": "HTTP_403_DETAIL_ACCESS_DENIED_CLAIM",
+        "access denied": "HTTP_403_DETAIL_ACCESS_DENIED_CLAIM",
+    }
+    return messages.get(phrase, "HTTP_403_JSON_STRING_DETAIL_NO_MESSAGE")
+
+
 def _forbidden_reason(body):
     """Safely classify a 403 envelope; *not proof* of publisher identity.
 
@@ -139,7 +177,7 @@ def _forbidden_reason(body):
         if type(doc.get("error")) is str:
             return "HTTP_403_JSON_STRING_ERROR_NO_MESSAGE"
         if type(doc.get("detail")) is str:
-            return "HTTP_403_JSON_STRING_DETAIL_NO_MESSAGE"
+            return _safe_detail_claim(doc["detail"])
         if type(doc.get("errors")) is list:
             return "HTTP_403_JSON_ERRORS_ARRAY_NO_MESSAGE"
         if type(doc.get("error")) is bool:
