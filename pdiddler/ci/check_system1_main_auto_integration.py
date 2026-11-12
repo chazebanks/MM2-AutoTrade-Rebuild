@@ -66,6 +66,19 @@ for banned in ("AcceptTrade:FireServer(", "OfferItem:FireServer(", "PostAsync(")
     assert banned not in fork
 
 native=read("pdiddler/system1/SYSTEM1_MAIN_AUTO_FOUR_TRADES_NATIVE.lua")
+# Validate that P3's runtime HTTP ref is a resolvable COMMIT, and that the
+# committed source is byte-for-byte the full source reviewed by CI.
+p3_path="pdiddler/system1/pdiddler3_outgoing_single_send_epoch.lua"
+p3_pin=re.search(r'local P3_EPOCH="([0-9a-f]{40})"',native)
+assert p3_pin is not None, "P3 git revision not pinned"
+p3_rev=p3_pin.group(1)
+assert p3_rev=="96f6c577cee996266dc8af664a20af445200edff"
+assert subprocess.check_output(
+    ["git","cat-file","-t",p3_rev],text=True
+).strip()=="commit", "P3 pin is not a commit"
+assert subprocess.check_output(
+    ["git","rev-parse",f"{p3_rev}:{p3_path}"],text=True
+).strip()==sha(p3_path), "Runtime P3 ref differs from tested source"
 fsm=read("pdiddler/system1/system1_main_auto_failstop_controller.lua")
 tests=read("pdiddler/ci/system1_main_auto_failstop_mocks.luau")
 for text in (native,fsm):
