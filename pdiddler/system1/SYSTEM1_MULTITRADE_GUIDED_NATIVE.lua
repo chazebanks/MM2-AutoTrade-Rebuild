@@ -11,7 +11,8 @@ local MAIN="a3c209659942e8b45eec5da3555f7cfb83059c59"
 local WALK="61536126eec12707174d16319e757ab7829b4534"
 local BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local KEY="PDIDDLER_SYSTEM1_MULTITRADE_OWNER"
-if game.PlaceId~=PLACE or E[KEY]~=nil then
+if game.PlaceId~=PLACE or E[KEY]~=nil or
+   E.PDIDDLER_SYSTEM1_MULTITRADE_USED_JOB==game.JobId then
  warn("[SYSTEM1] Original MM2 + one active owner required")
  return nil
 end
@@ -110,6 +111,7 @@ local madeGui=pcall(function()
  panel.Name="Panel"
  panel.BackgroundColor3=Color3.fromRGB(35,22,55)
  panel.BorderSizePixel=0;panel.Visible=false
+ panel.ZIndex=10
  panel.Parent=sg;ui.panel=panel
  local stroke=Instance.new("UIStroke")
  stroke.Color=Color3.fromRGB(173,124,247)
@@ -126,6 +128,7 @@ local madeGui=pcall(function()
   x.Font=Enum.Font.GothamSemibold
   x.TextXAlignment=Enum.TextXAlignment.Left
   x.TextYAlignment=Enum.TextYAlignment.Top
+  x.ZIndex=11
   x.Position=UDim2.fromOffset(10,y)
   x.Size=UDim2.fromOffset(290,h)
   x.Parent=panel;return x
@@ -140,6 +143,7 @@ local madeGui=pcall(function()
   b.TextColor3=Color3.fromRGB(255,255,255)
   b.BackgroundColor3=Color3.fromRGB(79,48,117)
   b.Font=Enum.Font.GothamBold
+  b.ZIndex=12
   b.Position=UDim2.fromOffset(x,164)
   b.Size=UDim2.fromOffset(w,27)
   b.Parent=panel
@@ -281,7 +285,10 @@ local function kill(reason)
  lastSourceReason=reason or "OPERATOR_STOPPED"
  copyStatus()
  if ui.screen then pcall(function()ui.screen:Destroy()end) end
+ E.PDIDDLER_SYSTEM1_MULTITRADE_USED_JOB=owner.job
+ E.PDIDDLER_SYSTEM1_MULTITRADE_RUNNER=nil
  E[KEY]=nil
+ warn("[SYSTEM1 STOP] "..tostring(lastSourceReason))
  return lastResult
 end
 local function geometryCheck(root)
@@ -326,7 +333,12 @@ local function show(root)
       (r.rounds[r.round] and r.rounds[r.round].result or "REVIEW") or
       r.phase
  ui.title.Text="SYSTEM 1 | TRADE "..r.round.."/"..r.maxRounds
- ui.body.Text=r.instruction
+ if r.phase=="REVIEW" or r.phase=="WAIT_CLOSE_AFTER_FAIL"
+    or r.phase=="BLOCKED" then
+  ui.body.Text=r.instruction.." Reason: "..tostring(r.reason)
+ else
+  ui.body.Text=r.instruction
+ end
  ui.metrics.Text="Phase: "..tostring(statusPrefix)..
    " | GUI own:"..tostring(lastSlotsOwn)..
    " ALT:"..tostring(lastSlotsTheir)..
@@ -392,8 +404,8 @@ ui.next.Activated:Connect(function()
  local ok,why=fsm.next()
  if not ok then return end
  -- REVIEW is only available after original game trade root vanished.
- local root=exactTrade()
- if root~=nil then
+ local root,unsafe=exactTrade()
+ if unsafe or root~=nil then
   kill("NEXT_WHILE_TRADE_STILL_VISIBLE")
   return
  end
