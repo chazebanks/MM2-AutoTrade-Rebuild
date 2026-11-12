@@ -368,7 +368,7 @@ local function fixture(opts)
     then return sources.shadow end
    if url:find("system1_step1_alt_recovery_controller.lua",1,true) then
     assert(url=="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
-     "96458e472fb1e23b8cc2773cd3c7d49a5d7d5c7c/pdiddler/"..
+     "f702ee7f750e67f8757ff5850de6e1a0841899a4/pdiddler/"..
      "system1/system1_step1_alt_recovery_controller.lua",
      "exact controller raw URL must use reviewed COMMIT, not blob hash")
     if opts.simulateControllerFetch404 then error("MOCK_CONTROLLER_404") end
@@ -689,6 +689,13 @@ do
    "quantity rebound x1 to x2 is not an authorized clear")
  eq(x.state().reason,"ALT_CHANGED_WHILE_CLEARING_FOR_REOFFER",
    "rebound keeps existing STOP classification")
+ local proof=x.state().firstFailureEvidence
+ eq(type(proof),"table","anonymous diagnostic evidence exists")
+ eq(proof.expectedQuantity,2,"expected original x2 stack")
+ eq(proof.observedQuantity,2,"rebound was x2 after x1")
+ eq(proof.lastClearQuantity,1,"last safely reduced stack was x1")
+ eq(proof.sameVisibleName,true,"same item, incorrect quantity increase")
+ eq(proof.sameClientIdCandidate,true,"same unverified visible client id")
  eq(x.requests(),2,"never request a third trade after clear rebound")
  eq(#x.sent,3,"no unsafe second item sent during rebound")
  eq(x.declines(),1,"no blind Decline on modified ALT offer")
