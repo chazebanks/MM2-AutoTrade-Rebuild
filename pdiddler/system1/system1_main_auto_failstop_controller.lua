@@ -136,12 +136,17 @@ function M.new(api,options)
    options.finalAcceptDisabled~=true or
    options.exactConsentingAlt~=true or
    options.approvedTwoDistinctOwnedItems~=true or
+   (options.includeAdaptiveRound==true and
+      options.explicitAdaptiveRevisionConsent~=true) or
+   (options.includeAdaptiveRound~=nil and
+      type(options.includeAdaptiveRound)~="boolean") or
    not integer(options.requestTimeout or 30,15,45) or
    not integer(options.altStepTimeout or 90,15,180) or
    not integer(options.actionTimeout or 8,3,30) then
   return nil,report("BLOCKED","DEPENDENCY_OR_EXPLICIT_APPROVAL_MISSING",
     0,"PREPARING",0,0,{})
  end
+ local maxRounds=options.includeAdaptiveRound==true and 5 or 4
  local round=1
  local phase="PREPARING"
  local deadline=nil
@@ -167,6 +172,8 @@ function M.new(api,options)
  local nowLast=0
  local tickBusy=false
  local lastOutcome="UNKNOWN"
+ local adaptiveWithdraw=false
+ local adaptiveReoffered=false
  local function receipt()
   local r=report(
    phase=="STOPPED" and "STOPPED" or
@@ -245,11 +252,14 @@ function M.new(api,options)
  local function transitionAfterAlt(now)
   if phase=="ALT_ADD" then
    if round==4 then enter("ALT_REMOVE_ONE",now,"ALT_TWO_CLIENT_SLOTS_VERIFIED")
+   elseif round==5 then
+    enter("ALT_REVISE",now,"AWAIT_AUTHORIZED_ALT_REPLACEMENT")
    else enter("ALT_REMOVE_ALL",now,"ALT_ONE_CLIENT_SLOT_VERIFIED") end
   elseif phase=="ALT_REMOVE_ONE" then
    enter("ALT_REMOVE_ALL",now,"ALT_ONE_OF_TWO_REMOVED")
   else
    if round>=3 then
+    adaptiveWithdraw=false
     enter("MAIN_WITHDRAWING",now,"ALT_OFFER_CLEARED")
    else
     enter("MAIN_DECLINING",now,"ALT_OFFER_CLEARED")
@@ -280,6 +290,7 @@ function M.new(api,options)
   boundEpoch=b
   root=nil;oursPrev=nil;theirPrev=nil
   ownExpected=nil;otherExpected=nil
+  adaptiveWithdraw=false;adaptiveReoffered=false
   enter("WAIT_OPEN",now,"WAITING_FRESH_ALT_REQUEST_ACCEPT")
   return receipt()
  end
@@ -358,7 +369,7 @@ function M.new(api,options)
    if not ok or closed~=true then
     return stop("P3_OLD_EPOCH_DID_NOT_CLOSE")
    end
-   if completed==4 then return finished() end
+   if completed==maxRounds then return finished() end
    round+=1
    enter("REQUESTING",now,"REQUEST_NEXT_FRESH_P3_EPOCH")
    return issueRequest(now)
