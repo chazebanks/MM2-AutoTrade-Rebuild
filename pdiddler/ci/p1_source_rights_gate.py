@@ -57,6 +57,100 @@ def receipt(now=None):
     }
 
 
+
+# Research candidate screening complements the permanent source-rights veto.
+# It NEVER grants a license or market authority based on caller-provided metadata.
+CANDIDATE_RIGHTS = {"CC_BY_4_DECLARED", "API_ACCESS_ONLY", "UNKNOWN", "RESTRICTED"}
+CANDIDATE_ORIGINS = {"INDEPENDENT_CLAIM", "SUPREME_DERIVED", "MIXED_DERIVED", "UNKNOWN"}
+PUBLISHER_TIME = {"PUBLISHER_TIMESTAMP", "AGGREGATOR_REFRESH", "DISPLAY_DATE_ONLY", "UNKNOWN"}
+IDENTITY_STATUS = {"EXACT_GAME_RAW_KEY_CLAIM", "AMBIGUOUS_COLLISION", "UNKNOWN"}
+RESEARCH_MAX_AGE_DAYS = 7  # Screening heuristic only; NOT a live data policy.
+
+
+def _candidate_time(value):
+    if type(value) is not str:
+        return None
+    try:
+        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except (ValueError, OverflowError):
+        return None
+    if dt.tzinfo is None or dt.utcoffset() is None:
+        return None
+    return dt.astimezone(timezone.utc)
+
+
+def screen_public_candidate(candidate, *, observed_utc):
+    """Classify supplied *research metadata*; never fetch or trust the dataset.
+
+    Even a plausible independent, fresh, licensed source must be separately
+    authenticated, reviewed for rights/scope, raw item identity and coverage.
+    This function CANNOT authorize a trader, quote or completed-trade label.
+    """
+    if type(candidate) is not dict:
+        raise ValueError("INVALID_CANDIDATE_OBJECT")
+    required = {"provider", "declaredRights", "upstreamProvenance",
+                "timestampMeaning", "publisherUpdatedUtc", "identityEvidence"}
+    if set(candidate) != required:
+        raise ValueError("INVALID_CANDIDATE_FIELDS")
+    if type(candidate["provider"]) is not str or not 1 <= len(candidate["provider"]) <= 120:
+        raise ValueError("INVALID_PROVIDER")
+    for field, allowed in (
+        ("declaredRights", CANDIDATE_RIGHTS),
+        ("upstreamProvenance", CANDIDATE_ORIGINS),
+        ("timestampMeaning", PUBLISHER_TIME),
+        ("identityEvidence", IDENTITY_STATUS),
+    ):
+        if type(candidate[field]) is not str or candidate[field] not in allowed:
+            raise ValueError("INVALID_" + field.upper())
+
+    observation = _candidate_time(observed_utc)
+    if observation is None:
+        raise ValueError("INVALID_OBSERVATION_CLOCK")
+    published = _candidate_time(candidate["publisherUpdatedUtc"])
+    reasons = []
+    rights = candidate["declaredRights"]
+    if rights == "RESTRICTED":
+        reasons.append("PUBLISHER_RESTRICTS_REUSE")
+    elif rights == "UNKNOWN":
+        reasons.append("REUSE_RIGHTS_NOT_DECLARED")
+    elif rights == "API_ACCESS_ONLY":
+        reasons.append("UPSTREAM_DATA_REUSE_RIGHTS_NOT_PROVEN")
+    # CC_BY_4_DECLARED is a claim within metadata, not authenticated permission.
+    if candidate["upstreamProvenance"] in ("SUPREME_DERIVED", "MIXED_DERIVED"):
+        reasons.append("SUPREME_DERIVED_SOURCE_REUSE_NOT_CLEARED")
+    elif candidate["upstreamProvenance"] == "UNKNOWN":
+        reasons.append("ORIGINAL_SOURCE_PROVENANCE_UNKNOWN")
+
+    if candidate["timestampMeaning"] != "PUBLISHER_TIMESTAMP" or published is None:
+        reasons.append("PUBLISHER_CLOCK_NOT_PROVEN")
+        age = None
+    else:
+        age = (observation - published).total_seconds() / 86400
+        if age < 0:
+            reasons.append("FUTURE_PUBLISHER_TIME")
+        elif age > RESEARCH_MAX_AGE_DAYS:
+            reasons.append("RESEARCH_DATA_STALE")
+    if candidate["identityEvidence"] == "AMBIGUOUS_COLLISION":
+        reasons.append("ITEM_IDENTITY_COLLISION")
+    elif candidate["identityEvidence"] == "UNKNOWN":
+        reasons.append("GAME_RAW_ITEM_IDENTITY_NOT_PROVEN")
+
+    return {
+        "schema": "gingerscope-p1-provider-research-screen-v1",
+        "providerLabelUnverified": candidate["provider"],
+        "status": "BLOCKED_CANDIDATE" if reasons else "RESEARCH_REVIEW_ONLY",
+        "blockers": reasons,
+        "publisherAgeDaysIfProven": None if age is None else round(age, 4),
+        "researchThresholdDaysNotPricePermission": RESEARCH_MAX_AGE_DAYS,
+        "permissionEvidenceVerified": False,
+        "providerIndependentProvenanceVerified": False,
+        "serverSettledTradeEvidenceVerified": False,
+        "mayAdvanceP2": False,
+        "tradeOutcome": "UNKNOWN",
+        **DENIED,
+    }
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
