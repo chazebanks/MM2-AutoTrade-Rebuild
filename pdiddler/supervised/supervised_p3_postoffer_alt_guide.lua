@@ -39,7 +39,7 @@ function M.new()
    if root~=nil then return block("P4_WINDOW_CLOSED_BEFORE_ALT_SEQUENCE") end
    return controller.current()
   end
-  if data.clientBound~=true or type(data.root)~="table" then
+  if data.clientBound~=true or (type(data.root)~="table" and type(data.root)~="userdata") then
    return block("UNBOUND_OR_MISSING_CLIENT_ROOT")
   end
   local own,their=data.ownSlots,data.theirSlots
