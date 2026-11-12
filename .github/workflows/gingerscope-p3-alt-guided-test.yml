@@ -63,7 +63,7 @@ jobs:
               assert required in alt,required
           assert 'authorizesAccept=false' in alt and 'serverCompletionProven=false' in alt
           assert 'altMutationGuidedReadOnlyTest=true' in entry
-          assert 'b1a9b69eab0b406342384df7e6d59e6a8f923673' in entry
+          assert 'ddfcbed413893839976fc04d503e4fbb3452c004' in entry
           assert '2f4478ed23743060bb3bd3a56daad47dc59f494e' in alt
           assert gate.count('ALT_ADD')>0 and gate.count('WAIT_ALT_REMOVE')>0
           print('P3_ALT_GUIDED_SOURCE_SAFETY_PASS')
