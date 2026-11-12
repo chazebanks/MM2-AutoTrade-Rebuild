@@ -50,6 +50,13 @@ local function setup(mode)
   -- In the adversarial multi-target test, the scanner record exists but
   -- the authoritative Players lookup is unavailable. P3 must not click.
   -- Each consented-but-unresolvable target is individually processed once.
+  -- Step2 additional fixture can resolve the real Player object but
+  -- deliberately omit the leaderboard GUI, proving PRE-TRADE skip.
+  if mode.multiPlayerNoCard then
+   for _,target in ipairs(fakeTargets)do
+    if target.UserId==uid then return target end
+   end
+  end
   if mode.multiPlayer then return nil end
   return nil
  end
@@ -260,6 +267,30 @@ do
  eq(c.isArmed(),false,"pre-ARM pending read sends no request")
  c.stop()
  eq(c.pendingVisible(),nil,"stale session cannot claim UI clear")
+end
+-- Actual Step2 source: public whitelist has two existing real Player
+-- instances but MM2 leaderboard/profile-card UI is absent. P3 may tap
+-- neither Trade button nor request remote; each player is skipped ONCE.
+do
+ local x=setup({ready=true,multiPlayer=true,multiPlayerNoCard=true,stopAfter=70})
+ local c=x.start()
+ eq(c.arm(),true,"public missing-card case independently operator armed")
+ x.execute()
+ eq(c.state.processed[201],"card-unavailable",
+    "eligible public A without visible player card skipped pre-Trade")
+ eq(c.state.processed[202],"card-unavailable",
+    "eligible public B without visible player card skipped pre-Trade")
+ eq(c.state.preTradeCardSkipped,2,
+    "two pre-Trade card failures counted without fake sends")
+ eq(c.state.requestTargetsAttempted,2,
+    "two distinct target windows, no resend")
+ eq(c.state.sent,0,"no request sent when card could not be verified")
+ eq(c.state.tradeButtonTapAttempted,false,
+    "missing last player card never tried to tap Trade")
+ eq(c.state.lastOutcomeCode,"CARD_NOT_VERIFIED_PRE_TRADE",
+    "precise sanitized pre-dispatch outcome")
+ eq(c.state.failStop,false,
+    "pre-Trade card absence is not falsely classified as possible request")
 end
 -- String-source integrity checks are in addition to runtime fake-Roblox tests.
 eq(source:find("MaxUnavailableChecks=1",1,true)~=nil,true,
