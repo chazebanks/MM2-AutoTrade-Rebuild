@@ -1837,6 +1837,14 @@ function M.run(scanner,options)
         isPaused=function()
             return S.paused==true
         end,
+        -- Read-only pending request observation needed before Step2 may
+        -- classify queue exhaustion, rotate, or claim the test completed.
+        -- The original pendingVisible() is reused, not guessed from GUI text.
+        pendingVisible=function()
+            if not alive() then return nil end
+            local ok,yes=pcall(pendingVisible)
+            return ok and yes==true or (ok and false or nil)
+        end,
         resume=function(reason)
             if not alive() then
                 return false,"stale-session"
