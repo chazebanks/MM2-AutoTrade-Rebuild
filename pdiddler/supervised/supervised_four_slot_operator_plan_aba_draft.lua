@@ -216,11 +216,9 @@ local function prepareShadow(bound,opts,itemIndex)
    then return nil end
  -- Observer UI/event attachment (if supplied) MUST succeed before
  -- the next item can be considered. No implicit retry or permission.
- if opts.onShadowPrepared~=nil then
-   if type(opts.onShadowPrepared)~="function" then return nil end
-   local attached,yes=pcall(opts.onShadowPrepared,w,itemIndex)
-   if not attached or yes~=true then return nil end
- end
+ if type(opts.onShadowPrepared)~="function" then return nil end
+ local attached,yes=pcall(opts.onShadowPrepared,w,itemIndex)
+ if not attached or yes~=true then return nil end
  return currentShadowFresh(w) and w or nil
 end
 -- Explicit operator approval covers exactly one planned list.
@@ -283,7 +281,8 @@ function M.run(bound,io,gate,approval,opts)
  -- EXPLICITLY opt into ABA denial. A required but absent witness blocks
  -- before any remote or consumption; do not silently use snapshot-only.
  local shadowRequired=(opts.experimentalABAShadowRequired==true and #selected>1)
- if shadowRequired and type(opts.makeShadowWitness)~="function" then
+ if shadowRequired and (type(opts.makeShadowWitness)~="function"
+       or type(opts.onShadowPrepared)~="function") then
   return report("BLOCKED","ABA_SHADOW_REQUIRED_FOR_MULTI_ITEM")
  end
  local baseline,why=current(bound,nil,nil)
