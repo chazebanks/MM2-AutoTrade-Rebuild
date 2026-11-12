@@ -1138,4 +1138,112 @@ for _,kind in ipairs({"reindex","replacement","quantity","chroma"}) do
  testOwnRemovalIndex(kind)
 end
 
+-- First fully automated eight-TRADE batch: one distinct scenario per
+-- FRESH original-P3 mock epoch and separate original protected P4 GUI root.
+-- Every trade cleans up and terminates before the next; no final Accept.
+do
+ local x=fixture({ownRemovalMutation="reindex"})
+ for _=1,20 do x.tick() end
+ for i=1,4 do
+  local button=x.named("OwnedChoice_"..i)
+  eq(type(button),"table","four eligible owned-choice buttons "..i)
+  button.Activated:Fire()
+ end
+ x.tick()
+ local arm=x.named("ArmEightScenarios")
+ eq(type(arm),"table","eight-trade explicitly approved ARM GUI exists")
+ eq(arm.Visible,true,"ARM8 enabled only after four distinct approved choices")
+ eq(x.named("ArmAllFour").Visible,false,"ARM4 not on four-choice approval")
+ arm.Activated:Fire()
+ eq(x.requests(),0,"no P3 request until ARM8 worker advances")
+ local delayTicks=0
+ for n=1,8 do
+  eq(untilRound(x,n,"WAIT_OPEN",190),true,
+    "eight-trade new bound P3 epoch "..n)
+  eq(x.requests(),n,"exactly one fresh request per scenario "..n)
+  x.open() -- consenting ALT accepts *trade request*, NEVER final Accept
+  local finishedRound=false
+  for _=1,650 do
+   local st=x.state()
+   if st.status=="STOPPED" then
+    error("SYSTEM1 ARM8 STOP in trade "..n.." phase "..
+      st.phase.." reason "..st.reason)
+   end
+   if st.completedRounds>=n then finishedRound=true;break end
+   if st.phase=="ALT_ADD" then
+    if n==1 then x.setAlt(1,2,false)
+    elseif n==2 then x.setAlt(1,1,true)
+    elseif n==3 then
+     delayTicks+=1
+     if delayTicks>=54 then x.setAlt(1,1,false) end
+    elseif n==4 then x.setAlt(2,1,false)
+    else x.setAlt(1,1,false) end
+   elseif st.phase=="ALT_REMOVE_ONE" then
+    x.setAlt(1)
+   elseif st.phase=="ALT_REMOVE_ALL" then
+    x.setAlt(0)
+   elseif st.phase=="WAIT_ALT_CANCEL" then
+    x.prematurelyClose() -- ALT intentionally presses Decline, no fake accept
+   elseif st.phase=="ALT_REVISE" then
+    x.setAlt(1)
+    x.their:FindFirstChild("NewItem1"):FindFirstChild("ItemName")
+      :FindFirstChild("Label").Text="ALT_B"
+   elseif st.phase=="ALT_REVISE_SECOND" then
+    x.setAlt(1)
+    x.their:FindFirstChild("NewItem1"):FindFirstChild("ItemName")
+      :FindFirstChild("Label").Text="ALT_C"
+   elseif st.phase=="ALT_CLEAR_FOR_REOFFER" then
+    x.setAlt(0)
+   elseif st.phase=="ALT_READD" then
+    x.setAlt(1)
+   end
+   x.tick()
+  end
+  eq(finishedRound,true,"one trade closes and ledger saves scenario "..n)
+  eq(x.state().completedRounds,n,"no skipped or double-counted scenario "..n)
+  eq(x.declines(),n==8 and 7 or (n==7 and 6 or n),
+    "exact MAIN declines excluding intended ALT cancellation "..n)
+ end
+ local st=x.state()
+ eq(st.status,"CLIENT_TEST_SEQUENCE_COMPLETE","all eight client trades passed")
+ eq(st.reason,"ALL_EIGHT_CLIENT_SCENARIOS_VERIFIED",
+   "distinct eight-trade outcome text")
+ eq(st.maxRounds,8,"eight bounded independent client trade windows")
+ eq(st.eightTradeBatchAuthorized,true,"separate ARM8 authorization recorded")
+ eq(st.actions.requestsStarted,8,"eight fresh P3 mock request epochs")
+ eq(st.actions.offersAttempted,10,"2+2+4+1+1 protected outgoing items")
+ eq(st.actions.offersClientVisible,10,"ten original protected GUI items")
+ eq(st.actions.removalsAttempted,10,"all ten own slots removed separately")
+ eq(st.actions.declinesAttempted,7,"seven MAIN declines")
+ eq(st.actions.clientClosedWindows,8,"eight verified client closures")
+ eq(st.actions.partnerCancelWindows,1,"one ALT cancellation scenario")
+ eq(st.actions.stackedAltSlotsVerified,1,"stack x2 verified as one slot")
+ eq(st.actions.chromaAltSlotsVerified,1,"one Chroma variant verified")
+ eq(st.actions.delayedAltOffersVerified,1,"delayed ALT verified after 5s")
+ eq(st.actions.altRevisionsObserved,2,"two distinct ALT revisions")
+ eq(st.actions.adaptiveReoffersAttempted,1,"one distinct MAIN reoffer")
+ eq(st.actions.ownRemovalSlotReindexesObserved>=1,true,
+   "own GUI reindex observed during protected withdrawals")
+ eq(#st.rounds,8,"eight distinct per-trade ledger records")
+ for i,record in ipairs(st.rounds) do
+  eq(record.round,i,"ledger order matches trade index "..i)
+  eq(type(record.scenarioId),"string","distinct scenario ID "..i)
+  eq(record.clientWindowClosed,true,"independent closed window "..i)
+  eq(record.status,"CLIENT_SEQUENCE_PASS","per-trade outcome "..i)
+ end
+ eq(st.rounds[7].reason,"EXPECTED_PARTNER_CLIENT_CLOSURE_UNATTRIBUTED",
+   "ALT cancellation does not claim server outcome")
+ eq(st.rounds[8].closedBy,"MAIN_GUARDED_DECLINE",
+   "new P3 request resumes only after ALT cancellation")
+ eq(x.requests(),8,"no ninth P3 epoch")
+ eq(x.declines(),7,"no blind MAIN decline on ALT cancellation")
+ eq(#x.sent,10,"ten guarded original OfferItem remote attempts")
+ eq(#x.copies>=1,true,"terminal batch report automatically copied")
+ local json=serde.decode("json",x.copies[#x.copies])
+ eq(json.completedRounds,8,"native clipboard eight closed windows")
+ eq(json.finalAcceptEverAttempted,false,"never final Accept")
+ eq(json.serverCompletionProven,false,"not actual settlement proof")
+ eq(json.verifiedCompletedTrades,0,"no fabricated trade completions")
+end
+
 print("SYSTEM1_MAIN_AUTO_NATIVE_ORIGINAL_PASS",tests)
