@@ -452,14 +452,21 @@ end
 local function refreshSelection()
  if not owner.running or owner.armed then return end
  local count=#selected
- screen.status.Text="Chosen: "..tostring(count).."/2 | ALT eligible: "..
-   (availableForArm() and "YES" or "WAITING")
- screen.arm.Visible=count==2 and availableForArm()
+ local available=availableForArm()
+ screen.status.Text="Chosen: "..tostring(count).."/4 | ALT eligible: "..
+   (available and "YES" or "WAITING")
+ screen.arm.Visible=count==2 and available
  screen.arm.Active=screen.arm.Visible
  screen.armAdaptive.Visible=screen.arm.Visible
  screen.armAdaptive.Active=screen.arm.Visible
+ screen.armBatch.Visible=count==4 and available
+ screen.armBatch.Active=screen.armBatch.Visible
  if count==2 then
   screen.body.Text="ARM 4: 4 automatic requests; 3 offers/removals; 4 declines. ARM 5: 5 requests; 5 offers/removals/declines; ALT swap. NEVER final Accept."
+ elseif count==4 then
+  screen.body.Text="ARM 8: EIGHT fresh exact-ALT trades; one feature per trade; 10 approved offer slots, 7 MAIN declines + 1 ALT cancel. NO final Accept."
+ else
+  screen.body.Text="Select TWO cheap distinct own items for ARM4/5 or FOUR for ARM8. No requests before ARM."
  end
 end
 local function showOwned(choices)
@@ -726,13 +733,17 @@ function adapters.inspect(round,epoch)
  }
 end
 function adapters.offerApproved(round,count,epoch,choiceIndex)
+ local permitted=owner.batch8 and
+   ((round==4 and count==2 and choiceIndex==1) or
+    (round==5 and count==2 and choiceIndex==1) or
+    (round==6 and count==4 and choiceIndex==1) or
+    (round==8 and count==1 and (choiceIndex==1 or choiceIndex==2))) or
+   (not owner.batch8 and
+    ((round==3 and count==1 and choiceIndex==1) or
+     (round==4 and count==2 and choiceIndex==1) or
+     (round==5 and count==1 and (choiceIndex==1 or choiceIndex==2))))
  if actionBusy or epochRound~=round or
-    not liveBeforeAction() or
-    not ((round==3 and count==1 and choiceIndex==1) or
-         (round==4 and count==2 and choiceIndex==1) or
-         (round==5 and count==1 and (choiceIndex==1 or choiceIndex==2))) then
-  return nil
- end
+   not liveBeforeAction() or not permitted then return nil end
  local b=currentClientSnapshot()
  if not b or b.snap.physicalOwnSlots~=0 or
     b.snap.physicalTheirSlots~=0 then return nil end
@@ -905,7 +916,8 @@ local function showRuntime()
  end
  screen.arm.Visible=false
  screen.armAdaptive.Visible=false
- screen.choices.Visible=false
+  screen.armBatch.Visible=false
+  screen.choices.Visible=false
  screen.reset.Visible=false
 end
 screen.stop.Activated:Connect(function()
@@ -928,21 +940,26 @@ screen.copy.Activated:Connect(function()
  end
 end)
 local function armRounds(requestedRounds)
- if requestedRounds~=4 and requestedRounds~=5 then return end
+ if requestedRounds~=4 and requestedRounds~=5 and requestedRounds~=8 then return end
  if not owner.running or owner.armed or
-    #selected~=2 or not availableForArm() or
+   #selected~=(requestedRounds==8 and 4 or 2) or
+   not availableForArm() or
     not profileReadAt or os.clock()-profileReadAt>180 or
     io.trade()~=nil then return end
  -- The operator explicitly approves ALL FOUR guarded exact-ALT test rounds:
  -- 4 outgoing requests, 3 preselected cheap own-item placements, up to
  -- 3 own-item removals and 4 declines. NEVER final Accept.
  owner.startAuthorized=true
+ owner.batch8=requestedRounds==8
  owner.armed=true
  local engine,why=controllerModule.new(adapters,{
   explicitFourRoundConsent=true,finalAcceptDisabled=true,
   exactConsentingAlt=true,approvedTwoDistinctOwnedItems=true,
   includeAdaptiveRound=requestedRounds==5,
   explicitAdaptiveRevisionConsent=requestedRounds==5,
+  includeEightTradeBatch=requestedRounds==8,
+  explicitEightBatchConsent=requestedRounds==8,
+  approvedFourDistinctOwnedItems=requestedRounds==8 and #selected==4,
   requestTimeout=30,altStepTimeout=90,actionTimeout=12,
  })
  if not engine then
@@ -956,6 +973,7 @@ local function armRounds(requestedRounds)
  screen.status.Position=UDim2.fromOffset(10,93)
  screen.arm.Visible=false
  screen.armAdaptive.Visible=false
+ screen.armBatch.Visible=false
  screen.title.Text="SYSTEM1 AUTO ARMED"
  screen.body.Text="MAIN automatically manages "..tostring(requestedRounds)..
    " test trades. ALT follows panel. NEVER final Accept."
@@ -986,6 +1004,7 @@ local function armRounds(requestedRounds)
 end
 screen.arm.Activated:Connect(function()armRounds(4)end)
 screen.armAdaptive.Activated:Connect(function()armRounds(5)end)
+screen.armBatch.Activated:Connect(function()armRounds(8)end)
 local profileWorker=pcall(function()
  task.spawn(function()
   local choices,reason=parseOwned()
@@ -1036,5 +1055,5 @@ E.PDIDDLER_SYSTEM1_MAIN_AUTO_RUNNER={
    reason=haltReason or "NOT_ARMED",authorizesAccept=false})
  end,
 }
-print("[SYSTEM1 MAIN AUTO] Select 2 cheap owned weapon types, then ARM all 4. After ARM MAIN automatically sends/places/removes/declines. ALT must accept each incoming REQUEST and change items per purple GUI. Any unexpected stop auto copies diagnostic. NEVER final Accept.")
+print("[SYSTEM1 MAIN AUTO] Select 2 cheap items for ARM4/5 or 4 distinct for ARM8; one test scenario per trade window and no final Accept.")
 return E.PDIDDLER_SYSTEM1_MAIN_AUTO_RUNNER
