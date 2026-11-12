@@ -283,11 +283,14 @@ class DurableStoreTests(unittest.TestCase):
                 pass
             self.assert_blocked(self.store.safe_status(now=NOW))
 
-    def test_invalid_schema_version_is_detected(self):
-        self.store.db.execute("UPDATE schema_metadata SET version=99")
+    def test_invalid_schema_version_is_rejected_at_database_boundary(self):
+        # CHECK(version=1) prevents silent migration/overwrite by default.
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.store.db.execute("UPDATE schema_metadata SET version=99")
         self.store.close()
-        with self.assertRaises(InvalidEvidence):
-            Store(self.path)
+        self.store=Store(self.path)
+        self.assertEqual(self.store.db.execute(
+            "SELECT version FROM schema_metadata").fetchone()[0],1)
 
 class PrivateRuntimeTests(unittest.TestCase):
     def setUp(self):
