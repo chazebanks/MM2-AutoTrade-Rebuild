@@ -176,5 +176,30 @@ do
  eq(second.isArmed(),false,"second epoch ended without any physical request")
 end
 
+-- Pure timeout decision from REAL supervised P3 source. This guards
+-- against repeating a previously observed bug: reporting IGNORED after
+-- cancelPending() returns false, allowing rotation with pending UI still up.
+do
+ local x=setup({ready=true})
+ local classify=x.lib.ignoredTimeoutCancellationVerified
+ eq(type(classify),"function","actual P3 exports cancellation verification")
+ local combinations=0
+ for _,cancelled in ipairs({false,true}) do
+  for _,pending in ipairs({false,true}) do
+   for _,tradeOpen in ipairs({false,true}) do
+    local expected=cancelled and not pending and not tradeOpen
+    eq(classify(cancelled,pending,tradeOpen),expected,
+      "P3 cancel outcome true only after cancellation+no UI+no trade")
+    combinations+=1
+   end
+  end
+ end
+ eq(combinations,8,"all boolean cancel/pending/trade combinations covered")
+ eq(classify(nil,false,false),false,"missing cancel evidence is not ignored")
+ eq(classify(true,nil,false),false,"unreadable pending state fail closed")
+ eq(classify(true,false,nil),false,"unreadable trade state fail closed")
+ eq(classify(true,false,false),true,"verified ignored request can rotate")
+end
+
 print("SYSTEM1_MAIN_AUTO_P3_FRESH_EPOCH_FORK_PASS",tests)
 print("[PASS] no outgoing loop, incoming decline, or whitelist work until approved supervisor")
