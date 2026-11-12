@@ -11,6 +11,11 @@ local function count(t)
 end
 local allowedFaults={
  "P3_NOT_ARMED", "P3_CANCEL_UNVERIFIED_STOP", "P3_AMBIGUOUS_SEND_STOP",
+ "P3_CARD_FAILURE_WITH_ACTIVE_TRADE_UI",
+ "P3_TRADE_TAP_RETURNED_UNCONFIRMED",
+ "P3_POST_TAP_PENDING_UI_NOT_SEEN",
+ "P3_PENDING_DISAPPEARED_UNCLASSIFIED",
+ "P3_CANCEL_AFTER_PENDING_UNVERIFIED",
  "P3_HANDOFF_UNATTRIBUTED", "P3_PLAYER_IDENTITY_CHANGED",
  "P4_BOUND_SNAPSHOT_UNSAFE", "P4_OWN_ITEMS_UNEXPECTED",
  "P4_ROOT_REPLACED", "P4_DECLINE_FAILED_OR_UNCONFIRMED",
@@ -53,6 +58,13 @@ function M.new(api,options)
       or phase=="INCONCLUSIVE" and "CLIENT_ROTATION_ONLY_HANDOFF_NOT_PROVEN"
       or phase=="STOPPED" and "STOPPED" or phase,
    phase=phase,reason=reason,firstFault=firstFault,
+   firstFailureEvidence=phase=="STOPPED" and observed.failureEvidence or nil,
+   publicRequestDiagnostic={
+    preTradeCardSkips=observed.preTradeCardSkips or 0,
+    requestTargetsAttempted=observed.requestTargetsAttempted or 0,
+    pendingUiEverConfirmed=observed.pendingUiEverConfirmed==true,
+    originalP3SentConfirmed=observed.originalP3SentConfirmed or 0,
+   },
    targetBudget=3,
    attemptedDistinctContacts=observed.distinctContacts or 0,
    processedTargets=observed.processedTargets or 0,
@@ -100,6 +112,10 @@ function M.new(api,options)
    count(v.acceptedRequests) and
    count(v.ignoredRequests) and count(v.declinedRequests) and
    count(v.incomingDeclined) and
+   count(v.preTradeCardSkips) and
+   count(v.requestTargetsAttempted) and
+   count(v.originalP3SentConfirmed) and
+   type(v.pendingUiEverConfirmed)=="boolean" and
    v.clientTradeSettled==false and v.noFinalAccept==true and
    v.noItemsOffered==true and v.noServerHop==true and
    type(v.exhausted)=="boolean" and
