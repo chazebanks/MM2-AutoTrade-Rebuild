@@ -57,13 +57,9 @@ for token in (
     'maxWaitSeconds or 90',
 ):
     assert token in p,token
-assert len(re.findall(r'\{phase="R[1-4]_',p))==13, "phase-count regression"
+assert len(re.findall(r'\{phase="R[1-4]_',p))==15, "phase-count regression"
 assert "61536126eec12707174d16319e757ab7829b4534" in s
 assert "a3c209659942e8b45eec5da3555f7cfb83059c59" in s
-assert all(x in m for x in (
-    'luau.load(runnerSource', 'original protected', 
-    'no scripted offers', 'four actual client trade', 
-)) is False or "SYSTEM1_MULTITRADE_NATIVE_ORIGINAL_PASS" in m
 assert "SYSTEM1_MULTITRADE_NATIVE_ORIGINAL_PASS" in m
 assert "SYSTEM1_MULTITRADE_PURE_PASS" in t
 print("SYSTEM1_MULTITRADE_SOURCE_SAFETY_PASS",len(originals),"unchanged protected originals")
