@@ -433,6 +433,52 @@ class PrivateRuntimeTests(unittest.TestCase):
             server.server_close()
             thread.join(timeout=3)
 
+    def test_headless_worker_initializes_without_an_http_server_or_token(self):
+        class StopAtFirstWait:
+            waits=[]
+            def wait(self, duration):
+                self.waits.append(duration)
+                return True
+        stop=StopAtFirstWait()
+        runtime.run_private_worker(self.path,stop_event=stop)
+        self.assertEqual(stop.waits,[300])
+        with Store(self.path) as store:
+            result=store.safe_status(now=runtime.current_time())
+            self.assertEqual(result["healthJobStatus"],"OK_PRIVATE_LOCAL")
+            self.assertFalse(result["authorizesTrade"])
+            self.assertFalse(result["maySendDiscordWebhook"])
+
+    def test_headless_worker_retries_local_health_on_tick_only(self):
+        from unittest.mock import patch
+        class TwoTicks:
+            def __init__(self):
+                self.calls=0
+            def wait(self,duration):
+                self.calls+=1
+                self.last_duration=duration
+                return self.calls==2
+        stop=TwoTicks()
+        with patch.object(runtime,"run_once",return_value={}) as called:
+            runtime.run_private_worker(self.path,stop_event=stop,
+                                       interval_seconds=45)
+        self.assertEqual(called.call_count,2)
+        self.assertEqual(stop.calls,2)
+        self.assertEqual(stop.last_duration,45)
+
+    def test_worker_fails_closed_on_invalid_interval(self):
+        from unittest.mock import patch
+        with patch.object(runtime,"run_once",side_effect=AssertionError("NO_IO")):
+            for value in (0,29,3601,True,"300"):
+                with self.subTest(interval=value):
+                    with self.assertRaises(ValueError):
+                        runtime.run_private_worker(self.path,interval_seconds=value)
+
+    def test_worker_cli_runs_headless_without_http_or_provider_key(self):
+        from unittest.mock import patch
+        with patch.object(runtime,"run_private_worker") as worker:
+            self.assertEqual(runtime.main(["worker","--db",str(self.path)]),0)
+            worker.assert_called_once_with(self.path)
+
     def test_server_token_policy_fail_closed(self):
         for token in (None,"", "weak", "é"*64):
             with self.subTest(token=repr(token)):
