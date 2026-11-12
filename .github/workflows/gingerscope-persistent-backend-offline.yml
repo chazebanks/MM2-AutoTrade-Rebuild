@@ -31,6 +31,13 @@ jobs:
         run: |
           python3 -m py_compile pdiddler/backend/persistent_store.py pdiddler/backend/runtime.py pdiddler/ci/test_persistent_backend.py
           python3 -m unittest -v pdiddler.ci.test_persistent_backend
+      - name: Build minimal private-worker container and smoke-test offline
+        run: |
+          docker build --file pdiddler/backend/Dockerfile --tag gingerscope-backend-ci .
+          docker run --rm --network none --read-only --tmpfs /data:rw,size=32m \
+            gingerscope-backend-ci \
+            python -m pdiddler.backend.runtime once --db /data/test.sqlite \
+            | python -c "import sys,json; x=json.load(sys.stdin); assert x['healthJobStatus']=='OK_PRIVATE_LOCAL'; assert x['authorizesTrade'] is False; assert x['maySendDiscordWebhook'] is False; print('RAILWAY_WORKER_CONTAINER_OFFLINE_PASS')"
       - name: No unsafe provider, Discord or trade-action integration
         run: |
           python3 - <<'PY'
