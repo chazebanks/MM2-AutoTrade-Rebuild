@@ -146,7 +146,32 @@ local function safeSnap(s)
  end
  return {ours=ours,theirs=theirs}
 end
-local function expectedAltCount(round,stage)
+local batchNames={
+ "STACK_QTY2","CHROMA_VARIANT","DELAYED_ALT_RESPONSE",
+ "ALT_SLOT_COMPACTION","MAIN_SLOT_COMPACTION",
+ "FOUR_MAIN_PHYSICAL_SLOTS","NORMAL_ALT_CANCEL",
+ "TWO_ALT_REVISIONS",
+}
+local function initialMainCount(round,batch)
+ if batch then
+  if round==4 or round==5 then return 2 end
+  if round==6 then return 4 end
+  if round==8 then return 1 end
+  return 0
+ end
+ if round==3 or round==5 then return 1 end
+ if round==4 then return 2 end
+ return 0
+end
+local function expectedAltCount(round,stage,batch)
+ if batch then
+  if round==4 then
+   if stage=="ADD" then return 2 end
+   if stage=="REMOVE_ONE" then return 1 end
+   return 0
+  end
+  return stage=="ADD" and 1 or 0
+ end
  if round==2 or round==3 or round==5 then
   return stage=="ADD" and 1 or 0 end
  if round==4 then
@@ -189,6 +214,13 @@ function M.new(api,options)
    options.approvedTwoDistinctOwnedItems~=true or
    (options.includeAdaptiveRound==true and
       options.explicitAdaptiveRevisionConsent~=true) or
+   (options.includeEightTradeBatch==true and
+     (options.explicitEightBatchConsent~=true or
+      options.approvedFourDistinctOwnedItems~=true)) or
+   (options.includeEightTradeBatch==true and
+     options.includeAdaptiveRound==true) or
+   (options.includeEightTradeBatch~=nil and
+     type(options.includeEightTradeBatch)~="boolean") or
    (options.includeAdaptiveRound~=nil and
       type(options.includeAdaptiveRound)~="boolean") or
    not integer(options.requestTimeout or 30,15,45) or
@@ -197,10 +229,13 @@ function M.new(api,options)
   return nil,report("BLOCKED","DEPENDENCY_OR_EXPLICIT_APPROVAL_MISSING",
     0,"PREPARING",0,0,{})
  end
- local maxRounds=options.includeAdaptiveRound==true and 5 or 4
+ local batchEight=options.includeEightTradeBatch==true
+ local maxRounds=batchEight and 8 or
+  (options.includeAdaptiveRound==true and 5 or 4)
  local round=1
  local phase="PREPARING"
  local deadline=nil
+ local phaseEnteredAt=0
  local consumed,completed=0,0
  local rounds={}
  local actions={
@@ -209,6 +244,8 @@ function M.new(api,options)
   altRevisionsObserved=0,adaptiveReoffersAttempted=0,
   altRemovalSlotReindexesObserved=0,
    ownRemovalSlotReindexesObserved=0,
+  stackedAltSlotsVerified=0,chromaAltSlotsVerified=0,
+  delayedAltOffersVerified=0,partnerCancelWindows=0,
  }
  local root=nil
  local boundEpoch=nil
@@ -243,16 +280,26 @@ function M.new(api,options)
     adaptiveReoffersAttempted=actions.adaptiveReoffersAttempted,
     altRemovalSlotReindexesObserved=actions.altRemovalSlotReindexesObserved,
      ownRemovalSlotReindexesObserved=actions.ownRemovalSlotReindexesObserved,
+    stackedAltSlotsVerified=actions.stackedAltSlotsVerified,
+    chromaAltSlotsVerified=actions.chromaAltSlotsVerified,
+    delayedAltOffersVerified=actions.delayedAltOffersVerified,
+    partnerCancelWindows=actions.partnerCancelWindows,
   })
   r.maxRounds=maxRounds
   r.adaptiveRoundAuthorized=maxRounds==5
+  r.eightTradeBatchAuthorized=batchEight
+  r.scenarioId=batchEight and batchNames[round] or nil
+  r.firstFailureScenario=phase=="STOPPED" and
+    (batchEight and batchNames[round] or nil) or nil
   r.lastAction=lastAction
   r.possibleSideEffect=possibleSideEffect
   r.copyAttempted=copied
   r.rounds={}
   for i,v in ipairs(rounds) do
    r.rounds[i]={round=v.round,status=v.status,reason=v.reason,
-     clientWindowClosed=v.clientWindowClosed}
+     clientWindowClosed=v.clientWindowClosed,
+     scenarioId=v.scenarioId,phaseAtEnd=v.phaseAtEnd,
+     closedBy=v.closedBy}
   end
   r.instruction=phase=="ALT_REVISE" and
     "ALT: REPLACE your offered item with a DIFFERENT cheap weapon in ONE physical slot. MAIN automatically withdraws."
@@ -273,6 +320,35 @@ function M.new(api,options)
     or phase=="DONE" and
 (tostring(maxRounds).." client test windows processed. Report copied. No settlement proven.")
     or "MAIN automatic: "..phase..". ALT: do not press final Accept."
+  if batchEight then
+   if phase=="ALT_ADD" then
+    if round==1 then
+     r.instruction="ALT: offer ONE cheap stacked weapon at quantity x2 (ONE physical slot)."
+    elseif round==2 then
+     r.instruction="ALT: offer ONE cheap CHROMA weapon quantity x1."
+    elseif round==3 then
+     r.instruction="ALT: WAIT at least SIX seconds, THEN offer ONE cheap item."
+    elseif round==4 then
+     r.instruction="ALT: offer TWO DISTINCT cheap weapons; wait for remove-one instruction."
+    else
+     r.instruction="ALT: offer ONE cheap item; MAIN removes and declines automatically."
+    end
+   elseif phase=="ALT_REVISE" then
+    r.instruction="ALT: replace A with DIFFERENT item B. No final Accept."
+   elseif phase=="ALT_REVISE_SECOND" then
+    r.instruction="ALT: replace B with DIFFERENT item C; then leave C unchanged."
+   elseif phase=="WAIT_ALT_CANCEL" then
+    r.instruction="ALT: press DECLINE to close THIS trade. MAIN tests recovery to new request."
+   elseif phase=="ALT_REMOVE_ONE" then
+    r.instruction="ALT: remove ONE of your two distinct items; leave survivor unchanged."
+   elseif phase=="ALT_REMOVE_ALL" then
+    r.instruction="ALT: remove ALL items; MAIN removes and declines automatically."
+   elseif phase=="ALT_CLEAR_FOR_REOFFER" then
+    r.instruction="ALT: remove revised item C. MAIN then reoffers second cheap approved weapon."
+   elseif phase=="ALT_READD" then
+    r.instruction="ALT: add ONE cheap item after MAIN reoffers."
+   end
+  end
   return r
  end
  local function safeCall(method,...)
@@ -299,8 +375,9 @@ function M.new(api,options)
   return receipt()
  end
  local function finished()
-  phase="DONE";reason=maxRounds==5 and "ALL_FIVE_CLIENT_ROUNDS_VERIFIED" or
-    "ALL_FOUR_CLIENT_ROUNDS_VERIFIED"
+  phase="DONE";reason=maxRounds==8 and "ALL_EIGHT_CLIENT_SCENARIOS_VERIFIED" or
+    (maxRounds==5 and "ALL_FIVE_CLIENT_ROUNDS_VERIFIED" or
+     "ALL_FOUR_CLIENT_ROUNDS_VERIFIED")
   stopOnce=true
   pcall(api.stopAll)
   pushClipboard()
@@ -308,11 +385,13 @@ function M.new(api,options)
  end
  local function enter(next,now,why)
   phase=next
+  phaseEnteredAt=now
   reason=why or "CLIENT_PHASE_ACTIVE"
   local limit=(next=="WAIT_OPEN" and (options.requestTimeout or 30))
    or ((next=="ALT_ADD" or next=="ALT_REMOVE_ONE" or
 next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
-       next=="ALT_CLEAR_FOR_REOFFER" or next=="ALT_READD") and
+     next=="ALT_REVISE_SECOND" or next=="WAIT_ALT_CANCEL" or
+     next=="ALT_CLEAR_FOR_REOFFER" or next=="ALT_READD") and
        (options.altStepTimeout or 90))
    or (options.actionTimeout or 8)
   deadline=now+limit
