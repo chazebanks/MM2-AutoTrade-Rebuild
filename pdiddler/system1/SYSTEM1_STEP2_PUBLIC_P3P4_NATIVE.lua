@@ -8,8 +8,8 @@ local USED_KEY="PDIDDLER_SYSTEM1_STEP2_PUBLIC_USED_JOB"
 local ORIGINAL_MM2=142823291
 local MAIN="a3c209659942e8b45eec5da3555f7cfb83059c59"
 local GATE="2db52f96fadd58957a804ebada8f77c3bc7a9228"
-local P3="79b64c9dbd8f8c7df5043ac5f574fc3c45a36b0f"
-local CTRL="be567ce2dd40417ae9c6ed9c47aa731071a01664"
+local P3="88fccfbd98281c1e47dce506bccf136604bd1485"
+local CTRL="77d83cb9c1abf7f5991c7408ce006701484844b8"
 local BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local conflicts={
  "PDIDDLER_PART4_CONTROLLER_ACTIVE",
@@ -405,24 +405,56 @@ local function observe()
   ignoredRequests=state.ignored or 0,
   declinedRequests=state.declined or 0,
   incomingDeclined=state.incomingDeclined or 0,
+  preTradeCardSkips=state.preTradeCardSkipped or 0,
+  requestTargetsAttempted=state.requestTargetsAttempted or 0,
+  originalP3SentConfirmed=state.sent or 0,
+  pendingUiEverConfirmed=state.pendingRequestUiEverConfirmed==true,
   autoDeclines=autoDeclines,
   exhausted=status.status=="EXHAUSTED",
   boundActive=false,pendingVisible=pending,p3Paused=paused,
  }
- for uid,code in pairs(state.processed)do
+ local stageCodes={
+  TRADE_TAP_RETURNED_UNCONFIRMED="P3_TRADE_TAP_RETURNED_UNCONFIRMED",
+  PENDING_UI_MISSING_AFTER_TRADE_TAP="P3_POST_TAP_PENDING_UI_NOT_SEEN",
+  PENDING_DISAPPEARED_UNCLASSIFIED="P3_PENDING_DISAPPEARED_UNCLASSIFIED",
+  CANCEL_UNVERIFIED="P3_CANCEL_AFTER_PENDING_UNVERIFIED",
+  CARD_FAILURE_WITH_ACTIVE_TRADE_UI="P3_CARD_FAILURE_WITH_ACTIVE_TRADE_UI",
+ }
+ for _,code in pairs(state.processed)do
   if code=="trade-open" or code=="ignored" or code=="declined" then
    observed.distinctContacts+=1
-  elseif code=="cancel-unverified" or code=="failed" or
-       code=="unavailable-final" then
-   observed.fault="P3_AMBIGUOUS_SEND_STOP"
-   observed.possibleSideEffect=true
+  elseif code=="failed" or code=="unavailable-final" or
+      code=="cancel-unverified" then
+   observed.fault=stageCodes[state.lastOutcomeCode] or
+     "P3_AMBIGUOUS_SEND_STOP"
   end
  end
  if state.failStop==true then
-  observed.fault="P3_AMBIGUOUS_SEND_STOP"
-  observed.possibleSideEffect=true
+  observed.fault=observed.fault or
+    stageCodes[state.lastOutcomeCode] or "P3_AMBIGUOUS_SEND_STOP"
  end
- if haltReason then observed.fault="P3_SESSION_OR_WATCHDOG_LOST" end
+ if observed.fault then
+  observed.possibleSideEffect=true
+  -- No usernames/IDs or inventory details leave this test.
+  local function safeStage(v)
+   if type(v)~="string" or #v>64 or
+      not v:match("^[A-Z_]+$") then return "UNKNOWN" end
+   return v
+  end
+  observed.failureEvidence={
+   stage=safeStage(state.lastRequestStage),
+   outcome=safeStage(state.lastOutcomeCode),
+   tradeButtonTapAttempted=state.tradeButtonTapAttempted==true,
+   tradeButtonTapReturnedTrue=state.tradeButtonTapReturnedTrue==true,
+   pendingRequestUiEverConfirmed=state.pendingRequestUiEverConfirmed==true,
+   pendingUiVisibleAtStop=pending==true,
+   originalP3SentConfirmed=state.sent or 0,
+   preTradeCardSkips=state.preTradeCardSkipped or 0,
+  }
+ end
+ if haltReason and observed.fault==nil then
+  observed.fault="P3_SESSION_OR_WATCHDOG_LOST"
+ end
  if status.status=="STOPPED" then
   observed.fault="P3_GATE_STOPPED" end
  local root,why=tradeRoot()
