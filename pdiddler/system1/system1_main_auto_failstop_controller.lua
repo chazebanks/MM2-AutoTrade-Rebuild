@@ -314,7 +314,6 @@ function M.new(api,options)
  end
  local function onTick(now)
   if phase=="STOPPED" or phase=="DONE" then return receipt() end
-  if not type(now)=="number" then return stop("INVALID_CLOCK") end
   if type(now)~="number" or now<nowLast or now>=math.huge then
    return stop("MISSING_OR_NONMONOTONIC_CLOCK")
   end
@@ -447,7 +446,7 @@ function M.new(api,options)
   if phase=="WAIT_MAIN_WITHDRAW" then
    if #ob.theirs~=0 then return stop("ALT_CHANGED_DURING_OWN_REMOVAL") end
    if #ob.ours~=ownExpected then
-    if #ob.ours>#oursPrev then return stop("OWN_OFFER_GREW_DURING_REMOVAL") end
+    if #ob.ours > #oursPrev then return stop("OWN_OFFER_GREW_DURING_REMOVAL") end
     return receipt()
    end
    -- Confirm surviving physical slot really is the previous own slot.
