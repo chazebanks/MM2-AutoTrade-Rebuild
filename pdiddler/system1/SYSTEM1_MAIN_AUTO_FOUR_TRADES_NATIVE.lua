@@ -11,7 +11,7 @@ local ORIGINAL_MM2=142823291
 local MAIN="a3c209659942e8b45eec5da3555f7cfb83059c59"
 local P3_EPOCH="ba76adb21ffe4124c44d6d9a256683861eceb61d"
 local SHADOW_PLAN="be8d8c5b77c0c7c345639c53e6a04959728d01a8"
-local CTRL="802a138db9bf55d6d4eec43e3d3a1d692888ca09"
+local CTRL="064d37b881bcf08d02f6c5c902bb623c9e367507"
 local BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local isTrue=function(x)return x==true end
 local conflictNames={
@@ -87,7 +87,7 @@ local choicesModule=loadPinned(MAIN,"supervised/p3_one_item_owned_selection.lua"
 local outgoingModule=loadPinned(P3_EPOCH,"system1/pdiddler3_outgoing_single_send_epoch.lua",70000)
 local planModule=loadPinned(SHADOW_PLAN,"supervised/supervised_four_slot_operator_plan_aba_draft.lua",25000)
 local shadowModule=loadPinned(SHADOW_PLAN,"intelligence_lab/p3_shadow_aba_offer_lease.lua",13000)
-local controllerModule=loadPinned(CTRL,"system1/system1_main_auto_failstop_controller.lua",26000)
+local controllerModule=loadPinned(CTRL,"system1/system1_main_auto_failstop_controller.lua",40000)
 if not geometry or type(geometry.choose)~="function" or
    not protectedIO or type(protectedIO.new)~="function" or
    not bridge or type(bridge.bind)~="function" or
@@ -115,7 +115,7 @@ if not okIO or type(io)~="table" or
  return nil
 end
 local owner={
- job=game.JobId,running=true,armed=false,
+ job=game.JobId,running=true,armed=false,batch8=false,
  startAuthorized=false,alt=ALT,offerActive=false,
 }
 E[OWNER_KEY]=owner
@@ -324,18 +324,21 @@ local okayUI=pcall(function()
   b.Parent=panel
   return b
  end
- screen.stop=button("StopAuto","STOP",10,56)
- screen.copy=button("CopyAuto","COPY",72,56)
- screen.reset=button("ResetChoices","RESET",134,59)
- screen.arm=button("ArmAllFour","ARM 4",198,61)
- screen.armAdaptive=button("ArmFiveAdaptive","ARM 5",264,66)
+ screen.stop=button("StopAuto","STOP",10,45)
+ screen.copy=button("CopyAuto","COPY",59,45)
+ screen.reset=button("ResetChoices","RESET",108,47)
+ screen.arm=button("ArmAllFour","ARM 4",158,50)
+ screen.armAdaptive=button("ArmFiveAdaptive","ARM 5",212,50)
+ screen.armBatch=button("ArmEightScenarios","ARM 8",266,64)
+ screen.armBatch.Visible=false
+ screen.armBatch.Active=false
  screen.armAdaptive.Visible=false
  screen.armAdaptive.Active=false
  screen.arm.Visible=false
  screen.arm.Active=false
 end)
 if not okayUI or not screen.gui or not screen.arm or
-   not screen.armAdaptive or not screen.copy then
+   not screen.armAdaptive or not screen.armBatch or not screen.copy then
  earlyStop("AUTO_GUI_CREATION_FAILED")
  return nil
 end
@@ -344,10 +347,10 @@ if not safe then
  earlyStop(layoutReason or "GUI_LAYOUT_UNAVAILABLE")
  return nil
 end
-screen.title.Text="SYSTEM 1 AUTO | SELECT 2"
+screen.title.Text="SYSTEM 1 AUTO | SELECT 2 OR 4"
 screen.warning.Visible=false
 screen.status.Position=UDim2.fromOffset(10,83)
-screen.body.Text="Select TWO distinct, cheap OWNED weapons to test. MAIN will auto-offer, remove and decline. ALT accepts REQUESTS + changes items."
+screen.body.Text="Select TWO cheap OWNED weapons for ARM4/5, or FOUR distinct cheap OWNED weapons for ARM8. NEVER final Accept."
 screen.status.Text="Reading current owned MM2 inventory..."
 -- The original scanner may draw its old full-screen inventory GUI; hide it
 -- so this safety panel never obscures original MM2 trade controls.
@@ -465,7 +468,7 @@ local function showOwned(choices)
   earlyStop("FEWER_THAN_TWO_ELIGIBLE_OWN_WEAPON_TYPES")
   return
  end
- screen.status.Text="Tap any 2 distinct cheap weapons. Never use Gingerscope."
+ screen.status.Text="Choose 2 for ARM4/5 or 4 for ARM8. Never Gingerscope."
  for index,choice in ipairs(choices) do
   if approvedKey(choice.raw) and
      type(choice.display)=="string" and #choice.display>0 and
@@ -488,7 +491,7 @@ local function showOwned(choices)
    b.Parent=screen.choices
    b.Activated:Connect(function()
     if not owner.running or owner.armed or
-       #selected>=2 or
+       #selected>=4 or
        not altExact() then return end
     for _,p in ipairs(selected) do
      if p.raw==choice.raw then return end
@@ -543,7 +546,7 @@ local function currentlyOwned()
  if not ok or type(inv)~="table" or
     type(inv.items)~="table" or inv.unmapped~=0
     or inv.badQty~=0 or
-    type(inv.rawOwned)~="number" or inv.rawOwned<2 then
+    type(inv.rawOwned)~="number" or inv.rawOwned<#selected then
   return false
  end
  for _,wanted in ipairs(selected) do
