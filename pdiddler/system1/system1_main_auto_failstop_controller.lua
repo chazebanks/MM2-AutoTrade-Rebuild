@@ -400,13 +400,13 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
  local function transitionAfterAlt(now)
   if phase=="ALT_ADD" then
    if round==4 then enter("ALT_REMOVE_ONE",now,"ALT_TWO_CLIENT_SLOTS_VERIFIED")
-   elseif round==5 then
+   elseif (batchEight and round==8) or (not batchEight and round==5) then
     enter("ALT_REVISE",now,"AWAIT_AUTHORIZED_ALT_REPLACEMENT")
    else enter("ALT_REMOVE_ALL",now,"ALT_ONE_CLIENT_SLOT_VERIFIED") end
   elseif phase=="ALT_REMOVE_ONE" then
    enter("ALT_REMOVE_ALL",now,"ALT_ONE_OF_TWO_REMOVED")
   else
-   if round>=3 then
+   if initialMainCount(round,batchEight)>0 then
     adaptiveWithdraw=false
     enter("MAIN_WITHDRAWING",now,"ALT_OFFER_CLEARED")
    else
@@ -504,15 +504,22 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
    enter("CHECK_EMPTY",now,"FRESH_CLIENT_TRADE_WINDOW_OBSERVED")
    return receipt()
   end
-  if phase=="WAIT_CLOSE" then
+  if phase=="WAIT_CLOSE" or phase=="WAIT_ALT_CANCEL" then
    if ob.root~=nil then
     if ob.root~=root then return stop("REPLACED_ROOT_DURING_DECLINE") end
     return receipt()
    end
    actions.clientClosedWindows+=1
    completed+=1
+   local canceled=phase=="WAIT_ALT_CANCEL"
+   if canceled then actions.partnerCancelWindows+=1 end
    rounds[#rounds+1]={round=round,status="CLIENT_SEQUENCE_PASS",
-      reason="AUTOMATIC_DECLINE_CLIENT_WINDOW_CLOSED",clientWindowClosed=true}
+     reason=canceled and "EXPECTED_PARTNER_CLIENT_CLOSURE_UNATTRIBUTED" or
+       "AUTOMATIC_DECLINE_CLIENT_WINDOW_CLOSED",
+     clientWindowClosed=true,
+     scenarioId=batchEight and batchNames[round] or nil,
+     phaseAtEnd=phase,closedBy=canceled and "ALT_REQUESTED_CLOSE_CLIENT_ONLY" or
+       "MAIN_GUARDED_DECLINE"}
    -- The old epoch must be fully stopped before any new original P3 queue.
    local ok,closed=pcall(api.endEpoch,round,boundEpoch)
    if not ok or closed~=true then
@@ -532,7 +539,13 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
    local yes=stepStable(ob,{}, {})
    if not yes then return receipt() end
    oursPrev=ob.ours;theirPrev=ob.theirs
-   if round==1 then enter("MAIN_DECLINING",now,"ROUND1_EMPTY_VERIFIED")
+   if batchEight then
+    if round==7 then
+     enter("WAIT_ALT_CANCEL",now,"WAIT_FOR_SCRIPTED_ALT_CLIENT_DECLINE")
+    elseif initialMainCount(round,true)>0 then
+     enter("MAIN_OFFERING",now,"AUTO_PLACE_SCENARIO_APPROVED_ITEMS")
+    else enter("ALT_ADD",now,"WAIT_SCENARIO_ALT_OFFER") end
+   elseif round==1 then enter("MAIN_DECLINING",now,"ROUND1_EMPTY_VERIFIED")
    elseif round==2 then enter("ALT_ADD",now,"WAIT_ALT_SINGLE_ITEM")
    else enter("MAIN_OFFERING",now,"AUTO_PLACE_PREAPPROVED_ITEMS") end
    return receipt()
@@ -541,7 +554,7 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
    if #ob.ours~=0 or #ob.theirs~=0 then
     return stop("PREOFFER_CLIENT_SIDE_CHANGED") end
    local reoffer=phase=="MAIN_REOFFERING"
-   local n=round==4 and not reoffer and 2 or 1
+   local n=reoffer and 1 or initialMainCount(round,batchEight)
    lastAction=reoffer and "MAIN_GUARDED_ADAPTIVE_REOFFER" or
      "MAIN_GUARDED_OFFER"
    actions.offersAttempted+=n
@@ -560,7 +573,7 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
   end
   if phase=="WAIT_MAIN_OFFER" or phase=="WAIT_MAIN_REOFFER" then
    local reoffer=phase=="WAIT_MAIN_REOFFER"
-   local n=round==4 and not reoffer and 2 or 1
+   local n=reoffer and 1 or initialMainCount(round,batchEight)
    if #ob.ours~=n or #ob.theirs~=0 then
     return stop("MAIN_OFFER_GUI_NOT_RECONCILED") end
    local yes=stepStable(ob,nil,{})
@@ -574,8 +587,9 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
    end
    return receipt()
   end
-  if phase=="ALT_REVISE" then
-   if round~=5 or not sameSide(ob.ours,oursPrev) then
+  if phase=="ALT_REVISE" or phase=="ALT_REVISE_SECOND" then
+   if round~=(batchEight and 8 or 5) or
+     not sameSide(ob.ours,oursPrev) then
     return stop("UNAUTHORIZED_MAIN_OFFER_CHANGE") end
    if #ob.theirs>1 then
     return stop("ALT_ADDED_UNEXPECTED_EXTRA_SLOTS") end
@@ -586,13 +600,17 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
    if not yes then return receipt() end
    actions.altRevisionsObserved+=1
    theirPrev=ob.theirs
-   adaptiveWithdraw=true
-   enter("MAIN_WITHDRAWING",now,
+   if batchEight and phase=="ALT_REVISE" then
+    enter("ALT_REVISE_SECOND",now,"AWAIT_SECOND_DISTINCT_ALT_REVISION")
+   else
+    adaptiveWithdraw=true
+    enter("MAIN_WITHDRAWING",now,
       "STABLE_CLIENT_ALT_REVISION_WITHDRAW_OWN_FIRST")
+   end
    return receipt()
   end
   if phase=="ALT_CLEAR_FOR_REOFFER" then
-   if round~=5 or #ob.ours~=0 then
+   if round~=(batchEight and 8 or 5) or #ob.ours~=0 then
     return stop("ADAPTIVE_REOFFER_MAIN_NOT_EMPTY") end
    if #ob.theirs>1 then
     return stop("ALT_ADDED_UNEXPECTED_EXTRA_SLOTS") end
@@ -615,10 +633,10 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
     return stop("UNAUTHORIZED_MAIN_OFFER_CHANGE") end
    local stage=(phase=="ALT_ADD" or phase=="ALT_READD") and "ADD" or
       phase=="ALT_REMOVE_ONE" and "REMOVE_ONE" or "REMOVE_ALL"
-   local want=expectedAltCount(round,stage)
+   local want=expectedAltCount(round,stage,batchEight)
    if #ob.theirs~=want then
-    -- A repeated/incorrect ALT count may be a transient manual action;
-    -- but any unexpected extra slot is terminal, never trust >2.
+    -- A repeated/incorrect ALT count may be a transient manual action.
+    -- Unexpected extra physical slots are terminal, never assumed safe.
     if #ob.theirs> (round==4 and 2 or 1) then
      return stop("ALT_ADDED_UNEXPECTED_EXTRA_SLOTS") end
     stable=0;lastFull=nil;return receipt()
