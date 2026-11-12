@@ -1,0 +1,34 @@
+name: Gingerscope future Discord report preview (offline)
+on:
+  push:
+    branches:
+      - feature/gingerscope-future-discord-preview-offline
+    paths:
+      - 'pdiddler/intelligence_lab/future_discord_trade_preview.py'
+      - 'pdiddler/intelligence_lab/test_future_discord_trade_preview.py'
+      - 'pdiddler/intelligence_lab/FUTURE_DISCORD_REPORT_PREVIEW_RESEARCH.md'
+      - '.github/workflows/mm2-future-discord-preview-tests.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/future_discord_trade_preview.py'
+      - 'pdiddler/intelligence_lab/test_future_discord_trade_preview.py'
+      - 'pdiddler/intelligence_lab/FUTURE_DISCORD_REPORT_PREVIEW_RESEARCH.md'
+      - '.github/workflows/mm2-future-discord-preview-tests.yml'
+permissions:
+  contents: read
+jobs:
+  discord-preview-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Inherited and Discord-only offline regressions
+        run: python -m unittest discover -s pdiddler/intelligence_lab -p 'test_*.py' -v
+      - name: Refuse network/discord transport
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -E '(requests\.post|requests\.get|DiscordWebhook|PostAsync|HttpGet|FireServer|InvokeServer|webhook_url|os\.environ)' pdiddler/intelligence_lab/future_discord_trade_preview.py
