@@ -880,4 +880,64 @@ do
  eq(receipt.serverCompletionProven,false,"client-only no settlement proof")
 end
 
+-- B18 adaptive-specific: ALT's first revision was confirmed,
+-- but it CHANGES AGAIN immediately before the protected MAIN withdrawal.
+-- No withdrawal may be attempted from the old proposal; stop and copy the
+-- exact first error without requesting a sixth trade or final Accept.
+do
+ local x=armedTest({adaptive=true})
+ for round=1,4 do
+  if round>1 then
+   eq(untilRound(x,round,"WAIT_OPEN",180),true,
+    "adversarial adaptive setup request "..round)
+  end
+  x.open()
+  local completed=false
+  for _=1,300 do
+   local st=x.state()
+   if st.completedRounds>=round then completed=true;break end
+   assert(st.phase~="STOPPED",
+    "unexpected setup failure "..tostring(st.reason))
+   if st.phase=="ALT_ADD" then
+    x.setAlt(round==4 and 2 or 1)
+   elseif st.phase=="ALT_REMOVE_ONE" then
+    x.setAlt(1)
+   elseif st.phase=="ALT_REMOVE_ALL" then
+    x.setAlt(0)
+   end
+   x.tick()
+  end
+  eq(completed,true,"adversarial setup completes earlier round "..round)
+ end
+ eq(untilRound(x,5,"WAIT_OPEN",180),true,
+  "fifth P3 request starts after 4 verified closes")
+ x.open()
+ eq(untilRound(x,5,"ALT_ADD",90),true,"MAIN first adaptive item offered")
+ x.setAlt(1)
+ eq(untilRound(x,5,"ALT_REVISE",30),true,"ALT first offer established")
+ x.setAlt(1)
+ x.their:FindFirstChild("NewItem1"):FindFirstChild("ItemName")
+   :FindFirstChild("Label").Text="ALT_CONFIRMED_REPLACEMENT"
+ eq(untilRound(x,5,"MAIN_WITHDRAWING",35),true,
+  "stable replacement authorized MAIN withdrawal stage")
+ -- Invalidated before the click: same single slot, different candidate.
+ x.setAlt(1)
+ x.their:FindFirstChild("NewItem1"):FindFirstChild("ItemName")
+   :FindFirstChild("Label").Text="ALT_REPLACED_AGAIN"
+ eq(untilState(x,"STOPPED",25),true,
+  "second ALT replacement stops stale MAIN removal")
+ local r=copiedStop(x,"MAIN_WITHDRAW_PRECONDITION_FAILED",5)
+ eq(r.completedRounds,4,"four previous windows remain verified")
+ eq(r.actions.altRevisionsObserved,1,"one stable first ALT replacement")
+ eq(r.actions.offersAttempted,4,"3 original + 1 first adaptive offer")
+ eq(r.actions.adaptiveReoffersAttempted,0,
+  "NO second MAIN offer after ALT mutated before withdrawal")
+ eq(r.actions.removalsAttempted,3,
+  "no fifth-round item withdrawal occurred from invalidated snapshot")
+ eq(x.requests(),5,"no sixth request after adaptive failure")
+ eq(x.declines(),4,"no premature fifth decline after ALT changed again")
+ eq(#x.sent,4,"only earlier approved protected outbound offers")
+ eq(r.finalAcceptEverAttempted,false,"no final accept on unsafe ALT revision")
+end
+
 print("SYSTEM1_MAIN_AUTO_NATIVE_ORIGINAL_PASS",tests)
