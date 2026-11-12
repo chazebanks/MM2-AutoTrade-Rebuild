@@ -23,6 +23,7 @@ from pdiddler.intelligence_lab.stage121_source_to_strategy_firewall import FALSE
 BASE = "https://api.rblxvalue.com/v2"
 ALLOWED_PATHS = {"/meta", "/items"}
 MAX_BYTES = 512_000
+MAX_ERROR_BYTES = 4096
 ITEM_LIMIT = 100
 MAX_TOTAL = 5000
 REQUIRED_CREDIT = "Data from rblxvalue.com"
@@ -61,7 +62,16 @@ def _no_redirect_get(path: str, api_key: str) -> tuple[int, bytes]:
             return 413, b""
         return status, raw
     except urllib.error.HTTPError as ex:
-        # Do not inspect, print or store response bodies and/or secrets.
+        # Only HTTP 403 gets a bounded, transient read. The classifier below
+        # emits fixed labels, NEVER the error body, headers, URL or API key.
+        if ex.code == 403:
+            try:
+                raw = ex.read(MAX_ERROR_BYTES + 1)
+                return 403, raw if len(raw) <= MAX_ERROR_BYTES else b""
+            except (OSError, ValueError, AttributeError):
+                return 403, b""
+            finally:
+                ex.close()
         return ex.code, b""
     except urllib.error.URLError as ex:
         # Error *types* only; never serialize exception messages, URLs,
@@ -105,9 +115,44 @@ def _valid_naive_clock(value):
     except ValueError:
         return False
 
+def _forbidden_reason(body):
+    """Safely classify a 403 envelope; *not proof* of publisher identity.
+
+    JSON can originate at an edge proxy too. Only fixed reason labels leave
+    this function; received body content is never logged or cached.
+    """
+    if type(body) is not bytes or not body:
+        return "HTTP_403_EMPTY_OR_UNAVAILABLE_BODY"
+    if len(body) > MAX_ERROR_BYTES:
+        return "HTTP_403_OVERSIZED_BODY"
+    try:
+        doc = json.loads(body.decode("utf-8"))
+    except (UnicodeError, ValueError):
+        return "HTTP_403_NON_JSON_POSSIBLE_EDGE_BLOCK"
+    if type(doc) is not dict:
+        return "HTTP_403_UNRECOGNIZED_JSON"
+    msg = doc.get("message")
+    if type(msg) is not str or not 1 <= len(msg) <= 512:
+        return "HTTP_403_UNRECOGNIZED_JSON"
+    message = msg.lower()
+    if "not activated" in message or "not active" in message or "activate" in message:
+        return "HTTP_403_JSON_KEY_ACTIVATION_CLAIM"
+    if "expired" in message or "expiry" in message:
+        return "HTTP_403_JSON_KEY_EXPIRED_CLAIM"
+    if "suspended" in message or "revoked" in message:
+        return "HTTP_403_JSON_KEY_SUSPENDED_CLAIM"
+    if "invalid" in message or "incorrect" in message:
+        return "HTTP_403_JSON_KEY_INVALID_CLAIM"
+    if "forbidden" in message or "access denied" in message or "blocked" in message:
+        return "HTTP_403_JSON_ACCESS_DENIED_CLAIM"
+    return "HTTP_403_JSON_UNCLASSIFIED"
+
+
 def _decode_json(status, body):
     if type(status) is not int:
         return None, _denied("BLOCKED", "UNTRUSTED_HTTP_STATUS")
+    if status == 403:
+        return None, _denied("ACCESS_RESTRICTED", _forbidden_reason(body))
     if status in STATUS_MAP:
         a, b = STATUS_MAP[status]
         return None, _denied(a, b)
