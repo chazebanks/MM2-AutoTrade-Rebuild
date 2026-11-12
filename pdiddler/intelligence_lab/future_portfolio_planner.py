@@ -12,7 +12,9 @@ from typing import Any
 SCHEMA = "gingerscope-offline-portfolio-candidate-v1"
 MAX_TYPES_PER_SIDE = 5
 MAX_COPIES_PER_TYPE = 2
-MAX_COPIES_PER_SIDE = 4
+MAX_PHYSICAL_SLOTS_PER_SIDE = 4
+# Bounded research enumeration permits at most two stacked copies per occupied slot.
+MAX_COPIES_PER_SIDE = MAX_PHYSICAL_SLOTS_PER_SIDE * MAX_COPIES_PER_TYPE
 MAX_VALUE = 1_000_000
 MAX_TOTAL_VALUE = 100_000_000
 
@@ -55,7 +57,7 @@ def _inventory(rows: object) -> dict[str, int] | None:
 def _offers(inv: dict[str, int]):
     keys = list(inv)
     for quantities in itertools.product(*(range(inv[key] + 1) for key in keys)):
-        if 1 <= sum(quantities) <= MAX_COPIES_PER_SIDE:
+        if 1 <= sum(qty > 0 for qty in quantities) <= MAX_PHYSICAL_SLOTS_PER_SIDE:
             yield [(key, qty) for key, qty in zip(keys, quantities) if qty]
 
 
@@ -135,8 +137,9 @@ def plan(
                and items[key]["stability"] in {"Stable", "Overpaid For"}
                for key, _ in offer)
     ]
-    # Five types with at most two of each yield at most 95 nonempty
-    # four-copy bundles per side, or 9,025 candidate pair comparisons.
+    # Five types with at most two copies per type yield 210 nonempty
+    # <=4-PHYSICAL-slot bundles per side, or 44,100 pair comparisons.
+    # A stack occupies one slot even when its quantity is two.
     for giving in own:
         our_value = _metric_sum(giving, items, "value")
         our_keys = {key for key, _ in giving}
@@ -190,6 +193,6 @@ def plan(
     result["candidatePairsConsidered"] = len(prepared)
     result["searchCap"] = {"maxDistinctTypesPerSide": MAX_TYPES_PER_SIDE,
                            "maxCopiesPerType": MAX_COPIES_PER_TYPE,
-                           "maxSlotsPerSide": MAX_COPIES_PER_SIDE,
+                           "maxSlotsPerSide": MAX_PHYSICAL_SLOTS_PER_SIDE,
                            "maxCopiesPerSide": MAX_COPIES_PER_SIDE}
     return result

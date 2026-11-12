@@ -83,6 +83,23 @@ class FuturePortfolioPlannerTests(unittest.TestCase):
             self.assertTrue(all(1<=z["quantity"]<=2 for z in proposed["offer"]))
         self.assertEqual(a[0]["quantity"],2)
 
+    def test_regression_four_physical_slots_can_hold_eight_stacked_copies(self):
+        # Exactly four occupied trade slots, two copies per slot; the old
+        # total-copy <=4 cap wrongly rejects this unique positive proposal.
+        ours=[{"key":k,"quantity":2} for k in ("a","b","c","d")]
+        theirs=[{"key":"target","quantity":1}]
+        market=sample()[2]
+        market["items"]={k:entry(5) for k in ("a","b","c","d")}
+        market["items"]["target"]=entry(60)
+        x=self.run_plan((ours,theirs,market))
+        self.assertEqual(x["status"],"CANDIDATES_PREPARED")
+        c=x["candidates"][0]
+        self.assertEqual(len(c["offer"]),4)
+        self.assertEqual(sum(z["quantity"] for z in c["offer"]),8)
+        self.assertEqual(c["projectedListedGain"],20)
+        self.assertEqual(c["type"],"UPGRADE")
+        self.assertTrue(x["enumerationCompleteForProvidedShortlists"])
+
     def test_no_silent_top_five_from_full_inventory(self):
         a,b,m=sample()
         a=[{"key":f"item-{i}","quantity":1} for i in range(6)]
@@ -142,11 +159,38 @@ class FuturePortfolioPlannerTests(unittest.TestCase):
             m["items"][f"b{i}"]=entry(55+i*5)
         x=self.run_plan((a,b,m))
         self.assertEqual(x["status"],"CANDIDATES_PREPARED")
-        self.assertLessEqual(x["candidatePairsConsidered"],9025)
+        self.assertLessEqual(x["candidatePairsConsidered"],44100)
         self.assertEqual(len(x["candidates"]),5)
         for candidate in x["candidates"]:
             for side in ("offer","receive"):
-                self.assertLessEqual(sum(row["quantity"] for row in candidate[side]),4)
+                self.assertLessEqual(len(candidate[side]),4)
+                self.assertLessEqual(sum(row["quantity"] for row in candidate[side]),8)
+
+    def test_five_types_cannot_occupy_five_physical_slots(self):
+        inventory={"k"+str(i):2 for i in range(5)}
+        offered=list(MOD._offers(inventory))
+        self.assertEqual(len(offered),210)
+        self.assertTrue(all(1 <= len(offer) <= 4 for offer in offered))
+        self.assertTrue(all(sum(q for _,q in offer) <= 8 for offer in offered))
+        self.assertFalse(any(len(offer)==5 for offer in offered))
+        self.assertIn([("k0",2),("k1",2),("k2",2),("k3",2)],offered)
+
+    def test_stack_research_bounds_do_not_claim_unlimited_game_capacity(self):
+        a,b,m=sample()
+        a[0]["quantity"]=3  # Research type cap is separate from physical slots.
+        x=self.run_plan((a,b,m))
+        self.assertEqual(x["status"],"BLOCKED")
+        self.assertFalse(x["enumerationCompleteForProvidedShortlists"])
+        a,b,m=sample()
+        a=[{"key":f"w{i}","quantity":2} for i in range(5)]
+        b=[{"key":"theirs","quantity":1}]
+        for i in range(5):
+            m["items"][f"w{i}"]=entry(5)
+        m["items"]["theirs"]=entry(60)
+        x=self.run_plan((a,b,m))
+        self.assertEqual(x["status"],"CANDIDATES_PREPARED")
+        self.assertEqual(x["searchCap"]["maxSlotsPerSide"],4)
+        self.assertEqual(x["searchCap"]["maxCopiesPerSide"],8)
 
     def test_600_adversarial_inputs_never_authorize(self):
         rng=random.Random(6084)

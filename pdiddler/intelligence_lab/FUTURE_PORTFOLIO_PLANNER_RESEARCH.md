@@ -4,13 +4,13 @@
 
 ## What it prepares in advance
 
-- Generates hypothetical one-, two-, three-, or four-slot exchange candidates from preselected inventory and opponent item pools.
+- Generates hypothetical one-, two-, three-, or four-**physical-slot** exchange candidates from preselected inventory and opponent item pools. Several stacked copies of one weapon occupy one slot in this bounded research model; copies and slots are NOT synonyms.
 - Handles stack quantities explicitly. A weapon with two copies may be offered as two only when the input inventory actually contains two.
-- Differentiates **UPGRADE** (more copies offered than received), **DOWNGRADE** (fewer copies offered than received), and **SIDEGRADE** (equal counts), while keeping the four-visible-slot constraint. These are structural definitions, not market guarantees.
+- Differentiates **UPGRADE** (more copies offered than received), **DOWNGRADE** (fewer copies offered than received), and **SIDEGRADE** (equal counts), while keeping the four-visible-slot constraint. Quantity-based labels are research-only and do not predict willingness to trade. These are structural definitions, not market guarantees.
 - Uses list-value change, demand, liquidity, stability and a concentration-increase penalty to rank candidates. All policy weights are provisional and can be revised once verified market/trade-outcome evidence exists. A +5 candidate is permitted; **no inherited mandatory +15 profit floor**.
 - Refuses raw weapon/checker mappings not marked as independently exact, absent or expired *publisher* timestamp, untrusted value fields, low-demand/low-liquidity acquisitions, and received items with Declining stability. The real project's current Stage58 mappings are still unauthenticated, so those real inputs must fail closed.
 - Refuses any input pool of more than five distinct types per side. It **does not silently trim full inventories**. Selecting a quality shortlist from a 100+-type inventory is a separate future engineering component.
-- Enumerates exhaustively **only within the explicitly supplied bounded shortlists**: five distinct types maximum, two copies per type, four slots per offer. The theoretical number of nonempty side configurations is 210, so at most 44,100 pair comparisons per search.
+- Enumerates exhaustively **only within the explicitly supplied bounded shortlists**: five distinct types maximum, **two copies per type (separate research cap)**, **four occupied physical slots per side**. Four occupied slots may carry up to eight stacked copies in this prototype. The theoretical number of nonempty side configurations is 210, so at most 44,100 pair comparisons per search. Larger stacks (three or more copies per type) are still **BLOCKED** here, not claimed impossible in MM2 or silently truncated. This corrects the former `sum(quantities)<=4` mistaken copy/slot conflation.
 - Rejects same-key outgoing/incoming swaps to avoid artificial zero-risk recycling and inventory-count accounting mistakes.
 
 ## Nonauthority contract
