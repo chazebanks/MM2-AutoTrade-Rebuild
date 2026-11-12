@@ -242,7 +242,11 @@ local function fixture(opts)
    table.sort(survivors,function(a,b)return a.Name<b.Name end)
    for _,v in ipairs(survivors) do self.children[v.Name]=nil end
    for i,v in ipairs(survivors) do
-    v.Name="NewItem"..i;self.children[v.Name]=v
+    -- Protected original removeOne removes highest index first. Model a
+    -- subsequent MM2 GUI layout renumber of the *retained* item in this test.
+    local position=opts.ownRemovalMutation=="reindex" and
+      #survivors==1 and 2 or i
+    v.Name="NewItem"..position;self.children[v.Name]=v
    end
    if #survivors==1 and opts.ownRemovalMutation~="reindex" then
     local slot=survivors[1]
