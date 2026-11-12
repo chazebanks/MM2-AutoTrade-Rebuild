@@ -124,6 +124,7 @@ class RblxV2PrivateAdapterTests(unittest.TestCase):
         args, kwargs = run.call_args
         self.assertNotIn(FAKE_SECRET, str(args))
         self.assertIn(FAKE_SECRET.encode(), kwargs["input"])
+        self.assertNotIn(b"show-error = no", kwargs["input"])
         self.assertTrue(kwargs["capture_output"])
         self.assertFalse(kwargs["check"])
 
