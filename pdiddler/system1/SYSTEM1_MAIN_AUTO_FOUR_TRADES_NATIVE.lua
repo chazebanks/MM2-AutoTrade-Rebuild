@@ -435,7 +435,7 @@ local function refreshSelection()
  screen.arm.Visible=count==2 and availableForArm()
  screen.arm.Active=screen.arm.Visible
  if count==2 then
-  screen.body.Text="TWO test weapons authorized for review. Tap ARM 4 TRADES ONCE. After ARM, MAIN acts automatically; ALT follows instructions."
+  screen.body.Text="ARM authorizes EXACT ALT: 4 automatic requests, 3 approved MAIN item offers, up to 3 removals, 4 automatic Declines. NEVER final Accept. ALT follows instructions."
  end
 end
 local function showOwned(choices)
