@@ -19,6 +19,18 @@ originals={
 for file,expected in originals.items():
     got=sha(file)
     assert got==expected, (file,expected,got)
+# The PR240 and PR238 candidate modules executed by the native integration
+# fixture are BYTE IDENTICAL to their reviewed source, not renamed replicas.
+# Runtime still loads pinned original branch revisions, not these test files.
+reviewed_shadow_fixtures={
+ "pdiddler/ci/fixtures/SYSTEM1_FROZEN_PR240_ABA_PLAN.lua":
+     "06f00d239ef3d22cc38e23e8f194bb606e6e4a87",
+ "pdiddler/ci/fixtures/SYSTEM1_FROZEN_PR238_SHADOW_LEASE.lua":
+     "5114d5d5cd57882397150dfe5b306d5571a43826",
+}
+for fixture,expected in reviewed_shadow_fixtures.items():
+    assert sha(fixture)==expected, f"Unreviewed candidate source: {fixture}"
+
 original=read("pdiddler/supervised/pdiddler3_outgoing_START_GATED_v1.lua")
 fork=read("pdiddler/system1/pdiddler3_outgoing_single_send_epoch.lua")
 preamble=fork.split("-- SUPERVISED P3 START-BARRIER FORK.",1)[0]
@@ -106,6 +118,11 @@ assert 'noAutomaticAcceptAcknowledged=true' in native
 assert native.count("owner.armed=true")==1
 assert 'requestedNonce' not in native
 assert "SYSTEM1_MAIN_AUTO_FAILSTOP_PURE_PASS" in tests
+assert "4 automatic requests, 3 approved MAIN item offers" in native
+assert "NEVER final Accept" in native
+assert 'system1_main_auto_native_original_mocks.luau' in (ROOT/".github/workflows/gingerscope-system1-multitrade.yml").read_text()
+assert 'SHADOW_OBSERVER_STALE_DURING_PLACEMENT' in native
+
 assert native.count('controller.abort(')>=3
 assert 'onShadowPrepared=function(w)' in native
 assert 'makeShadowWitness=function(bound)' in native
