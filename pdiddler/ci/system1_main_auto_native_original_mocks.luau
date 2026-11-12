@@ -424,7 +424,7 @@ local function fixture(opts)
  end
  e.task=taskApi
  local abaPhase=0
- local round6MutationPhase=0
+ local round6MutationInjected=false
  local function tickTasks()
   now+=0.12
   -- Adversarial R4 ONLY: ALT A->B->A between first and second approved
@@ -449,29 +449,26 @@ local function fixture(opts)
   -- Live-flow mirror: an ALT mutation after the first of FOUR guarded
   -- MAIN offer sends in round6 must invalidate the remaining three.
   -- This is an isolated fake-GUI fault, NEVER an authorized live trade.
-  if opts.injectRound6Mutation and round6MutationPhase<2 then
+  if opts.injectRound6Mutation and not round6MutationInjected then
    local runner=e.E.PDIDDLER_SYSTEM1_MAIN_AUTO_RUNNER
    local progress=runner and runner.status()
    if progress and progress.round==6 and
       progress.phase=="MAIN_OFFERING" and #sent==5 and #tasks>=2 then
-    if round6MutationPhase==0 then
-     add(their,1,"ALT_MUTATION_A",1,false)
-     round6MutationPhase=1; injectionTick=true
+    -- Each variant is present in the GUI BEFORE original shadow polling.
+    if opts.injectRound6Mutation=="ALT_SINGLE" then
+     add(their,1,"ALT_NEW_SINGLE",1,false)
+    elseif opts.injectRound6Mutation=="ALT_STACKED" then
+     add(their,1,"ALT_NEW_STACKED",2,false)
+    elseif opts.injectRound6Mutation=="ALT_CHROMA" then
+     add(their,1,"ALT_NEW_CHROMA",1,true)
+    elseif opts.injectRound6Mutation=="ALT_TWO_SLOTS" then
+     add(their,1,"ALT_NEW_FIRST",1,false)
+     add(their,2,"ALT_NEW_SECOND",1,false)
     else
-     if opts.injectRound6Mutation=="ABA" then
-      their.children["NewItem1"]=nil
-     elseif opts.injectRound6Mutation=="REPLACED" then
-      their.children["NewItem1"]=nil
-      add(their,1,"ALT_MUTATION_B",1,false)
-     elseif opts.injectRound6Mutation=="QUANTITY" then
-      their:FindFirstChild("NewItem1"):FindFirstChild("Container"):
-       FindFirstChild("Amount").Text="x2"
-     elseif opts.injectRound6Mutation=="CHROMA" then
-      their:FindFirstChild("NewItem1"):put(node("Frame","Tags")):
-       put(node("Frame","Chroma"))
-     end
-     round6MutationPhase=2; injectionTick=true
+     error("invalid round6 mutation mode")
     end
+    round6MutationInjected=true
+    injectionTick=true
    end
   end
   local snapshot={}
@@ -524,6 +521,7 @@ local function fixture(opts)
   declines=function()return declineCount end,
   copies=copied,tick=tickTasks,named=named,state=state,
   setAlt=setAlt,open=open,gameRead=gameRead,warnings=capturedWarnings,
+  round6MutationInjected=function()return round6MutationInjected end,
   prematurelyClose=function()screen.Enabled=false end,
  }
 end
@@ -1403,7 +1401,7 @@ end
 -- Distinct System1 P4 four-physical-slot mutation verification. Each
 -- variant runs in its own isolated fake-MM2 session, since hard STOP is
 -- terminal, with the five PRIOR safe controlled rounds to prove ledger.
-for _,mutation in ipairs({"ABA","REPLACED","QUANTITY","CHROMA"}) do
+for _,mutation in ipairs({"ALT_SINGLE","ALT_STACKED","ALT_CHROMA","ALT_TWO_SLOTS"}) do
  local x=fixture({injectRound6Mutation=mutation})
  for _=1,20 do x.tick()end
  for i=1,4 do x.named("OwnedChoice_"..i).Activated:Fire()end
@@ -1442,6 +1440,8 @@ for _,mutation in ipairs({"ABA","REPLACED","QUANTITY","CHROMA"}) do
  eq(untilState(x,"STOPPED",400),true,
   "mutation invalidates remaining 4-slot sends "..mutation)
  local st=x.state()
+ eq(x.round6MutationInjected(),true,
+  "distinct ALT mutation confirmed in real native fixture "..mutation)
  eq(st.completedRounds,5,"no sixth completed window "..mutation)
  eq(st.round,6,"specific failed sixth round "..mutation)
  eq(st.reason=="SHADOW_OBSERVER_STALE_DURING_PLACEMENT" or
