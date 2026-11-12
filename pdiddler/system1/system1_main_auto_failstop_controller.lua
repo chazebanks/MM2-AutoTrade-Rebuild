@@ -105,12 +105,20 @@ local function expectedAltCount(round,stage)
  end
  return 0
 end
-local validKinds={
- PREPARING=true,REQUESTING=true,WAIT_OPEN=true,CHECK_EMPTY=true,
- MAIN_OFFERING=true,WAIT_MAIN_OFFER=true,ALT_ADD=true,
- ALT_REMOVE_ONE=true,ALT_REMOVE_ALL=true,
- MAIN_WITHDRAWING=true,WAIT_MAIN_WITHDRAW=true,
- MAIN_DECLINING=true,WAIT_CLOSE=true,STOPPED=true,DONE=true
+-- Only literal audited diagnostic codes may cross this boundary. Never
+-- serialize freeform GUI labels, usernames, weapon IDs, or remote errors.
+local knownNativeFaults={
+ TRADE_PARTNER_NOT_CONSENTING_ALT=true,
+ ORIGINAL_P4_ROOT_CHANGED=true,
+ MULTIPLE_VISIBLE_TRADE_ROOTS=true,
+ GUI_NO_NONOVERLAPPING_SPACE=true,
+ ORIGINAL_P3_P4_CLIENT_SNAPSHOT_REJECTED=true,
+ P3_WATCHDOG_LOST=true,
+ ALT_LEFT_OR_REPLACED=true,
+ JOB_CHANGED=true,
+ COMPETING_CONTROLLER_ACTIVE=true,
+ P3_SESSION_EPOCH_MISMATCH=true,
+ CLIENT_GUI_OR_OPERATOR_SESSION_LOST=true,
 }
 function M.new(api,options)
  if type(api)~="table" or
@@ -279,7 +287,9 @@ function M.new(api,options)
   if not good or type(ob)~="table" or
      ob.sessionFresh~=true or ob.exactPartner~=true or
      ob.noOtherController~=true then
-   return nil,"P3_P4_SESSION_OR_PARTNER_UNSAFE"
+   local verified=type(ob)=="table" and ob.errorCode
+   return nil,knownNativeFaults[verified] and verified
+       or "P3_P4_SESSION_OR_PARTNER_UNSAFE"
   end
   if ob.p3Status=="BLOCKED" or
      ob.p3Status=="P3_PAUSED_UNATTRIBUTED" then
