@@ -1246,4 +1246,35 @@ do
  eq(json.verifiedCompletedTrades,0,"no fabricated trade completions")
 end
 
+-- Negative ARM8 first-fault proof: wrong stack quantity is terminal,
+-- preserves exact scenario/phase, does not request trade 2 or click Decline.
+do
+ local x=fixture()
+ for _=1,20 do x.tick() end
+ for i=1,4 do x.named("OwnedChoice_"..i).Activated:Fire()end
+ x.tick()
+ x.named("ArmEightScenarios").Activated:Fire()
+ eq(untilRound(x,1,"WAIT_OPEN",180),true,
+   "negative scenario starts exactly one request")
+ x.open()
+ eq(untilRound(x,1,"ALT_ADD",80),true,
+   "wrong-stack test reached exact requested phase")
+ x.setAlt(1,1,false) -- expected quantity x2, physically one slot x1
+ eq(untilState(x,"STOPPED",18),true,"wrong stack terminal stop")
+ local r=x.state()
+ eq(r.reason,"ALT_EXPECTED_ONE_STACKED_QTY2_SLOT",
+   "specific first scenario fault")
+ eq(r.firstFailureScenario,"STACK_QTY2",
+   "failure scenario precisely exported")
+ eq(r.round,1,"failed trade index precisely exported")
+ eq(r.completedRounds,0,"no fictitious successful trades")
+ eq(r.actions.requestsStarted,1,"no request 2 after first fault")
+ eq(r.actions.offersAttempted,0,"no physical own offer attempted")
+ eq(r.actions.declinesAttempted,0,"never blind decline wrong ALT offer")
+ eq(r.actions.clientClosedWindows,0,"open client window not falsely closed")
+ eq(r.authorizesAccept,false,"zero final accept on fatal stack mismatch")
+ eq(#x.copies>=1,true,"STOP automatically saves sanitized JSON")
+ eq(x.state().status,"STOPPED","cannot resume same run after STOP")
+end
+
 print("SYSTEM1_MAIN_AUTO_NATIVE_ORIGINAL_PASS",tests)
