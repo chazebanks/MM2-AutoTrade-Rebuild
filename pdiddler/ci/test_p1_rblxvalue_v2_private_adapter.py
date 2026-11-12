@@ -211,7 +211,7 @@ class RblxV2PrivateAdapterTests(unittest.TestCase):
             "Key was suspended": "HTTP_403_JSON_KEY_SUSPENDED_CLAIM",
             "Invalid API key": "HTTP_403_JSON_KEY_INVALID_CLAIM",
             "Forbidden access": "HTTP_403_JSON_ACCESS_DENIED_CLAIM",
-            "Unexpected private problem": "HTTP_403_JSON_UNCLASSIFIED",
+            "Unexpected private problem": "HTTP_403_JSON_MESSAGE_UNCLASSIFIED",
         }
         for message, expected in examples.items():
             body = encode({"error": True, "message": message + " " + FAKE_SECRET})
@@ -228,12 +228,37 @@ class RblxV2PrivateAdapterTests(unittest.TestCase):
              "HTTP_403_NON_JSON_POSSIBLE_EDGE_BLOCK"),
             (b"\xff", "HTTP_403_NON_JSON_POSSIBLE_EDGE_BLOCK"),
             (b"[]", "HTTP_403_UNRECOGNIZED_JSON"),
-            (encode({"error": True}), "HTTP_403_UNRECOGNIZED_JSON"),
+            (encode({"error": True}), "HTTP_403_JSON_BOOLEAN_ERROR_NO_MESSAGE"),
             (b"x" * (api.MAX_ERROR_BYTES + 1), "HTTP_403_OVERSIZED_BODY"),
         ):
             result = self.safe(api.classify_meta(403, body))
             self.assertEqual(result["status"], "ACCESS_RESTRICTED")
             self.assertEqual(result["reason"], expected)
+
+    def test_403_unrecognized_json_shape_is_sanitized_not_content(self):
+        private = FAKE_SECRET
+        variants = [
+            ({"error": "Forbidden: " + private},
+             "HTTP_403_JSON_STRING_ERROR_NO_MESSAGE"),
+            ({"detail": "Access denied for " + private},
+             "HTTP_403_JSON_STRING_DETAIL_NO_MESSAGE"),
+            ({"errors": [{"message": private}]},
+             "HTTP_403_JSON_ERRORS_ARRAY_NO_MESSAGE"),
+            ({"error": False, "customPrivate": private},
+             "HTTP_403_JSON_BOOLEAN_ERROR_NO_MESSAGE"),
+            ({"code": 403, "private": private},
+             "HTTP_403_JSON_CODE_NO_MESSAGE"),
+            ({"unexpectedField": private},
+             "HTTP_403_JSON_OTHER_FIELDS_NO_MESSAGE"),
+            ({"message": "Unknown error: " + private},
+             "HTTP_403_JSON_MESSAGE_UNCLASSIFIED"),
+        ]
+        for body, expected in variants:
+            with self.subTest(expected=expected):
+                classified = self.safe(api.classify_meta(403, encode(body)))
+                self.assertEqual(classified["status"], "ACCESS_RESTRICTED")
+                self.assertEqual(classified["reason"], expected)
+                self.assertNotIn(private, str(classified))
 
     def test_transport_bounded_403_error_read_only_and_secret_not_logged(self):
         import io
