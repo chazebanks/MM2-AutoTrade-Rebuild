@@ -97,7 +97,8 @@ local function safeSnap(s)
  return {ours=ours,theirs=theirs}
 end
 local function expectedAltCount(round,stage)
- if round==2 or round==3 then return stage=="ADD" and 1 or 0 end
+ if round==2 or round==3 or round==5 then
+  return stage=="ADD" and 1 or 0 end
  if round==4 then
   if stage=="ADD" then return 2 end
   if stage=="REMOVE_ONE" then return 1 end
@@ -356,7 +357,8 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
   nowLast=now
   if phase=="PREPARING" then return issueRequest(now) end
   if deadline~=nil and now>deadline then
-   return stop("TIMEOUT_"..phase,phase=="MAIN_OFFERING"
+   return stop("TIMEOUT_"..phase,phase=="MAIN_REOFFERING" or
+      phase=="MAIN_OFFERING"
       or phase=="MAIN_WITHDRAWING" or phase=="MAIN_DECLINING")
   end
   if phase=="REQUESTING" then return issueRequest(now) end
