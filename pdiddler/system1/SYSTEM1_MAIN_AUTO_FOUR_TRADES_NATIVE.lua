@@ -129,6 +129,8 @@ local epochRound=nil
 local latestP3="NOT_STARTED"
 local currentBound=nil
 local boundRoot=nil
+local handoffRoot=nil
+local handoffFirstSeen=nil
 local actionBusy=false
 local currentShadow=nil
 local shadowLoopLive=false
@@ -287,8 +289,8 @@ local okayUI=pcall(function()
  screen.warning.Text="FINAL ACCEPT DISABLED | TEST ONLY"
  local scroll=Instance.new("ScrollingFrame")
  scroll.Name="ApprovedOwnedChoices"
- scroll.Position=UDim2.fromOffset(10,148)
- scroll.Size=UDim2.fromOffset(318,31)
+ scroll.Position=UDim2.fromOffset(10,108)
+ scroll.Size=UDim2.fromOffset(318,70)
  scroll.CanvasSize=UDim2.fromOffset(0,0)
  scroll.ScrollBarThickness=4
  scroll.BackgroundColor3=Color3.fromRGB(17,12,29)
@@ -324,6 +326,8 @@ if not safe then
  return nil
 end
 screen.title.Text="SYSTEM 1 AUTO | SELECT 2"
+screen.warning.Visible=false
+screen.status.Position=UDim2.fromOffset(10,83)
 screen.body.Text="Select TWO distinct, cheap OWNED weapons to test. MAIN will auto-offer, remove and decline. ALT accepts REQUESTS + changes items."
 screen.status.Text="Reading current owned MM2 inventory..."
 -- The original scanner may draw its old full-screen inventory GUI; hide it
@@ -375,6 +379,22 @@ local function parseOwned()
  if not profile or not profile:IsA("RemoteFunction") or
     not syncNode then return nil,"OWN_PROFILE_SOURCE_MISSING" end
  local okSync,sync=pcall(require,syncNode)
+ if (not okSync or type(sync)~="table") and
+     type(setthreadidentity)=="function" then
+  -- Match the original proven owned-picker fallback; restore the previous
+  -- thread identity even on error. Never assume this grants item authority.
+  local oldIdentity=8
+  if type(getthreadidentity)=="function" then
+   local known,previous=pcall(getthreadidentity)
+   if known and type(previous)=="number" then
+    oldIdentity=previous
+   end
+  end
+  pcall(setthreadidentity,2)
+  local okay,ret=pcall(require,syncNode)
+  pcall(setthreadidentity,oldIdentity)
+  if okay then okSync=true;sync=ret end
+ end
  if not okSync or type(sync)~="table" then
   return nil,"OWN_GAME_WEAPON_CATALOG_UNAVAILABLE"
  end
@@ -564,6 +584,7 @@ function adapters.startEpoch(round,nonce)
   return false,"NEW_ORIGINAL_P3_SESSION_CREATION_FAILED"
  end
  currentSupervisor=sup;epochRound=round
+ handoffRoot=nil;handoffFirstSeen=nil
  latestP3="P3_SUPERVISOR_PREPARED_NOT_ARMED"
  local watcherCtx={
   getJobId=function()return game.JobId end,
@@ -644,10 +665,28 @@ function adapters.inspect(round,epoch)
   return blockedInspection(why)
  end
  if root then
+  if handoffRoot~=root then
+   handoffRoot=root
+   handoffFirstSeen=os.clock()
+  end
   local b,whyClient=currentClientSnapshot()
   if not b then
+   -- A visible GUI may precede the ORIGINAL P3 processed("trade-open")
+   -- event/paused coordinator by a frame. Never interpret the raw GUI
+   -- as a valid bound trade or dispatch an item during this grace window.
+   -- After a bounded 1.5s, fail closed with a precise clipboard error.
+   if latestP3~="BLOCKED" and
+      handoffFirstSeen~=nil and
+      os.clock()-handoffFirstSeen<=1.5 then
+    return {
+     sessionFresh=true,exactPartner=true,noOtherController=true,
+     p3Status="P3_BINDING_PENDING_CLIENT_ONLY",
+     root=nil,snapshot=nil,
+    }
+   end
    return blockedInspection("ORIGINAL_P3_P4_CLIENT_SNAPSHOT_REJECTED")
   end
+  handoffRoot=nil;handoffFirstSeen=nil
   -- Use the original protected P3/P4 read-only lease, never caller GUI claim.
   currentBound=b.bound;boundRoot=root
   return {
@@ -656,6 +695,7 @@ function adapters.inspect(round,epoch)
   }
  end
  currentBound=nil;boundRoot=nil
+ handoffRoot=nil;handoffFirstSeen=nil
  return {
   sessionFresh=true,exactPartner=true,noOtherController=true,
   p3Status=latestP3,root=nil,snapshot=nil,
@@ -790,6 +830,7 @@ function adapters.endEpoch(round,epoch)
  end
  currentWatchdog=nil;currentSupervisor=nil
  currentBound=nil;boundRoot=nil;epochRound=nil
+ handoffRoot=nil;handoffFirstSeen=nil
  latestP3="EPOCH_ENDED"
  gate.checkOutbound=nil
  return true
@@ -875,6 +916,8 @@ screen.arm.Activated:Connect(function()
  controller=engine
  screen.choices.Visible=false
  screen.reset.Visible=false
+ screen.warning.Visible=true
+ screen.status.Position=UDim2.fromOffset(10,93)
  screen.arm.Visible=false
  screen.title.Text="SYSTEM1 AUTO ARMED"
  screen.body.Text="MAIN now automatically requests and manages 4 client test trades. ALT follows panel."
