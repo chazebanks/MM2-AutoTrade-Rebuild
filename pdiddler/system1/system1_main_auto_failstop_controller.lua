@@ -109,6 +109,7 @@ end
 -- serialize freeform GUI labels, usernames, weapon IDs, or remote errors.
 local knownNativeFaults={
  TRADE_PARTNER_NOT_CONSENTING_ALT=true,
+ UNEXPECTED_ACCEPTED_STATE=true,
  ORIGINAL_P4_ROOT_CHANGED=true,
  MULTIPLE_VISIBLE_TRADE_ROOTS=true,
  GUI_NO_NONOVERLAPPING_SPACE=true,
