@@ -132,8 +132,21 @@ def _forbidden_reason(body):
     if type(doc) is not dict:
         return "HTTP_403_UNRECOGNIZED_JSON"
     msg = doc.get("message")
+    # A 403 JSON object does not establish who generated it. Restrict shape
+    # classification to fixed return codes: no keys, user data, response text
+    # or arbitrary field names may enter an Actions log.
     if type(msg) is not str or not 1 <= len(msg) <= 512:
-        return "HTTP_403_UNRECOGNIZED_JSON"
+        if type(doc.get("error")) is str:
+            return "HTTP_403_JSON_STRING_ERROR_NO_MESSAGE"
+        if type(doc.get("detail")) is str:
+            return "HTTP_403_JSON_STRING_DETAIL_NO_MESSAGE"
+        if type(doc.get("errors")) is list:
+            return "HTTP_403_JSON_ERRORS_ARRAY_NO_MESSAGE"
+        if type(doc.get("error")) is bool:
+            return "HTTP_403_JSON_BOOLEAN_ERROR_NO_MESSAGE"
+        if type(doc.get("code")) in (str, int):
+            return "HTTP_403_JSON_CODE_NO_MESSAGE"
+        return "HTTP_403_JSON_OTHER_FIELDS_NO_MESSAGE"
     message = msg.lower()
     if "not activated" in message or "not active" in message or "activate" in message:
         return "HTTP_403_JSON_KEY_ACTIVATION_CLAIM"
@@ -145,7 +158,7 @@ def _forbidden_reason(body):
         return "HTTP_403_JSON_KEY_INVALID_CLAIM"
     if "forbidden" in message or "access denied" in message or "blocked" in message:
         return "HTTP_403_JSON_ACCESS_DENIED_CLAIM"
-    return "HTTP_403_JSON_UNCLASSIFIED"
+    return "HTTP_403_JSON_MESSAGE_UNCLASSIFIED"
 
 
 def _decode_json(status, body):
