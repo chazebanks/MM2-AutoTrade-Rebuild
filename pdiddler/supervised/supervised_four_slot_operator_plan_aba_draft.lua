@@ -280,7 +280,10 @@ function M.run(bound,io,gate,approval,opts)
  -- The old implementation is unmodified. New test candidates must
  -- EXPLICITLY opt into ABA denial. A required but absent witness blocks
  -- before any remote or consumption; do not silently use snapshot-only.
- local shadowRequired=(opts.experimentalABAShadowRequired==true and #selected>1)
+ local shadowRequired=(#selected>1)
+ if shadowRequired and opts.experimentalABAShadowRequired~=true then
+  return report("BLOCKED","ABA_SHADOW_EXPLICIT_MODE_REQUIRED")
+ end
  if shadowRequired and (type(opts.makeShadowWitness)~="function"
        or type(opts.onShadowPrepared)~="function") then
   return report("BLOCKED","ABA_SHADOW_REQUIRED_FOR_MULTI_ITEM")
