@@ -72,6 +72,32 @@ local function sameSide(a,b)
  end
  return true
 end
+-- The physical NewItem index is a GUI position, not a weapon-instance ID.
+-- MM2 may compact NewItem2 -> NewItem1 when the earlier slot is removed.
+-- Require the one remaining visible candidate to match EXACTLY ONE of the
+-- prior two by name/chroma/quantity/visible-id, ignoring slot position only.
+-- This is CLIENT-only reconciliation, not authoritative identity proof.
+local function sameVisibleCandidate(a,b)
+ return a~=nil and b~=nil and a.name==b.name and
+   a.chroma==b.chroma and a.quantity==b.quantity and a.id==b.id
+end
+local function uniqueSurvivor(before,after)
+ if type(before)~="table" or type(after)~="table" or
+    #before~=2 or #after~=1 then return false,"INVALID_COUNTS" end
+ local matches=0
+ local oldSlot=nil
+ for _,old in ipairs(before) do
+  if sameVisibleCandidate(old,after[1]) then
+   matches+=1
+   oldSlot=old.slot
+  end
+ end
+ if matches>1 then return false,"DUPLICATE_AMBIGUITY" end
+ if matches~=1 then return false,"NO_IDENTICAL_CLIENT_CANDIDATE" end
+ return true,oldSlot~=after[1].slot and "CLIENT_SLOT_REINDEXED" or
+   "CLIENT_SLOT_STABLE"
+end
+
 local function protected(s)
  return type(s)=="string" and
    s:lower():gsub("[^%w]",""):find("gingerscope",1,true)~=nil
@@ -157,6 +183,7 @@ function M.new(api,options)
   requestsStarted=0,offersAttempted=0,offersClientVisible=0,
   removalsAttempted=0,declinesAttempted=0,clientClosedWindows=0,
   altRevisionsObserved=0,adaptiveReoffersAttempted=0,
+  altRemovalSlotReindexesObserved=0,
  }
  local root=nil
  local boundEpoch=nil
@@ -189,6 +216,7 @@ function M.new(api,options)
     clientClosedWindows=actions.clientClosedWindows,
     altRevisionsObserved=actions.altRevisionsObserved,
     adaptiveReoffersAttempted=actions.adaptiveReoffersAttempted,
+    altRemovalSlotReindexesObserved=actions.altRemovalSlotReindexesObserved,
   })
   r.maxRounds=maxRounds
   r.adaptiveRoundAuthorized=maxRounds==5
@@ -490,17 +518,15 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
      return stop("ALT_ADDED_UNEXPECTED_EXTRA_SLOTS") end
     stable=0;lastFull=nil;return receipt()
    end
-   -- Quantity/chroma or labels must remain unchanged on non-target slots.
+   -- Accept a compacted GUI slot only when the *same unique visible*
+   -- candidate survives; never authorize a different name/chroma/quantity.
    if phase=="ALT_REMOVE_ONE" then
-     local retained=false
-     for _,current in ipairs(ob.theirs) do
-      for _,old in ipairs(theirPrev or {}) do
-       if current.slot==old.slot and sameSide({current},{old}) then
-        retained=true
-       end
-      end
-     end
-     if not retained then return stop("ALT_REPLACED_ITEM_INSTEAD_OF_REMOVING") end
+    local ok,why=uniqueSurvivor(theirPrev,ob.theirs)
+    if not ok then
+     return stop(why=="DUPLICATE_AMBIGUITY" and
+       "ALT_REMOVAL_SURVIVOR_AMBIGUOUS" or
+       "ALT_REPLACED_ITEM_INSTEAD_OF_REMOVING")
+    end
    elseif phase=="ALT_REMOVE_ALL" and #ob.theirs==0 then
     -- ALT's full side has become empty, which is expected.
    elseif phase~="ALT_ADD" and phase~="ALT_READD" and
@@ -509,6 +535,15 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
    end
    local yes=stepStable(ob,oursPrev,nil)
    if not yes then return receipt() end
+   if phase=="ALT_REMOVE_ONE" then
+    local ok,kind=uniqueSurvivor(theirPrev,ob.theirs)
+    if not ok then return stop(kind=="DUPLICATE_AMBIGUITY" and
+       "ALT_REMOVAL_SURVIVOR_AMBIGUOUS" or
+       "ALT_REPLACED_ITEM_INSTEAD_OF_REMOVING") end
+    if kind=="CLIENT_SLOT_REINDEXED" then
+     actions.altRemovalSlotReindexesObserved+=1
+    end
+   end
    theirPrev=ob.theirs
    if phase=="ALT_READD" then
     enter("ALT_REMOVE_ALL",now,"ADAPTIVE_ALT_NEW_PROPOSAL_VISIBLE")
