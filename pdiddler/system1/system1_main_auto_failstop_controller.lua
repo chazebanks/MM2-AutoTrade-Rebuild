@@ -155,6 +155,7 @@ function M.new(api,options)
  local actions={
   requestsStarted=0,offersAttempted=0,offersClientVisible=0,
   removalsAttempted=0,declinesAttempted=0,clientClosedWindows=0,
+  altRevisionsObserved=0,adaptiveReoffersAttempted=0,
  }
  local root=nil
  local boundEpoch=nil
@@ -185,7 +186,11 @@ function M.new(api,options)
     removalsAttempted=actions.removalsAttempted,
     declinesAttempted=actions.declinesAttempted,
     clientClosedWindows=actions.clientClosedWindows,
+    altRevisionsObserved=actions.altRevisionsObserved,
+    adaptiveReoffersAttempted=actions.adaptiveReoffersAttempted,
   })
+  r.maxRounds=maxRounds
+  r.adaptiveRoundAuthorized=maxRounds==5
   r.lastAction=lastAction
   r.possibleSideEffect=possibleSideEffect
   r.copyAttempted=copied
@@ -194,7 +199,13 @@ function M.new(api,options)
    r.rounds[i]={round=v.round,status=v.status,reason=v.reason,
      clientWindowClosed=v.clientWindowClosed}
   end
-  r.instruction=phase=="WAIT_OPEN" and
+  r.instruction=phase=="ALT_REVISE" and
+    "ALT: REPLACE your offered item with a DIFFERENT cheap weapon in ONE physical slot. MAIN automatically withdraws."
+    or phase=="ALT_CLEAR_FOR_REOFFER" and
+    "ALT: REMOVE the remaining offered item. MAIN will reoffer a second approved weapon."
+    or phase=="ALT_READD" and
+    "ALT: ADD ONE cheap item after MAIN reoffers. Wait for the REMOVE instruction."
+    or phase=="WAIT_OPEN" and
     "ALT: accept MAIN's incoming trade REQUEST only. NEVER final Accept."
     or phase=="ALT_ADD" and
     ("ALT: add "..(round==4 and "TWO" or "ONE").." cheap weapons. MAIN automatic.")
@@ -205,7 +216,7 @@ function M.new(api,options)
     or phase=="STOPPED" and
     "MAIN AUTO STOPPED; copy receipt. If trade remains open, manually Decline."
     or phase=="DONE" and
-    "Four client test windows processed. Report copied. No settlement proven."
+(tostring(maxRounds).." client test windows processed. Report copied. No settlement proven.")
     or "MAIN automatic: "..phase..". ALT: do not press final Accept."
   return r
  end
@@ -233,7 +244,8 @@ function M.new(api,options)
   return receipt()
  end
  local function finished()
-  phase="DONE";reason="ALL_FOUR_CLIENT_ROUNDS_VERIFIED"
+  phase="DONE";reason=maxRounds==5 and "ALL_FIVE_CLIENT_ROUNDS_VERIFIED" or
+    "ALL_FOUR_CLIENT_ROUNDS_VERIFIED"
   stopOnce=true
   pcall(api.stopAll)
   pushClipboard()
@@ -244,7 +256,9 @@ function M.new(api,options)
   reason=why or "CLIENT_PHASE_ACTIVE"
   local limit=(next=="WAIT_OPEN" and (options.requestTimeout or 30))
    or ((next=="ALT_ADD" or next=="ALT_REMOVE_ONE" or
-       next=="ALT_REMOVE_ALL") and (options.altStepTimeout or 90))
+next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
+       next=="ALT_CLEAR_FOR_REOFFER" or next=="ALT_READD") and
+       (options.altStepTimeout or 90))
    or (options.actionTimeout or 8)
   deadline=now+limit
   stable=0;lastFull=nil
@@ -388,37 +402,83 @@ function M.new(api,options)
    else enter("MAIN_OFFERING",now,"AUTO_PLACE_PREAPPROVED_ITEMS") end
    return receipt()
   end
-  if phase=="MAIN_OFFERING" then
+  if phase=="MAIN_OFFERING" or phase=="MAIN_REOFFERING" then
    if #ob.ours~=0 or #ob.theirs~=0 then
     return stop("PREOFFER_CLIENT_SIDE_CHANGED") end
-   local n=round==3 and 1 or 2
-   lastAction="MAIN_GUARDED_OFFER"
+   local reoffer=phase=="MAIN_REOFFERING"
+   local n=round==4 and not reoffer and 2 or 1
+   lastAction=reoffer and "MAIN_GUARDED_ADAPTIVE_REOFFER" or
+     "MAIN_GUARDED_OFFER"
    actions.offersAttempted+=n
-   local ok,receiptOrWhy=pcall(api.offerApproved,round,n,boundEpoch)
+   if reoffer then actions.adaptiveReoffersAttempted+=1 end
+   local ok,receiptOrWhy=pcall(api.offerApproved,round,n,boundEpoch,
+      reoffer and 2 or 1)
    if not ok or not validReceipt(receiptOrWhy) or
      receiptOrWhy.offerAttempts~=n or
      receiptOrWhy.clientVisibleAddedSlots~=n then
     return stop("GUARDED_OFFER_FAILED_OR_UNCONFIRMED",true)
    end
    actions.offersClientVisible+=n
-   enter("WAIT_MAIN_OFFER",now,"GUARDED_MAIN_GUI_SLOTS_AWAIT_STABLE_READ")
+   enter(reoffer and "WAIT_MAIN_REOFFER" or "WAIT_MAIN_OFFER",now,
+     "GUARDED_MAIN_GUI_SLOTS_AWAIT_STABLE_READ")
    return receipt()
   end
-  if phase=="WAIT_MAIN_OFFER" then
-   local n=round==3 and 1 or 2
+  if phase=="WAIT_MAIN_OFFER" or phase=="WAIT_MAIN_REOFFER" then
+   local reoffer=phase=="WAIT_MAIN_REOFFER"
+   local n=round==4 and not reoffer and 2 or 1
    if #ob.ours~=n or #ob.theirs~=0 then
     return stop("MAIN_OFFER_GUI_NOT_RECONCILED") end
    local yes=stepStable(ob,nil,{})
    if not yes then return receipt() end
    oursPrev=ob.ours;theirPrev=ob.theirs
-   enter("ALT_ADD",now,"MAIN_OFFER_VISIBLE_ALT_CAN_NOW_ACT")
+   if reoffer then
+    adaptiveReoffered=true
+    enter("ALT_READD",now,"ADAPTIVE_MAIN_REOFFER_VISIBLE")
+   else
+    enter("ALT_ADD",now,"MAIN_OFFER_VISIBLE_ALT_CAN_NOW_ACT")
+   end
    return receipt()
   end
-  if phase=="ALT_ADD" or phase=="ALT_REMOVE_ONE" or
-      phase=="ALT_REMOVE_ALL" then
+  if phase=="ALT_REVISE" then
+   if round~=5 or not sameSide(ob.ours,oursPrev) then
+    return stop("UNAUTHORIZED_MAIN_OFFER_CHANGE") end
+   if #ob.theirs>1 then
+    return stop("ALT_ADDED_UNEXPECTED_EXTRA_SLOTS") end
+   if #ob.theirs~=1 or sameSide(ob.theirs,theirPrev) then
+    stable=0;lastFull=nil;return receipt()
+   end
+   local yes=stepStable(ob,oursPrev,nil)
+   if not yes then return receipt() end
+   actions.altRevisionsObserved+=1
+   theirPrev=ob.theirs
+   adaptiveWithdraw=true
+   enter("MAIN_WITHDRAWING",now,
+      "STABLE_CLIENT_ALT_REVISION_WITHDRAW_OWN_FIRST")
+   return receipt()
+  end
+  if phase=="ALT_CLEAR_FOR_REOFFER" then
+   if round~=5 or #ob.ours~=0 then
+    return stop("ADAPTIVE_REOFFER_MAIN_NOT_EMPTY") end
+   if #ob.theirs>1 then
+    return stop("ALT_ADDED_UNEXPECTED_EXTRA_SLOTS") end
+   if #ob.theirs==1 then
+    if not sameSide(ob.theirs,theirPrev) then
+     return stop("ALT_CHANGED_WHILE_CLEARING_FOR_REOFFER") end
+    stable=0;lastFull=nil;return receipt()
+   end
+   local yes=stepStable(ob,{}, {})
+   if not yes then return receipt() end
+   theirPrev=ob.theirs
+   adaptiveWithdraw=false
+   enter("MAIN_REOFFERING",now,
+      "CLIENT_BOTH_EMPTY_FOR_SECOND_APPROVED_ITEM")
+   return receipt()
+  end
+  if phase=="ALT_ADD" or phase=="ALT_READD" or
+      phase=="ALT_REMOVE_ONE" or phase=="ALT_REMOVE_ALL" then
    if not sameSide(ob.ours,oursPrev) then
     return stop("UNAUTHORIZED_MAIN_OFFER_CHANGE") end
-   local stage=phase=="ALT_ADD" and "ADD" or
+   local stage=(phase=="ALT_ADD" or phase=="ALT_READD") and "ADD" or
       phase=="ALT_REMOVE_ONE" and "REMOVE_ONE" or "REMOVE_ALL"
    local want=expectedAltCount(round,stage)
    if #ob.theirs~=want then
@@ -447,17 +507,23 @@ function M.new(api,options)
    local yes=stepStable(ob,oursPrev,nil)
    if not yes then return receipt() end
    theirPrev=ob.theirs
-   transitionAfterAlt(now)
+   if phase=="ALT_READD" then
+    enter("ALT_REMOVE_ALL",now,"ADAPTIVE_ALT_NEW_PROPOSAL_VISIBLE")
+   else
+    transitionAfterAlt(now)
+   end
    return receipt()
   end
   if phase=="MAIN_WITHDRAWING" then
-   if #ob.theirs~=0 or #ob.ours==0 or
+   local expectedTheir=adaptiveWithdraw and theirPrev or {}
+   if not sameSide(ob.theirs,expectedTheir) or #ob.ours==0 or
      not sameSide(ob.ours,oursPrev) then
     return stop("MAIN_WITHDRAW_PRECONDITION_FAILED")
    end
    lastAction="MAIN_REMOVE_OWN_ONE"
    actions.removalsAttempted+=1
-   local ok,yes=pcall(api.removeOwnOne,round,root,boundEpoch)
+   local ok,yes=pcall(api.removeOwnOne,round,root,boundEpoch,
+      adaptiveWithdraw==true)
    if not ok or yes~=true then
     return stop("MAIN_REMOVAL_CLICK_UNCONFIRMED",true)
    end
@@ -466,7 +532,9 @@ function M.new(api,options)
    return receipt()
   end
   if phase=="WAIT_MAIN_WITHDRAW" then
-   if #ob.theirs~=0 then return stop("ALT_CHANGED_DURING_OWN_REMOVAL") end
+   local expectedTheir=adaptiveWithdraw and theirPrev or {}
+   if not sameSide(ob.theirs,expectedTheir) then
+    return stop("ALT_CHANGED_DURING_OWN_REMOVAL") end
    if #ob.ours~=ownExpected then
     if #ob.ours > #oursPrev then return stop("OWN_OFFER_GREW_DURING_REMOVAL") end
     return receipt()
@@ -484,8 +552,14 @@ function M.new(api,options)
    local yes=stepStable(ob,nil,{})
    if not yes then return receipt() end
    oursPrev=ob.ours
-   if #ob.ours>0 then enter("MAIN_WITHDRAWING",now,"MORE_OWN_ITEMS_TO_REMOVE")
-   else enter("MAIN_DECLINING",now,"ALL_OWN_ITEMS_CLEARED") end
+   if #ob.ours>0 then
+    enter("MAIN_WITHDRAWING",now,"MORE_OWN_ITEMS_TO_REMOVE")
+   elseif adaptiveWithdraw then
+    enter("ALT_CLEAR_FOR_REOFFER",now,
+      "OWN_WITHDRAWN_AFTER_ALT_REVISION")
+   else
+    enter("MAIN_DECLINING",now,"ALL_OWN_ITEMS_CLEARED")
+   end
    return receipt()
   end
   if phase=="MAIN_DECLINING" then
