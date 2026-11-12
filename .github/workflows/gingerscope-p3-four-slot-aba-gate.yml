@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'pdiddler/supervised/supervised_four_slot_operator_plan.lua'
+      - 'pdiddler/supervised/supervised_four_slot_operator_plan_aba_draft.lua'
       - 'pdiddler/ci/p3_four_slot_aba_guard_real_mocks.luau'
       - 'pdiddler/ci/check_p3_four_slot_aba_guard.py'
       - 'pdiddler/supervised/P3_FOUR_SLOT_SHADOW_ABA_GUARD_HANDOFF.md'
