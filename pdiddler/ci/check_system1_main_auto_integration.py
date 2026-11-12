@@ -115,7 +115,25 @@ for requirement in (
     if requirement=="OFFER_FAILED_OR_UNCONFIRMED":
         continue
     assert requirement in fsm,requirement
-assert f'local CTRL="{sha("pdiddler/system1/system1_main_auto_failstop_controller.lua")}"' in native, "Loaded controller must match exact current tested Git blob"
+# Raw.githubusercontent.com/<revision>/<path> requires a tree-ish ref,
+# NOT git hash-object's BLOB SHA. A prior green offline mock accidentally
+# approved a blob as a commit, causing SOURCE_UNAVAILABLE on real iPad.
+controller_path="pdiddler/system1/system1_main_auto_failstop_controller.lua"
+controller_ref=re.search(r'local CTRL="([0-9a-f]{40})"',native)
+assert controller_ref is not None, "Missing pinned controller revision"
+controller_rev=controller_ref.group(1)
+kind=subprocess.check_output(["git","cat-file","-t",controller_rev],text=True).strip()
+assert kind=="commit", f"Controller revision must be COMMIT; got {kind}"
+pinned_blob=subprocess.check_output(
+    ["git","rev-parse",f"{controller_rev}:{controller_path}"],text=True
+).strip()
+assert pinned_blob==sha(controller_path), (
+    "Pinned commit controller bytes differ from exact test source",
+    pinned_blob, sha(controller_path)
+)
+assert controller_rev=="845d537babeef3e71d2f627b48721794ba264119", (
+    "Update pinned commit only after a reviewed controller change"
+)
 assert 'screen.armBatch.Activated:Connect(function()armRounds(8)end)' in native
 assert 'explicitEightBatchConsent=requestedRounds==8' in native
 assert 'approvedFourDistinctOwnedItems=requestedRounds==8 and #selected==4' in native
