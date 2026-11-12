@@ -321,7 +321,12 @@ do
 end
 do
  local x=fixture({viewportW=360,viewportH=440,x=0,y=70,w=360,h=360})
- eq(x.runner==nil,true,"no safe overlay means no native script")
+ eq(type(x.runner),"table","no trade open: safe panel may be installed")
+ x.open()
+ eq(x.env.E.PDIDDLER_SYSTEM1_MULTITRADE_OWNER,nil,
+  "when trade fills viewport and overlaps every panel candidate, fail closed")
+ eq(x.runner.status().screenLayoutFailures>=1,true,
+  "unsafe collision recorded without overlaying MM2 trade buttons")
 end
 do
  local x=fixture({altMissing=true})
