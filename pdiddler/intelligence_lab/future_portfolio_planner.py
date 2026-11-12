@@ -36,6 +36,7 @@ def _result(status: str, reason: str, candidates: list | None = None) -> dict[st
         "authorizesTrade": False,
         "authorizesAccept": False,
         "tradeOutcome": "UNKNOWN",
+        "protectedOutboundItem": "Gingerscope",
     }
 
 
@@ -129,7 +130,10 @@ def plan(
 
     baseline_hhi = _hhi(a, items)
     prepared = []
-    own = list(_offers(a))
+    # Permanent target protection applies to every candidate, not just to
+    # an eventual execution guard. An already-owned Gingerscope is never
+    # spendable, regardless of hypothetical listed value gain.
+    own = list(_offers({k: n for k, n in a.items() if k != "Gingerscope"}))
     theirs = [
         offer for offer in _offers(b)
         if all(items[key]["demand"] >= min_received_demand
