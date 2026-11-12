@@ -661,4 +661,151 @@ do
  eq(receipt.finalAcceptEverAttempted,false,"no final accept")
 end
 
+-- Consolidated System 1 adversarial acceptance: STOP outcomes are isolated
+-- fake-Roblox runs. Do not combine these terminal faults on real ALT/iPad:
+-- first unexpected error ends that session by design.
+local function armedTest(opts)
+ local x=fixture(opts)
+ for _=1,20 do x.tick()end
+ local a=x.named("OwnedChoice_1")
+ local b=x.named("OwnedChoice_2")
+ assert(a and b,"two exact owned selection choices required")
+ a.Activated:Fire()
+ b.Activated:Fire()
+ x.tick()
+ x.named("ArmAllFour").Activated:Fire()
+ eq(untilState(x,"WAIT_OPEN",60),true,"fresh MAIN auto request is armed")
+ return x
+end
+local function untilRound(x,number,phase,limit)
+ for _=1,(limit or 180) do
+  local status=x.state()
+  if status.round==number and status.phase==phase then return true end
+  if status.phase=="STOPPED" or status.phase=="DONE" then return false end
+  x.tick()
+ end
+ return false
+end
+local function copiedStop(x,expectedReason,round)
+ eq(x.state().status,"STOPPED","terminal fault outcome")
+ eq(x.state().reason,expectedReason,"controller first error preserved")
+ eq(x.state().round,round,"exact offending trade round")
+ eq(#x.copies>=1,true,"JSON copied on first unsafe transition")
+ local r=serde.decode("json",x.copies[#x.copies])
+ eq(r.reason,expectedReason,"clipboard first root cause")
+ eq(r.round,round,"clipboard round number")
+ eq(r.authorizesAccept,false,"clipboard never authorizes Accept")
+ eq(r.tradeOutcome,"UNKNOWN","no fabricated trade settlement")
+ eq(r.finalAcceptEverAttempted,false,"zero auto final Accept")
+ return r
+end
+local function finishRoundOne(x)
+ x.open()
+ eq(untilRound(x,2,"WAIT_OPEN",150),true,
+  "round1 auto-declined then issued round2 fresh request")
+ eq(x.requests(),2,"two distinct P3 mock request epochs")
+ eq(x.declines(),1,"one guarded auto decline")
+end
+
+-- B01: In round2 after expected normal window OPEN, ALT unexpectedly
+-- closes the trade. No silent skip to round3, no blind follow-up request.
+do
+ local x=armedTest()
+ finishRoundOne(x)
+ x.open()
+ eq(untilRound(x,2,"ALT_ADD",80),true,"ALT add phase reached")
+ x.prematurelyClose()
+ eq(untilState(x,"STOPPED",30),true,"unexpected ALT close immediately stops MAIN")
+ copiedStop(x,"TRADE_CLOSED_UNEXPECTEDLY",2)
+ eq(x.requests(),2,"cannot send round3 request after early close")
+ eq(#x.sent,0,"zero MAIN protected item offers after early close")
+ eq(x.declines(),1,"cannot blind-decline the already missing trade root")
+end
+
+-- B03: ALT adds THREE physical items in one-item round, not a stacked x3
+-- in one slot. Client scope violation: stop, log, never start another round.
+do
+ local x=armedTest()
+ finishRoundOne(x)
+ x.open()
+ eq(untilRound(x,2,"ALT_ADD",80),true,"ALT add phase for extra-slot test")
+ x.setAlt(3)
+ eq(untilState(x,"STOPPED",25),true,"extra ALT slots cause immediate stop")
+ copiedStop(x,"ALT_ADDED_UNEXPECTED_EXTRA_SLOTS",2)
+ eq(x.requests(),2,"no round3 request after unapproved extra slots")
+ eq(x.declines(),1,"no unapproved auto decline during unsafe offer")
+end
+
+-- B04: Test unexpected accepted-state indicator in native original P4
+-- bridge entirely OFFLINE. The human test MUST NEVER press final Accept.
+do
+ local x=armedTest()
+ x.open()
+ eq(untilRound(x,1,"CHECK_EMPTY",20),true,"fresh P4 GUI read is armed")
+ x.root:FindFirstChild("TheirOffer"):FindFirstChild("Accepted").Visible=true
+ eq(untilState(x,"STOPPED",30),true,"unsafe accepted state stops MAIN")
+ copiedStop(x,"ORIGINAL_P3_P4_CLIENT_SNAPSHOT_REJECTED",1)
+ eq(x.requests(),1,"no second P3 request after accepted ambiguity")
+ eq(x.declines(),0,"no script decline with unsafe accepted GUI")
+end
+
+-- B05: ALT player removed from actual Players membership during WAIT_OPEN.
+-- No cached display-name-only substitution and no more requests.
+do
+ local x=armedTest()
+ x.alt.Parent=nil
+ eq(untilState(x,"STOPPED",20),true,"ALT departure stops")
+ copiedStop(x,"ALT_LEFT_OR_REPLACED",1)
+ eq(x.requests(),1,"no continued P3 rotation after ALT departed")
+ eq(#x.sent,0,"no item sent after ALT departed")
+end
+
+-- B02: ALT does not accept first incoming request. Bounded 30 second
+-- request expiry and no repeated outgoing send in this test epoch.
+do
+ local x=armedTest()
+ eq(untilState(x,"STOPPED",350),true,"30s pending request expires")
+ copiedStop(x,"TIMEOUT_WAIT_OPEN",1)
+ eq(x.requests(),1,"one only P3 request epoch before timeout")
+ eq(x.declines(),0,"never decline absent trade window")
+ eq(#x.sent,0,"never send item without a protected trade window")
+end
+
+-- B14: iPad clipboard support can be missing/throw. It must NOT hide
+-- the failure: preserve identical sanitized JSON in environment fallback.
+do
+ local x=armedTest({clipboardUnavailable=true})
+ x.alt.Parent=nil
+ eq(untilState(x,"STOPPED",20),true,"clipboard-unsupported stop is terminal")
+ eq(#x.copies,0,"clipboard API truly unavailable in native harness")
+ local json=x.e.E.PDIDDLER_SYSTEM1_MAIN_AUTO_LAST_JSON
+ eq(type(json),"string","same error preserved in native env fallback")
+ local r=serde.decode("json",json)
+ eq(r.reason,"ALT_LEFT_OR_REPLACED","precise reason survives clipboard failure")
+ eq(r.round,1,"fallback keeps exact failing round")
+ eq(r.authorizesAccept,false,"fallback never claims Accept authority")
+ eq(x.requests(),1,"clipboard failure cannot restart P3 sender")
+end
+
+-- A02/A03: A STACK of quantity 2 is ONE physical ALT slot, and Chroma
+-- metadata must be observed without promoting an unverified raw ID.
+-- These legitimate display variations continue, rather than triggering
+-- a mistaken extra-slot error.
+do
+ local x=armedTest()
+ finishRoundOne(x)
+ x.open()
+ eq(untilRound(x,2,"ALT_ADD",80),true,"round2 waiting for stacked chroma ALT")
+ x.setAlt(1,2,true)
+ eq(untilRound(x,2,"ALT_REMOVE_ALL",40),true,
+   "ALT x2 chroma one physical slot accepted as normal")
+ x.setAlt(0)
+ eq(untilRound(x,3,"WAIT_OPEN",120),true,
+   "MAIN auto declines ALT stacked-chroma round then starts third request")
+ eq(x.declines(),2,"two expected auto declines before round3")
+ eq(x.requests(),3,"continued fresh P3 request after valid stacked Chroma")
+ eq(#x.sent,0,"MAIN did not send any item in stacked ALT-only round")
+ eq(x.state().authorizesAccept,false,"still no final Accept")
+end
+
 print("SYSTEM1_MAIN_AUTO_NATIVE_ORIGINAL_PASS",tests)
