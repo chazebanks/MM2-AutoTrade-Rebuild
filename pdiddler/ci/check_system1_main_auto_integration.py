@@ -125,7 +125,7 @@ assert 'adaptiveReoffersAttempted' in fsm
 assert 'requestedNonce' not in native
 assert "SYSTEM1_MAIN_AUTO_FAILSTOP_PURE_PASS" in tests
 assert "ARM 4: 4 automatic requests" in native
-assert "ARM 5: 5 requests, 5 offers, 5 removals, 5 declines" in native
+assert "ARM 5: 5 requests; 5 offers/removals/declines;" in native
 assert 'includeAdaptiveRound=requestedRounds==5' in native
 assert 'explicitAdaptiveRevisionConsent=requestedRounds==5' in native
 assert "NEVER final Accept" in native
