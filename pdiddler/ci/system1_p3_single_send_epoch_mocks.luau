@@ -35,8 +35,24 @@ local function setup(mode)
  player.Name="MainAccount"
  player.UserId=101
  local players={LocalPlayer=player,PlayerAdded=event(),PlayerRemoving=event()}
- function players:GetPlayers()return {player} end
- function players:GetPlayerByUserId(uid)return nil end
+ local fakeTargets={}
+ if mode.multiPlayer then
+  fakeTargets={
+   {Name="CONSENTED_TEST_A",UserId=201,Parent=players},
+   {Name="CONSENTED_TEST_B",UserId=202,Parent=players},
+  }
+ end
+ function players:GetPlayers()
+  if not mode.multiPlayer then return {player}end
+  return {player,fakeTargets[1],fakeTargets[2]}
+ end
+ function players:GetPlayerByUserId(uid)
+  -- In the adversarial multi-target test, the scanner record exists but
+  -- the authoritative Players lookup is unavailable. P3 must not click.
+  -- Each consented-but-unresolvable target is individually processed once.
+  if mode.multiPlayer then return nil end
+  return nil
+ end
  local storage={}
  function storage:FindFirstChild()return nil end
  local service={Players=players,ReplicatedStorage=storage,
@@ -46,10 +62,20 @@ local function setup(mode)
  local scanner={}
  function scanner.getWhitelist()
   whitelistReads+=1
+  if mode.multiPlayer then return fakeTargets end
   return {}
  end
- function scanner.getRecord()return nil end
- function scanner.isWhitelisted()return false end
+ function scanner.getRecord(uid)
+  if mode.multiPlayer then
+   for _,p in ipairs(fakeTargets)do
+    if p.UserId==uid then return {player=p,state="whitelist"}end
+   end
+  end
+  return nil
+ end
+ function scanner.isWhitelisted(uid)
+  return scanner.getRecord(uid)~=nil
+ end
  function scanner.hasPendingWork()
   pendingChecks+=1
   return false
@@ -65,7 +91,7 @@ local function setup(mode)
  end
  function fakeTask.wait(seconds)
   ticks+=1
-  if ticks>=8 and controller then controller.stop() end
+  if ticks>=(mode.stopAfter or 8) and controller then controller.stop() end
   return seconds
  end
  local ready=mode.ready
@@ -77,6 +103,7 @@ local function setup(mode)
  end
  local env={game=fakeGame,task=fakeTask,
   getgenv=function()return envState end,
+  os=mode.multiPlayer and {clock=function()return 1000 end} or os,
   print=function()end,warn=function()end}
  local lib=luau.load(source,{environment=env,injectGlobals=true})()
  local function start()
@@ -174,6 +201,28 @@ do
  eq(second.arm(),true,"new epoch may be separately authorized")
  second.stop()
  eq(second.isArmed(),false,"second epoch ended without any physical request")
+end
+
+-- Original multi-player queue source: a scanner can surface more than
+-- one eligible contact, but a mismatched/missing authoritative Player
+-- lookup MUST fail before tapping a player card or sending a request.
+-- Process each distinct UserId once. This is OFFLINE negative coverage,
+-- NOT proof of true in-game multi-target contact, nor a test of P4.
+do
+ local x=setup({ready=true,multiPlayer=true,stopAfter=25})
+ local c=x.start()
+ eq(c.arm(),true,"original P3 multi-target selection explicitly armed")
+ x.execute()
+ eq(c.state.processed[201],"left",
+  "first unresolved consented target processed without unsafe contact")
+ eq(c.state.processed[202],"left",
+  "second unresolved consented target independently processed")
+ eq(c.state.left,2,"two distinct unsafe identity checks rejected")
+ eq(c.state.sent,0,"no actual P3 request with unresolved Player object")
+ eq(c.state.accepted,0,"no fake trade-open or P4 handoff")
+ eq(x.counts().whitelistReads>1,true,
+  "source queue rotated its scanner candidate assessment")
+ eq(c.isArmed(),false,"fail-closed mock session stopped after tests")
 end
 
 -- Pure timeout decision from REAL supervised P3 source. This guards
