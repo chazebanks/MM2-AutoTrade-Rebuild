@@ -368,10 +368,36 @@ local function fixture(opts)
   return coroutine.yield(seconds or 0)
  end
  e.task=taskApi
+ local abaPhase=0
  local function tickTasks()
   now+=0.12
+  -- Adversarial R4 ONLY: ALT A->B->A between first and second approved
+  -- MAIN item. Resume the registered original shadow observer BEFORE
+  -- the main controller may dispatch item 2, to prove observed ABA abort.
+  local injectionTick=false
+  if opts.injectRound4ABA and abaPhase<2 then
+   local runner=e.E.PDIDDLER_SYSTEM1_MAIN_AUTO_RUNNER
+   local progress=runner and runner.status()
+   if progress and progress.round==4 and
+      progress.phase=="MAIN_OFFERING" and #sent==2 and #tasks>=2 then
+    if abaPhase==0 then
+     add(their,1,"ALT_UNEXPECTED_TRANSIENT")
+     abaPhase=1
+     injectionTick=true
+    else
+     their.children["NewItem1"]=nil
+     abaPhase=2
+    end
+   end
+  end
   local snapshot={}
   for _,t in ipairs(tasks)do snapshot[#snapshot+1]=t end
+  if injectionTick then
+   for i=1,math.floor(#snapshot/2) do
+    local j=#snapshot-i+1
+    snapshot[i],snapshot[j]=snapshot[j],snapshot[i]
+   end
+  end
   for _,taskCo in ipairs(snapshot)do
    if coroutine.status(taskCo)~="dead" then
     local ok,err=coroutine.resume(taskCo)
@@ -568,6 +594,61 @@ do
  eq(r.round,1,"failure round exact")
  eq(#x.sent,0,"zero physical offers on unbound original handoff")
  eq(x.requests(),1,"no second automatic request after unbound error")
+end
+
+-- Real fork of PR240 pre-send safety integration under active native
+-- script: after one approved MAIN weapon in trade4, ALT changes its
+-- physical GUI offer then restores it. No second MAIN OfferItem may fire,
+-- and clipboard MUST name that precise client-observed shadow failure.
+do
+ local x=fixture({injectRound4ABA=true})
+ for _=1,20 do x.tick()end
+ x.named("OwnedChoice_1").Activated:Fire()
+ x.named("OwnedChoice_2").Activated:Fire()
+ x.tick()
+ x.named("ArmAllFour").Activated:Fire()
+ for round=1,4 do
+  eq(untilState(x,"WAIT_OPEN",100),true,
+    "native ABA: new outgoing request epoch "..round)
+  x.open()
+  local reached=false
+  for _=1,350 do
+   local st=x.state()
+   if st.phase=="STOPPED" then
+    eq(round,4,"native ABA must only interrupt fourth round")
+    reached=true
+    break
+   end
+   if st.completedRounds>=round then
+    reached=true
+    break
+   end
+   if st.phase=="ALT_ADD" then
+    x.setAlt(round==4 and 2 or 1)
+   elseif st.phase=="ALT_REMOVE_ONE" then
+    x.setAlt(1)
+   elseif st.phase=="ALT_REMOVE_ALL" then
+    x.setAlt(0)
+   end
+   x.tick()
+  end
+  eq(reached,true,"native ABA round reached terminal or close "..round)
+ end
+ local result=x.state()
+ eq(result.phase,"STOPPED","observed inter-item ABA stops all MAIN actions")
+ eq(result.round,4,"ABA precisely attributed to fourth trade")
+ eq(result.completedRounds,3,"only 3 previously closed test windows")
+ eq(result.reason,"SHADOW_OBSERVER_STALE_DURING_PLACEMENT",
+  "shadow reason retained, not generic plan failure")
+ eq(#x.sent,2,"R3 item + first R4 item, NO second R4 item sent")
+ eq(x.requests(),4,"no fifth P3 request after observed ABA")
+ eq(x.declines(),3,"no blind R4 decline after observed ABA")
+ eq(#x.copies>=1,true,"ABA STOP sends JSON immediately to clipboard")
+ local receipt=serde.decode("json",x.copies[#x.copies])
+ eq(receipt.reason,"SHADOW_OBSERVER_STALE_DURING_PLACEMENT",
+    "exact first ABA fault is in clipboard report")
+ eq(receipt.possibleSideEffect,true,"prior physical item may be present")
+ eq(receipt.finalAcceptEverAttempted,false,"no final accept")
 end
 
 print("SYSTEM1_MAIN_AUTO_NATIVE_ORIGINAL_PASS",tests)
