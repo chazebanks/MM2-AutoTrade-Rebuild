@@ -368,7 +368,7 @@ for i=1,4 do x.advance(0.2);x.E.__WATCH.tick()end
 eq(x.named("CurrentStep").Text,"3/5 ALT — ADD ONE WEAPON",
   "no ALT action: must not skip ALT ADD")
 local altContainer=x.theirs:FindFirstChild("Container")
-local altSlot=altContainer:put(node("Frame","ALT_Offer_1"))
+local altSlot=altContainer:put(node("Frame","NewItem1"))
 local altLabel=altSlot:put(node("Frame","ItemName"))
 altLabel:put(node("TextLabel","Label")).Text="TestAltWeapon"
 altSlot:put(node("Frame","Container")):put(node("TextLabel","Amount")).Text=""
