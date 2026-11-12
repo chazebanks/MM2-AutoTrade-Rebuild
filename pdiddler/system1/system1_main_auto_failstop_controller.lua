@@ -493,6 +493,16 @@ function M.new(api,options)
   lastAction="OPERATOR_STOP_BUTTON"
   return stop("OPERATOR_STOPPED")
  end
+ function controller.abort(errorCode)
+  -- Native runtime may signal a validated STATIC error, never serialize an
+  -- arbitrary partner name, profile value, item label or stack trace.
+  local code=type(errorCode)=="string" and
+      #errorCode>0 and #errorCode<=90 and
+      errorCode:match("^[A-Z0-9_]+$") and errorCode or
+      "EXTERNAL_RUNTIME_FAULT"
+  lastAction="EXTERNAL_RUNTIME_FAILSTOP"
+  return stop(code,true)
+ end
  function controller.status()return receipt()end
  function controller.copyNow()return pushClipboard()end
  return controller,nil
