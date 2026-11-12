@@ -45,7 +45,7 @@ for text in (native,fsm):
 for requirement in (
  "ba76adb21ffe4124c44d6d9a256683861eceb61d",
  "be8d8c5b77c0c7c345639c53e6a04959728d01a8",
- "e27ce2e1a7b9d8e634fe1344365524ed0f3af535",
+ "dfa278462006a81895a64898207c5423c5260d60",
  'ALT_NAME="venossgaming90190"',
  'function adapters.startEpoch(round,nonce)',
  'function adapters.inspect(round,epoch)',
