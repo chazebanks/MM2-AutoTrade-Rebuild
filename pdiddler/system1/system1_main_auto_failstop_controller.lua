@@ -50,10 +50,14 @@ local function normSide(side)
        #v.internalIdCandidate>100 or
        v.internalIdCandidate:find("[%c]"))) then return nil end
   seen[v.physicalSlot]=true
+  local source=({
+   EXPLICIT_X_COUNT_CLIENT=true,BLANK_SINGLETON_CLIENT=true,
+   HIDDEN_SINGLETON_CLIENT=true,ABSENT_SINGLETON_CLIENT=true,
+  })[v.quantityLabelEvidence] and v.quantityLabelEvidence or "UNREPORTED"
   items[#items+1]={
    slot=v.physicalSlot,quantity=v.quantity,
    name=v.displayCandidate,chroma=v.chromaCandidate,
-   id=v.internalIdCandidate or "",
+   id=v.internalIdCandidate or "",quantitySource=source,
   }
  end
  if count~=#side then return nil end
@@ -236,6 +240,8 @@ function M.new(api,options)
  local phase="PREPARING"
  local deadline=nil
  local phaseEnteredAt=0
+ local altFirstVisibleAt=nil
+ local firstFailureEvidence=nil
  local consumed,completed=0,0
  local rounds={}
  local actions={
@@ -291,6 +297,8 @@ function M.new(api,options)
   r.scenarioId=batchEight and batchNames[round] or nil
   r.firstFailureScenario=phase=="STOPPED" and
     (batchEight and batchNames[round] or nil) or nil
+  -- Sanitized observable slot/quantity/flag/source only; no names or IDs.
+  r.firstFailureEvidence=phase=="STOPPED" and firstFailureEvidence or nil
   r.lastAction=lastAction
   r.possibleSideEffect=possibleSideEffect
   r.copyAttempted=copied
@@ -395,7 +403,7 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
        (options.altStepTimeout or 90))
    or (options.actionTimeout or 8)
   deadline=now+limit
-  stable=0;lastFull=nil
+  stable=0;lastFull=nil;altFirstVisibleAt=nil
  end
  local function transitionAfterAlt(now)
   if phase=="ALT_ADD" then
@@ -641,21 +649,10 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
      return stop("ALT_ADDED_UNEXPECTED_EXTRA_SLOTS") end
     stable=0;lastFull=nil;return receipt()
    end
-   -- Per-scenario constraints are intentionally distinct, so a passing
-   -- round proves its assigned feature rather than a generic one-slot flow.
-   if batchEight and phase=="ALT_ADD" then
-    if round==1 and (#ob.theirs~=1 or
-       ob.theirs[1].quantity~=2 or ob.theirs[1].chroma~=false) then
-     return stop("ALT_EXPECTED_ONE_STACKED_QTY2_SLOT")
-    elseif round==2 and (#ob.theirs~=1 or
-       ob.theirs[1].quantity~=1 or ob.theirs[1].chroma~=true) then
-     return stop("ALT_EXPECTED_ONE_CHROMA_QTY1_SLOT")
-    elseif round==3 and now-phaseEnteredAt<5 then
-     return stop("ALT_OFFER_ARRIVED_BEFORE_DELAY_WINDOW")
-    elseif round==4 and sameVisibleCandidate(ob.theirs[1],
-       ob.theirs[2]) then
-     return stop("ALT_TWO_DISTINCT_VISIBLE_CANDIDATES_REQUIRED")
-    end
+   -- The client GUI may show a slot before its stack count/Chroma marker.
+   -- First observe the slot's appearance, THEN check stable client evidence.
+   if batchEight and phase=="ALT_ADD" and altFirstVisibleAt==nil then
+    altFirstVisibleAt=now
    end
    -- Accept a compacted GUI slot only when the *same unique visible*
    -- candidate survives; never authorize a different name/chroma/quantity.
@@ -674,6 +671,41 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
    end
    local yes=stepStable(ob,oursPrev,nil)
    if not yes then return receipt() end
+   -- Allow 1.25s after the FIRST visible ALT slot to settle its stack
+   -- count/Chroma marker, in addition to requiring two identical snapshots.
+   -- Persistent mismatch still STOPs before any MAIN offer or further request.
+   if batchEight and phase=="ALT_ADD" then
+    if (round==1 or round==2) and
+       (now-(altFirstVisibleAt or now))<1.25 then return receipt() end
+    local observed=ob.theirs[1]
+    local why=nil
+    if round==1 and
+       (not observed or observed.quantity~=2 or
+        observed.chroma~=false) then
+     why="ALT_EXPECTED_ONE_STACKED_QTY2_SLOT"
+    elseif round==2 and
+       (not observed or observed.quantity~=1 or
+        observed.chroma~=true) then
+     why="ALT_EXPECTED_ONE_CHROMA_QTY1_SLOT"
+    elseif round==3 and
+       ((altFirstVisibleAt or now)-phaseEnteredAt)<5 then
+     why="ALT_OFFER_ARRIVED_BEFORE_DELAY_WINDOW"
+    elseif round==4 and sameVisibleCandidate(ob.theirs[1],
+       ob.theirs[2]) then
+     why="ALT_TWO_DISTINCT_VISIBLE_CANDIDATES_REQUIRED"
+    end
+    if why then
+     firstFailureEvidence={
+      observedPhysicalSlots=#ob.theirs,
+      observedQuantity=observed and observed.quantity or 0,
+      observedChroma=observed and observed.chroma or false,
+      quantitySource=observed and observed.quantitySource or "UNREPORTED",
+      secondsSinceFirstSlot=math.floor(
+       (now-(altFirstVisibleAt or now))*10)/10,
+     }
+     return stop(why)
+    end
+   end
    if phase=="ALT_REMOVE_ONE" then
     local ok,kind=uniqueSurvivor(theirPrev,ob.theirs)
     if not ok then return stop(kind=="DUPLICATE_AMBIGUITY" and
