@@ -101,6 +101,7 @@ local autoDeclines=0
 local closedIds={}
 local handoffFirstAt=nil
 local rootFirstSeen=nil
+local lastP4DeclineAt=nil
 local lastJson=nil
 local haltReason=nil
 local function writeReceipt(record)
@@ -412,6 +413,18 @@ local function observe()
   return observed end
  if not root then
   rootFirstSeen=nil
+  -- The original P3 watchdog resumes the queue after P4 has safely
+  -- closed its exact client window. Allow one bounded dispatch interval.
+  if lastP4DeclineAt~=nil and paused then
+   if os.clock()-lastP4DeclineAt>2.5 then
+    observed.fault="P3_UNEXPECTED_RESUME"
+   else
+    observed.exhausted=false
+   end
+  end
+  if lastP4DeclineAt~=nil and not paused then
+   lastP4DeclineAt=nil
+  end
   return observed
  end
  observed.exhausted=false -- no terminal state while any trade root exists
@@ -482,6 +495,7 @@ local function declineBound(ob)
  local accepted,closed=pcall(io.decline,
    "SYSTEM1_STEP2_PUBLIC_EXACT_BOUND_CLIENT_CLOSE")
  if not accepted or closed~=true or io.trade()~=nil then return false end
+ lastP4DeclineAt=os.clock()
  closedIds[ob.partnerUserId]=true
  return true
 end
