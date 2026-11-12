@@ -10,6 +10,8 @@ import argparse
 import json
 import os
 import re
+import socket
+import ssl
 import urllib.error
 import urllib.request
 from datetime import datetime
@@ -57,7 +59,21 @@ def _no_redirect_get(path: str, api_key: str) -> tuple[int, bytes]:
     except urllib.error.HTTPError as ex:
         # Do not inspect, print or store response bodies and/or secrets.
         return ex.code, b""
-    except (urllib.error.URLError, TimeoutError, OSError):
+    except urllib.error.URLError as ex:
+        # Error *types* only; never serialize exception messages, URLs,
+        # response bodies or credential-bearing diagnostic strings.
+        if isinstance(ex.reason, socket.gaierror):
+            return 590, b""
+        if isinstance(ex.reason, ssl.SSLError):
+            return 591, b""
+        if isinstance(ex.reason, (socket.timeout, TimeoutError)):
+            return 593, b""
+        return 599, b""
+    except ssl.SSLError:
+        return 591, b""
+    except (socket.timeout, TimeoutError):
+        return 593, b""
+    except OSError:
         return 599, b""
 
 def _denied(status: str, reason: str, **safe_fields):
@@ -91,8 +107,23 @@ def _decode_json(status, body):
     if status in STATUS_MAP:
         a, b = STATUS_MAP[status]
         return None, _denied(a, b)
+    # Fixed status codes are safe to report. We cannot diagnose the previous
+    # SOURCE_UNAVAILABLE without distinguishing a 404/5xx from DNS/TLS failure.
+    # Never include response bodies or error exception strings in output.
+    network_failure = {
+        590: "NETWORK_DNS_FAILURE",
+        591: "NETWORK_TLS_FAILURE",
+        593: "NETWORK_TIMEOUT",
+        599: "NETWORK_OR_PROXY_FAILURE",
+    }
+    if status in network_failure:
+        return None, _denied("SOURCE_UNAVAILABLE", network_failure[status])
+    if status in (301, 302, 303, 307, 308):
+        return None, _denied("SOURCE_UNAVAILABLE", "HTTP_REDIRECT_NOT_FOLLOWED")
+    if 400 <= status <= 598:
+        return None, _denied("SOURCE_UNAVAILABLE", "HTTP_STATUS_" + str(status))
     if status != 200:
-        return None, _denied("SOURCE_UNAVAILABLE", "NO_SUCCESSFUL_API_RESPONSE")
+        return None, _denied("SOURCE_UNAVAILABLE", "UNEXPECTED_HTTP_STATUS")
     if type(body) is not bytes or not 1 <= len(body) <= MAX_BYTES:
         return None, _denied("BLOCKED", "INVALID_API_PAYLOAD_SIZE")
     try:
