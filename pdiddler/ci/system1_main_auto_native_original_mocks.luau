@@ -51,6 +51,11 @@ function M.new(scanner,outgoing,coordinator,bridge,io,players,lp,ctx)
  end
  function supervisor.currentBoundReadOnly()
   if stopped or not supervisor.isP3Paused() then return nil end
+  if E.PDIDDLER_TEST_PENDING_HANDOFF and
+     E.PDIDDLER_TEST_PENDING_HANDOFF>0 then
+   E.PDIDDLER_TEST_PENDING_HANDOFF-=1
+   return nil -- original P3 processed event not published yet
+  end
   local bound=bridge.bind(scanner,fakeOutgoing,io,players,lp,{
     targetName="venossgaming90190",
     getJobId=ctx.getJobId,
@@ -331,7 +336,7 @@ local function fixture(opts)
   return n
  end
  local e={}
- e.E={}
+ e.E={PDIDDLER_TEST_PENDING_HANDOFF=opts.handoffDelays or 0}
  e.game=game
  e.getgenv=function()return e.E end
  e.loadstring=function(src)
@@ -519,4 +524,50 @@ do
  eq(#x.sent,0,"no item offered to wrong partner")
  eq(x.declines(),0,"no blind decline action after wrong partner")
 end
+-- Normal GUI-vs-original-P3 processed callback ordering: visible root
+-- before a safely bound original P4 lease must NEVER dispatch an offer and
+-- must get a small read-only grace, not a false wrong-partner STOP.
+do
+ local x=fixture({handoffDelays=2})
+ for _=1,20 do x.tick()end
+ x.named("OwnedChoice_1").Activated:Fire()
+ x.named("OwnedChoice_2").Activated:Fire()
+ x.tick()
+ x.named("ArmAllFour").Activated:Fire()
+ eq(untilState(x,"WAIT_OPEN",50),true,"P3 armed for delayed read-only handoff")
+ x.open()
+ local eventually=false
+ for _=1,50 do
+  x.tick()
+  if x.state().phase=="CHECK_EMPTY" or
+    x.state().phase=="MAIN_DECLINING" then
+   eventually=true
+   break
+  end
+ end
+ eq(eventually,true,"bounded two-frame P3 callback lag reconciled")
+ eq(x.state().status~="STOPPED",true,"normal handoff delay does not false stop")
+ eq(#x.sent,0,"no item offer during handoff reconciliation")
+end
+-- If the protected original bridge NEVER binds, stop and put precise root
+-- cause in clipboard; no request #2 and no blind Decline/Offer.
+do
+ local x=fixture({handoffDelays=999})
+ for _=1,20 do x.tick()end
+ x.named("OwnedChoice_1").Activated:Fire()
+ x.named("OwnedChoice_2").Activated:Fire()
+ x.tick()
+ x.named("ArmAllFour").Activated:Fire()
+ eq(untilState(x,"WAIT_OPEN",50),true,"P3 first request armed")
+ x.open()
+ eq(untilState(x,"STOPPED",60),true,"missing protected binding is terminal")
+ eq(#x.copies>=1,true,"handoff failure auto copied")
+ local r=serde.decode("json",x.copies[#x.copies])
+ eq(r.reason,"ORIGINAL_P3_P4_CLIENT_SNAPSHOT_REJECTED",
+  "precise original P3-to-P4 unbound client error")
+ eq(r.round,1,"failure round exact")
+ eq(#x.sent,0,"zero physical offers on unbound original handoff")
+ eq(x.requests(),1,"no second automatic request after unbound error")
+end
+
 print("SYSTEM1_MAIN_AUTO_NATIVE_ORIGINAL_PASS",tests)
