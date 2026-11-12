@@ -673,7 +673,13 @@ local function armedTest(opts)
  a.Activated:Fire()
  b.Activated:Fire()
  x.tick()
- x.named("ArmAllFour").Activated:Fire()
+ if opts and opts.adaptive then
+  eq(x.named("ArmFiveAdaptive").Visible,true,
+    "fifth-round ARM shown only after two preapproved own items")
+  x.named("ArmFiveAdaptive").Activated:Fire()
+ else
+  x.named("ArmAllFour").Activated:Fire()
+ end
  eq(untilState(x,"WAIT_OPEN",60),true,"fresh MAIN auto request is armed")
  return x
 end
@@ -806,6 +812,72 @@ do
  eq(x.requests(),3,"continued fresh P3 request after valid stacked Chroma")
  eq(#x.sent,0,"MAIN did not send any item in stacked ALT-only round")
  eq(x.state().authorizesAccept,false,"still no final Accept")
+end
+
+-- A05: the new optional fifth trade does an actual revision response,
+-- not just detects a change. Original protected TradeIO physically offers
+-- one MAIN item, ALT replaces its offer with a different cheap item, MAIN
+-- withdraws the first item while the ALT item is present, waits until ALT
+-- clears, then uses a fresh protected plan for second preapproved MAIN key.
+-- ALT responds again, removes, MAIN withdraws second and declines.
+do
+ local x=armedTest({adaptive=true})
+ for round=1,5 do
+  if round>1 then
+   eq(untilRound(x,round,"WAIT_OPEN",180),true,
+      "adaptive new epoch "..round)
+  end
+  x.open()
+  local endRound=false
+  for i=1,400 do
+   local st=x.state()
+   assert(st.phase~="STOPPED",
+      "adaptive native unexpectedly stopped "..tostring(st.reason))
+   if st.completedRounds>=round then endRound=true;break end
+   if st.phase=="ALT_ADD" then
+    x.setAlt(round==4 and 2 or 1)
+   elseif st.phase=="ALT_REVISE" then
+    x.setAlt(1)
+    local box=x.their:FindFirstChild("NewItem1")
+    box:FindFirstChild("ItemName"):FindFirstChild("Label").Text=
+      "ALT_DIFFERENT_WEAPON"
+   elseif st.phase=="ALT_CLEAR_FOR_REOFFER" then
+    x.setAlt(0)
+   elseif st.phase=="ALT_READD" then
+    x.setAlt(1)
+   elseif st.phase=="ALT_REMOVE_ONE" then
+    x.setAlt(1)
+   elseif st.phase=="ALT_REMOVE_ALL" then
+    x.setAlt(0)
+   end
+   x.tick()
+  end
+  eq(endRound,true,"adaptive round completed "..round)
+ end
+ local r=x.state()
+ eq(r.phase,"DONE","native full fifth-round adaptive MAIN finished")
+ eq(r.completedRounds,5,"5 separate client windows")
+ eq(r.actions.requestsStarted,5,"5 P3 mock session epochs")
+ eq(r.actions.offersAttempted,5,"3 original + 2 adaptive physical offers")
+ eq(r.actions.offersClientVisible,5,"5 reconciled original P4 offer slots")
+ eq(r.actions.removalsAttempted,5,"3 original + 2 adaptive removals")
+ eq(r.actions.declinesAttempted,5,"5 original guarded decline remotes")
+ eq(r.actions.clientClosedWindows,5,"5 client roots closed")
+ eq(r.actions.altRevisionsObserved,1,"one stable replaced ALT offer")
+ eq(r.actions.adaptiveReoffersAttempted,1,"one different MAIN reoffer")
+ eq(x.declines(),5,"five original protected DeclineTrade remotes")
+ eq(#x.sent,5,"five original protected OfferItem remote calls")
+ eq(x.sent[4].raw~=x.sent[5].raw,true,
+    "adaptive first and second MAIN weapon must be distinct")
+ eq(x.requests(),5,"no sixth P3 request")
+ eq(#x.copies>=1,true,"single terminal auto copy after five")
+ local receipt=serde.decode("json",x.copies[#x.copies])
+ eq(receipt.reason,"ALL_FIVE_CLIENT_ROUNDS_VERIFIED",
+    "five-round receipt distinguished from old four-round")
+ eq(receipt.actions.altRevisionsObserved,1,"clipboard revision evidence")
+ eq(receipt.actions.adaptiveReoffersAttempted,1,"clipboard new offer count")
+ eq(receipt.finalAcceptEverAttempted,false,"no auto final Accept")
+ eq(receipt.serverCompletionProven,false,"client-only no settlement proof")
 end
 
 print("SYSTEM1_MAIN_AUTO_NATIVE_ORIGINAL_PASS",tests)
