@@ -131,7 +131,7 @@ assert pinned_blob==sha(controller_path), (
     "Pinned commit controller bytes differ from exact test source",
     pinned_blob, sha(controller_path)
 )
-assert controller_rev=="845d537babeef3e71d2f627b48721794ba264119", (
+assert controller_rev=="e0f0259ff116b0618c3d3504251294302d2e37a2", (
     "Update pinned commit only after a reviewed controller change"
 )
 assert 'screen.armBatch.Activated:Connect(function()armRounds(8)end)' in native
