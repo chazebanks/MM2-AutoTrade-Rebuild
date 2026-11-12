@@ -154,8 +154,19 @@ assert 'altRemovalSlotReindexesObserved' in fsm
 assert 'ALT_REMOVAL_SURVIVOR_AMBIGUOUS' in fsm
 assert 'requestedNonce' not in native
 assert "SYSTEM1_MAIN_AUTO_FAILSTOP_PURE_PASS" in tests
-assert "ARM 4: 4 automatic requests" in native
-assert "ARM 5: 5 requests; 5 offers/removals/declines;" in native
+# The current operator UI must present ARM8 only; four cheap approved
+# weapons are still mandatory, with no P3 or P4 until a valid ARM.
+assert 'screen.arm.Visible=false' in native
+assert 'screen.arm.Active=false' in native
+assert 'screen.armAdaptive.Visible=false' in native
+assert 'screen.armAdaptive.Active=false' in native
+assert 'screen.armBatch.Visible=true' in native
+assert 'screen.armBatch.Active=canArm' in native
+assert 'local canArm=count==4 and available' in native
+assert 'PICK "..tostring(4-count).." MORE' in native
+assert 'screen.body.Text="ARM 8: EIGHT fresh ALT trade windows' in native
+assert 'requestedRounds~=4 and requestedRounds~=5 and requestedRounds~=8' in native
+assert 'FEWER_THAN_FOUR_ELIGIBLE_OWN_WEAPON_TYPES' in native
 assert 'includeAdaptiveRound=requestedRounds==5' in native
 assert 'explicitAdaptiveRevisionConsent=requestedRounds==5' in native
 assert "NEVER final Accept" in native
