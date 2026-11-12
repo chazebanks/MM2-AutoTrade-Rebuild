@@ -1,0 +1,76 @@
+name: Stage59 passive sender and receiver witness evidence tests
+on:
+  pull_request:
+    paths:
+      - 'scripts/validate_manual_trade_pair.py'
+      - 'pdiddler/new_part4/STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua'
+      - 'pdiddler/new_part4/STAGE59_MAIN_RECEIVER.lua'
+      - 'pdiddler/new_part4/STAGE59_ALT_SENDER.lua'
+      - 'pdiddler/new_part4/STAGE59_MAIN_RECOVER_LAST.lua'
+      - 'pdiddler/new_part4/STAGE59_ALT_RECOVER_LAST.lua'
+      - 'pdiddler/new_part4/STAGE59_LOCAL_STORAGE_CHECK.lua'
+      - 'pdiddler/new_part4/STAGE59_MAIN_STORAGE_CHECK.lua'
+      - 'pdiddler/new_part4/STAGE59_ALT_STORAGE_CHECK.lua'
+      - 'pdiddler/intelligence_lab/test_stage59_storage_capability_probe.py'
+      - 'pdiddler/intelligence_lab/test_stage59_local_receipt_archive.py'
+      - 'pdiddler/intelligence_lab/test_stage59_dedicated_role_launchers.py'
+      - 'pdiddler/new_part4/STAGE59_POSTCLOSE_LEDGER_120S.lua'
+      - 'pdiddler/new_part4/STAGE59_RESULT_DELTA_120S_PROBE.lua'
+      - 'pdiddler/new_part4/STAGE59_RESULT_DELTA_ROLE_NEUTRAL_BASELINE.lua'
+      - 'pdiddler/new_part4/STAGE59_SCANNER_SILENT_BOOT.lua'
+      - 'pdiddler/intelligence_lab/test_stage59_silent_scanner_boot.py'
+      - 'pdiddler/intelligence_lab/test_stage59_role_neutral_baseline.py'
+      - 'pdiddler/intelligence_lab/test_stage59_bounded_timeout_fidelity.py'
+      - 'pdiddler/intelligence_lab/STAGE59_TWO_CLIENT_MANUAL_OUTCOME_RESEARCH.md'
+      - 'pdiddler/intelligence_lab/test_stage59_two_client_manual_witness.py'
+      - 'pdiddler/intelligence_lab/test_stage59_guided_witness_wrapper.py'
+      - '.github/workflows/mm2-stage59-dual-witness-tests.yml'
+  push:
+    branches:
+      - feature/gingerscope-stage59-dual-client-outcome-corroboration
+    paths:
+      - 'scripts/validate_manual_trade_pair.py'
+      - 'pdiddler/new_part4/STAGE59_GUIDED_DUAL_CLIENT_WITNESS.lua'
+      - 'pdiddler/new_part4/STAGE59_MAIN_RECEIVER.lua'
+      - 'pdiddler/new_part4/STAGE59_ALT_SENDER.lua'
+      - 'pdiddler/new_part4/STAGE59_MAIN_RECOVER_LAST.lua'
+      - 'pdiddler/new_part4/STAGE59_ALT_RECOVER_LAST.lua'
+      - 'pdiddler/new_part4/STAGE59_LOCAL_STORAGE_CHECK.lua'
+      - 'pdiddler/new_part4/STAGE59_MAIN_STORAGE_CHECK.lua'
+      - 'pdiddler/new_part4/STAGE59_ALT_STORAGE_CHECK.lua'
+      - 'pdiddler/intelligence_lab/test_stage59_storage_capability_probe.py'
+      - 'pdiddler/intelligence_lab/test_stage59_local_receipt_archive.py'
+      - 'pdiddler/intelligence_lab/test_stage59_dedicated_role_launchers.py'
+      - 'pdiddler/new_part4/STAGE59_POSTCLOSE_LEDGER_120S.lua'
+      - 'pdiddler/new_part4/STAGE59_RESULT_DELTA_120S_PROBE.lua'
+      - 'pdiddler/new_part4/STAGE59_RESULT_DELTA_ROLE_NEUTRAL_BASELINE.lua'
+      - 'pdiddler/new_part4/STAGE59_SCANNER_SILENT_BOOT.lua'
+      - 'pdiddler/intelligence_lab/test_stage59_silent_scanner_boot.py'
+      - 'pdiddler/intelligence_lab/test_stage59_role_neutral_baseline.py'
+      - 'pdiddler/intelligence_lab/test_stage59_bounded_timeout_fidelity.py'
+      - 'pdiddler/intelligence_lab/STAGE59_TWO_CLIENT_MANUAL_OUTCOME_RESEARCH.md'
+      - 'pdiddler/intelligence_lab/test_stage59_two_client_manual_witness.py'
+      - 'pdiddler/intelligence_lab/test_stage59_guided_witness_wrapper.py'
+      - '.github/workflows/mm2-stage59-dual-witness-tests.yml'
+permissions:
+  contents: read
+jobs:
+  offline-paired-client-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua5.4 for actual Stage59 wrapper test
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+      - name: Validate two independent client aggregates and guided wrapper
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -v -s pdiddler/intelligence_lab -p 'test_stage59*.py'
+      - name: Run all inherited mainline intelligence regressions
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -q -s pdiddler/intelligence_lab -p 'test_*.py'
