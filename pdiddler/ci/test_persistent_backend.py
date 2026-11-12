@@ -465,6 +465,35 @@ class PrivateRuntimeTests(unittest.TestCase):
         self.assertEqual(stop.calls,2)
         self.assertEqual(stop.last_duration,45)
 
+    def test_production_worker_refuses_undurable_data_path(self):
+        from unittest.mock import patch
+        class Stop:
+            def wait(self,_):
+                return True
+        with patch.object(runtime.os.path,"ismount",return_value=False):
+            with patch.object(runtime,"run_once") as called:
+                with self.assertRaisesRegex(RuntimeError,
+                                            "PRODUCTION_SQLITE_VOLUME_NOT_MOUNTED"):
+                    runtime.run_private_worker("/data/gingerscope.sqlite",stop_event=Stop())
+                called.assert_not_called()
+
+    def test_production_worker_accepts_mounted_data_path_without_network(self):
+        from unittest.mock import patch
+        class Stop:
+            def wait(self,_):
+                return True
+        with patch.object(runtime.os.path,"ismount",return_value=True):
+            with patch.object(runtime,"run_once",return_value={}) as run:
+                runtime.run_private_worker("/data/gingerscope.sqlite",stop_event=Stop())
+                run.assert_called_once_with("/data/gingerscope.sqlite")
+
+    def test_worker_rejects_data_path_symlink_escape(self):
+        from unittest.mock import patch
+        with patch.object(runtime.Path,"resolve",return_value=Path("/tmp/ephemeral.sqlite")):
+            with patch.object(runtime.os.path,"ismount",return_value=True):
+                with self.assertRaisesRegex(RuntimeError,"PRODUCTION_DB_PATH_ESCAPE_BLOCKED"):
+                    runtime._require_railway_persistent_volume("/data/gingerscope.sqlite")
+
     def test_worker_fails_closed_on_invalid_interval(self):
         from unittest.mock import patch
         with patch.object(runtime,"run_once",side_effect=AssertionError("NO_IO")):
