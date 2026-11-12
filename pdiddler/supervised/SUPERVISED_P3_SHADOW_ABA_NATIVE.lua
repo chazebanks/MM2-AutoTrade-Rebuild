@@ -738,7 +738,9 @@ local watchdogCtx={
             last=statusRecord("INCONCLUSIVE",clientStep.reason)
             clipboard(last)
         end
-        if clientStep.phase=="READY_MANUAL_DECLINE" and
+        if r.status=="P4_TWO_SIDED_CLIENT_SNAPSHOT" and
+            clientStep.phase=="READY_MANUAL_DECLINE" and
+            not shadowStillStaleAfterAltRemove and
             shadowInvalidatedOnAltAdd and shadow~=nil and
             not shadowExperimentBlocked then
             local okStill,still=pcall(shadow.recheckShadow)
