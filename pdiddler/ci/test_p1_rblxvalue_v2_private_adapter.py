@@ -88,6 +88,8 @@ class RblxV2PrivateAdapterTests(unittest.TestCase):
         self.assertEqual(r["status"], "RESEARCH_META_ONLY")
         self.assertEqual(r["datasetItemsReported"], 1200)
         self.assertEqual(r["aggregatorClockTimeZone"], "UNSPECIFIED")
+        self.assertEqual(r["aggregatorLastUpdatedUnzoned"], "2026-11-12 12:33:44")
+        self.assertEqual(r["aggregatorLastRunUnzoned"], "2026-11-12 12:35:00")
         self.assertTrue(r["knownSupremeDerivedData"])
         self.assertTrue(r["creditRequired"])
 
