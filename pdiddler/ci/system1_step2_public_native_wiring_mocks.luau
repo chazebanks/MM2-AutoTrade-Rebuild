@@ -160,6 +160,7 @@ local function fixture(opts)
  local pending={}
  local clipboard={}
  local calls={}
+ local warnings={}
  local pg=node("PlayerGui","PlayerGui")
  local screen=pg:put(node("ScreenGui","TradeGUI"))
  screen.Enabled=false
@@ -255,7 +256,11 @@ local function fixture(opts)
  env.UDim={new=function(...)return {...}end}
  env.UDim2={fromOffset=function(...)return {...}end}
  env.os={clock=function()return now end}
- env.warn=function(...)end
+ env.warn=function(...) 
+  local vals={}
+  for _,v in ipairs({...})do vals[#vals+1]=tostring(v)end
+  warnings[#warnings+1]=table.concat(vals," ")
+ end
  env.print=function(...)end
  env.setclipboard=function(v)clipboard[#clipboard+1]=v end
  env.loadstring=function(src)
@@ -294,11 +299,15 @@ local function fixture(opts)
  end
  return {
   env=env,runner=runner,screen=screen,tick=tick,named=named,
-  calls=calls,clipboard=clipboard,urls=urls,
+  calls=calls,clipboard=clipboard,urls=urls,warnings=warnings,
  }
 end
 do
  local x=fixture()
+ if type(x.runner)~="table" then
+  error("Step2 loader returned nil. warnings: "..table.concat(x.warnings," | ")..
+   " URLs: "..table.concat(x.urls," | "))
+ end
  eq(type(x.runner),"table","actual native Step2 loader returns real controller")
  eq(#x.urls,10,"all ten reviewed source dependencies pinned")
  eq(x.runner.status().status,"PREPARING","no P3 contact before ARM")
