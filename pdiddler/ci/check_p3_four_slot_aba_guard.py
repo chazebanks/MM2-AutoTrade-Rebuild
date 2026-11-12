@@ -60,7 +60,7 @@ for must in (
 # Guard must not be a one-time check only: it checks before the GUI step,
 # after the potentially yielding GUI step and inside guarded outbound dispatch.
 assert draft.count('currentShadowFresh(preparedWitness)')==3
-assert draft.index('onBeforeItem(itemIndex,#selected,#before.ours)') < draft.index(
+assert draft.index('opts.onBeforeItem,itemIndex,#selected,#before.ours') < draft.index(
     '  -- On-screen step may yield')
 assert draft.index('  -- After the prior approved own-item placement') > draft.index(
     '  if not observed then')
