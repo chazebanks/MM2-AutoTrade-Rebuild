@@ -1,0 +1,34 @@
+name: MM2 future server intelligence (offline)
+on:
+  push:
+    branches:
+      - feature/gingerscope-future-server-intelligence-offline
+    paths:
+      - 'pdiddler/intelligence_lab/future_server_intelligence.py'
+      - 'pdiddler/intelligence_lab/test_future_server_intelligence.py'
+      - 'pdiddler/intelligence_lab/FUTURE_SERVER_INTELLIGENCE_RESEARCH.md'
+      - '.github/workflows/mm2-future-server-intelligence-tests.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/future_server_intelligence.py'
+      - 'pdiddler/intelligence_lab/test_future_server_intelligence.py'
+      - 'pdiddler/intelligence_lab/FUTURE_SERVER_INTELLIGENCE_RESEARCH.md'
+      - '.github/workflows/mm2-future-server-intelligence-tests.yml'
+permissions:
+  contents: read
+jobs:
+  future-server-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run inherited and new offline intelligence tests
+        run: python -m unittest discover -s pdiddler/intelligence_lab -p 'test_*.py' -v
+      - name: Disallow gameplay/network side effects
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -E '(TeleportAsync|TeleportToPlaceInstance|FireServer|InvokeServer|HttpGet|requests\.get|PostAsync|setclipboard)' pdiddler/intelligence_lab/future_server_intelligence.py
