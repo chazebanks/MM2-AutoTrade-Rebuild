@@ -65,7 +65,7 @@ jobs:
                         'shadowAuthorizesOffer=false','shadowServerRevisionAuthenticated=false',
                         'e2e768e15a12dd9fffaf721519db79aa3bcaec7d'):
               assert token in runner,token
-          assert '5b7189ddbaf457270e218ce940707a18d7c0a5d6' in picker
+          assert 'b16fb1c03e6123fe6b25346f2619ca6fa0fb4d90' in picker
           assert 'shadowAbaReadOnlyTest=true' in picker
           print('P3_SHADOW_ABA_NATIVE_SOURCE_INTEGRITY_PASS')
           PY
