@@ -940,4 +940,113 @@ do
  eq(r.finalAcceptEverAttempted,false,"no final accept on unsafe ALT revision")
 end
 
+-- Real-world round-4 STOP receipt: MM2 may reindex the surviving
+-- NewItem2 -> NewItem1 after deleting the first ALT item. The survivor
+-- must match a UNIQUE earlier client-visible item, including quantity
+-- and Chroma marker, not necessarily the same GUI *position*.
+-- No ALT raw item identity or server transfer is claimed.
+local function testAltRemovalSurvivor(kind)
+ local x=armedTest({adaptive=true})
+ local reachedRound4=false
+ local failSeen=false
+ for round=1,5 do
+  if round>1 then
+   eq(untilRound(x,round,"WAIT_OPEN",180),true,
+    "fresh test round "..round.." for "..kind)
+  end
+  x.open()
+  local completed=false
+  for _=1,460 do
+   local st=x.state()
+   if st.status=="STOPPED" then
+    failSeen=true
+    break
+   end
+   if st.completedRounds>=round then
+    completed=true
+    break
+   end
+   if round==4 and st.phase=="ALT_REMOVE_ONE" then
+    reachedRound4=true
+    x.setAlt(1,kind=="quantity" and 2 or 1,kind=="chroma")
+    local slot=x.their:FindFirstChild("NewItem1")
+    if kind=="reindexed" or kind=="unmoved_second" then
+     slot:FindFirstChild("ItemName"):FindFirstChild("Label").Text=
+       "ALT_ITEM_2"
+    elseif kind=="replacement" then
+     slot:FindFirstChild("ItemName"):FindFirstChild("Label").Text=
+       "ALT_ITEM_3"
+    end
+    if kind=="unmoved_second" then
+     x.their.children.NewItem1=nil
+     slot.Name="NewItem2"
+     x.their.children.NewItem2=slot
+    end
+   elseif st.phase=="ALT_ADD" then
+    x.setAlt(round==4 and 2 or 1)
+    if round==4 and kind=="duplicate" then
+     x.their:FindFirstChild("NewItem2"):FindFirstChild("ItemName")
+      :FindFirstChild("Label").Text="ALT_ITEM_1"
+    end
+   elseif st.phase=="ALT_REVISE" then
+    x.setAlt(1)
+    x.their:FindFirstChild("NewItem1"):FindFirstChild("ItemName")
+     :FindFirstChild("Label").Text="ALT_ITEM_CHANGED_AFTER_ADD"
+   elseif st.phase=="ALT_CLEAR_FOR_REOFFER" then
+    x.setAlt(0)
+   elseif st.phase=="ALT_READD" then
+    x.setAlt(1)
+   elseif st.phase=="ALT_REMOVE_ONE" then
+    x.setAlt(1)
+   elseif st.phase=="ALT_REMOVE_ALL" then
+    x.setAlt(0)
+   end
+   x.tick()
+  end
+  if failSeen then break end
+  eq(completed,true,"round completed under "..kind.." at "..round)
+ end
+ eq(reachedRound4,true,"actually exercised round4 ALT 2->1 "..kind)
+ if kind=="reindexed" or kind=="unmoved_second" then
+  local r=x.state()
+  eq(r.status,"CLIENT_TEST_SEQUENCE_COMPLETE",
+    "valid survivor must pass complete five-round path "..kind)
+  eq(r.completedRounds,5,"five confirmed client windows "..kind)
+  eq(r.actions.requestsStarted,5,"fifth epoch continued "..kind)
+  eq(r.actions.altRemovalSlotReindexesObserved,
+    kind=="reindexed" and 1 or 0,
+    "reindex counted ONLY for actual changed GUI slot "..kind)
+  eq(r.actions.adaptiveReoffersAttempted,1,
+    "fifth round adaptation unaffected by previous ALT removal "..kind)
+  eq(#x.copies>=1,true,"completion copied automatically "..kind)
+  local json=serde.decode("json",x.copies[#x.copies])
+  eq(json.actions.altRemovalSlotReindexesObserved,
+    kind=="reindexed" and 1 or 0,
+    "sanitized clipboard includes renumber diagnostic "..kind)
+ else
+  eq(failSeen,true,"unsafe ALT item change must STOP "..kind)
+  local why=kind=="duplicate" and "ALT_REMOVAL_SURVIVOR_AMBIGUOUS"
+    or "ALT_REPLACED_ITEM_INSTEAD_OF_REMOVING"
+  local r=copiedStop(x,why,4)
+  eq(r.completedRounds,3,"only three closed windows on fault "..kind)
+  eq(r.actions.requestsStarted,4,"no fifth request after fault "..kind)
+  eq(r.actions.removalsAttempted,1,
+    "no MAIN own removal after ALT uncertain survivor "..kind)
+  eq(r.actions.declinesAttempted,3,
+    "no blind fourth decline after ALT uncertain survivor "..kind)
+  eq(r.actions.adaptiveReoffersAttempted,0,
+    "no adaptive item reoffer after round4 fault "..kind)
+  eq(r.actions.altRemovalSlotReindexesObserved,0,
+    "unverified survivor is NOT counted as compaction "..kind)
+  eq(x.declines(),3,"original guarded decline not fired on unsafe offer "..kind)
+  eq(x.requests(),4,"no continuation to fifth epoch "..kind)
+ end
+end
+for _,kind in ipairs({
+ "reindexed","unmoved_second","replacement",
+ "quantity","chroma","duplicate"
+}) do
+ testAltRemovalSurvivor(kind)
+end
+
 print("SYSTEM1_MAIN_AUTO_NATIVE_ORIGINAL_PASS",tests)
