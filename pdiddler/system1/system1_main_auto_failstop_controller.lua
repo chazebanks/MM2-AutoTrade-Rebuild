@@ -641,6 +641,22 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
      return stop("ALT_ADDED_UNEXPECTED_EXTRA_SLOTS") end
     stable=0;lastFull=nil;return receipt()
    end
+   -- Per-scenario constraints are intentionally distinct, so a passing
+   -- round proves its assigned feature rather than a generic one-slot flow.
+   if batchEight and phase=="ALT_ADD" then
+    if round==1 and (#ob.theirs~=1 or
+       ob.theirs[1].quantity~=2 or ob.theirs[1].chroma~=false) then
+     return stop("ALT_EXPECTED_ONE_STACKED_QTY2_SLOT")
+    elseif round==2 and (#ob.theirs~=1 or
+       ob.theirs[1].quantity~=1 or ob.theirs[1].chroma~=true) then
+     return stop("ALT_EXPECTED_ONE_CHROMA_QTY1_SLOT")
+    elseif round==3 and now-phaseEnteredAt<5 then
+     return stop("ALT_OFFER_ARRIVED_BEFORE_DELAY_WINDOW")
+    elseif round==4 and sameVisibleCandidate(ob.theirs[1],
+       ob.theirs[2]) then
+     return stop("ALT_TWO_DISTINCT_VISIBLE_CANDIDATES_REQUIRED")
+    end
+   end
    -- Accept a compacted GUI slot only when the *same unique visible*
    -- candidate survives; never authorize a different name/chroma/quantity.
    if phase=="ALT_REMOVE_ONE" then
@@ -666,6 +682,11 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
     if kind=="CLIENT_SLOT_REINDEXED" then
      actions.altRemovalSlotReindexesObserved+=1
     end
+   end
+   if batchEight and phase=="ALT_ADD" then
+    if round==1 then actions.stackedAltSlotsVerified+=1 end
+    if round==2 then actions.chromaAltSlotsVerified+=1 end
+    if round==3 then actions.delayedAltOffersVerified+=1 end
    end
    theirPrev=ob.theirs
    if phase=="ALT_READD" then
