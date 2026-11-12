@@ -1843,7 +1843,8 @@ function M.run(scanner,options)
         pendingVisible=function()
             if not alive() then return nil end
             local ok,yes=pcall(pendingVisible)
-            return ok and yes==true or (ok and false or nil)
+            if not ok or type(yes)~="boolean" then return nil end
+            return yes
         end,
         resume=function(reason)
             if not alive() then
