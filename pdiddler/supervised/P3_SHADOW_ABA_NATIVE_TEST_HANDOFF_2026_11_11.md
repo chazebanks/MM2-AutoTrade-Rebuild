@@ -8,7 +8,7 @@ The user has already provided a **real, unique** ALT add→remove client test re
 
 ## Protected code chain and intent
 
-PR239 is stacked on actual PR237 branch, not merged main. Its new picker `SUPERVISED_P3_SHADOW_ABA_PICKER.lua` is a fork of the ALREADY TESTED human-owned one-shot picker and immutably pins **new** native runner `5b7189ddbaf457270e218ce940707a18d7c0a5d6`. It requires exact consenting ALT, selected safe currently-owned inexpensive non-Gingerscope item, separate human **AUTHORIZE 1 AUTO OFFER** and **ARM P3**. Previous PR218/PR237 picker, native runner, P3/P4 coordinator, protected IO and one-shot gate remain Git-blob identical.
+PR239 is stacked on actual PR237 branch, not merged main. Its new picker `SUPERVISED_P3_SHADOW_ABA_PICKER.lua` is a fork of the ALREADY TESTED human-owned one-shot picker and immutably pins **new** native runner `b16fb1c03e6123fe6b25346f2619ca6fa0fb4d90`. It requires exact consenting ALT, selected safe currently-owned inexpensive non-Gingerscope item, separate human **AUTHORIZE 1 AUTO OFFER** and **ARM P3**. Previous PR218/PR237 picker, native runner, P3/P4 coordinator, protected IO and one-shot gate remain Git-blob identical.
 
 New runner `SUPERVISED_P3_SHADOW_ABA_NATIVE.lua` uses the PR237 protected ALT on-screen guide, plus immutable source `pdiddler/intelligence_lab/p3_shadow_aba_offer_lease.lua` from verified PR238 head `e2e768e15a12dd9fffaf721519db79aa3bcaec7d`. It calls `supervisor.currentBoundReadOnly()` from the protected frozen PR215 P3/P4 supervisor; the shadow observer itself has **no** offer, Accept, decline, prices or actual trade authority.
 
