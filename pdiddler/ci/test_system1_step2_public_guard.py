@@ -41,6 +41,10 @@ class Step2PublicBoundaries(unittest.TestCase):
         self.assertIn('S.startGateOpen=false', P3)
         self.assertIn('cancel-unverified', P3)
         self.assertIn('pendingVisible=function()', P3)
+        self.assertIn('return "card-unavailable"', P3)
+        self.assertIn('S.preTradeCardSkipped+=1', P3)
+        self.assertIn('S.lastOutcomeCode="PENDING_UI_MISSING_AFTER_TRADE_TAP"', P3)
+        self.assertIn('S.lastOutcomeCode="CANCEL_UNVERIFIED"', P3)
 
     def test_real_roblox_players_type_accepted(self):
         self.assertIn('(type(players)~="table" and type(players)~="userdata")', GATE)
@@ -72,6 +76,8 @@ class Step2PublicBoundaries(unittest.TestCase):
         self.assertIn('observed.distinctContacts>=2 and closedCount>=1', CTRL)
         self.assertIn('CLIENT_ROTATION_ONLY_HANDOFF_NOT_PROVEN', CTRL)
         self.assertIn('P4_DECLINE_FAILED_OR_UNCONFIRMED', CTRL)
+        self.assertIn('firstFailureEvidence=', CTRL)
+        self.assertIn('publicRequestDiagnostic=', CTRL)
 
 if __name__ == "__main__":
     unittest.main()
