@@ -110,6 +110,33 @@ class FuturePortfolioPlannerTests(unittest.TestCase):
         self.assertEqual(x["candidates"],[])
         self.assertFalse(x["authorizesTrade"])
 
+    def test_protected_target_excluded_when_other_tradeable_items_exist(self):
+        ours=[{"key":"Gingerscope","quantity":1},
+              {"key":"spare","quantity":1}]
+        theirs=[{"key":"upgrade","quantity":1}]
+        market=sample()[2]
+        market["items"]={"Gingerscope":entry(100),"spare":entry(50),
+                         "upgrade":entry(55)}
+        result=self.run_plan((ours,theirs,market))
+        self.assertEqual(result["status"],"CANDIDATES_PREPARED")
+        self.assertEqual(result["protectedOutboundItem"],"Gingerscope")
+        self.assertTrue(result["candidates"])
+        for proposal in result["candidates"]:
+            self.assertNotIn("Gingerscope",
+                             [r["key"] for r in proposal["offer"]])
+        self.assertEqual(ours[0]["key"],"Gingerscope")
+
+    def test_protected_target_remains_permitted_as_inbound_goal(self):
+        ours=[{"key":"spare","quantity":1}]
+        theirs=[{"key":"Gingerscope","quantity":1}]
+        market=sample()[2]
+        market["items"]={"spare":entry(100),"Gingerscope":entry(105)}
+        result=self.run_plan((ours,theirs,market))
+        self.assertEqual(result["status"],"CANDIDATES_PREPARED")
+        self.assertEqual(result["candidates"][0]["receive"][0]["key"],"Gingerscope")
+        self.assertNotIn("Gingerscope",[x["key"] for x in result["candidates"][0]["offer"]])
+        self.assertFalse(result["authorizesTrade"])
+
     def test_no_silent_top_five_from_full_inventory(self):
         a,b,m=sample()
         a=[{"key":f"item-{i}","quantity":1} for i in range(6)]
