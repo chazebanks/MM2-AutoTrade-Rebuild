@@ -100,6 +100,16 @@ class FuturePortfolioPlannerTests(unittest.TestCase):
         self.assertEqual(c["type"],"UPGRADE")
         self.assertTrue(x["enumerationCompleteForProvidedShortlists"])
 
+    def test_regression_protected_gingerscope_must_never_be_outbound(self):
+        a=[{"key":"Gingerscope","quantity":1}]
+        b=[{"key":"someUpgrade","quantity":1}]
+        m=sample()[2]
+        m["items"]={"Gingerscope":entry(100),"someUpgrade":entry(105)}
+        x=self.run_plan((a,b,m))
+        self.assertEqual(x["status"],"NO_CANDIDATES")
+        self.assertEqual(x["candidates"],[])
+        self.assertFalse(x["authorizesTrade"])
+
     def test_no_silent_top_five_from_full_inventory(self):
         a,b,m=sample()
         a=[{"key":f"item-{i}","quantity":1} for i in range(6)]
