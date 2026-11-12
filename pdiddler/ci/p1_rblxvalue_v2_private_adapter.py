@@ -43,6 +43,10 @@ def _no_redirect_get(path: str, api_key: str) -> tuple[int, bytes]:
         raise ValueError("ENDPOINT_NOT_ALLOWED")
     if not isinstance(api_key, str) or not 12 <= len(api_key) <= 256:
         raise ValueError("PRIVATE_KEY_REQUIRED")
+    # urllib's HTTP header encoder can fail on invisible Unicode characters.
+    # Never normalize, strip, echo or repair a supplied credential silently.
+    if not api_key.isascii() or re.fullmatch(r"[A-Za-z0-9_-]{12,256}", api_key) is None:
+        raise ValueError("PRIVATE_KEY_FORMAT_INVALID")
     request = urllib.request.Request(
         BASE + path,
         headers={"X-Api-Key": api_key, "Accept": "application/json"},
@@ -246,6 +250,10 @@ def probe_private_meta(*, enabled: bool, secret: str | None,
         return _denied("DISABLED", "PRIVATE_PROBE_NOT_ARMED")
     if type(secret) is not str or not 12 <= len(secret) <= 256:
         return _denied("KEY_REQUIRED", "PRIVATE_ENVIRONMENT_KEY_MISSING")
+    if not secret.isascii():
+        return _denied("KEY_FORMAT_INVALID", "PRIVATE_KEY_NON_ASCII_CHARACTERS")
+    if re.fullmatch(r"[A-Za-z0-9_-]{12,256}", secret) is None:
+        return _denied("KEY_FORMAT_INVALID", "PRIVATE_KEY_FORMAT_UNEXPECTED_CHARACTERS")
     # Distinguish an unexpected transport bug from an unexpected metadata
     # parser bug. Do not emit exception messages, tracebacks or request URLs.
     # These fixed categories cannot leak the X-Api-Key or private proxy values.
