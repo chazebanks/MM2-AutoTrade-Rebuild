@@ -57,7 +57,7 @@ for text in (native,fsm):
 for requirement in (
  "ba76adb21ffe4124c44d6d9a256683861eceb61d",
  "be8d8c5b77c0c7c345639c53e6a04959728d01a8",
- "dfa278462006a81895a64898207c5423c5260d60",
+ "6cd8dd4347d37efa8bd6f425b8303fa67d62cea5",
  'ALT_NAME="venossgaming90190"',
  'function adapters.startEpoch(round,nonce)',
  'function adapters.inspect(round,epoch)',
@@ -76,6 +76,7 @@ for requirement in (
  'watchdog.new(sup,',
  'boot.new,',
  'screen.arm.Activated:Connect',
+ 'UNEXPECTED_ACCEPTED_STATE',
  'screen.stop.Activated:Connect',
  'screen.copy.Activated:Connect',
  'noAutomaticAcceptAcknowledged=true',
