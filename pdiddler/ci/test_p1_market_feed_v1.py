@@ -238,6 +238,7 @@ class MarketFeedV1Tests(unittest.TestCase):
     def test_previous_snapshot_unchanged_small_change_allowed_in_research(self):
         x = fixture()
         x["previous"] = {
+            "provider": "TEST_PROVIDER", "units": "TEST_POINTS",
             "version": "TEST_REV1",
             "publishedAtUtc": "2026-11-11T00:00:00Z",
             "items": [{"gameRawKey": "TEST_RAW0", "value": 110}],
@@ -247,6 +248,7 @@ class MarketFeedV1Tests(unittest.TestCase):
     def test_large_value_shift_requires_review(self):
         x = fixture()
         x["previous"] = {
+            "provider": "TEST_PROVIDER", "units": "TEST_POINTS",
             "version": "TEST_REV1",
             "publishedAtUtc": "2026-11-11T00:00:00Z",
             "items": [{"gameRawKey": "TEST_RAW0", "value": 70}],
@@ -256,6 +258,7 @@ class MarketFeedV1Tests(unittest.TestCase):
     def test_rollback_and_duplicate_previous_keys_rejected(self):
         x = fixture()
         x["previous"] = {
+            "provider": "TEST_PROVIDER", "units": "TEST_POINTS",
             "version": "TEST_REV2", "publishedAtUtc": "2026-11-12T02:00:00Z",
             "items": [],
         }
@@ -264,6 +267,21 @@ class MarketFeedV1Tests(unittest.TestCase):
         x["previous"]["version"] = "TEST_REV1"
         x["previous"]["items"] = [{"gameRawKey": "TEST_RAW0", "value": 110}] * 2
         self.assertEqual(self.safe(judge(x))["reason"], "PREVIOUS_DUPLICATE_RAW_KEY")
+
+    def test_previous_provider_and_currency_are_exactly_bound(self):
+        x = fixture()
+        x["previous"] = {
+            "provider": "TEST_PROVIDER", "units": "TEST_POINTS",
+            "version": "TEST_REV1",
+            "publishedAtUtc": "2026-11-11T00:00:00Z",
+            "items": [{"gameRawKey": "TEST_RAW0", "value": 110}],
+        }
+        self.assertEqual(self.safe(judge(x))["status"], "SYNTHETIC_READY_FOR_SHADOW")
+        x["previous"]["provider"] = "TEST_OTHER_PROVIDER"
+        self.assertEqual(self.safe(judge(x))["reason"], "CROSS_PROVIDER_PRICE_COMPARISON")
+        x["previous"]["provider"] = "TEST_PROVIDER"
+        x["previous"]["units"] = "TEST_DIFFERENT_POINTS"
+        self.assertEqual(self.safe(judge(x))["reason"], "CROSS_UNIT_PRICE_COMPARISON")
 
     def test_synthetic_mode_never_accepts_real_weapon_labels(self):
         x = fixture()
