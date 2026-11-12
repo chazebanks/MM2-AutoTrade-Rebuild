@@ -430,7 +430,10 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
    local n=round==4 and not reoffer and 2 or 1
    if #ob.ours~=n or #ob.theirs~=0 then
     return stop("MAIN_OFFER_GUI_NOT_RECONCILED") end
-   local yes=stepStable(ob,nil,{})
+   -- During an explicitly authorized ALT replacement, the withdrawn
+   -- MAIN item must disappear while ALT's DIFFERENT item remains exactly
+   -- stable. Do not mistakenly require ALT to be empty yet.
+   local yes=stepStable(ob,nil,expectedTheir)
    if not yes then return receipt() end
    oursPrev=ob.ours;theirPrev=ob.theirs
    if reoffer then
