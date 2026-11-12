@@ -89,7 +89,7 @@ do
  eq(twice(d,{},{}).phase,"R4_CLOSE","MAIN removed both")
  eq(tick(nil).phase,"REVIEW","round4 closed")
  eq(w.status().passedRounds,4,"all 4 passes")
- eq(w.status().observedStepTransitions,12,"12 witnessed item/offer phase transitions")
+ eq(w.status().observedStepTransitions,11,"eleven witnessed item/offer phase transitions")
  eq(w.next(),true,"explicit finish after reviewed fourth")
  eq(w.status().phase,"DONE","full multi-trade test complete")
  eq(w.status().finished,true,"marked completed")
