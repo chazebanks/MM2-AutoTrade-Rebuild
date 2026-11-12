@@ -269,6 +269,17 @@ do
  eq(#z.x.sends,0,"zero items sent without required source")
 end
 
+-- Explicit draft mode cannot be silently omitted: no multi-item execution
+-- may fall back to the legacy snapshot-only behavior in this new candidate.
+do
+ local z=fixtureGuard()
+ z.opts.experimentalABAShadowRequired=nil
+ local r=z.run()
+ eq(r.status,"BLOCKED","omitted ABA mode blocks all multi-item offers")
+ eq(r.reason,"ABA_SHADOW_EXPLICIT_MODE_REQUIRED","no unguarded fallback")
+ eq(#z.x.sends,0,"no P3 remote when mandatory new mode omitted")
+end
+
 -- Shadow opt-in also requires an attached observer contract; a factory
 -- alone cannot catch event history without active pumping of client snapshots.
 do
