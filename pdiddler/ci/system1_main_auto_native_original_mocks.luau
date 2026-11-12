@@ -113,11 +113,15 @@ function M.hasPendingWork()return false end
 function M.setRequestState()end
 function M.setStatus()end
 function M.getOwnInventory()
- return {rawOwned=2,unmapped=0,badQty=0,items={
+ return {rawOwned=4,unmapped=0,badQty=0,items={
   {id="Iceblaster",name="Iceblaster",cat="Weapons",qty=1,
     page="godly",type="Gun"},
   {id="Batwing",name="Batwing",cat="Weapons",qty=1,
     page="ancient",type="Knife"},
+  {id="Frostsaber",name="Frostsaber",cat="Weapons",qty=1,
+    page="godly",type="Knife"},
+  {id="Bioblade",name="Bioblade",cat="Weapons",qty=1,
+    page="godly",type="Knife"},
  }}
 end
 return M
@@ -285,7 +289,7 @@ local function fixture(opts)
  local inv=remotes:put(node("Folder","Inventory"))
  local rf=inv:put(node("RemoteFunction","GetProfileData"))
  function rf:InvokeServer()
-  return {Weapons={Owned={Iceblaster=1,Batwing=1}}}
+  return {Weapons={Owned={Iceblaster=1,Batwing=1,Frostsaber=1,Bioblade=1}}}
  end
  local database=RS:put(node("Folder","Database"))
  local syncNode=database:put(node("ModuleScript","Sync"))
@@ -293,6 +297,8 @@ local function fixture(opts)
   Weapons={
    Iceblaster={ItemName="Iceblaster",Rarity="Godly",ItemType="Gun"},
    Batwing={ItemName="Batwing",Rarity="Ancient",ItemType="Knife"},
+   Frostsaber={ItemName="Frostsaber",Rarity="Godly",ItemType="Knife"},
+   Bioblade={ItemName="Bioblade",Rarity="Godly",ItemType="Knife"},
   },
  }
  local services={
