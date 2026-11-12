@@ -24,6 +24,13 @@
 --   * does not offer/rebalance/confirm items
 
 local M={}
+-- Pure guarded timeout policy, exported for the real-source Lune regression.
+-- A vanished request widget is not enough if a client trade just opened.
+function M.ignoredTimeoutCancellationVerified(cancelled,stillPending,tradeWindowOpen)
+    return cancelled==true
+        and stillPending==false
+        and tradeWindowOpen==false
+end
 
 function M.run(scanner,options)
     -- Do not start the legacy request loop without a separate explicit
@@ -91,6 +98,7 @@ function M.run(scanner,options)
         accepted=0,
         incomingDeclined=0,
         startGateOpen=false,
+        failStop=false,
         joinedAt={},
         unavailableUntil={},
         unavailableCount={},
@@ -1582,26 +1590,46 @@ function M.run(scanner,options)
 
         if not alive() then return "stale-session" end
 
-        S.ignored=S.ignored+1
-
         scanner.setRequestState(
             target,
-            "ignored",
-            "No response for 15s | cancelling confirmed pending request"
+            "requesting",
+            "No response for 15s | verifying pending cancellation"
         )
 
         local cancelled=cancelPending(
             "15s no response for "..target.Name
         )
+        -- A failed cancellation or a late trade-open transition MUST NOT
+        -- be treated as "ignored" and must never rotate to a new player.
+        local pendingOk,stillPending=pcall(pendingVisible)
+        local tradeOk,tradeWindow=pcall(tradeOpen)
+        local verified=pendingOk and tradeOk and
+            M.ignoredTimeoutCancellationVerified(
+                cancelled,stillPending,tradeWindow~=nil
+            )
+        if not verified then
+            S.failStop=true
+            S.startGateOpen=false
+            S.paused=true
+            S.failed=S.failed+1
+            scanner.setRequestState(
+                target,
+                "sendfailed",
+                "Cancel unverified / possible late trade-open | P3 halted"
+            )
+            scanner.setStatus(
+                "P3 OUT — STOP: pending cancellation unverified; no rotation"
+            )
+            warn("[PDIDDLER P3 OUT] FAIL CLOSED: cancellation unverified")
+            return "cancel-unverified"
+        end
 
+        S.ignored=S.ignored+1
         scanner.setRequestState(
             target,
             "ignored",
-            cancelled
-                and "Ignored 15s | pending request cancelled"
-                or "Ignored 15s | cancel attempted but pending UI may remain"
+            "Ignored 15s | pending request cancellation client-verified"
         )
-
         return "ignored"
     end
 
@@ -1768,10 +1796,12 @@ function M.run(scanner,options)
         session=SESSION,
         state=S,
         isArmed=function()
-            return alive() and S.startGateOpen==true
+            return alive() and S.startGateOpen==true and
+                S.failStop~=true
         end,
         arm=function()
             if not alive() then return false,"stale-session" end
+            if S.failStop then return false,"P3_CANCEL_UNVERIFIED_STOP" end
             if S.startGateOpen then return false,"already-armed" end
             local ok,ready=pcall(options.readyCheck)
             if not ok or ready~=true then
@@ -1786,6 +1816,9 @@ function M.run(scanner,options)
         resume=function(reason)
             if not alive() then
                 return false,"stale-session"
+            end
+            if S.failStop then
+                return false,"P3_CANCEL_UNVERIFIED_STOP"
             end
 
             if tradeOpen() then
