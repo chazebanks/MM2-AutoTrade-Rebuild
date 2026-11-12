@@ -1,0 +1,25 @@
+name: Gingerscope System2 manual Supreme reference (OFFLINE)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/supervised_supreme_reference.py'
+      - 'pdiddler/ci/test_system2_supervised_supreme_reference.py'
+      - 'pdiddler/system2/SUPREME_MANUAL_SUPERVISED_REVIEW_2026_11_12.md'
+      - '.github/workflows/gingerscope-system2-manual-reference-offline.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-manual-reference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Run manual-only packet negative coverage (no network or market imports)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_system2_supervised_supreme_reference
+          ! grep -E '(requests|urllib|httpx|subprocess|socket)\.' pdiddler/system2/supervised_supreme_reference.py
