@@ -186,8 +186,11 @@ class FuturePortfolioPlannerTests(unittest.TestCase):
         b=[{"key":"theirs","quantity":1}]
         for i in range(5):
             m["items"][f"w{i}"]=entry(5)
+        m["items"]["theirs"]=entry(60)
         x=self.run_plan((a,b,m))
-        self.assertLessEqual(x["searchCap"]["maxSlotsPerSide"],4) if x["status"]=="CANDIDATES_PREPARED" else self.assertFalse(x["authorizesTrade"])
+        self.assertEqual(x["status"],"CANDIDATES_PREPARED")
+        self.assertEqual(x["searchCap"]["maxSlotsPerSide"],4)
+        self.assertEqual(x["searchCap"]["maxCopiesPerSide"],8)
 
     def test_600_adversarial_inputs_never_authorize(self):
         rng=random.Random(6084)
