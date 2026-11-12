@@ -136,6 +136,8 @@ local function run(x,keys,wait)
  return x.plan.run(b,x.io,x.gate,approval,{wait=wait or function()end}),approval,b
 end
 
+local legacyCode=fs.readFile("pdiddler/supervised/supervised_four_slot_operator_plan.lua")
+local legacyPlan=luau.load(legacyCode,{environment={math=math},injectGlobals=true})()
 local shadowCode=fs.readFile("pdiddler/intelligence_lab/p3_shadow_aba_offer_lease.lua")
 local shadow=luau.load(shadowCode,{environment={math=math},injectGlobals=true})()
 local function fixtureGuard(two)
@@ -167,6 +169,30 @@ local function fixtureGuard(two)
   witness=function()return witness end,
   built=function()return built end,
  }
+end
+
+-- Baseline: the original snapshot-only plan cannot distinguish B observed
+-- and then reverted to A between its two reads; it sends item 2. This is
+-- NOT a new live action, just original source executed against fake Roblox.
+do
+ local x=fixture()
+ simulateOffer(x)
+ local b=getBound(x)
+ local approval=arm({"Iceblaster","Batwing"})
+ local r=legacyPlan.run(b,x.io,x.gate,approval,{
+  wait=function()end,
+  onBeforeItem=function(index)
+   if index==2 then
+    x.add(x.theirs,1,"ALTTransient",1)
+    x.theirs.children["NewItem1"]=nil -- A -> B -> A before next capture
+   end
+   return true
+  end,
+ })
+ eq(r.status,"CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED",
+     "unchanged original cannot remember unobserved ABA event")
+ eq(#x.sends,2,"old snapshot-only plan sends second item after invisible ABA")
+ eq(r.authorizesAccept,false,"even original has no Accept authority")
 end
 
 -- This test MUST be RED against old physical-slot planner: GUI A->B->A is
