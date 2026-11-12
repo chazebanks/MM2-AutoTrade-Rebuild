@@ -23,13 +23,13 @@ jobs:
       - name: Checkout immutable reviewed P1 research commit
         uses: actions/checkout@v4
         with:
-          ref: 0ff10308d6fb231f38b140fece8e45487b6d0783
+          ref: 23a68d231456ad70872bc7adf7bb6594e8dc009b
           fetch-depth: 1
           persist-credentials: false
       - name: Verify adapter source pin
         shell: bash
         run: |
-          test "$(git rev-parse HEAD)" = "0ff10308d6fb231f38b140fece8e45487b6d0783"
+          test "$(git rev-parse HEAD)" = "23a68d231456ad70872bc7adf7bb6594e8dc009b"
           echo "P1 reviewed research code pin confirmed"
       - uses: actions/setup-python@v5
         with:
