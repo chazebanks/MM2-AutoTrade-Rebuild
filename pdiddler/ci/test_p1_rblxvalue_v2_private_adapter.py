@@ -275,6 +275,49 @@ class RblxV2PrivateAdapterTests(unittest.TestCase):
             self.assertEqual(build.return_value.open.call_count, 1)
         self.assertEqual((code, body), (429, b""))
 
+    def test_unavailable_provider_status_is_now_diagnostic_and_sanitized(self):
+        statuses = {
+            400: "HTTP_STATUS_400",
+            404: "HTTP_STATUS_404",
+            500: "HTTP_STATUS_500",
+            502: "HTTP_STATUS_502",
+            503: "HTTP_STATUS_503",
+            590: "NETWORK_DNS_FAILURE",
+            591: "NETWORK_TLS_FAILURE",
+            593: "NETWORK_TIMEOUT",
+            599: "NETWORK_OR_PROXY_FAILURE",
+            302: "HTTP_REDIRECT_NOT_FOLLOWED",
+        }
+        for status, reason in statuses.items():
+            with self.subTest(status=status):
+                result = self.safe(api.classify_meta(status, b"SECRET_NEVER_ECHO"))
+                self.assertEqual(result["status"], "SOURCE_UNAVAILABLE")
+                self.assertEqual(result["reason"], reason)
+
+    def test_transport_dns_tls_and_timeout_errors_are_safe_error_categories(self):
+        import socket
+        import ssl
+        import urllib.error
+        examples = [
+            (urllib.error.URLError(socket.gaierror("EXAMPLE_PRIVATE_SECRET")),
+             590, "NETWORK_DNS_FAILURE"),
+            (urllib.error.URLError(ssl.SSLCertVerificationError("PRIVATE_CERT_PATH")),
+             591, "NETWORK_TLS_FAILURE"),
+            (urllib.error.URLError(TimeoutError("PRIVATE_REQUEST_TARGET")),
+             593, "NETWORK_TIMEOUT"),
+            (urllib.error.URLError("PRIVATE_PROXY_PASSWORD"),
+             599, "NETWORK_OR_PROXY_FAILURE"),
+        ]
+        for exception, code, reason in examples:
+            with self.subTest(reason=reason):
+                with mock.patch("urllib.request.build_opener") as build:
+                    build.return_value.open.side_effect = exception
+                    status, body = api._no_redirect_get("/meta", FAKE_SECRET)
+                self.assertEqual((status, body), (code, b""))
+                result = self.safe(api.classify_meta(status, body))
+                self.assertEqual(result["reason"], reason)
+                self.assertNotIn("PRIVATE_", str(result))
+
     def test_fake_transport_exception_sanitized_without_leaking_key(self):
         def err(_path, key):
             raise RuntimeError(key)
