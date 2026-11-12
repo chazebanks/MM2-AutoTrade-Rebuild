@@ -45,7 +45,7 @@ def _item(item: object, side: str) -> dict:
         raise ValueError("INVALID_ITEM_LABEL")
     if type(quantity) is not int or not 1 <= quantity <= MAX_QUANTITY:
         raise ValueError("INVALID_STACK_QUANTITY")
-    if category not in CATEGORIES or type(category) is not str:
+    if type(category) is not str or category not in CATEGORIES:
         raise ValueError("INVALID_CATEGORY")
     if side == "ownOffer" and re.sub(r"\s+", "", label.casefold()) == "gingerscope":
         raise ValueError("PROTECTED_GINGERSCOPE_OUTBOUND")
