@@ -57,7 +57,6 @@ def _curl_get(path: str, api_key: str) -> tuple[int, bytes]:
         'header = "Accept: application/json"\\n'
         'header = "X-Api-Key: ' + api_key + '"\\n'
         'silent\\n'
-        'show-error = no\\n'
         'max-time = 8\\n'
     )
     try:
