@@ -71,6 +71,7 @@ def _denied(status: str, reason: str, **safe_fields):
         "upstreamRightsApproved": False,
         "gameRawKeyMappingProven": False,
         "marketFeedReadyForProduction": False,
+        "confirmedMarketQuote": False,
         "tradeOutcome": "UNKNOWN",
         **DENIED, **FALSE,
     }
