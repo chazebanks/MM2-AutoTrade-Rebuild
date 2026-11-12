@@ -843,7 +843,8 @@ function adapters.removeOwnOne(round,root,epoch,allowAltItem)
     io.trade()~=root then return false end
  local b=currentClientSnapshot()
  if not b or b.snap.physicalOwnSlots<1 or
-   ((allowAltItem==true and (round~=5 or b.snap.physicalTheirSlots~=1)) or
+   ((allowAltItem==true and (round~=(owner.batch8 and 8 or 5) or
+       b.snap.physicalTheirSlots~=1)) or
     (allowAltItem~=true and b.snap.physicalTheirSlots~=0)) then return false end
  actionBusy=true
  local ok,clicked=pcall(io.removeOne,root)
