@@ -281,6 +281,10 @@ function M.new(api,options)
  local lastOutcome="UNKNOWN"
  local adaptiveWithdraw=false
  local adaptiveReoffered=false
+ -- Round2-only: GUI can unwind a x2 ALT stack through x1 on way to empty.
+ -- Track the last observed quantity in this clear phase; NEVER allow
+ -- a different item, Chroma, slot, more copies, or rebound to a higher qty.
+ local recoveryClearLastQuantity=nil
  local function receipt()
   local r=report(
    phase=="STOPPED" and "STOPPED" or
@@ -384,7 +388,9 @@ function M.new(api,options)
     elseif phase=="ALT_REVISE_READD" then
      r.instruction="ALT: offer DIFFERENT cheap item B x1 after stable empty."
     elseif phase=="ALT_CLEAR_FOR_REOFFER" then
-     r.instruction="ALT: REMOVE remaining item. MAIN reoffers second selected item."
+     r.instruction=round==2 and
+      "ALT: clear A x2 to EMPTY (it may show x1 first). No different item; wait." or
+      "ALT: REMOVE remaining item entirely; then MAIN reoffers second item."
     elseif phase=="ALT_READD" then
      r.instruction="ALT: add ONE cheap item x1 after MAIN reoffers."
     elseif phase=="ALT_REMOVE_ALL" then
@@ -492,6 +498,7 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
   root=nil;oursPrev=nil;theirPrev=nil
   ownExpected=nil;otherExpected=nil
   adaptiveWithdraw=false;adaptiveReoffered=false
+  recoveryClearLastQuantity=nil
   enter("WAIT_OPEN",now,"WAITING_FRESH_ALT_REQUEST_ACCEPT")
   return receipt()
  end
@@ -710,7 +717,24 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
    if #ob.theirs>1 then
     return stop("ALT_ADDED_UNEXPECTED_EXTRA_SLOTS") end
    if #ob.theirs==1 then
-    if not sameSide(ob.theirs,theirPrev) then
+    local expected=theirPrev and theirPrev[1]
+    local current=ob.theirs[1]
+    if recoveryMode and round==2 and expected and current and
+       expected.quantity==2 and
+       current.slot==expected.slot and
+       current.name==expected.name and
+       current.chroma==expected.chroma and
+       current.id==expected.id and
+       current.quantity>=1 and
+       recoveryClearLastQuantity~=nil and
+       current.quantity<=recoveryClearLastQuantity then
+     -- Only the already verified ALT weapon may decrease x2->x1
+     -- while MAIN has no items. This is observation ONLY.
+     recoveryClearLastQuantity=current.quantity
+    elseif not sameSide(ob.theirs,theirPrev) or
+       (recoveryMode and round==2 and
+        recoveryClearLastQuantity~=nil and current and
+        current.quantity>recoveryClearLastQuantity) then
      return stop("ALT_CHANGED_WHILE_CLEARING_FOR_REOFFER") end
     stable=0;lastFull=nil;return receipt()
    end
@@ -718,6 +742,7 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
    if not yes then return receipt() end
    theirPrev=ob.theirs
    adaptiveWithdraw=false
+   recoveryClearLastQuantity=nil
    enter("MAIN_REOFFERING",now,
       "CLIENT_BOTH_EMPTY_FOR_SECOND_APPROVED_ITEM")
    return receipt()
@@ -863,6 +888,8 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
    if #ob.ours>0 then
     enter("MAIN_WITHDRAWING",now,"MORE_OWN_ITEMS_TO_REMOVE")
    elseif adaptiveWithdraw then
+    recoveryClearLastQuantity=(recoveryMode and round==2 and
+        theirPrev and theirPrev[1] and theirPrev[1].quantity) or nil
     enter("ALT_CLEAR_FOR_REOFFER",now,
       "OWN_WITHDRAWN_AFTER_ALT_REVISION")
    else
