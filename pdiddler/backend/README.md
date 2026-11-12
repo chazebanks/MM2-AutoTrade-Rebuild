@@ -15,6 +15,14 @@ python3 -m pdiddler.backend.runtime init --db /persistent-private-volume/gingers
 python3 -m pdiddler.backend.runtime once --db /persistent-private-volume/gingerscope.sqlite
 ```
 
+**Private online SQLite backup and recovery drill** (source connection stays live while a consistent snapshot is made):
+
+```sh
+python3 -m pdiddler.backend.runtime backup --db /persistent-private-volume/gingerscope.sqlite --to /encrypted-offsite-backups/gingerscope-2026-11-12.sqlite
+```
+
+The backup command makes a **new, never-overwritten** file with the SQLite online backup API, validates `PRAGMA integrity_check`, and returns only a safe status string. Offline regression tests reopen backups and check that research market receipts, client-only inventory checkpoints and trade observations survived. To recover after host loss, stop all backend writers and verify a separately preserved backup before restoring to a NEW private database path; **no automatic destructive restore operation is enabled**. Backups on the same disk do not protect against host/disk loss. Production requires an encrypted, separately retained copy, restore drills, retention policy and access controls. Backup contains private inventory observations and must never be committed to public GitHub.
+
 The examples require an existing writable directory that survives process restarts and provider reboots. **GitHub Actions storage is ephemeral and must not be treated as the production persistent disk.** Never put private `.sqlite` files in the public repo or commit inventory records.
 
 For a local-only read-only status endpoint, configure a *different* private random bearer secret `GINGERSCOPE_BACKEND_READ_TOKEN` (at least 32 ASCII characters) and run:
@@ -36,7 +44,7 @@ Do not reuse the RBLXValue provider key as a reader token and **do not place eit
 
 ## What must happen before calling this long-running system operational
 
-1. **Deploy private host with persistent volume** or provision an accessible Supabase project (the connected account currently lists **zero projects**) and run a separately reviewed schema/permission migration. No project, paid plan or host was created without user confirmation.
+1. **Deploy on an always-on private host with an attached persistent volume.** SQLite is the sole database in this design; do not introduce Supabase. No host, plan, private disk or cloud account has been provisioned.
 2. Add backups/snapshot retention, uptime alerts, TLS termination, outbound allowlists, audited credentials and server health/restart policy; verify actual runtime survives restarts and database corruption/recovery.
 3. Resolve P1 legal right to use actual derived MM2 prices. RBLXValue `ACTIVE` dashboard and GitHub HTTP403 `UNRECOGNIZED_JSON` are **not** a successful authenticated feed. No live snapshots/quotes until approval, exact mapping and true publisher timestamp.
 4. After that, add a separately licensed source poller using sane refresh cadence and versioned validated snapshot promotion, then a read-only, integrity-checked planning *proposal* interface; never grant trade authority from the backend alone.
