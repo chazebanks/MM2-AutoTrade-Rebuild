@@ -29,6 +29,10 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/system1_multitrade_walkthrough_mocks.luau
+      - name: Automatic MAIN four-epoch fail-stop controller and clipboard test
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_main_auto_failstop_mocks.luau
       - name: Original protected P3 P4 bridge unit regressions
         run: |
           set -euo pipefail
