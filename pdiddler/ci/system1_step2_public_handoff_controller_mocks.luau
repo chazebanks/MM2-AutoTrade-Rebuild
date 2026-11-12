@@ -13,6 +13,8 @@ local function snapshot(override)
   safe=true,frozenTargets=3,processedTargets=0,distinctContacts=0,
   acceptedRequests=0,ignoredRequests=0,declinedRequests=0,
   incomingDeclined=0,autoDeclines=0,exhausted=false,
+  preTradeCardSkips=0,requestTargetsAttempted=0,
+  originalP3SentConfirmed=0,pendingUiEverConfirmed=false,
   boundActive=false,pendingVisible=false,p3Paused=false,
   clientTradeSettled=false,noFinalAccept=true,
   noItemsOffered=true,noServerHop=true,
@@ -198,5 +200,46 @@ do
  eq(c.stop().status,"STOPPED","operator STOP terminal")
  eq(o.stops,1,"STOP halts P3")
  eq(o.declines,0,"operator stop prevents P4 decline")
+end
+-- A post-Trade-button tap can be rejected even if no pending popup
+-- appears. Exact anonymized first-fault evidence MUST survive STOP/COPY.
+for _,entry in ipairs({
+ {reason="P3_POST_TAP_PENDING_UI_NOT_SEEN", outcome="PENDING_UI_MISSING_AFTER_TRADE_TAP"},
+ {reason="P3_TRADE_TAP_RETURNED_UNCONFIRMED", outcome="TRADE_TAP_RETURNED_UNCONFIRMED"},
+ {reason="P3_PENDING_DISAPPEARED_UNCLASSIFIED", outcome="PENDING_DISAPPEARED_UNCLASSIFIED"},
+ {reason="P3_CANCEL_AFTER_PENDING_UNVERIFIED", outcome="CANCEL_UNVERIFIED"},
+ {reason="P3_CARD_FAILURE_WITH_ACTIVE_TRADE_UI", outcome="CARD_FAILURE_WITH_ACTIVE_TRADE_UI"},
+}) do
+ local evidence={stage="POST_TAP_PENDING_UI_NOT_SEEN",outcome=entry.outcome,
+  tradeButtonTapAttempted=true,tradeButtonTapReturnedTrue=true,
+  pendingRequestUiEverConfirmed=false,pendingUiVisibleAtStop=false,
+  originalP3SentConfirmed=0,preTradeCardSkips=0}
+ local c,o=fixture({snapshot({frozenTargets=3,processedTargets=1,
+  requestTargetsAttempted=1, distinctContacts=0,
+  fault=entry.reason,possibleSideEffect=true,
+  failureEvidence=evidence})})
+ eq(c.arm(2),true,"new first fault case ARM")
+ local r=c.tick(3)
+ eq(r.status,"STOPPED","new exact P3 source first fault stops")
+ eq(r.reason,entry.reason,"not collapsed to generic ambiguity")
+ eq(r.firstFailureEvidence.outcome,entry.outcome,
+  "anonymous first-fault P3 outcome retained")
+ eq(r.firstFailureEvidence.tradeButtonTapAttempted,true,
+  "dispatch side-effect uncertainty in copy")
+ eq(r.possibleSideEffect,true,"side effect uncertainty not cleared")
+ eq(o.declines,0,"P4 cannot decline while P3 request ambiguous")
+end
+do
+ local c,o=fixture({snapshot({frozenTargets=3,processedTargets=3,
+  processedTargets=3,preTradeCardSkips=3,
+  requestTargetsAttempted=3,distinctContacts=0,exhausted=true})})
+ eq(c.arm(1),true,"all cards unavailable client test")
+ local r=c.tick(2)
+ eq(r.status,"CLIENT_ROTATION_ONLY_HANDOFF_NOT_PROVEN",
+  "three pre-trade card skips must NOT count as contacts")
+ eq(r.publicRequestDiagnostic.preTradeCardSkips,3,
+  "anonymous pre-trade failures preserved")
+ eq(r.attemptedDistinctContacts,0,"no pretend request from failed card")
+ eq(o.declines,0,"no P4 action from card skips")
 end
 print("SYSTEM1_STEP2_PUBLIC_HANDOFF_CONTROLLER_PASS",tests)
