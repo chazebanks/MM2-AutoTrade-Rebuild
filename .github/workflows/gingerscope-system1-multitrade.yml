@@ -33,6 +33,10 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/system1_main_auto_failstop_mocks.luau
+      - name: Actual P3 one-send source, separate fresh session and old processed anti-replay
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_p3_single_send_epoch_mocks.luau
       - name: Compile native automatic MAIN runner and one-send P3 fork
         run: |
           set -euo pipefail
