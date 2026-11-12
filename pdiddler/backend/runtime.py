@@ -14,6 +14,7 @@ import json
 import os
 from pathlib import Path
 import secrets
+import threading
 from socket import getaddrinfo, AF_INET
 import time
 
@@ -91,9 +92,27 @@ def serve_local(db_path, *, port: int, read_token: str):
         raise ValueError("PORT_NOT_ALLOWED")
     handler = make_handler(db_path, read_token)
     # Loopback only. No direct public interface and no TLS termination here.
-    with ThreadingHTTPServer(("127.0.0.1",port),handler) as server:
-        server.daemon_threads = True
-        server.serve_forever(poll_interval=1)
+    # A host process can run for months. Checkpoint only the local heartbeat
+    # on startup and every five minutes. No actual provider polling is enabled.
+    run_once(db_path)
+    stop = threading.Event()
+    def heartbeat():
+        while not stop.wait(300):
+            try:
+                run_once(db_path)
+            except Exception:
+                # Do not silently promote stale market state on health failure.
+                # No API credentials, content or exception text in service logs.
+                pass
+    worker = threading.Thread(target=heartbeat, daemon=True)
+    worker.start()
+    try:
+        with ThreadingHTTPServer(("127.0.0.1",port),handler) as server:
+            server.daemon_threads = True
+            server.serve_forever(poll_interval=1)
+    finally:
+        stop.set()
+        worker.join(timeout=2)
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
