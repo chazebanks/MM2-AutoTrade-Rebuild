@@ -57,7 +57,7 @@ for text in (native,fsm):
 for requirement in (
  "ba76adb21ffe4124c44d6d9a256683861eceb61d",
  "be8d8c5b77c0c7c345639c53e6a04959728d01a8",
- "3ec1173c01b95fa97e981fdd368ee33104ebaec4",
+ "bd92654a14a477522a3b07375096a4e42209554c",
  'ALT_NAME="venossgaming90190"',
  'function adapters.startEpoch(round,nonce)',
  'function adapters.inspect(round,epoch)',
@@ -122,6 +122,9 @@ assert 'MAIN_REOFFERING' in fsm
 assert 'ALT_REVISE' in fsm
 assert 'ALT_CLEAR_FOR_REOFFER' in fsm
 assert 'adaptiveReoffersAttempted' in fsm
+assert 'uniqueSurvivor(theirPrev,ob.theirs)' in fsm
+assert 'altRemovalSlotReindexesObserved' in fsm
+assert 'ALT_REMOVAL_SURVIVOR_AMBIGUOUS' in fsm
 assert 'requestedNonce' not in native
 assert "SYSTEM1_MAIN_AUTO_FAILSTOP_PURE_PASS" in tests
 assert "ARM 4: 4 automatic requests" in native
