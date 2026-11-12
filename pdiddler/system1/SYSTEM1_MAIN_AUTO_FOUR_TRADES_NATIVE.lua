@@ -710,8 +710,25 @@ function adapters.offerApproved(round,count,epoch)
    return started==true
   end,
  }
+ -- The shadow guards the *prepared next outbound* interval only. Once
+ -- the original protected TradeIO successfully performs that next
+ -- outgoing send, the expected OWN-side item-2 GUI change invalidates
+ -- the old hypothetical shadow; that is NOT an unexpected ALT revision.
+ -- Detach this specific witness immediately after the guarded IO call
+ -- returns. The PR240 gate still checked it at the actual remote boundary.
+ local originalOfferItem=io.offerItem
+ local guardedOfferCalls=0
+ io.offerItem=function(item)
+  guardedOfferCalls+=1
+  local accepted,reason=originalOfferItem(item)
+  if count>1 and guardedOfferCalls>=2 then
+   shadowLive=false
+  end
+  return accepted,reason
+ end
  local ok,receipt=pcall(planModule.run,
     b.bound,io,gate,approval,opts)
+ io.offerItem=originalOfferItem
  shadowLive=false
  gate.checkOutbound=nil;actionBusy=false
  if not ok or type(receipt)~="table" then return nil end
