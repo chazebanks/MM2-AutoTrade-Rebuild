@@ -366,8 +366,14 @@ local function fixture(opts)
     then return sources.plan end
    if url:find("p3_shadow_aba_offer_lease.lua",1,true)
     then return sources.shadow end
-   if url:find("system1_main_auto_failstop_controller.lua",1,true)
-    then return sources.controller end
+   if url:find("system1_main_auto_failstop_controller.lua",1,true) then
+    assert(url=="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
+     "845d537babeef3e71d2f627b48721794ba264119/pdiddler/"..
+     "system1/system1_main_auto_failstop_controller.lua",
+     "exact controller raw URL must use reviewed COMMIT, not blob hash")
+    if opts.simulateControllerFetch404 then error("MOCK_CONTROLLER_404") end
+    return sources.controller
+   end
    error("UNRECOGNIZED_PINNED_URL "..url)
   end,
  }
@@ -379,6 +385,10 @@ local function fixture(opts)
   return n
  end
  local e={}
+ local capturedWarnings={}
+ e.warn=function(message)
+  capturedWarnings[#capturedWarnings+1]=tostring(message)
+ end
  e.E={PDIDDLER_TEST_PENDING_HANDOFF=opts.handoffDelays or 0}
  e.game=game
  e.getgenv=function()return e.E end
@@ -484,7 +494,7 @@ local function fixture(opts)
    return e.E.PDIDDLER_TEST_P3_EPOCH_REQUESTS or 0 end,
   declines=function()return declineCount end,
   copies=copied,tick=tickTasks,named=named,state=state,
-  setAlt=setAlt,open=open,gameRead=gameRead,
+  setAlt=setAlt,open=open,gameRead=gameRead,warnings=capturedWarnings,
   prematurelyClose=function()screen.Enabled=false end,
  }
 end
@@ -1275,6 +1285,30 @@ do
  eq(r.authorizesAccept,false,"zero final accept on fatal stack mismatch")
  eq(#x.copies>=1,true,"STOP automatically saves sanitized JSON")
  eq(x.state().status,"STOPPED","cannot resume same run after STOP")
+end
+
+-- Reproduce the exact reported iPad startup class: a dependency ref
+-- returns 404. No controller, GUI ARM, request, offer or decline may occur.
+-- Static module-alias console output must identify the failed dependency.
+do
+ local x=fixture({simulateControllerFetch404=true})
+ eq(x.runner,nil,"404 controller source never creates an armed runner")
+ eq(x.requests(),0,"404 before any P3 request")
+ eq(#x.sent,0,"404 before any physical offer")
+ eq(x.declines(),0,"404 before any decline")
+ eq(#x.gameRead,12,"all dependency URLs attempted before preflight return")
+ local named=false
+ local general=false
+ for _,line in ipairs(x.warnings) do
+  if line=="[SYSTEM1 AUTO] PINNED_MODULE_FAILED: controllerModule" then
+   named=true
+  end
+  if line=="[SYSTEM1 AUTO] SOURCE_UNAVAILABLE: no request/offer was started" then
+   general=true
+  end
+ end
+ eq(named,true,"static failed module alias in user console")
+ eq(general,true,"general existing SOURCE_UNAVAILABLE retained")
 end
 
 print("SYSTEM1_MAIN_AUTO_NATIVE_ORIGINAL_PASS",tests)
