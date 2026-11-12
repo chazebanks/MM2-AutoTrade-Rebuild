@@ -38,6 +38,18 @@ jobs:
             gingerscope-backend-ci \
             python -m pdiddler.backend.runtime once --db /data/test.sqlite \
             | python -c "import sys,json; x=json.load(sys.stdin); assert x['healthJobStatus']=='OK_PRIVATE_LOCAL'; assert x['authorizesTrade'] is False; assert x['maySendDiscordWebhook'] is False; print('RAILWAY_WORKER_CONTAINER_OFFLINE_PASS')"
+      - name: Production worker refuses ephemeral /data without mounted volume
+        run: |
+          set -euo pipefail
+          if docker run --rm --network none --read-only \
+              gingerscope-backend-ci \
+              python -m pdiddler.backend.runtime worker --db /data/gingerscope.sqlite \
+              > "$RUNNER_TEMP/worker-no-volume.log" 2>&1; then
+            echo "PRODUCTION_WORKER_SILENT_EPHEMERAL_DATA_FAILURE"
+            exit 1
+          fi
+          grep -q "PRODUCTION_SQLITE_VOLUME_NOT_MOUNTED" "$RUNNER_TEMP/worker-no-volume.log"
+          echo "PRODUCTION_WORKER_EPHEMERAL_VOLUME_REFUSED_PASS"
       - name: No unsafe provider, Discord or trade-action integration
         run: |
           python3 - <<'PY'
