@@ -503,7 +503,8 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
      if not retained then return stop("ALT_REPLACED_ITEM_INSTEAD_OF_REMOVING") end
    elseif phase=="ALT_REMOVE_ALL" and #ob.theirs==0 then
     -- ALT's full side has become empty, which is expected.
-   elseif phase~="ALT_ADD" and not sameSide(ob.theirs,theirPrev) then
+   elseif phase~="ALT_ADD" and phase~="ALT_READD" and
+      not sameSide(ob.theirs,theirPrev) then
     return stop("ALT_UNEXPECTED_OFFER_REVISION")
    end
    local yes=stepStable(ob,oursPrev,nil)
