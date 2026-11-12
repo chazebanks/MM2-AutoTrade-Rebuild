@@ -440,6 +440,10 @@ next=="ALT_REMOVE_ALL" or next=="ALT_REVISE" or
   consumed+=1
   actions.requestsStarted+=1
   local ok,a,b=pcall(api.startEpoch,round,consumed)
+  -- A callback might synchronously trigger a nested tick/abort. That STOP is
+  -- terminal even if startEpoch subsequently returns success. Never set a new
+  -- epoch or enter WAIT_OPEN after stopAll has already fired.
+  if stopOnce or phase=="STOPPED" then return receipt() end
   if not ok or a~=true then
    return stop("P3_FRESH_REQUEST_EPOCH_FAILED",true)
   end
