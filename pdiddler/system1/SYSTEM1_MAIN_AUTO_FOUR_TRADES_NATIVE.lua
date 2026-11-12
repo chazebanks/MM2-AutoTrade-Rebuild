@@ -100,6 +100,28 @@ if not geometry or type(geometry.choose)~="function" or
    not planModule or type(planModule.run)~="function" or
    not shadowModule or type(shadowModule.new)~="function" or
    not controllerModule or type(controllerModule.new)~="function" then
+ -- Report which STATIC reviewed module failed loading; do not leak
+ -- fetched source, player data, or executor network error messages.
+ local moduleChecks={
+  {"geometry",geometry,"choose"},
+  {"protectedIO",protectedIO,"new"},
+  {"bridge",bridge,"bind"},
+  {"coordinator",coordinator,"new"},
+  {"boot",boot,"new"},
+  {"watchdog",watchdog,"new"},
+  {"rawScanner",rawScanner,"getOwnInventory"},
+  {"choicesModule",choicesModule,"build"},
+  {"outgoingModule",outgoingModule,"run"},
+  {"planModule",planModule,"run"},
+  {"shadowModule",shadowModule,"new"},
+  {"controllerModule",controllerModule,"new"},
+ }
+ for _,part in ipairs(moduleChecks) do
+  if type(part[2])~="table" or
+    type(part[2][part[3]])~="function" then
+   warn("[SYSTEM1 AUTO] PINNED_MODULE_FAILED: "..part[1])
+  end
+ end
  warn("[SYSTEM1 AUTO] SOURCE_UNAVAILABLE: no request/offer was started")
  return nil
 end
