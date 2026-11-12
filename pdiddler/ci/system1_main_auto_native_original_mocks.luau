@@ -271,13 +271,14 @@ local function fixture(opts)
   VirtualInputManager={SendMouseButtonEvent=function()end},
  }
  local requested=0
- local function add(side,index,name)
+ local function add(side,index,name,qty,chroma)
   local s=side:put(node("Frame","NewItem"..index))
   local nameBox=s:put(node("Frame","ItemName"))
   nameBox:put(node("TextLabel","Label")).Text=name
   local box=s:put(node("Frame","Container"))
-  box:put(node("TextLabel","Amount")).Text="x1"
+  box:put(node("TextLabel","Amount")).Text="x"..tostring(qty or 1)
   box:put(node("TextButton","ActionButton"))
+  if chroma then s:put(node("Frame","Tags")):put(node("Frame","Chroma")) end
   return s
  end
  function offerRemote:FireServer(raw,category)
@@ -357,7 +358,9 @@ local function fixture(opts)
   if x==syncNode then return catalog end
   error("unknown dependency")
  end
- e.setclipboard=function(txt)copied[#copied+1]=txt end
+ if not opts.clipboardUnavailable then
+  e.setclipboard=function(txt)copied[#copied+1]=txt end
+ end
  local taskApi={}
  taskApi.spawn=function(fn)
   local co=coroutine.create(fn)
@@ -420,9 +423,11 @@ local function fixture(opts)
  local function state()
   return runner and runner.status() or {status="NO_RUNNER"}
  end
- local function setAlt(n)
+ local function setAlt(n,qty,chroma)
   for i=1,4 do their.children["NewItem"..i]=nil end
-  for i=1,n do add(their,i,"ALT_ITEM_"..tostring(i))end
+  for i=1,n do
+   add(their,i,"ALT_ITEM_"..tostring(i),qty,chroma)
+  end
  end
  local function open()
   for i=1,4 do
@@ -438,6 +443,7 @@ local function fixture(opts)
   declines=function()return declineCount end,
   copies=copied,tick=tickTasks,named=named,state=state,
   setAlt=setAlt,open=open,gameRead=gameRead,
+  prematurelyClose=function()screen.Enabled=false end,
  }
 end
 local function untilState(x,phase,limit)
