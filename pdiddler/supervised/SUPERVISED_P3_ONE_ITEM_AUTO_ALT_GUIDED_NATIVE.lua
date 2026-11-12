@@ -591,6 +591,14 @@ local watchdogCtx={
     getJobId=ctx.getJobId,
     isLive=stillLive,
     onStatus=function(r)
+        -- Capture prior completion BEFORE this callback may synchronously run
+        -- the auto one-shot send. The r slot snapshot was captured on entry:
+        -- never compare it against an item placed later in this same tick.
+        local offerConfirmedAtTickStart=
+            evidence.autoOfferTriggeredClient==true
+            and evidence.oneItemOfferStatus=="CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED"
+            and evidence.oneItemOfferAttempts==1
+            and evidence.clientVisibleAddedSlots==1
         if r.status=="P4_TWO_SIDED_CLIENT_SNAPSHOT" then
             evidence.clientTradeWindowObserved=true
         elseif r.status=="P3_RESUMED_AFTER_CLIENT_TRADE_CLOSED" then
@@ -629,10 +637,7 @@ local watchdogCtx={
             root=io.trade(),
             ownSlots=r.ownPhysicalSlots,
             theirSlots=r.theirPhysicalSlots,
-            oneShotComplete=evidence.autoOfferTriggeredClient==true
-                and evidence.oneItemOfferStatus=="CLIENT_MANUAL_PLAN_VISIBLE_UNATTRIBUTED"
-                and evidence.oneItemOfferAttempts==1
-                and evidence.clientVisibleAddedSlots==1,
+            oneShotComplete=offerConfirmedAtTickStart,
         })
         if not guideOK or type(clientStep)~="table" then
             last=statusRecord("INCONCLUSIVE","ALT_GUI_WITNESS_THROWN")
