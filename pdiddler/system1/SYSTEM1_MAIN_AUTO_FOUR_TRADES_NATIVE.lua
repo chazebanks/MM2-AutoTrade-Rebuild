@@ -792,6 +792,12 @@ function adapters.offerApproved(round,count,epoch)
  io.offerItem=originalOfferItem
  shadowLive=false
  gate.checkOutbound=nil;actionBusy=false
+ -- Surface the precise FIRST observed client ABA watcher failure directly,
+ -- before a generic "guarded offer not confirmed" can overwrite its reason.
+ if haltReason then
+  if controller then controller.abort(haltReason) end
+  return nil
+ end
  if not ok or type(receipt)~="table" then return nil end
  -- This is client-visible placement only, not settled transfer authority.
  return receipt
