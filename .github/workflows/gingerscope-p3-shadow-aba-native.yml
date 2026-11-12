@@ -1,0 +1,71 @@
+name: Gingerscope P3 shadow ABA guided native — one-shot no final Accept
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/p3_shadow_aba_offer_lease.lua'
+      - 'pdiddler/supervised/SUPERVISED_P3_SHADOW_ABA_NATIVE.lua'
+      - 'pdiddler/supervised/SUPERVISED_P3_SHADOW_ABA_PICKER.lua'
+      - 'pdiddler/ci/p3_shadow_aba_native_guided_mocks.luau'
+      - 'pdiddler/supervised/P3_SHADOW_ABA_NATIVE_TEST_HANDOFF_2026_11_11.md'
+      - '.github/workflows/gingerscope-p3-shadow-aba-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-p3-p4-shadow:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install checksum pinned official Lune v0.11.1
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 50 https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip -o "$RUNNER_TEMP/lune.zip"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/dist"
+          f="$(find "$RUNNER_TEMP/dist" -name lune -type f -print -quit)"
+          test -n "$f"
+          install -m 0755 "$f" "$RUNNER_TEMP/lune"
+      - name: Native guided original P3/P4 operator plus source-pinned ABA shadow witness
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/p3_shadow_aba_native_guided_mocks.luau
+      - name: Rerun original passed ALT guide and one-shot gate
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_postoffer_alt_guided_native_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_one_item_auto_gate_mocks.luau
+      - name: Python frozen source, exact shadow and no final Accept integrity
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          root=Path('pdiddler/supervised')
+          frozen={
+              root/'SUPERVISED_P3_ONE_ITEM_AUTO_OFFER_NATIVE.lua':'72f59f77e83fd353d184daf79b7d6a34088170b3',
+              root/'SUPERVISED_P3_ONE_ITEM_AUTO_OWNED_PICKER.lua':'8824ce83a7384821a906a335c655c1ef94908c6b',
+              root/'SUPERVISED_P3_ONE_ITEM_AUTO_ALT_GUIDED_NATIVE.lua':'ac7d3f11439d0278101f4bcc0b94e5ac442c9e9d',
+              root/'SUPERVISED_P3_AUTO_ALT_GUIDED_PICKER.lua':'c8ca2a783706684fa21e91873cb4c804e0f8ec8c',
+              Path('pdiddler/intelligence_lab/p3_shadow_aba_offer_lease.lua'):'5114d5d5cd57882397150dfe5b306d5571a43826',
+          }
+          for p,h in frozen.items():
+              assert subprocess.check_output(['git','hash-object',str(p)],text=True).strip()==h,p
+          runner=(root/'SUPERVISED_P3_SHADOW_ABA_NATIVE.lua').read_text()
+          picker=(root/'SUPERVISED_P3_SHADOW_ABA_PICKER.lua').read_text()
+          shadow=Path('pdiddler/intelligence_lab/p3_shadow_aba_offer_lease.lua').read_text()
+          for file in (runner,picker,shadow):
+              for bad in ('AcceptTrade:FireServer(', 'OfferItem:FireServer(', 'DeclineTrade:FireServer(', 'SendRequest:FireServer(', 'PostAsync(', 'TeleportService'):
+                  assert bad not in file, (file[:50],bad)
+          for token in ('shadowAbaReadOnlyTest~=true','shadowPreparedClient=shadowPrepared',
+                        'shadowInvalidatedOnAltAdd=shadowInvalidatedOnAltAdd',
+                        'shadowStillStaleAfterAltRemove=shadowStillStaleAfterAltRemove',
+                        'OBSERVED_GUI_MUTATION_REQUIRES_FRESH_PLAN',
+                        'shadowAuthorizesOffer=false','shadowServerRevisionAuthenticated=false',
+                        'e2e768e15a12dd9fffaf721519db79aa3bcaec7d'):
+              assert token in runner,token
+          assert '5b7189ddbaf457270e218ce940707a18d7c0a5d6' in picker
+          assert 'shadowAbaReadOnlyTest=true' in picker
+          print('P3_SHADOW_ABA_NATIVE_SOURCE_INTEGRITY_PASS')
+          PY
