@@ -513,6 +513,8 @@ do
  eq(receipt.status,"STOPPED","stop receipt")
  eq(receipt.serverCompletionProven,false,"still no fabricated settlement")
  eq(receipt.round,1,"error identifies first trade")
+ eq(receipt.reason,"TRADE_PARTNER_NOT_CONSENTING_ALT",
+  "clipboard identifies exact wrong-partner root-cause")
  eq(x.requests(),1,"no next outgoing request after fault")
  eq(#x.sent,0,"no item offered to wrong partner")
  eq(x.declines(),0,"no blind decline action after wrong partner")
