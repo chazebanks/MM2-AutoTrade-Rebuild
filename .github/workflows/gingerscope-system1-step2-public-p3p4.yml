@@ -39,6 +39,10 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/system1_step2_public_target_gate_mocks.luau
+      - name: Actual Step2 native GUI loader plus original protected P4 client-decline wiring
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_step2_public_native_wiring_mocks.luau
       - name: Luau syntax-check actual production candidate without running Roblox actions
         run: |
           set -euo pipefail
