@@ -249,6 +249,7 @@ local function sanitized()
   observedStepTransitions=result.observedStepTransitions,
   rounds=result.rounds,stopped=result.stopped,finished=result.finished,
   screenLayoutFailures=layoutFailures,
+  nativeStopReason=lastSourceReason,
   p3AutomaticRequestsSent=0,
   physicalOffersSentByScript=0,actualAcceptsByScript=0,
   actualDeclinesByScript=0,actualTeleportsByScript=0,
