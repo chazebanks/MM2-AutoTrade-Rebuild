@@ -1,5 +1,8 @@
 # System 1 — Optional Adaptive Fifth Trade: MAIN automatic / ALT guided
 
+> **2026-11-12 live test correction:** User's real five-round iPad attempt STOPPED in **round 4, not round 5**, with `ALT_REPLACED_ITEM_INSTEAD_OF_REMOVING`: `completedRounds=3`, `requestsStarted=4`, `offersAttempted=3`, `removalsAttempted=1`, `declinesAttempted=3`. The report **does not identify whether the remaining ALT item truly changed** or MM2 merely compacted its slot. Prior controller incorrectly demanded the retained item have the exact prior `NewItem` GUI index. Reviewed fix now requires exactly ONE match of the previous two item candidates by visible name, Chroma, quantity and optional visible ID **ignoring index only**; ambiguity/real substitution still STOP. Adds `actions.altRemovalSlotReindexesObserved` to sanitized output. Added original protected P4 native tests for compacted slot, unchanged second slot, replaced candidate, changed quantity, changed Chroma, and indistinguishable duplicate. **No fifth-round iPad pass yet.**
+
+
 **Current stage:** offline verified candidate on DRAFT PR #241, NOT yet verified on the real iPad/Delta. Do **not** confuse a simulated original-P4 action with an authenticated completed trade. The existing four-round native iPad happy path was previously observed at frozen commit `5607c9655dda960aee5eb8226881a1bbb106eae5`; that fact is unchanged.
 
 ## Why this test exists
