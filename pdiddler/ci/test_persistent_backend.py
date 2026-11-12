@@ -283,6 +283,87 @@ class DurableStoreTests(unittest.TestCase):
                 pass
             self.assert_blocked(self.store.safe_status(now=NOW))
 
+    def test_backup_is_consistent_with_live_wal_and_can_reopen_as_restored_db(self):
+        self.store.record_market_receipt(market(),now=NOW)
+        self.store.record_inventory(inventory(),now=NOW)
+        self.store.record_trade_event(event(),now=NOW)
+        # Deliberately leave WAL checkpoint timing to SQLite; online backup
+        # must carry committed records, not merely copy the main .sqlite file.
+        backup=Path(self.folder.name)/"private-backup-1.sqlite"
+        self.assertEqual(self.store.backup_to(backup),
+                         "PRIVATE_BACKUP_CREATED_AND_INTEGRITY_CHECKED")
+        self.assertTrue(backup.exists())
+        with sqlite3.connect(backup) as raw:
+            self.assertEqual(raw.execute("PRAGMA integrity_check").fetchone()[0],"ok")
+            self.assertEqual(raw.execute("SELECT COUNT(*) FROM market_receipts").fetchone()[0],1)
+            self.assertEqual(raw.execute("SELECT COUNT(*) FROM inventory_checkpoints").fetchone()[0],1)
+            self.assertEqual(raw.execute("SELECT COUNT(*) FROM client_trade_events").fetchone()[0],1)
+        with Store(backup) as restored:
+            result=self.assert_blocked(restored.safe_status(now=NOW))
+            self.assertEqual(result["observedTradeEventsClientOnly"],1)
+            self.assertEqual(result["inventoryCheckpointStatus"],"CLIENT_ONLY")
+            self.assertEqual(result["marketStatus"],"RESEARCH_ONLY_UNEXPIRED")
+        self.assertFalse(list(Path(self.folder.name).glob(".gingerscope-backup-*.part")))
+        if os.name == "posix":
+            self.assertEqual(backup.stat().st_mode & 0o777,0o600)
+
+    def test_backup_never_overwrites_original_or_existing_destination(self):
+        self.store.record_inventory(inventory(),now=NOW)
+        before=self.path.read_bytes()
+        with self.assertRaises(InvalidEvidence):
+            self.store.backup_to(self.path)
+        self.assertEqual(self.path.read_bytes(),before)
+        target=Path(self.folder.name)/"existing.sqlite"
+        target.write_bytes(b"DO_NOT_REPLACE_THIS_FILE")
+        with self.assertRaises(InvalidEvidence):
+            self.store.backup_to(target)
+        self.assertEqual(target.read_bytes(),b"DO_NOT_REPLACE_THIS_FILE")
+
+    def test_backup_rejects_missing_parent_and_symlink_destination(self):
+        parent=Path(self.folder.name)
+        with self.assertRaises(InvalidEvidence):
+            self.store.backup_to(parent/"no-such-dir"/"copy.sqlite")
+        target=parent/"real-existing.sqlite"
+        target.write_bytes(b"PROTECT_EXISTING")
+        link=parent/"linked.sqlite"
+        try:
+            link.symlink_to(target)
+        except (NotImplementedError, OSError):
+            self.skipTest("symlink creation not supported")
+        with self.assertRaises(InvalidEvidence):
+            self.store.backup_to(link)
+        self.assertEqual(target.read_bytes(),b"PROTECT_EXISTING")
+
+    def test_backup_after_new_events_uses_new_destination_and_does_not_change_old(self):
+        first=Path(self.folder.name)/"first.sqlite"
+        second=Path(self.folder.name)/"second.sqlite"
+        self.store.record_trade_event(event(),now=NOW)
+        self.store.backup_to(first)
+        self.store.record_trade_event(event(
+            eventId="TEST_event_2",revision=2,kind="COUNTEROFFER_OBSERVED"),now=NOW)
+        self.store.backup_to(second)
+        for dbfile,expected in ((first,1),(second,2)):
+            with sqlite3.connect(dbfile) as db:
+                self.assertEqual(db.execute(
+                    "SELECT COUNT(*) FROM client_trade_events").fetchone()[0],expected)
+        with self.assertRaises(InvalidEvidence):
+            self.store.backup_to(first)
+
+    def test_backup_cli_creates_file_without_dumping_private_records(self):
+        self.store.record_inventory(inventory(),now=NOW)
+        destination=Path(self.folder.name)/"cli-backup.sqlite"
+        out=StringIO()
+        with redirect_stdout(out):
+            self.assertEqual(runtime.main([
+                "backup","--db",str(self.path),"--to",str(destination)]),0)
+        result=json.loads(out.getvalue())
+        self.assertEqual(result["backup"],"PRIVATE_BACKUP_CREATED_AND_INTEGRITY_CHECKED")
+        self.assertFalse(result["contentsExposed"])
+        self.assertNotIn("TEST_Gingerscope",out.getvalue())
+        with Store(destination) as restored:
+            self.assertEqual(restored.safe_status(now=NOW)["inventoryCheckpointStatus"],
+                             "CLIENT_ONLY")
+
     def test_invalid_schema_version_is_rejected_at_database_boundary(self):
         # CHECK(version=1) prevents silent migration/overwrite by default.
         with self.assertRaises(sqlite3.IntegrityError):
