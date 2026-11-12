@@ -1,0 +1,86 @@
+name: Gingerscope RBLXValue one-shot metadata (MANUAL ONLY)
+on:
+  workflow_dispatch:
+    inputs:
+      check:
+        description: "One metadata-only API request. No weapon prices, trading or Discord."
+        required: true
+        type: choice
+        options:
+          - metadata-only
+permissions:
+  contents: read
+concurrency:
+  group: gingerscope-p1-rblxvalue-metadata-once
+  cancel-in-progress: false
+
+jobs:
+  metadata-probe:
+    if: ${{ github.ref == 'refs/heads/main' && inputs.check == 'metadata-only' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout immutable reviewed P1 research commit
+        uses: actions/checkout@v4
+        with:
+          ref: d5386c427e6f071d0406d4d115a13b4f21900d52
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Verify adapter source pin
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "d5386c427e6f071d0406d4d115a13b4f21900d52"
+          echo "P1 reviewed research code pin confirmed"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Source-rights and private probe preflight (NO API request)
+        run: |
+          python3 -m unittest -q pdiddler.ci.test_p1_source_rights_gate pdiddler.ci.test_p1_market_feed_v1 pdiddler.ci.test_p1_rblxvalue_v2_private_adapter
+      - name: ONE authenticated metadata-only request (no raw prices)
+        shell: bash
+        env:
+          RBLXVALUE_API_KEY: ${{ secrets.RBLXVALUE_API_KEY }}
+          P1_PRIVATE_METADATA_PROBE: "YES"
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.ci.p1_rblxvalue_v2_private_adapter --probe-meta > "$RUNNER_TEMP/rblxvalue-meta-response.json"
+          python3 - <<'PY'
+          import json, os, pathlib, sys
+          path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "rblxvalue-meta-response.json"
+          try:
+              record = json.loads(path.read_text(encoding="utf-8"))
+          except Exception:
+              print("METADATA_CHECK_RESULT=INVALID_SANITIZED_RESULT")
+              raise SystemExit(1)
+          status = record.get("status")
+          reason = record.get("reason")
+          allowed_status = {
+              "RESEARCH_META_ONLY", "KEY_REQUIRED", "ACCESS_RESTRICTED",
+              "RATE_LIMITED", "SOURCE_UNAVAILABLE", "BLOCKED", "DISABLED",
+          }
+          if status not in allowed_status:
+              print("METADATA_CHECK_RESULT=UNEXPECTED_STATUS")
+              raise SystemExit(1)
+          if status != "RESEARCH_META_ONLY":
+              print("METADATA_CHECK_RESULT=" + status)
+              print("NO_LIVE_DATA_OR_MARKET_AUTHORIZATION")
+              raise SystemExit(1)
+          if (record.get("marketFeedReadyForProduction") is not False
+                  or record.get("upstreamRightsApproved") is not False
+                  or record.get("maySendDiscordWebhook") is not False
+                  or record.get("authorizesOffer") is not False
+                  or record.get("confirmedMarketQuote") is not False):
+              print("METADATA_CHECK_RESULT=PROHIBITED_AUTHORITY")
+              raise SystemExit(1)
+          print("METADATA_CHECK_RESULT=AUTHENTICATED_AGGREGATOR_METADATA_ONLY")
+          print("PROVIDER_ITEM_COUNT=" + str(record["datasetItemsReported"]))
+          print("PROVIDER_CLAIMED_REFRESH_HOURS=" + str(record["aggregatorRefreshHours"]))
+          print("AGGREGATOR_LAST_UPDATED_TIMEZONE_UNVERIFIED=" +
+                record["aggregatorLastUpdatedUnzoned"])
+          print("AGGREGATOR_LAST_RUN_TIMEZONE_UNVERIFIED=" +
+                record["aggregatorLastRunUnzoned"])
+          print("SOURCE_DERIVED_FROM_SUPREME=" + str(record["knownSupremeDerivedData"]))
+          print("LIVE_PRICE_AUTHORITY=BLOCKED")
+          print("NO_WEAPON_PRICES_OR_DISCORD_SENT")
+          PY
