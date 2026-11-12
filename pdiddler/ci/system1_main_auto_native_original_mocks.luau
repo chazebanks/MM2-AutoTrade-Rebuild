@@ -1269,6 +1269,41 @@ do
  eq(json.verifiedCompletedTrades,0,"no fabricated trade completions")
 end
 
+-- Real-MM2-like delayed stack-label hydration: the physical ALT item
+-- appears as quantity x1 for several client ticks, then the same visible
+-- weapon becomes x2. This must NOT STOP early or fabricate evidence.
+do
+ local x=fixture()
+ for _=1,20 do x.tick() end
+ for i=1,4 do x.named("OwnedChoice_"..i).Activated:Fire() end
+ x.tick()
+ x.named("ArmEightScenarios").Activated:Fire()
+ eq(untilRound(x,1,"WAIT_OPEN",150),true,
+   "delayed stack test starts fresh original P3 request epoch")
+ x.open()
+ eq(untilRound(x,1,"ALT_ADD",80),true,
+   "delayed stack test reaches dedicated ALT_ADD phase")
+ x.setAlt(1,1,false) -- first GUI frame can precede count-label hydration
+ for _=1,7 do
+  x.tick()
+  local v=x.state()
+  eq(v.phase,"ALT_ADD",
+    "initial x1 snapshot held harmlessly while UI count settles")
+  eq(v.actions.offersAttempted,0,
+    "no MAIN offer while x1 screenshot differs from planned x2")
+ end
+ x.setAlt(1,2,false) -- same displayed item, client count is now hydrated
+ eq(untilRound(x,1,"ALT_REMOVE_ALL",60),true,
+   "corrected x2 passes only after stable GUI observations")
+ eq(x.state().actions.stackedAltSlotsVerified,1,
+   "one physical ALT stacked x2 unit scenario verified")
+ x.setAlt(0)
+ eq(untilRound(x,2,"WAIT_OPEN",90),true,
+   "clean first trade declines and starts second new P3 epoch")
+ eq(x.declines(),1,"first trade guarded original decline exactly once")
+ eq(x.requests(),2,"no duplicate request despite delayed stack hydration")
+end
+
 -- Negative ARM8 first-fault proof: wrong stack quantity is terminal,
 -- preserves exact scenario/phase, does not request trade 2 or click Decline.
 do
@@ -1287,6 +1322,18 @@ do
  local r=x.state()
  eq(r.reason,"ALT_EXPECTED_ONE_STACKED_QTY2_SLOT",
    "specific first scenario fault")
+ eq(type(r.firstFailureEvidence),"table",
+   "bad stack STOP keeps sanitized diagnostic evidence")
+ eq(r.firstFailureEvidence.observedPhysicalSlots,1,
+   "diagnostic reports observed physical ALT slot count")
+ eq(r.firstFailureEvidence.observedQuantity,1,
+   "diagnostic states parser read x1, not planned x2")
+ eq(r.firstFailureEvidence.observedChroma,false,
+   "diagnostic reports non-Chroma flag without item identity")
+ eq(r.firstFailureEvidence.quantitySource,"EXPLICIT_X_COUNT_CLIENT",
+   "diagnostic describes exact protected quantity label source")
+ eq(r.firstFailureEvidence.secondsSinceFirstSlot>=1.25,true,
+   "persistent mismatch stops only after UI settling interval")
  eq(r.firstFailureScenario,"STACK_QTY2",
    "failure scenario precisely exported")
  eq(r.round,1,"failed trade index precisely exported")
