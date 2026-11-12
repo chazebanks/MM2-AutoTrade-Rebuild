@@ -23,13 +23,13 @@ jobs:
       - name: Checkout immutable reviewed P1 research commit
         uses: actions/checkout@v4
         with:
-          ref: d23c4af7928745fc6b5419f973e18faec9f75e69
+          ref: 0b2ff8983a1ced5199b585dacbff268bcdca76f4
           fetch-depth: 1
           persist-credentials: false
       - name: Verify adapter source pin
         shell: bash
         run: |
-          test "$(git rev-parse HEAD)" = "d23c4af7928745fc6b5419f973e18faec9f75e69"
+          test "$(git rev-parse HEAD)" = "0b2ff8983a1ced5199b585dacbff268bcdca76f4"
           echo "P1 reviewed research code pin confirmed"
       - uses: actions/setup-python@v5
         with:
@@ -45,27 +45,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m pdiddler.ci.p1_rblxvalue_v2_private_adapter --probe-meta > "$RUNNER_TEMP/rblxvalue-meta-response.json"
-          # Independent client comparison: only if adapter reports a 403.
-          # curl reads its private header from stdin, never CLI args or logs.
-          python3 - <<'PY'
-          import json, os, subprocess
-          from pathlib import Path
-          record = json.loads((Path(os.environ["RUNNER_TEMP"]) / "rblxvalue-meta-response.json").read_text())
-          if record.get("status") != "ACCESS_RESTRICTED":
-              print("INDEPENDENT_CURL_CHECK=SKIPPED_NOT_403")
-          else:
-              key = os.environ.get("RBLXVALUE_API_KEY", "")
-              print("SECRET_PREFIX_FORMAT=" + ("EXPECTED" if key.startswith("rbx_") else "UNEXPECTED"))
-              # No secret, URL parameters, headers or raw body in outputs.
-              config = 'url = "https://api.rblxvalue.com/v2/meta"\nrequest = "GET"\nheader = "Accept: application/json"\nheader = "X-Api-Key: ' + key + '"\noutput = "/dev/null"\nsilent\nshow-error = no\nwrite-out = "%{http_code}"\nmax-time = 8\n'
-              try:
-                  p = subprocess.run(["curl", "--config", "-", "--proto", "=https", "--max-redirs", "0"], input=config, text=True, capture_output=True, timeout=12, check=False)
-                  code = p.stdout.strip()
-                  print("INDEPENDENT_CURL_HTTP=" + (code if code in ("200","401","403","429") else "OTHER"))
-                  print("INDEPENDENT_CURL_TRANSPORT=" + ("OK" if p.returncode == 0 else "FAILED"))
-              except (OSError, subprocess.TimeoutExpired):
-                  print("INDEPENDENT_CURL_TRANSPORT=FAILED")
-          PY
+          # Exactly ONE API request: adapter uses curl already; no fallback probe.
           python3 - <<'PY'
           import json, os, pathlib, re, sys
           path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "rblxvalue-meta-response.json"
