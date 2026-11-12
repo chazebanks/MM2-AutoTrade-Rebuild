@@ -9,7 +9,10 @@ on:
       - 'pdiddler/ci/test_p1_supreme_transport_probe.py'
       - 'pdiddler/ci/p1_source_rights_gate.py'
       - 'pdiddler/ci/test_p1_source_rights_gate.py'
+      - 'pdiddler/ci/p1_mm2index_research_audit.py'
+      - 'pdiddler/ci/test_p1_mm2index_research_audit.py'
       - 'pdiddler/intelligence_lab/P1_SOURCE_RIGHTS_DISCOVERY_2026_11_11.md'
+      - 'pdiddler/intelligence_lab/P1_MM2INDEX_RESEARCH_AUDIT_2026_11_11.md'
   workflow_dispatch:
 permissions:
   contents: read
@@ -28,9 +31,9 @@ jobs:
         run: |
           python3 -m pdiddler.continuity.manager verify
           python3 -m pdiddler.continuity.manager recover
-      - name: Verify historic HTTP diagnostic and source rights block offline
+      - name: Verify historic HTTP, source rights and MM2 Index audit OFFLINE
         run: |
-          python3 -m unittest -v pdiddler.ci.test_p1_supreme_transport_probe pdiddler.ci.test_p1_source_rights_gate
+          python3 -m unittest -v pdiddler.ci.test_p1_supreme_transport_probe pdiddler.ci.test_p1_source_rights_gate pdiddler.ci.test_p1_mm2index_research_audit
       - name: Write source permission BLOCKED receipt; never access publisher
         run: |
           python3 -m pdiddler.ci.p1_source_rights_gate --output /tmp/gingerscope-p1-rights/source_access_receipt.json
