@@ -1,3 +1,5 @@
+> **SUPERSEDED AS THE FIRST DEVICE TEST:** The user has authorized the separately safeguarded **MAIN-AUTOMATIC** four-trade test. For the current test, read **[SYSTEM1_MAIN_AUTO_FOUR_TRADE_RUNBOOK.md](SYSTEM1_MAIN_AUTO_FOUR_TRADE_RUNBOOK.md)** and use `SYSTEM1_MAIN_AUTO_FOUR_TRADES_NATIVE.lua` from a frozen, all-green PR241 head. This older document and `SYSTEM1_MULTITRADE_GUIDED_NATIVE.lua` are preserved as READ-ONLY/manual baseline tests; they require manual MAIN actions and are **NOT** the correct current test. Do not mix the two loaders.
+
 # System 1 — Supervised Trading Engine: one integrated MAIN/ALT test program
 
 **Status: DRAFT.** The four-round native manual-client GUI script is a **diagnostic**, not the finished trading engine. It does NOT automate Part 3 requests, Part 4 offers, final Accept or trade settlements. The purpose is to exercise **multiple distinct trade windows with the same consenting ALT in one server**, with a step-by-step purple GUI and an immutable, sanitized per-round report.
