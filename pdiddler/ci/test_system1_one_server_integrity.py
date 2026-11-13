@@ -92,6 +92,8 @@ class OneServerComposedSafety(unittest.TestCase):
             'preflight.stableReadinessChecks>=4',
             'engine.preflightAbort(',
             'task.wait(0.2)',
+            'pcall(readiness)',
+            'PREFLIGHT_READ_EXCEPTION',
         ):
             with self.subTest(token=token):
                 self.assertIn(token, NATIVE)
