@@ -18,7 +18,7 @@ class OneServerComposedSafety(unittest.TestCase):
         self.assertEqual(
             pins["FIRST"], "b24661781e72e3dec759960d2f4b423841961c8b")
         self.assertEqual(
-            pins["SECOND"], "beabbd8194e8071e93829d87b63eb839ab48aa7c")
+            pins["SECOND"], "00df99fe94e3c201596db9243b6c01b8279339ae")
         self.assertEqual(
             pins["CONTROL"], "2c822f3519739d075eab3ec0f4e76830ad0da715")
 
