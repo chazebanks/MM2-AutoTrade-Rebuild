@@ -1,0 +1,44 @@
+name: Gingerscope System2 licensed listing observations (offline)
+
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/licensed_listing_observation.py'
+      - 'pdiddler/system2/LICENSED_LISTING_OBSERVATION_HANDOFF_2026_11_13.md'
+      - 'pdiddler/ci/test_system2_licensed_listing_observation.py'
+      - '.github/workflows/gingerscope-system2-licensed-listing-research.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  listing-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python source and synthetic adversarial tests, no network
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_system2_licensed_listing_observation
+      - name: Reject accidental network and market-trading coupling
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          src = Path("pdiddler/system2/licensed_listing_observation.py").read_text()
+          checks = {
+            "no HTTP client": all(x not in src for x in ("urllib", "requests", "http.client", "socket.", "httpx", "aiohttp")),
+            "no gameplay/executor coupling": all(x not in src for x in ("OfferItem", "AcceptTrade", "FireServer", "getgenv()", "Delta", "p3Module")),
+            "licensed dataset attribution": 'CC BY 4.0' in src and 'FairStash' in src,
+            "no fake missing zeros": 'latestDaySellingObserved' in src and 'if value else None' in src,
+            "no live trading": all(x in src for x in (
+              '"mayFeedLiveStrategy": False', '"authorizesTrade": False',
+              '"authorizesAccept": False', '"verifiedMarketQuote": False',
+              '"serverCompletionProven": False')),
+          }
+          for name, ok in checks.items():
+            print(("PASS" if ok else "FAIL"), name)
+          assert all(checks.values())
+          PY
