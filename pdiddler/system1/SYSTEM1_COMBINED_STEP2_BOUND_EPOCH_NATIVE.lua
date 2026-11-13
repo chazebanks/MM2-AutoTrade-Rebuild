@@ -475,6 +475,24 @@ local function observe()
  if not pOk or type(pending)~="boolean" or
    not sOk or type(paused)~="boolean" then
   return failed("P3_OBSERVER_INVALID","P3_GUI_PENDING_OR_PAUSE_INVALID")end
+ -- Frozen targets may leave or lose eligibility after operator ARM.
+ -- Observe remaining exact current eligible targets without contacting.
+ local gotList,current=pcall(targetGate.scanner.getWhitelist)
+ local gotPending,hasPending=pcall(targetGate.scanner.hasPendingWork)
+ if not gotList or type(current)~="table" or
+    not gotPending or type(hasPending)~="boolean" then
+  return failed("P3_OBSERVER_INVALID","POST_CLOSE_WHITELIST_UNREADABLE")end
+ local remainingEligible=0
+ for _,candidate in ipairs(current)do
+  if candidate and type(candidate.UserId)=="number" and
+     state.processed[candidate.UserId]==nil then
+   remainingEligible+=1
+  end
+ end
+ local remainingFrozen=status.frozenTargets-status.processedTargets
+ if remainingFrozen<0 or remainingEligible>remainingFrozen or
+    remainingEligible>3 then
+  return failed("P3_OBSERVER_INVALID","FROZEN_ELIGIBLE_COUNTS_UNSAFE")end
  local observed={
   safe=true,noFinalAccept=true,noItemsOffered=true,
   noServerHop=true,clientTradeSettled=false,
