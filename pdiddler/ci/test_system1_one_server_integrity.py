@@ -20,7 +20,7 @@ class OneServerComposedSafety(unittest.TestCase):
         self.assertEqual(
             pins["SECOND"], "b7d98b9b0815f72bff63fe7b58b8c92c59c3e0d7")
         self.assertEqual(
-            pins["CONTROL"], "7c07db3ec5feeb3404d195a89fad14bbcff9985a")
+            pins["CONTROL"], "16d78bdeb9dd2eec6649afe8a08fab2333da6625")
 
     def test_stage2_original_io_code_is_byte_identical_after_preflight(self):
         anchor = 'local Players=game:GetService("Players")'
@@ -97,6 +97,19 @@ class OneServerComposedSafety(unittest.TestCase):
                 self.assertIn(token, NATIVE)
         self.assertIn('PREFLIGHT_"..', NATIVE)
         self.assertIn('COMBINED_STEP1_PREFLIGHT_NOT_READY', CTRL)
+
+    def test_step1_original_startup_error_is_not_lost_or_stale(self):
+        for required in (
+            'startFailure=step1StartFailure',
+            'priorStep1Json=E.PDIDDLER_SYSTEM1_MAIN_AUTO_LAST_JSON',
+            'raw~=priorStep1Json',
+            'Http:JSONDecode(raw)',
+            'SOURCE_PINNED_FETCH_FAILED',
+            'SCRIPT_EXECUTION_FAILED',
+            'SCRIPT_RETURNED_NO_RUNNER',
+        ):
+            self.assertIn(required, NATIVE)
+        self.assertIn('step1Failure=childFault(sourceFailure)', CTRL)
 
     def test_source_names_and_original_test_integrity(self):
         for part in (
