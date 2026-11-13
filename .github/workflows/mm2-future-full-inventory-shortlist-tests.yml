@@ -1,0 +1,34 @@
+name: MM2 future full-inventory shortlist (offline)
+on:
+  push:
+    branches:
+      - feature/gingerscope-future-full-inventory-shortlist-offline
+    paths:
+      - 'pdiddler/intelligence_lab/future_full_inventory_shortlist.py'
+      - 'pdiddler/intelligence_lab/test_future_full_inventory_shortlist.py'
+      - 'pdiddler/intelligence_lab/FUTURE_FULL_INVENTORY_SHORTLIST_RESEARCH.md'
+      - '.github/workflows/mm2-future-full-inventory-shortlist-tests.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/future_full_inventory_shortlist.py'
+      - 'pdiddler/intelligence_lab/test_future_full_inventory_shortlist.py'
+      - 'pdiddler/intelligence_lab/FUTURE_FULL_INVENTORY_SHORTLIST_RESEARCH.md'
+      - '.github/workflows/mm2-future-full-inventory-shortlist-tests.yml'
+permissions:
+  contents: read
+jobs:
+  bounded-offline-inventory-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Full inherited and shortlist offline Python test suite
+        run: python -m unittest discover -s pdiddler/intelligence_lab -p 'test_*.py' -v
+      - name: No network/game actions in shortlister
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -E '(FireServer|InvokeServer|HttpGet|requests\.get|PostAsync|TeleportToPlaceInstance|setclipboard)' pdiddler/intelligence_lab/future_full_inventory_shortlist.py
