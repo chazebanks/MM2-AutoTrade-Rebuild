@@ -12,19 +12,40 @@ local function step1()
  local rounds={}
  for i,name in ipairs(names)do
   rounds[i]={round=i,scenarioId=name,status="CLIENT_SEQUENCE_PASS",
-   clientWindowClosed=true}
+   clientWindowClosed=true,closedBy="MAIN_GUARDED_DECLINE"}
  end
  return{
   status="CLIENT_TEST_SEQUENCE_COMPLETE",phase="DONE",
   reason="ALL_THREE_RECOVERY_CLIENT_SCENARIOS_VERIFIED",
   completedRounds=3,maxRounds=3,recoveryBatchAuthorized=true,
-  authorizesAccept=false,finalAcceptEverAttempted=false,
-  serverCompletionProven=false,verifiedCompletedTrades=0,
+  -- Real original Step1 raw controller.status() omits these two
+  -- fields. They exist ONLY in the serializer's separate JSON.
+  authorizesAccept=false,serverCompletionProven=false,
   possibleSideEffect=false,rounds=rounds,
   actions={requestsStarted=3,offersClientVisible=6,
    removalsAttempted=6,declinesAttempted=3,clientClosedWindows=3,
    adaptiveReoffersAttempted=3},
  }
+end
+local function serializedStep1(raw)
+ local actions={}
+ for k,v in pairs(raw.actions or {})do actions[k]=v end
+ local rounds={}
+ for i,v in ipairs(raw.rounds or {})do
+  rounds[i]={}
+  for k,value in pairs(v)do rounds[i][k]=value end
+ end
+ local exported={}
+ for k,v in pairs(raw)do exported[k]=v end
+ exported.actions=actions
+ exported.rounds=rounds
+ exported.schema="gingerscope-system1-step1-alt-recovery-native-v1"
+ exported.runNonce="00000000-0000-0000-0000-SERIALIZED_STEP1"
+ exported.finalAcceptEverAttempted=false
+ exported.verifiedCompletedTrades=0
+ exported.noServerSettlementProof=true
+ exported.clientOnly=true
+ return exported
 end
 local function step2()
  return{
@@ -44,6 +65,7 @@ local function fixture(cfg)
  local f={now=1,jobOk=true,epoch=18,quiescentSafe=true,
   first=step1(),second=step2(),launchedFirst=0,launchedSecond=0,
   stopped=0,reports={},log={},isStage2=false}
+ f.export=serializedStep1(f.first)
  local api={
   launchStep1=function()
    f.launchedFirst+=1
@@ -51,6 +73,9 @@ local function fixture(cfg)
    return true
   end,
   step1Status=function()return f.first end,
+  step1VerifiedReceipt=function()
+   return cfg.dropExport and nil or f.export
+  end,
   quiescent=function()
    return {safe=f.quiescentSafe,epoch=f.epoch}
   end,
@@ -294,6 +319,72 @@ do
  eq(r.step1Failure.possibleSideEffect,true,
   "uncertain child side effect never reclassified safe")
  eq(f.launchedSecond,0,"no Step2 after uncertain stop")
+end
+
+
+-- Reproduce exact device issue: live Step1.status() has no serialized-only
+-- fields even after 3/3, while the separately exported original Step1 JSON
+-- contains explicit false/zero. Matching both is a PASS; no safety bypass.
+do
+ local f=fixture()
+ eq(f.first.finalAcceptEverAttempted,nil,
+  "real controller.status omits finalAcceptEverAttempted")
+ eq(f.first.verifiedCompletedTrades,nil,
+  "real controller.status omits verifiedCompletedTrades")
+ eq(f.export.finalAcceptEverAttempted,false,
+  "original JSON explicitly asserts no final Accept")
+ eq(f.export.verifiedCompletedTrades,0,
+  "original JSON explicitly asserts no settled trade")
+ eq(f.engine.start(f.now),true,"real raw/export mismatch test starts")
+ eq(f.advance(1).phase,"QUIESCENCE",
+  "verified source JSON closes raw status safety-field gap")
+ eq(f.launchedSecond,0,"no Step2 before old-session barrier")
+end
+
+-- Missing or contradictory original serializer evidence FAILS CLOSED,
+-- regardless of the raw Step1 report's 3/3 completion.
+for _,mode in ipairs({
+ "NO_EXPORT","FINAL_ACCEPT_TRUE","SETTLED_NONZERO",
+ "SERIALIZER_NOT_CLIENT","STALE_ROUND","ALTERED_SLOT",
+ "NO_GUARDED_DECLINE","SAFETY_FLAG_MISSING",
+})do
+ local f=fixture({dropExport=mode=="NO_EXPORT"})
+ if mode=="FINAL_ACCEPT_TRUE" then
+  f.export.finalAcceptEverAttempted=true
+ elseif mode=="SETTLED_NONZERO" then
+  f.export.verifiedCompletedTrades=1
+ elseif mode=="SERIALIZER_NOT_CLIENT" then
+  f.export.clientOnly=false
+ elseif mode=="STALE_ROUND" then
+  f.export.completedRounds=2
+ elseif mode=="ALTERED_SLOT" then
+  f.export.actions.offersClientVisible=5
+ elseif mode=="NO_GUARDED_DECLINE" then
+  f.export.rounds[2].closedBy="UNKNOWN"
+ elseif mode=="SAFETY_FLAG_MISSING" then
+  f.export.noServerSettlementProof=nil
+ end
+ f.engine.start(f.now)
+ local r=f.advance(1)
+ eq(r.status,"STOPPED","export mismatch terminal "..mode)
+ eq(r.reason,mode=="NO_EXPORT" and
+  "COMBINED_STEP1_SERIALIZED_RECEIPT_UNAVAILABLE" or
+  "COMBINED_STEP1_LEDGER_NOT_VERIFIED",
+  "precise mismatch classification "..mode)
+ eq(f.launchedSecond,0,"never start public requests from bad proof "..mode)
+ eq(f.stopped,1,"STOP after original proof mismatch "..mode)
+end
+
+-- Even with a good serialized report, unexpected non-nil raw security
+-- fields must never be silently accepted.
+for _,field in ipairs({"finalAcceptEverAttempted","verifiedCompletedTrades"})do
+ local f=fixture()
+ f.first[field]=field=="finalAcceptEverAttempted" and true or 1
+ f.engine.start(f.now)
+ local r=f.advance(1)
+ eq(r.reason,"COMBINED_STEP1_LEDGER_NOT_VERIFIED",
+  "raw report safety contradiction not authorized "..field)
+ eq(f.launchedSecond,0,"no public requests on raw mismatch "..field)
 end
 
 print("SYSTEM1_ONE_SERVER_TRANSITION_CONTROLLER_PASS",tests)
