@@ -315,7 +315,14 @@ local function updatePanel()
  if controller then
   local r=controller.status()
   screen.title.Text="STEP 2 | "..r.status
-  screen.body.Text=r.reason
+  local progress=r.publicProgressDiagnostic
+  if r.phase=="RUNNING" and type(progress)=="table" then
+   screen.body.Text="P3 "..(progress.p3Paused and "PAUSED" or "ACTIVE")..
+    " | Eligible remaining: "..tostring(progress.remainingEligibleNow)..
+    " | No progress: "..tostring(progress.secondsSinceLastProgress).."s"
+  else
+   screen.body.Text=r.reason
+  end
   screen.status.Text="Contacts: "..tostring(r.attemptedDistinctContacts)..
    " | Processed: "..tostring(r.processedTargets).."/"..tostring(r.frozenTargets)..
    " | Bound closes: "..tostring(r.provenBoundClientCloses)
@@ -510,6 +517,12 @@ local function observe()
   autoDeclines=autoDeclines,
   exhausted=status.status=="EXHAUSTED",
   boundActive=false,pendingVisible=pending,p3Paused=paused,
+  remainingFrozenUnprocessed=remainingFrozen,
+  remainingEligibleNow=remainingEligible,
+  scannerPendingWork=hasPending,
+  p3Active=state.active~=nil,
+  tradeRootVisible=false,
+  watchdogStatus=safeCode(watchdogLastStatus),
  }
  local stageCodes={
   TRADE_TAP_RETURNED_UNCONFIRMED="P3_TRADE_TAP_RETURNED_UNCONFIRMED",
@@ -567,6 +580,7 @@ local function observe()
  if status.status=="STOPPED" then
   observed.fault="P3_GATE_STOPPED" end
  local root,why=tradeRoot()
+ observed.tradeRootVisible=root~=nil
  if why then
   observed.fault="P4_BOUND_SNAPSHOT_UNSAFE"
   return observed end
