@@ -88,6 +88,44 @@ function M.new(api,opts)
  local retirement=nil
  local quiescenceProof=0
  local firstFault=nil
+ local step1Failure=nil
+ local step2Failure=nil
+ -- Preserve no free-form usernames, inventories, GUI text or raw IDs.
+ local function enum(v)
+  return type(v)=="string" and #v<=72 and
+   v:match("^[A-Z0-9_]+$") and v or "UNKNOWN"
+ end
+ local function num(v,max)
+  return type(v)=="number" and v==v and v>=0 and
+   v<=max and v==math.floor(v) and v or 0
+ end
+ local function childFault(r)
+  if type(r)~="table" then return {reason="NO_CHILD_RECEIPT"}end
+  local actions=type(r.actions)=="table" and r.actions or {}
+  local p=type(r.firstFailureEvidence)=="table" and
+    r.firstFailureEvidence or {}
+  return {
+   reason=enum(r.reason),phase=enum(r.phase),
+   scenarioId=enum(r.scenarioId),lastAction=enum(r.lastAction),
+   round=num(r.round,8),completedRounds=num(r.completedRounds,8),
+   requestAttempts=num(actions.requestsStarted,12),
+   offersClientVisible=num(actions.offersClientVisible,24),
+   removalsAttempted=num(actions.removalsAttempted,24),
+   declinesAttempted=num(actions.declinesAttempted,12),
+   clientClosedWindows=num(actions.clientClosedWindows,12),
+   possibleSideEffect=r.possibleSideEffect==true,
+   childCopyAttempted=r.copyAttempted==true,
+   firstFailureEvidence={
+    expectedQuantity=num(p.expectedQuantity,20),
+    observedQuantity=num(p.observedQuantity,20),
+    lastClearQuantity=num(p.lastClearQuantity,20),
+    sameVisibleName=p.sameVisibleName==true,
+    sameChroma=p.sameChroma==true,
+    sameSlot=p.sameSlot==true,
+    sameClientIdCandidate=p.sameClientIdCandidate==true,
+   },
+  }
+ end
  local function result()
   return {
    schema="gingerscope-system1-one-server-integration-client-v1",
@@ -96,6 +134,8 @@ function M.new(api,opts)
      or phase=="INCONCLUSIVE" and "INCONCLUSIVE" or phase,
    phase=phase,reason=reason,
    firstFault=firstFault,
+   step1Failure=step1Failure,
+   step2Failure=step2Failure,
    step1ThreeWindowsVerified=phase1~=nil,
    step1ClosedWindows=phase1 and 3 or 0,
    step2AttemptedDistinctContacts=phase2 and
@@ -125,9 +165,17 @@ function M.new(api,opts)
   end
   return result()
  end
- local function stop(why)
+ local function stop(why,child)
   if phase=="DONE" or phase=="STOPPED" or phase=="INCONCLUSIVE" then
    return result()end
+  if why=="COMBINED_STEP1_STOPPED" or
+     why=="COMBINED_STEP1_PREARM_STOPPED" or
+     why=="COMBINED_STEP1_LEDGER_NOT_VERIFIED" then
+   step1Failure=childFault(child)
+  elseif why=="COMBINED_STEP2_STOPPED" or
+     why=="COMBINED_STEP2_LEDGER_NOT_VERIFIED" then
+   step2Failure=childFault(child)
+  end
   phase="STOPPED";reason=why;firstFault=why
   pcall(api.stopActive)
   if not terminalEmitted then
@@ -159,10 +207,15 @@ function M.new(api,opts)
    if not ok or type(r)~="table" then
     return stop("COMBINED_STEP1_STATUS_UNREADABLE")end
    if r.phase=="STOPPED" or r.status=="STOPPED" then
-    return stop("COMBINED_STEP1_STOPPED")end
+    return stop("COMBINED_STEP1_STOPPED",r)end
+   if r.phase=="SELECT_TWO_OWN_ITEMS" and
+      r.status=="PREPARING" and
+      r.reason~="NO_REQUESTS_UNTIL_ARM_BUTTON" and
+      r.reason~="NOT_ARMED" then
+    return stop("COMBINED_STEP1_PREARM_STOPPED",r)end
    if r.phase=="DONE" or r.status=="CLIENT_TEST_SEQUENCE_COMPLETE" then
     if not checkedStep1(r) then
-     return stop("COMBINED_STEP1_LEDGER_NOT_VERIFIED")end
+     return stop("COMBINED_STEP1_LEDGER_NOT_VERIFIED",r)end
     phase1=r;phase="QUIESCENCE";reason="WAIT_OLD_P3_RETIREMENT"
     changedAt=now
    end
@@ -193,12 +246,12 @@ function M.new(api,opts)
    if not ok or type(r)~="table" then
     return stop("COMBINED_STEP2_STATUS_UNREADABLE")end
    if r.phase=="STOPPED" or r.status=="STOPPED" then
-    return stop("COMBINED_STEP2_STOPPED")end
+    return stop("COMBINED_STEP2_STOPPED",r)end
    if r.phase=="INCONCLUSIVE" then
     return finalize("COMBINED_STEP2_NOT_PROVEN",false)end
    if r.phase=="DONE" or r.status=="PUBLIC_CLIENT_ROTATION_HANDOFF_PASS" then
     if not checkedStep2(r) then
-     return stop("COMBINED_STEP2_LEDGER_NOT_VERIFIED")end
+     return stop("COMBINED_STEP2_LEDGER_NOT_VERIFIED",r)end
     phase2=r
     return finalize("ALT_RECOVERY_AND_PUBLIC_P3P4_SAME_JOB_PROVEN",true)
    end
