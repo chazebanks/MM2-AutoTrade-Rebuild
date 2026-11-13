@@ -8,7 +8,7 @@ local USED="PDIDDLER_SYSTEM1_ONE_SERVER_COMBINED_USED_JOB"
 local PLACE=142823291
 local FIRST="b24661781e72e3dec759960d2f4b423841961c8b"
 local SECOND="b7d98b9b0815f72bff63fe7b58b8c92c59c3e0d7"
-local CONTROL="7c07db3ec5feeb3404d195a89fad14bbcff9985a"
+local CONTROL="16d78bdeb9dd2eec6649afe8a08fab2333da6625"
 local PREFIX="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local THIS_JOB=game.JobId
 local Players=game:GetService("Players")
@@ -56,6 +56,8 @@ local owner={job=THIS_JOB,running=true,phase="STARTING"}
 E[KEY]=owner
 local firstRunner=nil
 local secondRunner=nil
+local stage1LoaderReason="STEP1_SOURCE_NOT_ATTEMPTED"
+local priorStep1Json=nil
 local lastJson=nil
 local runNonce="GUID_UNAVAILABLE"
 pcall(function()runNonce=Http:GenerateGUID(false) end)
@@ -178,11 +180,13 @@ local function quiescent()
 end
 local function loadScript(rev,path,min,max)
  local src=pinned(rev,path,min,max)
- if not src then return nil end
+ if not src then return nil,"SOURCE_PINNED_FETCH_FAILED" end
  local okay,res=pcall(function()
   return assert(compiler(src))()
  end)
- return okay and type(res)=="table" and res or nil
+ if not okay then return nil,"SCRIPT_EXECUTION_FAILED" end
+ if type(res)~="table" then return nil,"SCRIPT_RETURNED_NO_RUNNER" end
+ return res,nil
 end
 local function emit(r)
  local data={}
@@ -210,13 +214,43 @@ local function emit(r)
 end
 local function launchStep1()
  if not jobMatches() or firstRunner or
-    E.PDIDDLER_OUTGOING_SESSION~=nil then return false end
- firstRunner=loadScript(
+    E.PDIDDLER_OUTGOING_SESSION~=nil then
+  stage1LoaderReason="STARTUP_SESSION_OR_JOB_INVALID"
+  return false
+ end
+ -- Do not mistake a stale previous-job child JSON for this fresh run.
+ priorStep1Json=E.PDIDDLER_SYSTEM1_MAIN_AUTO_LAST_JSON
+ local loaded,why=loadScript(
   FIRST,"system1/SYSTEM1_STEP1_ALT_DYNAMIC_RECOVERY_NATIVE.lua",
   15000,70000)
- return type(firstRunner)=="table" and
-    type(firstRunner.status)=="function" and
-    type(firstRunner.stop)=="function"
+ firstRunner=loaded
+ if type(firstRunner)~="table" then
+  stage1LoaderReason=why or "SCRIPT_RETURNED_NO_RUNNER"
+  return false end
+ if type(firstRunner.status)~="function" or
+    type(firstRunner.stop)~="function" then
+  stage1LoaderReason="RUNNER_API_INCOMPLETE"
+  return false end
+ return true
+end
+local function step1StartFailure()
+ -- Original Step1 writes its OWN diagnostic JSON when its setup fails.
+ -- Decode it only when newly written by THIS attempt, then sanitize it
+ -- inside the transition controller's childFault before copying.
+ local raw=E.PDIDDLER_SYSTEM1_MAIN_AUTO_LAST_JSON
+ if type(raw)=="string" and #raw<=16000 and raw~=priorStep1Json then
+  local ok,decoded=pcall(function()return Http:JSONDecode(raw)end)
+  if ok and type(decoded)=="table" and decoded.schema==
+     "gingerscope-system1-step1-alt-recovery-native-v1" and
+     decoded.status=="STOPPED" then
+   return decoded
+  end
+ end
+ return{
+  status="STOPPED",phase="SETUP",round=0,completedRounds=0,
+  lastAction="BEFORE_ARM",reason=stage1LoaderReason,
+  possibleSideEffect=false,
+ }
 end
 local function launchStep2(retiredEpoch)
  if not jobMatches() or secondRunner or
@@ -265,6 +299,7 @@ local function stopActive()
 end
 local api={
  launchStep1=launchStep1,
+ startFailure=step1StartFailure,
  step1Status=function()return firstRunner and firstRunner.status()end,
  quiescent=quiescent,
  launchStep2=launchStep2,
