@@ -388,4 +388,51 @@ for _,field in ipairs({"finalAcceptEverAttempted","verifiedCompletedTrades"})do
  eq(f.launchedSecond,0,"no public requests on raw mismatch "..field)
 end
 
+
+-- Actual reported combined failure: Step1 fully passed but Step2 watchdog
+-- stopped with zero contacts. The *new* child must carry exact sanitized
+-- watchdog reason and heartbeat/epoch evidence into ONE combined JSON.
+do
+ local f=fixture()
+ eq(f.engine.start(f.now),true,"Step1 source starts")
+ eq(f.advance(6).phase,"STEP2","Step1 exact 3/3 and P3 retired")
+ f.second={
+  status="STOPPED",phase="STOPPED",
+  reason="P3_WATCHDOG_BLOCKED",lastAction="P3_PUBLIC_GATE_AND_SUPERVISOR_ARM",
+  possibleSideEffect=false,copyAttempted=true,
+  publicRequestDiagnostic={originalP3SentConfirmed=0},
+  firstFailureEvidence={
+   stage="WATCHDOG_BLOCKED_EVENT",
+   watchdogStatus="BLOCKED",
+   watchdogReason="P3_ONSCREEN_INSTRUCTIONS_LOST",
+   sessionEpochMatches=true,watchdogReady=false,
+   observedP3Sends=0,tradeButtonTapAttempted=false,
+  }
+ }
+ local r=f.advance(1)
+ eq(r.status,"STOPPED","combined closes before another public request")
+ eq(r.reason,"COMBINED_STEP2_STOPPED","outer stop matches first-fault stage")
+ eq(r.step1ThreeWindowsVerified,true,"Stage1 remains independently PASS")
+ eq(r.step2Failure.reason,"P3_WATCHDOG_BLOCKED",
+   "original Step2 terminal cause not erased")
+ eq(r.step2Failure.firstFailureEvidence.watchdogReason,
+  "P3_ONSCREEN_INSTRUCTIONS_LOST","actual original watchdog reason retained")
+ eq(r.step2Failure.firstFailureEvidence.watchdogStatus,"BLOCKED",
+  "explicit BLOCKED distinct from missing heartbeat")
+ eq(r.step2Failure.firstFailureEvidence.supervisionStage,
+  "WATCHDOG_BLOCKED_EVENT","actual supervision stage retained")
+ eq(r.step2Failure.firstFailureEvidence.sessionEpochMatches,true,
+  "no false session loss when epoch remains valid")
+ eq(r.step2Failure.firstFailureEvidence.watchdogReady,false,
+  "watchdog heartbeat state preserved")
+ eq(r.step2Failure.originalP3Sends,0,"zero confirmed request sends")
+ eq(r.step2Failure.firstFailureEvidence.observedP3Sends,0,
+  "zero native P3 requests at first watchdog fault")
+ eq(f.launchedSecond,1,"Step2 launched once only")
+ eq(f.stopped,1,"terminal automatically stops all")
+ eq(#f.reports,1,"single copied combined terminal JSON")
+ eq(f.reports[1].step2Failure.firstFailureEvidence.watchdogReason,
+  "P3_ONSCREEN_INSTRUCTIONS_LOST","terminal copy contains watchdog reason")
+end
+
 print("SYSTEM1_ONE_SERVER_TRANSITION_CONTROLLER_PASS",tests)
