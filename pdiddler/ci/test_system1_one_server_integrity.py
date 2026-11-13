@@ -50,7 +50,7 @@ class OneServerComposedSafety(unittest.TestCase):
         combined = restore_region(
             combined, 'local haltReason=nil', 'local function writeReceipt')
         combined = restore_region(
-            combined, '  onStatus=function(result)', ' },{\\n  spawn=')
+            combined, '  onStatus=function(result)', ' },{\n  spawn=')
         combined = restore_region(
             combined, 'local function observe()', ' local observed={')
         combined = restore_region(
