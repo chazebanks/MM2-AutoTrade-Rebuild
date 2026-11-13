@@ -18,14 +18,15 @@ local function passedStep1()
  local rounds={}
  for i,name in ipairs(names)do
   rounds[i]={round=i,scenarioId=name,
-    status="CLIENT_SEQUENCE_PASS",clientWindowClosed=true}
+    status="CLIENT_SEQUENCE_PASS",clientWindowClosed=true,
+    closedBy="MAIN_GUARDED_DECLINE"}
  end
  return{
   status="CLIENT_TEST_SEQUENCE_COMPLETE",phase="DONE",
   reason="ALL_THREE_RECOVERY_CLIENT_SCENARIOS_VERIFIED",
   completedRounds=3,maxRounds=3,recoveryBatchAuthorized=true,
-  authorizesAccept=false,finalAcceptEverAttempted=false,
-  serverCompletionProven=false,verifiedCompletedTrades=0,
+  -- Original raw status omits serializer-only safety fields.
+  authorizesAccept=false,serverCompletionProven=false,
   possibleSideEffect=false,rounds=rounds,
   actions={requestsStarted=3,offersClientVisible=6,
    removalsAttempted=6,declinesAttempted=3,
@@ -49,7 +50,25 @@ local STEP1=[[
 local E=getgenv()
 E.TEST_LOAD_SEQUENCE[#E.TEST_LOAD_SEQUENCE+1]="STAGE1"
 return {
- status=function()return E.TEST_STAGE1_STATE end,
+ status=function()
+  local r=E.TEST_STAGE1_STATE
+  -- The ORIGINAL native Step1 serializer adds two flags only to
+  -- its terminal JSON, not to the live controller.status().
+  if r and r.phase=="DONE" and E.TEST_SUPPRESS_STEP1_COPY~=true
+    and E.PDIDDLER_SYSTEM1_MAIN_AUTO_LAST_JSON==nil then
+   local published={}
+   for k,v in pairs(r)do published[k]=v end
+   published.schema="gingerscope-system1-step1-alt-recovery-native-v1"
+   published.runNonce="00000000-1111-2222-3333-444444444444"
+   published.finalAcceptEverAttempted=false
+   published.verifiedCompletedTrades=0
+   published.noServerSettlementProof=true
+   published.clientOnly=true
+   local http=game:GetService("HttpService")
+   E.PDIDDLER_SYSTEM1_MAIN_AUTO_LAST_JSON=http:JSONEncode(published)
+  end
+  return r
+ end,
  stop=function()E.TEST_STEP1_STOP_COUNT+=1;return true end,
 }
 ]]
@@ -450,6 +469,67 @@ do
   "precise redacted GUI exception classification")
  eq(#x.global.TEST_LOAD_SEQUENCE,0,"no request script loaded after GUI error")
  eq(#x.clips,1,"exception yields one safe COPY report")
+end
+
+
+-- Actual device schema reproduction: the live Step1 3/3 record omitted
+-- serialized-only finalAccept and settlement fields, but its original
+-- exported JSON explicitly contained them.
+do
+ local x=fixture()
+ for _=1,5 do x.tick()end
+ local raw=passedStep1()
+ eq(raw.finalAcceptEverAttempted,nil,"raw Step1 status omits Accept flag")
+ eq(raw.verifiedCompletedTrades,nil,"raw Step1 status omits settlement flag")
+ x.global.TEST_STAGE1_STATE=raw
+ x.global.PDIDDLER_OUTGOING_SESSION=8
+ x.global.PDIDDLER_SYSTEM1_STEP1_RECOVERY_USED_JOB=x.game.JobId
+ x.tick()
+ eq(x.runner.status().phase,"QUIESCENCE",
+  "combined verifier accepts actual status and exact original JSON")
+ eq(x.global.TEST_LOAD_SEQUENCE[2],nil,"no premature second controller")
+end
+-- Missing or contradictory original serialization MUST still STOP,
+-- even if the raw controller reports a successful 3/3 client run.
+for _,mode in ipairs({"NO_EXPORT","FINAL_ACCEPT_TRUE","SETTLED_NONZERO",
+  "MISMATCHED_ROUND","WRONG_SERIALIZER_SCHEMA"})do
+ local x=fixture()
+ for _=1,5 do x.tick()end
+ local raw=passedStep1()
+ x.global.TEST_STAGE1_STATE=raw
+ x.global.PDIDDLER_OUTGOING_SESSION=8
+ x.global.PDIDDLER_SYSTEM1_STEP1_RECOVERY_USED_JOB=x.game.JobId
+ if mode=="NO_EXPORT" then
+  x.global.TEST_SUPPRESS_STEP1_COPY=true
+ else
+  local published={}
+  for k,v in pairs(raw)do published[k]=v end
+  published.schema="gingerscope-system1-step1-alt-recovery-native-v1"
+  published.runNonce="00000000-1111-2222-3333-444444444444"
+  published.finalAcceptEverAttempted=false
+  published.verifiedCompletedTrades=0
+  published.noServerSettlementProof=true
+  published.clientOnly=true
+  if mode=="FINAL_ACCEPT_TRUE" then
+   published.finalAcceptEverAttempted=true
+  elseif mode=="SETTLED_NONZERO" then
+   published.verifiedCompletedTrades=1
+  elseif mode=="MISMATCHED_ROUND" then
+   published.completedRounds=2
+  elseif mode=="WRONG_SERIALIZER_SCHEMA" then
+   published.schema="OTHER_SCHEMA"
+  end
+  x.global.PDIDDLER_SYSTEM1_MAIN_AUTO_LAST_JSON=
+   serde.encode("json",published)
+ end
+ x.tick()
+ local r=x.runner.status()
+ eq(r.status,"STOPPED","bad original JSON blocks public request "..mode)
+ local expected=(mode=="NO_EXPORT" or mode=="WRONG_SERIALIZER_SCHEMA")
+   and "COMBINED_STEP1_SERIALIZED_RECEIPT_UNAVAILABLE" or
+   "COMBINED_STEP1_LEDGER_NOT_VERIFIED"
+ eq(r.reason,expected,"typed original serialization error "..mode)
+ eq(#x.global.TEST_LOAD_SEQUENCE,1,"no Stage2 loaded "..mode)
 end
 
 print("SYSTEM1_ONE_SERVER_NATIVE_LOADER_PASS",tests)
