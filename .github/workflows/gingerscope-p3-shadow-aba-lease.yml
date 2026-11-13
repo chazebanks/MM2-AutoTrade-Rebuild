@@ -1,0 +1,63 @@
+name: Gingerscope P3 client shadow ABA invalidation — offline ONLY
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/p3_shadow_aba_offer_lease.lua'
+      - 'pdiddler/ci/p3_shadow_aba_offer_lease_mocks.luau'
+      - 'pdiddler/ci/p3_shadow_aba_native_bound_mocks.luau'
+      - 'pdiddler/ci/test_p3_shadow_aba_integrity.py'
+      - 'pdiddler/intelligence_lab/P3_SHADOW_ABA_OFFER_LEASE_HANDOFF_2026_11_11.md'
+      - '.github/workflows/gingerscope-p3-shadow-aba-lease.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-shadow-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install checksum pinned official Lune v0.11.1
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 50 https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip -o "$RUNNER_TEMP/lune.zip"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/dist"
+          f="$(find "$RUNNER_TEMP/dist" -name lune -type f -print -quit)"
+          test -n "$f"
+          install -m 0755 "$f" "$RUNNER_TEMP/lune"
+      - name: Python source authority and original immutable source checks
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_p3_shadow_aba_integrity
+      - name: Run pure adversarial client ABA Luau state tests
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/p3_shadow_aba_offer_lease_mocks.luau
+      - name: Run exact original P3/P4 bridge and trade IO read-only native mocks
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/p3_shadow_aba_native_bound_mocks.luau
+      - name: Recheck original protected physical-offer and one-shot source tests
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_four_slot_operator_plan_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_one_item_auto_gate_mocks.luau
+      - name: Explicit no-live-writes release gate
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          source=Path('pdiddler/intelligence_lab/p3_shadow_aba_offer_lease.lua').read_text()
+          for bad in ('OfferItem:FireServer(', 'AcceptTrade:FireServer(', 'DeclineTrade:FireServer(', 'SendRequest:FireServer(',
+                      'game:HttpGet(', 'PostAsync(', 'setclipboard(', 'TeleportService'):
+              assert bad not in source,bad
+          for require in ('observedGuiMutationCount','CLIENT_CALLBACK_REQUIRES_FRESH_PLAN',
+                          'OBSERVED_GUI_MUTATION_REQUIRES_FRESH_PLAN',
+                          'authorizesOffer=false','authorizesAccept=false',
+                          'serverCompletionProven=false','tradeOutcome="UNKNOWN"'):
+              assert require in source,require
+          print('P3_SHADOW_ABA_NO_RUNTIME_AUTHORITY_PASS')
+          PY
