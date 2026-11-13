@@ -1,0 +1,56 @@
+name: Gingerscope System1 combined ONE SERVER (offline)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system1/SYSTEM1_ONE_SERVER_*.lua'
+      - 'pdiddler/system1/SYSTEM1_COMBINED_*.lua'
+      - 'pdiddler/system1/system1_one_server_*.lua'
+      - 'pdiddler/ci/system1_one_server_*.luau'
+      - 'pdiddler/ci/test_system1_one_server_integrity.py'
+      - 'pdiddler/system1/SYSTEM1_ONE_SERVER_INTEGRATION_RUNBOOK.md'
+      - '.github/workflows/gingerscope-system1-one-server-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  combined-p3p4-supervised:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install verified official Lune v0.11.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 50 https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip -o "$RUNNER_TEMP/lune.zip"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/dist"
+          install -m 0755 "$(find "$RUNNER_TEMP/dist" -name lune -type f -print -quit)" "$RUNNER_TEMP/lune"
+      - name: Run protected one-server Step1 to Step2 epoch transition scenarios
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_one_server_transition_mocks.luau
+      - name: Compile combined real Luau runtime and one-time Step2 fork
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_one_server_compile_mocks.luau
+      - name: Verify exact immutable source pins and prohibit unauthorized actions
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_system1_one_server_integrity
+      - name: Re-run distinct already iPad-proven Step1 source module mocks
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_step1_alt_dynamic_recovery_native_mocks.luau
+      - name: Re-run distinct already iPad-proven Step2 original protected module mocks
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_step2_public_handoff_controller_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_step2_public_p3_source_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_step2_public_native_wiring_mocks.luau
+      - name: Original ARM8 baseline still safe
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_main_auto_native_original_mocks.luau
