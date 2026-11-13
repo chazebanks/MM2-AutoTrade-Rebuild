@@ -293,6 +293,14 @@ local started=pcall(function()
    local ready,why=readiness()
    preflight.lastReason=why
    preflight.checks+=1
+   -- A changed JobId or live competing controller is not a cold-start
+   -- timing issue. Stop without contacting anybody or waiting 18s.
+   if why=="PREFLIGHT_JOB_CHANGED" or
+      why=="PREFLIGHT_ACTIVE_SESSION" or
+      why=="PREFLIGHT_COMPETING_CONTROLLER" then
+    engine.preflightAbort(why,preflight.stableReadinessChecks)
+    break
+   end
    if ready then
     preflight.stableReadinessChecks+=1
    else
