@@ -211,4 +211,89 @@ do
  eq(f.engine.status().status,"STOPPED","no unverified fallback")
  eq(f.launchedSecond,0,"never run Step2 after first launch failed")
 end
+
+-- Real combined-device report COMBINED_STEP1_STOPPED originally discarded
+-- Step1's actionable reason. Never discard it, never "repair" a STOP,
+-- and never change original ALT/Part4 mechanics.
+do
+ local f=fixture()
+ f.first={
+  status="STOPPED",phase="STOPPED",
+  reason="ALT_CHANGED_WHILE_CLEARING_FOR_REOFFER",
+  round=2,scenarioId="ALT_STACK_X1_TO_X2",
+  completedRounds=1,lastAction="MAIN_REMOVE_OWN_ONE",
+  copyAttempted=true,possibleSideEffect=false,
+  actions={requestsStarted=2,offersClientVisible=3,
+   removalsAttempted=3,declinesAttempted=1,
+   clientClosedWindows=1},
+ }
+ eq(f.engine.start(f.now),true,"actual failed Step1 starts under launcher")
+ local r=f.advance(1)
+ eq(r.status,"STOPPED","original Step1 failure remains a STOP")
+ eq(r.reason,"COMBINED_STEP1_STOPPED","combined first-fault category stable")
+ eq(type(r.step1Failure),"table","nested child reason is retained")
+ eq(r.step1Failure.reason,"ALT_CHANGED_WHILE_CLEARING_FOR_REOFFER",
+  "exact original Step1 reason not hidden by combined wrapper")
+ eq(r.step1Failure.phase,"STOPPED","original phase copied")
+ eq(r.step1Failure.scenarioId,"ALT_STACK_X1_TO_X2","original scenario retained")
+ eq(r.step1Failure.round,2,"original round retained")
+ eq(r.step1Failure.completedRounds,1,"completed window count retained")
+ eq(r.step1Failure.lastAction,"MAIN_REMOVE_OWN_ONE","last action retained")
+ eq(r.step1Failure.requestAttempts,2,"request count retained")
+ eq(r.step1Failure.possibleSideEffect,false,"uncertainty unchanged")
+ eq(r.step1Failure.childCopyAttempted,true,"prior child COPY was attempted")
+ eq(f.launchedSecond,0,"no stage2 launches on child STOP")
+ eq(#f.reports,1,"one combined terminal report")
+ eq(f.reports[1].step1Failure.reason,r.step1Failure.reason,
+  "terminal clipboard includes actual child reason")
+end
+
+do
+ local f=fixture()
+ f.first={
+  status="PREPARING",phase="SELECT_TWO_OWN_ITEMS",
+  reason="OWNED_PICKER_NOT_READY",
+  completedRounds=0,round=0,lastAction="NONE",
+ }
+ eq(f.engine.start(f.now),true,"pre-ARM diagnostic fixture starts")
+ local r=f.advance(1)
+ eq(r.status,"STOPPED","stale pre-arm setup is not allowed to hang")
+ eq(r.reason,"COMBINED_STEP1_PREARM_STOPPED","specific pre-arm wrapper cause")
+ eq(r.step1Failure.reason,"OWNED_PICKER_NOT_READY",
+  "pre-arm original setup reason preserved")
+ eq(f.launchedSecond,0,"no public requests after setup failure")
+end
+
+do
+ local f=fixture()
+ f.first={
+  status="STOPPED",phase="STOPPED",round=7,completedRounds=0,
+  reason="USER_123_REVEALS_DETAIL_<PRIVATE>",
+  lastAction="RAW_WEAPON_ID",
+  actions={requestsStarted=2,offersClientVisible=2},
+ }
+ f.engine.start(f.now)
+ local r=f.advance(1)
+ eq(r.step1Failure.reason,"UNKNOWN","never copy arbitrary untrusted strings")
+ eq(r.step1Failure.lastAction,"RAW_WEAPON_ID",
+  "safe enum-shaped action code retained")
+ eq(r.step1Failure.round,7,"bounded numeric round retained")
+ eq(r.step1Failure.firstFailureEvidence.sameVisibleName,false,
+  "no user data or names copied from empty proof")
+end
+
+do
+ local f=fixture()
+ f.first={
+  status="STOPPED",phase="STOPPED",
+  reason="ALT_LEFT_OR_REPLACED",round=1,
+  completedRounds=0,possibleSideEffect=true,
+ }
+ f.engine.start(f.now)
+ local r=f.advance(1)
+ eq(r.step1Failure.possibleSideEffect,true,
+  "uncertain child side effect never reclassified safe")
+ eq(f.launchedSecond,0,"no Step2 after uncertain stop")
+end
+
 print("SYSTEM1_ONE_SERVER_TRANSITION_CONTROLLER_PASS",tests)
