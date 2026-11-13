@@ -137,6 +137,52 @@ class FuturePortfolioPlannerTests(unittest.TestCase):
         self.assertNotIn("Gingerscope",[x["key"] for x in result["candidates"][0]["offer"]])
         self.assertFalse(result["authorizesTrade"])
 
+    def test_research_protected_target_case_and_separator_aliases_never_outbound(self):
+        # Real MM2 raw identity remains unproved; this prevents an obvious
+        # synthetic input bypass of the existing exact-string lock.
+        aliases = ("gingerscope", "GINGERSCOPE", "Ginger Scope",
+                   "Ginger_Scope", "Ginger-Scope", "test_gingerscope_gun")
+        for alias in aliases:
+            with self.subTest(alias=alias):
+                ours=[{"key":alias,"quantity":1},{"key":"spare","quantity":1}]
+                theirs=[{"key":"upgrade","quantity":1}]
+                market=sample()[2]
+                market["items"]={alias:entry(100), "spare":entry(50),
+                                 "upgrade":entry(55)}
+                result=self.run_plan((ours,theirs,market))
+                self.assertEqual(result["status"],"CANDIDATES_PREPARED")
+                for proposal in result["candidates"]:
+                    self.assertEqual([r["key"] for r in proposal["offer"]],["spare"])
+
+    def test_research_protected_target_ambiguous_unicode_controls_fail_closed(self):
+        for alias in ("Ginger\u200bScope","Gіngerscope",
+                      "Ｇｉｎｇｅｒｓｃｏｐｅ","Gingerscope\n"):
+            with self.subTest(alias=alias):
+                a=[{"key":alias,"quantity":1}]
+                b=[{"key":"upgrade","quantity":1}]
+                m=sample()[2]
+                m["items"]={alias:entry(100),"upgrade":entry(105)}
+                result=self.run_plan((a,b,m))
+                self.assertEqual(result["status"],"BLOCKED")
+                self.assertFalse(result["authorizesTrade"])
+
+    def test_300_case_separator_mutations_never_outbound_protected_item(self):
+        rng=random.Random(20261113)
+        for _ in range(300):
+            alias="".join(ch.upper() if rng.randrange(2) else ch
+                          for ch in "gingerscope")
+            for __ in range(rng.randrange(5)):
+                at=rng.randrange(len(alias)+1)
+                alias=alias[:at]+rng.choice(" _-.")+alias[at:]
+            a=[{"key":alias,"quantity":1}]
+            b=[{"key":"upgrade","quantity":1}]
+            m=sample()[2]
+            m["items"]={alias:entry(100),"upgrade":entry(105)}
+            result=self.run_plan((a,b,m))
+            self.assertIn(result["status"],{"BLOCKED","NO_CANDIDATES"})
+            self.assertFalse(result["candidates"])
+            self.assertFalse(result["authorizesAccept"])
+
     def test_no_silent_top_five_from_full_inventory(self):
         a,b,m=sample()
         a=[{"key":f"item-{i}","quantity":1} for i in range(6)]
