@@ -1,0 +1,42 @@
+# System 1 — One-server combined controlled test (after independent Steps 1 & 2 physically passed)
+
+**Date:** Nov 12, 2026 (America/New_York). **Status:** PR #248 DRAFT pending one-server iPad proof. This test combines the exact preverified client mechanics. It does NOT create auto final Accept, verify weapon settlement, run bot avoidance, send Discord market reports or hop servers.
+
+## Verified prerequisites and provenance
+- **Step 1 PR #246 already merged to System1 development branch** and physically PASSED on consenting ALT: three separate 3/3 windows of different-item replacement, stack x1→x2 (including monotone clear), stable empty→new offer. Exactly 3 original P3 requests, 6 guarded own offers, 6 withdrawals and 3 guarded client Declines; zero final Accept.
+- **Step 2 PR #247 already merged to System1 development branch** and physically PASSED in public MM2: three distinct eligible players contacted, two accepted, one declined, two exact protected P3→P4 client trade-window closures, zero weapons offered, zero final Accept, zero teleports. Source of proof: unique device runNonce `099f9c6e-ce83-4719-b265-7efbee14134c`.
+- Parent System1 [PR #241](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/241) remains DRAFT and **main is unchanged**. Combined new script is independent [PR #248](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/248).
+- **One LOAD; same original MM2 server and JobId; two separate operator ARMs.** Original known-good parts execute sequentially. They may never both be live at the same time.
+- The known-good P1 bot classifier, P2 startup, P5 hopping and all economic/strategy systems are unchanged and NOT tested by this campaign.
+
+## On-device preparation
+1. MAIN iPad/Delta joins a **FRESH public original MM2 server** (PlaceId `142823291`), not an old test JobId or other MM2 game. Make sure there is no leftover pending request, trade GUI, or other automated trading/bot scripts. Automated modified-client actions risk Roblox enforcement: this test is optional and strictly bounded.
+2. Trusted ALT `venossgaming90190` is present in that same public server for Step 1 and can accept its test trade requests. Ideally at least one **other** distinct verified Ancient/Godly/Chroma public player is also present, so Step 2 later has 2+ eligible candidates. Do not contact anyone repetitively; do not pressure public players to accept.
+3. On MAIN only, execute **the final immutable SHA loader released AFTER all exact-HEAD CI has passed**. DO NOT run old Step1 or Step2 loaders separately in this JobId. Do not clear `PDIDDLER_OUTGOING_SESSION` or manually overwrite old ownership flags.
+4. The Step1 purple GUI appears. Select **TWO different cheap expendable owned weapon types**, never Gingerscope. Press **ARM 3** exactly once. MAIN automatically sends requests, offers, revokes/reoffers and declines only with the trusted ALT, while ALT follows purple instructions. Do NOT press final Accept on either device.
+
+## Stage 1 — exact prior proven ALT mechanics, in this SAME server
+- Trade 1: ALT accepts request, adds cheap A x1, swaps to different B x1 when prompted, clears B, later reoffers one cheap x1 when prompted, and clears; MAIN performs guarded own offer/reoffer/removals and Decline.
+- Trade 2: ALT accepts new request, adds A x1, changes same A to stacked x2, removes copies until its offer is fully empty (brief intermediate x1 is allowed), adds final cheap x1 when prompted, clears; MAIN handles its side and Declines.
+- Trade 3: ALT accepts new request, offers A x1, fully clears it and **waits for `ALT_REVISE_READD` purple instruction** before adding DIFFERENT B x1, then clears, follows final reoffer/clear prompts; MAIN Declines.
+- The umbrella will **NOT** launch Step2 unless Step1's exact **3/3 completed client-window ledger, six placements/six removals/three declines, no uncertainty/no Accept** are present. If Stage1 STOPs, there is no Step2.
+- The umbrella then checks a stopped/released old P3 supervisor, its **retired monotonic session epoch**, unchanged server JobId, no open P4 session, and **four stable no-pending/no-trade-GUI reads over at least one second**. It NEVER resets that original P3 session number or bypasses lease safety. If uncertain, stops the combined test instead of launching Step2.
+
+## Stage 2 — public P3/P4, same JobId
+- When the successful barrier clears, **the standalone Step1 GUI hides automatically and the separate Step2 public GUI appears**. This is expected and uses the same one-line loader; do NOT run a second script or change server.
+- When Step2 shows **ARM MAX 3** (requires at least TWO real scanner-eligible players), press it once. Part3 automatically sends up to 3 distinct eligible Player/UserIds one normal trade request apiece, handles pending/decline/timeout classification and rotates. Part4 acts only on a bound accepted client trade with its own offer empty on two checks; Part4 automatically guarded Declines and verifies client close. **No weapon placement, no final Accept, no settlement.**
+- Ideally the ALT is one eligible accepting player; when ALT receives a request **accept the TRADE REQUEST only**, offer no weapons, and let MAIN's protected P4 Decline. Other public eligible players may decline/ignore. P3 handles that automatically. Never automate chat or make unsolicited repeated requests.
+- The two test modules **must not overlap**, even if the ALT accepts instantly or an unrelated incoming request arrives. Any ambiguous request, stale epoch, wrong Player/root, unexpected weapon, unverified decline or missing UI produces STOP; do not retry in that job.
+- If the public scanner only finds one eligible player, Step2 will show `NEED 2 ELIGIBLE`. You can remain in the SAME server until enough eligible players join; the bounded combined test is not a server hopper. If no one becomes eligible before the bounded test deadline, expect incomplete/STOP, not a false PASS.
+
+## Final receipt
+- The combined script automatically **copies and prints** a distinct `[SYSTEM1 COMBINED JSON]` after Step2 terminates. If the clipboard instead contains the Step2 standalone JSON, retrieve the last combined JSON from Delta's executor log or `getgenv().PDIDDLER_SYSTEM1_ONE_SERVER_LAST_JSON` without running another trade action.
+- Required complete outcome: `status="ONE_SERVER_SYSTEM1_CLIENT_INTEGRATION_PASS"`, `reason="ALT_RECOVERY_AND_PUBLIC_P3P4_SAME_JOB_PROVEN"`, `step1ThreeWindowsVerified=true`, `step1ClosedWindows=3`, `step2AttemptedDistinctContacts>=2`, `step2VerifiedBoundCloses>=1`, `sameGameJobMaintained=true`, `combinedScriptsSerialized=true`, `originalP3EpochNeverReset=true`.
+- Required safety: `finalAcceptEverAttempted=false`, `actualTeleports=0`, `serverCompletionProven=false`, `verifiedCompletedTrades=0`, `tradeOutcome="UNKNOWN"`. These are **client-mechanics windows only**, not proof of a completed in-game weapon exchange.
+- If the combined result is `STOPPED` or `INCONCLUSIVE`, copy the exact `reason` and send the whole JSON. Do not rerun in the same game JobId or blindly modify P3 epoch/global state. Close any lingering trade safely by hand if necessary, then diagnose before a new test.
+- Only AFTER a real integrated device PASS should we close the System1 supervised trading-mechanics milestone / consider moving the parent PR toward main. System2 pricing, System3 strategy, System4 settlement and System5 unattended P1/P5 orchestration remain independently gated.
+
+## Offline verification policy
+- Real Lua source pins are immutable and exact; combined Step2 is byte-identical to the physically verified original Step2 from the first `local Players=...` onward. The sole preflight change is **one-use combined transition authorization** replacing fresh-job-only restriction for an exact retired P3 epoch; old numeric epoch is never reset.
+- Lune native pure controller and full fake-JobId wrapper tests include strict 3/3 first ledger proof; four no-trade/no-pending handoff checks; one-use token consumption; same JobId; no premature public request; STOP on pending, root, server change, bad ledgers, failed pinned fetch; original Step1/Step2 and ARM8 regressions all remain green.
+- Source compile and Python guard assure unchanged tested source pins, no newly added offer/Accept/hop remotes, and stage2 original code unchanged after the one-time preflight. CI on exact commit must be **all green** before providing the device loader.
