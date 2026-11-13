@@ -1,0 +1,71 @@
+name: Gingerscope P3 ALT guided post-offer native regression (NO FINAL ACCEPT)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/supervised/supervised_p3_postoffer_alt_guide.lua'
+      - 'pdiddler/supervised/SUPERVISED_P3_ONE_ITEM_AUTO_ALT_GUIDED_NATIVE.lua'
+      - 'pdiddler/supervised/SUPERVISED_P3_AUTO_ALT_GUIDED_PICKER.lua'
+      - 'pdiddler/ci/supervised_p3_postoffer_alt_guide_mocks.luau'
+      - 'pdiddler/ci/supervised_p3_postoffer_alt_guided_native_mocks.luau'
+      - 'pdiddler/supervised/P3_ALT_GUIDED_TEST_HANDOFF_2026_11_11.md'
+      - '.github/workflows/gingerscope-p3-alt-guided-test.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  guide-and-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install SHA-256 pinned official Lune v0.11.1
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 50 https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip -o "$RUNNER_TEMP/lune.zip"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/dist"
+          f="$(find "$RUNNER_TEMP/dist" -name lune -type f -print -quit)"
+          test -n "$f"
+          install -m 0755 "$f" "$RUNNER_TEMP/lune"
+      - name: Run strict sequential ALT add/remove guide source tests
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_postoffer_alt_guide_mocks.luau
+      - name: Run exact P3/P4 original modules and guided ALT native mock
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_postoffer_alt_guided_native_mocks.luau
+      - name: Re-run frozen original one-shot gate without retroactive changes
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_one_item_auto_gate_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_one_item_auto_native_runner_mocks.luau
+      - name: Fail closed on unexpected new runtime privileges or changed original
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          root=Path('pdiddler/supervised')
+          original=root/'SUPERVISED_P3_ONE_ITEM_AUTO_OFFER_NATIVE.lua'
+          picker=root/'SUPERVISED_P3_ONE_ITEM_AUTO_OWNED_PICKER.lua'
+          assert subprocess.check_output(['git','hash-object',str(original)],text=True).strip()=='72f59f77e83fd353d184daf79b7d6a34088170b3'
+          assert subprocess.check_output(['git','hash-object',str(picker)],text=True).strip()=='8824ce83a7384821a906a335c655c1ef94908c6b'
+          alt=(root/'SUPERVISED_P3_ONE_ITEM_AUTO_ALT_GUIDED_NATIVE.lua').read_text()
+          entry=(root/'SUPERVISED_P3_AUTO_ALT_GUIDED_PICKER.lua').read_text()
+          gate=(root/'supervised_p3_postoffer_alt_guide.lua').read_text()
+          for forbidden in ('AcceptTrade:FireServer(', 'DeclineTrade:FireServer(', 'OfferItem:FireServer(', 'SendRequest:FireServer(', 'TeleportService', 'PostAsync('):
+              assert forbidden not in alt,forbidden
+              assert forbidden not in entry,forbidden
+              assert forbidden not in gate,forbidden
+          for required in ('3/5 ALT — ADD ONE WEAPON','4/5 ALT — REMOVE SAME WEAPON','5/5 MAIN — MANUALLY DECLINE',
+                           'altGuide.observe','oneShotComplete','altMutationGuidedReadOnlyTest~=true','runNonce=runNonce'):
+              assert required in alt,required
+          assert 'authorizesAccept=false' in alt and 'serverCompletionProven=false' in alt
+          assert 'altMutationGuidedReadOnlyTest=true' in entry
+          assert '45b9c3b98c918fa5bdf4e7bf17e5018925d86740' in entry
+          assert '2f4478ed23743060bb3bd3a56daad47dc59f494e' in alt
+          assert gate.count('ALT_ADD')>0 and gate.count('WAIT_ALT_REMOVE')>0
+          print('P3_ALT_GUIDED_SOURCE_SAFETY_PASS')
+          PY
