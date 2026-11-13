@@ -11,7 +11,7 @@ local ORIGINAL_MM2=142823291
 local MAIN="a3c209659942e8b45eec5da3555f7cfb83059c59"
 local GATE="2db52f96fadd58957a804ebada8f77c3bc7a9228"
 local P3="88fccfbd98281c1e47dce506bccf136604bd1485"
-local CTRL="4e45ece155a9efb31bdc377a08ed91ea7e4d366a"
+local CTRL="ca5a705137ee820d88c2e6d2c02f59d3b483d2fd"
 local BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local conflicts={
  "PDIDDLER_PART4_CONTROLLER_ACTIVE",
