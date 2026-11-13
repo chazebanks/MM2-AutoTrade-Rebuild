@@ -204,6 +204,12 @@ function M.new(api,opts)
    return false,"COMBINED_INITIAL_START_DENIED" end
   local ok,yes=pcall(api.launchStep1)
   if not ok or yes~=true then
+   local sourceFailure=nil
+   if type(api.startFailure)=="function" then
+    local captured,detail=pcall(api.startFailure)
+    if captured then sourceFailure=detail end
+   end
+   step1Failure=childFault(sourceFailure)
    stop("COMBINED_STEP1_PIN_OR_START_FAILED")
    return false,"COMBINED_STEP1_PIN_OR_START_FAILED"
   end
