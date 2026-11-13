@@ -8,7 +8,7 @@ end
 local scenarioNames={
  "ALT_REPLACES_ITEM","ALT_STACK_X1_TO_X2","ALT_CLEAR_THEN_NEW",
 }
-local function checkedStep1(r)
+local function checkedStep1(r,exported)
  if type(r)~="table" or
     r.status~="CLIENT_TEST_SEQUENCE_COMPLETE" or
     r.phase~="DONE" or
@@ -16,10 +16,34 @@ local function checkedStep1(r)
     r.completedRounds~=3 or r.maxRounds~=3 or
     r.recoveryBatchAuthorized~=true or
     r.authorizesAccept~=false or
-    r.finalAcceptEverAttempted~=false or
     r.serverCompletionProven~=false or
-    r.verifiedCompletedTrades~=0 or
     r.possibleSideEffect~=false or
+    -- The original immutable Step1 status() omits two serializer-only
+    -- fields; validate those only from the actual freshly emitted Step1
+    -- JSON, not from a mocked-up report or a manufactured default.
+    (r.finalAcceptEverAttempted~=nil and
+      r.finalAcceptEverAttempted~=false) or
+    (r.verifiedCompletedTrades~=nil and
+      r.verifiedCompletedTrades~=0) or
+    type(exported)~="table" or
+    exported.schema~="gingerscope-system1-step1-alt-recovery-native-v1" or
+    exported.clientOnly~=true or
+    exported.noServerSettlementProof~=true or
+    exported.authorizesAccept~=false or
+    exported.serverCompletionProven~=false or
+    exported.finalAcceptEverAttempted~=false or
+    exported.verifiedCompletedTrades~=0 or
+    exported.possibleSideEffect~=false or
+    exported.status~=r.status or
+    exported.phase~=r.phase or
+    exported.reason~=r.reason or
+    exported.round~=r.round or
+    exported.completedRounds~=r.completedRounds or
+    exported.maxRounds~=r.maxRounds or
+    exported.recoveryBatchAuthorized~=r.recoveryBatchAuthorized or
+    type(exported.runNonce)~="string" or
+    #exported.runNonce<1 or #exported.runNonce>80 or
+    type(exported.actions)~="table" or
     type(r.actions)~="table" or
     r.actions.requestsStarted~=3 or
     r.actions.offersClientVisible~=6 or
@@ -27,15 +51,31 @@ local function checkedStep1(r)
     r.actions.declinesAttempted~=3 or
     r.actions.clientClosedWindows~=3 or
     r.actions.adaptiveReoffersAttempted~=3 or
-    type(r.rounds)~="table" or #r.rounds~=3 then
+    exported.actions.requestsStarted~=r.actions.requestsStarted or
+    exported.actions.offersClientVisible~=r.actions.offersClientVisible or
+    exported.actions.removalsAttempted~=r.actions.removalsAttempted or
+    exported.actions.declinesAttempted~=r.actions.declinesAttempted or
+    exported.actions.clientClosedWindows~=r.actions.clientClosedWindows or
+    exported.actions.adaptiveReoffersAttempted~=
+       r.actions.adaptiveReoffersAttempted or
+    type(r.rounds)~="table" or #r.rounds~=3 or
+    type(exported.rounds)~="table" or #exported.rounds~=3 then
   return false
  end
  for i,name in ipairs(scenarioNames)do
   local v=r.rounds[i]
+  local published=exported.rounds[i]
   if type(v)~="table" or v.round~=i or
      v.scenarioId~=name or
      v.clientWindowClosed~=true or
-     v.status~="CLIENT_SEQUENCE_PASS" then return false end
+     v.status~="CLIENT_SEQUENCE_PASS" or
+     v.closedBy~="MAIN_GUARDED_DECLINE" or
+     type(published)~="table" or
+     published.round~=v.round or
+     published.scenarioId~=v.scenarioId or
+     published.status~=v.status or
+     published.clientWindowClosed~=v.clientWindowClosed or
+     published.closedBy~=v.closedBy then return false end
  end
  return true
 end
@@ -67,6 +107,7 @@ function M.new(api,opts)
  if type(api)~="table" or
   type(api.launchStep1)~="function" or
   type(api.step1Status)~="function" or
+  type(api.step1VerifiedReceipt)~="function" or
   type(api.quiescent)~="function" or
   type(api.launchStep2)~="function" or
   type(api.step2Status)~="function" or
@@ -235,7 +276,10 @@ function M.new(api,opts)
       r.reason~="NOT_ARMED" then
     return stop("COMBINED_STEP1_PREARM_STOPPED",r)end
    if r.phase=="DONE" or r.status=="CLIENT_TEST_SEQUENCE_COMPLETE" then
-    if not checkedStep1(r) then
+    local readOk,serialized=pcall(api.step1VerifiedReceipt)
+    if not readOk or type(serialized)~="table" then
+     return stop("COMBINED_STEP1_SERIALIZED_RECEIPT_UNAVAILABLE",r)end
+    if not checkedStep1(r,serialized) then
      return stop("COMBINED_STEP1_LEDGER_NOT_VERIFIED",r)end
     phase1=r;phase="QUIESCENCE";reason="WAIT_OLD_P3_RETIREMENT"
     changedAt=now
