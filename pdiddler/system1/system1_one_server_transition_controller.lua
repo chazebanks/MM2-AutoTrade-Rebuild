@@ -51,8 +51,10 @@ local function checkedStep2(r)
   number(r.provenBoundClientCloses) and
   r.provenBoundClientCloses>=1 and
   r.provenBoundClientCloses<=3 and
-  number(r.originalP3SentConfirmed) and
-  r.originalP3SentConfirmed>=r.attemptedDistinctContacts and
+  type(r.publicRequestDiagnostic)=="table" and
+  number(r.publicRequestDiagnostic.originalP3SentConfirmed) and
+  r.publicRequestDiagnostic.originalP3SentConfirmed>=
+    r.attemptedDistinctContacts and
   r.authorizesAccept==false and
   r.authorizesOffer==false and
   r.finalAcceptEverAttempted==false and
