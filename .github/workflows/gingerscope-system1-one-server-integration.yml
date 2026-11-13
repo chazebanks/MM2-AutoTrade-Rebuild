@@ -32,6 +32,10 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/system1_one_server_transition_mocks.luau
+      - name: Run actual combined native launcher with fake MM2 JobId and pinned source gating
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_one_server_native_loader_mocks.luau
       - name: Compile combined real Luau runtime and one-time Step2 fork
         run: |
           set -euo pipefail
