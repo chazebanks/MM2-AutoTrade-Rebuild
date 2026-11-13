@@ -112,10 +112,22 @@ local function fixture()
   return kind=="PlayerGui" and PG or nil
  end
  local place=142823291
+ local Players={LocalPlayer=P}
+ local ALT={Name="venossgaming90190",UserId=2,Parent=Players}
+ function Players:FindFirstChild(name)
+  if name==ALT.Name and ALT.Parent==self then return ALT end
+  return nil
+ end
+ function Players:GetPlayerByUserId(id)
+  if id==ALT.UserId and ALT.Parent==self then return ALT end
+  return nil
+ end
+ local Workspace={CurrentCamera={}}
  local game={
   PlaceId=place,JobId="SAME_TEST_JOB",
   GetService=function(_,name)
-   if name=="Players" then return {LocalPlayer=P} end
+   if name=="Players" then return Players end
+   if name=="Workspace" then return Workspace end
    if name=="HttpService" then
     return {
      GenerateGUID=function()return "12345678-1234-1234-1234-123456789012"end,
@@ -175,17 +187,20 @@ local function fixture()
   jobs=remaining
  end
  return{env=env,global=E,runner=runner,game=game,gui=PG,
+  players=Players,alt=ALT,world=Workspace,
   errors=errors,clips=clips,urls=urls,prints=prints,tick=tick}
 end
 do
  local x=fixture()
  eq(type(x.runner),"table","combined native loader constructed")
- eq(#x.urls,2,"only transition module and first Step1 loaded initially")
- eq(x.runner.status().phase,"STEP1","only Step1 live on initial load")
+ eq(#x.urls,1,"no trade script loaded at cold startup")
+ eq(x.runner.status().phase,"PREPARING","preflight starts read-only")
+ eq(x.global.TEST_LOAD_SEQUENCE[1],nil,"no Stage1 before stable ALT")
+ for _=1,5 do x.tick()end
+ eq(x.runner.status().phase,"STEP1","stable ALT, GUI and camera allow Step1")
+ eq(#x.urls,2,"original Step1 source loaded once after readiness")
  eq(x.global.TEST_LOAD_SEQUENCE[1],"STAGE1","Step1 first")
  eq(x.global.TEST_LOAD_SEQUENCE[2],nil,"no Step2 prefetch/execution")
- for _=1,3 do x.tick()end
- eq(x.global.TEST_LOAD_SEQUENCE[2],nil,"no premature public requests")
  x.global.TEST_STAGE1_STATE=passedStep1()
  x.global.PDIDDLER_OUTGOING_SESSION=8
  x.global.PDIDDLER_SYSTEM1_STEP1_RECOVERY_USED_JOB=x.game.JobId
@@ -222,6 +237,7 @@ do
 end
 do
  local x=fixture()
+ for _=1,5 do x.tick()end
  x.global.TEST_STAGE1_STATE=passedStep1()
  x.global.PDIDDLER_OUTGOING_SESSION=8
  x.global.PDIDDLER_SYSTEM1_STEP1_RECOVERY_USED_JOB=x.game.JobId
@@ -233,6 +249,7 @@ do
 end
 do
  local x=fixture()
+ for _=1,5 do x.tick()end
  x.global.TEST_STAGE1_STATE=passedStep1()
  x.global.PDIDDLER_OUTGOING_SESSION=8
  x.global.PDIDDLER_SYSTEM1_STEP1_RECOVERY_USED_JOB=x.game.JobId
@@ -247,6 +264,7 @@ do
 end
 do
  local x=fixture()
+ for _=1,5 do x.tick()end
  x.global.TEST_STAGE1_STATE={phase="STOPPED",status="STOPPED"}
  x.tick()
  eq(x.runner.status().status,"STOPPED","first stop prevents public contacts")
@@ -258,7 +276,11 @@ do
  x.game.JobId="OTHER_SERVER"
  x.tick()
  eq(x.runner.status().status,"STOPPED","server change aborts")
- eq(#x.global.TEST_LOAD_SEQUENCE,1,"no other JobId test starts")
+ eq(x.runner.status().reason,"COMBINED_STEP1_PREFLIGHT_NOT_READY",
+  "pre-arm job change classified precisely")
+ eq(x.runner.status().preflightFailure.reason,"PREFLIGHT_JOB_CHANGED",
+  "exact unsafe preflight condition retained")
+ eq(#x.global.TEST_LOAD_SEQUENCE,0,"no trader started in changed server")
 end
 
 -- Real Step1 already sets its own original terminal JSON on STOP. The
@@ -266,6 +288,7 @@ end
 -- COMBINED_STEP1_STOPPED, which caused the operator diagnostic blind spot.
 do
  local x=fixture()
+ for _=1,5 do x.tick()end
  x.global.TEST_STAGE1_STATE={
   status="STOPPED",phase="STOPPED",
   reason="ALT_CHANGED_WHILE_CLEARING_FOR_REOFFER",
@@ -289,6 +312,87 @@ do
  eq(copied.step1Failure.reason,report.step1Failure.reason,
   "clipboard contains true child cause, not only generic STOP")
  eq(#x.global.TEST_LOAD_SEQUENCE,1,"no public script launched after Step1 STOP")
+end
+
+
+-- A late ALT joining is a preflight-only event, NEVER a trade retry.
+do
+ local x=fixture()
+ x.alt.Parent=nil
+ for _=1,8 do x.tick()end
+ eq(x.runner.status().phase,"PREPARING","missing ALT waits before source")
+ eq(x.runner.status().reason,"PREFLIGHT_ALT_NOT_PRESENT",
+  "no arbitrary ALT substitution")
+ eq(#x.global.TEST_LOAD_SEQUENCE,0,"no trade action when ALT absent")
+ x.alt.Parent=x.players
+ for _=1,5 do x.tick()end
+ eq(x.runner.status().phase,"STEP1",
+  "stable exact consenting ALT allows original Step1 launch")
+ eq(#x.global.TEST_LOAD_SEQUENCE,1,"Stage1 launches exactly once")
+end
+do
+ local x=fixture()
+ x.alt.Parent=nil
+ for _=1,85 do x.tick()end
+ local r=x.runner.status()
+ eq(r.status,"STOPPED","ALT never joined before bounded 18-second deadline")
+ eq(r.reason,"COMBINED_STEP1_PREFLIGHT_NOT_READY",
+  "cannot misreport preflight as completed Stage1 trade")
+ eq(r.preflightFailure.reason,"PREFLIGHT_ALT_NOT_PRESENT",
+  "precise ALT readiness failure")
+ eq(r.preflightFailure.tradeRequestAttempted,false,
+  "no request in preflight")
+ eq(#x.global.TEST_LOAD_SEQUENCE,0,"did not load original Step1")
+ eq(#x.clips,1,"sanitized preflight stop is copied")
+end
+do
+ local x=fixture()
+ x.world.CurrentCamera=nil
+ for _=1,8 do x.tick()end
+ eq(x.runner.status().reason,"PREFLIGHT_CAMERA_NOT_READY",
+  "missing camera not treated as trading error")
+ eq(#x.global.TEST_LOAD_SEQUENCE,0,"no Step1 without camera")
+ x.world.CurrentCamera={}
+ for _=1,5 do x.tick()end
+ eq(x.runner.status().phase,"STEP1","camera readiness recovered safely")
+end
+do
+ local x=fixture()
+ x.gui:add(fakeNode("TextLabel","TradeRequestStatus")).Text=
+  "Trade Request Pending"
+ for _=1,8 do x.tick()end
+ eq(x.runner.status().reason,"PREFLIGHT_REQUEST_POPUP_ACTIVE",
+  "pending request means no Step1 yet")
+ eq(#x.global.TEST_LOAD_SEQUENCE,0,"preflight never taps Trade")
+ x.gui.children.TradeRequestStatus.Parent=nil
+ x.gui.children.TradeRequestStatus=nil
+ for _=1,5 do x.tick()end
+ eq(x.runner.status().phase,"STEP1",
+  "after popup clears, stable readiness allows Stage1 once")
+end
+do
+ local x=fixture()
+ local g=x.gui:add(fakeNode("ScreenGui","TradeGUI"))
+ g.Enabled=true
+ g:add(fakeNode("Frame","Container")):add(fakeNode("Frame","Trade"))
+ for _=1,8 do x.tick()end
+ eq(x.runner.status().reason,"PREFLIGHT_TRADE_WINDOW_ACTIVE",
+  "active MM2 trade window blocks Stage1 startup")
+ eq(#x.global.TEST_LOAD_SEQUENCE,0,
+  "cannot send ALT requests while someone else's trade is open")
+ g.Enabled=false
+ for _=1,5 do x.tick()end
+ eq(x.runner.status().phase,"STEP1","clear UI permits safe startup")
+end
+do
+ local x=fixture()
+ x.global.PDIDDLER_AUTOTRADE_ACTIVE=true
+ x.tick()
+ local r=x.runner.status()
+ eq(r.status,"STOPPED","any existing automated trade owner blocks")
+ eq(r.preflightFailure.reason,"PREFLIGHT_COMPETING_CONTROLLER",
+  "precise competing controller failure")
+ eq(#x.global.TEST_LOAD_SEQUENCE,0,"no P3 request on active owner conflict")
 end
 
 print("SYSTEM1_ONE_SERVER_NATIVE_LOADER_PASS",tests)
