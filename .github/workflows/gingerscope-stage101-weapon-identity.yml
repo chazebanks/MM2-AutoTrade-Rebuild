@@ -1,0 +1,82 @@
+name: Gingerscope Stage101 full weapon key to Part4 offer GUI identity research
+on:
+  push:
+    branches:
+      - research/gingerscope-weapon-key-identity-matching
+    paths:
+      - 'pdiddler/intelligence_lab/stage101_multiweapon_raw_key_match.lua'
+      - 'pdiddler/tests/test_stage101_multiweapon_raw_key_match.lua'
+      - 'pdiddler/tests/test_stage101_multiweapon_raw_key_driver.py'
+      - 'pdiddler/intelligence_lab/STAGE101_WEAPON_IDENTITY_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage101-weapon-identity.yml'
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/stage101_multiweapon_raw_key_match.lua'
+      - 'pdiddler/tests/test_stage101_multiweapon_raw_key_match.lua'
+      - 'pdiddler/tests/test_stage101_multiweapon_raw_key_driver.py'
+      - 'pdiddler/intelligence_lab/STAGE101_WEAPON_IDENTITY_HANDOFF.md'
+      - '.github/workflows/gingerscope-stage101-weapon-identity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-stage9-stage83-two-sided-rawkeys:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Lua 5.4
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y lua5.4
+          lua5.4 -v
+      - name: Fetch and verify immutable original Stage9 physical quantity and Stage83 public registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gingerscope101
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 3 --max-time 45 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope101/contract.lua
+          curl -fsSL --retry 3 --max-time 45 "$base/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua" -o /tmp/gingerscope101/registry.lua
+          test "$(git hash-object /tmp/gingerscope101/contract.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          test "$(git hash-object /tmp/gingerscope101/registry.lua)" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          echo STAGE101_TWO_ORIGINAL_SOURCE_GIT_BLOBS_VERIFIED
+      - name: Run real original Lua weapon-key resolution under Python, 500 adversarial cases
+        env:
+          STAGE101_REQUIRE_PINNED: '1'
+          STAGE101_MODULE: pdiddler/intelligence_lab/stage101_multiweapon_raw_key_match.lua
+          STAGE101_ORIGINAL_STAGE9: /tmp/gingerscope101/contract.lua
+          STAGE101_ORIGINAL_STAGE83: /tmp/gingerscope101/registry.lua
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.tests.test_stage101_multiweapon_raw_key_driver
+      - name: Static no automatic game, market, profit, Discord or final Accept authority
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('pdiddler/intelligence_lab/stage101_multiweapon_raw_key_match.lua').read_text()
+          for marker in (
+              'CLIENT_MULTISLOT_RAW_KEY_CANDIDATES_MATCH_GUI_UNATTRIBUTED',
+              'MULTIPLE_DISTINCT_CLIENT_RAW_KEYS_MATCH_GUI_SLOT',
+              'CLIENT_EVENT_COUNT_NOT_EXACTLY_ONE',
+              'currentPricesVerified=false,priceForTradeVerified=false',
+              'marketValueAuthority=false','authorizesTrade=false',
+              'authorizesAccept=false','serverCompletionProven=false',
+              'eventSessionAssociationProven=false,callbackCausalityProven=false',
+              'validForAutomatedTrade=false',
+              'validForAutomatedAccept=false',
+              'rawKeyServerAuthenticated=false',
+          ):
+              assert marker in s,marker
+          for forbidden in (
+              ':FireServer(',':InvokeServer(', 'VirtualInputManager',
+              'SendMouseButtonEvent(', 'TeleportService','HttpPost(',
+              'PostAsync(', 'AcceptTrade(', 'DeclineTrade(',
+              'getconnections(', 'game:GetService(', 'loadstring(game:HttpGet('
+          ):
+              assert forbidden not in s,forbidden
+          print('STAGE101_READ_ONLY_RAW_KEY_CANDIDATE_POLICY_PASS')
+          PY
