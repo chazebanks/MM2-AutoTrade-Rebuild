@@ -20,7 +20,7 @@ class OneServerComposedSafety(unittest.TestCase):
         self.assertEqual(
             pins["SECOND"], "b7d98b9b0815f72bff63fe7b58b8c92c59c3e0d7")
         self.assertEqual(
-            pins["CONTROL"], "16d78bdeb9dd2eec6649afe8a08fab2333da6625")
+            pins["CONTROL"], "1d1b94838bbc88684952e0d07a7d568fe7e54945")
 
     def test_stage2_original_io_code_is_byte_identical_after_preflight(self):
         anchor = 'local Players=game:GetService("Players")'
@@ -112,6 +112,28 @@ class OneServerComposedSafety(unittest.TestCase):
         ):
             self.assertIn(required, NATIVE)
         self.assertIn('step1Failure=childFault(sourceFailure)', CTRL)
+
+    def test_live_step1_status_vs_original_serialized_json(self):
+        """The real Step1 controller adds safety fields only to copied JSON."""
+        step1_controller = (
+            BASE / "system1_step1_alt_recovery_controller.lua"
+        ).read_text()
+        step1_native = (
+            BASE / "SYSTEM1_STEP1_ALT_DYNAMIC_RECOVERY_NATIVE.lua"
+        ).read_text()
+        self.assertIn('function controller.status()return receipt()end',
+                      step1_controller)
+        self.assertIn('data.finalAcceptEverAttempted=false', step1_native)
+        self.assertIn('data.verifiedCompletedTrades=0', step1_native)
+        self.assertNotIn('finalAcceptEverAttempted=false',
+                         step1_controller.split("local function report",1)[1]
+                         .split("local function integer",1)[0])
+        self.assertIn('step1VerifiedReceipt=step1VerifiedReceipt', NATIVE)
+        self.assertIn('raw~=priorStep1Json', NATIVE)
+        self.assertIn('exported.finalAcceptEverAttempted~=false', CTRL)
+        self.assertIn('exported.verifiedCompletedTrades~=0', CTRL)
+        self.assertIn('exported.actions.offersClientVisible', CTRL)
+        self.assertIn('published.closedBy~=v.closedBy', CTRL)
 
     def test_source_names_and_original_test_integrity(self):
         for part in (
