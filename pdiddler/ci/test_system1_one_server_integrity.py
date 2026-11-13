@@ -71,7 +71,8 @@ class OneServerComposedSafety(unittest.TestCase):
         self.assertIn('P3_WATCHDOG_BLOCKED', new_controller)
         self.assertIn('return stop(observed.fault,observed.possibleSideEffect)',
                       new_controller)
-        self.assertNotIn('return stop(observed.fault,observed.possibleSideEffect)',
+        self.assertIn('if not validSnapshot(observed) then', new_controller)
+        self.assertNotIn('if not validSnapshot(observed) then',
                          old_controller)
         self.assertIn('firstFailureEvidence=', new_controller)
 
