@@ -105,6 +105,7 @@ local function fixture()
  local prints={}
  local errors={}
  local P={Name="MAIN_CLIENT"}
+ function P:IsA(kind)return kind=="Player"end
  local PG=fakeNode("PlayerGui","PlayerGui")
  PG.Parent=P
  function P:FindFirstChildOfClass(kind)
