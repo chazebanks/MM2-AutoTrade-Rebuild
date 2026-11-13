@@ -93,7 +93,7 @@ do
  eq(f.advance(1).phase,"QUIESCENCE","exact 3/3 ledger arms quiescence")
  eq(f.advance(3).phase,"QUIESCENCE","requires stable multiple samples")
  eq(f.launchedSecond,0,"no early P3 epoch transition")
- eq(f.advance(4).phase,"STEP2","quiescence and elapsed threshold verified")
+ eq(f.advance(2).phase,"STEP2","quiescence and elapsed threshold verified")
  eq(f.launchedSecond,1,"exactly one combined Step2 launch")
  eq(f.log[1],18,"previous retired P3 epoch preserved")
  local report=f.advance(1)
@@ -168,7 +168,7 @@ end
 do
  local f=fixture()
  f.engine.start(f.now)
- f.advance(10)
+ f.advance(6)
  f.second.publicRequestDiagnostic.originalP3SentConfirmed=1
  eq(f.advance(1).reason,"COMBINED_STEP2_LEDGER_NOT_VERIFIED",
   "do not count unconfirmed contacts")
@@ -177,14 +177,14 @@ end
 do
  local f=fixture()
  f.engine.start(f.now)
- f.advance(10)
+ f.advance(6)
  f.second.authorizesAccept=true
  eq(f.advance(1).status,"STOPPED","unexpected Accept authority is unsafe")
 end
 do
  local f=fixture()
  f.engine.start(f.now)
- f.advance(10)
+ f.advance(6)
  f.second={phase="INCONCLUSIVE",status="CLIENT_ROTATION_ONLY_HANDOFF_NOT_PROVEN"}
  eq(f.advance(1).status,"INCONCLUSIVE",
   "no actual accept/handoff cannot count a complete integration")
