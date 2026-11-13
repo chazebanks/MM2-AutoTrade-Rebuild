@@ -18,19 +18,62 @@ class OneServerComposedSafety(unittest.TestCase):
         self.assertEqual(
             pins["FIRST"], "b24661781e72e3dec759960d2f4b423841961c8b")
         self.assertEqual(
-            pins["SECOND"], "b7d98b9b0815f72bff63fe7b58b8c92c59c3e0d7")
+            pins["SECOND"], "f2c6b9ab11175885692027658038862da77be1cd")
         self.assertEqual(
-            pins["CONTROL"], "1d1b94838bbc88684952e0d07a7d568fe7e54945")
+            pins["CONTROL"], "2c822f3519739d075eab3ec0f4e76830ad0da715")
 
-    def test_stage2_original_io_code_is_byte_identical_after_preflight(self):
+    def test_combined_step2_only_changes_supervision_diagnostics(self):
+        """Protect the proven public trading flow from unrelated changes.
+
+        The original Stage2 is byte identical after its preflight EXCEPT
+        the new terminal-only watchdog diagnostics/controller pin.
+        """
         anchor = 'local Players=game:GetService("Players")'
         self.assertIn(anchor, ORIGINAL_STAGE2)
         self.assertIn(anchor, STAGE2)
+        combined = STAGE2.split(anchor, 1)[1]
+        original = ORIGINAL_STAGE2.split(anchor, 1)[1]
+
+        def restore_region(src, start, end):
+            i = src.index(start)
+            j = src.index(end, i + len(start))
+            i_orig = original.index(start)
+            j_orig = original.index(end, i_orig + len(start))
+            return src[:i] + original[i_orig:j_orig] + src[j:]
+
+        combined = combined.replace(
+            'local CTRL="4e45ece155a9efb31bdc377a08ed91ea7e4d366a"',
+            'local CTRL="77d83cb9c1abf7f5991c7408ce006701484844b8"')
+        combined = combined.replace(
+            '"system1/system1_combined_step2_handoff_controller.lua"',
+            '"system1/system1_step2_public_handoff_controller.lua"')
+        combined = restore_region(
+            combined, 'local haltReason=nil', 'local function writeReceipt')
+        combined = restore_region(
+            combined, '  onStatus=function(result)', ' },{\\n  spawn=')
+        combined = restore_region(
+            combined, 'local function observe()', ' local observed={')
+        combined = restore_region(
+            combined, ' if haltReason and observed.fault==nil then',
+            ' if status.status=="STOPPED" then')
         self.assertEqual(
-            ORIGINAL_STAGE2.split(anchor, 1)[1],
-            STAGE2.split(anchor, 1)[1],
-            "Combined Step2 must not modify original public trading logic",
-        )
+            combined, original,
+            "Unexpected modification outside combined watchdog diagnostics")
+
+        new_controller = (
+            BASE / "system1_combined_step2_handoff_controller.lua"
+        ).read_text()
+        old_controller = (
+            BASE / "system1_step2_public_handoff_controller.lua"
+        ).read_text()
+        self.assertIn('P3_WATCHDOG_HEARTBEAT_MISSING', new_controller)
+        self.assertIn('P3_SESSION_EPOCH_CHANGED', new_controller)
+        self.assertIn('P3_WATCHDOG_BLOCKED', new_controller)
+        self.assertIn('return stop(observed.fault,observed.possibleSideEffect)',
+                      new_controller)
+        self.assertNotIn('return stop(observed.fault,observed.possibleSideEffect)',
+                         old_controller)
+        self.assertIn('firstFailureEvidence=', new_controller)
 
     def test_retired_epoch_transition_is_not_reset_or_unsafe_bypass(self):
         for required in (
