@@ -246,6 +246,42 @@ class TestLicensedListingObservation(unittest.TestCase):
         self.assertEqual(audit_csv(raw, evaluated_utc=NOW)["reason"],
                          "CSV_PREAMBLE_INVALID")
 
+    def test_response_denied_authority_and_source_labels_cannot_be_overridden(self):
+        # The direct response helper is a future-proof authority boundary,
+        # not just a safe helper when its present callers send benign details.
+        from pdiddler.system2.licensed_listing_observation import response, ATTRIBUTION, LICENSE
+        hostile = response(
+            "RESEARCH_LISTING_OBSERVATIONS_ONLY", "SYNTHETIC_TEST",
+            schema="FORGED", provider="IMPERSONATED", datasetUrl="https://fake.invalid",
+            attribution="NOT_FAIRSTASH", licenseUrl="https://fake.invalid",
+            verifiedMarketQuote=True, mayFeedStage120AsVerifiedMarket=True,
+            mayFeedLiveStrategy=True, authorizesTrade=True,
+            authorizesOffer=True, authorizesAccept=True,
+            mayReportProfit=True, maySendDiscordWebhook=True,
+            mayUseForStrategyLearning=True, serverCompletionProven=True,
+            sourceHttpOriginIndependentlyAuthenticated=True,
+            postedListingsAreCompletedTrades=True,
+            observedCompletedTradeLiquidityVerified=True,
+            tradeOutcome="COMPLETED", benignResearchCount=7,
+        )
+        for flag in (
+            "verifiedMarketQuote", "mayFeedStage120AsVerifiedMarket",
+            "mayFeedLiveStrategy", "authorizesTrade", "authorizesOffer",
+            "authorizesAccept", "mayReportProfit", "maySendDiscordWebhook",
+            "mayUseForStrategyLearning", "serverCompletionProven",
+            "sourceHttpOriginIndependentlyAuthenticated",
+            "postedListingsAreCompletedTrades",
+            "observedCompletedTradeLiquidityVerified",
+        ):
+            self.assertIs(hostile[flag], False, flag)
+        self.assertEqual(hostile["tradeOutcome"], "UNKNOWN")
+        self.assertEqual(hostile["schema"], SCHEMA)
+        self.assertEqual(hostile["provider"], "FairStash")
+        self.assertEqual(hostile["datasetUrl"], SOURCE)
+        self.assertEqual(hostile["attribution"], ATTRIBUTION)
+        self.assertEqual(hostile["licenseUrl"], LICENSE)
+        self.assertEqual(hostile["benignResearchCount"], 7)
+
     def test_authority_invariants_for_all_results(self):
         cases = [
             valid(), valid(observed="2026-11-19T00:00:00Z"),
