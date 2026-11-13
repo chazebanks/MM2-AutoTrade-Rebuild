@@ -90,6 +90,7 @@ function M.new(api,opts)
  local firstFault=nil
  local step1Failure=nil
  local step2Failure=nil
+ local preflightFailure=nil
  -- Preserve no free-form usernames, inventories, GUI text or raw IDs.
  local function enum(v)
   return type(v)=="string" and #v<=72 and
@@ -136,6 +137,7 @@ function M.new(api,opts)
    firstFault=firstFault,
    step1Failure=step1Failure,
    step2Failure=step2Failure,
+   preflightFailure=preflightFailure,
    step1ThreeWindowsVerified=phase1~=nil,
    step1ClosedWindows=phase1 and 3 or 0,
    step2AttemptedDistinctContacts=phase2 and
@@ -184,6 +186,19 @@ function M.new(api,opts)
   return result()
  end
  local C={}
+ -- Pre-arm checks never send a request. A bounded timeout must issue its
+ -- own precise sanitised fault, without pretending the Step1 controller
+ -- was started or invoking a second run in the same server.
+ function C.preflightAbort(code,checks)
+  if phase~="PREPARING" then return result() end
+  preflightFailure={
+   reason=enum(code),
+   stableReadinessChecks=num(checks,100),
+   tradeRequestAttempted=false,
+   tradeOfferAttempted=false,
+  }
+  return stop("COMBINED_STEP1_PREFLIGHT_NOT_READY")
+ end
  function C.start(now)
   if phase~="PREPARING" or not number(now) or not api.jobMatches() then
    return false,"COMBINED_INITIAL_START_DENIED" end
