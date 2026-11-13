@@ -8,13 +8,15 @@ local USED="PDIDDLER_SYSTEM1_ONE_SERVER_COMBINED_USED_JOB"
 local PLACE=142823291
 local FIRST="b24661781e72e3dec759960d2f4b423841961c8b"
 local SECOND="b7d98b9b0815f72bff63fe7b58b8c92c59c3e0d7"
-local CONTROL="8f6b736ca05bb529bf6dc78864ad080fca65d0b8"
+local CONTROL="7c07db3ec5feeb3404d195a89fad14bbcff9985a"
 local PREFIX="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local THIS_JOB=game.JobId
-local Player=game:GetService("Players").LocalPlayer
+local Players=game:GetService("Players")
+local Player=Players.LocalPlayer
 local PG=Player and Player:FindFirstChildOfClass("PlayerGui")
 local Http=game:GetService("HttpService")
-if game.PlaceId~=PLACE or not Player or not PG or
+local ALT_NAME="venossgaming90190"
+if game.PlaceId~=PLACE or not Player or
  type(THIS_JOB)~="string" or #THIS_JOB==0 or
  E[KEY]~=nil or E[USED]==THIS_JOB or
  E.PDIDDLER_OUTGOING_SESSION~=nil or
@@ -59,7 +61,7 @@ local runNonce="GUID_UNAVAILABLE"
 pcall(function()runNonce=Http:GenerateGUID(false) end)
 local function jobMatches()
  return game.JobId==THIS_JOB and game.PlaceId==PLACE and
-    E[KEY]==owner and PG.Parent==Player
+    E[KEY]==owner and (PG==nil or PG.Parent==Player)
 end
 local function visible(obj)
  local ok,yes=pcall(function()
@@ -80,35 +82,81 @@ local function noTradeOrPending()
   if g and g:IsA("ScreenGui") and g.Enabled then
    local c=g:FindFirstChild("Container")
    local t=c and c:FindFirstChild("Trade")
-   if t and visible(t) then return false end
+   if t and visible(t) then return false,"TRADE_WINDOW_ACTIVE" end
   end
  end
  local roots={PG}
  if type(gethui)=="function" then
   local ok,root=pcall(gethui)
-  if not ok then return false end
+  if not ok then return false,"GUI_ROOT_UNREADABLE" end
   if root then roots[#roots+1]=root end
  end
  for _,root in ipairs(roots)do
   local ok,desc=pcall(function()return root:GetDescendants()end)
-  if not ok or type(desc)~="table" then return false end
+  if not ok or type(desc)~="table" then
+   return false,"GUI_DESCENDANTS_UNREADABLE" end
   for _,v in ipairs(desc)do
    if visible(v) and
      (v:IsA("TextLabel") or v:IsA("TextButton") or
       v:IsA("TextBox")) then
     local yes,txt=pcall(function()return tostring(v.Text or "") end)
-    if not yes then return false end
+    if not yes then return false,"GUI_TEXT_UNREADABLE" end
     local upper=txt:upper()
     if upper:find("TRADE REQUEST PENDING",1,true) or
        upper:find("TRADE REQUEST FROM",1,true) or
        upper:find("INCOMING TRADE REQUEST",1,true) or
        upper:find("SENT YOU A TRADE REQUEST",1,true) then
-      return false
+      return false,"REQUEST_POPUP_ACTIVE"
     end
    end
   end
  end
- return true
+ return true,"NO_TRADE_OR_PENDING"
+end
+-- This extra gate runs before executing either of the two original
+-- source-pinned trading scripts. It never taps Trade or sends a remote.
+-- A short stable readiness interval avoids cold public-server startup races.
+local conflictNames={
+ "PDIDDLER_PART4_CONTROLLER_ACTIVE",
+ "PDIDDLER_OUTGOING_CONTROLLER_ACTIVE",
+ "PDIDDLER_AUTOTRADE_ACTIVE",
+ "PDIDDLER_SUPERVISED_P3_NATIVE_OWNER",
+ "PDIDDLER_SUPERVISED_FOUR_SLOT_PILOT",
+ "PDIDDLER_SYSTEM1_MULTITRADE_OWNER",
+ "PDIDDLER_SYSTEM1_MAIN_AUTO_OWNER",
+}
+local function readiness()
+ if not jobMatches() then return false,"PREFLIGHT_JOB_CHANGED" end
+ if E.PDIDDLER_OUTGOING_SESSION~=nil or
+    E.PDIDDLER_PART4_SESSION~=nil or
+    E.PDIDDLER_SYSTEM1_STEP1_RECOVERY_OWNER~=nil or
+    E.PDIDDLER_SYSTEM1_STEP2_PUBLIC_OWNER~=nil then
+  return false,"PREFLIGHT_ACTIVE_SESSION"
+ end
+ for _,key in ipairs(conflictNames)do
+  if E[key]~=nil and E[key]~=false then
+   return false,"PREFLIGHT_COMPETING_CONTROLLER" end
+ end
+ local pgui=Player:FindFirstChildOfClass("PlayerGui")
+ if not pgui or pgui.Parent~=Player then
+  return false,"PREFLIGHT_PLAYERGUI_NOT_READY" end
+ PG=pgui
+ local world=game:GetService("Workspace")
+ if not world or not world.CurrentCamera then
+  return false,"PREFLIGHT_CAMERA_NOT_READY" end
+ local alt=Players:FindFirstChild(ALT_NAME)
+ if not alt then return false,"PREFLIGHT_ALT_NOT_PRESENT" end
+ local ok,found=pcall(function()
+  return Players:GetPlayerByUserId(alt.UserId)
+ end)
+ if not ok or alt==Player or alt.Parent~=Players or
+   type(alt.UserId)~="number" or alt.UserId<=0 or
+   alt.Name~=ALT_NAME or found~=alt then
+  return false,"PREFLIGHT_ALT_IDENTITY_UNVERIFIED" end
+ local clear,why=noTradeOrPending()
+ if not clear then return false,"PREFLIGHT_"..
+    tostring(why or "GUI_UNCLEAR") end
+ return true,"PREFLIGHT_READY"
 end
 local function quiescent()
  if not jobMatches() or not firstRunner then return {safe=false}end
@@ -234,16 +282,43 @@ if not engine then
  warn("[SYSTEM1 ONE SERVER] transition controller default closed",why)
  return nil
 end
-local ok,begin=pcall(engine.start,os.clock())
-if not ok or begin~=true then
- E[KEY]=nil
- E[USED]=THIS_JOB
- warn("[SYSTEM1 ONE SERVER] Step1 source missing or startup denied")
- return nil
-end
+local preflight={lastReason="PREFLIGHT_CHECKS_STARTING",
+  stableReadinessChecks=0,checks=0,started=false}
 local started=pcall(function()
  task.spawn(function()
-  while owner.running and jobMatches() do
+  -- Total bounded 18s of read-only validation. We do NOT silently
+  -- rerun a stopped Stage1 trade, re-arm P3, or reset session epochs.
+  local deadline=os.clock()+18
+  while owner.running and not preflight.started do
+   local ready,why=readiness()
+   preflight.lastReason=why
+   preflight.checks+=1
+   if ready then
+    preflight.stableReadinessChecks+=1
+   else
+    preflight.stableReadinessChecks=0
+   end
+   if ready and preflight.stableReadinessChecks>=4 then
+    local ok,begin=pcall(engine.start,os.clock())
+    if not ok or begin~=true then
+     if engine.status().phase~="STOPPED" then
+      engine.preflightAbort("PREFLIGHT_STEP1_START_DENIED",
+        preflight.stableReadinessChecks)
+     end
+     break
+    end
+    preflight.started=true
+    print("[SYSTEM1 ONE SERVER] PRECHECK PASSED; original ALT ARM3 GUI loaded.")
+    break
+   end
+   if os.clock()>=deadline then
+    engine.preflightAbort(why or "PREFLIGHT_UNKNOWN",
+      preflight.stableReadinessChecks)
+    break
+   end
+   task.wait(0.2)
+  end
+  while owner.running and preflight.started and jobMatches() do
    local good,r=pcall(engine.tick,os.clock())
    if not good or type(r)~="table" then
     engine.stop()
@@ -256,16 +331,24 @@ local started=pcall(function()
    end
    task.wait(0.2)
   end
-  if owner.running and not jobMatches() then
-   engine.stop()
-  end
+  if owner.running and not jobMatches() then engine.stop()end
  end)
 end)
-if not started then engine.stop()end
+if not started then
+ engine.preflightAbort("PREFLIGHT_WORKER_SCHEDULE_FAILED",0)
+end
 E.PDIDDLER_SYSTEM1_ONE_SERVER_RUNNER={
- status=function()return engine.status()end,
+ status=function()
+  local report=engine.status()
+  if report.phase=="PREPARING" then
+   report.reason=preflight.lastReason
+   report.preflightChecks=preflight.checks
+   report.preflightStableChecks=preflight.stableReadinessChecks
+  end
+  return report
+ end,
  stop=function()return engine.stop()end,
  copy=function()return engine.copy()end,
 }
-print("[SYSTEM1 ONE SERVER] Step1 ALT ARM3 panel is active. Same-job Step2 automatically appears AFTER exact Step1 PASS.")
+print("[SYSTEM1 ONE SERVER] Read-only bounded preflight checking ALT, GUI, camera, trade and other controllers BEFORE loading Step1. One JobId; Step2 after verified 3/3.")
 return E.PDIDDLER_SYSTEM1_ONE_SERVER_RUNNER
