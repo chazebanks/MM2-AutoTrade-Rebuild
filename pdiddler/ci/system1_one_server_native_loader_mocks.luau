@@ -53,6 +53,17 @@ return {
  stop=function()E.TEST_STEP1_STOP_COUNT+=1;return true end,
 }
 ]]
+local STEP1_FAIL=[[
+local E=getgenv()
+local H=game:GetService("HttpService")
+E.PDIDDLER_SYSTEM1_MAIN_AUTO_LAST_JSON=H:JSONEncode({
+ schema="gingerscope-system1-step1-alt-recovery-native-v1",
+ status="STOPPED",phase="SETUP",reason="OWN_PROFILE_READ_TIMEOUT",
+ round=0,completedRounds=0,lastAction="BEFORE_ARM",
+ possibleSideEffect=false,
+})
+return nil
+]]
 local STEP2=[[
 local E=getgenv()
 local token=E.PDIDDLER_SYSTEM1_COMBINED_TRANSITION_TOKEN
@@ -97,7 +108,8 @@ local function fakeNode(class,name)
  end
  return n
 end
-local function fixture()
+local function fixture(options)
+ options=options or {}
  local clock=0
  local jobs={}
  local clips={}
@@ -132,6 +144,7 @@ local function fixture()
     return {
      GenerateGUID=function()return "12345678-1234-1234-1234-123456789012"end,
      JSONEncode=function(_,v)return serde.encode("json",v)end,
+     JSONDecode=function(_,v)return serde.decode("json",v)end,
     }
    end
   end,
@@ -140,7 +153,7 @@ local function fixture()
    if url:find("one_server_transition_controller.lua",1,true) then
     return controller
    elseif url:find("SYSTEM1_STEP1_ALT_DYNAMIC_RECOVERY_NATIVE.lua",1,true) then
-    return large(STEP1)
+    return large(options.failStep1 and STEP1_FAIL or STEP1)
    elseif url:find("SYSTEM1_COMBINED_STEP2_BOUND_EPOCH_NATIVE.lua",1,true) then
     return large(STEP2)
    end
@@ -393,6 +406,29 @@ do
  eq(r.preflightFailure.reason,"PREFLIGHT_COMPETING_CONTROLLER",
   "precise competing controller failure")
  eq(#x.global.TEST_LOAD_SEQUENCE,0,"no P3 request on active owner conflict")
+end
+
+
+-- Original Step1 may fail during setup *before* returning the runner.
+-- Its first fresh child JSON must survive the combined START failure.
+do
+ local x=fixture({failStep1=true})
+ for _=1,6 do x.tick()end
+ local r=x.runner.status()
+ eq(r.status,"STOPPED","native combined fails closed if original Step1 returns nil")
+ eq(r.reason,"COMBINED_STEP1_PIN_OR_START_FAILED",
+  "combined category retained without throwing original error away")
+ eq(type(r.step1Failure),"table","child setup error included in combined output")
+ eq(r.step1Failure.reason,"OWN_PROFILE_READ_TIMEOUT",
+  "real original Step1 setup reason decoded from new sanitized JSON")
+ eq(r.step1Failure.phase,"SETUP","correct original setup phase retained")
+ eq(r.step1Failure.round,0,"no phantom trade attempt on startup error")
+ eq(#x.clips,1,"one combined failure copied")
+ local copied=serde.decode("json",x.clips[1])
+ eq(copied.step1Failure.reason,"OWN_PROFILE_READ_TIMEOUT",
+  "clipboard includes original internal error")
+ eq(#x.global.TEST_LOAD_SEQUENCE,0,
+  "no Stage1 controller started after original failure")
 end
 
 print("SYSTEM1_ONE_SERVER_NATIVE_LOADER_PASS",tests)
