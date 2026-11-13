@@ -325,7 +325,13 @@ local started=pcall(function()
   -- rerun a stopped Stage1 trade, re-arm P3, or reset session epochs.
   local deadline=os.clock()+18
   while owner.running and not preflight.started do
-   local ready,why=readiness()
+   local checkOk,ready,why=pcall(readiness)
+   if not checkOk then
+    -- A transient Roblox GUI/Players lookup exception cannot leave a
+    -- half-armed test running forever or permit blind re-entry.
+    ready=false
+    why="PREFLIGHT_READ_EXCEPTION"
+   end
    preflight.lastReason=why
    preflight.checks+=1
    -- A changed JobId or live competing controller is not a cold-start
