@@ -1,0 +1,70 @@
+name: Gingerscope System1 MAIN auto 4-trade fail-stop + ALT guided (offline)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system1/**'
+      - 'pdiddler/ci/system1_*'
+      - '.github/workflows/gingerscope-system1-multitrade.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-protected-client-four-rounds:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # Check that raw.githubusercontent.com pins are commits, not blobs
+      - name: Install SHA-256 pinned official Lune v0.11.1
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 50 https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip -o "$RUNNER_TEMP/lune.zip"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $RUNNER_TEMP/lune.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/lune.zip" -d "$RUNNER_TEMP/dist"
+          f="$(find "$RUNNER_TEMP/dist" -name lune -type f -print -quit)"
+          test -n "$f"
+          install -m 0755 "$f" "$RUNNER_TEMP/lune"
+      - name: Pure four-round MAIN ALT guided client FSM
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_multitrade_walkthrough_mocks.luau
+      - name: Automatic MAIN four-epoch fail-stop controller and clipboard test
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_main_auto_failstop_mocks.luau
+      - name: Public-lobby snapshot gate (OFFLINE ONLY, zero requests)
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_public_lobby_target_gate_mocks.luau
+      - name: Actual P3 one-send source, separate fresh session and old processed anti-replay
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_p3_single_send_epoch_mocks.luau
+      - name: Compile native automatic MAIN runner and one-send P3 fork
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_main_auto_native_compile.luau
+      - name: Original protected P3 P4 bridge unit regressions
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_p4_handoff_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_four_slot_operator_plan_mocks.luau
+      - name: Native original IO GUI multi-trade adapter integration test
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_multitrade_native_original_mocks.luau
+      - name: Full automatic MAIN native four-window original P4 plus frozen ABA modules
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_main_auto_native_original_mocks.luau
+      - name: Python client-only multi-trade receipt integrity and false-settlement rejection
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_system1_batch_receipt_grader
+      - name: Python source integrity, safety and original source checks
+        run: |
+          set -euo pipefail
+          python3 pdiddler/ci/check_system1_multitrade_integration.py
+          python3 pdiddler/ci/check_system1_main_auto_integration.py
