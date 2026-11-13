@@ -151,6 +151,8 @@ function M.new(api,opts)
    scenarioId=enum(r.scenarioId),lastAction=enum(r.lastAction),
    round=num(r.round,8),completedRounds=num(r.completedRounds,8),
    requestAttempts=num(actions.requestsStarted,12),
+   originalP3Sends=type(r.publicRequestDiagnostic)=="table" and
+      num(r.publicRequestDiagnostic.originalP3SentConfirmed,3) or 0,
    offersClientVisible=num(actions.offersClientVisible,24),
    removalsAttempted=num(actions.removalsAttempted,24),
    declinesAttempted=num(actions.declinesAttempted,12),
@@ -165,6 +167,15 @@ function M.new(api,opts)
     sameChroma=p.sameChroma==true,
     sameSlot=p.sameSlot==true,
     sameClientIdCandidate=p.sameClientIdCandidate==true,
+    -- Terminal combined-only watchdog evidence. Source accepts only
+    -- enum-shaped codes/counters/bools: never partner identities/GUI text.
+    supervisionStage=enum(p.stage),
+    watchdogStatus=enum(p.watchdogStatus),
+    watchdogReason=enum(p.watchdogReason),
+    sessionEpochMatches=p.sessionEpochMatches==true,
+    watchdogReady=p.watchdogReady==true,
+    observedP3Sends=num(p.observedP3Sends,3),
+    tradeButtonTapAttempted=p.tradeButtonTapAttempted==true,
    },
   }
  end
