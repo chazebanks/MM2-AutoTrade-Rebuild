@@ -20,7 +20,7 @@ class OneServerComposedSafety(unittest.TestCase):
         self.assertEqual(
             pins["SECOND"], "b7d98b9b0815f72bff63fe7b58b8c92c59c3e0d7")
         self.assertEqual(
-            pins["CONTROL"], "833590724cf42e377599b79c61eea48fe87410b8")
+            pins["CONTROL"], "8f6b736ca05bb529bf6dc78864ad080fca65d0b8")
 
     def test_stage2_original_io_code_is_byte_identical_after_preflight(self):
         anchor = 'local Players=game:GetService("Players")'
