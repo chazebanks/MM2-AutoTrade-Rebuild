@@ -40,3 +40,25 @@
 - Real Lua source pins are immutable and exact; combined Step2 is byte-identical to the physically verified original Step2 from the first `local Players=...` onward. The sole preflight change is **one-use combined transition authorization** replacing fresh-job-only restriction for an exact retired P3 epoch; old numeric epoch is never reset.
 - Lune native pure controller and full fake-JobId wrapper tests include strict 3/3 first ledger proof; four no-trade/no-pending handoff checks; one-use token consumption; same JobId; no premature public request; STOP on pending, root, server change, bad ledgers, failed pinned fetch; original Step1/Step2 and ARM8 regressions all remain green.
 - Source compile and Python guard assure unchanged tested source pins, no newly added offer/Accept/hop remotes, and stage2 original code unchanged after the one-time preflight. CI on exact commit must be **all green** before providing the device loader.
+
+
+## Real combined iPad STOP: underlying Step1 reason was lost (Nov 12)
+
+**Operator's first actual one-server combined result (runNonce `1a2ceaf4-b651-4976-8447-18f1bd07cc6e`) is a STOP**, not a test pass: `status="STOPPED"`, `reason=COMBINED_STEP1_STOPPED`, `step1ThreeWindowsVerified=false`, `step2AttemptedDistinctContacts=0`, `step2VerifiedBoundCloses=0`, `quiescenceChecks=0`, `actualTeleports=0`, `finalAcceptEverAttempted=false`. **The combined top-level `step1ClosedWindows=0` means no complete Step1 3/3 batch was approved; it is NOT evidence zero individual client windows closed.** The original child status was STOPPED, so `COMBINED_STEP1_PIN_OR_START_FAILED` is not the current fault. The prior unrelated screenshot was explicitly withdrawn by the operator and must NOT be used to infer this run's failure.
+
+**Root cause of the missing diagnostic:** the originally green combined controller correctly detected the child STOP but threw away the Step1-specific `reason`, `round`, `completedRounds`, `lastAction` and optional `firstFailureEvidence` before emitting its combined JSON. No specific source-level fault can be established from this top-level receipt alone. Do not guess "ALT absent", "GUI blocked", "pending request" or "unexpected ALT stack" from unrelated prior device runs.
+
+**Immediate evidence recovery (read-only, no runtime changes):** In the SAME original Roblox client JobId, if still active, run:
+```lua
+local e=(type(getgenv)=="function" and getgenv()) or _G
+local result=e.PDIDDLER_SYSTEM1_MAIN_AUTO_LAST_JSON
+if type(result)=="string" then print(result) else
+ print("NO_STEP1_REPORT_IN_THIS_SESSION") end
+```
+This recovers the original Step1 test JSON saved before the combined wrapper overrode the clipboard; never reset/re-arm ownership globals to recover evidence. Ask for this exact JSON if available. If session has ended, old result may be unavailable; record root cause as UNKNOWN until a new bounded test provides data.
+
+**Correction on independent combined-only PR #248:** the combined pure transition controller now captures a *sanitized* `step1Failure` nested object **before releasing the first owner**, including exact enum-shaped Step1 `reason`, `phase`, `scenarioId`, `lastAction`, `round`, `completedRounds`, request/offer/removal/decline/closed-client-window counts, `possibleSideEffect` and safe quantity/boolean evidence. Similarly captures Step2 faults, if they arise later. Handles a terminated pre-ARM Step1 setup without spinning for 900 seconds. Leaves original Step1 and Step2 scripts, original P3/P4 IO, P1/P2, market systems and final Accept completely unchanged. Does NOT automatically retry any STOP.
+
+**CI regression additions:** real original STOP case scenario `ALT_STACK_X1_TO_X2` and child cause `ALT_CHANGED_WHILE_CLEARING_FOR_REOFFER` copied through the native one-server wrapper; pure controller tests assert first-fault preservation, copied evidence, pre-arm setup stop, untrusted free-form enum rejection and possible-side-effect retention; original Step1, Step2 and ARM8 tests remain green. Loader immutable controller pin updated. Review focused GitHub run and 7/7 checks on exact final head before considering another device test.
+
+**Status:** Both **standalone** Step1 3/3 and Step2 three-public-player/two-P4-close tests still physically PASS from prior independent runs; only their NEW **combined same-server integration is unproven / STOP**. Neither System1 parent nor combined PR is merged to `main`. Next: inspect original saved Step1 JSON; decide specific targeted fix based on that root cause before asking operator to rerun a full three-window sequence.
