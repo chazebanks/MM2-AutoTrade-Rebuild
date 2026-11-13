@@ -53,6 +53,18 @@ class OneServerComposedSafety(unittest.TestCase):
             combined, '  onStatus=function(result)', ' },{\n  spawn=')
         combined = restore_region(
             combined, 'local function observe()', ' local observed={')
+        # Combined-only read-only liveness fields; no P3 send/offer logic.
+        combined = restore_region(
+            combined, ' local observed={', ' local stageCodes=')
+        combined = restore_region(
+            combined, ' local root,why=tradeRoot()', ' if why then')
+        # The only UI change shows current remaining eligible/pause/progress.
+        start_ui = '  local progress=r.publicProgressDiagnostic'
+        end_ui = '  screen.status.Text='
+        i = combined.index(start_ui)
+        j = combined.index(end_ui, i)
+        original_ui = '  screen.body.Text=r.reason\n'
+        combined = combined[:i] + original_ui + combined[j:]
         combined = restore_region(
             combined, ' if haltReason and observed.fault==nil then',
             ' if status.status=="STOPPED" then')
@@ -75,6 +87,17 @@ class OneServerComposedSafety(unittest.TestCase):
         self.assertNotIn('if not validSnapshot(observed) then',
                          old_controller)
         self.assertIn('firstFailureEvidence=', new_controller)
+        self.assertIn('PUBLIC_FROZEN_TARGET_UNAVAILABLE_INCOMPLETE',
+                      new_controller)
+        self.assertIn('PUBLIC_POST_CLOSE_QUEUE_STALLED_INCOMPLETE',
+                      new_controller)
+        self.assertIn('P3_POST_CLOSE_ACTIVE_REQUEST_STALLED',
+                      new_controller)
+        self.assertIn('remainingEligibleNow=remainingEligible', STAGE2)
+        self.assertIn('state.processed[candidate.UserId]==nil', STAGE2)
+        self.assertIn('scannerPendingWork=hasPending', STAGE2)
+        self.assertIn('p3Paused=paused', STAGE2)
+        self.assertIn('observed.tradeRootVisible=root~=nil', STAGE2)
 
     def test_retired_epoch_transition_is_not_reset_or_unsafe_bypass(self):
         for required in (
