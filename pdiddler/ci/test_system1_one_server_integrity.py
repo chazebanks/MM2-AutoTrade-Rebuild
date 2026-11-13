@@ -47,6 +47,10 @@ class OneServerComposedSafety(unittest.TestCase):
         combined = combined.replace(
             '"system1/system1_combined_step2_handoff_controller.lua"',
             '"system1/system1_step2_public_handoff_controller.lua"')
+        # Only the reviewed source bound grew with read-only progress code.
+        combined = combined.replace(
+            '"system1/system1_step2_public_handoff_controller.lua",16000)',
+            '"system1/system1_step2_public_handoff_controller.lua",12000)')
         combined = restore_region(
             combined, 'local haltReason=nil', 'local function writeReceipt')
         combined = restore_region(
