@@ -1,3 +1,4 @@
+-- Combined-only after-P4-close bounded progress observability; every incomplete outcome remains NOT PASS.
 -- Combined-only diagnostic fork of the original protected Step2
 -- controller. No change to request/offer/decline/accept behavior.
 -- System1 Step2 bounded public P3→P4 test orchestrator (injected/pure).
@@ -29,6 +30,7 @@ local allowedFaults={
  "P3_WATCHDOG_BLOCKED", "P3_WATCHDOG_HEARTBEAT_MISSING",
  "P3_SESSION_EPOCH_CHANGED", "P3_SCREEN_OR_OWNER_LOST",
  "P3_OBSERVER_INVALID", "P3_P3_CONTROLLER_MISSING",
+ "P3_POST_CLOSE_ACTIVE_REQUEST_STALLED",
 }
 local allowed={}
 for _,v in ipairs(allowedFaults) do allowed[v]=true end
@@ -57,6 +59,10 @@ function M.new(api,options)
  local lastAction="NONE"
  local possibleSideEffect=false
  local lastObserved=nil
+ local lastProgressAt=nil
+ local progressSignature=nil
+ local lastCloseAt=nil
+ local p3UnpausedAfterClose=false
  local function receipt()
   local observed=lastObserved or {}
   return {
@@ -71,6 +77,21 @@ function M.new(api,options)
     requestTargetsAttempted=observed.requestTargetsAttempted or 0,
     pendingUiEverConfirmed=observed.pendingUiEverConfirmed==true,
     originalP3SentConfirmed=observed.originalP3SentConfirmed or 0,
+   },
+   publicProgressDiagnostic={
+    remainingFrozenUnprocessed=observed.remainingFrozenUnprocessed or 0,
+    remainingEligibleNow=observed.remainingEligibleNow or 0,
+    scannerPendingWork=observed.scannerPendingWork==true,
+    p3Paused=observed.p3Paused==true,
+    p3Active=observed.p3Active==true,
+    pendingVisible=observed.pendingVisible==true,
+    tradeRootVisible=observed.tradeRootVisible==true,
+    watchdogStatus=observed.watchdogStatus or "UNKNOWN",
+    p3UnpausedAfterClose=p3UnpausedAfterClose,
+    secondsSinceLastProgress=lastProgressAt and
+      math.max(0,math.floor(lastNow-lastProgressAt)) or 0,
+    secondsSinceLastBoundClose=lastCloseAt and
+      math.max(0,math.floor(lastNow-lastCloseAt)) or 0,
    },
    targetBudget=3,
    attemptedDistinctContacts=observed.distinctContacts or 0,
@@ -129,6 +150,15 @@ function M.new(api,options)
    type(v.boundActive)=="boolean" and
    type(v.pendingVisible)=="boolean" and
    type(v.p3Paused)=="boolean" and
+   count(v.remainingFrozenUnprocessed) and
+   count(v.remainingEligibleNow) and
+   v.remainingFrozenUnprocessed==v.frozenTargets-v.processedTargets and
+   v.remainingEligibleNow<=v.remainingFrozenUnprocessed and
+   type(v.scannerPendingWork)=="boolean" and
+   type(v.p3Active)=="boolean" and
+   type(v.tradeRootVisible)=="boolean" and
+   type(v.watchdogStatus)=="string" and
+   #v.watchdogStatus<=72 and
    type(v.autoDeclines)=="number" and v.autoDeclines>=0 and
    v.autoDeclines<=3
  end
@@ -143,6 +173,7 @@ function M.new(api,options)
    return false,"STEP2_P3_START_REJECTED"
   end
   startedAt=now;lastNow=now;phase="RUNNING"
+  lastProgressAt=now
   reason="P3_PUBLIC_ROTATION_RUNNING_P4_CLIENT_ONLY"
   return true,"STEP2_ARMED"
  end
@@ -169,6 +200,21 @@ function M.new(api,options)
   lastObserved=observed
   if observed.fault~=nil then
    return stop(observed.fault,observed.possibleSideEffect) end
+  -- Only a changed confirmed contact/decline counter can refresh the
+  -- bounded progress timer. Scanner heartbeat cannot mask a frozen target.
+  local sig=tostring(observed.processedTargets)..":"..
+    tostring(observed.originalP3SentConfirmed)..":"..
+    tostring(observed.acceptedRequests)..":"..
+    tostring(observed.ignoredRequests)..":"..
+    tostring(observed.declinedRequests)..":"..tostring(closedCount)
+  if progressSignature~=sig then
+   progressSignature=sig
+   lastProgressAt=now
+  end
+  if lastCloseAt~=nil and not observed.p3Paused and
+     not observed.tradeRootVisible then
+   p3UnpausedAfterClose=true
+  end
   if observed.boundActive then
    if not observed.p3Paused or observed.pendingVisible then
     return stop("P3_HANDOFF_UNATTRIBUTED") end
@@ -196,6 +242,10 @@ function M.new(api,options)
      return stop("P4_DECLINE_FAILED_OR_UNCONFIRMED",true) end
     closedTargets[observed.partnerUserId]=true
     closedCount+=1
+    lastCloseAt=now
+    p3UnpausedAfterClose=false
+    lastProgressAt=now
+    progressSignature=nil
     active=nil
     stable=0
    end
@@ -210,6 +260,27 @@ function M.new(api,options)
     return terminal("TWO_DISTINCT_CONTACTS_AND_BOUND_CLIENT_CLOSE_PROVEN",true)
    end
    return terminal("PUBLIC_ROTATION_HANDOFF_INCOMPLETE",false)
+  end
+  -- Frozen targets can become ineligible or leave. Original P3 must NOT
+  -- contact them; report INCOMPLETE instead of appearing to run forever.
+  -- Do not manufacture processed events or a public-test PASS.
+  local idle=lastCloseAt and lastProgressAt and
+     now-lastProgressAt or 0
+  if closedCount>=1 and not observed.boundActive and idle>=30 then
+   if observed.pendingVisible or observed.p3Active or
+      observed.tradeRootVisible then
+    if idle>=60 then
+     return stop("P3_POST_CLOSE_ACTIVE_REQUEST_STALLED",true) end
+   elseif observed.p3Paused then
+    return stop("P3_UNEXPECTED_RESUME")
+   elseif observed.remainingEligibleNow==0 and
+      not observed.scannerPendingWork then
+    return terminal("PUBLIC_FROZEN_TARGET_UNAVAILABLE_INCOMPLETE",false)
+   elseif idle>=60 then
+    return terminal(observed.remainingEligibleNow==0 and
+      "PUBLIC_SCANNER_UNRESOLVED_INCOMPLETE" or
+      "PUBLIC_POST_CLOSE_QUEUE_STALLED_INCOMPLETE",false)
+   end
   end
   return receipt()
  end
