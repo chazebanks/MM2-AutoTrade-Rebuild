@@ -42,6 +42,10 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/system1_combined_step2_supervision_native_mocks.luau
+      - name: Original P3 watchdog heartbeat and retired-session epoch behavior
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_combined_original_watchdog_epoch_mocks.luau
       - name: Compile combined real Luau runtime and one-time Step2 fork
         run: |
           set -euo pipefail
