@@ -120,7 +120,12 @@ local function fixture(options)
  function P:IsA(kind)return kind=="Player"end
  local PG=fakeNode("PlayerGui","PlayerGui")
  PG.Parent=P
+ local guiLookupCount=0
  function P:FindFirstChildOfClass(kind)
+  guiLookupCount+=1
+  if options.failGuiLookup and guiLookupCount>1 then
+   error("FAKE_ROBLOX_GUI_LOOKUP_EXCEPTION")
+  end
   return kind=="PlayerGui" and PG or nil
  end
  local place=142823291
@@ -429,6 +434,22 @@ do
   "clipboard includes original internal error")
  eq(#x.global.TEST_LOAD_SEQUENCE,0,
   "no Stage1 controller started after original failure")
+end
+
+
+-- A Roblox GUI lookup can throw while the client loads; the combined
+-- preflight must report a bounded safe failure, not strand the test.
+do
+ local x=fixture({failGuiLookup=true})
+ for _=1,85 do x.tick()end
+ local r=x.runner.status()
+ eq(r.status,"STOPPED","GUI read exception cannot hang PREPARING")
+ eq(r.reason,"COMBINED_STEP1_PREFLIGHT_NOT_READY",
+  "GUI read exception fails before original Stage1")
+ eq(r.preflightFailure.reason,"PREFLIGHT_READ_EXCEPTION",
+  "precise redacted GUI exception classification")
+ eq(#x.global.TEST_LOAD_SEQUENCE,0,"no request script loaded after GUI error")
+ eq(#x.clips,1,"exception yields one safe COPY report")
 end
 
 print("SYSTEM1_ONE_SERVER_NATIVE_LOADER_PASS",tests)
