@@ -1,0 +1,64 @@
+name: Gingerscope pinned offline cross-module compatibility
+on:
+  push:
+    branches:
+      - feature/gingerscope-offline-crossmodule-contract
+  pull_request:
+    paths:
+      - 'pdiddler/intelligence_lab/test_future_offline_crossmodule_contract.py'
+      - 'pdiddler/intelligence_lab/test_future_runtime_server_crossmodule.py'
+      - 'pdiddler/intelligence_lab/test_future_hop_runtime_contract.lua'
+      - '.github/workflows/gingerscope-offline-crossmodule.yml'
+permissions:
+  contents: read
+jobs:
+  verify-pinned-offline-chain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout tested PR105 offer guard (read-only, pinned)
+        uses: actions/checkout@v4
+        with:
+          ref: 2f49e2f25cdbf7c8ca01702db159d412cc4382bc
+          path: .offline_sources/pr105
+          persist-credentials: false
+      - name: Checkout tested PR106 portfolio planner (read-only, pinned)
+        uses: actions/checkout@v4
+        with:
+          ref: 6ed48e084bd58fab38e3bf061ac36fb295ecf103
+          path: .offline_sources/pr106
+          persist-credentials: false
+      - name: Checkout tested PR109 Discord preview (read-only, pinned)
+        uses: actions/checkout@v4
+        with:
+          ref: 4640d4fe7aa8e3b0efb670131533d0f31e3abbef
+          path: .offline_sources/pr109
+          persist-credentials: false
+      - name: Checkout tested PR110 full-inventory selector (read-only, pinned)
+        uses: actions/checkout@v4
+        with:
+          ref: 48c825f1a14f10e6a8498e0a60e12e26fb196265
+          path: .offline_sources/pr110
+          persist-credentials: false
+      - name: Checkout tested PR107 runtime supervisor (read-only, pinned)
+        uses: actions/checkout@v4
+        with:
+          ref: ff2f2750234ad91d4bed87f3d7e05f370373cbb0
+          path: .offline_sources/pr107
+          persist-credentials: false
+      - name: Checkout tested PR108 server intelligence (read-only, pinned)
+        uses: actions/checkout@v4
+        with:
+          ref: 4799138c580b36e891d892182e98427525af8a46
+          path: .offline_sources/pr108
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install actual Lua 5.4 for runtime state tests
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lua5.4
+      - name: Verify pinned strategy + reporting chain and runtime + navigation gate
+        run: |
+          python -m unittest pdiddler.intelligence_lab.test_future_offline_crossmodule_contract -v
+          python -m unittest pdiddler.intelligence_lab.test_future_runtime_server_crossmodule -v
