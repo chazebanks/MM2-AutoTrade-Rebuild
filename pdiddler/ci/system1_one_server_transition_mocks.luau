@@ -74,7 +74,8 @@ local function fixture(cfg)
   end,
   step1Status=function()return f.first end,
   step1VerifiedReceipt=function()
-   return cfg.dropExport and nil or f.export
+   if cfg.dropExport then return nil end
+   return f.export
   end,
   quiescent=function()
    return {safe=f.quiescentSafe,epoch=f.epoch}
