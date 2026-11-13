@@ -260,4 +260,35 @@ do
  eq(x.runner.status().status,"STOPPED","server change aborts")
  eq(#x.global.TEST_LOAD_SEQUENCE,1,"no other JobId test starts")
 end
+
+-- Real Step1 already sets its own original terminal JSON on STOP. The
+-- combined wrapper must not overwrite the actionable reason with only
+-- COMBINED_STEP1_STOPPED, which caused the operator diagnostic blind spot.
+do
+ local x=fixture()
+ x.global.TEST_STAGE1_STATE={
+  status="STOPPED",phase="STOPPED",
+  reason="ALT_CHANGED_WHILE_CLEARING_FOR_REOFFER",
+  round=2,completedRounds=1,scenarioId="ALT_STACK_X1_TO_X2",
+  lastAction="MAIN_REMOVE_OWN_ONE",
+  copyAttempted=true,possibleSideEffect=false,
+  actions={requestsStarted=2,offersClientVisible=3,
+   removalsAttempted=3,declinesAttempted=1,clientClosedWindows=1},
+ }
+ x.tick()
+ local report=x.runner.status()
+ eq(report.status,"STOPPED","combined source stops on original child fault")
+ eq(report.step1Failure.reason,"ALT_CHANGED_WHILE_CLEARING_FOR_REOFFER",
+  "actual loader captures Stage1 source's precise cause")
+ eq(report.step1Failure.scenarioId,"ALT_STACK_X1_TO_X2",
+  "source round name kept in combined receipt")
+ eq(report.step1Failure.completedRounds,1,
+  "earlier successful rounds not erased")
+ eq(#x.clips,1,"single combined clipboard output")
+ local copied=serde.decode("json",x.clips[1])
+ eq(copied.step1Failure.reason,report.step1Failure.reason,
+  "clipboard contains true child cause, not only generic STOP")
+ eq(#x.global.TEST_LOAD_SEQUENCE,1,"no public script launched after Step1 STOP")
+end
+
 print("SYSTEM1_ONE_SERVER_NATIVE_LOADER_PASS",tests)
