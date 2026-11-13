@@ -1,0 +1,23 @@
+name: Gingerscope System2 catalog discovery diff
+on:
+  pull_request:
+    paths:
+      - "pdiddler/system2/catalog_discovery_diff.py"
+      - "pdiddler/ci/test_system2_catalog_discovery_diff.py"
+      - "pdiddler/system2/CATALOG_DISCOVERY_HANDOFF_2026_11_13.md"
+      - ".github/workflows/gingerscope-system2-catalog-discovery.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-catalog-diff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Strict offline regression tests
+        run: python3 -m unittest -v pdiddler.ci.test_system2_catalog_discovery_diff
