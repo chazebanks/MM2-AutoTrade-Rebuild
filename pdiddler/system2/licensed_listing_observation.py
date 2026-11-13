@@ -107,7 +107,19 @@ def _audit(raw: bytes, *, evaluated_utc: str, source_url: str,
     except UnicodeDecodeError:
         raise InvalidListingSource("CSV_UTF8_INVALID") from None
     require("\x00" not in data, "CSV_BINARY_CONTENT_INVALID")
-    reader = csv.DictReader(io.StringIO(data, newline=""), strict=True)
+    # The provider's GitHub mirror (confirmed Nov13) prefixes descriptive
+    # comment lines. Comments are NOT an authenticated publisher watermark,
+    # rights grant or measurement date. Only allow them BEFORE the header;
+    # comments midstream are malformed observations, not skipped silently.
+    lines = data.splitlines(keepends=True)
+    comments = 0
+    while comments < len(lines) and lines[comments].startswith("#"):
+        require(comments < 32 and len(lines[comments]) <= 1024,
+                "CSV_PREAMBLE_INVALID")
+        comments += 1
+    require(comments < len(lines), "CSV_COLUMNS_NOT_CANONICAL")
+    reader = csv.DictReader(
+        io.StringIO("".join(lines[comments:]), newline=""), strict=True)
     require(reader.fieldnames == HEADER, "CSV_COLUMNS_NOT_CANONICAL")
 
     mm2_rows = 0
@@ -185,6 +197,7 @@ def _audit(raw: bytes, *, evaluated_utc: str, source_url: str,
     # HTTP origin, upstream trade settlement, license holder identity or URL.
     summary = {
         "inputSha256": hashlib.sha256(raw).hexdigest(),
+        "untrustedHeaderCommentLines": comments,
         "datasetRows": all_rows,
         "mm2ObservationRows": mm2_rows,
         "mm2DistinctSlugs": len(names),
