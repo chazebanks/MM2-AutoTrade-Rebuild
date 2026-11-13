@@ -71,6 +71,9 @@ def nonnegative(s: str, label: str) -> int:
 def response(status: str, reason: str, **details) -> dict:
     """Fixed, fail-closed authority surface independent of caller claims."""
     return {
+        # Untrusted/unforeseen detail keys can never replace source metadata
+        # or the mandatory disabled-authority contract.
+        **details,
         "schema": SCHEMA, "status": status, "reason": reason,
         "provider": "FairStash", "datasetUrl": SOURCE,
         "attribution": ATTRIBUTION, "licenseUrl": LICENSE,
@@ -89,7 +92,6 @@ def response(status: str, reason: str, **details) -> dict:
         "authorizesAccept": False, "mayReportProfit": False,
         "maySendDiscordWebhook": False, "mayUseForStrategyLearning": False,
         "serverCompletionProven": False, "tradeOutcome": "UNKNOWN",
-        **details,
     }
 
 
