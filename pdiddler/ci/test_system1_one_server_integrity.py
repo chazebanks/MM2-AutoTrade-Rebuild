@@ -20,7 +20,7 @@ class OneServerComposedSafety(unittest.TestCase):
         self.assertEqual(
             pins["SECOND"], "b7d98b9b0815f72bff63fe7b58b8c92c59c3e0d7")
         self.assertEqual(
-            pins["CONTROL"], "8f6b736ca05bb529bf6dc78864ad080fca65d0b8")
+            pins["CONTROL"], "7c07db3ec5feeb3404d195a89fad14bbcff9985a")
 
     def test_stage2_original_io_code_is_byte_identical_after_preflight(self):
         anchor = 'local Players=game:GetService("Players")'
@@ -79,6 +79,23 @@ class OneServerComposedSafety(unittest.TestCase):
             'clientOnly=true',
         ):
             self.assertIn(required, CTRL)
+
+    def test_cold_lobby_preflight_does_not_start_original_trader_early(self):
+        for token in (
+            'PREFLIGHT_ALT_NOT_PRESENT',
+            'PREFLIGHT_ALT_IDENTITY_UNVERIFIED',
+            'PREFLIGHT_PLAYERGUI_NOT_READY',
+            'PREFLIGHT_CAMERA_NOT_READY',
+            'PREFLIGHT_COMPETING_CONTROLLER',
+            'PREFLIGHT_REQUEST_POPUP_ACTIVE',
+            'PREFLIGHT_TRADE_WINDOW_ACTIVE',
+            'preflight.stableReadinessChecks>=4',
+            'engine.preflightAbort(',
+            'task.wait(0.2)',
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, NATIVE)
+        self.assertIn('COMBINED_STEP1_PREFLIGHT_NOT_READY', CTRL)
 
     def test_source_names_and_original_test_integrity(self):
         for part in (
