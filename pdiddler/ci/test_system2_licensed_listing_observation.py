@@ -202,6 +202,50 @@ class TestLicensedListingObservation(unittest.TestCase):
                                    evaluated_utc=NOW)["reason"],
                          "CSV_SIZE_INVALID")
 
+    def test_real_provider_comment_preamble_before_columns(self):
+        """FairStash's own mirror CSV begins with # descriptive lines."""
+        raw = (b"# FairStash: observations, not prices\n"
+               b"# CC BY 4.0 but this comment does not authenticate origin\n"
+               + encode())
+        r = audit_csv(raw, evaluated_utc=NOW, item_slug="test-axe")
+        self.assertEqual(r["status"], "RESEARCH_LISTING_OBSERVATIONS_ONLY")
+        self.assertEqual(r["untrustedHeaderCommentLines"], 2)
+        self.assertEqual(r["itemObservation"]["latestDaySellingObserved"], 3)
+        self.assertFalse(r["sourceHttpOriginIndependentlyAuthenticated"])
+
+    def test_historical_mirror_is_stale_even_when_fetched_now(self):
+        raw = (b"# Older repository mirror, not current official export\n"
+               b"# Days checked so far: mm2 3\n"
+               + encode([("mm2", "Test Axe", "test-axe",
+                          "2026-09-08", "9", "1")]))
+        r = audit_csv(raw, evaluated_utc=NOW, item_slug="test-axe")
+        self.assertEqual(r["status"], "BLOCKED_STALE_LISTING_SAMPLE")
+        self.assertEqual(r["mm2LatestObservedDay"], "2026-09-08")
+        self.assertFalse(r["mayFeedLiveStrategy"])
+
+    def test_genuine_mirror_issues_block_instead_of_fabricating_keys(self):
+        rows = [
+            ("mm2", "Chroma Beach Set 2026", "",
+             "2026-09-08", "12", ""),
+        ]
+        self.assertEqual(valid(rows)["reason"], "MM2_SLUG_INVALID")
+        duplicate = [
+            ("mm2", "Test Axe", "test-axe",
+             "2026-09-08", "1", ""),
+            ("mm2", "Test Axe", "test-axe",
+             "2026-09-08", "3", ""),
+        ]
+        self.assertEqual(valid(duplicate)["reason"],
+                         "MM2_DUPLICATE_SLUG_DAY")
+
+    def test_midstream_comment_or_giant_preamble_blocks(self):
+        raw = encode() + b"# fake publisher freshness 2026-11-13\n"
+        self.assertEqual(audit_csv(raw, evaluated_utc=NOW)["reason"],
+                         "CSV_ROW_INVALID")
+        raw = b"# x\n" * 33 + encode()
+        self.assertEqual(audit_csv(raw, evaluated_utc=NOW)["reason"],
+                         "CSV_PREAMBLE_INVALID")
+
     def test_authority_invariants_for_all_results(self):
         cases = [
             valid(), valid(observed="2026-11-19T00:00:00Z"),
