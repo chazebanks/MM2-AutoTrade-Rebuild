@@ -8,7 +8,7 @@ local USED="PDIDDLER_SYSTEM1_ONE_SERVER_COMBINED_USED_JOB"
 local PLACE=142823291
 local FIRST="b24661781e72e3dec759960d2f4b423841961c8b"
 local SECOND="b7d98b9b0815f72bff63fe7b58b8c92c59c3e0d7"
-local CONTROL="16d78bdeb9dd2eec6649afe8a08fab2333da6625"
+local CONTROL="1d1b94838bbc88684952e0d07a7d568fe7e54945"
 local PREFIX="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local THIS_JOB=game.JobId
 local Players=game:GetService("Players")
@@ -252,6 +252,20 @@ local function step1StartFailure()
   possibleSideEffect=false,
  }
 end
+local function step1VerifiedReceipt()
+ -- The pinned ORIGINAL Step1 module serializes terminal evidence with
+ -- finalAcceptEverAttempted=false and verifiedCompletedTrades=0. Its
+ -- raw controller.status() omits those fields. Verify both independently.
+ local raw=E.PDIDDLER_SYSTEM1_MAIN_AUTO_LAST_JSON
+ if type(raw)~="string" or #raw>16000 or
+    raw==priorStep1Json or not firstRunner then return nil end
+ local ok,decoded=pcall(function()return Http:JSONDecode(raw)end)
+ if not ok or type(decoded)~="table" or
+    decoded.schema~="gingerscope-system1-step1-alt-recovery-native-v1" or
+    decoded.status~="CLIENT_TEST_SEQUENCE_COMPLETE" or
+    decoded.phase~="DONE" then return nil end
+ return decoded
+end
 local function launchStep2(retiredEpoch)
  if not jobMatches() or secondRunner or
     type(retiredEpoch)~="number" or
@@ -301,6 +315,7 @@ local api={
  launchStep1=launchStep1,
  startFailure=step1StartFailure,
  step1Status=function()return firstRunner and firstRunner.status()end,
+ step1VerifiedReceipt=step1VerifiedReceipt,
  quiescent=quiescent,
  launchStep2=launchStep2,
  step2Status=function()return secondRunner and secondRunner.status()end,
