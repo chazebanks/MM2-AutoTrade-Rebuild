@@ -5,7 +5,9 @@ on:
       - 'pdiddler/system1/SYSTEM1_ONE_SERVER_*.lua'
       - 'pdiddler/system1/SYSTEM1_COMBINED_*.lua'
       - 'pdiddler/system1/system1_one_server_*.lua'
+      - 'pdiddler/system1/system1_combined_*.lua'
       - 'pdiddler/ci/system1_one_server_*.luau'
+      - 'pdiddler/ci/system1_combined_*.luau'
       - 'pdiddler/ci/test_system1_one_server_integrity.py'
       - 'pdiddler/system1/SYSTEM1_ONE_SERVER_INTEGRATION_RUNBOOK.md'
       - '.github/workflows/gingerscope-system1-one-server-integration.yml'
@@ -36,6 +38,10 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/system1_one_server_native_loader_mocks.luau
+      - name: Combined-only Step2 actual protected IO and watchdog stop classification
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system1_combined_step2_supervision_native_mocks.luau
       - name: Compile combined real Luau runtime and one-time Step2 fork
         run: |
           set -euo pipefail
