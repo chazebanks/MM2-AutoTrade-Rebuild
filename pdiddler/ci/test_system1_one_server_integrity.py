@@ -87,14 +87,15 @@ class OneServerComposedSafety(unittest.TestCase):
             'PREFLIGHT_PLAYERGUI_NOT_READY',
             'PREFLIGHT_CAMERA_NOT_READY',
             'PREFLIGHT_COMPETING_CONTROLLER',
-            'PREFLIGHT_REQUEST_POPUP_ACTIVE',
-            'PREFLIGHT_TRADE_WINDOW_ACTIVE',
+            'REQUEST_POPUP_ACTIVE',
+            'TRADE_WINDOW_ACTIVE',
             'preflight.stableReadinessChecks>=4',
             'engine.preflightAbort(',
             'task.wait(0.2)',
         ):
             with self.subTest(token=token):
                 self.assertIn(token, NATIVE)
+        self.assertIn('PREFLIGHT_"..', NATIVE)
         self.assertIn('COMBINED_STEP1_PREFLIGHT_NOT_READY', CTRL)
 
     def test_source_names_and_original_test_integrity(self):
