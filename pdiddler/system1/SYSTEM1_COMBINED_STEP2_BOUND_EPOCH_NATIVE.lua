@@ -11,7 +11,7 @@ local ORIGINAL_MM2=142823291
 local MAIN="a3c209659942e8b45eec5da3555f7cfb83059c59"
 local GATE="2db52f96fadd58957a804ebada8f77c3bc7a9228"
 local P3="88fccfbd98281c1e47dce506bccf136604bd1485"
-local CTRL="77d83cb9c1abf7f5991c7408ce006701484844b8"
+local CTRL="4e45ece155a9efb31bdc377a08ed91ea7e4d366a"
 local BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local conflicts={
  "PDIDDLER_PART4_CONTROLLER_ACTIVE",
@@ -84,7 +84,7 @@ local watchdogModule=pinned(MAIN,"supervised/supervised_p3_continuous_watchdog.l
 local scanner=pinned(MAIN,"pdiddler3_scanner_MODULE_v6_5_PART4_STATUS_BRIDGE.lua",95000)
 local targetModule=pinned(GATE,"system1/system1_step2_public_target_gate.lua",12000)
 local p3Module=pinned(P3,"system1/system1_step2_public_p3_single_send.lua",72000)
-local controllerModule=pinned(CTRL,"system1/system1_step2_public_handoff_controller.lua",12000)
+local controllerModule=pinned(CTRL,"system1/system1_combined_step2_handoff_controller.lua",12000)
 if not geometry or type(geometry.choose)~="function"
  or not originalIO or type(originalIO.new)~="function"
  or not bridge or type(bridge.bind)~="function"
@@ -124,6 +124,13 @@ local rootFirstSeen=nil
 local lastP4DeclineAt=nil
 local lastJson=nil
 local haltReason=nil
+local watchdogBlockReason="NONE"
+local watchdogLastStatus="NONE"
+local function safeCode(v)
+ if type(v)=="string" and #v>0 and #v<=72 and
+    v:match("^[A-Z0-9_]+$") then return v end
+ return "UNKNOWN"
+end
 local function writeReceipt(record)
  local copied={}
  for k,v in pairs(record) do copied[k]=v end
@@ -377,8 +384,12 @@ local function setupStart()
   getJobId=function()return game.JobId end,
   isLive=function()return owner.running and layoutSafe()end,
   onStatus=function(result)
-   if result and result.status=="BLOCKED" then
-    haltReason="P3_SESSION_OR_WATCHDOG_LOST"
+   if type(result)=="table" then
+    watchdogLastStatus=safeCode(result.status)
+    if result.status=="BLOCKED" then
+     watchdogBlockReason=safeCode(result.reason)
+     haltReason="P3_SESSION_OR_WATCHDOG_LOST"
+    end
    end
   end,
  },{
@@ -405,16 +416,65 @@ local function observe()
   safe=false,clientTradeSettled=false,noFinalAccept=true,
   noItemsOffered=true,noServerHop=true,
  }
- if not owner.running or not p3 or not watcher or
-  watcher.isReady()~=true or not layoutSafe() then return broken end
+ -- Every missing supervision proof remains a TERMINAL STOP; the
+ -- original inspector collapsed six distinct cases into one generic
+ -- event without retaining watchdog status.
+ local function failed(code,stage)
+  local state=type(p3)=="table" and p3.state or nil
+  local watchStatus=nil
+  if type(watcher)=="table" and type(watcher.status)=="function" then
+   local ok,report=pcall(watcher.status)
+   if ok and type(report)=="table" then watchStatus=report end
+  end
+  local ready=false
+  if type(watcher)=="table" and type(watcher.isReady)=="function" then
+   local ok,flag=pcall(watcher.isReady)
+   ready=ok and flag==true
+  end
+  broken.fault=code
+  broken.possibleSideEffect=type(state)=="table" and
+     (state.tradeButtonTapAttempted==true or
+      (type(state.sent)=="number" and state.sent>0)) or false
+  broken.failureEvidence={
+   stage=safeCode(stage),
+   watchdogStatus=watchStatus and safeCode(watchStatus.status) or
+       watchdogLastStatus,
+   watchdogReason=watchdogBlockReason~="NONE" and watchdogBlockReason
+       or watchStatus and safeCode(watchStatus.reason) or "UNKNOWN",
+   sessionEpochMatches=type(p3)=="table" and
+       type(p3.session)=="number" and
+       p3.session==E.PDIDDLER_OUTGOING_SESSION,
+   watchdogReady=ready,
+   observedP3Sends=type(state)=="table" and
+       type(state.sent)=="number" and
+       math.max(0,math.min(3,state.sent)) or 0,
+   tradeButtonTapAttempted=type(state)=="table" and
+       state.tradeButtonTapAttempted==true or false,
+  }
+  return broken
+ end
+ if not owner.running or not p3 or not watcher then
+  return failed("P3_P3_CONTROLLER_MISSING","P3_CONTROLLER_UNAVAILABLE") end
+ if type(p3.session)~="number" or
+    p3.session~=E.PDIDDLER_OUTGOING_SESSION then
+  return failed("P3_SESSION_EPOCH_CHANGED","P3_EPOCH_IDENTITY")end
+ if not layoutSafe() then
+  return failed("P3_SCREEN_OR_OWNER_LOST","SCREEN_OR_OWNER")end
+ if haltReason~=nil then
+  return failed("P3_WATCHDOG_BLOCKED","WATCHDOG_BLOCKED_EVENT")end
+ if watcher.isReady()~=true then
+  return failed("P3_WATCHDOG_HEARTBEAT_MISSING","WATCHDOG_NOT_READY")end
  local state=p3.state
  if type(state)~="table" or type(state.processed)~="table" then
-  return broken end
- local status=targetGate.status(state.processed)
+  return failed("P3_OBSERVER_INVALID","P3_STATE_INVALID")end
+ local gateOk,status=pcall(targetGate.status,state.processed)
+ if not gateOk or type(status)~="table" then
+  return failed("P3_OBSERVER_INVALID","PUBLIC_GATE_STATUS_INVALID")end
  local pOk,pending=pcall(p3.pendingVisible)
  local sOk,paused=pcall(p3.isPaused)
  if not pOk or type(pending)~="boolean" or
-   not sOk or type(paused)~="boolean" then return broken end
+   not sOk or type(paused)~="boolean" then
+  return failed("P3_OBSERVER_INVALID","P3_GUI_PENDING_OR_PAUSE_INVALID")end
  local observed={
   safe=true,noFinalAccept=true,noItemsOffered=true,
   noServerHop=true,clientTradeSettled=false,
@@ -473,7 +533,18 @@ local function observe()
   }
  end
  if haltReason and observed.fault==nil then
-  observed.fault="P3_SESSION_OR_WATCHDOG_LOST"
+  observed.fault="P3_WATCHDOG_BLOCKED"
+  observed.possibleSideEffect=state.tradeButtonTapAttempted==true or
+      (type(state.sent)=="number" and state.sent>0)
+  observed.failureEvidence={
+   stage="WATCHDOG_BLOCKED_AFTER_VALID_SNAPSHOT",
+   watchdogStatus=watchdogLastStatus,
+   watchdogReason=watchdogBlockReason,
+   sessionEpochMatches=p3.session==E.PDIDDLER_OUTGOING_SESSION,
+   watchdogReady=watcher.isReady()==true,
+   observedP3Sends=state.sent or 0,
+   tradeButtonTapAttempted=state.tradeButtonTapAttempted==true,
+  }
  end
  if status.status=="STOPPED" then
   observed.fault="P3_GATE_STOPPED" end
