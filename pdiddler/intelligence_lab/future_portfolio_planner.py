@@ -36,7 +36,18 @@ def _result(status: str, reason: str, candidates: list | None = None) -> dict[st
         "authorizesTrade": False,
         "authorizesAccept": False,
         "tradeOutcome": "UNKNOWN",
+        "protectedOutboundItem": "Gingerscope",
     }
+
+
+def _protected_outbound_key(key: str) -> bool:
+    """Conservatively quarantine Gingerscope-looking ASCII aliases in research.
+
+    This is NOT an authenticated game raw-key map. Non-ASCII and invisible-key
+    encodings are rejected separately by _inventory, never treated as safe.
+    """
+    condensed = "".join(c for c in key.casefold() if c.isascii() and c.isalnum())
+    return "gingerscope" in condensed
 
 
 def _inventory(rows: object) -> dict[str, int] | None:
@@ -48,6 +59,7 @@ def _inventory(rows: object) -> dict[str, int] | None:
             return None
         key, count = row.get("key"), row.get("quantity")
         if (not isinstance(key, str) or not 1 <= len(key) <= 80 or key in out
+                or not key.isascii() or not key.isprintable() or key != key.strip()
                 or type(count) is not int or not 1 <= count <= MAX_COPIES_PER_TYPE):
             return None
         out[key] = count
@@ -129,7 +141,10 @@ def plan(
 
     baseline_hhi = _hhi(a, items)
     prepared = []
-    own = list(_offers(a))
+    # Permanent target protection applies to every candidate, not just to
+    # an eventual execution guard. An already-owned Gingerscope is never
+    # spendable, regardless of hypothetical listed value gain.
+    own = list(_offers({k: n for k, n in a.items() if not _protected_outbound_key(k)}))
     theirs = [
         offer for offer in _offers(b)
         if all(items[key]["demand"] >= min_received_demand
