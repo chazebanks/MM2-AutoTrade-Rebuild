@@ -37,6 +37,8 @@ jobs:
         env:
           GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/stage83-original.lua
         run: python3 -m unittest -v pdiddler.ci.test_system2_public_market_gamekey_crosswalk
+      - name: Check inherited source ingest and decision-engine regressions
+        run: python3 -m unittest -q pdiddler.ci.test_system2_mm2tradehub_market_candidate pdiddler.ci.test_system2_real_intelligence_decisions
       - name: Collect independent actual public market pages (no mock)
         env:
           GINGERSCOPE_MARKET_OUTPUT: ${{ runner.temp }}/market-source-real.json
