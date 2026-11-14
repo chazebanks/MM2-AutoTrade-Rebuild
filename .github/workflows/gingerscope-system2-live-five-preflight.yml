@@ -33,6 +33,23 @@ jobs:
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y -qq lua5.4
+      - name: Compile NEW actual native iPad runner and both pure Luau modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/luau-ubuntu-0.746.zip"
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 20 \
+            "https://github.com/luau-lang/luau/releases/download/0.746/luau-ubuntu.zip" \
+            --output "$archive"
+          echo "30f11c9cde8be2dc0e3066d210705532aac3726a2db89a6c5078080b6faa6cf8  $archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/s2-luau-dist"
+          compiler="$(find "$RUNNER_TEMP/s2-luau-dist" -type f -name luau-compile -print -quit)"
+          test -n "$compiler"
+          chmod +x "$compiler"
+          "$compiler" --binary pdiddler/system2/SYSTEM2_LIVE_FIVE_MAIN_NATIVE.lua > /dev/null
+          "$compiler" --binary pdiddler/system2/system2_live_five_controller.lua > /dev/null
+          "$compiler" --binary pdiddler/system2/system2_live_strategy_evidence.lua > /dev/null
+          echo SYSTEM2_LIVE_FIVE_ACTUAL_NATIVE_LUAU_COMPILE_PASS
       - name: Verify immutable System1 original source and pinned System2 controller
         shell: bash
         run: |
