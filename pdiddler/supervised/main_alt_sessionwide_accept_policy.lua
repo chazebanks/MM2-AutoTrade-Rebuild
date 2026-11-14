@@ -22,7 +22,7 @@ local function key(k)
      k:match("^[A-Za-z0-9_]+$")~=nil
 end
 local function protected(k)
- return k:lower():find("gingerscope",1,true)~=nil
+ return k:lower():gsub("[^%w]",""):find("gingerscope",1,true)~=nil
 end
 local function digestSide(entries,outbound)
  if type(entries)~="table" then return nil,"SLOT_COUNT_INVALID" end
