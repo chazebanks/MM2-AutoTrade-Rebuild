@@ -170,6 +170,35 @@ class ScenarioTests(unittest.TestCase):
         self.assertEqual(result["status"],"BLOCKED")
         self.assertEqual(result["reason"],"SHADOW_OBSERVATION_TIMESTAMP_INVALID")
 
+    def test_six_identical_valuable_copies_not_linear_trading_value(self):
+        self.observe({"EmberbowChroma":6})
+        result=self.review([("EmberbowChroma",6)],[("Gingerscope",1)])
+        self.assertFalse(result["listedDeltaReliableForNegotiation"])
+        self.assertEqual(result["outgoingUncertainStackKeys"],["EmberbowChroma"])
+        self.assertIn("PUBLISHER_STACK_PRICE_NONLINEAR_UNVERIFIED",result["warnings"])
+        self.assertFalse(result["authorizesTrade"])
+
+    def test_four_identical_copies_does_not_trigger_five_stack_warning(self):
+        self.observe({"EmberbowChroma":4})
+        result=self.review([("EmberbowChroma",4)],[("Gingerscope",1)])
+        self.assertTrue(result["listedDeltaReliableForNegotiation"])
+        self.assertNotIn("PUBLISHER_STACK_PRICE_NONLINEAR_UNVERIFIED",result["warnings"])
+
+    def test_five_copies_of_single_value_item_does_not_trigger_warning(self):
+        self.observe({"test_key_0":5})
+        result=self.review([("test_key_0",5)],[("Gingerscope",1)])
+        self.assertTrue(result["listedDeltaReliableForNegotiation"])
+        self.assertEqual(result["outgoingUncertainStackKeys"],[])
+
+    def test_value_weighted_demand_does_not_overweight_cheap_weapons(self):
+        self.observe({"test_key_100":1})
+        result=self.review([("test_key_100",1)],
+                           [("Celestial",1),("EmberbowChroma",1)])
+        expected=(1950*5+6000*6)/7950
+        self.assertAlmostEqual(result["incomingDemandValueWeightedMean"],expected,places=7)
+        self.assertNotAlmostEqual(result["incomingDemandValueWeightedMean"],5.5,places=3)
+        self.assertTrue(result["listedDeltaReliableForNegotiation"])
+
     def test_replay_is_deterministic(self):
         s=trade([("Celestial",1)],[("EmberbowChroma",1)])
         self.assertEqual(lab.inspect(self.market,self.shadow,s,evaluated_at_utc=self.evaluated_at),lab.inspect(self.market,self.shadow,s,evaluated_at_utc=self.evaluated_at))

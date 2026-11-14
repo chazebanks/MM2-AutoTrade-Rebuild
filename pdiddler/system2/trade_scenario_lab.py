@@ -121,6 +121,9 @@ def _owned_from_shadow(shadow, idx, *, evaluated_at_utc):
 def _totals(slots, idx):
     value = low = high = copies = 0
     weighted_demand = 0
+    # Supreme calculator uses LISTED-VALUE weighted demand, not copy-count mean.
+    # Large stacks also need separate nonlinear pricing uncertainty.
+    nonlinear_stacks = []
     labels = Counter()
     for key, qty in slots.items():
         source = idx[key]
@@ -128,11 +131,14 @@ def _totals(slots, idx):
         low += source["rangeLow"] * qty
         high += source["rangeHigh"] * qty
         copies += qty
-        weighted_demand += source["demand"] * qty
+        weighted_demand += source["demand"] * source["decimalValue"] * qty
+        if qty >= 5 and source["decimalValue"] > 1:
+            nonlinear_stacks.append(key)
         labels[source["stability"]] += qty
     return {
         "listed": value, "low": low, "high": high, "copies": copies,
-        "demandArithmeticMean": (weighted_demand / copies) if copies else None,
+        "demandValueWeightedMean": (weighted_demand / value) if value else None,
+        "publisherStackPricingUncertainKeys": sorted(nonlinear_stacks),
         "stabilityCopyCounts": dict(sorted(labels.items())),
     }
 
@@ -170,6 +176,10 @@ def inspect(mapped, shadow, scenario, *, evaluated_at_utc=None):
             risk.append("WORST_CASE_RANGE_LOSS_POSSIBLE")
         if sold["copies"] > MAX_OFFER_SLOTS or bought["copies"] > MAX_OFFER_SLOTS:
             risk.append("STACKED_COPIES_DISTINCT_FROM_PHYSICAL_SLOTS")
+        stack_uncertain = bool(sold["publisherStackPricingUncertainKeys"] or
+                               bought["publisherStackPricingUncertainKeys"])
+        if stack_uncertain:
+            risk.append("PUBLISHER_STACK_PRICE_NONLINEAR_UNVERIFIED")
         if TARGET_KEY in incoming:
             risk.append("TARGET_INCOMING_HYPOTHETICAL_NOT_ACQUIRED")
         if not outgoing:
@@ -188,6 +198,11 @@ def inspect(mapped, shadow, scenario, *, evaluated_at_utc=None):
             offeredListedValue=sold["listed"],
             receivedListedValue=bought["listed"],
             listedDelta=gain,
+            # Arithmetic is exact for listed base units, but not necessarily
+            # a realized trade value when >=5 copies of one item worth >1.
+            listedDeltaReliableForNegotiation=not stack_uncertain,
+            outgoingUncertainStackKeys=sold["publisherStackPricingUncertainKeys"],
+            incomingUncertainStackKeys=bought["publisherStackPricingUncertainKeys"],
             worstCaseRangeDelta=bought["low"] - sold["high"],
             bestCaseRangeDelta=bought["high"] - sold["low"],
             beforeListedPortfolioValue=before,
@@ -195,8 +210,8 @@ def inspect(mapped, shadow, scenario, *, evaluated_at_utc=None):
             hypotheticalTargetReceived=TARGET_KEY in incoming,
             gingerscopeTargetListedValue=idx[TARGET_KEY]["decimalValue"],
             postHypotheticalListedGapToTarget=max(0,idx[TARGET_KEY]["decimalValue"]-after),
-            outgoingDemandScoreMean=sold["demandArithmeticMean"],
-            incomingDemandScoreMean=bought["demandArithmeticMean"],
+            outgoingDemandValueWeightedMean=sold["demandValueWeightedMean"],
+            incomingDemandValueWeightedMean=bought["demandValueWeightedMean"],
             incomingStabilityCounts=bought["stabilityCopyCounts"],
             outgoingStabilityCounts=sold["stabilityCopyCounts"],
             warnings=risk,

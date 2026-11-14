@@ -124,6 +124,9 @@ def compare(mapped, shadow, alternatives, *, evaluated_at_utc=None):
                 issues.append("UNAPPROVED_LISTED_LOSS")
             if review["worstCaseRangeDelta"]<0:
                 issues.append("PRICE_RANGE_DOWNSIDE_EXPOSED")
+            stack_uncertain = review["listedDeltaReliableForNegotiation"] is False
+            if stack_uncertain:
+                issues.append("PUBLISHER_NONLINEAR_STACK_PRICE_NEEDS_INDEPENDENT_EVIDENCE")
             labels = {idx[row["rawGameKey"]]["stability"]
                       for row in candidate["incomingSlots"]}
             if not labels.issubset(STABILITY_LABELS):
@@ -146,7 +149,9 @@ def compare(mapped, shadow, alternatives, *, evaluated_at_utc=None):
             # No numeric accept/retrade probabilities are derived or recorded.
             audited.append({
                 "candidateIndex":i,
-                "status":"LOSS_NOT_AUTHORIZED" if review["listedDelta"]<0 else "OFFLINE_RESEARCH_CANDIDATE_ONLY",
+                "status":("LOSS_NOT_AUTHORIZED" if review["listedDelta"]<0 else
+                          "PAPER_STACK_VALUE_UNCERTAIN" if stack_uncertain else
+                          "OFFLINE_RESEARCH_CANDIDATE_ONLY"),
                 "scenarioKind":review["scenarioKind"],
                 "hypotheticalTargetReceived":review["hypotheticalTargetReceived"],
                 "listedDelta":review["listedDelta"],
@@ -154,7 +159,8 @@ def compare(mapped, shadow, alternatives, *, evaluated_at_utc=None):
                 "beforeListedConcentration":baseline["largestListedPositionShare"],
                 "afterListedConcentration":concentration["largestListedPositionShare"],
                 "distinctKeysAfter":concentration["distinctOwnedKeys"],
-                "incomingDemandOrdinalAverage":review["incomingDemandScoreMean"],
+                "incomingDemandValueWeightedMean":review["incomingDemandValueWeightedMean"],
+                "listedDeltaReliableForNegotiation":review["listedDeltaReliableForNegotiation"],
                 "incomingSourceStabilityCounts":review["incomingStabilityCounts"],
                 "evidenceWarnings":issues,
                 "verifiedPartnerAppeal":False,
@@ -163,6 +169,8 @@ def compare(mapped, shadow, alternatives, *, evaluated_at_utc=None):
             })
         # A lower warning count indicates *what to investigate first*.
         # It is NOT an offer preference, learned accept likelihood, or policy.
+        # Stack-price-uncertain alternatives are EXCLUDED from the nominal
+        # attention ordering until independent executable-value evidence exists.
         valid = [a for a in audited if a["status"]=="OFFLINE_RESEARCH_CANDIDATE_ONLY"]
         attention = sorted(valid, key=lambda a:(
             len(a["evidenceWarnings"]), -a["listedDelta"], a["candidateIndex"]
@@ -177,6 +185,7 @@ def compare(mapped, shadow, alternatives, *, evaluated_at_utc=None):
             baselineListedValue=value_before,
             alternativesReviewed=len(audited),
             nonLossResearchAlternatives=len(valid),
+            stackPriceUncertainAlternatives=sum(a["status"]=="PAPER_STACK_VALUE_UNCERTAIN" for a in audited),
             lossBlockedAlternatives=sum(a["status"]=="LOSS_NOT_AUTHORIZED" for a in audited),
             invalidAlternatives=sum(a["status"]=="INVALID_ALTERNATIVE" for a in audited),
             researchAttentionIndices=[a["candidateIndex"] for a in attention],
