@@ -87,9 +87,14 @@ local function fake(options)
  local altAccepted=put(their,node("Frame","Accepted"));altAccepted.Visible=false
  local username=put(their,node("TextLabel","Username"))
  username.Text=options.wrongPartner and "Imposter" or "FixtureAlt"
- local acceptParent=put(root,node("Frame","Buttons"))
+ local acceptParent=options.acceptInYourOffer and our
+   or put(root,node("Frame","Buttons"))
  local acceptFrame=put(acceptParent,node("Frame","Accept"))
  local acceptControl=nil
+ if options.labelOnly then
+  local label=put(acceptFrame,node("TextLabel","AcceptText"))
+  label.Text="Accept"
+ end
  if not options.noAccept then
   acceptControl=put(acceptFrame,node("ImageButton","ActionButton"))
   acceptControl.AbsolutePosition=vec(520,570)
@@ -140,7 +145,7 @@ local function fake(options)
   GetService=function(_,key)return services[key]end,
   HttpGet=function(_,url)
    table.insert(reads,url)
-   if url:find("b41bfae1a897e99c5775eff98dc48c4148d7adc2",1,true)
+   if url:find("cca3d8359b8ce537dc4a5f1aa474323c2833dd01",1,true)
      and url:find("main_alt_accept_control_shape_probe.lua",1,true)then
     return coreCode
    elseif url:find("1971b93d324f0275e6a9affb472ac3e804439ed8",1,true)
@@ -229,6 +234,22 @@ do
  eq(core.inspect(f.root,{x=1024,y=768}).status,
     "INCONCLUSIVE","missing clickable control inconclusive")
 end
+do
+ local f=fake({acceptInYourOffer=true})
+ local result=core.inspect(f.root,{x=1024,y=768})
+ eq(result.status,"ONE_VISIBLE_CANDIDATE_SHAPE",
+    "Accept control under MAIN YourOffer is considered")
+ eq(result.candidatePath,"YourOffer/Accept/ActionButton",
+    "no incorrect exclusion of MAIN-side control")
+end
+do
+ local f=fake({noAccept=true,labelOnly=true})
+ local result=core.inspect(f.root,{x=1024,y=768})
+ eq(result.status,"INCONCLUSIVE","label alone is not clickable")
+ eq(result.labelOnlyCount,1,"label-only discovery correctly reported")
+ eq(result.candidateCount,0,"never treat text-only Accept label as action")
+end
+
 do
  local f=fake({twoAccept=true})
  eq(core.inspect(f.root,{x=1024,y=768}).status,
