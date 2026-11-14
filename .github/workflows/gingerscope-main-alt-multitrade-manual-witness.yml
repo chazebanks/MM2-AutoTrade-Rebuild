@@ -25,11 +25,24 @@ jobs:
           set -euo pipefail
           python3 -m pdiddler.continuity.manager verify
           python3 -m pdiddler.continuity.manager recover
-          git fetch --no-tags --depth=1 origin 0c0004ceaaa1a0c55c7fe31534003aa03b3319ca
-          git show 0c0004ceaaa1a0c55c7fe31534003aa03b3319ca:pdiddler/supervised/main_alt_manual_multitrade_delta_core.lua > "$RUNNER_TEMP/pinned-multitrade.lua"
-          test "$(git hash-object "$RUNNER_TEMP/pinned-multitrade.lua")" = d23ea1b7a7b85817e0ef469b4d5b07a6bf9cc2a9
+          git fetch --no-tags --depth=1 origin 553b7e44245c5ed36aa3f65aea335953ec1fed5f
+          git show 553b7e44245c5ed36aa3f65aea335953ec1fed5f:pdiddler/supervised/main_alt_manual_multitrade_delta_core.lua > "$RUNNER_TEMP/pinned-multitrade.lua"
+          test "$(git hash-object "$RUNNER_TEMP/pinned-multitrade.lua")" = 39cd86cb6cd9e56833be60019ca1fbaf4d47374b
           cmp "$RUNNER_TEMP/pinned-multitrade.lua" pdiddler/supervised/main_alt_manual_multitrade_delta_core.lua
-          echo MAIN_ALT_MULTI_TRADE_PURE_CORE_PINNED
+          git fetch --no-tags --depth=1 origin ea3cdfa24bc0cfffc73c4b01c2c595fa2245d284
+          git show ea3cdfa24bc0cfffc73c4b01c2c595fa2245d284:pdiddler/supervised/MAIN_ALT_MANUAL_MULTITRADE_WITNESS_NATIVE.lua > "$RUNNER_TEMP/pinned-multitrade-native.lua"
+          test "$(git hash-object "$RUNNER_TEMP/pinned-multitrade-native.lua")" = aeabc1ff959ea61121d505dfc58e2164ed1afacf
+          cmp "$RUNNER_TEMP/pinned-multitrade-native.lua" pdiddler/supervised/MAIN_ALT_MANUAL_MULTITRADE_WITNESS_NATIVE.lua
+          git fetch --no-tags --depth=1 origin 1971b93d324f0275e6a9affb472ac3e804439ed8
+          mkdir -p pdiddler/new_part4
+          git show 1971b93d324f0275e6a9affb472ac3e804439ed8:pdiddler/new_part4/p4_native_observer.lua > pdiddler/new_part4/p4_native_observer.lua
+          git show 1971b93d324f0275e6a9affb472ac3e804439ed8:pdiddler/new_part4/p4_observer_contract.lua > pdiddler/new_part4/p4_observer_contract.lua
+          test "$(git hash-object pdiddler/new_part4/p4_native_observer.lua)" = a6338e946467ad738005bc5cb13cd2d2fbc2a2d0
+          test "$(git hash-object pdiddler/new_part4/p4_observer_contract.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          git fetch --no-tags --depth=1 origin 5b8ee35d7f281c23d9c2181abd97a063e59a0660
+          git show 5b8ee35d7f281c23d9c2181abd97a063e59a0660:pdiddler/new_part4/stage100_screen_prompt_overlay.lua > pdiddler/new_part4/stage100_screen_prompt_overlay.lua
+          test "$(git hash-object pdiddler/new_part4/stage100_screen_prompt_overlay.lua)" = e0eac8e039655999bd7bbac1f12da179db7c22ed
+          echo MAIN_ALT_MULTI_TRADE_ALL_ORIGINAL_SOURCE_BLOBS_PINNED
       - name: Install official Lune v0.11.1 pinned release
         shell: bash
         run: |
@@ -48,6 +61,11 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/main_alt_manual_multitrade_delta_mocks.luau
+      - name: Execute actual native MAIN+ALT 3 successive trade-windows, delta and errors
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/main_alt_manual_multitrade_native_mocks.luau
       - name: No live Accept or identity exposure
         shell: bash
         run: |
@@ -55,11 +73,16 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           s=Path('pdiddler/supervised/main_alt_manual_multitrade_delta_core.lua').read_text()
+          native=Path('pdiddler/supervised/MAIN_ALT_MANUAL_MULTITRADE_WITNESS_NATIVE.lua').read_text()
           for bad in ('FireServer(', 'InvokeServer(', 'HttpGet(', 'AcceptTrade(', 'setclipboard(', 'TeleportService',
                       'SendMouseButtonEvent(', 'PostAsync(', 'writefile(', 'request('):
               assert bad not in s,bad
           assert 'actualScriptAccepts=0' in s
           assert 'serverCompletionProven=false' in s
+          for bad in ('FireServer(', 'SendMouseButtonEvent(', 'AcceptTrade(', 'OfferItem(', 'TeleportService', 'PostAsync('):
+              assert bad not in native, bad
+          assert native.count('rf:InvokeServer()')==1
+          assert 'actualScriptAccepts=0' in s
           assert 'ALL_MAIN_ALT_TRADES_IN_THIS_JOB' in s
           print('CONSECUTIVE_MAIN_ALT_NO_AUTO_ACCEPT_PURE_POLICY_PASS')
           PY
