@@ -26,9 +26,9 @@ jobs:
           set -euo pipefail
           python3 -m pdiddler.continuity.manager verify
           python3 -m pdiddler.continuity.manager recover
-          git fetch --no-tags --depth=1 origin a24eec90f27d46edebe36be4805369a5c4fe92fa
-          git show a24eec90f27d46edebe36be4805369a5c4fe92fa:pdiddler/system2/native_offer_item_identity_resolver.lua > "$RUNNER_TEMP/s2-identity.lua"
-          test "$(git hash-object "$RUNNER_TEMP/s2-identity.lua")" = c04c1bccb893d4cf5c52a46151fb3b84dbe26ea5
+          git fetch --no-tags --depth=1 origin e9b5473ffc3adf14c3ba2d660a6a9b9929e7522b
+          git show e9b5473ffc3adf14c3ba2d660a6a9b9929e7522b:pdiddler/system2/native_offer_item_identity_resolver.lua > "$RUNNER_TEMP/s2-identity.lua"
+          test "$(git hash-object "$RUNNER_TEMP/s2-identity.lua")" = b05f70710606ea087079ffa079a76d88568dadf5
           cmp "$RUNNER_TEMP/s2-identity.lua" pdiddler/system2/native_offer_item_identity_resolver.lua
           git fetch --no-tags --depth=1 origin 1971b93d324f0275e6a9affb472ac3e804439ed8
           mkdir -p pdiddler/new_part4
