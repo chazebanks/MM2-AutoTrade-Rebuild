@@ -88,6 +88,18 @@ do
  eq(c.operatorStop().status,"STOPPED","one operator stop disables all trades")
  eq(c.begin(ctx({},3)).status,"STOPPED","cannot restart stopped controller")
 end
+-- MM2 has FOUR physical slots, not four TOTAL weapon copies:
+-- five copies stacked in position #1 must NOT be interpreted as a fifth slot.
+do
+ local c=assert(policy.new(config))
+ local root={}
+ local stacked=ctx(root,1,{},{{rawKey="stacked_test_weapon",quantity=5,slotIndex=1,category="Weapons"}})
+ eq(c.begin(stacked).status,"OBSERVING","five copies one real physical slot")
+ eq(c.observe(stacked).status,"OBSERVING","one physical slot baseline")
+ stacked.now=1.35
+ eq(c.observe(stacked).status,"STABLE_RESEARCH_ONLY","five copies not a fifth slot")
+ eq(c.requestAccept(stacked).status,"HOLD_NATIVE_ACCEPT_MAPPING_REQUIRED","stack remains non-executable")
+end
 do
  local c,r,last=observed()
  eq(c.observe(ctx(r,1.4)).status,"STABLE_RESEARCH_ONLY","unchanged stable state")
