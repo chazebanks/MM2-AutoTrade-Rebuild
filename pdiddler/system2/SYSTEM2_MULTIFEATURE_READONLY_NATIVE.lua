@@ -39,7 +39,7 @@ local function frozen(rev,path)
     local loaded,res=pcall(function()return assert(compiler(raw))()end)
     return loaded and type(res)=="table" and res or nil
 end
-local core=frozen("95a74ca8279198f9e64ad556b3807c6383af9b2c",
+local core=frozen("139311e7eb5dc8d155652218ac1acc30e33955c5",
     "system2/native_multifeature_catalog_core.lua")
 local geometry=frozen("5b8ee35d7f281c23d9c2181abd97a063e59a0660",
     "new_part4/stage100_screen_prompt_overlay.lua")
