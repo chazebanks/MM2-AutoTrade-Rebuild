@@ -24,9 +24,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags --depth=1 origin f03639b0ac9a330df69a82e3fb47d13e77d1aacd
-          git show f03639b0ac9a330df69a82e3fb47d13e77d1aacd:pdiddler/system2/evidence_quality_arbiter.py > "$RUNNER_TEMP/arbiter-original.py"
-          test "$(git hash-object "$RUNNER_TEMP/arbiter-original.py")" = ccc4c748a08aa5228411a737d551359f0f653e13
+          git fetch --no-tags --depth=1 origin 285640deced402720df175a933ad764a2276a047
+          git show 285640deced402720df175a933ad764a2276a047:pdiddler/system2/evidence_quality_arbiter.py > "$RUNNER_TEMP/arbiter-original.py"
+          test "$(git hash-object "$RUNNER_TEMP/arbiter-original.py")" = 4bd555cac7823495821bbf2de8014431bdde0f46
           cmp "$RUNNER_TEMP/arbiter-original.py" pdiddler/system2/evidence_quality_arbiter.py
           test "$(git hash-object pdiddler/intelligence_lab/stage121_source_to_strategy_firewall.py)" = 9ef6f0b15caee96df06a445101d5cae5d7d01c3a
           test "$(git hash-object pdiddler/system2/publisher_page_parity.py)" = 1464e78a75f36bb2798b9d8a9ab1886bc888d4b5
