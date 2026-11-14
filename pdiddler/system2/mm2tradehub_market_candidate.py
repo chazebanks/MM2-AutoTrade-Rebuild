@@ -90,6 +90,8 @@ def parse_tier(html, category):
             fail("CARD_CATEGORY_MISMATCH")
         node1 = card.select_one(".vs-row.vs-mm2 .vs-num")
         node2 = card.select_one(".vs-row.vs-supreme .vs-num")
+        if (node1 is None) != (node2 is None):
+            fail("SOURCE_PRICE_ROWS_MISSING")
         if node1 is None and node2 is None:
             solo = card.select_one(".vs-row.vs-row--only")
             num = solo.select_one(".vs-num") if solo else None
