@@ -139,7 +139,7 @@ local function classify(s,mentions)
   end
   if marker and v.start-marker.ending<=90 then
    kind=marker.kind
-   local segment=s:sub(marker.ending+1,v.start-1)
+   local segment=" "..s:sub(marker.ending+1,v.start-1).." "
    if segment:find(" but not ",1,true) then
     kind="AVOIDS"
    elseif segment:find(" not ",1,true) or segment:find(" maybe ",1,true)
