@@ -111,8 +111,10 @@ local function classify(s,mentions)
   {" nlf ","AVOIDS"}, {" not looking for ","AVOIDS"},
   {" don t want ","AVOIDS"}, {" dont want ","AVOIDS"},
   {" do not want ","AVOIDS"}, {" no interest in ","AVOIDS"},
+  {" but not ","AVOIDS"}, {" dont need ","AVOIDS"},
+  {" don t need ","AVOIDS"}, {" no need for ","AVOIDS"},
   {" lf ","WANTS"}, {" looking for ","WANTS"}, {" searching for ","WANTS"},
-  {" i want ","WANTS"}, {" need ","WANTS"}, {" i like ","WANTS"},
+  {" i want ","WANTS"}, {" i need ","WANTS"}, {" i like ","WANTS"},
  }
  local markers={}
  for _,v in ipairs(tokens) do
@@ -135,7 +137,17 @@ local function classify(s,mentions)
   for _,t in ipairs(markers) do
    if t.ending<=v.start then marker=t end
   end
-  if marker and v.start-marker.ending<=90 then kind=marker.kind end
+  if marker and v.start-marker.ending<=90 then
+   kind=marker.kind
+   local segment=s:sub(marker.ending+1,v.start-1)
+   if segment:find(" but not ",1,true) then
+    kind="AVOIDS"
+   elseif segment:find(" not ",1,true) or segment:find(" maybe ",1,true)
+       or segment:find(" might ",1,true) or
+       segment:find(" unsure ",1,true) then
+    kind="MENTION_ONLY"
+   end
+  end
   items[#items+1]={key=v.id,intent=kind}
  end
  local function has(x)return s:find(x,1,true)~=nil end
@@ -270,6 +282,9 @@ function M.new(config)
      not acceptScope(bound,scope,ctx) then
    return nil,nil,nil,"ORIGINAL_P3_P4_CLIENT_SCOPE_NOT_CURRENT"
   end
+  if lastRevision~=nil and ctx.clientOfferRevision<lastRevision then
+   return nil,nil,nil,"CLIENT_OFFER_REVISION_ROLLBACK"
+  end
   if ctx.crosswalkRowsSha256~=config.crosswalk.crosswalkRowsSha256 or
      ctx.sourceRetrievedUtc~=config.crosswalk.sourceRetrievedUtc then
    return nil,nil,nil,"SOURCE_REVISION_CHANGED"
@@ -277,9 +292,11 @@ function M.new(config)
   return ctx,scope,now,nil
  end
  local function reset(id,revision)
-  if current~=id or lastRevision~=revision then
+  if current~=id then
    current=id;lastRevision=revision
    seen={};seenList={};events={}
+  elseif lastRevision==nil or revision>lastRevision then
+   lastRevision=revision -- allow LF/NLF TTL within same bound session
   end
  end
  local function envelope(status,why,extra)
@@ -378,29 +395,36 @@ function M.new(config)
      compactInventory=false}
   local total,public,contextual,direct=0,0,0,0
   for _,e in ipairs(events) do
-   if now-e.time<=TTL and e.revision==ctx.clientOfferRevision then
-    total+=1
-    if e.personalReplyProven then direct+=1
-    elseif e.addressing=="TENTATIVE_IN_CURRENT_TRADE_AFTER_OWN_OFFER" then
-     contextual+=1 else public+=1 end
+   if now>=e.time and now-e.time<=TTL and
+       e.revision<=ctx.clientOfferRevision then
+    if e.revision==ctx.clientOfferRevision then
+     total+=1
+     if e.personalReplyProven then direct+=1
+     elseif e.addressing=="TENTATIVE_IN_CURRENT_TRADE_AFTER_OWN_OFFER" then
+      contextual+=1 else public+=1 end
+     counts[e.intent]=(counts[e.intent] or 0)+1
+    end
+    -- LF/NLF and simple constraints persist briefly within the SAME lease.
+    -- Previous revision chat "NTY" does NOT become a new trade decline.
     for _,p in ipairs(e.items) do
      if p.intent=="WANTS" or p.intent=="AVOIDS" then
       local record=latest[p.key]
       if not record or e.time>=record.at then
        latest[p.key]={intent=p.intent,at=e.time,addressing=e.addressing,
-        explicitlyAddressed=e.personalReplyProven}
+        explicitlyAddressed=e.personalReplyProven,revision=e.revision}
       end
      end
     end
     for k,v in pairs(e.constraints) do
      if v then constraints[k]=true end
     end
-    counts[e.intent]=(counts[e.intent] or 0)+1
    end
   end
   for id,v in pairs(latest) do
    prefs[#prefs+1]={rawGameKeyCandidate=id,intent=v.intent,
-     addressing=v.addressing,explicitlyAddressed=v.explicitlyAddressed}
+     addressing=v.addressing,explicitlyAddressed=v.explicitlyAddressed,
+     statedAtClientOfferRevision=v.revision,
+     carriedAcrossOfferChange=v.revision~=ctx.clientOfferRevision}
   end
   table.sort(prefs,function(a,b)return a.rawGameKeyCandidate<b.rawGameKeyCandidate end)
   return envelope("CLIENT_ONLY_PASSIVE_PARTNER_PREFERENCE_RESEARCH",
