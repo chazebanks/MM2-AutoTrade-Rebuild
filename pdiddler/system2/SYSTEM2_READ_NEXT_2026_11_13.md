@@ -1,3 +1,15 @@
+# LATEST VERIFIED SYSTEM 2 QA — Nov 13/14, 2026 (NEW YORK)
+
+**Research-only PR #265 remains DRAFT and unmerged to main.** Latest bugfix code+test commit `f5849712aabc74c8312385bfb2384880ece380a7` on `research/system2-nov13-market-inventory-sync-gate`; exact-head [CI #43552815393](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/43552815393) **311/311 Python tests PASS** with original Stage83/PR106/PR182 exact Git blob SHA locks; **all 6/6 GitHub workflows SUCCESS** at this tested head.
+
+- Found a previously untested reliability flaw in `market_inventory_revision_gate.compare()`: a previous research stamp could pass key-shape checks while containing a malformed or impossible `evaluatedAtUTC`; `_utc` then raised an **uncaught ValueError** during comparison. The previous research stamp is caller-supplied, never a trusted authorization token.
+- Fixed **only** the prior-timestamp validation boundary. Parse and validate before observing current data; malformed string, impossible calendar date, null, number, or object now returns `BLOCKED / PRIOR_RESEARCH_STAMP_TIMESTAMP_INVALID` and `researchDecisionReusable=false`; no exceptions. Future valid previous timestamp vs now remains `INVALIDATED / RESEARCH_CLOCK_ROLLBACK`.
+- Added two Python tests, including five adversarial malformed-timestamp subcases; 309 inherited + 2 new = 311 tests confirmed from the job logs. No source prices or real inventory captured/uploaded; no P3/P4/Delta edits, trade offers, Accept, chat, webhook, learning or live authority.
+- The last commit that only adds this handoff needs its **own exact-head CI check** before claiming that documentation HEAD is green. Do not conflate previous test-head checks with new docs HEAD.
+- **Next ONE System2 evidence issue:** independently captured first-party raw publisher source chain Stage111→110→104→69 with edition/expiry plus separate privacy-safe native scanner+job/lease/offer revision witness. Current four-page publisher watermark (Nov 13, 2026 at 1:20 PM EST) is merely a website observation. Do not restamp the old private 189-source artifact or claim current native stream. System 3 chat work in PR #263/#264 is a separate draft line; it is NOT active in System 2.
+
+---
+
 # NEW SYSTEM 2 CHECKPOINT (Nov 13/14 2026): MARKET + INVENTORY REVISION SYNC
 
 **Draft PR #265** https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/265, branch `research/system2-nov13-market-inventory-sync-gate`, stacked on **unmerged** System2 draft PR #262. New `pdiddler/system2/market_inventory_revision_gate.py` adds research-only revalidated original-source + four-page visible publisher timestamp + full own-inventory census + server/job/partner/trade lease/offer revision **two-snapshot invalidation**. The prior 60-second scanner TTL alone would not detect mid-window changes. Source/private row bytes remain outside GitHub. No live client/session or publisher current-edition authentication; **all trading and Accept permissions false**.
