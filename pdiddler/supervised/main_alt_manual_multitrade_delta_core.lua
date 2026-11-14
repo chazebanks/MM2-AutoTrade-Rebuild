@@ -261,6 +261,12 @@ function M.new(config)
    return report("WAIT_MANUAL_ACCEPT","OPERATOR_MAY_MANUALLY_ACCEPT_FINAL_WITH_BOTH_ACCOUNTS")
   end
   if s.phase=="WAIT_MANUAL_ACCEPT" or s.phase=="WAIT_CLOSE" then
+   if s.phase=="WAIT_MANUAL_ACCEPT" and c.mainAccepted then
+    return stop("ALT_ACCEPT_MUST_BE_OBSERVED_FIRST")
+   end
+   if s.phase=="WAIT_CLOSE" and c.mainAccepted and not c.altAccepted then
+    return stop("ALT_ACCEPT_INDICATOR_REVERTED")
+   end
    if c.mainAccepted or c.altAccepted then
     if not l.acceptedSeen then
      l.acceptedSeen=true;s.manualAcceptObservations+=1
