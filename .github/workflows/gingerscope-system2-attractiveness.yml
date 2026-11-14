@@ -1,0 +1,54 @@
+name: Gingerscope System2 attractiveness evidence test suite (offline)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/attractiveness_evidence_lab.py'
+      - 'pdiddler/ci/test_attractiveness_evidence_lab.py'
+      - 'pdiddler/system2/SYSTEM2_MODULAR_PLANNING_AND_TESTING_MATRIX_2026_11_13.md'
+      - '.github/workflows/gingerscope-system2-attractiveness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  attractiveness-provenance-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Recover and hash-check original Stage83 plus real PR106 planner and corrected PR182 guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/system2-pin"
+          git fetch --no-tags --depth=1 origin 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae
+          git show 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae:pdiddler/intelligence_lab/stage83_public_slug_registry.lua > "$RUNNER_TEMP/system2-pin/stage83.lua"
+          git fetch --no-tags --depth=1 origin 6ed48e084bd58fab38e3bf061ac36fb295ecf103
+          git show 6ed48e084bd58fab38e3bf061ac36fb295ecf103:pdiddler/intelligence_lab/future_portfolio_planner.py > "$RUNNER_TEMP/system2-pin/planner.py"
+          git fetch --no-tags --depth=1 origin 94ecefee86fd36293dcac58d0c24d9f379e719e5
+          git show 94ecefee86fd36293dcac58d0c24d9f379e719e5:pdiddler/intelligence_lab/offer_snapshot_guard.py > "$RUNNER_TEMP/system2-pin/guard.py"
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/stage83.lua")" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/planner.py")" = 78948cdacd2a760db5b888fce242d598fc6f14b6
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/guard.py")" = 11db895622d053ddced4fba9666135bf97bd615b
+          grep -Fq 'PROTECTED_GINGERSCOPE_OUTGOING' "$RUNNER_TEMP/system2-pin/guard.py"
+          echo 'ORIGINAL_S2_OLD_COMPONENT_SOURCE_LOCKS_PASS'
+      - name: Run full original Stage120 and all modular System2 offline tests
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/system2-pin/stage83.lua
+          STAGE120_REQUIRE_PINNED: '1'
+          STAGE120_PLANNER: ${{ runner.temp }}/system2-pin/planner.py
+          STAGE120_CORRECTED_GUARD: ${{ runner.temp }}/system2-pin/guard.py
+        run: |
+          python3 -m unittest -v \
+            pdiddler.ci.test_attractiveness_evidence_lab \
+            pdiddler.ci.test_trade_scenario_lab \
+            pdiddler.ci.test_stage120_corrected_guard_preview \
+            pdiddler.ci.test_client_inventory_shadow \
+            pdiddler.ci.test_market_research_reader \
+            pdiddler.ci.test_publisher_page_parity \
+            pdiddler.ci.test_operator_capture_adapter \
+            pdiddler.ci.test_system2_catalog_discovery_diff
