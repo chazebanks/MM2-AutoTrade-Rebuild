@@ -128,10 +128,19 @@ class PartnerEvidenceOracle(unittest.TestCase):
     def test_full_revision_invalidation_and_dedup(self):
         for required in (
             "local TTL=120", "local MAX_EVENTS=48",
-            "lastRevision~=revision", "MESSAGE_ID_ALREADY_SEEN",
+            "ctx.clientOfferRevision<lastRevision", "MESSAGE_ID_ALREADY_SEEN",
             "PARTNER_OFFER_LEASE_OR_SOURCE_CHANGED_MID_MESSAGE",
         ):
             self.assertIn(required, self.core)
+
+    def test_explicit_preferences_have_short_cross_revision_ttl(self):
+        code = self.core
+        self.assertIn("e.revision<=ctx.clientOfferRevision", code)
+        self.assertIn("e.revision==ctx.clientOfferRevision", code)
+        self.assertIn("carriedAcrossOfferChange=", code)
+        self.assertIn('return nil,nil,nil,"CLIENT_OFFER_REVISION_ROLLBACK"', code)
+        self.assertIn('kind="MENTION_ONLY"', code)
+        self.assertIn('segment:find(" but not "', code)
 
     def test_no_autochat_no_remotes_no_external_posting(self):
         for text in (self.adapter, self.core):
