@@ -228,6 +228,10 @@ eq(bridge.observeOffer().reason,
    "old native Stage9 Laser collision remains blocked")
 theirs.Attributes.ItemId="Iceblaster"
 theirs:FindFirstChild("ItemName"):FindFirstChild("Label").Text="Iceblaster"
+appendSlot(ourList,5,"Iceblaster","Iceblaster","",false)
+eq(bridge.observeOffer().reason,"GUI_CAPTURE_PHYSICAL_SLOT_LAYOUT_EXCEEDS_FOUR",
+   "native GUI capture refuses fifth physical slot")
+ourList.children.NewItem5=nil
 opponent.Name="SomeoneElse"
 eq(bridge.observeOffer().reason,"GUI_CAPTURE_GUI_PARTNER_DIFFERENT_FROM_BOUND_ACCOUNT",
    "changed partner GUI association rejects")
