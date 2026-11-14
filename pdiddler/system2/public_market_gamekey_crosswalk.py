@@ -246,6 +246,13 @@ def reconcile_one_client_metadata(mapping, raw_key, game_meta):
     rows = mapping.get("items")
     if type(rows) is not list or len(rows) != 189 or type(raw_key) is not str:
         return fail("RAW_KEY_NOT_EXACTLY_MAPPED")
+    # A caller cannot silently replace the validated candidate table after
+    # source admission, then claim the old crosswalk fingerprint still applies.
+    if (type(mapping.get("crosswalkRowsSha256")) is not str or
+            hashlib.sha256(json.dumps(rows, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            != mapping["crosswalkRowsSha256"] or
+            mapping.get("authorizesTrade") is not False):
+        return fail("CROSSWALK_ROWS_MUTATED_AFTER_VALIDATION")
     matches = [row for row in rows if row["rawGameKeyCandidate"] == raw_key]
     if len(matches) != 1:
         return fail("RAW_KEY_NOT_EXACTLY_MAPPED")
@@ -268,3 +275,36 @@ def reconcile_one_client_metadata(mapping, raw_key, game_meta):
             "marketSlug": row["marketSlug"], "gameChroma": row["gameChroma"],
             "gameRarity": row["gameRarity"], "marketEdition": mapping["marketEdition"],
             **PROVENANCE}
+
+
+
+def main(argv=None):
+    import argparse
+    import sys
+    from pathlib import Path
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--market", type=Path, required=True)
+    p.add_argument("--stage83", type=Path, required=True)
+    p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--evaluated-utc", required=True)
+    args = p.parse_args(argv)
+    try:
+        source = json.loads(args.market.read_text("utf-8"))
+        registry = args.stage83.read_bytes()
+        result = crosswalk(source, registry, evaluated_utc=args.evaluated_utc)
+        args.output.write_text(json.dumps(result, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+        print("GAMEKEY_MARKET_STATUS=" + result["status"])
+        print("GAMEKEY_MATCHED=" + str(result["matchedHistoricalGameKeys"]))
+        print("GAMEKEY_SOURCE_EDITION=" + result["marketEdition"])
+        print("GAMEKEY_ROWS_SHA256=" + result["crosswalkRowsSha256"])
+        print("LIVE_GAMEPLAY_TRADING_AUTHORIZED=FALSE")
+        return 0
+    except (MappingBlocked, OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
+        code = str(exc) if isinstance(exc, MappingBlocked) else "INVALID_LOCAL_INPUT"
+        print("GAMEKEY_MARKET_STATUS=BLOCKED")
+        print("GAMEKEY_MARKET_REASON=" + code)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
