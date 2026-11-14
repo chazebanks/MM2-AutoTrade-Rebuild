@@ -68,6 +68,12 @@ function M.run(scanner,options)
 end
 return M
 ]]
+print("[MOCK LEN]",#outgoingCode,#scannerCode)
+local newSender=luau.load(outgoingCode)()
+local newScanner=luau.load(scannerCode,{environment={
+ game={GetService=function()return {FindFirstChild=function()end}end}
+},injectGlobals=true})()
+assert(type(newSender.run)=="function" and type(newScanner.getWhitelist)=="function")
 local assertions=0
 local function eq(a,b,why)
  assertions+=1
