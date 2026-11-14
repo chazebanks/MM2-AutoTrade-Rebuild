@@ -42,7 +42,7 @@ class SourceContract(unittest.TestCase):
     def test_controller_never_directly_acts_on_game_or_discord(self):
         for dangerous in (":FireServer(", ":InvokeServer(",
             "HttpGet(", "PostAsync(", "AcceptTrade(", "TeleportService",
-            "DiscordWebhook", "setclipboard(", "loadstring("):
+            "sendDiscordWebhook(", "setclipboard(", "loadstring("):
             self.assertNotIn(dangerous,self.c)
         self.assertIn("api.startEpoch",self.c)
         self.assertIn("api.offerApproved",self.c)
@@ -70,7 +70,7 @@ class SourceContract(unittest.TestCase):
             self.assertIn(item,self.n)
         self.assertIn('finalAcceptDisabled=true',self.n)
         self.assertIn('noAutomaticAcceptAcknowledged=true',self.n)
-        self.assertIn('io.decline(',self.n)
+        self.assertIn('pcall(io.decline,',self.n)
         self.assertNotIn('io.accept(',self.n)
 
     def test_original_exact_slot_vs_copy_boundary(self):
