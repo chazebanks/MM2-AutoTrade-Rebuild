@@ -1,3 +1,11 @@
+# REAL MAIN iPad read-only two-census test — CLIENT PASS (Nov 13/14, 2026)
+
+The operator returned one sanitized `gingerscope-system2-native-own-census-v1` JSON receipt from the immutable native loader. `status=CLIENT_TWO_READS_STABLE`, `reason=LOCAL_CENSUS_EQUALITY_ONLY_NO_SERVER_PROOF`, `readAttempts=2`, `clientCensusChanged=false`, observation gap within the programmed 2–60 second window, and both distinct-key and total-copy aggregates matched across the two reads. The pasted 31-field report was checked for consistent field types, matching counts, denied authority flags and zero script offers/accepts/declines/teleports. **No inventory counts, raw IDs, game JobId or other private runtime values are reproduced in this PUBLIC repo.** Source evidence is user-provided client-only, not independently server-authenticated; do not treat a pasted receipt as cryptographically genuine. No server settlement, game-instance identity, price, official market edition or revision source proven. Hardware task CLOSED: **do not ask to rerun this same two-census test.**
+
+Next distinct task: native catalog/metadata coverage and raw-key identity-confidence measurement, with privacy-safe aggregates and no invented market valuation, followed independently by genuine fresh publisher source verification. The old 189 catalog is NOT the user's total weapons census. No P3/P4/Delta changes, source secrets, automatic offers, Accept or profit claims.
+
+---
+
 # System2 native own-census witness — isolated MAIN-only iPad test candidate
 
 **Date:** Nov 13/14, 2026 (NYC). **Draft PR #266** https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/266, stacked on unmerged System2 PR #265. **Not merged, not an active production feature.** This is the next distinct System2 evidence test, NOT a repetition of closed original Stage119 two-event ALT offer or Stage101 identity tests.
