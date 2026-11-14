@@ -1,0 +1,43 @@
+name: Gingerscope public tier page connectivity preflight (no trade)
+on:
+  push:
+    branches:
+      - research/system2-live-public-tier-ingest-nov14
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-source-diagnostic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test actual current public HTML pages and structural coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import re,urllib.request,urllib.error
+          for category,minimum in (("ancient",16),("godly",128),("chroma",65)):
+              url="https://mm2tradehub.com/values/category/"+category
+              try:
+                  req=urllib.request.Request(url,headers={"Accept":"text/html","User-Agent":"GingerscopeMarketDiagnostic/1.0"})
+                  with urllib.request.urlopen(req,timeout=20) as resp:
+                      status=resp.status
+                      raw=resp.read(2100000)
+              except urllib.error.HTTPError as err:
+                  print(f"{category.upper()}_SOURCE_HTTP_{err.code}")
+                  raise SystemExit(2)
+              except Exception as err:
+                  print(f"{category.upper()}_SOURCE_TRANSPORT_FAILURE:{type(err).__name__}")
+                  raise SystemExit(2)
+              html=raw.decode("utf-8")
+              count=len(re.findall(r'<a class="group card ',html))
+              print(f"{category.upper()}_HTTP={status} BYTES={len(raw)} REAL_CARDS={count}")
+              if status!=200 or count!=minimum:
+                  raise SystemExit(2)
+          print("LIVE_PAGE_STRUCTURAL_DIAGNOSTIC=PASS_NO_AUTHORIZED_TRADES")
+          PY
