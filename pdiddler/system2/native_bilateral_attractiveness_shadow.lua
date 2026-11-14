@@ -108,7 +108,7 @@ local function sumQuotes(bundle,index)
  for id,q in pairs(bundle) do
   local row=index[id]
   if not row then return nil,"UNKNOWN_MARKET_WEAPON" end
-  if type(row.stabilityLabel)~="string" then
+  if type(row.stabilityLabel)~="string" or #row.stabilityLabel==0 then
    return nil,"PUBLISHER_STABILITY_MISSING" end
   if row.mm2Listed==nil or row.supremeListed==nil then
    return nil,"DUAL_PUBLISHER_PRICE_NOT_AVAILABLE" end
@@ -181,9 +181,10 @@ function M.compare(context,market,alternatives)
   type(context.clientOfferRevision)~="number" or
   context.clientOfferRevision~=context.offer.clientRevision or
   context.clientOfferRevision<1 or
-  type(context.offer.sourceAgeSeconds)~="number" or
+  context.clientOfferRevision~=math.floor(context.clientOfferRevision) or
+  not scalar(context.offer.sourceAgeSeconds) or
   context.offer.sourceAgeSeconds<0 or context.offer.sourceAgeSeconds>21600 or
-  type(context.offer.ownedCensusAgeSeconds)~="number" or
+  not scalar(context.offer.ownedCensusAgeSeconds) or
   context.offer.ownedCensusAgeSeconds<0 or context.offer.ownedCensusAgeSeconds>30 then
   return block("FRESH_UNAUTHORIZED_OR_WRONG_CLIENT_CONTEXT")
  end
@@ -194,8 +195,17 @@ function M.compare(context,market,alternatives)
  local opponentCurrent={}
  if type(context.offer.their)~="table" or
     type(context.offer.their.items)~="table" or
+    #context.offer.their.items>4 or
     type(context.offer.our)~="table" or
-    type(context.offer.our.items)~="table" then
+    type(context.offer.our.items)~="table" or
+    #context.offer.our.items>4 or
+    type(context.offer.theirAccepted)~="boolean" or
+    type(context.offer.ourAccepted)~="boolean" or
+    type(context.offer.nameOnlyCatalogCandidateCount)~="number" or
+    not scalar(context.offer.nameOnlyCatalogCandidateCount) or
+    context.offer.nameOnlyCatalogCandidateCount<0 or
+    context.offer.nameOnlyCatalogCandidateCount~=math.floor(context.offer.nameOnlyCatalogCandidateCount) or
+    type(context.offer.exactRawAttributesBothSidesObserved)~="boolean" then
   return block("TWO_SIDED_CLIENT_OFFER_REQUIRED") end
  for _,item in ipairs(context.offer.their.items) do
   if not key(item.id) or not qty(item.quantity) or
