@@ -148,6 +148,7 @@ function M.new(config)
   if not ok2 or active2~=true then
    return {status="BLOCKED",reason="REVIEWED_P3_P4_LEASE_CHANGED"} end
   first.doubleReadStable=true
+  first.clientRawCaptureSignature=sig(first)
   return first
  end
  return adapter,nil
