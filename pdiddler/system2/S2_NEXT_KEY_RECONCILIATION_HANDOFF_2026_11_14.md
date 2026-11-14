@@ -1,3 +1,15 @@
+# MAIN HARDWARE RESULT RECEIVED — SIX-FEATURE HISTORICAL KEY BATCH CLIENT PASS (NOV 13/14 2026)
+
+The operator completed the exact immutable MAIN iPad one-tap `gingerscope-system2-native-key-reconciliation-batch-v1` runner. Pasted sanitized receipt status `CLIENT_KEY_RECONCILIATION_BATCH`; `readAttempts=1`; local session PASS, no trade-related RPC actions. The immutable original 189-row historical PUBLIC key registry was read correctly; **all historical registry keys matched current client game `Database.Sync` metadata in identity/type/rarity/Chroma and nontrade-classification, with no missing, conflicting, structurally changed, label-drift or metadata-malformed entries**. All currently owned provisionally eligible keys mapped to that historical registry by exact raw key and game name/type, with no eligible outside-registry keys or unresolved owned game metadata, and own copy totals were internally reconciled. The reported own-weapon stack distribution was internally consistent; protected-target checker generated no candidate and did not reveal target ownership. Script actions all zero. Tested with independent Python arithmetic/invariant checks against sanitized aggregate fields.
+
+**PUBLIC REPOSITORY PRIVACY:** Do NOT commit the user's actual owned item counts, private owned items, actual stack quantities, usernames, ALT state, game JobId, raw inventory, copied JSON or historical private calculator export. This summary intentionally records the source class and zero-drift/pass conditions only.
+
+**Critical evidence boundary:** This hardware evidence is operator-provided CLIENT-ONLY; it does NOT independently authenticate Roblox server item instances, allow transferability, confirm sale/settlement, or bind the original Stage83 source to a current Supreme publisher edition. Historical registry `publisherExpiryUtc=2026-11-09T15:56:07Z`, `currentMarketPriceAuthenticated=false`, `publisherEditionBound=false`, all offer/Accept/trading/profit/Discord/learning authorities DENIED. No changes to P3/P4/Delta or main. PR #268 stays draft/unmerged. **Hardware task CLOSED: do not repeat the six-feature or earlier MAIN census/classification tests.**
+
+**Next genuinely new blocker**: independently authenticated current first-party market publication and current key-to-value edition linkage (original SHA-locked Stage111→110→104→69 source chain + user's PRIVATE 189-row browser export `publisherVersion=null`), followed by tested scenario-planning safeguards using only source-eligible data. Do not launch an unproved live market price feed or repeat stale research. Future hardware observations should again batch distinct new components into one supervised safe test after independent CI green.
+
+---
+
 # System2 — NEXT multi-feature MAIN iPad test (historical game-key reconciliation)
 
 **Research-only DRAFT PR #268:** https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/268, stacked on #267. Main and existing P3/P4/Delta scripts unchanged. Prior native MAIN two-census and five-feature classifications are **DONE/CLOSED**; this is a distinct new batch, not a replay.
