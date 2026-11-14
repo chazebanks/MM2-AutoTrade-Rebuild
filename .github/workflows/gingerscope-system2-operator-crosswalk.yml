@@ -1,0 +1,39 @@
+name: Gingerscope System2 189 operator crosswalk (offline)
+on:
+  pull_request:
+    paths:
+      - "pdiddler/system2/operator_capture_adapter.py"
+      - "pdiddler/ci/test_operator_capture_adapter.py"
+      - ".github/workflows/gingerscope-system2-operator-crosswalk.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  immutable-189-crosswalk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Recover original immutable historical Stage83 Git blob
+        run: |
+          git fetch --no-tags --depth=1 origin 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae
+          git show FETCH_HEAD:pdiddler/intelligence_lab/stage83_public_slug_registry.lua > "$RUNNER_TEMP/stage83-original.lua"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,os
+          p=Path(os.environ['RUNNER_TEMP'])/'stage83-original.lua'
+          raw=p.read_bytes()
+          blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+          assert blob=='40e2a0ff01b70b2d0181c62cae347a08da82bcb8', blob
+          print('Original historical Stage83 Git blob SHA verified:',blob)
+          PY
+      - name: Test research-only adapter against pinned source and hostile synthetic receipts
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/stage83-original.lua
+        run: |
+          python3 -m unittest -v pdiddler.ci.test_operator_capture_adapter pdiddler.ci.test_system2_catalog_discovery_diff
