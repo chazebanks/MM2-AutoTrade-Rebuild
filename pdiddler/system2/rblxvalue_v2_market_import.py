@@ -108,7 +108,8 @@ def collect(transport, *, retrieved_utc):
         datetime.fromisoformat(retrieved_utc.replace("Z", "+00:00"))
     except (ValueError, OverflowError):
         _fail("RETRIEVAL_CLOCK_INVALID")
-    meta = _meta(transport("/meta", {}))
+    # Read one authenticated item page first; this isolates item-key access from
+    # a separately blocked public metadata endpoint without redundant probes.
     rows, seen_id, seen_slug = [], set(), set()
     counts = {}
     for category in CATEGORIES:
@@ -146,6 +147,7 @@ def collect(transport, *, retrieved_utc):
                 break
         else:
             _fail("ITEM_PAGINATION_LIMIT_EXCEEDED")
+    meta = _meta(transport("/meta", {}))
     rows.sort(key=lambda r: (r["providerCategory"], r["providerId"]))
     digest = hashlib.sha256(json.dumps(rows, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     return {
@@ -191,8 +193,10 @@ class HTTPTransport:
                 _fail("PROVIDER_RESPONSE_NOT_OBJECT")
             return result
         except HTTPError as exc:
-            _fail({401: "API_KEY_REJECTED", 403: "API_KEY_ACCESS_DENIED",
-                   429: "API_RATE_LIMITED"}.get(exc.code, "PROVIDER_HTTP_FAILURE"))
+            endpoint = "META" if path == "/meta" else "ITEMS"
+            reason = {401: "AUTH_REJECTED", 403: "ACCESS_DENIED",
+                      429: "RATE_LIMITED"}.get(exc.code, "HTTP_FAILURE")
+            _fail("PROVIDER_" + endpoint + "_" + reason)
         except (URLError, TimeoutError, OSError):
             _fail("PROVIDER_NETWORK_UNAVAILABLE")
         except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
