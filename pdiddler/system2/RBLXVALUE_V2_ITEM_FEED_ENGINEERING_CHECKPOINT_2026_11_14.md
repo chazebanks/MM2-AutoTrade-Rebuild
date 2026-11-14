@@ -11,3 +11,12 @@ This is a child of draft PR #281, not an update to production main. One distinct
 
 ## Evidence and next task
 Record exact tested Git SHA, workflow run, number of retrieved rows (or precise BLOCKED code) and selected variant coverage. Only once a real snapshot is retrieved may downstream market-to-game item exact mapping be scoped. No repeat ALT gift, old five-window loader, or live public Accept. No user's secret needs to be pasted into chat.
+
+## Verified real GitHub execution
+- Research DRAFT PR #282: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/282, stacked on unmerged #281; production main unchanged.
+- Initial real-source run #43635287410: 16/16 isolated tests passed; authenticated provider call returned HTTP 403. Source job FAILED visibly, unlike earlier diagnostic-only green.
+- Public /v2/meta without a key also returned 403. Next action tried authenticated /v2/items FIRST and separated endpoint failures.
+- Run #43635511637: 17/17 offline tests passed; actual item request returned PROVIDER_ITEMS_ACCESS_DENIED.
+- Latest run #43635681731: 19/19 adversarial Python tests passed; authenticated /v2/items returned PROVIDER_ITEMS_API_FORBIDDEN (HTTP 403 with JSON content-type), not a detected gateway challenge. Zero actual item pages, no admitted live market source.
+- The existing GitHub secret was present, and format validation passed. This does NOT prove the key is active for item access. Do not blindly rotate, guess network mitigation, or claim a current value feed.
+- Next task: distinguish current provider-account/credential access from other independently available current item feeds. No player test, old S2 five-window loader, or automatic Accept.
