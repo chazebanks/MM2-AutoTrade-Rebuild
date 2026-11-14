@@ -1,3 +1,9 @@
+# READ LATEST BEFORE THIS ARCHIVE: `pdiddler/system2/SYSTEM2_READ_NEXT_2026_11_13.md`
+
+Newest verified research scope: original 189-value source preserved privately; full mapped-row SHA seal; independently researched Supreme value-weighted demand and 5+ same-item stack risk; bounded explicit synthetic counterpart shortlist option enumeration (draft PR #262) with 275/275 focused tests on prior exact head. No live market authorization, current client/opponent proof, realized trade liquidity, loss budget, or auto Accept. Read the newer dated continuation before treating older statuses below as current.
+
+---
+
 # SYSTEM 2 READ FIRST — VERIFIED NOVEMBER 13–14, 2026 (NEW YORK)
 
 This is the newest compact System 2 handoff. **Read `pdiddler/START_HERE.md` and this file before doing any System2 integration or additional collection.** The next distinct issue is a **read-only exact game inventory-key/quantity binding**, not another Supreme value capture, Stage119 client device test, or a full 189-value rescan. Follow repo-wide continuity, latest branch state, original source and explicit authorization boundaries.
