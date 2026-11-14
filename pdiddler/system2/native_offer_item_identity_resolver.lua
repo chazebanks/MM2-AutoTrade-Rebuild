@@ -54,6 +54,9 @@ function M.buildCatalog(sync)
    for id,meta in pairs(rows) do
     count+=1
     if count>MAX_CATALOG then return nil,"LIVE_CATALOG_OVERSIZED" end
+    if not key(id) or type(meta)~="table" then
+     return nil,"LIVE_CATALOG_RAW_KEY_OR_ROW_INVALID"
+    end
     if key(id) and type(meta)=="table" then
      local r=expectedMeta(meta)
      if not r then return nil,"LIVE_CATALOG_METADATA_INVALID" end
@@ -155,6 +158,9 @@ function M.resolve(index,slot,parseQty)
    return nil,nil,"NAME_ONLY_CATALOG_VARIANT_OR_ALIAS_AMBIGUOUS"
   end
   id=matches[1];chosen=index.byId[id]
+  if chosen.chroma and not variantIndicated then
+   return nil,nil,"CHROMA_VARIANT_NOT_VISIBLY_PROVEN"
+  end
  end
  if chosen.eligible~=true then
   return nil,nil,"OFFERED_WEAPON_INELIGIBLE_OR_EXCLUDED"
