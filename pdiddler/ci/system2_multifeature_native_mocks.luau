@@ -74,7 +74,7 @@ local function pure()
     eq(other.features.classification.excludedKeys,1,"non-weapon category excluded")
     local both={Weapons={A={ItemName="A",ItemType="Gun",Rarity="Godly"}},
                 Item={A={ItemName="A",ItemType="Gun",Rarity="Godly"}}}
-    eq(core.assess(profile({A=2}),both,"FAKE_JOB_001",10,10).features.classification.godlyCopies,
+    eq(core.assess(profile({A=2}),both,"FAKE_JOB_001",10,10).features.classification.eligibleCopies,
         2,"equivalent duplicate sources match")
     local bads={{A=-1},{A=1.5},{A=true},{A="4.5"},{A=1000001}}
     for _,item in ipairs(bads) do
