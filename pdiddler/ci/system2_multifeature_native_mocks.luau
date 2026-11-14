@@ -75,7 +75,11 @@ local function pure()
     -- Original P3 scanner excludes explicit non-tradable weapon metadata.
     for _,flag in ipairs({"Tradable","CanTrade","Untradable","NonTradable"}) do
         local d={ItemName="Blocked",ItemType="Gun",Rarity="Godly"}
-        d[flag]=(flag=="Tradable" or flag=="CanTrade") and false or true
+        if flag=="Tradable" or flag=="CanTrade" then
+            d[flag]=false
+        else
+            d[flag]=true
+        end
         local out=core.assess(profile({A=1}),{Weapons={A=d}},"FAKE_JOB_001",10,10)
         eq(out.features.classification.eligibleKeys,0,flag.." not eligible")
         eq(out.features.classification.excludedKeys,1,flag.." excluded")
