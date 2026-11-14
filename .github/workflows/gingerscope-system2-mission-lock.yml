@@ -1,0 +1,43 @@
+name: Gingerscope System2 mission and non-repetitive testing continuity
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/START_HERE.md'
+      - 'pdiddler/continuity/README.md'
+      - 'pdiddler/system2/SYSTEM2_READ_NEXT_2026_11_13.md'
+      - 'pdiddler/system2/SYSTEM2_MODULAR_PLANNING_AND_TESTING_MATRIX_2026_11_13.md'
+      - 'pdiddler/system2/SYSTEM2_MISSION_LOCK_AND_TEST_GOVERNANCE_2026_11_14.md'
+      - 'pdiddler/ci/test_system2_mission_lock_continuity.py'
+      - '.github/workflows/gingerscope-system2-mission-lock.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  enforce-mission-first-on-next-chat:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check actual read-first routing, System2 distinct features and closed tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_system2_mission_lock_continuity
+      - name: Source-only governance: no game code in this change
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --porcelain
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('pdiddler/system2/SYSTEM2_MISSION_LOCK_AND_TEST_GOVERNANCE_2026_11_14.md')
+          assert p.is_file()
+          s=p.read_text()
+          assert 'This file is a governance/checkpoint fix ONLY' in s
+          assert 'No replay for a filled box' in s
+          assert 'S2.7 outcome-learning' in s
+          assert 'five MAIN client inventory-delta confirmations' in s
+          print('SYSTEM2_MISSION_GOVERNANCE_PRESENT; NO LIVE AUTHORITY CLAIMED')
+          PY
