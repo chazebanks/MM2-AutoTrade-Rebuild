@@ -1,5 +1,15 @@
 name: Gingerscope System2 mission and non-repetitive testing continuity
 on:
+  push:
+    branches:
+      - research/system2-mission-lock-nov14
+    paths:
+      - 'pdiddler/START_HERE.md'
+      - 'pdiddler/continuity/README.md'
+      - 'pdiddler/continuity/manifest.json'
+      - 'pdiddler/system2/**'
+      - 'pdiddler/ci/test_system2_mission_lock_continuity.py'
+      - '.github/workflows/gingerscope-system2-mission-lock.yml'
   pull_request:
     paths:
       - 'pdiddler/START_HERE.md'
