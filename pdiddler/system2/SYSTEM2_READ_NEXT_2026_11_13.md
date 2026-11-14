@@ -1,3 +1,20 @@
+# NEW SYSTEM 2 OPERATOR REQUIREMENT — MULTI-FEATURE BATCH TESTING (NOV 13/14, 2026)
+
+**Explicit operator reminder:** System 2 must be developed and tested as **multiple separately testable features per supervised test session**, instead of requiring one manual iPad session per small feature. This is an efficiency requirement, not permission to skip independent regressions or merge unreviewed changes. Each feature should return a distinct PASS/FAIL/INCONCLUSIVE status and an identifiable reason; a failure in one should not fabricate success in others. Preserve one-change-at-a-time code review and offline source-pinned tests, while **batching safe hardware observations** after each component passes its own mocks.
+
+**New operator-provided real-device result:** prior MAIN-only own-census read was `CLIENT_TWO_READS_STABLE`, two consistent observations within the permitted time window, zero script trade actions, no authenticated server ownership. This narrow read-only hardware test is DONE and must not be repeated as the entire next test. Privacy-safe confirmation is recorded in `pdiddler/system2/S2_NATIVE_CENSUS_TEST_HANDOFF_2026_11_14.md` without public raw inventory records or count totals.
+
+**Next proposed combined System2 MAIN-only observational test batch, not yet implemented or released:**
+1. **Catalog/identity coverage**: compare current owned raw keys to the game's available `Database.Sync` metadata by exact key, report aggregates for known/unknown, Ancient/Godly/Chroma, ordinary and excluded/evolution entries. Metadata names and game item IDs remain private; no fuzzy identity promotion.
+2. **Quantity and variant integrity**: reconcile raw owned counts with grouped eligible/excluded/unknown buckets, verify nonnegative stack quantities and separate Chroma from normal entries.
+3. **Change/freshness invalidation**: within a single safe operator-supervised session, verify that a changed own snapshot invalidates dependent read-only research stamps; only observe real changes if safely induced, otherwise test negative cases offline, NOT by transferring real items or repeating completed tests.
+4. **Failure and UI safety**: include independent counters for missing/invalid metadata, stale/changed JobId, unexpected TradeGUI, unavailable owner/camera or unsafe overlay placement; no trading actions needed.
+5. **Market-data provenance as a SEPARATE offline source gate**: evaluate whether the current publisher edition is genuinely fresh and independently bound to canonical Stage111→110→104→69 raw source. Never copy proprietary private exports into public GitHub or treat a page timestamp as a new verified 189-row catalog.
+
+**Batch acceptance criteria:** source-pinned Python + actual Luau/Lune native mock regressions for each module, one exact-head green CI release gate, one purple nonoverlapping iPad panel with clear sequential instructions, one sanitized report with per-feature statuses, no raw inventory, identifiers or values leaked, no P3/P4 production writes, and no automatic final Accept. Do NOT jump from successful native inventory reading to claims of verified item identity, trade settlement or measured liquidity. User should only be prompted for a new device run when the entire safe batch is tested and ready.
+
+---
+
 # LATEST SYSTEM2 NEXT CHECKPOINT — NATIVE OWN-CENSUS HARDWARE TEST PREPARED (NOV 13/14, 2026)
 
 **Current isolated draft PR #266** https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/266, branch `research/system2-nov14-native-own-census-witness`, stacked on **draft PR #265** (which itself is stacked on draft #262); NONE merged to `main`. Original Stage119/Stage101 iPad proofs remain CLOSED, untouched.
