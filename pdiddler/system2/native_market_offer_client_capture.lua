@@ -62,6 +62,14 @@ local function side(root,name)
   return nil,nil,"OFFER_SIDE_OR_ACCEPT_MISSING" end
  local acceptance=visible(accept,root)
  local slots={}
+ -- A changed GUI layout must not let a fifth physical offer slot disappear
+ -- from the snapshot and produce a misleading value delta.
+ for i=5,8 do
+  local unexpected=find(container,"NewItem"..tostring(i))
+  if unexpected and visible(unexpected,root) then
+   return nil,nil,"PHYSICAL_SLOT_LAYOUT_EXCEEDS_FOUR"
+  end
+ end
  for i=1,4 do
   local slot=find(container,"NewItem"..tostring(i))
   if slot and visible(slot,root) then
