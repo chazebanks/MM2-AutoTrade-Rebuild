@@ -142,8 +142,8 @@ class SealedSourceDecisionTests(unittest.TestCase):
     def test_unapproved_loss_rejected_by_individual_mode(self):
         a=scenario([("Celestial",1)],[("test_key_0",1)])
         r=self.runmode(payload=a)
-        self.assertEqual(r["status"],"SEALED_SOURCE_RESEARCH_ONLY",r)
-        self.assertEqual(r["researchResult"]["status"],"OFFLINE_LOSS_SCENARIO_BLOCKED_POLICY")
+        self.assertEqual(r["status"],"BLOCKED",r)
+        self.assertIn("NO_APPROVED_LOSS_BUDGET",r["reason"])
         self.assertFalse(r["authorizesTrade"])
 
     def test_unapproved_loss_in_growth_route_is_not_published_as_success(self):
@@ -177,7 +177,7 @@ class SealedSourceDecisionTests(unittest.TestCase):
         x["authorizesOffer"]=True
         r=self.runmode(source=x)
         self.assertEqual(r["status"],"BLOCKED")
-        self.assertIn("UNVERIFIED_OR_MUTATED_INVENTORY_SHADOW",r["reason"])
+        self.assertIn("SOURCE_AUTHORITY_CONTRACT_VIOLATION",r["reason"])
 
     def test_none_records_rejected(self):
         with self.assertRaisesRegex(ValueError,"MAPPED_189_RECORDS_REQUIRED"):
