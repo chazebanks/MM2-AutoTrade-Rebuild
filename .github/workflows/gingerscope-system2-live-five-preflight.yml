@@ -11,6 +11,8 @@ on:
       - 'pdiddler/system2/SYSTEM2_LIVE_FIVE_MAIN_NATIVE.lua'
       - 'pdiddler/ci/test_system2_live_five_controller.lua'
       - 'pdiddler/ci/test_system2_live_five_source_audit.py'
+      - 'pdiddler/system2/discord_v2_event_intake.py'
+      - 'pdiddler/ci/test_discord_v2_event_intake.py'
       - '.github/workflows/gingerscope-system2-live-five-preflight.yml'
   workflow_dispatch:
 permissions:
@@ -56,6 +58,7 @@ jobs:
           set -euo pipefail
           test "$(git hash-object pdiddler/system2/system2_live_five_controller.lua)" = f24f3da553683c8edf67c41a27c15ccd59804a17
           test "$(git hash-object pdiddler/system2/system2_live_strategy_evidence.lua)" = f473b57010158914815d014142a98dbf2c182525
+          test "$(git hash-object pdiddler/system2/discord_v2_event_intake.py)" = 20d8a0e8fda75c10a7101b242bfbd9a00d20cb7f
           python3 - <<'PY'
           from pathlib import Path
           import re
@@ -73,6 +76,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m unittest -v pdiddler.ci.test_system2_live_five_source_audit
+          python3 -m unittest -v pdiddler.ci.test_discord_v2_event_intake
       - name: Actual Lua5.4 five-stage controller with protected-P3 adapter mocks
         shell: bash
         run: |
@@ -94,6 +98,7 @@ jobs:
             echo '## System2 ONE-ARM live-five candidate — OFFLINE verified only'
             echo 'Implemented: 5-stage source-tested Luau state machine, native protected P3/P4 adapter, separate real-client strategy interpreter and adversarial Lua5.4/Python audits.'
             echo 'Not proved: live original-MM2 run, real Discord V2 delivery, current independently authenticated market prices, authoritative item instances, real negotiated profit, true learning, server settlement, automatic final Accept.'
-            echo 'Stage1 Discord live delivery and Stage3/4 market-growth decision remain BLOCKED prerequisites, never mislabeled LIVE PASS.'
+            echo 'Stage1 Discord PRIVATE bot V2 event schema/intake now implemented with fail-closed duplicate, timing, revision and partner-lease validation; actual network delivery remains BLOCKED.'
+            echo 'Stage3/4 market-growth decisions remain BLOCKED prerequisites, never mislabeled LIVE PASS.'
             echo 'Do NOT release operator loader until actual CI and dependency review; no live action is authorized from mock results.'
           } >> "$GITHUB_STEP_SUMMARY"
