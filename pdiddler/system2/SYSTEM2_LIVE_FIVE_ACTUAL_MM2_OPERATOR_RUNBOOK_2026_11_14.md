@@ -1,3 +1,11 @@
+# WITHDRAWN — NOT A FULL SYSTEM 2 INTELLIGENCE ACCEPTANCE TEST
+
+**Nov 14 operator correction:** The previously sent one-ARM five-window Delta test only verifies event observation/guarded P3/P4 mechanics and deliberately classifies 3/5 functional areas BLOCKED. **DO NOT RUN OR RECOMMEND THE LOADER IN THIS FILE AS SYSTEM 2'S FIVE-CAPABILITY LIVE TEST.** It would consume operator time without proving the required trade attractiveness, genuine multi-step Gingerscope growth, feedback learning or Discord delivery. This document remains as historical/engineering context only; its older "ready" classification is superseded by new draft PR #281 `research/system2-real-intelligence-acceptance-nov14`.
+
+Full acceptance requires decisions under real authenticated market/own-client evidence, valid counterpart event source, original-MM2 client coupling, multiple counterfactual outcomes and a research-model holdout that actually beats a baseline, plus a one-ARM original-MM2 native demonstration. The new pure Python decision engine supplies **offline algorithmic requirements, not a live five-stage release**. Until the implementation meets all five, no new operator instructions are authorized by this document.
+
+---
+
 # System2 original MM2 — one ARM / FIVE distinct live intelligence diagnostics
 
 **Mode:** controlled original Murder Mystery 2 MAIN iPad + exact consenting ALT on another account/device; ONE purple ARM, five automatic protected P3 request epochs, MAIN guarded cheap items only when pre-authorized, ALT follows purple instructions, ONE sanitized report. Not Roblox Studio. Do not repeat original System1 ARM8 or prior inventory-gift test. Do not use on a public partner.
