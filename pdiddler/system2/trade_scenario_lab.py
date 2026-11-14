@@ -12,6 +12,7 @@ from __future__ import annotations
 from collections import Counter
 from pdiddler.system2.market_research_reader import _index, TARGET_KEY
 from pdiddler.system2.operator_capture_adapter import AUTHORITY_DENIED, EXPORT_SHA256
+from pdiddler.system2.client_inventory_shadow import _utc
 
 SCHEMA = "gingerscope-system2-offline-trade-scenario-v1"
 SHADOW_SCHEMA = "gingerscope-system2-client-inventory-shadow-v1"
@@ -61,7 +62,7 @@ def _slots(rows, *, allow_empty):
     return parsed
 
 
-def _owned_from_shadow(shadow, idx):
+def _owned_from_shadow(shadow, idx, *, evaluated_at_utc):
     if (type(shadow) is not dict
             or shadow.get("schema") != SHADOW_SCHEMA
             or shadow.get("status") != "RESEARCH_CLIENT_INVENTORY_SHADOW_READY"
@@ -73,6 +74,20 @@ def _owned_from_shadow(shadow, idx):
             or shadow.get("targetOutgoingProtected") is not True
             or any(shadow.get(key) != value for key, value in AUTHORITY_DENIED.items())):
         raise ValueError("UNVERIFIED_OR_MUTATED_INVENTORY_SHADOW")
+    # Initial scanner validation is not a renewable freshness token. Revalidate
+    # against the caller's explicit current UTC at EVERY strategy consumption.
+    # This time is caller-supplied and does NOT authenticate a game client.
+    try:
+        captured = _utc(shadow.get("snapshotCapturedAt"))
+        evaluated = _utc(evaluated_at_utc)
+    except ValueError as exc:
+        raise ValueError("SHADOW_OBSERVATION_TIMESTAMP_INVALID") from exc
+    age_seconds = (evaluated - captured).total_seconds()
+    initial_age = shadow.get("snapshotAgeSeconds")
+    if (type(initial_age) not in (int, float)
+            or not 0 <= initial_age <= 60
+            or not 0 <= age_seconds <= 60):
+        raise ValueError("SHADOW_OBSERVATION_EXPIRED_OR_FUTURE")
     rows = shadow.get("records")
     if type(rows) is not list or len(rows) > 189:
         raise ValueError("INVALID_SHADOW_ROWS")
@@ -122,7 +137,7 @@ def _totals(slots, idx):
     }
 
 
-def inspect(mapped, shadow, scenario):
+def inspect(mapped, shadow, scenario, *, evaluated_at_utc=None):
     """Review one hypothetical bilateral exchange; NEVER selects execution."""
     try:
         idx = _index(mapped)
@@ -130,7 +145,7 @@ def inspect(mapped, shadow, scenario):
             "kind", "outgoingSlots", "incomingSlots"
         } or scenario["kind"] != SIMULATION_KIND):
             raise ValueError("EXPLICIT_SYNTHETIC_SCENARIO_REQUIRED")
-        owned, before = _owned_from_shadow(shadow, idx)
+        owned, before = _owned_from_shadow(shadow, idx, evaluated_at_utc=evaluated_at_utc)
         outgoing = _slots(scenario["outgoingSlots"], allow_empty=True)
         incoming = _slots(scenario["incomingSlots"], allow_empty=False)
         if TARGET_KEY in outgoing:
