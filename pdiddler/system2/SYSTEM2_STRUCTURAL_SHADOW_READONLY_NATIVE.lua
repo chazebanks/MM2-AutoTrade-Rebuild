@@ -41,7 +41,7 @@ local function frozen(rev,path)
     local loaded,res=pcall(function()return assert(compiler(raw))()end)
     return loaded and type(res)=="table" and res or nil
 end
-local core=frozen("586d2a6215ee7d119c8cbb7ed77a3412c71fe922",
+local core=frozen("95139f6c05f8c186239017ca19f50dbd33cff029",
     "system2/native_structural_shadow_core.lua")
 local auditor=frozen("eea9d6f5da3dfac8599e2f3e7b9fe1764d6ba288",
     "system2/native_key_reconciliation_core.lua")
