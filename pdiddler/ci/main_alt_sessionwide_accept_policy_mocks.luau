@@ -160,7 +160,7 @@ local badOffers={
             {rawKey="c",quantity=1,slotIndex=3,category="Weapons"},
             {rawKey="d",quantity=1,slotIndex=4,category="Weapons"},
             {rawKey="e",quantity=1,slotIndex=5,category="Weapons"}}},
- {ownAccepted=true},{altAccepted=nil},{ownOffer=nil},
+ {ownAccepted=true},
 }
 for i,change in ipairs(badOffers) do
  local c=assert(policy.new(config))
@@ -168,13 +168,26 @@ for i,change in ipairs(badOffers) do
  eq(c.begin(ctx(r,1)).status,"OBSERVING","bad offer lease starts "..i)
  local x=ctx(r,1.1)
  for k,v in pairs(change) do x[k]=v end
- -- Lua cannot represent nil in a test update literal; those test cases
- -- get their own explicit assignments below.
- if i==16 then x.altAccepted=nil end
- if i==17 then x.ownOffer=nil end
+
  local answer=c.observe(x)
  eq(answer.status,"STOPPED","invalid payload must stop "..i)
  eq(c.status().mayObserveFurtherMainAltTrades,false,"stop persists "..i)
+end
+-- Missing fields cannot be represented by a nil-valued table literal.
+-- Test them separately so array changes NEVER shift test case indices.
+do
+ local c=assert(policy.new(config))
+ local root={}
+ eq(c.begin(ctx(root,1)).status,"OBSERVING","missing acceptance lease")
+ local x=ctx(root,1.1);x.altAccepted=nil
+ eq(c.observe(x).status,"STOPPED","missing ALT accepted state fails closed")
+end
+do
+ local c=assert(policy.new(config))
+ local root={}
+ eq(c.begin(ctx(root,1)).status,"OBSERVING","missing offer lease")
+ local x=ctx(root,1.1);x.ownOffer=nil
+ eq(c.observe(x).status,"STOPPED","missing MAIN offer side fails closed")
 end
 -- A real empty opening trade is normal; it is NOT a fifth-slot error.
 do
