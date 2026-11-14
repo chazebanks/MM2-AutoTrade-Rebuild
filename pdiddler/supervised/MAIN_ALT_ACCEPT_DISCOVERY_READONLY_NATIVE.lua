@@ -112,7 +112,8 @@ if not shape or type(shape.inspect)~="function" or
 end
 local state={running=true,phase="PREPARED",job=game.JobId,started=0,
  root=nil,handle=nil,baseline=nil,baselineAt=0,lastSnapshot=nil,
- render=nil,status=pack("PREPARED","WAIT_OPERATOR_ARM"),everTrade=false}
+ render=nil,status=pack("PREPARED","WAIT_OPERATOR_ARM"),everTrade=false,
+ sawEmptyAltOffer=false}
 E[USED]=game.JobId
 E[OWNER]=state
 local function currentTrade()
@@ -334,6 +335,7 @@ local function tick()
   fail("UNEXPECTED_MAIN_OFFER_OR_CLIENT_SLOT_COUNT");return
  end
  if snap.theirSlots==0 then
+  state.sawEmptyAltOffer=true
   state.phase="WAIT_ALT_ITEM"
   ui.title.Text="2/3 • ALT ADD ONE"
   ui.body.Text="ALT manually adds ONE inexpensive eligible weapon. MAIN offers NOTHING. Neither side presses FINAL ACCEPT."
@@ -341,6 +343,9 @@ local function tick()
  end
  if snap.theirSlots~=1 then
   fail("ALT_TEST_OFFER_NOT_EXACTLY_ONE_SLOT");return
+ end
+ if not state.sawEmptyAltOffer then
+  fail("ALT_ITEM_PREEXISTED_WITHOUT_EMPTY_BASELINE");return
  end
  local vp=World.CurrentCamera.ViewportSize
  local info=shape.inspect(trade,{x=vp.X,y=vp.Y})
@@ -367,8 +372,11 @@ local function tick()
  end
  if t-state.baselineAt<0.4 then return end
  if t-state.baselineAt>5 then fail("STABLE_CAPTURE_WINDOW_EXPIRED");return end
- state.status=pack("CLIENT_ACCEPT_CONTROL_OBSERVED",
-   "GUI_SHAPE_ONLY_NOT_NATIVE_ACCEPT_OR_SETTLEMENT_AUTHORITY")
+ local shapeMapped=info.status=="ONE_VISIBLE_CANDIDATE_SHAPE"
+ state.status=pack(shapeMapped and "CLIENT_ACCEPT_CONTROL_OBSERVED"
+   or "INCONCLUSIVE_ACCEPT_CONTROL_MAPPING",
+   shapeMapped and "GUI_SHAPE_ONLY_NOT_NATIVE_ACCEPT_OR_SETTLEMENT_AUTHORITY"
+   or "NO_UNIQUE_TRUSTED_ACCEPT_CONTROL_SHAPE")
  state.status.mainAltAccountLookupExact=true
  state.status.clientTradePartnerLabelMatches=true
  state.status.originalStage9Used=true
