@@ -266,13 +266,31 @@ eq(badSpeaker.reason,"TEXTSOURCE_USERID_MALFORMED",
 active=false
 eq(api.snapshot().status,"BLOCKED","original P3/P4 lease invalidates evidence")
 active=true
+local afterLeaseReopened=api.snapshot()
+eq(afterLeaseReopened.activeSignals,0,"no chat evidence survives a lease gap")
+eq(#afterLeaseReopened.itemPreferences,0,
+ "no old wishlist contaminates restarted bound scope")
+local beforeHop=emit("@MainTestUser_Alpha LF Harvester")
+eq(beforeHop.status,"PASSIVE_ITEM_PREFERENCE","new active session reestablishes evidence")
 game.JobId="CHANGED_SERVER"
 eq(api.snapshot().status,"BLOCKED","server hop invalidates prior message binding")
 game.JobId=job
+eq(api.snapshot().activeSignals,0,"server hop clears retained preferences")
 eq(api.stop().status,"PASSIVE_CHAT_LISTENER_DETACHED","can unsubscribe")
 eq(api.start().status,"PASSIVE_CLIENT_CHAT_LISTENER_ATTACHED","one listener after explicit restart")
 api.stop()
 
+local oldAge=engine.new({
+ bound=scope,crosswalk=market,
+ readContext=function()
+  local c=ctx();c.offer.sourceAgeSeconds=-1;return c end,
+ readScope=function()
+  return {jobId=job,leaseId=lease,localUserId=own,partnerUserId=opponent,
+   mainUsername=username,tradeOpen=true,leaseActive=true} end,
+ now=function()return time end})
+yes(oldAge~=nil,"adversarial core exists for negative price-age input")
+eq(oldAge.snapshot().status,"BLOCKED",
+ "negative source-age cannot pass as a current offer")
 local toggled=false
 local changed=engine.new({
  bound=scope,crosswalk=market,
