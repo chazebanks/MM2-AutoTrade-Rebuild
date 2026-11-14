@@ -73,8 +73,8 @@ def _input_review(rows,channel,webhook):
     audit=review(rows,expected_channel_id=channel,expected_webhook_id=webhook)
     if audit.get("status")!="PRIVATE_BOT_V2_ENVELOPE_SHAPE_REVIEW_ONLY":
         raise ValueError("STRICT_V2_REVIEW_"+str(audit.get("reason","FAILED")))
-    if audit.get("realTrainingRowsAuthorized")!=0 or
-        audit.get("mayUseForStrategyLearning") is not False:
+    if (audit.get("realTrainingRowsAuthorized")!=0 or
+        audit.get("mayUseForStrategyLearning") is not False):
         raise ValueError("FORGED_V2_LEARNING_PERMISSION")
     return audit
 
@@ -90,16 +90,16 @@ def compile_client_evidence(
     invoking this, but Discord delivery remains a client self-report of MM2.
     """
     try:
-        if type(private_collector_origin) is not bool or
+        if (type(private_collector_origin) is not bool or
             type(minimum_holdout_partners) is not int or
-            not 2<=minimum_holdout_partners<=8:
+            not 2<=minimum_holdout_partners<=8):
             raise ValueError("PROVENANCE_OR_HOLDOUT_POLICY_INVALID")
         audit=_input_review(rows,expected_channel_id,expected_webhook_id)
         entries={}
         for row in rows:
-            if type(row) is not dict or set(row)!=KEYS or
+            if (type(row) is not dict or set(row)!=KEYS or
                 row.get("schema")!=V2_SCHEMA or row.get("source")!=SOURCE or
-                row.get("client_provenance")!=CLIENT_PROOF:
+                row.get("client_provenance")!=CLIENT_PROOF):
                 raise ValueError("V2_ENVELOPE_NOT_CANONICAL")
             key=row["message_id"]
             canonical=_canonical(row)
@@ -120,8 +120,8 @@ def compile_client_evidence(
         summaries=[]
         for seq in by_session.values():
             first=seq[0]
-            if first["kind"]!="MAIN_REQUEST_PENDING" or
-                first["revision"]!=0 or first["event_seq"]!=1:
+            if (first["kind"]!="MAIN_REQUEST_PENDING" or
+                first["revision"]!=0 or first["event_seq"]!=1):
                 raise ValueError("FIRST_REQUEST_NOT_BASELINE")
             stamp=None
             accepted=False
