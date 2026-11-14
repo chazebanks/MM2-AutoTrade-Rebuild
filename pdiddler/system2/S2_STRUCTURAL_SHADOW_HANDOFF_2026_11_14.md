@@ -1,3 +1,15 @@
+# REAL MAIN STRUCTURAL-SHADOW HARDWARE RESULT — CLIENT PASS, CLOSED (NOV 14 2026)
+
+**User completed the new, previously untested one-tap native structural-shadow batch** using the exact pinned launcher; sanitized receipt schema `gingerscope-system2-structural-shadow-batch-v1`, `status=CLIENT_STRUCTURAL_SHADOW_REPORT`, `readAttempts=1`, one local same-read context, approximately subsecond runtime. All six subsystems returned expected CLIENT/SYNTHETIC statuses: one-through-four non-target physical slot *capacity*, stack copy classification (no high-stack pricing uncertainty indicated), 10/10 independently tested PURE SYNTHETIC bilateral fixtures, protected Gingerscope outbound and masked possession, expired source / UNKNOWN liquidity / no current-market value delta, and local context+composition guard. All actual offers, accepts, declines, and teleports remained ZERO; original planner untouched, no live offer candidate produced.
+
+**Public privacy:** intentionally do not record actual owned item counts, singleton/stack distributions, top-four copy totals, private item names, account identities, JobId, or full device JSON in PUBLIC GitHub. Prior original two-census, 5-feature game metadata, and 6-feature historical-key hardware tests also remain CLOSED. Do NOT ask user to rerun any four tests without a separate, genuinely new evidence question.
+
+**Critical limits:** The four-slot observation is an offline non-price capacity bound, **not** proof of offer GUI controls, current Supreme publisher-edition provenance, actual counterparty inventory/appeal, session revision, resale liquidity, live market profit, independent server settlement, or authorized final Accept. The 10 synthetic tests are fake priced fixtures, not live trades, probabilities or real market value. All risk budget, loss trading, P3/P4/Delta production actions, automatic final Accept, Discord profit and strategy learning remain blocked.
+
+**Next independent work, entirely OFFLINE before another iPad request:** canonical first-party publisher source provenance + bounded TTL (original Stage111→110→104→69 SHA pins), and additive evidence-grade trade-quality/attractiveness arbitration around existing System2 scenario/growth/attractiveness modules. Do not self-upgrade `publisherVersion:null` export from website timestamp alone. If next native observation is necessary, batch multiple NEW tests rather than repeat inventory identity/census and require exact-source CI.
+
+---
+
 # NEXT REAL MULTI-FEATURE MAIN TEST — STRUCTURAL SHADOW PLANNING (NOV 14, 2026)
 
 **This is the NEXT NEW device test, not a re-run of three completed MAIN witnesses.** Draft research-only [PR #269](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/269), stacked on draft #268, #267, etc. Original main/P3/P4/Delta unmodified. This research batch prepares structural **offline** planning, not a live trading strategy or finished System 2.
