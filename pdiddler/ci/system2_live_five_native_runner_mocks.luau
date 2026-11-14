@@ -252,7 +252,7 @@ end
 do
  local x=fakeEnvironment()
  local runner=x.run()
- eq(type(runner),"table","native launcher warnings="..table.concat(x.warnings," | "))
+ eq(type(runner),"table","native launcher reads="..tostring(#x.reads).." ui="..tostring(#x.instances).." owner="..tostring(x.E.PDIDDLER_SYSTEM2_LIVE_FIVE_OWNER~=nil).." warnings="..table.concat(x.warnings," | "))
  eq(#x.reads,13,"all pinned source modules")
  eq(x.E.__NATIVE_P3_BOOT_COUNT,nil,"no implicit request startup")
  eq(x.button("ArmFiveIntelligence").Visible,false,"ARM hidden without selections")
