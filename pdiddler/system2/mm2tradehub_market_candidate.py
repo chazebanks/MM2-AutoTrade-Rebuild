@@ -66,7 +66,10 @@ def parse_tier(html, category):
     for card in soup.select("a.group.card"):
         href = card.get("href")
         parsed = urlparse(href or "")
-        if parsed.scheme != "https" or parsed.netloc != "mm2tradehub.com":
+        trusted_alias = parsed.scheme == "https" and parsed.netloc in (
+            "mm2tradehub.com", "www.mm2tradehub.com", "mm2values.app", "www.mm2values.app")
+        trusted_relative = parsed.scheme == "" and parsed.netloc == ""
+        if not (trusted_alias or trusted_relative):
             fail("ITEM_HREF_OUTSIDE_SOURCE")
         if not parsed.path.startswith("/values/") or parsed.query or parsed.fragment:
             fail("ITEM_LINK_FORMAT_CHANGED")
