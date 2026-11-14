@@ -1,0 +1,101 @@
+name: Gingerscope S2 component5 bounded multistep Gingerscope growth (no trade)
+on:
+  push:
+    branches:
+      - research/system2-real-market-growth-paths-nov14
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gingerscope-system2-real-growth-readonly
+  cancel-in-progress: false
+jobs:
+  source-native-growth-quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install source reader and immutable verified Lune runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check 'beautifulsoup4>=4.12,<5'
+          archive="$RUNNER_TEMP/lune-v0.11.1-linux-x86_64.zip"
+          curl -fsSL --retry 3 --connect-timeout 20 'https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip' -o "$archive"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/lune-dist"
+          lune_bin="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
+          test -n "$lune_bin"
+          install -m 0755 "$lune_bin" "$RUNNER_TEMP/lune"
+      - name: Download and SHA-verify immutable original Stage83 game registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --max-time 45 --retry 2 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua' -o "$RUNNER_TEMP/stage83.lua"
+          test "$(git hash-object "$RUNNER_TEMP/stage83.lua")" = "40e2a0ff01b70b2d0181c62cae347a08da82bcb8"
+          echo ORIGINAL_STAGE83_REGISTRY_PIN=PASS
+      - name: Re-run established market, key identity, intelligence and new statistical oracle
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/stage83.lua
+        run: |
+          python3 -m unittest -q \
+            pdiddler.ci.test_system2_mm2tradehub_market_candidate \
+            pdiddler.ci.test_system2_public_market_gamekey_crosswalk \
+            pdiddler.ci.test_system2_real_intelligence_decisions
+      - name: Obtain actual market records and rebuild 189 game-key dataset
+        shell: bash
+        run: |
+          set -euo pipefail
+          export GINGERSCOPE_MARKET_OUTPUT="$RUNNER_TEMP/actual-market.json"
+          python3 -m pdiddler.system2.mm2tradehub_market_candidate
+          python3 -m pdiddler.system2.public_market_gamekey_crosswalk \
+            --market "$RUNNER_TEMP/actual-market.json" \
+            --stage83 "$RUNNER_TEMP/stage83.lua" \
+            --evaluated-utc "$(date -u "+%Y-%m-%dT%H:%M:%SZ")" \
+            --output "$RUNNER_TEMP/mapped-market.json"
+          cp "$RUNNER_TEMP/mapped-market.json" pdiddler/system2/research_market_crosswalk_current.json
+          python3 - <<'PY'
+          import json,datetime,pathlib
+          m=json.loads(pathlib.Path('pdiddler/system2/research_market_crosswalk_current.json').read_text())
+          assert m['matchedHistoricalGameKeys']==189
+          stamp=datetime.datetime.fromisoformat(m['sourceRetrievedUtc'].replace('Z','+00:00'))
+          pathlib.Path('pdiddler/system2/research_market_epoch.txt').write_text(str(int(stamp.timestamp())))
+          print('LIVE_REAL_MARKET_SOURCE_AND_RAW_KEYS=189')
+          PY
+      - name: Run independent Python randomized real-market bilateral oracle
+        run: python3 -m unittest -v pdiddler.ci.test_system2_native_bilateral_market_oracle
+      - name: Execute independent Python multistep growth arithmetic oracle
+        run: python3 -m unittest -v pdiddler.ci.test_system2_native_multistep_growth_oracle
+      - name: Execute real native inventory, bilateral, and bounded three-step growth logic
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_bilateral_market_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_market_inventory_offer_bridge_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_multistep_growth_mocks.luau
+      - name: Native source and trade authority static audit
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ('native_bilateral_attractiveness_shadow.lua','native_bilateral_attractiveness_bridge.lua',
+                       'native_multistep_growth_shadow.lua','native_multistep_growth_bridge.lua'):
+              src=Path('pdiddler/system2',name).read_text()
+              for forbidden in ('FireServer(', 'InvokeServer(', 'TeleportService', 'AcceptTrade(', 'DeclineTrade(', 'PostAsync(', 'setclipboard(', 'mouse1click(', 'request('):
+                  assert forbidden not in src,(name,forbidden)
+              for needed in ('authorizesOffer=false','authorizesAccept=false'):
+                  assert needed in src,(name,needed)
+          print('GROWTH_NATIVE_NEVER_PERFORMS_TRADING=PASS')
+          PY
+      - name: Archive only public source and non-identifying research mapping
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-component5-public-source-market
+          path: ${{ runner.temp }}/mapped-market.json
+          retention-days: 7
+          if-no-files-found: error
