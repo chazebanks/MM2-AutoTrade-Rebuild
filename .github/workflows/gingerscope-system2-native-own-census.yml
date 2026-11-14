@@ -33,7 +33,11 @@ jobs:
           test "$(git hash-object "$RUNNER_TEMP/native-core-pinned.lua")" = b39f10fd47c6a2df6a206142b8b4c7b3dd39f3cf
           cmp "$RUNNER_TEMP/native-core-pinned.lua" pdiddler/system2/native_own_census_core.lua
           grep -Fq '8e0d3312404e8a1557545e81df351b7c55633451' pdiddler/system2/SYSTEM2_OWN_CENSUS_READONLY_NATIVE.lua
-          echo SYSTEM2_NATIVE_CORE_RUNTIME_AND_CHECKOUT_PIN_IDENTICAL
+          git fetch --no-tags --depth=1 origin e72fa4df21fe6f8a2c4da83087097be708ccbcc0
+          git show e72fa4df21fe6f8a2c4da83087097be708ccbcc0:pdiddler/system2/SYSTEM2_OWN_CENSUS_READONLY_NATIVE.lua > "$RUNNER_TEMP/native-runner-pinned.lua"
+          test "$(git hash-object "$RUNNER_TEMP/native-runner-pinned.lua")" = 069579ded6fe4f34630ce8abbc7d07d6e70b81ab
+          cmp "$RUNNER_TEMP/native-runner-pinned.lua" pdiddler/system2/SYSTEM2_OWN_CENSUS_READONLY_NATIVE.lua
+          echo SYSTEM2_NATIVE_CORE_AND_RUNNER_IMMUTABLE_SOURCE_PINS_MATCH
       - name: Install immutable Lune v0.11.1 (official release SHA256)
         shell: bash
         run: |
