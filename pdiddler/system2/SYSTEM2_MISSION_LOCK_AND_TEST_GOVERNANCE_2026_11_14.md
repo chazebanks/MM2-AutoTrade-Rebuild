@@ -1,6 +1,14 @@
 # SYSTEM 2 — MISSION LOCK, TEST-DIVERSITY GATE AND NEXT-CONVERSATION RECOVERY
 **As of November 14, 2026. Read this FIRST for every Project Gingerscope System 2 continuation, before a newer device/test handoff.** This file corrects a documented assistant process failure; it is not evidence of live execution or approval to deploy autonomous trades.
 
+## New operator correction — S2.7 MUST learn through the Discord bot/webhook pipeline
+
+**Read `pdiddler/system2/SYSTEM2_DISCORD_LEARNING_PIPELINE_HANDOFF_2026_11_14.md` before working on S2.7.** The existing Discord bot and webhook reports were deliberately created as System 2's feedback source. Required architecture: **P3/P4 instrumented MM2 episodes → versioned Discord webhooks → existing Discord bot → private evidence ledger → S2.7 outcome attribution and learner → improved future attractiveness/growth strategy.** Do NOT invent a detached production training source, claim Discord itself is authenticated settlement, or build a new unrelated learner. Old `MM2 Trade Completed` embeds are self-reported: historical audit has zero authenticated settled trades and zero learning-eligible rows. Rejected/ignored/cancelled trades need independently actor-/session-bound event notifications; existing importer parses only completed-trade claims. Observe in shadow first; true learned rewards require verified completion, fresh values and holdout tests.
+
+**Automatic FINAL ACCEPT remains bounded only to the exact consenting MAIN–ALT accounts in supervised testing**; none of these System 2 research modules enables public final Accept or produces action authority. Do not ask for another round of five manual ALT→MAIN gifts. Preserve all previously closed real hardware coverage.
+
+---
+
 ## 1. What went wrong and why
 This repository ALREADY had the answer in `pdiddler/system2/SYSTEM2_MODULAR_PLANNING_AND_TESTING_MATRIX_2026_11_13.md`. The assistant privileged the newest prepended MAIN–ALT test notes in `SYSTEM2_READ_NEXT_2026_11_13.md` and the supervised handoff over that actual architecture. It conflated System 1's mechanics (scan/send/GUI/Accept/transaction observation) with System 2's reason for existing (growth, attractiveness, adaptive strategy and evidence-controlled learning). It also measured user test success by the NUMBER of repeated transfers rather than the DISTINCT strategic behaviors covered, failed to read and reconcile superseding instructions, and gave code to test without a before-work feature/coverage gate. **This was a prioritization and governance failure, NOT absent information.**
 
