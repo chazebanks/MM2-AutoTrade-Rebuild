@@ -1,0 +1,118 @@
+name: Gingerscope System2 original-MM2 own inventory census witness (offline)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/native_own_census_core.lua'
+      - 'pdiddler/system2/SYSTEM2_OWN_CENSUS_READONLY_NATIVE.lua'
+      - 'pdiddler/ci/system2_native_own_census_mocks.luau'
+      - 'pdiddler/system2/S2_NATIVE_CENSUS_TEST_HANDOFF_2026_11_14.md'
+      - 'pdiddler/system2/SYSTEM2_READ_NEXT_2026_11_13.md'
+      - '.github/workflows/gingerscope-system2-native-own-census.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-own-census-lune:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate code-owner continuity pins and recover policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.continuity.manager verify
+          python3 -m pdiddler.continuity.manager recover
+      - name: Verify exact immutable native core loaded by iPad runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 8e0d3312404e8a1557545e81df351b7c55633451
+          git show 8e0d3312404e8a1557545e81df351b7c55633451:pdiddler/system2/native_own_census_core.lua > "$RUNNER_TEMP/native-core-pinned.lua"
+          test "$(git hash-object "$RUNNER_TEMP/native-core-pinned.lua")" = b39f10fd47c6a2df6a206142b8b4c7b3dd39f3cf
+          cmp "$RUNNER_TEMP/native-core-pinned.lua" pdiddler/system2/native_own_census_core.lua
+          grep -Fq '8e0d3312404e8a1557545e81df351b7c55633451' pdiddler/system2/SYSTEM2_OWN_CENSUS_READONLY_NATIVE.lua
+          git fetch --no-tags --depth=1 origin e72fa4df21fe6f8a2c4da83087097be708ccbcc0
+          git show e72fa4df21fe6f8a2c4da83087097be708ccbcc0:pdiddler/system2/SYSTEM2_OWN_CENSUS_READONLY_NATIVE.lua > "$RUNNER_TEMP/native-runner-pinned.lua"
+          test "$(git hash-object "$RUNNER_TEMP/native-runner-pinned.lua")" = 069579ded6fe4f34630ce8abbc7d07d6e70b81ab
+          cmp "$RUNNER_TEMP/native-runner-pinned.lua" pdiddler/system2/SYSTEM2_OWN_CENSUS_READONLY_NATIVE.lua
+          echo SYSTEM2_NATIVE_CORE_AND_RUNNER_IMMUTABLE_SOURCE_PINS_MATCH
+      - name: Install immutable Lune v0.11.1 (official release SHA256)
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/lune-v0.11.1-linux-x86_64.zip"
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 20 \
+            "https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip" \
+            --output "$archive"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/lune-dist"
+          found="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
+          test -n "$found"
+          install -m 0755 "$found" "$RUNNER_TEMP/lune"
+      - name: Execute pure core and ACTUAL native iPad census runner in Lune mock
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_own_census_mocks.luau
+      - name: Assert only read-only own inventory RPC in actual native witness
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('pdiddler/system2/SYSTEM2_OWN_CENSUS_READONLY_NATIVE.lua').read_text()
+          for forbidden in ('FireServer(', 'AcceptTrade(', 'DeclineTrade(', 'TeleportService', 'GetFullInventory', 'HttpService:PostAsync(', 'setreadonly(', 'hookmetamethod('):
+              assert forbidden not in s, f"UNEXPECTED_NATIVE_ACTION_OR_NETWORK: {forbidden}"
+          assert s.count('rf:InvokeServer()') == 1
+          assert s.count('game:HttpGet(url)') == 1
+          assert 'GetProfileData' in s and 'tradeVisible()' in s
+          assert 'native_own_census_core.lua' in s and 'stage100_screen_prompt_overlay.lua' in s
+          print("READ_ONLY_OWN_PROFILE_RPC_AND_NO_GAME_ACTIONS_PASS")
+          PY
+  all-inherited-source-pinned-python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Recover original Stage83 PR106 planner and corrected PR182 guard SHA pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/system2-pin"
+          git fetch --no-tags --depth=1 origin 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae
+          git show 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae:pdiddler/intelligence_lab/stage83_public_slug_registry.lua > "$RUNNER_TEMP/system2-pin/stage83.lua"
+          git fetch --no-tags --depth=1 origin 6ed48e084bd58fab38e3bf061ac36fb295ecf103
+          git show 6ed48e084bd58fab38e3bf061ac36fb295ecf103:pdiddler/intelligence_lab/future_portfolio_planner.py > "$RUNNER_TEMP/system2-pin/planner.py"
+          git fetch --no-tags --depth=1 origin 94ecefee86fd36293dcac58d0c24d9f379e719e5
+          git show 94ecefee86fd36293dcac58d0c24d9f379e719e5:pdiddler/intelligence_lab/offer_snapshot_guard.py > "$RUNNER_TEMP/system2-pin/guard.py"
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/stage83.lua")" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/planner.py")" = 78948cdacd2a760db5b888fce242d598fc6f14b6
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/guard.py")" = 11db895622d053ddced4fba9666135bf97bd615b
+          grep -Fq 'PROTECTED_GINGERSCOPE_OUTGOING' "$RUNNER_TEMP/system2-pin/guard.py"
+      - name: Run 311 inherited research-only Python regressions on exact source blobs
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/system2-pin/stage83.lua
+          STAGE120_REQUIRE_PINNED: '1'
+          STAGE120_PLANNER: ${{ runner.temp }}/system2-pin/planner.py
+          STAGE120_CORRECTED_GUARD: ${{ runner.temp }}/system2-pin/guard.py
+        run: |
+          python3 -m unittest -v \
+            pdiddler.ci.test_market_inventory_revision_gate \
+            pdiddler.ci.test_counterparty_candidate_explorer \
+            pdiddler.ci.test_sealed_decision_source \
+            pdiddler.ci.test_multitrade_growth_replay \
+            pdiddler.ci.test_attractiveness_evidence_lab \
+            pdiddler.ci.test_trade_scenario_lab \
+            pdiddler.ci.test_stage120_corrected_guard_preview \
+            pdiddler.ci.test_client_inventory_shadow \
+            pdiddler.ci.test_market_research_reader \
+            pdiddler.ci.test_publisher_page_parity \
+            pdiddler.ci.test_operator_capture_adapter \
+            pdiddler.ci.test_system2_catalog_discovery_diff
