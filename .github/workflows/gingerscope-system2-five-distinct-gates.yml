@@ -1,0 +1,117 @@
+name: Gingerscope System2 FIVE distinct major functional gates (offline)
+on:
+  push:
+    branches:
+      - research/system2-five-distinct-major-gates-nov14
+  pull_request:
+    paths:
+      - 'pdiddler/system2/discord_shadow_engagement.py'
+      - 'pdiddler/ci/test_system2_five_distinct_gates.py'
+      - 'pdiddler/system2/SYSTEM2_FIVE_MAJOR_GATES_RESULTS_2026_11_14.md'
+      - '.github/workflows/gingerscope-system2-five-distinct-gates.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  system2-five-distinct-capabilities:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify canonical source provenance and compile ALL new code
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.continuity.manager verify
+          python3 -m pdiddler.continuity.manager recover
+          test "$(git hash-object scripts/discord_private_history_import.py)" = d7524156702623b450e3195099a91f4679ac6524
+          test "$(git hash-object scripts/discord_history_embed_audit.py)" = 702d5924b870c0893c8a155d14b58e021afa4a29
+          test "$(git hash-object pdiddler/system2/discord_learning_evidence_bridge.py)" = b79aa47cbc7e8b4f2c01347b3aae7db695aaeb6b
+          test "$(git hash-object pdiddler/system2/counterparty_response_learning_lab.py)" = 31208dab4de3c5e348ad7f0f571d2dce70123eaa
+          test "$(git hash-object pdiddler/system2/multi_axis_strategy_stress_lab.py)" = ce103aef478e7557a0d5e5c6696eb948341fa27f
+          python3 -m py_compile pdiddler/system2/discord_shadow_engagement.py pdiddler/ci/test_system2_five_distinct_gates.py
+          echo '### Five independent System2 gates: source-pinned starting state' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Completed: original Discord importer, offline S2 strategies and evidence source-pin preflight.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Not completed: gates 1–5; real Discord V2 capture; verified settlement; live S2 deployment.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Test 1/5 — Discord webhook + private-ledger intake
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_system2_five_distinct_gates.Gate1DiscordBotArchive
+          {
+            echo '### Gate 1/5 passed — Discord webhook + private-ledger intake'
+            echo '**Completed:** 1. Discord webhook + private-ledger intake (offline).'
+            echo '**Still unfinished:** 2. Different Discord responses + shadow learning; 3. Bilateral appeal + feedback-driven research; 4. Multiple growth paths + risk/stacks; 5. Integration + fail-stop/Accept scope; live Discord V2 ingestion; authenticated game settlement; actual learned strategy; public auto final Accept remains forbidden.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Test 2/5 — Different Discord responses + shadow learning
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_system2_five_distinct_gates.Gate2DiscordShadowLearning
+          {
+            echo '### Gate 2/5 passed — Different Discord responses + shadow learning'
+            echo '**Completed:** 1. Discord webhook + private-ledger intake (offline); 2. Different Discord responses + shadow learning (offline).'
+            echo '**Still unfinished:** 3. Bilateral appeal + feedback-driven research; 4. Multiple growth paths + risk/stacks; 5. Integration + fail-stop/Accept scope; live Discord V2 ingestion; authenticated game settlement; actual learned strategy; public auto final Accept remains forbidden.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Test 3/5 — Bilateral appeal + feedback-driven research
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_system2_five_distinct_gates.Gate3BilateralAttractiveness
+          {
+            echo '### Gate 3/5 passed — Bilateral appeal + feedback-driven research'
+            echo '**Completed:** 1. Discord webhook + private-ledger intake (offline); 2. Different Discord responses + shadow learning (offline); 3. Bilateral appeal + feedback-driven research (offline).'
+            echo '**Still unfinished:** 4. Multiple growth paths + risk/stacks; 5. Integration + fail-stop/Accept scope; live Discord V2 ingestion; authenticated game settlement; actual learned strategy; public auto final Accept remains forbidden.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Test 4/5 — Multiple growth paths + risk/stacks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_system2_five_distinct_gates.Gate4GingerscopeGrowthPaths
+          {
+            echo '### Gate 4/5 passed — Multiple growth paths + risk/stacks'
+            echo '**Completed:** 1. Discord webhook + private-ledger intake (offline); 2. Different Discord responses + shadow learning (offline); 3. Bilateral appeal + feedback-driven research (offline); 4. Multiple growth paths + risk/stacks (offline).'
+            echo '**Still unfinished:** 5. Integration + fail-stop/Accept scope; live Discord V2 ingestion; authenticated game settlement; actual learned strategy; public auto final Accept remains forbidden.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Test 5/5 — Integration + fail-stop/Accept scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_system2_five_distinct_gates.Gate5IntegratedAuthorityFirewall
+          {
+            echo '### Gate 5/5 passed — Integration + fail-stop/Accept scope'
+            echo '**Completed:** 1. Discord webhook + private-ledger intake (offline); 2. Different Discord responses + shadow learning (offline); 3. Bilateral appeal + feedback-driven research (offline); 4. Multiple growth paths + risk/stacks (offline); 5. Integration + fail-stop/Accept scope (offline).'
+            echo '**Still unfinished:** none of the five offline gates; live Discord V2 ingestion; authenticated game settlement; actual learned strategy; public auto final Accept remains forbidden.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Inherited source-backed regression suites (no repeat human trades)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -q \
+            pdiddler.ci.test_discord_learning_evidence_bridge \
+            pdiddler.intelligence_lab.test_discord_private_history_import \
+            pdiddler.intelligence_lab.test_discord_history_embed_audit \
+            pdiddler.intelligence_lab.test_discord_readonly_probe \
+            pdiddler.ci.test_counterparty_response_learning_lab \
+            pdiddler.ci.test_multi_axis_strategy_stress_lab \
+            pdiddler.ci.test_growth_policy_decision
+      - name: Source guard — synthetic only, no trade/Webhook action API
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          source=Path('pdiddler/system2/discord_shadow_engagement.py').read_text()
+          for term in ('FireServer(', 'InvokeServer(', 'AcceptTrade(', 'OfferItem(', 'HttpGet(', 'PostAsync(', 'urlopen(', 'requests.post(', 'setclipboard(', 'TeleportService'):
+              assert term not in source, term
+          for field in ('"authorizesAccept": False','"publicFinalAcceptAuthorized": False','"verifiedServerSettlements": 0',
+                        '"realLearnerUpdated": False','"historicalDiscordCompletedClaimsTreatedAsTruth": False'):
+              assert field in source, field
+          print('SYSTEM2_SHADOW_LEARNER_ACTION_AND_SETTLEMENT_DENIAL_PASS')
+          PY
