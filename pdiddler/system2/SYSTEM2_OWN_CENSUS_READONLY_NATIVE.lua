@@ -37,7 +37,7 @@ local function frozen(rev,path)
     return ok2 and type(module)=="table" and module or nil
 end
 -- First is the Git-immutable pure core from this new research branch.
-local core=frozen("85a633eb54010e0b2aba770e857bccf0d33e8b21",
+local core=frozen("8e0d3312404e8a1557545e81df351b7c55633451",
     "system2/native_own_census_core.lua")
 local geometry=frozen("5b8ee35d7f281c23d9c2181abd97a063e59a0660",
     "new_part4/stage100_screen_prompt_overlay.lua")
