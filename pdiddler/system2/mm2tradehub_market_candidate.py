@@ -42,7 +42,10 @@ def price_of(label):
     label = label.strip().replace(",", "")
     match = PRICE.fullmatch(label)
     if not match:
-        return None
+        # Never silently convert arbitrary unrecognized text to missing data.
+        if label in ("Priceless", "Award only", "UNAVAILABLE"):
+            return None
+        fail("PRICE_LABEL_UNRECOGNIZED")
     try:
         value = Decimal(match.group(1)) * (10 ** {"": 0, "K": 3, "M": 6, "B": 9}[match.group(2).upper()])
     except (InvalidOperation, OverflowError):
