@@ -120,10 +120,10 @@ def _parity(item):
         if name not in cats or name in names or page.get("url")!=f"https://supremevalues.com/mm2/{name}":
             return "DUPLICATE_OR_NONCANONICAL_SOURCE_URL"
         names.add(name)
-        if page.get("httpStatus")!=200 or
+        if (page.get("httpStatus")!=200 or
             type(page.get("publishedItemMatches")) is not int or
             type(page.get("sourceHtmlSha256")) is not str or
-            SHA.fullmatch(page["sourceHtmlSha256"]) is None:
+            SHA.fullmatch(page["sourceHtmlSha256"]) is None):
             return "HTML_CAPTURE_METADATA_UNVERIFIED"
     if names!=cats:
         return "MISSING_PARITY_CATEGORY"
