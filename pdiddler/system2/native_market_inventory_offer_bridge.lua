@@ -39,4 +39,49 @@ function M.new(config)
   readOnly=true,authorizesOffer=false,authorizesAccept=false,
  },nil
 end
+-- Immutable Git commit from a REAL successful four-page source refresh,
+-- not an expired Stage83 listed-price snapshot nor a mutable latest branch.
+-- An expired snapshot BLOCKS after 6h. Only a reviewed new immutable source
+-- capture may replace this pin in a subsequent research revision.
+M.SOURCE_COMMIT="fd823dd0f0036c02ba4632a4f0a879bd429cb4fc"
+M.SOURCE_URL="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
+ M.SOURCE_COMMIT.."/pdiddler/system2/research_market_crosswalk_current.json"
+function M.newWithPinnedSource(config)
+ if type(config)~="table" or config.game==nil then
+  return nil,"PINNED_SOURCE_BRIDGE_CONFIG_INVALID" end
+ local loader=config.sourceHttpGet
+ local jsonDecode=config.jsonDecode
+ local toEpoch=config.isoToEpoch
+ if type(loader)~="function" then
+  loader=function(url)return config.game:HttpGet(url)end
+ end
+ if type(jsonDecode)~="function" then
+  local h=config.game:GetService("HttpService")
+  if h then jsonDecode=function(s)return h:JSONDecode(s)end end
+ end
+ if type(toEpoch)~="function" then
+  toEpoch=function(s)
+   local date=DateTime.fromIsoDate(s)
+   if date then return date.UnixTimestamp end
+   return nil
+  end
+ end
+ if type(loader)~="function" or type(jsonDecode)~="function" or
+  type(toEpoch)~="function" then
+  return nil,"PINNED_SOURCE_READER_DEPENDENCIES_INVALID" end
+ local ok,bytes=pcall(loader,M.SOURCE_URL)
+ if not ok or type(bytes)~="string" or #bytes<1000 or #bytes>300000 then
+  return nil,"PINNED_PUBLIC_SOURCE_FETCH_FAILED" end
+ local decoded,market=pcall(jsonDecode,bytes)
+ if not decoded or type(market)~="table" then
+  return nil,"PINNED_PUBLIC_SOURCE_JSON_INVALID" end
+ local parsed,epoch=pcall(toEpoch,market.sourceRetrievedUtc)
+ if not parsed or type(epoch)~="number" then
+  return nil,"PINNED_PUBLIC_SOURCE_UTC_TIME_INVALID" end
+ local dep={}
+ for k,v in pairs(config) do dep[k]=v end
+ dep.crosswalk=market
+ dep.sourceRetrievedEpoch=epoch
+ return M.new(dep)
+end
 return M
