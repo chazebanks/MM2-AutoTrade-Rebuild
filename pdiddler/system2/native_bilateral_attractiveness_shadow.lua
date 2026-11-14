@@ -42,7 +42,7 @@ local function priceRows(m,ctx)
    type(row.demandOrdinal)~="string" or
    not scalar(tonumber(row.demandOrdinal)) or
    tonumber(row.demandOrdinal)<0 or tonumber(row.demandOrdinal)>11 or
-   type(row.stabilityLabel)~="string" or
+   (row.stabilityLabel~=nil and type(row.stabilityLabel)~="string") or
    type(row.gameChroma)~="boolean" then
    return nil,"MARKET_VALUE_DEMAND_OR_VARIANT_MALFORMED"
   end
@@ -86,7 +86,7 @@ local function quality(owned,index)
  local val,most,weightedDemand,riskValue=0,0,0,0
  for id,q in pairs(owned) do
   local r=index[id]
-  if not r or not positive(r.mm2Listed) then return nil end
+  if not r or not positive(r.mm2Listed) or type(r.stabilityLabel)~="string" then return nil end
   local contribution=q*r.mm2Listed
   val+=contribution
   most=math.max(most,contribution)
@@ -108,6 +108,8 @@ local function sumQuotes(bundle,index)
  for id,q in pairs(bundle) do
   local row=index[id]
   if not row then return nil,"UNKNOWN_MARKET_WEAPON" end
+  if type(row.stabilityLabel)~="string" then
+   return nil,"PUBLISHER_STABILITY_MISSING" end
   if row.mm2Listed==nil or row.supremeListed==nil then
    return nil,"DUAL_PUBLISHER_PRICE_NOT_AVAILABLE" end
   local demand=tonumber(row.demandOrdinal)
