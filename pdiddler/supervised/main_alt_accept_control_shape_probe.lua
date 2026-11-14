@@ -33,18 +33,30 @@ local function partOfOffer(n,root)
  while n and n~=root do
   count+=1
   if count>24 then return true end
-  if n.Name=="TheirOffer" or n.Name=="YourOffer" or
+  -- MAIN-side Accept may legitimately live under YourOffer.
+  -- Exclude ALT side and the *item slot* containers, not every MAIN child.
+  if n.Name=="TheirOffer" or n.Name=="Accepted" or
       n.Name=="Decline" or n.Name=="Cancel" or
-      n.Name=="Close" or n.Name=="Inventory" then return true end
+      n.Name=="Close" or n.Name=="Inventory" or
+      n.Name:match("^NewItem%d+$") then return true end
   n=n.Parent
  end
  return n~=root
 end
 local function candidatePath(n,root)
  local parts,depth={},0
+ local safeNodes={
+  YourOffer=true,Buttons=true,Button=true,ActionButtons=true,
+  Actions=true,Accept=true,AcceptButton=true,ActionButton=true,
+  Confirm=true,ConfirmButton=true,Container=true,Frame=true,
+  Main=true,MainActions=true,TradeButtons=true,TradeControls=true,
+ }
  while n and n~=root do
   depth+=1
-  if depth>8 or not stringSafe(n.Name) then return nil end
+  if depth>8 or not stringSafe(n.Name) or not safeNodes[n.Name] then
+   -- Do NOT export dynamic names (which may be player usernames).
+   return nil
+  end
   table.insert(parts,1,n.Name)
   n=n.Parent
  end
@@ -92,7 +104,8 @@ function M.inspect(root,viewport)
    if okText and okImage then
     local isButton=t or img
     if isButton then r.visibleButtonCount+=1 end
-    local label=capText((t and node.Text) or "")
+    local isLabel=node:IsA("TextLabel")
+    local label=capText(((t or isLabel) and node.Text) or "")
     local isAcceptName=node.Name=="Accept" or node.Name=="AcceptButton"
     local parentName=node.Parent and node.Parent.Name or ""
     local namedAncestor=parentName=="Accept" or parentName=="AcceptButton"
