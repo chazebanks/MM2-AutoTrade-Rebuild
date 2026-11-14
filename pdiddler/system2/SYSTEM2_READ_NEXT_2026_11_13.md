@@ -1,3 +1,13 @@
+# NEW SYSTEM 2 CHECKPOINT (Nov 13/14 2026): MARKET + INVENTORY REVISION SYNC
+
+**Draft PR #265** https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/265, branch `research/system2-nov13-market-inventory-sync-gate`, stacked on **unmerged** System2 draft PR #262. New `pdiddler/system2/market_inventory_revision_gate.py` adds research-only revalidated original-source + four-page visible publisher timestamp + full own-inventory census + server/job/partner/trade lease/offer revision **two-snapshot invalidation**. The prior 60-second scanner TTL alone would not detect mid-window changes. Source/private row bytes remain outside GitHub. No live client/session or publisher current-edition authentication; **all trading and Accept permissions false**.
+
+Latest exact tested code head **`4b456abad90fb47a46e398e0d73c8558eade3ddc`**: [focused CI run #43552331632](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/43552331632) **309/309 Python tests PASS, no skips**, including **34 new tests** and the 275 inherited pinned-source tests; **6/6 GitHub workflows SUCCESS**, original Stage83/PR106/corrected PR182 Git blob source locks PASS. First CI run #43552281700 had **one test-only mock assertion mismatch** (non-byte source was correctly rejected *before* import; test had wrongly expected import). Corrected on code commit `4b456abad9` and full CI retested clean. Any later documentation-only commit must be checked at its exact head.
+
+Official Supreme homepage and category pages visibly show **Nov 13, 2026 at 1:20 PM EST**; the original operator 189 JSON still has `publisherVersion:null`, and a visible watermark does **not** authenticate that original source. Next distinct System2 issue: a genuine original Stage111→110→104→69 newly published raw source archive with independent captured edition and expiry + separately real native scanner/job/revision witness before integrating S2 into S3 actionable decisions. **Do not treat this new offline research sync as an actual live stream.** Handoff: `pdiddler/system2/MARKET_INVENTORY_SYNC_CHECKPOINT_2026_11_13.md`.
+
+---
+
 # SYSTEM 2 — READ NEXT (Nov 13/14 2026, New York)
 
 ## VERIFIED current checkpoint
