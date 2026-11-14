@@ -103,7 +103,7 @@ class ShadowTests(unittest.TestCase):
         self.blocked("SCANNER_META_IDENTITY_CONFLICT")
 
     def test_wrong_game_type(self):
-        self.envelope["inventory"]["items"][0]["type"]="Gun"
+        self.envelope["inventory"]["items"][0]["type"]="Knife"
         self.blocked("GAME_WEAPON_TYPE_MISMATCH")
 
     def test_raw_in_meta_differs(self):
