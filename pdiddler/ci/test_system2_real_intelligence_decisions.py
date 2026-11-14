@@ -33,6 +33,10 @@ C={"schema":"SYNTHETIC_S2_EXACT_RAW_KEY_MARKET_FIXTURE",
 OWN={"OwnA":1,"OwnB":1}
 def slot(k,q=1):return {"key":k,"copies":q}
 def dec(give,rec):return {"give":give,"receive":rec}
+def gdec(give,receive):
+    return {"give":give,"receive":receive,
+       "partnerStock":{row["key"]:row["copies"] for row in receive},
+       "partnerEvidenceScope":"SYNTHETIC_EXPLICIT_PARTNER_STOCK"}
 def bidec(give,receive,bonus=20):
     x=dec(give,receive)
     x["partnerIntent"]={
@@ -161,12 +165,36 @@ class S2AcceptanceOracles(unittest.TestCase):
         self.assertEqual(r["status"],"BLOCKED")
         self.assertEqual(r["reason"],"DUPLICATE_COUNTERFACTUAL")
 
+    def test_three_cannot_invent_a_future_counterparty_inventory(self):
+        steps=[
+          [gdec([slot("OwnB")],[slot("Cheap")]),
+           gdec([slot("OwnA")],[slot("Mid")])],
+          [gdec([slot("OwnB")],[slot("Cheap")]),
+           gdec([slot("OwnA"),slot("Cheap")],[slot("Valuable")])],
+        ]
+        steps[0][0]["partnerStock"]={"Cheap":0}
+        r=task(growth_route_decision,routes=steps)
+        self.assertEqual(r["status"],"BLOCKED")
+        self.assertEqual(r["reason"],"FUTURE_SELLER_CANNOT_SUPPLY_RECEIVED_COPIES")
+        self.assertSafety(r)
+
+    def test_three_cannot_claim_availability_without_seller_evidence(self):
+        steps=[
+          [dec([slot("OwnB")],[slot("Cheap")]),
+           gdec([slot("OwnA")],[slot("Mid")])],
+          [gdec([slot("OwnB")],[slot("Cheap")]),
+           gdec([slot("OwnA"),slot("Cheap")],[slot("Valuable")])]]
+        r=task(growth_route_decision,routes=steps)
+        self.assertEqual(r["status"],"BLOCKED")
+        self.assertEqual(r["reason"],"BAD_GROWTH_STEP")
+        self.assertSafety(r)
+
     def test_three_compounding_quality_beats_concentrated_route_on_equal_gain(self):
         routes=[
-          [dec([slot("OwnB")],[slot("Cheap")]),
-           dec([slot("OwnA")],[slot("Mid")])],
-          [dec([slot("OwnB")],[slot("Cheap")]),
-           dec([slot("OwnA"),slot("Cheap")],[slot("Valuable")])],
+          [gdec([slot("OwnB")],[slot("Cheap")]),
+           gdec([slot("OwnA")],[slot("Mid")])],
+          [gdec([slot("OwnB")],[slot("Cheap")]),
+           gdec([slot("OwnA"),slot("Cheap")],[slot("Valuable")])],
         ]
         r=task(growth_route_decision,routes=routes)
         self.assertEqual(r["status"],"RESEARCH_DECISION_PASS")
@@ -181,10 +209,10 @@ class S2AcceptanceOracles(unittest.TestCase):
 
     def test_three_no_unapproved_value_loss_even_if_great_demand(self):
         routes=[
-          [dec([slot("OwnA")],[slot("Cheap")]),
-           dec([slot("Cheap")],[slot("Good")])],
-          [dec([slot("OwnB")],[slot("Cheap")]),
-           dec([slot("OwnA")],[slot("Mid")])]
+          [gdec([slot("OwnA")],[slot("Cheap")]),
+           gdec([slot("Cheap")],[slot("Good")])],
+          [gdec([slot("OwnB")],[slot("Cheap")]),
+           gdec([slot("OwnA")],[slot("Mid")])]
         ]
         r=task(growth_route_decision,routes=routes)
         self.assertEqual(r["status"],"BLOCKED")
@@ -193,10 +221,10 @@ class S2AcceptanceOracles(unittest.TestCase):
 
     def test_three_never_offer_target_outbound(self):
         routes=[
-          [dec([slot("Gingerscope")],[slot("Valuable")]),
-           dec([slot("OwnB")],[slot("Cheap")])],
-          [dec([slot("OwnB")],[slot("Cheap")]),
-           dec([slot("OwnA")],[slot("Mid")])]]
+          [gdec([slot("Gingerscope")],[slot("Valuable")]),
+           gdec([slot("OwnB")],[slot("Cheap")])],
+          [gdec([slot("OwnB")],[slot("Cheap")]),
+           gdec([slot("OwnA")],[slot("Mid")])]]
         r=growth_route_decision(catalog=C,
                inventory={"Gingerscope":1,"OwnA":1,"OwnB":1},
                at=AT,routes=routes)
@@ -205,10 +233,10 @@ class S2AcceptanceOracles(unittest.TestCase):
 
     def test_three_circular_repackaging_no_false_growth(self):
         routes=[
-          [dec([slot("OwnB")],[slot("Cheap")]),
-           dec([slot("Cheap")],[slot("OwnB")])],
-          [dec([slot("OwnB")],[slot("Cheap")]),
-           dec([slot("OwnA")],[slot("Mid")])]
+          [gdec([slot("OwnB")],[slot("Cheap")]),
+           gdec([slot("Cheap")],[slot("OwnB")])],
+          [gdec([slot("OwnB")],[slot("Cheap")]),
+           gdec([slot("OwnA")],[slot("Mid")])]
         ]
         r=task(growth_route_decision,routes=routes)
         self.assertEqual(r["status"],"BLOCKED")
@@ -312,10 +340,10 @@ class S2AcceptanceOracles(unittest.TestCase):
             bidec([slot("OwnA")],[slot("Junk")]),
             bidec([slot("OwnA")],[slot("Good")])]),
           task(growth_route_decision,routes=[
-            [dec([slot("OwnB")],[slot("Cheap")]),
-             dec([slot("OwnA")],[slot("Mid")])],
-            [dec([slot("OwnB")],[slot("Cheap")]),
-             dec([slot("OwnA"),slot("Cheap")],[slot("Valuable")])]
+            [gdec([slot("OwnB")],[slot("Cheap")]),
+             gdec([slot("OwnA")],[slot("Mid")])],
+            [gdec([slot("OwnB")],[slot("Cheap")]),
+             gdec([slot("OwnA"),slot("Cheap")],[slot("Valuable")])]
           ]),
           adaptive_response(events=[
              event(1,"PARTNER_OFFER_STABLE"),
