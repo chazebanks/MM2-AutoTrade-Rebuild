@@ -61,6 +61,7 @@ def simulate(mapped, shadow, steps, *, evaluated_at_utc=None):
         prior_target = hypothetical.get(TARGET_KEY,0)
         target_witnessed_in_hypothesis = False
         current_value = starting_value
+        any_stack_unvalidated = False
         for number, scenario in enumerate(steps, 1):
             if (type(scenario) is not dict
                     or set(scenario) != {"kind","outgoingSlots","incomingSlots"}
@@ -77,6 +78,9 @@ def simulate(mapped, shadow, steps, *, evaluated_at_utc=None):
             outgoing = _totals(out,idx)
             incoming = _totals(rec,idx)
             delta = incoming["listed"] - outgoing["listed"]
+            per_step_stack_uncertain = bool(outgoing["publisherStackPricingUncertainKeys"] or
+                                            incoming["publisherStackPricingUncertainKeys"])
+            any_stack_unvalidated = any_stack_unvalidated or per_step_stack_uncertain
             if delta < 0:
                 return _out("BLOCKED_LOSS_POLICY",
                     "STEP_" + str(number) + "_UNAPPROVED_LISTED_LOSS",
@@ -106,6 +110,8 @@ def simulate(mapped, shadow, steps, *, evaluated_at_utc=None):
                 notes.append("RANGE_DOWNSIDE_POSSIBLE")
             if incoming["copies"]>4 or outgoing["copies"]>4:
                 notes.append("STACKED_COPIES_ARE_NOT_PHYSICAL_SLOTS")
+            if per_step_stack_uncertain:
+                notes.append("PUBLISHER_NONLINEAR_5PLUS_SAME_ITEM_STACK")
             if observed_target > 0:
                 notes.append("TARGET_COPIES_ONLY_HYPOTHETICAL_OR_CLIENT_OBSERVED")
             if delta==0:
@@ -122,6 +128,9 @@ def simulate(mapped, shadow, steps, *, evaluated_at_utc=None):
                 "outgoingListed":outgoing["listed"],
                 "incomingListed":incoming["listed"],
                 "listedDelta":delta,
+                "listedDeltaReliableForNegotiation":not per_step_stack_uncertain,
+                "outgoingUncertainStackKeys":outgoing["publisherStackPricingUncertainKeys"],
+                "incomingUncertainStackKeys":incoming["publisherStackPricingUncertainKeys"],
                 "worstCaseListedRangeDelta":incoming["low"]-outgoing["high"],
                 "hypotheticalPortfolioListedValueAfterStep":new_value,
                 "hypotheticalOwnedTargetCopies":observed_target,
@@ -131,13 +140,17 @@ def simulate(mapped, shadow, steps, *, evaluated_at_utc=None):
             current_value = new_value
         target = idx[TARGET_KEY]["decimalValue"]
         return _out(
-            "OFFLINE_GROWTH_PATH_SIMULATED",
-            "MULTISTEP_LISTED_VALUE_PATH_NOT_EXECUTABLE_OR_LEARNED",
+            ("OFFLINE_GROWTH_PATH_STACK_UNCERTAIN" if any_stack_unvalidated
+             else "OFFLINE_GROWTH_PATH_SIMULATED"),
+            ("PUBLISHER_STACK_VALUATION_CANNOT_SUPPORT_GROWTH_COMPARISON"
+             if any_stack_unvalidated else "MULTISTEP_LISTED_VALUE_PATH_NOT_EXECUTABLE_OR_LEARNED"),
             sourceExportSha256=EXPORT_SHA256,
             simulatedSteps=len(transitions),
             startingListedPortfolioValue=starting_value,
             endingHypotheticalListedPortfolioValue=current_value,
             hypotheticalListedValueGrowth=current_value-starting_value,
+            growthPaperArithmeticReliableForNegotiation=not any_stack_unvalidated,
+            unknownStackTradeValueNeedsIndependentEvidence=any_stack_unvalidated,
             startingGapToGingerscope=max(0,target-starting_value),
             endingHypotheticalGapToGingerscope=max(0,target-current_value),
             goalTargetHypotheticallyReceived=target_witnessed_in_hypothesis,
