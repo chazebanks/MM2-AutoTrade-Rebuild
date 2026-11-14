@@ -1,7 +1,10 @@
--- Project Gingerscope: consecutive ALT-to-MAIN manually accepted trade witness.
--- Multiple trades in ONE supervised session. STRICT read-only controller.
--- Real users do ALL trade requests, item offers, both final Accepts, any Claim.
--- No script Accept, OfferItem, Decline, Teleport, webhook or trading decisions.
+-- Project Gingerscope: MAIN P3 sends the outgoing trade REQUEST FIRST.
+-- Repeated exact ALT trades in ONE supervised session; P3 physical REQUEST
+-- initiation is a real client ACTION, not a read-only operation.
+-- Humans on ALT accept incoming REQUEST, choose ALT offer, then both humans
+-- perform FINAL ACCEPT and optional Claim; MAIN script offers ZERO items.
+-- MAIN own-inventory/Stage9 settlement watcher is READ-ONLY. No automated
+-- final Accept, OfferItem, Decline, Teleport, webhook or public trading.
 -- All failures STOP the whole controller, never merely skip a bad trade.
 local E=(type(getgenv)=="function" and getgenv()) or _G
 local OWNER="PDIDDLER_MAIN_ALT_MULTITRADE_MANUAL_OWNER"
@@ -391,7 +394,18 @@ local function UIarea(root)
 end
 local function report()
  local o=state.final or main.status()
- -- Core already exports only fixed numeric counters and sanitized literals.
+ -- The pure settlement core is read-only, BUT this wrapper actually sends
+ -- outbound P3 trade REQUEST clicks. Never mislabel whole test read-only.
+ -- S.sent counts pending-UI-confirmed requests; do not call it server proof.
+ o.readOnly=false
+ o.clientInventoryObserverReadOnly=true
+ o.mainAutomaticallyInitiatesTradeRequests=true
+ o.automaticFinalAcceptEnabled=false
+ o.publicRequestSendingEnabled=false
+ o.confirmedPendingOutboundRequestCount=
+   (state.outgoing and type(state.outgoing.state.sent)=="number" and
+    state.outgoing.state.sent>=0 and state.outgoing.state.sent) or 0
+ -- The user sees only safe aggregate counters; no account or weapon IDs.
  return o
 end
 local function copy()
