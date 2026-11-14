@@ -86,13 +86,17 @@ jobs:
           "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_market_inventory_offer_bridge_mocks.luau
           "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_multistep_growth_mocks.luau
           "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_partner_intent_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_v2_feedback_staging_mocks.luau
+          python3 -m unittest -v pdiddler.ci.test_system2_native_to_private_v2_compatibility
+          rm -f pdiddler/ci/.generated_system2_v2_synthetic.json
       - name: Native source and trade authority static audit
         run: |
           python3 - <<'PY'
           from pathlib import Path
           for name in ('native_bilateral_attractiveness_shadow.lua','native_bilateral_attractiveness_bridge.lua',
                        'native_multistep_growth_shadow.lua','native_multistep_growth_bridge.lua',
-                       'native_partner_intent_observer.lua','native_partner_textchat_receiver.lua'):
+                       'native_partner_intent_observer.lua','native_partner_textchat_receiver.lua',
+                       'native_v2_client_response_envelope.lua'):
               src=Path('pdiddler/system2',name).read_text()
               for forbidden in ('FireServer(', 'InvokeServer(', 'TeleportService', 'AcceptTrade(', 'DeclineTrade(', 'PostAsync(', 'setclipboard(', 'mouse1click(', 'request(', ':SendAsync(', ':Chat(', ':FireServer('):
                   assert forbidden not in src,(name,forbidden)
