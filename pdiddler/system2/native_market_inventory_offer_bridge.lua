@@ -7,8 +7,8 @@ function M.new(config)
  if type(config)~="table" or type(config.core)~="table"
   or type(config.core.new)~="function" or type(config.captureAdapter)~="table"
   or type(config.captureAdapter.new)~="function"
-  or type(config.scope)~="table" or type(config.game)~="table"
-  or type(config.players)~="table" or type(config.sync)~="table"
+  or type(config.scope)~="table" or config.game==nil
+  or config.players==nil or type(config.sync)~="table"
   or type(config.scannerApi)~="table"
   or type(config.crosswalk)~="table"
   or type(config.isBoundSession)~="function"
