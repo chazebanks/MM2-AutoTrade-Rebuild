@@ -68,12 +68,6 @@ function M.run(scanner,options)
 end
 return M
 ]]
-print("[MOCK LEN]",#outgoingCode,#scannerCode)
-local newSender=luau.load(outgoingCode)()
-local newScanner=luau.load(scannerCode,{environment={
- game={GetService=function()return {FindFirstChild=function()end}end}
-},injectGlobals=true})()
-assert(type(newSender.run)=="function" and type(newScanner.getWhitelist)=="function")
 local assertions=0
 local function eq(a,b,why)
  assertions+=1
@@ -197,7 +191,6 @@ local function gameFixture(opts)
   GetService=function(_,name)return services[name]end,
   HttpGet=function(_,u)
    table.insert(sources,u)
-   print("[MOCK SOURCE]",u)
    if u:find("553b7e44245c5ed36aa3f65aea335953ec1fed5f",1,true)
       and u:find("main_alt_manual_multitrade_delta_core.lua",1,true) then return core end
    if u:find("1c874cdbc5e85418360148fbdf33fa17534cd1ad",1,true)
@@ -220,7 +213,8 @@ local function gameFixture(opts)
  local E={PDIDDLER_ACCEPT_DISCOVERY_ALT_NAME="FixtureAlt"}
  if opts.otherController then E.PDIDDLER_PART4_SESSION={} end
  local copied={}
- local env={
+ local env
+ env={
   game=game,getgenv=function()return E end,
   Instance={new=function(kind)
    if opts.failUI and kind=="ScreenGui" then error("UI_FAILURE") end
@@ -238,17 +232,9 @@ local function gameFixture(opts)
    error("unexpected require")
   end,
   loadstring=function(source)
-   local success,loader=pcall(luau.load,source,{environment=env,injectGlobals=true})
-   if not success then print("[MOCK COMPILE FAILURE]",tostring(loader)) end
-   if not success then error(loader) end
-   return function()
-    local okay,value=pcall(loader)
-    print("[MODULE EVAL]",#source,okay,type(value),not okay and tostring(value) or "")
-    if not okay then error(value) end
-    return value
-   end
+   return luau.load(source,{environment=env,injectGlobals=true})
   end,
-  print=function()end,warn=function(...)print("[MOCK WARN]",...)end,
+  print=function()end,warn=function()end,
   setclipboard=function(x)table.insert(copied,x)end,
  }
  local function run()
