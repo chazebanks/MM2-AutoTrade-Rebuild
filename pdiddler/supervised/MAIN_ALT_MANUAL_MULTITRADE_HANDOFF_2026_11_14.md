@@ -1,3 +1,11 @@
+# SUPERSEDED REQUEST DIRECTION — DO NOT RUN OLD ALT-INITIATED LOADER (NOV 14 2026)
+
+**Operator corrected the integration:** MAIN is PRIMARY outbound initiator; ALT does **NOT** initiate the request during this supervised multi-trade test. The old manual one-session native instructions below are outdated. Use the NEW immutable MAIN-initiated test and per-trade source-gated P3 requeue handoff: `pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_HANDOFF_2026_11_14.md`. The old source `MAIN_ALT_MANUAL_MULTITRADE_WITNESS_NATIVE.lua` remains retained for regression but is NOT the next on-device loader.
+
+**Production intent:** scan all other players → whitelist genuine eligible traders → send outgoing requests one by one, with the usual trade-time checks → allow incoming as SECONDARY only in the post-scan/exhausted rotation grace policy. This test intentionally isolates exact authorized ALT and does NOT turn on incoming public trading or automatic final Accept.
+
+---
+
 # Gingerscope — repeated supervised MAIN↔exact ALT trades, ONE session, NOT one trade (Nov 14 2026)
 
 ## Scope corrected by user, implemented on draft PR #273
@@ -26,7 +34,7 @@ Research-only draft [PR #273](https://github.com/chazebanks/MM2-AutoTrade-Rebuil
 On MAIN iPad Delta, a new original MM2 server, authorized ALT present in the SAME game and no other Gingerscope trader/observer script or trade window already open. Exact ALT username is configured **locally** (never commit user ID/ALT account to public GitHub). Run this two-line immutable loader on MAIN:
 
 ```lua
-getgenv().PDIDDLER_ACCEPT_DISCOVERY_ALT_NAME="venossgaming90190"
+getgenv().PDIDDLER_ACCEPT_DISCOVERY_ALT_NAME="YOUR_EXACT_ALT_ACCOUNT_USERNAME"
 loadstring(game:HttpGet("https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/e19dfd94cecfe97ca0e00c6f1606e23d1acbf320/pdiddler/supervised/MAIN_ALT_MANUAL_MULTITRADE_WITNESS_NATIVE.lua"))()
 ```
 
