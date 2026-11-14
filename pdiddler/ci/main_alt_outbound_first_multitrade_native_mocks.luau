@@ -231,7 +231,7 @@ local function gameFixture(opts)
    error("unexpected require")
   end,
   loadstring=function(s) return luau.load(s,{environment=env,injectGlobals=true}) end,
-  print=function()end,warn=function()end,
+  print=function()end,warn=function(...)print("[MOCK WARN]",...)end,
   setclipboard=function(x)table.insert(copied,x)end,
  }
  local function run()
