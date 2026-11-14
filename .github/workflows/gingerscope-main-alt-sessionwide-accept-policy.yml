@@ -23,9 +23,9 @@ jobs:
           set -euo pipefail
           python3 -m pdiddler.continuity.manager verify
           python3 -m pdiddler.continuity.manager recover
-          git fetch --no-tags --depth=1 origin b86403da548a24b6e0ddabd5d5d242f4866a8b6e
-          git show b86403da548a24b6e0ddabd5d5d242f4866a8b6e:pdiddler/supervised/main_alt_sessionwide_accept_policy.lua > "$RUNNER_TEMP/original-policy.lua"
-          test "$(git hash-object "$RUNNER_TEMP/original-policy.lua")" = 16c72b5d60572bcc675ed1d81b4e5e681ddac4d5
+          git fetch --no-tags --depth=1 origin 9a9556a1f57b7073bd8d6ec0dcf63afa615ad220
+          git show 9a9556a1f57b7073bd8d6ec0dcf63afa615ad220:pdiddler/supervised/main_alt_sessionwide_accept_policy.lua > "$RUNNER_TEMP/original-policy.lua"
+          test "$(git hash-object "$RUNNER_TEMP/original-policy.lua")" = 7e5c7027a688f1f2d3bb24a9feb08b8693af5b15
           cmp "$RUNNER_TEMP/original-policy.lua" pdiddler/supervised/main_alt_sessionwide_accept_policy.lua
           echo EXACT_MAIN_ALT_POLICY_GIT_BLOB_PASS
       - name: Install immutable Lune v0.11.1 (official release SHA256)
