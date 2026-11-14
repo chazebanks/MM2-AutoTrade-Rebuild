@@ -165,6 +165,39 @@ for i,change in ipairs(badOffers) do
  eq(c.status().mayObserveFurtherMainAltTrades,false,"stop persists "..i)
 end
 do
+ local c=assert(policy.new(config))
+ local root={}
+ c.begin(ctx(root,1))
+ local tricky=ctx(root,1.1)
+ tricky.altOffer={[1]=gift(),[3]={rawKey="hidden",quantity=1,slotIndex=3,category="Weapons"}}
+ eq(c.observe(tricky).status,"STOPPED","sparse hidden offer slot stops")
+end
+do
+ local c=assert(policy.new(config))
+ local root={}
+ c.begin(ctx(root,1))
+ local tricky=ctx(root,1.1)
+ tricky.altOffer={gift()}
+ tricky.altOffer[5]={rawKey="hidden",quantity=1,slotIndex=4,category="Weapons"}
+ eq(c.observe(tricky).status,"STOPPED","hidden fifth entry blocks")
+end
+do
+ local c=assert(policy.new(config))
+ local root={}
+ c.begin(ctx(root,1))
+ local tricky=ctx(root,1.1)
+ tricky.altOffer={{rawKey="safe",quantity=1,slotIndex=1,category="Weapons",isGift=true}}
+ eq(c.observe(tricky).status,"STOPPED","unexpected metadata refused")
+end
+do
+ local c=assert(policy.new(config))
+ local root={}
+ c.begin(ctx(root,1))
+ local tricky=ctx(root,1.1)
+ tricky.altOffer={{rawKey="safe",quantity=1,slotIndex=1}}
+ eq(c.observe(tricky).status,"STOPPED","missing weapons category refused")
+end
+do
  local c,r=observed()
  local mismatch=ctx(r,1.5);mismatch.altOffer={{rawKey="another",quantity=1,slotIndex=1,category="Weapons"}}
  eq(c.observe(mismatch).reason,"OFFER_CHANGED_AFTER_STABLE_BINDING","offer swap stops all")
