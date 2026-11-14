@@ -1,0 +1,71 @@
+name: Gingerscope System2 canonical Supreme recapture — real HTTPS, research only
+on:
+  push:
+    branches:
+      - research/system2-real-intelligence-acceptance-nov14
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-canonical-https-research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: f3dfadb4b90c6a126e19dc4064514f795aea98e9
+          path: stage111-original
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install requests for real HTTPS, no private inputs
+        shell: bash
+        run: python3 -m pip install --disable-pip-version-check 'requests>=2.32,<3'
+      - name: Load exact historic Stage69 parser and Stage84 source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/stage111_prior"
+          base='https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild'
+          curl -fsSL --retry 2 --max-time 45 "$base/af4fee60ab9db45f9f018bc0fc691f025e2fbd5f/pdiddler/refresh_supreme_snapshot.py" -o "$RUNNER_TEMP/stage111_prior/parser.py"
+          for tier in ancients godlies chromas; do
+            curl -fsSL --retry 2 --max-time 45 "$base/f08ceb35a9ff684ee2cf577ccce7542c436cc68e/pdiddler/research_source_html/stage84_2026_11_09/$tier.html" -o "$RUNNER_TEMP/stage111_prior/$tier.html"
+          done
+          test "$(git hash-object "$RUNNER_TEMP/stage111_prior/parser.py")" = d5843a57f34078cbe7213aa78a4aa12a5775c016
+          test "$(git hash-object "$RUNNER_TEMP/stage111_prior/ancients.html")" = ce8178ab9579e8782d8f72a6dac051756a728506
+          test "$(git hash-object "$RUNNER_TEMP/stage111_prior/godlies.html")" = d3cf222a8e10cff3a9fb051b16188192389c4b2d
+          test "$(git hash-object "$RUNNER_TEMP/stage111_prior/chromas.html")" = 6c77624cac3df96168b008e9bc8eca68a2d78cf9
+          echo PINNED_STAGE111_ORIGINAL_SOURCES_VALID=TRUE
+      - name: Execute actual real-source HTTPS candidate capture and isolate exit code
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd stage111-original
+          set +e
+          python3 -m pdiddler.intelligence_lab.stage111_supreme_readonly_capture \
+            --parser "$RUNNER_TEMP/stage111_prior/parser.py" \
+            --prior-html-dir "$RUNNER_TEMP/stage111_prior" \
+            --output-dir "$RUNNER_TEMP/system2_supreme_research"
+          code="$?"
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo 'PUBLISHER_RECAPTURE_STATUS=OLD_VERSION_UNCHANGED_RESEARCH_ONLY'
+          elif [ "$code" -eq 3 ]; then
+            echo 'PUBLISHER_RECAPTURE_STATUS=NEW_PUBLICATION_OR_DRIFT_MANUAL_REVIEW'
+          elif [ "$code" -eq 2 ]; then
+            echo 'PUBLISHER_RECAPTURE_STATUS=TRANSPORT_OR_PARSER_INCONCLUSIVE'
+          else
+            echo 'PUBLISHER_RECAPTURE_STATUS=SCRIPT_FAILURE'
+            exit 1
+          fi
+          echo "PUBLISHER_RECAPTURE_EXIT=$code" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Actual source HTML, raw hashes and original Stage111 admission receipt are retained only as research artifacts. No price/offer/Accept source authority is granted.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve exact canonical HTML and source hashes, never promote value authority
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: system2-supreme-current-https-candidate-source
+          path: ${{ runner.temp }}/system2_supreme_research/*
+          retention-days: 14
+          if-no-files-found: warn
