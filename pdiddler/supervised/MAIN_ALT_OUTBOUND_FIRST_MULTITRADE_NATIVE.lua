@@ -83,6 +83,12 @@ if not core or type(core.new)~="function" or
  not scannerModule or type(scannerModule.getWhitelist)~="function" or
  type(scannerModule.isWhitelisted)~="function" or
  type(scannerModule.getRecord)~="function" then
+ warn("[MAIN ALT MULTI] pinned module checks",
+  type(core),type(stage9),type(contract),type(geometry),
+  type(outgoingModule),type(scannerModule),
+  type(scannerModule and scannerModule.getRecord),
+  type(scannerModule and scannerModule.getWhitelist),
+  type(scannerModule and scannerModule.isWhitelisted))
  warn("[MAIN ALT MULTI] pinned original modules unavailable; nothing started")
  return nil
 end
