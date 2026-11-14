@@ -139,12 +139,13 @@ def _game(item):
         return "NATIVE_IDENTITY_NOT_INCLUDED_IN_THIS_RESEARCH_RUN"
     if type(item) is not dict or item.get("schema") != KEY_AUDIT:
         return "INVALID_NATIVE_KEY_AUDIT_RECEIPT"
-    if (item.get("status") != "CLIENT_KEY_RECONCILIATION_BATCH" or
-        item.get("clientOnly") is not True or
+    if item.get("status") != "CLIENT_KEY_RECONCILIATION_BATCH":
+        return "UNVERIFIED_CLIENT_IDENTITY_STATUS"
+    if (item.get("clientOnly") is not True or
         not _false_flags(item,("authorizesOffer","authorizesTrade","authorizesAccept",
                                "currentMarketPriceAuthenticated","publisherEditionBound",
                                "serverCompletionProven"))):
-        return "UNVERIFIED_OR_FORGED_CLIENT_IDENTITY"
+        return "REJECT_FORGED_CLIENT_IDENTITY_AUTHORITY"
     features=item.get("features")
     if type(features) is not dict:
         return "NATIVE_KEY_STATUS_MISSING"
@@ -165,12 +166,13 @@ def _shadow(item):
         return "STRUCTURAL_SHADOW_NOT_INCLUDED_IN_RESEARCH_RUN"
     if type(item) is not dict or item.get("schema") != SHADOW:
         return "INVALID_STRUCTURAL_SHADOW_RECEIPT"
-    if (item.get("status")!="CLIENT_STRUCTURAL_SHADOW_REPORT" or
-        item.get("clientOnly") is not True or
+    if item.get("status")!="CLIENT_STRUCTURAL_SHADOW_REPORT":
+        return "UNVERIFIED_STRUCTURAL_SHADOW_STATUS"
+    if (item.get("clientOnly") is not True or
         not _false_flags(item,("authorizesOffer","authorizesTrade","authorizesAccept",
                                "verifiedCurrentMarketPrice","publisherEditionAuthenticated",
                                "serverCompletionProven"))):
-        return "UNVERIFIED_STRUCTURAL_SHADOW_RECEIPT"
+        return "REJECT_FORGED_STRUCTURAL_SHADOW_AUTHORITY"
     f=item.get("features")
     if (type(f) is not dict or
         type(f.get("syntheticBilateralModels")) is not dict or
