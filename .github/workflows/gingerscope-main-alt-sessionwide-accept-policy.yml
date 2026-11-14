@@ -1,0 +1,109 @@
+name: Gingerscope MAIN ALT session-wide acceptance fail-stop policy (OFFLINE only)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/supervised/main_alt_sessionwide_accept_policy.lua'
+      - 'pdiddler/ci/main_alt_sessionwide_accept_policy_mocks.luau'
+      - 'pdiddler/supervised/MAIN_ALT_SESSIONWIDE_ACCEPT_HANDOFF_2026_11_14.md'
+      - '.github/workflows/gingerscope-main-alt-sessionwide-accept-policy.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sessionwide-alt-only-lune:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify continuity and exact immutable original main-alt safety policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.continuity.manager verify
+          python3 -m pdiddler.continuity.manager recover
+          git fetch --no-tags --depth=1 origin b86403da548a24b6e0ddabd5d5d242f4866a8b6e
+          git show b86403da548a24b6e0ddabd5d5d242f4866a8b6e:pdiddler/supervised/main_alt_sessionwide_accept_policy.lua > "$RUNNER_TEMP/original-policy.lua"
+          test "$(git hash-object "$RUNNER_TEMP/original-policy.lua")" = 16c72b5d60572bcc675ed1d81b4e5e681ddac4d5
+          cmp "$RUNNER_TEMP/original-policy.lua" pdiddler/supervised/main_alt_sessionwide_accept_policy.lua
+          echo EXACT_MAIN_ALT_POLICY_GIT_BLOB_PASS
+      - name: Install immutable Lune v0.11.1 (official release SHA256)
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/lune-v0.11.1-linux-x86_64.zip"
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 20 \
+            "https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip" \
+            --output "$archive"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/lune-dist"
+          found="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
+          test -n "$found"
+          install -m 0755 "$found" "$RUNNER_TEMP/lune"
+      - name: Run actual Luau state machine with multi-trade and adversarial cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/main_alt_sessionwide_accept_policy_mocks.luau
+      - name: Static deny any active Accept button or trade mutation in policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('pdiddler/supervised/main_alt_sessionwide_accept_policy.lua').read_text()
+          for bad in ('FireServer(', 'InvokeServer(', 'AcceptTrade(', 'VIM:SendMouseButtonEvent',
+              'VirtualInputManager', 'firesignal(', 'http', 'HttpGet(', 'setclipboard('):
+              assert bad not in s,bad
+          assert 'ALL_MAIN_ALT_TRADES_IN_THIS_JOB' in s
+          assert 'liveAcceptActionEnabled=false' in s
+          assert 'actualAccepts=0' in s
+          assert 'stop("OFFER_CHANGED_AFTER_STABLE_BINDING")' in s
+          print('MAIN_ALT_SESSIONWIDE_ALL_TRADES_RESEARCH_FAIL_STOP_PASS')
+          PY
+  all-inherited-source-pinned-python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Recover original Stage83 PR106 planner and corrected PR182 guard SHA pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/system2-pin"
+          git fetch --no-tags --depth=1 origin 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae
+          git show 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae:pdiddler/intelligence_lab/stage83_public_slug_registry.lua > "$RUNNER_TEMP/system2-pin/stage83.lua"
+          git fetch --no-tags --depth=1 origin 6ed48e084bd58fab38e3bf061ac36fb295ecf103
+          git show 6ed48e084bd58fab38e3bf061ac36fb295ecf103:pdiddler/intelligence_lab/future_portfolio_planner.py > "$RUNNER_TEMP/system2-pin/planner.py"
+          git fetch --no-tags --depth=1 origin 94ecefee86fd36293dcac58d0c24d9f379e719e5
+          git show 94ecefee86fd36293dcac58d0c24d9f379e719e5:pdiddler/intelligence_lab/offer_snapshot_guard.py > "$RUNNER_TEMP/system2-pin/guard.py"
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/stage83.lua")" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/planner.py")" = 78948cdacd2a760db5b888fce242d598fc6f14b6
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/guard.py")" = 11db895622d053ddced4fba9666135bf97bd615b
+          grep -Fq 'PROTECTED_GINGERSCOPE_OUTGOING' "$RUNNER_TEMP/system2-pin/guard.py"
+      - name: Run 311 inherited research-only Python regressions on exact source blobs
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/system2-pin/stage83.lua
+          STAGE120_REQUIRE_PINNED: '1'
+          STAGE120_PLANNER: ${{ runner.temp }}/system2-pin/planner.py
+          STAGE120_CORRECTED_GUARD: ${{ runner.temp }}/system2-pin/guard.py
+        run: |
+          python3 -m unittest -v \
+            pdiddler.ci.test_market_inventory_revision_gate \
+            pdiddler.ci.test_counterparty_candidate_explorer \
+            pdiddler.ci.test_sealed_decision_source \
+            pdiddler.ci.test_multitrade_growth_replay \
+            pdiddler.ci.test_attractiveness_evidence_lab \
+            pdiddler.ci.test_trade_scenario_lab \
+            pdiddler.ci.test_stage120_corrected_guard_preview \
+            pdiddler.ci.test_client_inventory_shadow \
+            pdiddler.ci.test_market_research_reader \
+            pdiddler.ci.test_publisher_page_parity \
+            pdiddler.ci.test_operator_capture_adapter \
+            pdiddler.ci.test_system2_catalog_discovery_diff
