@@ -174,7 +174,11 @@ class HTTPTransport:
             time.sleep(2.2)
         self.calls += 1
         url = API_ROOT + path + ("?" + urlencode(params) if params else "")
-        request = Request(url, headers={"X-Api-Key": self.key, "Accept": "application/json"}, method="GET")
+        headers = {"Accept": "application/json"}
+        # Provider documentation states /v2/meta is public; only item pages use the secret.
+        if path == "/items":
+            headers["X-Api-Key"] = self.key
+        request = Request(url, headers=headers, method="GET")
         try:
             with urlopen(request, timeout=18) as response:
                 if response.status != 200:
