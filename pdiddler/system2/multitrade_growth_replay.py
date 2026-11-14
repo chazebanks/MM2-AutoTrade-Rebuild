@@ -46,11 +46,11 @@ def _portfolio_value(holdings, idx):
     return sum(idx[key]["decimalValue"] * qty for key,qty in holdings.items())
 
 
-def simulate(mapped, shadow, steps):
+def simulate(mapped, shadow, steps, *, evaluated_at_utc=None):
     """Read one legitimate offline shadow, then use ONLY synthetic copy ledgers."""
     try:
         idx = _index(mapped)
-        owned, starting_value = _owned_from_shadow(shadow, idx)
+        owned, starting_value = _owned_from_shadow(shadow, idx, evaluated_at_utc=evaluated_at_utc)
         if type(steps) is not list or not 2 <= len(steps) <= MAX_STEPS:
             raise ValueError("GROWTH_PATH_REQUIRES_TWO_TO_EIGHT_HYPOTHETICAL_STEPS")
         if sum(owned.values()) <= 0:

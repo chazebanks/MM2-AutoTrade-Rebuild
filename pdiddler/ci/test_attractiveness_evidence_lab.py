@@ -21,6 +21,7 @@ def alt(out,inc):
 class AttractivenessTests(unittest.TestCase):
     def setUp(self):
         self.market=data()
+        self.evaluated_at="2026-11-14T01:15:40.000Z"
         self.market["captureWindowUTC"]={"exportedAt":"2026-11-14T00:28:09.127Z"}
         self.observe({"Celestial":2,"EmberbowChroma":6,"Gingerscope":1})
     def observe(self,own):
@@ -28,7 +29,7 @@ class AttractivenessTests(unittest.TestCase):
         self.shadow=evaluate(self.market,snap,evaluated_at_utc="2026-11-14T01:15:40.000Z")
         self.assertEqual(self.shadow["status"],"RESEARCH_CLIENT_INVENTORY_SHADOW_READY",self.shadow)
     def compare(self,*options):
-        return m.compare(self.market,self.shadow,list(options))
+        return m.compare(self.market,self.shadow,list(options),evaluated_at_utc=self.evaluated_at)
     def test_two_alternatives_researched_without_offer_authority(self):
         x=self.compare(
             alt([("Celestial",1)],[("Gingerscope",1)]),
@@ -110,10 +111,10 @@ class AttractivenessTests(unittest.TestCase):
         a=alt([("Celestial",1)],[("Gingerscope",1)])
         self.assertEqual(self.compare(a,deepcopy(a))["status"],"BLOCKED")
     def test_only_one_alternative_rejected(self):
-        self.assertEqual(m.compare(self.market,self.shadow,[alt([("Celestial",1)],[("Gingerscope",1)])])["status"],"BLOCKED")
+        self.assertEqual(m.compare(self.market,self.shadow,[alt([("Celestial",1)],[("Gingerscope",1)])],evaluated_at_utc=self.evaluated_at)["status"],"BLOCKED")
     def test_thirteen_alternatives_rejected(self):
         x=[alt([("Celestial",1)],[(f"test_key_{i}",1)]) for i in range(13)]
-        self.assertEqual(m.compare(self.market,self.shadow,x)["status"],"BLOCKED")
+        self.assertEqual(m.compare(self.market,self.shadow,x,evaluated_at_utc=self.evaluated_at)["status"],"BLOCKED")
     def test_forged_live_kind_blocked(self):
         a=alt([("Celestial",1)],[("Gingerscope",1)])
         a["kind"]="LIVE_MM2"
@@ -126,6 +127,21 @@ class AttractivenessTests(unittest.TestCase):
         self.market["sourceExportSha256"]="0"*64
         self.assertEqual(self.compare(alt([("Celestial",1)],[("Gingerscope",1)]),
                                      alt([("Celestial",1)],[("EmberbowChroma",1)]))["status"],"BLOCKED")
+    def test_expired_shadow_rejected_before_any_alternative(self):
+        self.evaluated_at="2026-11-14T01:16:31.000Z"
+        result=self.compare(
+            alt([("Celestial",1)],[("Gingerscope",1)]),
+            alt([("Celestial",1)],[("EmberbowChroma",1)]))
+        self.assertEqual(result["status"],"BLOCKED")
+        self.assertEqual(result["reason"],"SHADOW_OBSERVATION_EXPIRED_OR_FUTURE")
+
+    def test_missing_clock_rejected(self):
+        result=m.compare(self.market,self.shadow,[
+            alt([("Celestial",1)],[("Gingerscope",1)]),
+            alt([("Celestial",1)],[("EmberbowChroma",1)])])
+        self.assertEqual(result["status"],"BLOCKED")
+        self.assertEqual(result["reason"],"SHADOW_OBSERVATION_TIMESTAMP_INVALID")
+
     def test_same_alternatives_deterministic(self):
         a=alt([("Celestial",1)],[("Gingerscope",1)])
         c=alt([("Celestial",1)],[("EmberbowChroma",1)])
