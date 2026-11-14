@@ -16,7 +16,7 @@ local ORIGINAL_MM2=142823291
 local MAIN="a3c209659942e8b45eec5da3555f7cfb83059c59"
 local P3_EPOCH="ba76adb21ffe4124c44d6d9a256683861eceb61d"
 local SHADOW_PLAN="be8d8c5b77c0c7c345639c53e6a04959728d01a8"
-local CTRL="98b3adaaa0ab6412f52f712947ba3604a690664f"
+local CTRL="1acc000789d778cf02a595d1a1a164a6888f1fee"
 local BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local isTrue=function(x)return x==true end
 local conflictNames={
