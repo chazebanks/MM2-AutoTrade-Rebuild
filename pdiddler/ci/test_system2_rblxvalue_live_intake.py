@@ -150,6 +150,24 @@ class MarketSourceContract(unittest.TestCase):
         self.assertEqual(seen[0][1], None)
         self.assertEqual(seen[1][1], "rbx_test")
 
+    def test_403_gateway_challenge_has_specific_reason(self):
+        from unittest.mock import patch
+        from urllib.error import HTTPError
+        error = HTTPError("https://api.rblxvalue.com/v2/items", 403,
+                          "blocked", {"cf-mitigated": "challenge"}, None)
+        with patch.object(m, "urlopen", side_effect=error):
+            with self.assertRaisesRegex(m.DataFailure, "PROVIDER_ITEMS_GATEWAY_CHALLENGE"):
+                m.HTTPTransport("rbx_test")("/items", {"category": "ancient"})
+
+    def test_403_json_api_forbidden_has_specific_reason(self):
+        from unittest.mock import patch
+        from urllib.error import HTTPError
+        error = HTTPError("https://api.rblxvalue.com/v2/items", 403,
+                          "blocked", {"content-type": "application/json"}, None)
+        with patch.object(m, "urlopen", side_effect=error):
+            with self.assertRaisesRegex(m.DataFailure, "PROVIDER_ITEMS_API_FORBIDDEN"):
+                m.HTTPTransport("rbx_test")("/items", {"category": "ancient"})
+
     def test_deterministic_fingerprint(self):
         self.assertEqual(self.got(fake())["candidateRowsSha256"],
                          self.got(fake())["candidateRowsSha256"])
