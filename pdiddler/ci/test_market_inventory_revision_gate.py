@@ -270,6 +270,35 @@ class MarketInventoryRevisionTests(unittest.TestCase):
         self.assertEqual(result["status"],"BLOCKED")
         self.assertIn("PRIOR_RESEARCH_STAMP_SHAPE_INVALID",result["reason"])
 
+    def test_malformed_prior_snapshot_timestamp_fails_closed(self):
+        first=self.baseline()
+        self.advance()
+        for invalid in (
+            "not-an-utc-timestamp",
+            "2026-02-30T01:15:40.000Z",
+            None,
+            17,
+            {"forged":"time"},
+        ):
+            with self.subTest(invalid=repr(invalid)):
+                tampered=copy.deepcopy(first)
+                tampered["researchStamp"]["evaluatedAtUTC"]=invalid
+                result=self.compare(tampered)
+                self.assertEqual(result["status"],"BLOCKED",result)
+                self.assertIn("PRIOR_RESEARCH_STAMP_TIMESTAMP_INVALID",result["reason"])
+                self.assertFalse(result["researchDecisionReusable"])
+                self.assertFalse(result["authorizesTrade"])
+                self.assertFalse(result["authorizesAccept"])
+
+    def test_prior_timestamp_future_rolls_back_invalidation(self):
+        first=self.baseline()
+        self.advance()
+        first["researchStamp"]["evaluatedAtUTC"]="2026-11-14T01:15:59.000Z"
+        result=self.compare(first)
+        self.assertEqual(result["status"],"INVALIDATED",result)
+        self.assertIn("RESEARCH_CLOCK_ROLLBACK",result["reason"])
+        self.assertFalse(result["researchDecisionReusable"])
+
     def test_source_older_than_research_max_age_requires_review(self):
         self.now="2026-11-15T01:15:40.000Z"
         self.web=pages(fetched="2026-11-15T01:15:38.000Z")
