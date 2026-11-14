@@ -173,6 +173,44 @@ eq(subject.compare(inconsistent,source,options).status,"BLOCKED",
 local duplicate=subject.compare(context(),source,{options[1],options[1]})
 eq(duplicate.status,"BLOCKED","duplicate options no false independent choice")
 
+local badAge=context()
+badAge.offer.sourceAgeSeconds=0/0
+eq(subject.compare(badAge,source,options).reason,
+ "FRESH_UNAUTHORIZED_OR_WRONG_CLIENT_CONTEXT","NaN source time never fresh")
+local badOwnAge=context()
+badOwnAge.offer.ownedCensusAgeSeconds=math.huge
+eq(subject.compare(badOwnAge,source,options).status,"BLOCKED",
+ "infinite owned census age blocked")
+local fractionalRevision=context()
+fractionalRevision.clientOfferRevision=7.5
+fractionalRevision.offer.clientRevision=7.5
+eq(subject.compare(fractionalRevision,source,options).status,
+ "BLOCKED","noninteger revision cannot validate offer")
+local forgedAccept=context()
+forgedAccept.offer.theirAccepted="true"
+eq(subject.compare(forgedAccept,source,options).status,
+ "BLOCKED","string accepted flag not partner willingness")
+local invisibleFifth=context()
+invisibleFifth.offer.their.items={
+ {slot=1,id="SnowDagger",quantity=1},
+ {slot=2,id="Icepiercer",quantity=1},
+ {slot=3,id="Iceblaster",quantity=1},
+ {slot=4,id="Frostsaber",quantity=1},
+ {slot=5,id="Harvester",quantity=1},
+}
+eq(subject.compare(invisibleFifth,source,options).status,
+ "BLOCKED","forged fifth physical partner offer rejected")
+local missingStable=context()
+missingStable.offer.their.items={{slot=1,id="TheSeer",quantity=1},
+ {slot=2,id="Icepiercer",quantity=1}}
+local noStable=subject.compare(missingStable,source,{
+ option({slot("Frostsaber")},{slot("TheSeer")}),
+ option({slot("Iceblaster")},{slot("Icepiercer")}),
+})
+eq(noStable.alternatives[1].reason,"PUBLISHER_STABILITY_MISSING",
+ "real Seer has no publisher stability, never silently treat stable")
+eq(noStable.alternatives[2].status,"RESEARCH_FEASIBLE_UNAUTHORIZED",
+ "unknown item stability does not taint unrelated observed option")
 local callN=0
 local current=context()
 local dynamic={researchContext=function()
