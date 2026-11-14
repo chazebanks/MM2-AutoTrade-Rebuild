@@ -215,6 +215,13 @@ local function transition(owned,give,receive,index,scope)
  local dMM2=incoming.mm2-outgoing.mm2
  local dSup=incoming.supreme-outgoing.supreme
  if dMM2<0 or dSup<0 then return nil,"UNAPPROVED_LISTED_VALUE_LOSS" end
+ -- Unverified future seller stock does not establish consent to hand over
+ -- most of an item's listed value for free. This 50%-of-received heuristic is
+ -- a conservative RESEARCH plausibility screen, not an empirical fill rate.
+ if scope=="EXPLICIT_HYPOTHETICAL_FUTURE_SELLER_UNVERIFIED" and
+   (dMM2*2>incoming.mm2 or dSup*2>incoming.supreme) then
+  return nil,"UNVERIFIED_FUTURE_SELLER_MAJOR_LISTED_GIVEAWAY"
+ end
  if fingerprint(give)==fingerprint(receive) then
   return nil,"SAME_ITEMS_NOT_A_REAL_GROWTH_STEP" end
  local after,why3=apply(owned,give,receive)
@@ -359,6 +366,9 @@ function M.search(context,market,spec,bilateral)
  if not index then return denied("BLOCKED",why) end
  local original,err=validateOwned(context.ownCounts,index)
  if not original then return denied("BLOCKED",err) end
+ if (original[TARGET] or 0)>0 then
+  return denied("ABSTAIN","CLIENT_CENSUS_ALREADY_INCLUDES_PROTECTED_TARGET")
+ end
  local partner,partnerErr=stock(context.offer.their.items,index,true)
  if not partner then return denied("BLOCKED",partnerErr) end
  if next(partner)==nil then return denied("ABSTAIN","PARTNER_CURRENT_OFFER_EMPTY") end
@@ -440,6 +450,8 @@ function M.search(context,market,spec,bilateral)
  local comparisons=0
  local terminal={}
  local stageStats={}
+ local typeCounts={UPGRADE=0,DOWNGRADE=0,SIDEGRADE=0}
+ local skippedMajorFutureSellerGiveaway=0
  for level,pool in ipairs(stagePools) do
   local incomingOptions,whyB=bundles(pool,4)
   if not incomingOptions then return denied("BLOCKED",whyB) end
@@ -458,6 +470,7 @@ function M.search(context,market,spec,bilateral)
       local step,whyStep=transition(node.holdings,give,receive,index,
        "EXPLICIT_HYPOTHETICAL_FUTURE_SELLER_UNVERIFIED")
       if step then
+       typeCounts[step.kind]+=1
        local stamp=fingerprint(step.ownedAfter)
        if not node.seen[stamp] then
         local newSteps={}
@@ -479,6 +492,8 @@ function M.search(context,market,spec,bilateral)
        skipped.stack+=1
       elseif whyStep=="UNAPPROVED_LISTED_VALUE_LOSS" then
        skipped.loss+=1
+      elseif whyStep=="UNVERIFIED_FUTURE_SELLER_MAJOR_LISTED_GIVEAWAY" then
+       skippedMajorFutureSellerGiveaway+=1
       else skipped.other+=1 end
      end
     end
@@ -545,6 +560,8 @@ function M.search(context,market,spec,bilateral)
   searchPairEvaluations=comparisons,
   rejectedListedLossPairs=skipped.loss,
   rejectedUnverifiedStackPairs=skipped.stack,
+  rejectedMajorFutureSellerGiveaways=skippedMajorFutureSellerGiveaway,
+  hypotheticalGeneratedStepTypes=typeCounts,
   selectedResearchRouteIndex=1,
   selectedRouteActionable=false,
   alternativeRoutes=results,
