@@ -67,6 +67,12 @@ local function pure()
     eq(bad.reason,"RAW_GAME_CENSUS_KEY_INVALID","explicit reason")
     eq(core.observe(profile({Celestial=1}),"NO",100),nil,"short job denied")
     eq(core.observe({Weapons={}},"FAKE_JOB_0001",100),nil,"missing Owned")
+    local thousands={}
+    for i=1,4001 do thousands["Key_"..tostring(i)]=0 end
+    local stamp,over=core.observe(profile(thousands),"FAKE_JOB_0001",100)
+    eq(stamp,nil,"zero-count massive map cannot bypass cap")
+    eq(over.reason,"OWNED_CENSUS_BOUNDS_EXCEEDED","full raw entry cap")
+
 end
 pure()
 local function event()
@@ -146,7 +152,7 @@ local function mock(options)
         readsSource+=1
         if options.failSource then error("source unavailable") end
         if string.find(url,"native_own_census_core.lua",1,true) then
-            check(string.find(url,"85a633eb54010e0b2aba770e857bccf0d33e8b21",1,true)~=nil,
+            check(string.find(url,"8e0d3312404e8a1557545e81df351b7c55633451",1,true)~=nil,
                 "source pin expected")
             return coreCode
         end
