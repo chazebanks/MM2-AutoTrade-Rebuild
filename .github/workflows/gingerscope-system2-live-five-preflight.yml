@@ -6,6 +6,8 @@ on:
   pull_request:
     paths:
       - 'pdiddler/system2/system2_live_five_controller.lua'
+      - 'pdiddler/system2/system2_live_strategy_evidence.lua'
+      - 'pdiddler/ci/test_system2_live_strategy_evidence.lua'
       - 'pdiddler/system2/SYSTEM2_LIVE_FIVE_MAIN_NATIVE.lua'
       - 'pdiddler/ci/test_system2_live_five_controller.lua'
       - 'pdiddler/ci/test_system2_live_five_source_audit.py'
@@ -35,13 +37,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object pdiddler/system2/system2_live_five_controller.lua)" = 98b3adaaa0ab6412f52f712947ba3604a690664f
+          test "$(git hash-object pdiddler/system2/system2_live_five_controller.lua)" = 1d10a379c02bd201c1be24264ddb3a299c90d58b
+          test "$(git hash-object pdiddler/system2/system2_live_strategy_evidence.lua)" = f473b57010158914815d014142a98dbf2c182525
           python3 - <<'PY'
           from pathlib import Path
           import re
           native=Path('pdiddler/system2/SYSTEM2_LIVE_FIVE_MAIN_NATIVE.lua').read_text()
           m=re.search(r'local CTRL="([0-9a-f]{40})"',native)
-          assert m and m.group(1)=='1acc000789d778cf02a595d1a1a164a6888f1fee'  # immutable commit, not blob
+          assert m and m.group(1)=='39005d4511c8660947ae63718deb85397d55c2e0'  # immutable commit, not blob
+          assert 'local S2_INTERPRETER="9c4d75c4a38faf555a356eae6901ae4ec5ecb5b7"' in native
+          assert 'loadPinned(S2_INTERPRETER,"system2/system2_live_strategy_evidence.lua"' in native
           for name in ('P3_EPOCH','SHADOW_PLAN','MAIN'):
               assert re.search(r'local '+name+r'="[0-9a-f]{40}"',native),name
           print('SYSTEM2_LIVE_FIVE_ACTUAL_SOURCE_SHA_PINS_PASS')
@@ -55,6 +60,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          lua5.4 pdiddler/ci/test_system2_live_strategy_evidence.lua
           lua5.4 pdiddler/ci/test_system2_live_five_controller.lua
       - name: Inherited System2 evidence/strategy regressions
         shell: bash
@@ -69,7 +75,7 @@ jobs:
         run: |
           {
             echo '## System2 ONE-ARM live-five candidate — OFFLINE verified only'
-            echo 'Implemented: 5-stage injected Luau state machine, original source-pinned native P3/P4 adapter, adversarial Lua5.4 mocks, Python boundary audit.'
+            echo 'Implemented: 5-stage source-tested Luau state machine, native protected P3/P4 adapter, separate real-client strategy interpreter and adversarial Lua5.4/Python audits.'
             echo 'Not proved: live original-MM2 run, real Discord V2 delivery, current independently authenticated market prices, authoritative item instances, real negotiated profit, true learning, server settlement, automatic final Accept.'
             echo 'Stage1 Discord live delivery and Stage3/4 market-growth decision remain BLOCKED prerequisites, never mislabeled LIVE PASS.'
             echo 'Do NOT release operator loader until actual CI and dependency review; no live action is authorized from mock results.'
