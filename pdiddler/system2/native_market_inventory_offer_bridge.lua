@@ -24,6 +24,7 @@ function M.new(config)
  local bound,err=config.core.new({
   scannerApi=config.scannerApi,
   sync=config.sync,
+  nameResolver=config.nameResolver,
   crosswalk=config.crosswalk,
   captureOffer=reader.capture,
   utcNow=config.utcNow,
