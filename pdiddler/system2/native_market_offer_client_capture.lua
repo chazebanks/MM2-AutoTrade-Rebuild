@@ -50,7 +50,8 @@ local function rawItemId(node)
    result=id
   end
  end
- if not result then return nil,"GUI_SLOT_RAW_ID_NOT_PROVEN" end
+ -- Missing raw attributes are common in the original GUI. Preserve UNKNOWN,
+ -- not a fabricated ID; the strategy may attempt a *candidate-only* lookup.
  return result,nil
 end
 local function side(root,name)
@@ -71,7 +72,7 @@ local function side(root,name)
    local chromaTag=find(find(slot,"Tags"),"Chroma")
    if label==nil or amount==nil then
     return nil,nil,"GUI_SLOT_LABEL_OR_AMOUNT_MISSING" end
-   slots[#slots+1]={slot=i,rawId=raw,label=label,
+   slots[#slots+1]={slot=i,rawId=raw,rawIdObserved=raw~=nil,label=label,
      amountText=amount,chromaTag=chromaTag~=nil and visible(chromaTag,slot)}
   end
  end
@@ -113,7 +114,7 @@ local function sig(frame)
   local t=frame[key]
   if type(t)~="table" then return nil end
   for _,x in ipairs(t) do
-   parts[#parts+1]=tostring(x.slot)..":"..x.rawId..":"..x.label..
+   parts[#parts+1]=tostring(x.slot)..":"..tostring(x.rawId)..":"..x.label..
     ":"..x.amountText..":"..tostring(x.chromaTag)
   end
   parts[#parts+1]="|"
