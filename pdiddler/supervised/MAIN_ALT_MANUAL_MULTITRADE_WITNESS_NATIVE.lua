@@ -219,6 +219,13 @@ local function theirOffer(root)
  local side=root:FindFirstChild("TheirOffer")
  local container=side and side:FindFirstChild("Container")
  if not side or not container then return nil,"THEIR_OFFER_GUI_MISSING" end
+ -- MM2 has EXACTLY four physical slots, never a fifth.
+ -- A fifth node would be hostile/corrupted client data, not a game slot.
+ for i=5,8 do
+  if container:FindFirstChild("NewItem"..i) then
+   return nil,"FABRICATED_EXTRA_ALT_SLOT_NODE"
+  end
+ end
  local rows={}
  for i=1,4 do
   local slot=container:FindFirstChild("NewItem"..i)
@@ -367,7 +374,7 @@ local function ctx(now,root,snap,offers)
 end
 local function issueRead(kind,now)
  if state.pending then return end
- if state.requests>=150 then stop("TOTAL_READ_ATTEMPT_SAFETY_CAP");return end
+ if state.requests>=1000 then stop("TOTAL_READ_ATTEMPT_SAFETY_CAP");return end
  state.requests+=1
  local pending={kind=kind,started=now,done=false,success=false,data=nil}
  state.pending=pending;state.lastRead=now
