@@ -102,5 +102,28 @@ class SourceContract(unittest.TestCase):
         self.assertIn("poisonFiveSlots=2",self.t)
         self.assertIn("clientClosedWindows",self.t)
 
+
+    def test_real_client_strategy_interpreter_is_source_bound(self):
+        interpreter=(ROOT/"pdiddler/system2/system2_live_strategy_evidence.lua").read_text()
+        self.assertIn('api.review',self.c)
+        self.assertIn('matchingClientSide(b.snap.ours,ours)',self.n)
+        self.assertIn('matchingClientSide(b.snap.theirs,revised or first)',self.n)
+        self.assertIn('loadPinned(S2_INTERPRETER,"system2/system2_live_strategy_evidence.lua"',self.n)
+        self.assertIn('local CTRL="39005d4511c8660947ae63718deb85397d55c2e0"',self.n)
+        for kind in ("EVENT_PROVENANCE","BEHAVIOR_REVISION",
+                     "BILATERAL_ALTERNATIVES","GROWTH_STRUCTURE",
+                     "INVALIDATE_STALE_RESEARCH"):
+            self.assertIn(kind,interpreter)
+        for flag in ("marketPriceAuthenticated=false",
+                     "realDiscordV2Delivered=false",
+                     "serverSettlementProven=false",
+                     "authorizesAccept=false"):
+            self.assertIn(flag,interpreter)
+        for actual_action in (":FireServer(", ":InvokeServer(",
+                              "PostAsync(", "HttpGet(", "setclipboard(",
+                              "AcceptTrade(", "TeleportService"):
+            self.assertNotIn(actual_action,interpreter)
+        self.assertIn('dofile("pdiddler/system2/system2_live_strategy_evidence.lua")',self.t)
+
 if __name__=="__main__":
     unittest.main()
