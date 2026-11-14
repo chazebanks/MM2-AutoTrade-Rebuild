@@ -72,6 +72,22 @@ local function pure()
         A={ItemName="A",ItemType="Pet",Rarity="Godly"}
     }},"FAKE_JOB_001",10,10)
     eq(other.features.classification.excludedKeys,1,"non-weapon category excluded")
+    -- Original P3 scanner excludes explicit non-tradable weapon metadata.
+    for _,flag in ipairs({"Tradable","CanTrade","Untradable","NonTradable"}) do
+        local d={ItemName="Blocked",ItemType="Gun",Rarity="Godly"}
+        d[flag]=(flag=="Tradable" or flag=="CanTrade") and false or true
+        local out=core.assess(profile({A=1}),{Weapons={A=d}},"FAKE_JOB_001",10,10)
+        eq(out.features.classification.eligibleKeys,0,flag.." not eligible")
+        eq(out.features.classification.excludedKeys,1,flag.." excluded")
+        eq(out.features.integrity.bucketsReconciled,true,flag.." buckets")
+    end
+    local conflict=core.assess(profile({A=1}),{
+        Weapons={A={ItemName="A",ItemType="Gun",Rarity="Godly",Tradable=false}},
+        Item={A={ItemName="A",ItemType="Gun",Rarity="Godly",Tradable=true}}
+    },"FAKE_JOB_001",10,10)
+    eq(conflict.features.metadata.conflictingKeys,1,"conflicting tradeability rejected")
+    eq(conflict.features.classification.eligibleKeys,0,"conflict never promotes eligible")
+
     local both={Weapons={A={ItemName="A",ItemType="Gun",Rarity="Godly"}},
                 Item={A={ItemName="A",ItemType="Gun",Rarity="Godly"}}}
     eq(core.assess(profile({A=2}),both,"FAKE_JOB_001",10,10).features.classification.eligibleCopies,
@@ -164,7 +180,7 @@ local function mock(opts)
         sourceFetches+=1
         if opts.sourceFailure then error("no GitHub source") end
         if url:find("native_multifeature_catalog_core.lua",1,true) then
-            ok(url:find("95a74ca8279198f9e64ad556b3807c6383af9b2c",1,true)~=nil,"core source pinned")
+            ok(url:find("139311e7eb5dc8d155652218ac1acc30e33955c5",1,true)~=nil,"core source pinned")
             return coreCode
         elseif url:find("stage100_screen_prompt_overlay.lua",1,true) then
             return geometryCode
