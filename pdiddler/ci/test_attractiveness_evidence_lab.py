@@ -177,6 +177,28 @@ class AttractivenessTests(unittest.TestCase):
         self.assertEqual(result["status"],"BLOCKED")
         self.assertEqual(result["reason"],"SHADOW_OBSERVATION_TIMESTAMP_INVALID")
 
+    def test_high_paper_profit_stack_excluded_from_attention_order(self):
+        self.observe({"Celestial":1})
+        result=self.compare(
+            alt([("Celestial",1)],[("test_key_175",12)]),
+            alt([("Celestial",1)],[("Gingerscope",1)]))
+        stack=result["alternatives"][0]
+        self.assertEqual(stack["status"],"PAPER_STACK_VALUE_UNCERTAIN")
+        self.assertFalse(stack["listedDeltaReliableForNegotiation"])
+        self.assertEqual(result["stackPriceUncertainAlternatives"],1)
+        self.assertEqual(result["researchAttentionIndices"],[1])
+        self.assertIn("PUBLISHER_NONLINEAR_STACK_PRICE_NEEDS_INDEPENDENT_EVIDENCE",
+                      stack["evidenceWarnings"])
+
+    def test_below_five_stack_may_still_be_research_only(self):
+        self.observe({"Celestial":1})
+        result=self.compare(
+            alt([("Celestial",1)],[("test_key_175",4)]),
+            alt([("Celestial",1)],[("Gingerscope",1)]))
+        self.assertEqual(result["stackPriceUncertainAlternatives"],0)
+        self.assertTrue(result["alternatives"][0]["listedDeltaReliableForNegotiation"])
+        self.assertFalse(result["alternatives"][0]["mayUseForTrade"])
+
     def test_same_alternatives_deterministic(self):
         a=alt([("Celestial",1)],[("Gingerscope",1)])
         c=alt([("Celestial",1)],[("EmberbowChroma",1)])
@@ -191,8 +213,8 @@ class AttractivenessTests(unittest.TestCase):
     def test_source_demand_is_ordinal_only(self):
         x=self.compare(alt([("Celestial",1)],[("Gingerscope",1)]),
                        alt([("Celestial",1)],[("EmberbowChroma",1)]))
-        self.assertEqual(x["alternatives"][0]["incomingDemandOrdinalAverage"],5)
-        self.assertEqual(x["alternatives"][1]["incomingDemandOrdinalAverage"],6)
+        self.assertEqual(x["alternatives"][0]["incomingDemandValueWeightedMean"],5)
+        self.assertEqual(x["alternatives"][1]["incomingDemandValueWeightedMean"],6)
         self.assertIsNone(x["verifiedTradeAcceptanceProbability"])
     def test_two_hypothetical_alternatives_not_sequential(self):
         x=self.compare(alt([("Celestial",2)],[("Gingerscope",1)]),
