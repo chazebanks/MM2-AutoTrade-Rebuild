@@ -212,6 +212,33 @@ class Gate3BilateralAttractiveness(unittest.TestCase):
         self.assertTrue(research["partnerAcceptanceStillUnknown"])
         self.assertFalse(research["realTradeOfferRankingAvailable"])
 
+    def test_receive_side_must_appear_in_synthetic_partner_scope(self):
+        x=original_strategy_fixture()
+        original=x.run_review()
+        self.assertEqual(original["status"],
+                         "OFFLINE_MULTIPLE_SYSTEM2_STRATEGY_FEATURES_REVIEWED")
+        self.assertEqual(original["syntheticAlternativesNotInDeclaredPartnerShortlist"],3)
+        self.assertEqual(original["alternatives"][0]["syntheticPartnerIncomingCoverage"],
+                         "NOT_IN_SYNTHETIC_PARTNER_SHORTLIST")
+        self.assertEqual(original["alternatives"][2]["syntheticPartnerIncomingCoverage"],
+                         "COVERED_BY_UNVERIFIED_SYNTHETIC_SHORTLIST")
+        self.assertFalse(original["alternatives"][2]["realPartnerOwnershipOrConsentProven"])
+        # Changing a fictional partner's declared inventory should change
+        # coverage of the +5 candidate WITHOUT creating real consent.
+        x.partner["counterparty"]["items"]=[
+            {"rawGameKey":"test_key_105","quantity":1}
+        ]
+        changed=x.run_review()
+        self.assertEqual(changed["status"],
+                         "OFFLINE_MULTIPLE_SYSTEM2_STRATEGY_FEATURES_REVIEWED")
+        self.assertEqual(changed["alternatives"][0]["syntheticPartnerIncomingCoverage"],
+                         "COVERED_BY_UNVERIFIED_SYNTHETIC_SHORTLIST")
+        self.assertEqual(changed["alternatives"][2]["syntheticPartnerIncomingCoverage"],
+                         "NOT_IN_SYNTHETIC_PARTNER_SHORTLIST")
+        self.assertIs(changed["counterpartyConsentProven"],False)
+        self.assertIs(changed["authorizesTrade"],False)
+        self.assertIs(changed["authorizesAccept"],False)
+
 
 class Gate4GingerscopeGrowthPaths(unittest.TestCase):
     """Multiple DIFFERENT routes, inventory evolution, losses, 4-slot stacks."""
