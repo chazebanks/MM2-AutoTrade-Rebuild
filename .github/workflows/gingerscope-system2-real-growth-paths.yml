@@ -69,6 +69,8 @@ jobs:
           PY
       - name: Run independent Python randomized real-market bilateral oracle
         run: python3 -m unittest -v pdiddler.ci.test_system2_native_bilateral_market_oracle
+      - name: Execute independent Python multistep growth arithmetic oracle
+        run: python3 -m unittest -v pdiddler.ci.test_system2_native_multistep_growth_oracle
       - name: Execute real native inventory, bilateral, and bounded three-step growth logic
         shell: bash
         run: |
