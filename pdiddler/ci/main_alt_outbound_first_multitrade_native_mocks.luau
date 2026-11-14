@@ -237,7 +237,12 @@ local function gameFixture(opts)
    if obj==sync then return meta end
    error("unexpected require")
   end,
-  loadstring=function(s) return luau.load(s,{environment=env,injectGlobals=true}) end,
+  loadstring=function(source)
+   local success,loader=pcall(luau.load,source,{environment=env,injectGlobals=true})
+   if not success then print("[MOCK COMPILE FAILURE]",tostring(loader)) end
+   if not success then error(loader) end
+   return loader
+  end,
   print=function()end,warn=function(...)print("[MOCK WARN]",...)end,
   setclipboard=function(x)table.insert(copied,x)end,
  }
