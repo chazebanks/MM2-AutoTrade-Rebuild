@@ -16,7 +16,8 @@ local ORIGINAL_MM2=142823291
 local MAIN="a3c209659942e8b45eec5da3555f7cfb83059c59"
 local P3_EPOCH="ba76adb21ffe4124c44d6d9a256683861eceb61d"
 local SHADOW_PLAN="be8d8c5b77c0c7c345639c53e6a04959728d01a8"
-local CTRL="1acc000789d778cf02a595d1a1a164a6888f1fee"
+local CTRL="39005d4511c8660947ae63718deb85397d55c2e0"
+local S2_INTERPRETER="9c4d75c4a38faf555a356eae6901ae4ec5ecb5b7"
 local BASE="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
 local isTrue=function(x)return x==true end
 local conflictNames={
@@ -94,6 +95,7 @@ local outgoingModule=loadPinned(P3_EPOCH,"system1/pdiddler3_outgoing_single_send
 local planModule=loadPinned(SHADOW_PLAN,"supervised/supervised_four_slot_operator_plan_aba_draft.lua",25000)
 local shadowModule=loadPinned(SHADOW_PLAN,"intelligence_lab/p3_shadow_aba_offer_lease.lua",13000)
 local controllerModule=loadPinned(CTRL,"system2/system2_live_five_controller.lua",40000)
+local strategyInterpreter=loadPinned(S2_INTERPRETER,"system2/system2_live_strategy_evidence.lua",12000)
 if not geometry or type(geometry.choose)~="function" or
    not protectedIO or type(protectedIO.new)~="function" or
    not bridge or type(bridge.bind)~="function" or
@@ -105,7 +107,8 @@ if not geometry or type(geometry.choose)~="function" or
    not outgoingModule or type(outgoingModule.run)~="function" or
    not planModule or type(planModule.run)~="function" or
    not shadowModule or type(shadowModule.new)~="function" or
-   not controllerModule or type(controllerModule.new)~="function" then
+   not controllerModule or type(controllerModule.new)~="function" or
+   not strategyInterpreter or type(strategyInterpreter.review)~="function" then
  warn("[SYSTEM1 AUTO] SOURCE_UNAVAILABLE: no request/offer was started")
  return nil
 end
@@ -606,6 +609,32 @@ local function newContext(supervisorGetter,watchdogGetter)
  }
 end
 local adapters={}
+local function matchingClientSide(actual,expected)
+ if type(actual)~="table" or type(expected)~="table" or
+    #actual~=#expected then return false end
+ for _,want in ipairs(expected) do
+  local matched=false
+  for _,row in ipairs(actual) do
+   if row.physicalSlot==want.slot and row.quantity==want.qty and
+      row.displayCandidate==want.name and
+      row.chromaCandidate==want.chroma and
+      (row.internalIdCandidate or "")==want.id then
+    matched=true;break
+   end
+  end
+  if not matched then return false end
+ end
+ return true
+end
+function adapters.review(kind,ours,first,revised)
+ if not targetStillSafe() or not currentSupervisor or
+    currentSupervisor.isP3Paused()~=true then return nil end
+ local b=currentClientSnapshot()
+ if not b or io.trade()~=boundRoot then return nil end
+ if not matchingClientSide(b.snap.ours,ours) or
+    not matchingClientSide(b.snap.theirs,revised or first) then return nil end
+ return strategyInterpreter.review(kind,ours,first,revised)
+end
 function adapters.startEpoch(round,nonce)
  if not targetStillSafe() or not availableForArm()
     or io.trade()~=nil or currentSupervisor~=nil or
