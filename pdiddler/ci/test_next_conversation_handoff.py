@@ -21,6 +21,13 @@ ALLOWED = {
     "pdiddler/ci/test_next_conversation_handoff.py",
     "pdiddler/ci/test_release_readiness.py",
     ".github/workflows/gingerscope-next-conversation-handoff.yml",
+    # Reviewed additional NOV-14 docs/CI-only mission-lock change. Still forbid
+    # every Lua/Luau runtime mutation and unlisted file in this scope guard.
+    "pdiddler/system2/SYSTEM2_MISSION_LOCK_AND_TEST_GOVERNANCE_2026_11_14.md",
+    "pdiddler/system2/SYSTEM2_MODULAR_PLANNING_AND_TESTING_MATRIX_2026_11_13.md",
+    "pdiddler/system2/SYSTEM2_READ_NEXT_2026_11_13.md",
+    "pdiddler/ci/test_system2_mission_lock_continuity.py",
+    ".github/workflows/gingerscope-system2-mission-lock.yml",
 }
 
 def load(path):
