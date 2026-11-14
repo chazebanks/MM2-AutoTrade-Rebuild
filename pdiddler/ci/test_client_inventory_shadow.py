@@ -49,6 +49,7 @@ def _env(mapped, quantities=None, extras=None):
 class ShadowTests(unittest.TestCase):
     def setUp(self):
         self.mapped=data()
+        self.mapped['captureWindowUTC']={'exportedAt':'2026-11-14T00:28:09.127Z'}
         self.envelope=_env(self.mapped)
         self.now="2026-11-14T01:15:40.000Z"
 
