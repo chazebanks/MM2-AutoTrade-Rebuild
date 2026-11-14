@@ -123,37 +123,57 @@ local function parseAmount(s)
  local q=tonumber(s)
  return natural(q) and q or nil
 end
-local function side(slots,byKey,sync,isOwn,own)
+local function side(slots,byKey,sync,isOwn,own,resolver,catalog)
  if type(slots)~="table" or #slots>4 then return nil,"PHYSICAL_SLOT_COUNT_INVALID" end
  local out,seenSlots,seenKeys={}, {}, {}
  local mm2,supreme=0,0
  local hasSupreme=true
+ local namesOnly=0
  for _,x in ipairs(slots) do
   if type(x)~="table" or not natural(x.slot) or x.slot>4 or seenSlots[x.slot]
-   or not validKey(x.rawId) or type(x.label)~="string"
-   or type(x.chromaTag)~="boolean" then
+   or (x.rawId~=nil and not validKey(x.rawId))
+   or type(x.label)~="string" or type(x.chromaTag)~="boolean" then
    return nil,"SLOT_INDEX_OR_EXACT_RAW_ID_INVALID" end
   seenSlots[x.slot]=true
-  local r=byKey[x.rawId]
+  local id,qty,clientClass=x.rawId,parseAmount(x.amountText),"EXACT_RAW_ATTRIBUTE_CLIENT"
+  if not qty then return nil,"OFFER_STACK_QUANTITY_UNVERIFIED" end
+  if id==nil then
+   if type(resolver)~="table" or type(resolver.resolve)~="function" or
+     type(catalog)~="table" then return nil,"GUI_RAW_KEY_ABSENT_NO_BOUND_CATALOG" end
+   local keyCandidate,parsedQty,reason=resolver.resolve(catalog,
+     {label=x.label,amountText=x.amountText,chromaTag=x.chromaTag,rawAttrs={}},
+     parseAmount)
+   if not keyCandidate then return nil,"NAME_CANDIDATE_"..tostring(reason) end
+   if parsedQty~=qty then return nil,"NAME_CANDIDATE_QUANTITY_CONFLICT" end
+   id=keyCandidate
+   namesOnly+=1
+   clientClass="UNVERIFIED_NAME_ONLY_GAME_CATALOG_CANDIDATE"
+  elseif x.rawIdObserved~=true then
+   return nil,"RAW_ATTRIBUTE_EVIDENCE_FLAG_ABSENT"
+  end
+  local r=byKey[id]
   if not r then return nil,"OFFERED_WEAPON_NOT_IN_CURRENT_CROSSWALK" end
-  local q=parseAmount(x.amountText)
-  if not q then return nil,"OFFER_STACK_QUANTITY_UNVERIFIED" end
-  if (r.gameChroma~=x.chromaTag or
+  local labelShowsChroma=type(x.label)=="string" and
+    x.label:lower():match("^%s*chroma%s+")~=nil
+  local variantSeen=x.chromaTag or labelShowsChroma
+  if (r.gameChroma~=variantSeen or
       normalized(x.label,r.gameChroma)~=normalized(r.expectedGameName,false)) then
    return nil,"OFFER_RAW_KEY_LABEL_OR_CHROMA_CONFLICT" end
-  local ok,why=validMeta(sync,x.rawId,r)
+  local ok,why=validMeta(sync,id,r)
   if not ok then return nil,why end
-  if seenKeys[x.rawId] then return nil,"DUPLICATE_RAW_KEY_IN_PHYSICAL_SLOTS" end
-  seenKeys[x.rawId]=true
-  if isOwn and (r.outgoingGingerscopeProtected or not own[x.rawId] or
-      q>own[x.rawId]) then return nil,"OUTGOING_TARGET_OR_QUANTITY_INVALID" end
-  mm2+=q*(r.mm2Listed or 0)
-  if r.supremeListed then supreme+=q*r.supremeListed else hasSupreme=false end
-  out[#out+1]={slot=x.slot,id=x.rawId,quantity=q}
+  if seenKeys[id] then return nil,"DUPLICATE_RAW_KEY_IN_PHYSICAL_SLOTS" end
+  seenKeys[id]=true
+  if isOwn and (r.outgoingGingerscopeProtected or not own[id] or
+      qty>own[id]) then return nil,"OUTGOING_TARGET_OR_QUANTITY_INVALID" end
+  mm2+=qty*(r.mm2Listed or 0)
+  if r.supremeListed then supreme+=qty*r.supremeListed else hasSupreme=false end
+  out[#out+1]={slot=x.slot,id=id,quantity=qty,clientIdentityEvidence=clientClass}
  end
  table.sort(out,function(a,b)return a.slot<b.slot end)
  return {items=out,mm2Listed=mm2,
-   supremeListed=hasSupreme and supreme or nil,physicalSlots=#out},nil
+   supremeListed=hasSupreme and supreme or nil,physicalSlots=#out,
+   clientNameOnlyCandidates=namesOnly,
+   allRawAttributesObserved=namesOnly==0},nil
 end
 local function signature(a,b)
  local x={}
@@ -177,6 +197,16 @@ function M.new(deps)
   then return nil,"NATIVE_BRIDGE_DEPENDENCIES_INVALID" end
  local idx,why=marketIndex(deps.crosswalk)
  if not idx then return nil,why end
+ local catalog=nil
+ if deps.nameResolver~=nil then
+  if type(deps.nameResolver)~="table" or
+   type(deps.nameResolver.buildCatalog)~="function" or
+   type(deps.nameResolver.resolve)~="function" then
+   return nil,"NAME_CANDIDATE_RESOLVER_INVALID" end
+  local catalogWhy
+  catalog,catalogWhy=deps.nameResolver.buildCatalog(deps.sync)
+  if not catalog then return nil,catalogWhy end
+ end
  local obj={own=nil,ownAt=nil,lastSignature=nil,revision=0,
     market=deps.crosswalk,byKey=idx,jobId=deps.jobId,leaseId=deps.leaseId}
  function obj:checkClock()
@@ -294,11 +324,11 @@ function M.new(deps)
       frame.doubleReadStable~=true or type(frame.ourAccepted)~="boolean" or
       type(frame.theirAccepted)~="boolean" then
    return fail("OFFER_SESSION_PARTNER_OR_ROOT_UNVERIFIED") end
-  local our,whyOur=side(frame.ourSlots,self.byKey,deps.sync,true,self.own)
+  local our,whyOur=side(frame.ourSlots,self.byKey,deps.sync,true,self.own,deps.nameResolver,catalog)
   if not our then return fail("OUR_"..whyOur) end
-  local their,whyTheir=side(frame.theirSlots,self.byKey,deps.sync,false,self.own)
+  local their,whyTheir=side(frame.theirSlots,self.byKey,deps.sync,false,self.own,deps.nameResolver,catalog)
   if not their then return fail("THEIR_"..whyTheir) end
-  local sig=signature(our,their)..";accept:"..tostring(frame.ourAccepted)..":"..tostring(frame.theirAccepted)
+  local sig=signature(our,their)..";accept:"..tostring(frame.ourAccepted)..":"..tostring(frame.theirAccepted)..";gui:"..tostring(frame.clientRawCaptureSignature)
   local changed=self.lastSignature~=nil and sig~=self.lastSignature
   if self.lastSignature~=sig then self.revision+=1;self.lastSignature=sig end
   return {status=changed and "CLIENT_OFFER_CHANGED_PREVIEW_INVALIDATED"
@@ -313,6 +343,9 @@ function M.new(deps)
     clientOnly=true,readOnly=true,offerObservedViaClientGUI=true,
     serverOfferRevisionProven=false,serverCompletionProven=false,
     counterpartyInventoryProven=false,marketLiquidityMeasured=false,
+    exactRawAttributesBothSidesObserved=our.allRawAttributesObserved and their.allRawAttributesObserved,
+    nameOnlyCatalogCandidateCount=our.clientNameOnlyCandidates+their.clientNameOnlyCandidates,
+    verifiedGameItemInstances=false,
     authorizesTrade=false,authorizesOffer=false,authorizesAccept=false,
     mayReportProfit=false,mayUseForStrategyLearning=false,
     tradeOutcome="UNKNOWN"}
