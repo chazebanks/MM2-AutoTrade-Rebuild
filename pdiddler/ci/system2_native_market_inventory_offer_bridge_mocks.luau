@@ -171,7 +171,7 @@ eq(own.mm2ListedSubtotal,6*rows.EmberbowChroma.mm2Listed+
  rows.FlowerwoodKnife.mm2Listed+rows.Gingerscope.mm2Listed,"source value own")
 eq(own.supremeListedSubtotal,nil,"single-source Flowerwood missing Supreme")
 eq(own.scannerLegacyPriceIgnored,true,"no October 31 price")
-eq(scannerReads,1,"existing scanner called once")
+eq(scannerReads,2,"two independent read-only mock bridge instances each called scanner once")
 local observe=bridge.observeOffer()
 eq(observe.status,"CLIENT_OFFER_OBSERVATION_READONLY","observed real shape")
 eq(observe.clientRevision,1,"initial client revision")
