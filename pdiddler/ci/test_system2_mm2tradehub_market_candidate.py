@@ -74,6 +74,12 @@ class CandidateMarketTests(unittest.TestCase):
         with self.assertRaisesRegex(m.MarketBlocked, 'ITEM_HREF_OUTSIDE_SOURCE'):
             m.parse_tier(bad, 'ancient')
 
+    def test_known_alias_and_relative_links_are_same_source_cards(self):
+        first = tier('ancient').replace('https://mm2tradehub.com/values/', 'https://mm2values.app/values/', 1)
+        self.assertEqual(len(m.parse_tier(first, 'ancient')), 16)
+        second = tier('ancient').replace('https://mm2tradehub.com/values/', '/values/', 1)
+        self.assertEqual(len(m.parse_tier(second, 'ancient')), 16)
+
     def test_missing_source_prices_fail(self):
         bad = tier('ancient').replace('vs-row vs-supreme', 'vs-row vs-unrelated', 1)
         with self.assertRaisesRegex(m.MarketBlocked, 'SOURCE_PRICE_ROWS_MISSING'):
