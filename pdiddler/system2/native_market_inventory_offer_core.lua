@@ -204,13 +204,15 @@ function M.new(deps)
      or type(inventory.rawOwned)~="number") then
    return fail("SCANNER_OWN_CENSUS_MALFORMED") end
   -- Existing scanner.total, scanner.value, checkerId are STALE Oct31: ignore.
-  local all,sum={},0
+  local all,sum,rawCounts={},0,{}
   for _,s in ipairs(inventory.seen) do
    if type(s)~="string" then return fail("OWN_RAW_FINGERPRINT_INVALID") end
    all[#all+1]=s
    local id,q=s:match("^(.-)x(%d+)$")
    local n=tonumber(q)
    if not validKey(id) or not natural(n) then return fail("OWN_RAW_FINGERPRINT_INVALID") end
+   if rawCounts[id]~=nil then return fail("DUPLICATE_RAW_IN_OWN_FINGERPRINT") end
+   rawCounts[id]=n
    sum+=n
   end
   table.sort(all)
@@ -239,6 +241,27 @@ function M.new(deps)
    listed+=it.qty*(row.mm2Listed or 0)
    if row.supremeListed then supreme+=it.qty*row.supremeListed else pricesHaveFullSupreme=false end
   end
+  -- Reconcile the other direction: no eligible raw key in the actual
+  -- all-owned fingerprint may be silently omitted by scanner.items.
+  for rawId,qty in pairs(rawCounts) do
+   local sourceMeta,metaWhy=findMeta(deps.sync,rawId)
+   if not sourceMeta then return fail(metaWhy) end
+   local eligible=sourceMeta.ItemType=="Gun" or sourceMeta.ItemType=="Knife"
+   eligible=eligible and
+     (sourceMeta.Rarity=="Ancient" or sourceMeta.Rarity=="Godly")
+   eligible=eligible and sourceMeta.Tradable~=false and
+     sourceMeta.CanTrade~=false and sourceMeta.Untradable~=true and
+     sourceMeta.NonTradable~=true and sourceMeta.EvoIndex==nil and
+     sourceMeta.EvoBaseID==nil
+   if eligible then
+    if not self.byKey[rawId] then
+     return fail("NEW_OWN_ELIGIBLE_ITEM_MISSING_CURRENT_MARKET")
+    end
+    if owned[rawId]~=qty then return fail("SCANNER_ELIGIBLE_ROW_OMITTED") end
+   elseif owned[rawId]~=nil then
+    return fail("SCANNER_INCLUDED_UNTRADABLE_ROW")
+   end
+  end
   self.own=owned
   self.ownAt=ended
   self.lastSignature=nil
@@ -261,6 +284,9 @@ function M.new(deps)
   local ok,frame=pcall(deps.captureOffer)
   if not ok or type(frame)~="table" then
    return fail("ORIGINAL_GAME_GUI_CAPTURE_UNAVAILABLE") end
+  if frame.status=="BLOCKED" and type(frame.reason)=="string" then
+   return fail("GUI_CAPTURE_"..frame.reason)
+  end
   if frame.clientOnly~=true or frame.tradeOpen~=true or
       frame.jobId~=deps.jobId or frame.tradeLeaseId~=deps.leaseId or
       frame.partnerUserId~=deps.partnerUserId or
