@@ -147,7 +147,6 @@ local badOffers={
             {rawKey="c",quantity=1,slotIndex=3,category="Weapons"},
             {rawKey="d",quantity=1,slotIndex=4,category="Weapons"},
             {rawKey="e",quantity=1,slotIndex=5,category="Weapons"}}},
- {altOffer={},ownOffer={}},
  {ownAccepted=true},{altAccepted=nil},{ownOffer=nil},
 }
 for i,change in ipairs(badOffers) do
@@ -164,6 +163,17 @@ for i,change in ipairs(badOffers) do
  eq(answer.status,"STOPPED","invalid payload must stop "..i)
  eq(c.status().mayObserveFurtherMainAltTrades,false,"stop persists "..i)
 end
+-- A real empty opening trade is normal; it is NOT a fifth-slot error.
+do
+ local c=assert(policy.new(config))
+ local root={}
+ c.begin(ctx(root,1))
+ local empty=ctx(root,1.1);empty.altOffer={};empty.ownOffer={}
+ eq(c.observe(empty).status,"OBSERVING","empty opening trade waits safely")
+ eq(c.status().phase,"OBSERVING","empty trade does not stop session")
+ eq(c.observe(ctx(root,1.5)).status,"OBSERVING","first item needs new baseline")
+ eq(c.observe(ctx(root,1.9)).status,"STABLE_RESEARCH_ONLY","later independent recheck")
+end
 do
  local c=assert(policy.new(config))
  local root={}
@@ -179,7 +189,7 @@ do
  local tricky=ctx(root,1.1)
  tricky.altOffer={gift()}
  tricky.altOffer[5]={rawKey="hidden",quantity=1,slotIndex=4,category="Weapons"}
- eq(c.observe(tricky).status,"STOPPED","hidden fifth entry blocks")
+ eq(c.observe(tricky).status,"STOPPED","fabricated fifth data entry beyond four physical slots blocks")
 end
 do
  local c=assert(policy.new(config))
