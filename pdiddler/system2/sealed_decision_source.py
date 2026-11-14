@@ -93,8 +93,10 @@ def inspect_sealed(*, export_bytes, stage83_lua_bytes, client_envelope,
         else:
             result = growth_simulate(mapped, shadow, payload,
                                      evaluated_at_utc=evaluated_at_utc)
-        if (result.get("status") in (None, "BLOCKED", "BLOCKED_LOSS_POLICY") or
-            any(result.get(flag) != deny for flag,deny in AUTHORITY_DENIED.items())):
+        if (result.get("status") in (
+                None, "BLOCKED", "BLOCKED_LOSS_POLICY",
+                "OFFLINE_LOSS_SCENARIO_BLOCKED_POLICY"
+            ) or any(result.get(flag) != deny for flag,deny in AUTHORITY_DENIED.items())):
             return _result(
                 "BLOCKED",
                 "UNDERLYING_RESEARCH_DECISION_DENIED:" +
