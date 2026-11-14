@@ -278,7 +278,7 @@ class S2AcceptanceOracles(unittest.TestCase):
              dec([slot("OwnA")],[slot("Mid")])],
             [dec([slot("OwnB")],[slot("Cheap")]),
              dec([slot("OwnA"),slot("Cheap")],[slot("Valuable")])]
-          ),
+          ]),
           adaptive_response(events=[
              event(1,"PARTNER_OFFER_STABLE"),
              event(2,"PARTNER_OFFER_REVISED",1)],
