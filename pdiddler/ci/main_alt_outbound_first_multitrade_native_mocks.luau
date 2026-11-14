@@ -191,6 +191,7 @@ local function gameFixture(opts)
   GetService=function(_,name)return services[name]end,
   HttpGet=function(_,u)
    table.insert(sources,u)
+   print("[MOCK SOURCE]",u)
    if u:find("553b7e44245c5ed36aa3f65aea335953ec1fed5f",1,true)
       and u:find("main_alt_manual_multitrade_delta_core.lua",1,true) then return core end
    if u:find("1c874cdbc5e85418360148fbdf33fa17534cd1ad",1,true)
