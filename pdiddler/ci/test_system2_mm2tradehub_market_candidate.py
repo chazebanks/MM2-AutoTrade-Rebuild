@@ -85,6 +85,15 @@ class CandidateMarketTests(unittest.TestCase):
         with self.assertRaisesRegex(m.MarketBlocked, 'SOURCE_PRICE_ROWS_MISSING'):
             m.parse_tier(bad, 'ancient')
 
+    def test_real_single_source_mm2_card_preserves_supreme_missing(self):
+        original = tier('godly')
+        dual = '<div class="vs-row vs-mm2"><span class="vs-num">35</span></div><div class="vs-row vs-supreme"><span class="vs-num">33</span></div>'
+        solo = '<div class="vs-row vs-row--only"><span class="vs-num">35</span><span class="vs-tag">MM2</span></div>'
+        changed = original.replace(dual, solo, 1)
+        row = m.parse_tier(changed, 'godly')[0]
+        self.assertEqual(row['mm2Listed'], 35)
+        self.assertIsNone(row['supremeListed'])
+
     def test_missing_demand_fails(self):
         bad = tier('ancient').replace('title="Demand 5"', 'title="Not demand"', 1)
         with self.assertRaisesRegex(m.MarketBlocked, 'DEMAND_MARKER_MISSING'):
