@@ -334,6 +334,7 @@ function M.new(deps)
   return {status=changed and "CLIENT_OFFER_CHANGED_PREVIEW_INVALIDATED"
     or "CLIENT_OFFER_OBSERVATION_READONLY",
     clientRevision=self.revision,priorPreviewInvalidated=changed,
+    ourAccepted=frame.ourAccepted,theirAccepted=frame.theirAccepted,
     our=our,their=their,
     mm2ListedDelta=their.mm2Listed-our.mm2Listed,
     supremeListedDelta=our.supremeListed~=nil and
@@ -349,6 +350,29 @@ function M.new(deps)
     authorizesTrade=false,authorizesOffer=false,authorizesAccept=false,
     mayReportProfit=false,mayUseForStrategyLearning=false,
     tradeOutcome="UNKNOWN"}
+ end
+ -- Local-only handoff. This contains PRIVATE owner holdings and must NEVER
+ -- be sent to Discord, GitHub logs/artifacts, or stored in a public repo.
+ function obj:researchContext()
+  local offer=self:observe()
+  if type(offer)~="table" or (offer.status~="CLIENT_OFFER_OBSERVATION_READONLY" and
+      offer.status~="CLIENT_OFFER_CHANGED_PREVIEW_INVALIDATED") then
+   return fail("FRESH_CLIENT_OFFER_REQUIRED")
+  end
+  if type(self.own)~="table" or type(self.ownAt)~="number" then
+   return fail("FRESH_OWN_CENSUS_REQUIRED")
+  end
+  local copy={}
+  for id,qty in pairs(self.own) do copy[id]=qty end
+  return {schema="gingerscope-system2-local-bilateral-context-v1",
+   status="LOCAL_READONLY_MARKET_OFFER_CONTEXT",
+   ownCounts=copy,offer=offer,
+   crosswalkRowsSha256=self.market.crosswalkRowsSha256,
+   sourceRetrievedUtc=self.market.sourceRetrievedUtc,
+   clientOnly=true,readOnly=true,clientOfferRevision=offer.clientRevision,
+   marketSourceVerifiedForLiveTrade=false,
+   counterpartyWillingnessVerified=false,serverTradeRevisionProven=false,
+   authorizesOffer=false,authorizesAccept=false,mayReportProfit=false}
  end
  return obj,nil
 end
