@@ -64,7 +64,7 @@ def _after(owned, scenario):
     return result
 
 
-def compare(mapped, shadow, alternatives):
+def compare(mapped, shadow, alternatives, *, evaluated_at_utc=None):
     """Audit 2–12 simultaneous, mutually exclusive alternatives.
 
     Returns descriptions and research attention order only: NOT an offer,
@@ -72,7 +72,7 @@ def compare(mapped, shadow, alternatives):
     """
     try:
         idx = _index(mapped)
-        owned, value_before = _owned_from_shadow(shadow, idx)
+        owned, value_before = _owned_from_shadow(shadow, idx, evaluated_at_utc=evaluated_at_utc)
         if type(alternatives) is not list or not 2 <= len(alternatives) <= 12:
             raise ValueError("TWO_TO_TWELVE_SYNTHETIC_ALTERNATIVES_REQUIRED")
         seen = set()
@@ -85,7 +85,7 @@ def compare(mapped, shadow, alternatives):
             if fingerprint in seen:
                 raise ValueError("DUPLICATE_HYPOTHETICAL_ALTERNATIVE")
             seen.add(fingerprint)
-            review = review_scenario(mapped,shadow,candidate)
+            review = review_scenario(mapped,shadow,candidate,evaluated_at_utc=evaluated_at_utc)
             if review["status"] == "BLOCKED":
                 audited.append({
                     "candidateIndex":i,"status":"INVALID_ALTERNATIVE",
