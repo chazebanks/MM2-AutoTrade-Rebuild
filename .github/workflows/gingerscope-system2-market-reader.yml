@@ -1,0 +1,39 @@
+name: Gingerscope System2 read-only market research reader
+on:
+  pull_request:
+    paths:
+      - "pdiddler/system2/market_research_reader.py"
+      - "pdiddler/ci/test_market_research_reader.py"
+      - "pdiddler/system2/MARKET_RESEARCH_READER_HANDOFF_2026_11_13.md"
+      - ".github/workflows/gingerscope-system2-market-reader.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reader-research-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Fetch immutable Stage83 historical registry
+        run: |
+          git fetch --no-tags --depth=1 origin 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae
+          git show FETCH_HEAD:pdiddler/intelligence_lab/stage83_public_slug_registry.lua > "$RUNNER_TEMP/stage83-original.lua"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os,hashlib
+          raw=(Path(os.environ['RUNNER_TEMP'])/'stage83-original.lua').read_bytes()
+          sha=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+          assert sha=='40e2a0ff01b70b2d0181c62cae347a08da82bcb8',sha
+          print('Immutable original Stage83 blob verified',sha)
+          PY
+      - name: Run complete System2 offline 88-test suite
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/stage83-original.lua
+        run: |
+          python3 -m unittest -v pdiddler.ci.test_market_research_reader pdiddler.ci.test_publisher_page_parity pdiddler.ci.test_operator_capture_adapter pdiddler.ci.test_system2_catalog_discovery_diff
