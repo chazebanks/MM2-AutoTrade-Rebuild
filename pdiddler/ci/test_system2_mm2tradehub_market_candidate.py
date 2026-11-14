@@ -48,6 +48,13 @@ class CandidateMarketTests(unittest.TestCase):
         self.assertIsNone(m.price_of('Priceless'))
         self.assertIsNone(m.price_of('Award only'))
 
+    def test_unrecognized_price_label_is_not_silently_missing(self):
+        with self.assertRaisesRegex(m.MarketBlocked, 'PRICE_LABEL_UNRECOGNIZED'):
+            m.price_of('CURRENT PRICE 500')
+        with self.assertRaisesRegex(m.MarketBlocked, 'PRICE_LABEL_UNRECOGNIZED'):
+            m.price_of('$100')
+        self.assertIsNone(m.price_of('UNAVAILABLE'))
+
     def test_chroma_variant_not_claimed_as_real_game_id(self):
         row = m.parse_tier(tier('chroma'), 'chroma')[0]
         self.assertIsNone(row['rawGameWeaponKey'])
