@@ -1,3 +1,17 @@
+# LATEST SYSTEM2 NEXT CHECKPOINT — NATIVE OWN-CENSUS HARDWARE TEST PREPARED (NOV 13/14, 2026)
+
+**Current isolated draft PR #266** https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/266, branch `research/system2-nov14-native-own-census-witness`, stacked on **draft PR #265** (which itself is stacked on draft #262); NONE merged to `main`. Original Stage119/Stage101 iPad proofs remain CLOSED, untouched.
+
+**New distinct capability:** a manual MAIN-only, read-only two-snapshot `GetProfileData` own-inventory census witness, not a trade test. Exact tested runtime native source commit `e72fa4df21fe6f8a2c4da83087097be708ccbcc0` (blob `069579ded6fe4f34630ce8abbc7d07d6e70b81ab`), pins pure core commit `8e0d3312404e8a1557545e81df351b7c55633451` (blob `b39f10fd47c6a2df6a206142b8b4c7b3dd39f3cf`) and original Stage100 geometry helper. No original P3/P4/Delta production script modification. This never proves server ownership, current publisher quotes, authentic offer revisions, settlement, or authorization for trade, offer, Accept, Discord/profit or strategy learning.
+
+**Actual offline release gate:** 82 native Lune assertions including real GUI/remote mocks and 311 inherited original SHA-pinned Stage83/PR106/PR182 Python tests PASSED at code head, all six workflows SUCCESS. The final doc HEAD must have its own exact-head check before claiming release tested. New dedicated `.github/workflows/gingerscope-system2-native-own-census.yml` verifies continuity `verify`/`recover`, crypto-pinned core/runner Git blob and current checkout equality, actual native mock, no game mutation remotes and inherited research suite.
+
+**Manual hardware action only after final exact-head CI:** `pdiddler/system2/S2_NATIVE_CENSUS_TEST_HANDOFF_2026_11_14.md` contains one-line SHA-pinned MAIN iPad loader, safe purple game overlay and exact two manual CAPTURE steps, followed by COPY / CLOSE sanitized JSON. Main only, fresh original MM2 server, NO ALT, no open trade and no other script. DO NOT repeat Stage119, do not request full private inventory, do not leak raw IDs/usernames. Treat any observed matching snapshots as client-only read stability; the device test is NOT performed until a user returns its actual result.
+
+**After the new device result:** inspect sanitized evidence, establish independently attributable/native-safe scanner fields and a separately sourced genuine new market publication through original Stage111→110→104→69 before connecting actionable S2→S3. Do not silently restamp the old 189 private source, invent liquidity or reuse original PR106 artificial liquidity inputs. System3 chat drafts #263/#264 and separate Matrix Hub PC remain OUT OF SCOPE.
+
+---
+
 # LATEST VERIFIED SYSTEM 2 QA — Nov 13/14, 2026 (NEW YORK)
 
 **Research-only PR #265 remains DRAFT and unmerged to main.** Latest bugfix code+test commit `f5849712aabc74c8312385bfb2384880ece380a7` on `research/system2-nov13-market-inventory-sync-gate`; exact-head [CI #43552815393](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/43552815393) **311/311 Python tests PASS** with original Stage83/PR106/PR182 exact Git blob SHA locks; **all 6/6 GitHub workflows SUCCESS** at this tested head.
