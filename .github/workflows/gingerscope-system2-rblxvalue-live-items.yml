@@ -1,0 +1,44 @@
+name: Gingerscope System2 RBLXValue real item feed (candidate only)
+on:
+  push:
+    branches:
+      - research/system2-rblxvalue-item-intake-nov14
+    paths:
+      - "pdiddler/system2/rblxvalue_v2_market_import.py"
+      - "pdiddler/ci/test_system2_rblxvalue_live_intake.py"
+      - ".github/workflows/gingerscope-system2-rblxvalue-live-items.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gingerscope-system2-rblxvalue-items-candidate
+  cancel-in-progress: false
+jobs:
+  v2-item-feed:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run source-contract tests without network or API key
+        run: python3 -m unittest -v pdiddler.ci.test_system2_rblxvalue_live_intake
+      - name: Fetch authenticated actual v2 Ancient Godly Chroma item pages
+        shell: bash
+        env:
+          RBLXVALUE_API_KEY: ${{ secrets.RBLXVALUE_API_KEY }}
+          GINGERSCOPE_MARKET_OUTPUT: ${{ runner.temp }}/system2-rblxvalue-item-candidate.json
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.system2.rblxvalue_v2_market_import
+      - name: Archive candidate item set without game-trade authority
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: system2-rblxvalue-v2-item-candidate
+          path: ${{ runner.temp }}/system2-rblxvalue-item-candidate.json
+          retention-days: 7
+          if-no-files-found: error
