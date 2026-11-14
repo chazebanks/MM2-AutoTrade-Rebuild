@@ -1,3 +1,11 @@
+# CURRENT SYSTEM 2 READ-FIRST OVERRIDE — 2026-11-14
+
+**For any new Project Gingerscope System 2 conversation, FIRST read `pdiddler/system2/SYSTEM2_MISSION_LOCK_AND_TEST_GOVERNANCE_2026_11_14.md` on the current research branch, THEN the original `pdiddler/system2/SYSTEM2_MODULAR_PLANNING_AND_TESTING_MATRIX_2026_11_13.md`, relevant original `pdiddler/GINGERSCOPE_STRATEGY_AND_RESEARCH_PLAYBOOK.md`, and only THEN the recent P3/P4 or MAIN–ALT hardware handoffs.** The older November 11 P1 first-party source task below is a historical checkpoint, NOT a permanent override of the System 2 mission. Reconcile current operator instructions against dated records; inspect actual PR status and code before proceeding.
+
+**CRITICAL PROCESS CORRECTION:** System 2 = inventory growth, bilateral attractiveness, negotiation research, multi-step Gingerscope acquisition and learning under verified evidence; System 1 P3/P4 = scanning/request/GUI execution mechanics. Five repeated MAIN→ALT local trade-delta confirmations are a CLOSED repeatability test, not five System 2 strategic features. Sixth cycle STOPPED for an unclassified offered-item identity/quantity failure; its exact item is UNKNOWN. Fix diagnostics OFFLINE, test DIFFERENT strategic behaviors and failures, do NOT ask for more identical manual transfers. Never claim this research branch merged or live Final Accept authorized.
+
+---
+
 # Gingerscope — compact working entrypoint
 
 ## NOV 11 2026 — VERIFIED PLAN/HANDOFF ENTRYPOINT
