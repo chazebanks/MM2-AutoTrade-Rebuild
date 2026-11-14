@@ -196,6 +196,14 @@ class HTTPTransport:
             endpoint = "META" if path == "/meta" else "ITEMS"
             reason = {401: "AUTH_REJECTED", 403: "ACCESS_DENIED",
                       429: "RATE_LIMITED"}.get(exc.code, "HTTP_FAILURE")
+            # Distinguish provider JSON denial from an upstream gateway challenge.
+            # Never echo exception text, response body, URLs, or API credentials.
+            if exc.code == 403:
+                header = exc.headers or {}
+                if str(header.get("cf-mitigated", "")).lower() == "challenge":
+                    reason = "GATEWAY_CHALLENGE"
+                elif "application/json" in str(header.get("content-type", "")).lower():
+                    reason = "API_FORBIDDEN"
             _fail("PROVIDER_" + endpoint + "_" + reason)
         except (URLError, TimeoutError, OSError):
             _fail("PROVIDER_NETWORK_UNAVAILABLE")
