@@ -79,6 +79,16 @@ class SourceContract(unittest.TestCase):
         self.assertIn('target(v.name) or target(v.id)',self.c)
         self.assertIn("survivor(baseline,ob.ours)",self.c)
 
+    def test_processed_vs_live_pass_counts_are_distinct(self):
+        self.assertIn("processedStages=processed",self.c)
+        self.assertIn("completedStages=passed",self.c)
+        self.assertIn("livePassedStages=passed",self.c)
+        self.assertIn("blockedPrerequisiteStages=blocked",self.c)
+        self.assertIn('s.status=="BLOCKED_PREREQUISITE"',self.c)
+        self.assertIn('s.status=="LIVE_PASS"',self.c)
+        self.assertIn('tostring(r.livePassedStages)',self.n)
+        self.assertIn('tostring(r.processedStages)',self.n)
+
     def test_one_terminal_stop_after_fifth_revision(self):
         self.assertIn('phase="EXPECTED_TERMINAL_STOP"',self.c)
         self.assertIn('note="EXPECTED_REVISION_FAILSTOP_NO_FURTHER_ACTION"',self.c)
@@ -109,7 +119,7 @@ class SourceContract(unittest.TestCase):
         self.assertIn('matchingClientSide(b.snap.ours,ours)',self.n)
         self.assertIn('matchingClientSide(b.snap.theirs,revised or first)',self.n)
         self.assertIn('loadPinned(S2_INTERPRETER,"system2/system2_live_strategy_evidence.lua"',self.n)
-        self.assertIn('local CTRL="39005d4511c8660947ae63718deb85397d55c2e0"',self.n)
+        self.assertIn('local CTRL="bf72128813fd00992221f3c4e985958d81c5cb5c"',self.n)
         for kind in ("EVENT_PROVENANCE","BEHAVIOR_REVISION",
                      "BILATERAL_ALTERNATIVES","GROWTH_STRUCTURE",
                      "INVALIDATE_STALE_RESEARCH"):
