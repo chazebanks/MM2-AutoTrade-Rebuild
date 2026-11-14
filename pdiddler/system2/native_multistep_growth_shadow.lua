@@ -198,6 +198,12 @@ local function selectHeld(held,index,limit)
  return used,#items>limit
 end
 local function transition(owned,give,receive,index,scope)
+ -- A hypothetical future market listing of Gingerscope is NOT evidence that
+ -- any real seller owns or would transfer it. Keep target-acquisition routes
+ -- out of actionable-looking projections until independently verified intent.
+ if scope=="EXPLICIT_HYPOTHETICAL_FUTURE_SELLER_UNVERIFIED" and receive[TARGET] then
+  return nil,"FUTURE_GINGERSCOPE_SELLER_UNATTRIBUTED"
+ end
  local outgoing,why=valuation(give,index)
  if not outgoing then return nil,why end
  local incoming,why2=valuation(receive,index)
@@ -243,10 +249,18 @@ local function score(p,index)
  local gap=math.max(0,index[TARGET].mm2Listed-q.listed)
  local minGain=math.huge
  local lowDemand=0;local sellerSacrifice=0;local tempRisk=0
+ local speculativeSellerFrictionBps=0
  for _,step in ipairs(p.steps) do
   minGain=math.min(minGain,math.min(step.mm2Gain,step.supremeGain))
   lowDemand+=step.lowDemandIncomingKeys
   sellerSacrifice+=math.max(step.mm2Gain,step.supremeGain)
+  if step.scope=="EXPLICIT_HYPOTHETICAL_FUTURE_SELLER_UNVERIFIED" then
+   local rec=0
+   for _,z in ipairs(step.receive) do rec+=index[z.id].mm2Listed*z.quantity end
+   if rec>0 then
+    speculativeSellerFrictionBps+=math.floor(10000*step.mm2Gain/rec)
+   end
+  end
   if step.scope=="ACTUAL_CLIENT_OFFER_VISIBLE_UNVERIFIED_ACCEPTANCE" and
      step.receivedDemandOrdinal<3 then tempRisk+=1 end
  end
@@ -257,6 +271,7 @@ local function score(p,index)
   lowDemandIncomingOccurrences=lowDemand,
   lowDemandFirstStep=tempRisk,
   aggregatePartnerListedSacrifice=sellerSacrifice,
+  unverifiedFutureSellerSacrificeBasisPoints=speculativeSellerFrictionBps,
   minimumCrossListStepGain=minGain}
 end
 local function better(a,b)
@@ -267,6 +282,10 @@ local function better(a,b)
   return x.finalUncertaintyBps<y.finalUncertaintyBps end
  if x.lowDemandIncomingOccurrences~=y.lowDemandIncomingOccurrences then
   return x.lowDemandIncomingOccurrences<y.lowDemandIncomingOccurrences end
+ if x.unverifiedFutureSellerSacrificeBasisPoints~=
+     y.unverifiedFutureSellerSacrificeBasisPoints then
+  return x.unverifiedFutureSellerSacrificeBasisPoints<
+    y.unverifiedFutureSellerSacrificeBasisPoints end
  if x.targetGap~=y.targetGap then return x.targetGap<y.targetGap end
  if x.finalDemandOrdinal~=y.finalDemandOrdinal then
   return x.finalDemandOrdinal>y.finalDemandOrdinal end
