@@ -71,8 +71,15 @@ function M.observe(profile, jobId, nowClock)
     local owned=resolved.Weapons.Owned
     local parts={}
     local distinct=0
+    local scanned=0
     local total=0
     for key,rawQty in pairs(owned) do
+        -- Count zero-quantity catalog entries too; otherwise a hostile
+        -- oversized zero-only map could bypass the nonzero census bound.
+        scanned+=1
+        if scanned>4000 then
+            return nil,output("BLOCKED","OWNED_CENSUS_BOUNDS_EXCEEDED")
+        end
         if type(key)~="string" or #key<1 or #key>90 or
            not key:match("^[A-Za-z0-9_]+$") then
             return nil,output("BLOCKED","RAW_GAME_CENSUS_KEY_INVALID")
