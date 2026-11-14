@@ -131,8 +131,8 @@ class DistinctCounterpartyBehaviors(unittest.TestCase):
             [E(1,1,"MAIN_REQUEST_PENDING"),E(1,2,"NOT_AN_EVENT")],
             [E(1,1,"MAIN_REQUEST_PENDING",scope="REAL_PLAYER")],
             [E(1,1,"MAIN_REQUEST_PENDING",username="private")],
-            [E(1,1,"MAIN_REQUEST_PENDING",seq=True)],
-            [E(1,1,"MAIN_REQUEST_PENDING",episode=0)],
+            [{**E(1,1,"MAIN_REQUEST_PENDING"),"seq":True}],
+            [{**E(1,1,"MAIN_REQUEST_PENDING"),"episode":0}],
         ]
         for index,events in enumerate(bad):
             with self.subTest(index=index):
