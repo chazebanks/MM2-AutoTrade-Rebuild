@@ -76,7 +76,7 @@ local function marketIndex(c)
   byMarket[row.marketCategory..":"..row.marketSlug]=true
  end
  if total~=189 or counts.ancient~=15 or counts.godly~=128 or counts.chroma~=46 or
-    byKey.Gingerscope==nil or
+    type(c.categoryGameKeys)~="table" or byKey.Gingerscope==nil or
     c.categoryGameKeys.ancient~=15 or c.categoryGameKeys.godly~=128 or
     c.categoryGameKeys.chroma~=46 then
   return nil,"SOURCE_CROSSWALK_COVERAGE_INVALID"
@@ -172,7 +172,8 @@ function M.new(deps)
   or type(deps.utcNow)~="function" or type(deps.monoNow)~="function"
   or type(deps.jobId)~="string" or #deps.jobId<8
   or type(deps.leaseId)~="string" or #deps.leaseId<8
-  or type(deps.partnerUserId)~="number" or not natural(deps.partnerUserId)
+  or type(deps.partnerUserId)~="number" or
+   deps.partnerUserId~=math.floor(deps.partnerUserId) or deps.partnerUserId<=0
   then return nil,"NATIVE_BRIDGE_DEPENDENCIES_INVALID" end
  local idx,why=marketIndex(deps.crosswalk)
  if not idx then return nil,why end
@@ -193,7 +194,8 @@ function M.new(deps)
   local ok,inventory,why=pcall(deps.scannerApi.getOwnInventory)
   local ended=deps.monoNow()
   if not ok or inventory==nil then return fail("SCANNER_GET_OWN_INVENTORY_FAILED") end
-  if not natural(start,true) and type(start)~="number" then return fail("OWN_CENSUS_CLOCK_INVALID") end
+  if type(start)~="number" or start~=start or start==math.huge or start<0 then
+   return fail("OWN_CENSUS_CLOCK_INVALID") end
   if type(ended)~="number" or ended<start or ended-start>10 then
    return fail("OWN_CENSUS_TOO_SLOW_OR_CLOCK_INVALID") end
   if (type(inventory)~="table" or type(inventory.items)~="table"
@@ -202,7 +204,7 @@ function M.new(deps)
      or type(inventory.rawOwned)~="number") then
    return fail("SCANNER_OWN_CENSUS_MALFORMED") end
   -- Existing scanner.total, scanner.value, checkerId are STALE Oct31: ignore.
-  local all={},sum=0
+  local all,sum={},0
   for _,s in ipairs(inventory.seen) do
    if type(s)~="string" then return fail("OWN_RAW_FINGERPRINT_INVALID") end
    all[#all+1]=s
