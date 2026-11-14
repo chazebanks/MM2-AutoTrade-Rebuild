@@ -20,6 +20,7 @@ def t(out,rec):
 class MultitradeGrowthTests(unittest.TestCase):
     def setUp(self):
         self.market=data()
+        self.evaluated_at="2026-11-14T01:15:40.000Z"
         self.market["captureWindowUTC"]={"exportedAt":"2026-11-14T00:28:09.127Z"}
         self.owned({"test_key_100":1})
     def owned(self,counts):
@@ -27,7 +28,7 @@ class MultitradeGrowthTests(unittest.TestCase):
         self.shadow=evaluate(self.market,inventory,evaluated_at_utc="2026-11-14T01:15:40.000Z")
         self.assertEqual(self.shadow["status"],"RESEARCH_CLIENT_INVENTORY_SHADOW_READY",self.shadow)
     def runpath(self,*steps):
-        return simulate(self.market,self.shadow,list(steps))
+        return simulate(self.market,self.shadow,list(steps),evaluated_at_utc=self.evaluated_at)
     def blocked(self,why,*steps):
         r=self.runpath(*steps)
         self.assertIn(r["status"],("BLOCKED","BLOCKED_LOSS_POLICY"),r)
@@ -165,13 +166,26 @@ class MultitradeGrowthTests(unittest.TestCase):
         self.assertIsNone(r["partnerAcceptanceProbability"])
         self.assertEqual(r["empiricalLiquidityEvidence"],"UNKNOWN")
         self.assertFalse(r["autoAcceptAuthorized"])
+    def test_expired_shadow_cannot_be_reused_for_growth(self):
+        self.evaluated_at="2026-11-14T01:16:31.000Z"
+        self.blocked("SHADOW_OBSERVATION_EXPIRED_OR_FUTURE",
+            t([("test_key_100",1)],[("test_key_105",1)]),
+            t([("test_key_105",1)],[("test_key_110",1)]))
+
+    def test_absent_clock_is_not_implicit_freshness(self):
+        result=simulate(self.market,self.shadow,[
+            t([("test_key_100",1)],[("test_key_105",1)]),
+            t([("test_key_105",1)],[("test_key_110",1)])])
+        self.assertEqual(result["status"],"BLOCKED")
+        self.assertEqual(result["reason"],"SHADOW_OBSERVATION_TIMESTAMP_INVALID")
+
     def test_mutation_replay_deterministic(self):
         steps=[
             t([("test_key_100",1)],[("test_key_105",1)]),
             t([("test_key_105",1)],[("test_key_110",1)]),
         ]
-        self.assertEqual(simulate(self.market,self.shadow,steps),
-                         simulate(self.market,self.shadow,steps))
+        self.assertEqual(simulate(self.market,self.shadow,steps,evaluated_at_utc=self.evaluated_at),
+                         simulate(self.market,self.shadow,steps,evaluated_at_utc=self.evaluated_at))
 
 if __name__=="__main__":
     unittest.main()
