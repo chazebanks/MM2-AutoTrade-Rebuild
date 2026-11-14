@@ -145,7 +145,7 @@ function M.new(config)
    status=status,reason=reason,phase=s.phase,readOnly=true,
    testType="MULTIPLE_CONSECUTIVE_MANUAL_TRADES",
    nextExactAltTradeAllowed=s.failed==nil and s.phase=="READY",
-   observedTradeWindows=s.cycles,
+   tradeCyclesStarted=s.cycles,
    corroboratedClientDeltas=s.clientDeltas,
    observedManualAcceptTransitions=s.manualAcceptObservations,
    ownProfileReadAttempts=s.reads,
@@ -176,7 +176,8 @@ function M.new(config)
     c.mainName~=config.mainName or c.altUserId~=config.altUserId or
     c.altName~=config.altName or c.partnerUserId~=config.altUserId or
     c.partnerName~=config.altName or
-    c.exactPlayerObjects~=true or c.exactTradePartnerLabel~=true or
+    c.exactPlayerObjects~=true or
+    (c.tradeOpen==true and c.exactTradePartnerLabel~=true) or
     c.onlyTradeRoot~=true or c.uiSafe~=true or
     c.competingController~=false or not clock(c.now) or
     c.now<s.clock or
@@ -197,7 +198,7 @@ function M.new(config)
   if not p then return stop(why) end
   s.cycles+=1
   s.lease={
-   openedAt=nil,root=nil,lastAt=c.now,
+   startedAt=c.now,openedAt=nil,root=nil,lastAt=c.now,
    sawEmpty=false,signature=nil,stableAt=nil,
    expected=nil,old=p,acceptedSeen=false,
    postFirst=nil,postAt=nil,postStarted=nil,
@@ -216,7 +217,7 @@ function M.new(config)
   l.lastAt=c.now
   if s.phase=="WAIT_OPEN" then
    if c.tradeOpen~=true or c.tradeRoot==nil then
-    if c.now-l.lastAt>45 then return stop("OPEN_TIMEOUT") end
+    if c.now-l.startedAt>45 then return stop("OPEN_TIMEOUT") end
     return report("WAIT_OPEN","NO_TRADE_YET")
    end
    l.root=c.tradeRoot;l.openedAt=c.now
@@ -285,8 +286,11 @@ function M.new(config)
   local l=s.lease
   local same,whyDiff=compare(l.old,p,l.expected)
   if not same then
-   if equalInventory(l.old,p) and c.now-l.postStarted<=12 then
-    return report("VERIFY_DELTA","WAITING_CLIENT_INVENTORY_UPDATE_OR_MANUAL_CLAIM")
+   if equalInventory(l.old,p) then
+    if c.now-l.postStarted<=12 then
+     return report("VERIFY_DELTA","WAITING_CLIENT_INVENTORY_UPDATE_OR_MANUAL_CLAIM")
+    end
+    return stop("NO_CLIENT_INVENTORY_CHANGE_AFTER_WAIT")
    end
    return stop(whyDiff)
   end
