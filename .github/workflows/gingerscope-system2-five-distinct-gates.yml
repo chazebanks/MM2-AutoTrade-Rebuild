@@ -36,6 +36,8 @@ jobs:
           test "$(git hash-object pdiddler/system2/counterparty_response_learning_lab.py)" = 31208dab4de3c5e348ad7f0f571d2dce70123eaa
           test "$(git hash-object pdiddler/system2/multi_axis_strategy_stress_lab.py)" = c2a821969c1ff3192bfa10edde92ca3a4a2cb7d8
           python3 -m py_compile pdiddler/system2/discord_shadow_engagement.py pdiddler/ci/test_system2_five_distinct_gates.py
+          test "$(git hash-object pdiddler/ci/test_system2_five_distinct_gates.py)" = b6f6dcdb7278657f986a22e7e000c2934bd6f17e
+          echo SYSTEM2_FIVE_GATES_TRADE_PARTNER_COVERAGE_REGRESSION_PINNED
           echo '### Five independent System2 gates: source-pinned starting state' >> "$GITHUB_STEP_SUMMARY"
           echo 'Completed: original Discord importer, offline S2 strategies and evidence source-pin preflight.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Not completed: gates 1–5; real Discord V2 capture; verified settlement; live S2 deployment.' >> "$GITHUB_STEP_SUMMARY"
