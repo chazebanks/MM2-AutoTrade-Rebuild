@@ -11,6 +11,7 @@ import json
 import random
 import unittest
 from scripts.discord_private_history_import import build_record
+from scripts.discord_history_embed_audit import TEST_ACCOUNT
 from pdiddler.system2.discord_learning_evidence_bridge import (
     review, DENIED, WEBHOOK_FIXTURE_SCHEMA
 )
@@ -62,7 +63,7 @@ class DiscordLearnerEvidenceTests(unittest.TestCase):
 
     def fixture_records(self):
         a=build_record(fake_message(1))
-        b=build_record(fake_message(2,trader="venossgaming90190"))
+        b=build_record(fake_message(2,trader=TEST_ACCOUNT))
         c=build_record(fake_message(3,gave="Iceblaster x2 - 70"))
         self.assertIsNotNone(a)
         self.assertIsNotNone(b)
@@ -85,7 +86,7 @@ class DiscordLearnerEvidenceTests(unittest.TestCase):
         self.assertEqual(r["futureWebhookOutcomeEventsActuallyCaptured"],0)
         self.deny(r)
         output=json.dumps(r,sort_keys=True)
-        for forbidden in ("synthetic_player","venossgaming90190",
+        for forbidden in ("synthetic_player",TEST_ACCOUNT,
                           "Iceblaster","Nightblade",records[0]["message_id"],
                           WEBHOOK):
             self.assertNotIn(forbidden,output)
@@ -224,7 +225,7 @@ class DiscordLearnerEvidenceTests(unittest.TestCase):
         for i in range(160):
             m=fake_message(200+i)
             if rng.randrange(4)==0:
-                m["embeds"][0]["fields"][0]["value"]="venossgaming90190"
+                m["embeds"][0]["fields"][0]["value"]=TEST_ACCOUNT
             data.append(build_record(m,expected_webhook_id=WEBHOOK))
         r=review(data)
         self.assertEqual(r["status"],"DISCORD_ARCHIVE_TO_S2_EVIDENCE_RESEARCH_ONLY")
