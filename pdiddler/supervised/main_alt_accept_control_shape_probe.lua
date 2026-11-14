@@ -123,7 +123,7 @@ function M.inspect(root,viewport)
        r.candidateBoundsVerified=rect~=nil
       end
       if path then names[path]=true end
-     else
+     elseif isLabel and label~="NONE" then
       r.labelOnlyCount+=1
      end
     elseif not isButton and label~="NONE" then
