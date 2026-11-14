@@ -87,7 +87,7 @@ do
  eq(status.tradeCyclesStarted,3,"three distinct trade windows, no one-trade cap")
  eq(status.corroboratedClientDeltas,3,"three separate repeated client-only delta checks")
  eq(status.observedManualAcceptTransitions,3,"three manual acceptance observations")
- eq(status.ownProfileReadAttempts,9,"pre+two post profile read attempts each")
+ eq(status.ownProfileReadAttempts,12,"fresh pre, stale post, two independent matching post reads each")
  eq(status.nextExactAltTradeAllowed,true,"next authorized ALT trade can be observed")
  eq(status.serverCompletionProven,false,"never claim backend trade completion")
  eq(c.stop().status,"STOPPED","operator stop all session")
