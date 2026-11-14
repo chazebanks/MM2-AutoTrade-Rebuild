@@ -30,13 +30,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags --depth=1 origin 586d2a6215ee7d119c8cbb7ed77a3412c71fe922
-          git show 586d2a6215ee7d119c8cbb7ed77a3412c71fe922:pdiddler/system2/native_structural_shadow_core.lua > "$RUNNER_TEMP/shadow-core.lua"
-          test "$(git hash-object "$RUNNER_TEMP/shadow-core.lua")" = efd373798a9cb2729cd635ab2b2ef418f5c42782
+          git fetch --no-tags --depth=1 origin 95139f6c05f8c186239017ca19f50dbd33cff029
+          git show 95139f6c05f8c186239017ca19f50dbd33cff029:pdiddler/system2/native_structural_shadow_core.lua > "$RUNNER_TEMP/shadow-core.lua"
+          test "$(git hash-object "$RUNNER_TEMP/shadow-core.lua")" = beec3f85712c48ad4cba41d291a89bfc31ecf90a
           cmp "$RUNNER_TEMP/shadow-core.lua" pdiddler/system2/native_structural_shadow_core.lua
-          git fetch --no-tags --depth=1 origin c7592507b58f7463e5923f76d74f9d0e8299c0ee
-          git show c7592507b58f7463e5923f76d74f9d0e8299c0ee:pdiddler/system2/SYSTEM2_STRUCTURAL_SHADOW_READONLY_NATIVE.lua > "$RUNNER_TEMP/shadow-runner.lua"
-          test "$(git hash-object "$RUNNER_TEMP/shadow-runner.lua")" = 72608c2b290e3d0012787eb96d4c1e7821dafdd6
+          git fetch --no-tags --depth=1 origin e4d8728a4402e1a6048b584879475b385e42541b
+          git show e4d8728a4402e1a6048b584879475b385e42541b:pdiddler/system2/SYSTEM2_STRUCTURAL_SHADOW_READONLY_NATIVE.lua > "$RUNNER_TEMP/shadow-runner.lua"
+          test "$(git hash-object "$RUNNER_TEMP/shadow-runner.lua")" = dfba5b33602154616dceb5c619acc00fe44e8db6
           cmp "$RUNNER_TEMP/shadow-runner.lua" pdiddler/system2/SYSTEM2_STRUCTURAL_SHADOW_READONLY_NATIVE.lua
           git fetch --no-tags --depth=1 origin eea9d6f5da3dfac8599e2f3e7b9fe1764d6ba288
           git show eea9d6f5da3dfac8599e2f3e7b9fe1764d6ba288:pdiddler/system2/native_key_reconciliation_core.lua > "$RUNNER_TEMP/key-core.lua"
@@ -46,7 +46,7 @@ jobs:
           git show 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae:pdiddler/intelligence_lab/stage83_public_slug_registry.lua > "$RUNNER_TEMP/stage83.lua"
           test "$(git hash-object "$RUNNER_TEMP/stage83.lua")" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
           cp "$RUNNER_TEMP/stage83.lua" pdiddler/intelligence_lab/stage83_public_slug_registry.lua
-          for pin in 586d2a6215ee7d119c8cbb7ed77a3412c71fe922 eea9d6f5da3dfac8599e2f3e7b9fe1764d6ba288 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae; do
+          for pin in 95139f6c05f8c186239017ca19f50dbd33cff029 eea9d6f5da3dfac8599e2f3e7b9fe1764d6ba288 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae; do
             grep -Fq "$pin" pdiddler/system2/SYSTEM2_STRUCTURAL_SHADOW_READONLY_NATIVE.lua
           done
           echo SHADOW_PINNED_MODULE_BYTES_CONFIRMED
