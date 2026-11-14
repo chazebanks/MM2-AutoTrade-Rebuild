@@ -1,0 +1,44 @@
+name: Gingerscope System2 client inventory shadow (offline)
+on:
+  pull_request:
+    paths:
+      - "pdiddler/system2/client_inventory_shadow.py"
+      - "pdiddler/ci/test_client_inventory_shadow.py"
+      - "pdiddler/system2/CLIENT_INVENTORY_SHADOW_HANDOFF_2026_11_13.md"
+      - ".github/workflows/gingerscope-system2-inventory-shadow.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-inventory-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verify original immutable Stage83 source
+        run: |
+          git fetch --no-tags --depth=1 origin 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae
+          git show FETCH_HEAD:pdiddler/intelligence_lab/stage83_public_slug_registry.lua > "$RUNNER_TEMP/stage83-original.lua"
+          python3 - <<'PY'
+          import os,hashlib
+          from pathlib import Path
+          raw=(Path(os.environ['RUNNER_TEMP'])/'stage83-original.lua').read_bytes()
+          actual=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+          assert actual=='40e2a0ff01b70b2d0181c62cae347a08da82bcb8',actual
+          print('Stage83 exact original source Git blob:',actual)
+          PY
+      - name: Test inventory shadow and inherited four System2 stages
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/stage83-original.lua
+        run: |
+          python3 -m unittest -v \
+            pdiddler.ci.test_client_inventory_shadow \
+            pdiddler.ci.test_market_research_reader \
+            pdiddler.ci.test_publisher_page_parity \
+            pdiddler.ci.test_operator_capture_adapter \
+            pdiddler.ci.test_system2_catalog_discovery_diff
