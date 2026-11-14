@@ -1,0 +1,91 @@
+name: Gingerscope System2 evidence quality and research decision arbitration (offline)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/evidence_quality_arbiter.py'
+      - 'pdiddler/ci/test_evidence_quality_arbiter.py'
+      - 'pdiddler/system2/S2_EVIDENCE_QUALITY_ARBITER_HANDOFF_2026_11_14.md'
+      - '.github/workflows/gingerscope-system2-evidence-quality-arbiter.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  research-evidence-matrix-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify additive research arbiter original immutable code and guard source files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 285640deced402720df175a933ad764a2276a047
+          git show 285640deced402720df175a933ad764a2276a047:pdiddler/system2/evidence_quality_arbiter.py > "$RUNNER_TEMP/arbiter-original.py"
+          test "$(git hash-object "$RUNNER_TEMP/arbiter-original.py")" = 4bd555cac7823495821bbf2de8014431bdde0f46
+          cmp "$RUNNER_TEMP/arbiter-original.py" pdiddler/system2/evidence_quality_arbiter.py
+          test "$(git hash-object pdiddler/intelligence_lab/stage121_source_to_strategy_firewall.py)" = 9ef6f0b15caee96df06a445101d5cae5d7d01c3a
+          test "$(git hash-object pdiddler/system2/publisher_page_parity.py)" = 1464e78a75f36bb2798b9d8a9ab1886bc888d4b5
+          test "$(git hash-object pdiddler/system2/sealed_decision_source.py)" = a1e8dd701d4e893169f02d85b5593ec7debb1a90
+          test "$(git hash-object pdiddler/system2/market_inventory_revision_gate.py)" = 20db5ae4b2be0a9d7368073cf879574287b1e2d0
+          test "$(git hash-object pdiddler/strategy/growth_policy.json)" = cc8caa119af6faf160cff94729ed1cf49395dd4e
+          echo EVIDENCE_ORIGINAL_CODE_AND_PREDECESSOR_BLOBS_PINNED
+      - name: Recover and hash-check original Stage83 plus real PR106 planner and corrected PR182 guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/system2-pin"
+          git fetch --no-tags --depth=1 origin 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae
+          git show 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae:pdiddler/intelligence_lab/stage83_public_slug_registry.lua > "$RUNNER_TEMP/system2-pin/stage83.lua"
+          git fetch --no-tags --depth=1 origin 6ed48e084bd58fab38e3bf061ac36fb295ecf103
+          git show 6ed48e084bd58fab38e3bf061ac36fb295ecf103:pdiddler/intelligence_lab/future_portfolio_planner.py > "$RUNNER_TEMP/system2-pin/planner.py"
+          git fetch --no-tags --depth=1 origin 94ecefee86fd36293dcac58d0c24d9f379e719e5
+          git show 94ecefee86fd36293dcac58d0c24d9f379e719e5:pdiddler/intelligence_lab/offer_snapshot_guard.py > "$RUNNER_TEMP/system2-pin/guard.py"
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/stage83.lua")" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/planner.py")" = 78948cdacd2a760db5b888fce242d598fc6f14b6
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/guard.py")" = 11db895622d053ddced4fba9666135bf97bd615b
+          grep -Fq 'PROTECTED_GINGERSCOPE_OUTGOING' "$RUNNER_TEMP/system2-pin/guard.py"
+          echo 'ORIGINAL_S2_OLD_COMPONENT_SOURCE_LOCKS_PASS'
+      - name: Run original pinned planner regressions and evidence-arbitration adversarial cases
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/system2-pin/stage83.lua
+          STAGE120_REQUIRE_PINNED: '1'
+          STAGE120_PLANNER: ${{ runner.temp }}/system2-pin/planner.py
+          STAGE120_CORRECTED_GUARD: ${{ runner.temp }}/system2-pin/guard.py
+        run: |
+          python3 -m unittest -v \
+            pdiddler.ci.test_evidence_quality_arbiter \
+            pdiddler.ci.test_market_inventory_revision_gate \
+            pdiddler.ci.test_sealed_decision_source \
+            pdiddler.ci.test_counterparty_candidate_explorer \
+            pdiddler.ci.test_multitrade_growth_replay \
+            pdiddler.ci.test_attractiveness_evidence_lab \
+            pdiddler.ci.test_trade_scenario_lab \
+            pdiddler.ci.test_stage120_corrected_guard_preview \
+            pdiddler.ci.test_client_inventory_shadow \
+            pdiddler.ci.test_market_research_reader \
+            pdiddler.ci.test_publisher_page_parity \
+            pdiddler.ci.test_operator_capture_adapter \
+            pdiddler.ci.test_system2_catalog_discovery_diff
+
+      - name: Static deny privacy leakage and live action entry points
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('pdiddler/system2/evidence_quality_arbiter.py').read_text()
+          for bad in ('requests.get(', 'HttpGet(', 'FireServer(', 'AcceptTrade(',
+                      'setclipboard(', 'PostAsync(', 'TeleportService',
+                      'write_text(', 'open('):
+              assert bad not in s, bad
+          assert 'authorizesAccept": False' in s
+          assert 'mayUseForStrategyLearning": False' in s
+          assert 'marketSourceUsableForLiveOffer": False' in s
+          assert 'trustedCompletedTradeLabels":0' in s
+          print("SOURCE_ARBITER_LIVE_AUTHORITY_DENIED")
+          PY
