@@ -1,10 +1,14 @@
-name: Gingerscope MAIN ALT consecutive manual trade inventory-delta witness (offline)
+name: Gingerscope MAIN outbound FIRST repeated exact ALT request + human final Accept (offline)
 on:
   pull_request:
     paths:
       - 'pdiddler/supervised/main_alt_manual_multitrade_delta_core.lua'
       - 'pdiddler/ci/main_alt_manual_multitrade_delta_mocks.luau'
       - 'pdiddler/supervised/MAIN_ALT_MANUAL_MULTITRADE_WITNESS_NATIVE.lua'
+      - 'pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua'
+      - 'pdiddler/supervised/pdiddler3_exact_alt_outbound_requeue.lua'
+      - 'pdiddler/ci/main_alt_p3_exact_outbound_requeue_mocks.luau'
+      - 'pdiddler/ci/main_alt_outbound_first_multitrade_native_mocks.luau'
       - 'pdiddler/ci/main_alt_manual_multitrade_native_mocks.luau'
       - 'pdiddler/ci/test_main_alt_multitrade_oracle.py'
       - 'pdiddler/supervised/MAIN_ALT_MANUAL_MULTITRADE_HANDOFF_2026_11_14.md'
@@ -43,6 +47,18 @@ jobs:
           git fetch --no-tags --depth=1 origin 5b8ee35d7f281c23d9c2181abd97a063e59a0660
           git show 5b8ee35d7f281c23d9c2181abd97a063e59a0660:pdiddler/new_part4/stage100_screen_prompt_overlay.lua > pdiddler/new_part4/stage100_screen_prompt_overlay.lua
           test "$(git hash-object pdiddler/new_part4/stage100_screen_prompt_overlay.lua)" = e0eac8e039655999bd7bbac1f12da179db7c22ed
+          git fetch --no-tags --depth=1 origin 1c874cdbc5e85418360148fbdf33fa17534cd1ad
+          git show 1c874cdbc5e85418360148fbdf33fa17534cd1ad:pdiddler/supervised/pdiddler3_exact_alt_outbound_requeue.lua > "$RUNNER_TEMP/p3-exact-alt-requeue.lua"
+          test "$(git hash-object "$RUNNER_TEMP/p3-exact-alt-requeue.lua")" = 05642da61f3c38cadf7bdcc8d3c2da30a077ab15
+          cmp "$RUNNER_TEMP/p3-exact-alt-requeue.lua" pdiddler/supervised/pdiddler3_exact_alt_outbound_requeue.lua
+          git fetch --no-tags --depth=1 origin 3f00127e99a75a3bf01eb139afcc4e9c0ae246e4
+          git show 3f00127e99a75a3bf01eb139afcc4e9c0ae246e4:pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua > "$RUNNER_TEMP/main-initiated-multitrade.lua"
+          test "$(git hash-object "$RUNNER_TEMP/main-initiated-multitrade.lua")" = 50a588fb975d550c33422c76c2777bfe22bda406
+          cmp "$RUNNER_TEMP/main-initiated-multitrade.lua" pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua
+          git fetch --no-tags --depth=1 origin 2036ae5bd937620f21d46600f99550a1b233a654
+          git show 2036ae5bd937620f21d46600f99550a1b233a654:pdiddler/pdiddler3_scanner_MODULE_v6_5_PART4_STATUS_BRIDGE.lua > "$RUNNER_TEMP/original-p3-scanner.lua"
+          test "$(git hash-object "$RUNNER_TEMP/original-p3-scanner.lua")" = f7190538cbc882e23b22f723f3af0b6140a98bcd
+          echo MAIN_ALT_OUTBOUND_FIRST_ALL_P3_SOURCE_PINS
           echo MAIN_ALT_MULTI_TRADE_ALL_ORIGINAL_SOURCE_BLOBS_PINNED
       - name: Install official Lune v0.11.1 pinned release
         shell: bash
@@ -67,6 +83,12 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/main_alt_manual_multitrade_native_mocks.luau
+      - name: Execute original reviewed P3 sender exact ALT requeue and fake native outgoing-first adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/main_alt_p3_exact_outbound_requeue_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/main_alt_outbound_first_multitrade_native_mocks.luau
       - name: Independent Python 1500 randomized multi-trade sessions and static authority oracle
         shell: bash
         run: |
@@ -88,6 +110,17 @@ jobs:
           for bad in ('FireServer(', 'SendMouseButtonEvent(', 'AcceptTrade(', 'OfferItem(', 'TeleportService', 'PostAsync('):
               assert bad not in native, bad
           assert native.count('rf:InvokeServer()')==1
+          sender=Path('pdiddler/supervised/pdiddler3_exact_alt_outbound_requeue.lua').read_text()
+          outbound=Path('pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua').read_text()
+          assert 'requeueVerifiedExactAlt=function()' in sender
+          assert 'options.exactAltUserId' in sender
+          assert 'UNEXPECTED_INCOMING_REQUEST_DURING_OUTBOUND' in sender
+          assert 'MAIN P3 sends the trade REQUEST first' in outbound
+          assert 'requeueVerifiedExactAlt' in outbound
+          assert 'main.status().phase=="WAIT_OPEN"' in outbound
+          assert 'OUTBOUND_P3_ARM_FAILED' not in outbound
+          for action in ('AcceptTrade:FireServer(', 'OfferItem:FireServer(', 'TeleportService', 'PostAsync('):
+              assert action not in outbound, action
           assert 'actualScriptAccepts=0' in s
           assert 'ALL_MAIN_ALT_TRADES_IN_THIS_JOB' in s
           print('CONSECUTIVE_MAIN_ALT_NO_AUTO_ACCEPT_PURE_POLICY_PASS')
