@@ -2,7 +2,7 @@ name: Gingerscope S2 component6 partner-directed passive chat evidence (no trade
 on:
   push:
     branches:
-      - research/system2-partner-intent-observer-nov14
+      - research/system2-passive-partner-intent-clean-nov14
   workflow_dispatch:
 permissions:
   contents: read
