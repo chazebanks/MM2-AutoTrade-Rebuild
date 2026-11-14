@@ -155,6 +155,16 @@ eq(constraints.constraints.noDuplicates,true,"no dupes captured")
 eq(constraints.constraints.noSeers,true,"no seers captured")
 eq(constraints.constraints.noPets,true,"no pets captured")
 eq(constraints.constraints.compactInventory,true,"compact stock preference captured")
+local negated=emit("@MainTestUser_Alpha LF Harvester but not Iceblaster")
+local parsed={}
+for _,it in ipairs(negated.itemPreferences) do parsed[it.key]=it.intent end
+eq(parsed.Harvester,"WANTS","LF first item retains positive interest")
+eq(parsed.Iceblaster,"AVOIDS","but not excludes second named item")
+local tentative=emit("@MainTestUser_Alpha LF Harvester maybe Iceblaster")
+local maybe={}
+for _,it in ipairs(tentative.itemPreferences) do maybe[it.key]=it.intent end
+eq(maybe.Iceblaster,"MENTION_ONLY",
+ "maybe cannot upgrade a speculative item into a confirmed wishlist")
 local snapshot=api.snapshot()
 eq(snapshot.status,"CLIENT_ONLY_PASSIVE_PARTNER_PREFERENCE_RESEARCH",
  "only client evidence local snapshot")
@@ -228,8 +238,21 @@ local old=api.snapshot()
 yes(old.activeSignals>0,"brief in-session state kept for research")
 revision+=1
 local stale=api.snapshot()
-eq(stale.activeSignals,0,"offer revision invalidates old chat evidence")
+eq(stale.activeSignals,0,
+ "old-revision NTY and response signals do not apply to a new offer")
+local portable={}
+for _,p in ipairs(stale.itemPreferences) do portable[p.rawGameKeyCandidate]=p end
+eq(portable.FangChroma.intent,"AVOIDS",
+ "explicit NLF remains short-lived within same partner lease")
+eq(portable.FangChroma.carriedAcrossOfferChange,true,
+ "carried preference is visibly tagged from earlier offer revision")
+local duplicateAfterRevision=api.readonlyProcessDeliveredTextChatMessage(firstMsg)
+eq(duplicateAfterRevision.status,"IGNORED_DUPLICATE_MESSAGE",
+ "same TextChatMessage cannot be reintroduced on new revision")
 revision-=1
+eq(api.snapshot().reason,"CLIENT_OFFER_REVISION_ROLLBACK",
+ "stale or malicious client revision rollback blocked")
+revision+=1
 
 local wrongItem=api.compareResearchOptions({
  {give={{id="CompletelyInventedWeapon",quantity=1}},receive={}},
