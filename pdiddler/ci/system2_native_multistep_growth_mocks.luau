@@ -73,6 +73,14 @@ eq(result.authorizesOffer,false,"never place offer")
 eq(result.authorizesAccept,false,"never press Accept")
 eq(result.mayReportProfit,false,"no fake settled profit")
 eq(result.originalMM2LivePass,false,"offline native mock is not client pass")
+yes(result.hypotheticalGeneratedStepTypes.UPGRADE>0,
+ "generated a genuine 2-to-1 upgrade route in bounded search")
+yes(result.hypotheticalGeneratedStepTypes.DOWNGRADE>0,
+ "generated a genuine 1-to-2 downgrade route in bounded search")
+yes(result.rejectedMajorFutureSellerGiveaways>0,
+ "future unnamed sellers cannot be presumed willing to donate most listed value")
+eq(result.rejectedMajorFutureSellerGiveaways>0,true,
+ "seller sacrifice heuristic is distinct from invented acceptance likelihood")
 for _,route in ipairs(result.alternativeRoutes) do
  yes(route.routeLength>=2 and route.routeLength<=3,"must genuinely plan two or more steps")
  yes(route.steps[1].scope=="ACTUAL_CLIENT_OFFER_VISIBLE_UNVERIFIED_ACCEPTANCE",
@@ -148,6 +156,11 @@ eq(c5.search(context(),fakeSource,stages,c4).reason,
 local targetFuture=config(seller(id("Gingerscope")))
 eq(c5.search(context(),market,targetFuture,c4).status,"ABSTAIN",
  "unattributed future Gingerscope seller cannot create fantasy acquisition route")
+local alreadyOwned=context()
+alreadyOwned.ownCounts.Gingerscope=1
+eq(c5.search(alreadyOwned,market,stages,c4).reason,
+ "CLIENT_CENSUS_ALREADY_INCLUDES_PROTECTED_TARGET",
+ "once protected target is actually observed owned, no speculative acquisition loop")
 local noPartner=context()
 noPartner.offer.their.items={}
 eq(c5.search(noPartner,market,stages,c4).reason,
