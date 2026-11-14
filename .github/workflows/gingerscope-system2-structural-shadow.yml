@@ -1,0 +1,138 @@
+name: Gingerscope System2 structural shadow planning native + Python oracle (offline)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/native_structural_shadow_core.lua'
+      - 'pdiddler/system2/SYSTEM2_STRUCTURAL_SHADOW_READONLY_NATIVE.lua'
+      - 'pdiddler/ci/system2_structural_shadow_native_mocks.luau'
+      - 'pdiddler/ci/test_structural_shadow_oracle.py'
+      - 'pdiddler/system2/S2_STRUCTURAL_SHADOW_HANDOFF_2026_11_14.md'
+      - 'pdiddler/system2/SYSTEM2_READ_NEXT_2026_11_13.md'
+      - '.github/workflows/gingerscope-system2-structural-shadow.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-shadow-lune:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate code-owner continuity pins and recover policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.continuity.manager verify
+          python3 -m pdiddler.continuity.manager recover
+      - name: Pin shadow core and tested iPad wrapper, older key auditor, Stage83 public source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 586d2a6215ee7d119c8cbb7ed77a3412c71fe922
+          git show 586d2a6215ee7d119c8cbb7ed77a3412c71fe922:pdiddler/system2/native_structural_shadow_core.lua > "$RUNNER_TEMP/shadow-core.lua"
+          test "$(git hash-object "$RUNNER_TEMP/shadow-core.lua")" = efd373798a9cb2729cd635ab2b2ef418f5c42782
+          cmp "$RUNNER_TEMP/shadow-core.lua" pdiddler/system2/native_structural_shadow_core.lua
+          git fetch --no-tags --depth=1 origin c7592507b58f7463e5923f76d74f9d0e8299c0ee
+          git show c7592507b58f7463e5923f76d74f9d0e8299c0ee:pdiddler/system2/SYSTEM2_STRUCTURAL_SHADOW_READONLY_NATIVE.lua > "$RUNNER_TEMP/shadow-runner.lua"
+          test "$(git hash-object "$RUNNER_TEMP/shadow-runner.lua")" = 72608c2b290e3d0012787eb96d4c1e7821dafdd6
+          cmp "$RUNNER_TEMP/shadow-runner.lua" pdiddler/system2/SYSTEM2_STRUCTURAL_SHADOW_READONLY_NATIVE.lua
+          git fetch --no-tags --depth=1 origin eea9d6f5da3dfac8599e2f3e7b9fe1764d6ba288
+          git show eea9d6f5da3dfac8599e2f3e7b9fe1764d6ba288:pdiddler/system2/native_key_reconciliation_core.lua > "$RUNNER_TEMP/key-core.lua"
+          test "$(git hash-object "$RUNNER_TEMP/key-core.lua")" = 6d6d5760930c284317b7cee3980b50880ea642fc
+          cmp "$RUNNER_TEMP/key-core.lua" pdiddler/system2/native_key_reconciliation_core.lua
+          git fetch --no-tags --depth=1 origin 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae
+          git show 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae:pdiddler/intelligence_lab/stage83_public_slug_registry.lua > "$RUNNER_TEMP/stage83.lua"
+          test "$(git hash-object "$RUNNER_TEMP/stage83.lua")" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          cp "$RUNNER_TEMP/stage83.lua" pdiddler/intelligence_lab/stage83_public_slug_registry.lua
+          for pin in 586d2a6215ee7d119c8cbb7ed77a3412c71fe922 eea9d6f5da3dfac8599e2f3e7b9fe1764d6ba288 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae; do
+            grep -Fq "$pin" pdiddler/system2/SYSTEM2_STRUCTURAL_SHADOW_READONLY_NATIVE.lua
+          done
+          echo SHADOW_PINNED_MODULE_BYTES_CONFIRMED
+      - name: Install immutable Lune v0.11.1 (official release SHA256)
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/lune-v0.11.1-linux-x86_64.zip"
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 20 \
+            "https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip" \
+            --output "$archive"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/lune-dist"
+          found="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
+          test -n "$found"
+          install -m 0755 "$found" "$RUNNER_TEMP/lune"
+      - name: Run actual one-tap MAIN structural shadow GUI+classifier in Lune
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_structural_shadow_native_mocks.luau
+      - name: Assert native shadow has no mutation remotes or current-price authority
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('pdiddler/system2/SYSTEM2_STRUCTURAL_SHADOW_READONLY_NATIVE.lua').read_text()
+          for forbidden in ('FireServer(', 'AcceptTrade(', 'DeclineTrade(', 'TeleportService', 'GetFullInventory', 'HttpService:PostAsync(', 'setreadonly(', 'hookmetamethod('):
+              assert forbidden not in s, f"UNEXPECTED_NATIVE_ACTION_OR_NETWORK: {forbidden}"
+          assert s.count('rf:InvokeServer()') == 1
+          assert s.count('game:HttpGet(url)') == 1
+          assert 'GetProfileData' in s and 'tradeVisible()' in s
+          assert 'native_key_reconciliation_core.lua' in s and 'stage100_screen_prompt_overlay.lua' in s
+          assert 'native_structural_shadow_core.lua' in s
+          assert 'stage83_public_slug_registry.lua' in s
+          assert 'GetProfileData' in s and 'RUN SHADOW BATCH' in s
+          print("S2_SHADOW_READONLY_NO_ACTIONS_PASS")
+          PY
+
+      - name: Run independent Python structural-slot arithmetic + safety oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_structural_shadow_oracle
+  all-inherited-source-pinned-python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Recover original Stage83 PR106 planner and corrected PR182 guard SHA pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/system2-pin"
+          git fetch --no-tags --depth=1 origin 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae
+          git show 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae:pdiddler/intelligence_lab/stage83_public_slug_registry.lua > "$RUNNER_TEMP/system2-pin/stage83.lua"
+          git fetch --no-tags --depth=1 origin 6ed48e084bd58fab38e3bf061ac36fb295ecf103
+          git show 6ed48e084bd58fab38e3bf061ac36fb295ecf103:pdiddler/intelligence_lab/future_portfolio_planner.py > "$RUNNER_TEMP/system2-pin/planner.py"
+          git fetch --no-tags --depth=1 origin 94ecefee86fd36293dcac58d0c24d9f379e719e5
+          git show 94ecefee86fd36293dcac58d0c24d9f379e719e5:pdiddler/intelligence_lab/offer_snapshot_guard.py > "$RUNNER_TEMP/system2-pin/guard.py"
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/stage83.lua")" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/planner.py")" = 78948cdacd2a760db5b888fce242d598fc6f14b6
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/guard.py")" = 11db895622d053ddced4fba9666135bf97bd615b
+          grep -Fq 'PROTECTED_GINGERSCOPE_OUTGOING' "$RUNNER_TEMP/system2-pin/guard.py"
+      - name: Run 311 inherited research-only Python regressions on exact source blobs
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/system2-pin/stage83.lua
+          STAGE120_REQUIRE_PINNED: '1'
+          STAGE120_PLANNER: ${{ runner.temp }}/system2-pin/planner.py
+          STAGE120_CORRECTED_GUARD: ${{ runner.temp }}/system2-pin/guard.py
+        run: |
+          python3 -m unittest -v \
+            pdiddler.ci.test_market_inventory_revision_gate \
+            pdiddler.ci.test_counterparty_candidate_explorer \
+            pdiddler.ci.test_sealed_decision_source \
+            pdiddler.ci.test_multitrade_growth_replay \
+            pdiddler.ci.test_attractiveness_evidence_lab \
+            pdiddler.ci.test_trade_scenario_lab \
+            pdiddler.ci.test_stage120_corrected_guard_preview \
+            pdiddler.ci.test_client_inventory_shadow \
+            pdiddler.ci.test_market_research_reader \
+            pdiddler.ci.test_publisher_page_parity \
+            pdiddler.ci.test_operator_capture_adapter \
+            pdiddler.ci.test_system2_catalog_discovery_diff
