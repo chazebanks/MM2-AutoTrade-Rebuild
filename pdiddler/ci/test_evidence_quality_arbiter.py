@@ -171,7 +171,7 @@ class EvidenceQualityArbiterTests(unittest.TestCase):
   self.assertEqual(self.check(x)["status"],"BLOCKED")
  def test_forged_sealed_source_sha_blocks(self):
   x=good();x["sealed_decision"]["mappedRowsSha256"]="f"*64
-  self.assertEqual(self.check(x)["status"],"INCOMPLETE_EVIDENCE_RESEARCH_ONLY")
+  self.assertEqual(self.check(x)["status"],"BLOCKED")
  def test_sealed_research_outcome_changed_blocks(self):
   x=good();x["sealed_decision"]["researchResult"]["mayUseForStrategyLearning"]=True
   self.assertEqual(self.check(x)["status"],"BLOCKED")
