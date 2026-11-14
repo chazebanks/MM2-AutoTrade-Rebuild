@@ -131,6 +131,7 @@ local badOffers={
  {ownOffer={{rawKey="Gingerscope",quantity=1,slotIndex=1,category="Weapons"}}},
  {ownOffer={{rawKey="GINGERSCOPE",quantity=1,slotIndex=1,category="Weapons"}}},
  {ownOffer={{rawKey="Chroma_Gingerscope",quantity=1,slotIndex=1,category="Weapons"}}},
+ {ownOffer={{rawKey="Ginger_Scope",quantity=1,slotIndex=1,category="Weapons"}}},
  {altOffer={{rawKey="BAD/KEY",quantity=1,slotIndex=1,category="Weapons"}}},
  {altOffer={{rawKey="x",quantity=0,slotIndex=1,category="Weapons"}}},
  {altOffer={{rawKey="x",quantity=-1,slotIndex=1,category="Weapons"}}},
