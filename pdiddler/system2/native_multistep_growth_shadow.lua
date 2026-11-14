@@ -311,11 +311,16 @@ local function beamPick(nodes)
  end
  return out
 end
+local function convert(list)
+ local entries={}
+ for _,v in ipairs(list) do entries[v.id]=v.quantity end
+ return entries
+end
 local function newState(first,index)
  local stamp=fingerprint(first.ownedAfter)
  local node={steps={first},holdings=copy(first.ownedAfter),seen={[stamp]=true},
   pathKey=fingerprint(first.ownedAfter)..":1",
-  firstChoiceFingerprint=fingerprint(first.give).."/"..fingerprint(first.receive)}
+  firstChoiceFingerprint=fingerprint(convert(first.give)).."/"..fingerprint(convert(first.receive))}
  node.metrics=score(node,index)
  return node
 end
@@ -333,11 +338,6 @@ local function details(steps)
    sellerActuallyVerified=false,authorizedAction=false}
  end
  return out
-end
-local function convert(list)
- local entries={}
- for _,v in ipairs(list) do entries[v.id]=v.quantity end
- return entries
 end
 function M.search(context,market,spec,bilateral)
  if type(spec)~="table" or
