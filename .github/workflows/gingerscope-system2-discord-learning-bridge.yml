@@ -1,0 +1,75 @@
+name: Gingerscope System2 Discord bot private-ledger learning bridge (offline)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/discord_learning_evidence_bridge.py'
+      - 'pdiddler/ci/test_discord_learning_evidence_bridge.py'
+      - 'pdiddler/system2/SYSTEM2_DISCORD_LEARNING_PIPELINE_HANDOFF_2026_11_14.md'
+      - '.github/workflows/gingerscope-system2-discord-learning-bridge.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  discord-original-source-locked-evidence-learning:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exact original Discord bot private-ledger and audit source pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.continuity.manager verify
+          python3 -m pdiddler.continuity.manager recover
+          git fetch --no-tags --depth=1 origin 95e8946ba5c348cbaf548ba0db0c0a465a692ae0
+          git show 95e8946ba5c348cbaf548ba0db0c0a465a692ae0:scripts/discord_private_history_import.py > "$RUNNER_TEMP/original-discord-private-import.py"
+          test "$(git hash-object "$RUNNER_TEMP/original-discord-private-import.py")" = d7524156702623b450e3195099a91f4679ac6524
+          cmp "$RUNNER_TEMP/original-discord-private-import.py" scripts/discord_private_history_import.py
+          git show 95e8946ba5c348cbaf548ba0db0c0a465a692ae0:scripts/discord_history_embed_audit.py > "$RUNNER_TEMP/original-discord-embed-audit.py"
+          test "$(git hash-object "$RUNNER_TEMP/original-discord-embed-audit.py")" = 702d5924b870c0893c8a155d14b58e021afa4a29
+          cmp "$RUNNER_TEMP/original-discord-embed-audit.py" scripts/discord_history_embed_audit.py
+          git show 95e8946ba5c348cbaf548ba0db0c0a465a692ae0:pdiddler/system2/counterparty_response_learning_lab.py > "$RUNNER_TEMP/original-S2-response-replay.py"
+          test "$(git hash-object "$RUNNER_TEMP/original-S2-response-replay.py")" = 31208dab4de3c5e348ad7f0f571d2dce70123eaa
+          cmp "$RUNNER_TEMP/original-S2-response-replay.py" pdiddler/system2/counterparty_response_learning_lab.py
+          git fetch --no-tags --depth=1 origin ab3e1a8320d18bbfd3939e099b41e5571efc1f47
+          git show ab3e1a8320d18bbfd3939e099b41e5571efc1f47:pdiddler/system2/discord_learning_evidence_bridge.py > "$RUNNER_TEMP/new-discord-S2-bridge.py"
+          test "$(git hash-object "$RUNNER_TEMP/new-discord-S2-bridge.py")" = b79aa47cbc7e8b4f2c01347b3aae7db695aaeb6b
+          cmp "$RUNNER_TEMP/new-discord-S2-bridge.py" pdiddler/system2/discord_learning_evidence_bridge.py
+          echo ORIGINAL_DISCORD_LEDGER_AND_S2_RESPONSE_MODULE_BLOBS_PINNED
+      - name: Test real historical importer, synthetic v2 event proposal and all inherited safeguards
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v \
+            pdiddler.ci.test_discord_learning_evidence_bridge \
+            pdiddler.intelligence_lab.test_discord_private_history_import \
+            pdiddler.intelligence_lab.test_discord_history_embed_audit \
+            pdiddler.intelligence_lab.test_discord_readonly_probe \
+            pdiddler.ci.test_counterparty_response_learning_lab \
+            pdiddler.ci.test_multi_axis_strategy_stress_lab \
+            pdiddler.ci.test_growth_policy_decision
+      - name: Fail closed on live Discord network, credentials, completion authority and public Accept
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          source=Path("pdiddler/system2/discord_learning_evidence_bridge.py").read_text()
+          for forbidden in ("urlopen(", "requests.get(", "requests.post(", "FireServer(", "InvokeServer(", "HttpGet(", "PostAsync(", "bot.run(", "client.run("):
+              assert forbidden not in source, forbidden
+          for assertion in ('"mayUseForStrategyLearning": False',
+                            '"authorizesAccept": False',
+                            '"publicAutoAcceptAuthorized": False',
+                            '"historicalWebhookClaimsVerifiedAsSettlement": False',
+                            'HISTORICAL_UNVERIFIED_AUTHORITY_FORGERY',
+                            'DUPLICATE_DISCORD_RECEIPT_MUTATED',
+                            'SYNTHETIC_DISCORD_BOT_TEST_ONLY'):
+              assert assertion in source, assertion
+          print('DISCORD_REPORTING_AS_S2_SHADOW_FEEDBACK_NOT_SETTLEMENT_AUTHORITY_PASS')
+          PY
