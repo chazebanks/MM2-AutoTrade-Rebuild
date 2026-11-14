@@ -39,7 +39,7 @@ class MissionLockContinuity(unittest.TestCase):
         for phrase in (
             "System 2 = trading intelligence",
             "System 1 / P3 / P4 are the mechanics",
-            "bilateral attractiveness",
+            "both sides' incentives/attractiveness",
             "multi-step",
             "learning",
             "Gingerscope",
@@ -52,7 +52,7 @@ class MissionLockContinuity(unittest.TestCase):
     def test_hardware_replay_is_closed_not_the_project(self):
         s = read(LOCK)
         for phrase in (
-            "five matching MAIN client inventory deltas",
+            "five MAIN client inventory-delta confirmations",
             "six MAIN-initiated exact-ALT request cycles",
             "ALT_ITEM_ID_QUANTITY_OR_ELIGIBILITY_AMBIGUOUS",
             "DO NOT REQUEST ANOTHER SEQUENCE",
@@ -72,7 +72,7 @@ class MissionLockContinuity(unittest.TestCase):
             "Learning and uncertainty",
             "Negotiation/chat intent",
             "No replay for a filled box",
-            "does NOT independently authenticate game server completion",
+            "no independently proven server trade revision",
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, s)
@@ -80,11 +80,9 @@ class MissionLockContinuity(unittest.TestCase):
     def test_no_inadvertent_permitted_actions(self):
         s = read(LOCK)
         self.assertIn("Does not authorize FINAL ACCEPT", s)
-        self.assertIn("No numeric", s if "No numeric" in s else
-                      "No numeric policy approved") if False else None
-        self.assertIn("no approved", s.lower())
+        self.assertIn("null unapproved budgets", s.lower())
         self.assertIn("public", s.lower())
-        self.assertIn("not server", s.lower())
+        self.assertIn("no independently proven server trade revision", s.lower())
 
 if __name__ == "__main__":
     unittest.main()
