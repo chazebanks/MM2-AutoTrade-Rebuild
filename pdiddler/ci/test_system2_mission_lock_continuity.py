@@ -77,6 +77,25 @@ class MissionLockContinuity(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, s)
 
+    def test_s27_discord_bot_is_canonical_learning_input(self):
+        mission=read(LOCK)
+        path="pdiddler/system2/SYSTEM2_DISCORD_LEARNING_PIPELINE_HANDOFF_2026_11_14.md"
+        handoff=read(path)
+        self.assertIn(path,mission[:3000])
+        for phrase in (
+            "existing Discord bot",
+            "PRIVATE Discord evidence archive",
+            "historical",
+            "zero learning-eligible",
+            "automatic FINAL ACCEPT",
+            "NO Roblox script",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase.lower(),handoff.lower())
+        self.assertIn("zero independently verified completed trades",mission.lower())
+        self.assertIn("exact MAIN–ALT policy",mission)
+        self.assertIn("not an authorization to deploy",handoff.lower())
+
     def test_no_inadvertent_permitted_actions(self):
         s = read(LOCK)
         self.assertIn("Does not authorize FINAL ACCEPT", s)
