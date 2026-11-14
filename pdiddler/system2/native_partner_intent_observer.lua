@@ -199,6 +199,7 @@ local function acceptScope(bound,scope,ctx)
    type(ctx.offer)~="table" or ctx.offer.readOnly~=true or
    not finite(ctx.clientOfferRevision) or
    ctx.clientOfferRevision<1 or
+   ctx.clientOfferRevision~=math.floor(ctx.clientOfferRevision) or
    ctx.clientOfferRevision~=ctx.offer.clientRevision or
    type(scope.jobId)~="string" or scope.jobId~=bound.jobId or
    scope.leaseId~=bound.leaseId or
@@ -208,8 +209,10 @@ local function acceptScope(bound,scope,ctx)
    scope.tradeOpen~=true or scope.leaseActive~=true or
    not validId(scope.partnerUserId) or not validId(scope.localUserId) or
    not finite(ctx.offer.ownedCensusAgeSeconds) or
+   ctx.offer.ownedCensusAgeSeconds<0 or
    ctx.offer.ownedCensusAgeSeconds>30 or
    not finite(ctx.offer.sourceAgeSeconds) or
+   ctx.offer.sourceAgeSeconds<0 or
    ctx.offer.sourceAgeSeconds>21600 then
   return false
  end
@@ -274,19 +277,26 @@ function M.new(config)
  local current=nil
  local lastRevision=nil
  local observer={}
+ local function purge()
+  current=nil;lastRevision=nil
+  seen={};seenList={};events={}
+ end
  local function read()
   local ok,ctx=pcall(config.readContext)
   local good,scope=pcall(config.readScope)
   local tgood,now=pcall(config.now)
   if not ok or not good or not tgood or not finite(now) or
      not acceptScope(bound,scope,ctx) then
+   purge()
    return nil,nil,nil,"ORIGINAL_P3_P4_CLIENT_SCOPE_NOT_CURRENT"
   end
   if lastRevision~=nil and ctx.clientOfferRevision<lastRevision then
+   purge()
    return nil,nil,nil,"CLIENT_OFFER_REVISION_ROLLBACK"
   end
   if ctx.crosswalkRowsSha256~=config.crosswalk.crosswalkRowsSha256 or
      ctx.sourceRetrievedUtc~=config.crosswalk.sourceRetrievedUtc then
+   purge()
    return nil,nil,nil,"SOURCE_REVISION_CHANGED"
   end
   return ctx,scope,now,nil
@@ -450,7 +460,8 @@ function M.new(config)
   local options={}
   for index,o in ipairs(alternatives) do
    if type(o)~="table" or type(o.give)~="table" or
-     type(o.receive)~="table" or #o.give>4 or #o.receive>4 then
+     type(o.receive)~="table" or #o.give<1 or #o.receive<1 or
+     #o.give>4 or #o.receive>4 then
     return denied("OPTION_NOT_FOUR_PHYSICAL_SLOTS")
    end
    local likes,avoids,unknown=0,0,0
@@ -473,6 +484,17 @@ function M.new(config)
     if snapshot.constraints.noDuplicates and item.quantity>1 then
       duplicate=true end
    end
+   local receiveSeen={}
+   for _,other in ipairs(o.receive) do
+    if type(other)~="table" or not rows[other.id] or
+       not finite(other.quantity) or
+       other.quantity~=math.floor(other.quantity) or
+       other.quantity<1 or other.quantity>1000000 or
+       receiveSeen[other.id] then
+     return denied("RECEIVE_SIDE_ITEM_OR_QUANTITY_INVALID")
+    end
+    receiveSeen[other.id]=true
+   end
    local count=#o.give
    options[#options+1]={index=index,statedWantedMatches=likes,
      statedAvoidedMatches=avoids,unknownItemPreferences=unknown,
@@ -481,6 +503,7 @@ function M.new(config)
      itemCompatibility=(avoids>0 or duplicate) and "CONFLICTS_STATED_PREFERENCE" or
        likes>0 and "MATCHES_STATED_ITEM_INTEREST" or "UNVERIFIED",
      actualWillingnessToTrade=false,estimatedAcceptProbability=nil,
+     optionFeasibilityMustBeValidatedSeparatelyByComponent4=true,
      canProposeLiveOffer=false}
   end
   return envelope("CLIENT_ONLY_PREFERENCE_COMPATIBILITY_RESEARCH",
