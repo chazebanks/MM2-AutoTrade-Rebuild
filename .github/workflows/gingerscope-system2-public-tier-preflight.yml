@@ -1,4 +1,4 @@
-name: Gingerscope public tier page connectivity preflight (no trade)
+name: Gingerscope System2 public MM2 source — validated live candidate
 on:
   push:
     branches:
@@ -6,38 +6,33 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: gingerscope-system2-public-tier-source
+  cancel-in-progress: false
 jobs:
-  public-source-diagnostic:
+  live-source-candidate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 6
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Test actual current public HTML pages and structural coverage
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import re,urllib.request,urllib.error
-          for category,minimum in (("ancient",16),("godly",128),("chroma",65)):
-              url="https://mm2tradehub.com/values/category/"+category
-              try:
-                  req=urllib.request.Request(url,headers={"Accept":"text/html","User-Agent":"GingerscopeMarketDiagnostic/1.0"})
-                  with urllib.request.urlopen(req,timeout=20) as resp:
-                      status=resp.status
-                      raw=resp.read(2100000)
-              except urllib.error.HTTPError as err:
-                  print(f"{category.upper()}_SOURCE_HTTP_{err.code}")
-                  raise SystemExit(2)
-              except Exception as err:
-                  print(f"{category.upper()}_SOURCE_TRANSPORT_FAILURE:{type(err).__name__}")
-                  raise SystemExit(2)
-              html=raw.decode("utf-8")
-              count=len(re.findall(r'<a class="group card ',html))
-              print(f"{category.upper()}_HTTP={status} BYTES={len(raw)} REAL_CARDS={count}")
-              if status!=200 or count!=minimum:
-                  raise SystemExit(2)
-          print("LIVE_PAGE_STRUCTURAL_DIAGNOSTIC=PASS_NO_AUTHORIZED_TRADES")
-          PY
+      - name: Install read-only HTML parsing dependency
+        run: python3 -m pip install --disable-pip-version-check 'beautifulsoup4>=4.12,<5'
+      - name: Verify hostile and positive local data contracts
+        run: python3 -m unittest -v pdiddler.ci.test_system2_mm2tradehub_market_candidate
+      - name: Fetch and admit actual source edition, tier pages and item counts
+        env:
+          GINGERSCOPE_MARKET_OUTPUT: ${{ runner.temp }}/gingerscope-real-market-candidate.json
+        run: python3 -m pdiddler.system2.mm2tradehub_market_candidate
+      - name: Save immutable per-run research candidate
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-real-mm2-public-market-candidate
+          path: ${{ runner.temp }}/gingerscope-real-market-candidate.json
+          retention-days: 7
+          if-no-files-found: error
