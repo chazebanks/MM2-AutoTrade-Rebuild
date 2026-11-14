@@ -24,6 +24,16 @@ jobs:
           set -euo pipefail
           python3 -m pdiddler.continuity.manager verify
           python3 -m pdiddler.continuity.manager recover
+      - name: Verify exact immutable native core loaded by iPad runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 8e0d3312404e8a1557545e81df351b7c55633451
+          git show 8e0d3312404e8a1557545e81df351b7c55633451:pdiddler/system2/native_own_census_core.lua > "$RUNNER_TEMP/native-core-pinned.lua"
+          test "$(git hash-object "$RUNNER_TEMP/native-core-pinned.lua")" = b39f10fd47c6a2df6a206142b8b4c7b3dd39f3cf
+          cmp "$RUNNER_TEMP/native-core-pinned.lua" pdiddler/system2/native_own_census_core.lua
+          grep -Fq '8e0d3312404e8a1557545e81df351b7c55633451' pdiddler/system2/SYSTEM2_OWN_CENSUS_READONLY_NATIVE.lua
+          echo SYSTEM2_NATIVE_CORE_RUNTIME_AND_CHECKOUT_PIN_IDENTICAL
       - name: Install immutable Lune v0.11.1 (official release SHA256)
         shell: bash
         run: |
