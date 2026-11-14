@@ -51,9 +51,9 @@ jobs:
           git show 1c874cdbc5e85418360148fbdf33fa17534cd1ad:pdiddler/supervised/pdiddler3_exact_alt_outbound_requeue.lua > "$RUNNER_TEMP/p3-exact-alt-requeue.lua"
           test "$(git hash-object "$RUNNER_TEMP/p3-exact-alt-requeue.lua")" = 05642da61f3c38cadf7bdcc8d3c2da30a077ab15
           cmp "$RUNNER_TEMP/p3-exact-alt-requeue.lua" pdiddler/supervised/pdiddler3_exact_alt_outbound_requeue.lua
-          git fetch --no-tags --depth=1 origin 25d65beea1ebefcbe3c077b171a67f183dc1c61d
-          git show 25d65beea1ebefcbe3c077b171a67f183dc1c61d:pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua > "$RUNNER_TEMP/main-initiated-multitrade.lua"
-          test "$(git hash-object "$RUNNER_TEMP/main-initiated-multitrade.lua")" = e28df93a1396ff4be59248202c079c5fa97f099f
+          git fetch --no-tags --depth=1 origin 7087481aca6b5cac260f015704f236fee960d7ef
+          git show 7087481aca6b5cac260f015704f236fee960d7ef:pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua > "$RUNNER_TEMP/main-initiated-multitrade.lua"
+          test "$(git hash-object "$RUNNER_TEMP/main-initiated-multitrade.lua")" = a889f8440e3b8c16ddfcbdef44376947645ce12f
           cmp "$RUNNER_TEMP/main-initiated-multitrade.lua" pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua
           git fetch --no-tags --depth=1 origin 2036ae5bd937620f21d46600f99550a1b233a654
           git show 2036ae5bd937620f21d46600f99550a1b233a654:pdiddler/pdiddler3_scanner_MODULE_v6_5_PART4_STATUS_BRIDGE.lua > "$RUNNER_TEMP/original-p3-scanner.lua"
@@ -117,6 +117,11 @@ jobs:
           assert 'UNEXPECTED_INCOMING_REQUEST_DURING_OUTBOUND' in sender
           assert 'MAIN P3 sends the trade REQUEST first' in outbound
           assert 'mainAutomaticallyInitiatesTradeRequests=true' in outbound
+          assert 'ownedP3Epoch=outgoing.session' in outbound
+          assert 'liveP3Epoch~=ownedP3Epoch' in outbound
+          assert 'PREARM_OWNED_P3_EPOCH_CHANGED' in outbound
+          assert 'OWNED_P3_EPOCH_OR_CONTROLLER_CHANGED' in outbound
+          assert 'PREARM_VIEWPORT_UNSAFE' in outbound
           assert 'o.readOnly=false' in outbound
           assert 'automaticFinalAcceptEnabled=false' in outbound
           assert 'clientInventoryObserverReadOnly=true' in outbound
