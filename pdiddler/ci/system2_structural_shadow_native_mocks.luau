@@ -44,7 +44,7 @@ end
 local function pure()
  local a=core.syntheticTests()
  eq(a.status,"PURE_SYNTHETIC_SCENARIOS_PASSED","pure synthetic harness")
- eq(a.cases,8,"8 separately checked synthetic trade constraints")
+ eq(a.cases,10,"10 separately checked synthetic trade constraints")
  eq(a.estimatedAcceptanceProbabilityAvailable,false,"do not invent partner odds")
  local r=evaluate()
  eq(r.status,"CLIENT_STRUCTURAL_SHADOW_REPORT","normal test status")
@@ -57,7 +57,7 @@ local function pure()
  eq(r.features.stackConstraints.nonTargetKeysWithFivePlusCopies,1,"5-plus stack")
  eq(r.features.stackConstraints.topFourKeyCopyCountUpperBound,12,"top 4 distinct stacks")
  eq(r.features.stackConstraints.nonlinearFivePlusRequiresIndependentPricing,true,"nonlinear stacks flagged")
- eq(r.features.syntheticBilateralModels.cases,8,"fixture cases independently pass")
+ eq(r.features.syntheticBilateralModels.cases,10,"fixture cases independently pass")
  eq(r.features.protectedTarget.mayOfferTarget,false,"target never offer")
  eq(r.features.protectedTarget.targetOwnershipRevealed,false,"no ownership leak")
  eq(r.features.quoteProvenance.status,"HISTORICAL_KEYS_ONLY_NO_CURRENT_PRICE","old source denied")
@@ -189,7 +189,7 @@ local function mock(opts)
         sourceFetches+=1
         if opts.sourceFailure then error("no GitHub source") end
         if url:find("native_structural_shadow_core.lua",1,true) then
-            ok(url:find("586d2a6215ee7d119c8cbb7ed77a3412c71fe922",1,true)~=nil,"shadow core immutable")
+            ok(url:find("95139f6c05f8c186239017ca19f50dbd33cff029",1,true)~=nil,"shadow core immutable")
             return coreCode
         elseif url:find("native_key_reconciliation_core.lua",1,true) then
             ok(url:find("eea9d6f5da3dfac8599e2f3e7b9fe1764d6ba288",1,true)~=nil,"original key audit immutable")
@@ -256,7 +256,7 @@ do
  start.Activated:Fire()
  eq(t.reads(),1,"ONE own-profile RPC")
  eq(c.status().status,"CLIENT_STRUCTURAL_SHADOW_REPORT","real module invoked by runner")
- eq(c.status().features.syntheticBilateralModels.cases,8,"fixture integrated")
+ eq(c.status().features.syntheticBilateralModels.cases,10,"fixture integrated")
  eq(c.status().features.stackConstraints.topFourKeyCopyCountUpperBound,12,"real client structural combos")
  start.Activated:Fire()
  eq(t.reads(),1,"double tap ignored")
