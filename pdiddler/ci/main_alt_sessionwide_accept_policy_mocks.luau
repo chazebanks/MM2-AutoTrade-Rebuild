@@ -157,8 +157,8 @@ for i,change in ipairs(badOffers) do
  for k,v in pairs(change) do x[k]=v end
  -- Lua cannot represent nil in a test update literal; those test cases
  -- get their own explicit assignments below.
- if i==16 then x.altAccepted=nil end
- if i==17 then x.ownOffer=nil end
+ if i==15 then x.altAccepted=nil end
+ if i==16 then x.ownOffer=nil end
  local answer=c.observe(x)
  eq(answer.status,"STOPPED","invalid payload must stop "..i)
  eq(c.status().mayObserveFurtherMainAltTrades,false,"stop persists "..i)
