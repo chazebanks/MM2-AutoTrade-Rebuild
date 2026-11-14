@@ -311,7 +311,7 @@ do
  f.open();f.tick()
  f.addSlot();f.tick()
  f.tick(0.5)
- eq(runner.status().status,"CLIENT_ACCEPT_CONTROL_OBSERVED","source observation retained if no control")
+ eq(runner.status().status,"INCONCLUSIVE_ACCEPT_CONTROL_MAPPING","missing button not a passed control mapping")
  eq(runner.status().controlShapeStatus,"INCONCLUSIVE","no candidate explicitly inconclusive")
  eq(runner.status().candidateCount,0,"no false control")
 end
@@ -323,7 +323,18 @@ do
  f.addSlot();f.tick()
  f.tick(0.5)
  eq(runner.status().controlShapeStatus,"AMBIGUOUS","multiple control candidates")
+ eq(runner.status().status,"INCONCLUSIVE_ACCEPT_CONTROL_MAPPING","ambiguous control never passes")
  eq(runner.status().authorizesAccept,false,"ambiguous never offers Accept")
+end
+do
+ local f=fake()
+ local runner=f.run()
+ f.button("ArmObserver").Activated:Fire()
+ f.addSlot() -- Item already displayed before we ever saw empty ALT offer.
+ f.open();f.tick()
+ eq(runner.status().status,"STOPPED","ALT item before initial baseline fails closed")
+ eq(runner.status().reason,"ALT_ITEM_PREEXISTED_WITHOUT_EMPTY_BASELINE",
+    "observer cannot invent a transition")
 end
 do
  local f=fake({wrongPartner=true})
