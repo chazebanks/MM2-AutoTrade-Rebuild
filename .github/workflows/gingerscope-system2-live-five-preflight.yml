@@ -1,0 +1,123 @@
+name: Gingerscope System2 LIVE five original-MM2 ARM preflight (offline verification)
+on:
+  push:
+    branches:
+      - research/system2-live-five-distinct-shadow-nov14
+  pull_request:
+    paths:
+      - 'pdiddler/system2/system2_live_five_controller.lua'
+      - 'pdiddler/system2/system2_live_strategy_evidence.lua'
+      - 'pdiddler/ci/test_system2_live_strategy_evidence.lua'
+      - 'pdiddler/system2/SYSTEM2_LIVE_FIVE_MAIN_NATIVE.lua'
+      - 'pdiddler/ci/test_system2_live_five_controller.lua'
+      - 'pdiddler/ci/test_system2_live_five_source_audit.py'
+      - 'pdiddler/ci/system2_live_five_native_runner_mocks.luau'
+      - 'pdiddler/system2/discord_v2_event_intake.py'
+      - 'pdiddler/ci/test_discord_v2_event_intake.py'
+      - '.github/workflows/gingerscope-system2-live-five-preflight.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-source-five-scenario-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Set up actual Lua 5.4 (pure source-bound controller)
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lua5.4
+      - name: Compile NEW actual native iPad runner and both pure Luau modules
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/luau-ubuntu-0.746.zip"
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 20 \
+            "https://github.com/luau-lang/luau/releases/download/0.746/luau-ubuntu.zip" \
+            --output "$archive"
+          echo "30f11c9cde8be2dc0e3066d210705532aac3726a2db89a6c5078080b6faa6cf8  $archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/s2-luau-dist"
+          compiler="$(find "$RUNNER_TEMP/s2-luau-dist" -type f -name luau-compile -print -quit)"
+          test -n "$compiler"
+          chmod +x "$compiler"
+          "$compiler" --binary pdiddler/system2/SYSTEM2_LIVE_FIVE_MAIN_NATIVE.lua > /dev/null
+          "$compiler" --binary pdiddler/system2/system2_live_five_controller.lua > /dev/null
+          "$compiler" --binary pdiddler/system2/system2_live_strategy_evidence.lua > /dev/null
+          echo SYSTEM2_LIVE_FIVE_ACTUAL_NATIVE_LUAU_COMPILE_PASS
+      - name: Verify immutable System1 original source and pinned System2 controller
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object pdiddler/system2/system2_live_five_controller.lua)" = f24f3da553683c8edf67c41a27c15ccd59804a17
+          test "$(git hash-object pdiddler/system2/system2_live_strategy_evidence.lua)" = f473b57010158914815d014142a98dbf2c182525
+          test "$(git hash-object pdiddler/system2/discord_v2_event_intake.py)" = 20d8a0e8fda75c10a7101b242bfbd9a00d20cb7f
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          native=Path('pdiddler/system2/SYSTEM2_LIVE_FIVE_MAIN_NATIVE.lua').read_text()
+          m=re.search(r'local CTRL="([0-9a-f]{40})"',native)
+          assert m and m.group(1)=='bf72128813fd00992221f3c4e985958d81c5cb5c'  # immutable commit, not blob
+          assert 'local S2_INTERPRETER="9c4d75c4a38faf555a356eae6901ae4ec5ecb5b7"' in native
+          assert 'loadPinned(S2_INTERPRETER,"system2/system2_live_strategy_evidence.lua"' in native
+          for name in ('P3_EPOCH','SHADOW_PLAN','MAIN'):
+              assert re.search(r'local '+name+r'="[0-9a-f]{40}"',native),name
+          print('SYSTEM2_LIVE_FIVE_ACTUAL_SOURCE_SHA_PINS_PASS')
+          PY
+      - name: Install checksum-pinned official Lune for native original-MM2 launcher mocks
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/lune-v0.11.1-linux-x86_64.zip"
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 20 \
+            "https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip" \
+            --output "$archive"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/lune-dist"
+          found="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
+          test -n "$found"
+          install -m 0755 "$found" "$RUNNER_TEMP/lune"
+      - name: Execute ACTUAL System2 iPad native runner in strict Luau fake-MM2 runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_live_five_native_runner_mocks.luau
+      - name: Python source, authorization and five distinct scenario audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_system2_live_five_source_audit
+          python3 -m unittest -v pdiddler.ci.test_discord_v2_event_intake
+      - name: Actual Lua5.4 five-stage controller with protected-P3 adapter mocks
+        shell: bash
+        run: |
+          set -euo pipefail
+          lua5.4 pdiddler/ci/test_system2_live_strategy_evidence.lua
+          lua5.4 pdiddler/ci/test_system2_live_five_controller.lua
+      - name: Inherited System2 evidence/strategy regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -q \
+            pdiddler.ci.test_discord_learning_evidence_bridge \
+            pdiddler.ci.test_multi_axis_strategy_stress_lab \
+            pdiddler.ci.test_growth_policy_decision
+      - name: Publish accurate preflight checkpoint
+        shell: bash
+        run: |
+          {
+            echo '## System2 ONE-ARM live-five candidate — OFFLINE verified only'
+            echo 'Implemented: 5-stage source-tested Luau state machine, native protected P3/P4 adapter, separate real-client strategy interpreter and adversarial Lua5.4/Python audits.'
+            echo 'Not proved: live original-MM2 run, real Discord V2 delivery, current independently authenticated market prices, authoritative item instances, real negotiated profit, true learning, server settlement, automatic final Accept.'
+            echo 'Stage1 Discord PRIVATE bot V2 event schema/intake now implemented with fail-closed duplicate, timing, revision and partner-lease validation; actual network delivery remains BLOCKED.'
+            echo 'Stage3/4 market-growth decisions remain BLOCKED prerequisites, never mislabeled LIVE PASS.'
+            echo 'Do NOT release operator loader until actual CI and dependency review; no live action is authorized from mock results.'
+          } >> "$GITHUB_STEP_SUMMARY"
