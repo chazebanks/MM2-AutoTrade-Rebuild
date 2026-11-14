@@ -100,7 +100,7 @@ function M.new(api,opt)
    "decline","endEpoch","stopAll","copyReport","review"}) do
   if type(api[fn])~="function" then return nil,"REQUIRED_PROTECTED_ADAPTER_MISSING" end
  end
- local round,phase,completed,requestEpoch=1,"REQUESTING",0,0
+ local round,phase,processed,requestEpoch=1,"REQUESTING",0,0
  local root,lease=nil,nil
  local baseline=nil
  local prev,first,latest=nil,nil,nil
@@ -124,7 +124,10 @@ function M.new(api,opt)
  local lastAction="NONE"
  local function receipt()
   local copiedStages={}
+  local passed,blocked=0,0
   for i,s in ipairs(stages) do
+   if s.status=="LIVE_PASS" then passed=passed+1 end
+   if s.status=="BLOCKED_PREREQUISITE" then blocked=blocked+1 end
    copiedStages[i]={scenario=s.scenario,status=s.status,reason=s.reason,
     clientObserved=s.clientObserved,
     offerRevisionsObserved=s.offerRevisionsObserved,
@@ -137,7 +140,10 @@ function M.new(api,opt)
   end
   return {schema="gingerscope-system2-live-five-native-controller-v1",
    status=terminal and (firstFailure and "STOPPED" or "EXPECTED_TERMINAL_STOP") or "RUNNING",
-   phase=phase,round=round,maxRounds=5,completedStages=completed,
+   phase=phase,round=round,maxRounds=5,
+   processedStages=processed,completedStages=passed,
+   livePassedStages=passed,blockedPrerequisiteStages=blocked,
+   remainingUnprocessedStages=5-processed,
    reason=note,firstFailureScenario=firstFailure,
    scenarios=copiedStages,actions={
     requestsStarted=acts.requestsStarted,offersAttempted=acts.offersAttempted,
@@ -250,7 +256,7 @@ function M.new(api,opt)
   local r,why=statusFor(round)
   stages[round].status=r;stages[round].reason=why
   stages[round].clientObserved=true
-  completed=completed+1;acts.closedWindows=acts.closedWindows+1
+  processed=processed+1;acts.closedWindows=acts.closedWindows+1
   local ok,yes=pcall(api.endEpoch,round,lease)
   if not ok or yes~=true then return stop("OLD_PROTECTED_EPOCH_DID_NOT_CLOSE",true) end
   round=round+1
@@ -359,7 +365,7 @@ function M.new(api,opt)
     stages[round].clientObserved=true
     stages[round].status="LIVE_PASS"
     stages[round].reason="CLIENT_RESEARCH_PREVIEW_INVALIDATED_ON_REVISION"
-    completed=completed+1
+    processed=processed+1
     terminal=true;phase="EXPECTED_TERMINAL_STOP"
     note="EXPECTED_REVISION_FAILSTOP_NO_FURTHER_ACTION"
     lastAction="STOP_ON_RESEARCH_REVISION"
