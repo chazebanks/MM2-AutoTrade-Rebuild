@@ -78,8 +78,8 @@ local function gameFixture(opts)
  screen.Enabled=false
  local container=put(screen,node("Frame","Container"))
  local root=put(container,node("Frame","Trade"))
- root.AbsolutePosition=vec(400,130)
- root.AbsoluteSize=vec(440,420)
+ root.AbsolutePosition=opts.mobile and vec(120,130) or vec(400,130)
+ root.AbsoluteSize=opts.mobile and vec(560,420) or vec(440,420)
  local ours=put(root,node("Frame","YourOffer"))
  local oursContainer=put(ours,node("Frame","Container"))
  local ourAccepted=put(ours,node("Frame","Accepted"));ourAccepted.Visible=false
@@ -120,7 +120,7 @@ local function gameFixture(opts)
  local tickEvt=event()
  local services={
   Players=Players,ReplicatedStorage=RS,
-  Workspace={CurrentCamera={ViewportSize=vec(1024,768)}},
+  Workspace={CurrentCamera={ViewportSize=opts.mobile and vec(820,1180) or vec(1024,768)}},
   RunService={Heartbeat=tickEvt},
   HttpService={JSONEncode=function(_,o)return serde.encode("json",o)end},
  }
@@ -272,6 +272,26 @@ do
  local j=serde.decode("json",raw)
  eq(j.corroboratedClientDeltas,3,"3 matched deltas preserved in final receipt")
  eq(j.tradeOutcome,"UNKNOWN","server status never inferred")
+end
+do
+ local f=gameFixture({mobile=true})
+ local r=f.arm()
+ ok(type(r)=="table","iPad-like portrait viewport still permits non-overlapping GUI")
+ finishRound(f,r,{{label="AlphaFixture",qty=1}},{raw_alpha=1})
+ eq(r.status().corroboratedClientDeltas,1,"portrait iPad repeated-run supports first event")
+end
+do
+ local f=gameFixture()
+ local r=f.arm()
+ f.open();f.tick()
+ f.offer({
+  {label="AlphaFixture",qty=1},{label="BetaFixture",qty=1},
+  {label="GammaFixture",qty=1},{label="DeltaFixture",qty=1},
+  {label="AlphaFixture",qty=1},
+ })
+ f.tick()
+ eq(r.status().status,"STOPPED","fabricated fifth UI slot fails closed")
+ eq(r.status().reason,"FABRICATED_EXTRA_ALT_SLOT_NODE","fifth data node not actual MM2 slot")
 end
 do
  local f=gameFixture({otherController=true})
