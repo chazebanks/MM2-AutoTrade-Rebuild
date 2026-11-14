@@ -29,14 +29,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags --depth=1 origin 95a74ca8279198f9e64ad556b3807c6383af9b2c
-          git show 95a74ca8279198f9e64ad556b3807c6383af9b2c:pdiddler/system2/native_multifeature_catalog_core.lua > "$RUNNER_TEMP/catalog-core.lua"
-          test "$(git hash-object "$RUNNER_TEMP/catalog-core.lua")" = 3c3ede7f6f84b42d0fa9997867bd3ebb5f0c4e2e
+          git fetch --no-tags --depth=1 origin 139311e7eb5dc8d155652218ac1acc30e33955c5
+          git show 139311e7eb5dc8d155652218ac1acc30e33955c5:pdiddler/system2/native_multifeature_catalog_core.lua > "$RUNNER_TEMP/catalog-core.lua"
+          test "$(git hash-object "$RUNNER_TEMP/catalog-core.lua")" = aceec887302772c6d576a1a01d577aed33206a77
           cmp "$RUNNER_TEMP/catalog-core.lua" pdiddler/system2/native_multifeature_catalog_core.lua
-          grep -Fq '95a74ca8279198f9e64ad556b3807c6383af9b2c' pdiddler/system2/SYSTEM2_MULTIFEATURE_READONLY_NATIVE.lua
-          git fetch --no-tags --depth=1 origin 71a8eec4db768385c7b25182fc6fd74e712201e8
-          git show 71a8eec4db768385c7b25182fc6fd74e712201e8:pdiddler/system2/SYSTEM2_MULTIFEATURE_READONLY_NATIVE.lua > "$RUNNER_TEMP/catalog-native.lua"
-          test "$(git hash-object "$RUNNER_TEMP/catalog-native.lua")" = ab83da0a491e8797c756c79b183b4a69fee890ef
+          grep -Fq '139311e7eb5dc8d155652218ac1acc30e33955c5' pdiddler/system2/SYSTEM2_MULTIFEATURE_READONLY_NATIVE.lua
+          git fetch --no-tags --depth=1 origin 046dfb636326c6f3d261b2cfd883dacaa988e172
+          git show 046dfb636326c6f3d261b2cfd883dacaa988e172:pdiddler/system2/SYSTEM2_MULTIFEATURE_READONLY_NATIVE.lua > "$RUNNER_TEMP/catalog-native.lua"
+          test "$(git hash-object "$RUNNER_TEMP/catalog-native.lua")" = 7c9c4a7d9de9db257b21897a83bbc6931af8188a
           cmp "$RUNNER_TEMP/catalog-native.lua" pdiddler/system2/SYSTEM2_MULTIFEATURE_READONLY_NATIVE.lua
           echo SYSTEM2_MULTIFEATURE_IMMUTABLE_SOURCE_MATCH
       - name: Install immutable Lune v0.11.1 (official release SHA256)
