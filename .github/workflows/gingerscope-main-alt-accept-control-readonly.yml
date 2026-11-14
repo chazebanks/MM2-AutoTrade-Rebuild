@@ -28,9 +28,9 @@ jobs:
           git show c6830816c23624d43da2242e15a716127629a189:pdiddler/supervised/main_alt_accept_control_shape_probe.lua > "$RUNNER_TEMP/original-shape.lua"
           test "$(git hash-object "$RUNNER_TEMP/original-shape.lua")" = 54355936d16bfe749d90a93b120b45c9d84ffa94
           cmp "$RUNNER_TEMP/original-shape.lua" pdiddler/supervised/main_alt_accept_control_shape_probe.lua
-          git fetch --no-tags --depth=1 origin d1237970d89951f9b71f455fdc2f7710206def18
-          git show d1237970d89951f9b71f455fdc2f7710206def18:pdiddler/supervised/MAIN_ALT_ACCEPT_DISCOVERY_READONLY_NATIVE.lua > "$RUNNER_TEMP/original-runner.lua"
-          test "$(git hash-object "$RUNNER_TEMP/original-runner.lua")" = 1cb6f5373f433671b7ad4a264ce1bbcb1d00a882
+          git fetch --no-tags --depth=1 origin 5b31dbb7db7b945a4a2a8ab7e1290057ed6e0cda
+          git show 5b31dbb7db7b945a4a2a8ab7e1290057ed6e0cda:pdiddler/supervised/MAIN_ALT_ACCEPT_DISCOVERY_READONLY_NATIVE.lua > "$RUNNER_TEMP/original-runner.lua"
+          test "$(git hash-object "$RUNNER_TEMP/original-runner.lua")" = 0338dcfef8d1c195ed7d867611bfcb7d85ab0236
           cmp "$RUNNER_TEMP/original-runner.lua" pdiddler/supervised/MAIN_ALT_ACCEPT_DISCOVERY_READONLY_NATIVE.lua
           git fetch --no-tags --depth=1 origin 1971b93d324f0275e6a9affb472ac3e804439ed8
           git show 1971b93d324f0275e6a9affb472ac3e804439ed8:pdiddler/new_part4/p4_native_observer.lua > "$RUNNER_TEMP/original-stage9.lua"
