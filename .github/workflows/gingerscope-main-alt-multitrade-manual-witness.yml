@@ -1,0 +1,181 @@
+name: Gingerscope MAIN outbound FIRST repeated exact ALT request + human final Accept (offline)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/supervised/main_alt_manual_multitrade_delta_core.lua'
+      - 'pdiddler/ci/main_alt_manual_multitrade_delta_mocks.luau'
+      - 'pdiddler/supervised/MAIN_ALT_MANUAL_MULTITRADE_WITNESS_NATIVE.lua'
+      - 'pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua'
+      - 'pdiddler/supervised/pdiddler3_exact_alt_outbound_requeue.lua'
+      - 'pdiddler/ci/main_alt_p3_exact_outbound_requeue_mocks.luau'
+      - 'pdiddler/ci/main_alt_outbound_first_multitrade_native_mocks.luau'
+      - 'pdiddler/ci/main_alt_manual_multitrade_native_mocks.luau'
+      - 'pdiddler/ci/test_main_alt_multitrade_oracle.py'
+      - 'pdiddler/supervised/MAIN_ALT_MANUAL_MULTITRADE_HANDOFF_2026_11_14.md'
+      - '.github/workflows/gingerscope-main-alt-multitrade-manual-witness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-alt-consecutive-manual-trades:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Original author provenance and continuity before any execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.continuity.manager verify
+          python3 -m pdiddler.continuity.manager recover
+          git fetch --no-tags --depth=1 origin 553b7e44245c5ed36aa3f65aea335953ec1fed5f
+          git show 553b7e44245c5ed36aa3f65aea335953ec1fed5f:pdiddler/supervised/main_alt_manual_multitrade_delta_core.lua > "$RUNNER_TEMP/pinned-multitrade.lua"
+          test "$(git hash-object "$RUNNER_TEMP/pinned-multitrade.lua")" = 39cd86cb6cd9e56833be60019ca1fbaf4d47374b
+          cmp "$RUNNER_TEMP/pinned-multitrade.lua" pdiddler/supervised/main_alt_manual_multitrade_delta_core.lua
+          git fetch --no-tags --depth=1 origin e19dfd94cecfe97ca0e00c6f1606e23d1acbf320
+          git show e19dfd94cecfe97ca0e00c6f1606e23d1acbf320:pdiddler/supervised/MAIN_ALT_MANUAL_MULTITRADE_WITNESS_NATIVE.lua > "$RUNNER_TEMP/pinned-multitrade-native.lua"
+          test "$(git hash-object "$RUNNER_TEMP/pinned-multitrade-native.lua")" = ae9e51fcd403d909bb171318900d3d538db2f9c8
+          cmp "$RUNNER_TEMP/pinned-multitrade-native.lua" pdiddler/supervised/MAIN_ALT_MANUAL_MULTITRADE_WITNESS_NATIVE.lua
+          git fetch --no-tags --depth=1 origin 1971b93d324f0275e6a9affb472ac3e804439ed8
+          mkdir -p pdiddler/new_part4
+          git show 1971b93d324f0275e6a9affb472ac3e804439ed8:pdiddler/new_part4/p4_native_observer.lua > pdiddler/new_part4/p4_native_observer.lua
+          git show 1971b93d324f0275e6a9affb472ac3e804439ed8:pdiddler/new_part4/p4_observer_contract.lua > pdiddler/new_part4/p4_observer_contract.lua
+          test "$(git hash-object pdiddler/new_part4/p4_native_observer.lua)" = a6338e946467ad738005bc5cb13cd2d2fbc2a2d0
+          test "$(git hash-object pdiddler/new_part4/p4_observer_contract.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          git fetch --no-tags --depth=1 origin 5b8ee35d7f281c23d9c2181abd97a063e59a0660
+          git show 5b8ee35d7f281c23d9c2181abd97a063e59a0660:pdiddler/new_part4/stage100_screen_prompt_overlay.lua > pdiddler/new_part4/stage100_screen_prompt_overlay.lua
+          test "$(git hash-object pdiddler/new_part4/stage100_screen_prompt_overlay.lua)" = e0eac8e039655999bd7bbac1f12da179db7c22ed
+          git fetch --no-tags --depth=1 origin 1c874cdbc5e85418360148fbdf33fa17534cd1ad
+          git show 1c874cdbc5e85418360148fbdf33fa17534cd1ad:pdiddler/supervised/pdiddler3_exact_alt_outbound_requeue.lua > "$RUNNER_TEMP/p3-exact-alt-requeue.lua"
+          test "$(git hash-object "$RUNNER_TEMP/p3-exact-alt-requeue.lua")" = 05642da61f3c38cadf7bdcc8d3c2da30a077ab15
+          cmp "$RUNNER_TEMP/p3-exact-alt-requeue.lua" pdiddler/supervised/pdiddler3_exact_alt_outbound_requeue.lua
+          git fetch --no-tags --depth=1 origin 7087481aca6b5cac260f015704f236fee960d7ef
+          git show 7087481aca6b5cac260f015704f236fee960d7ef:pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua > "$RUNNER_TEMP/main-initiated-multitrade.lua"
+          test "$(git hash-object "$RUNNER_TEMP/main-initiated-multitrade.lua")" = a889f8440e3b8c16ddfcbdef44376947645ce12f
+          cmp "$RUNNER_TEMP/main-initiated-multitrade.lua" pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua
+          git fetch --no-tags --depth=1 origin 2036ae5bd937620f21d46600f99550a1b233a654
+          git show 2036ae5bd937620f21d46600f99550a1b233a654:pdiddler/pdiddler3_scanner_MODULE_v6_5_PART4_STATUS_BRIDGE.lua > "$RUNNER_TEMP/original-p3-scanner.lua"
+          test "$(git hash-object "$RUNNER_TEMP/original-p3-scanner.lua")" = f7190538cbc882e23b22f723f3af0b6140a98bcd
+          echo MAIN_ALT_OUTBOUND_FIRST_ALL_P3_SOURCE_PINS
+          echo MAIN_ALT_MULTI_TRADE_ALL_ORIGINAL_SOURCE_BLOBS_PINNED
+      - name: Install official Lune v0.11.1 pinned release
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/lune-v0.11.1-linux-x86_64.zip"
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 20 \
+            "https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip" \
+            --output "$archive"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/lune-dist"
+          found="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
+          test -n "$found"
+          install -m 0755 "$found" "$RUNNER_TEMP/lune"
+      - name: Execute actual pure multi-trade state controller including 3 successive ALT trades
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/main_alt_manual_multitrade_delta_mocks.luau
+      - name: Execute actual native MAIN+ALT 3 successive trade-windows, delta and errors
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/main_alt_manual_multitrade_native_mocks.luau
+      - name: Execute original reviewed P3 sender exact ALT requeue and fake native outgoing-first adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/main_alt_p3_exact_outbound_requeue_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/main_alt_outbound_first_multitrade_native_mocks.luau
+      - name: Independent Python 1500 randomized multi-trade sessions and static authority oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_main_alt_multitrade_oracle
+      - name: No live Accept or identity exposure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('pdiddler/supervised/main_alt_manual_multitrade_delta_core.lua').read_text()
+          native=Path('pdiddler/supervised/MAIN_ALT_MANUAL_MULTITRADE_WITNESS_NATIVE.lua').read_text()
+          for bad in ('FireServer(', 'InvokeServer(', 'HttpGet(', 'AcceptTrade(', 'setclipboard(', 'TeleportService',
+                      'SendMouseButtonEvent(', 'PostAsync(', 'writefile(', 'request('):
+              assert bad not in s,bad
+          assert 'actualScriptAccepts=0' in s
+          assert 'serverCompletionProven=false' in s
+          for bad in ('FireServer(', 'SendMouseButtonEvent(', 'AcceptTrade(', 'OfferItem(', 'TeleportService', 'PostAsync('):
+              assert bad not in native, bad
+          assert native.count('rf:InvokeServer()')==1
+          sender=Path('pdiddler/supervised/pdiddler3_exact_alt_outbound_requeue.lua').read_text()
+          outbound=Path('pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua').read_text()
+          assert 'requeueVerifiedExactAlt=function()' in sender
+          assert 'options.exactAltUserId' in sender
+          assert 'UNEXPECTED_INCOMING_REQUEST_DURING_OUTBOUND' in sender
+          assert 'MAIN P3 sends the trade REQUEST first' in outbound
+          assert 'mainAutomaticallyInitiatesTradeRequests=true' in outbound
+          assert 'ownedP3Epoch=outgoing.session' in outbound
+          assert 'liveP3Epoch~=ownedP3Epoch' in outbound
+          assert 'PREARM_OWNED_P3_EPOCH_CHANGED' in outbound
+          assert 'OWNED_P3_EPOCH_OR_CONTROLLER_CHANGED' in outbound
+          assert 'PREARM_VIEWPORT_UNSAFE' in outbound
+          assert 'o.readOnly=false' in outbound
+          assert 'automaticFinalAcceptEnabled=false' in outbound
+          assert 'clientInventoryObserverReadOnly=true' in outbound
+          assert 'requeueVerifiedExactAlt' in outbound
+          assert 'main.status().phase=="WAIT_OPEN"' in outbound
+          assert 'OUTBOUND_P3_ARM_FAILED' not in outbound
+          for action in ('AcceptTrade:FireServer(', 'OfferItem:FireServer(', 'TeleportService', 'PostAsync('):
+              assert action not in outbound, action
+          assert 'actualScriptAccepts=0' in s
+          assert 'ALL_MAIN_ALT_TRADES_IN_THIS_JOB' in s
+          print('CONSECUTIVE_MAIN_ALT_NO_AUTO_ACCEPT_PURE_POLICY_PASS')
+          PY
+  all-inherited-source-pinned-python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Recover original Stage83 PR106 planner and corrected PR182 guard SHA pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/system2-pin"
+          git fetch --no-tags --depth=1 origin 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae
+          git show 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae:pdiddler/intelligence_lab/stage83_public_slug_registry.lua > "$RUNNER_TEMP/system2-pin/stage83.lua"
+          git fetch --no-tags --depth=1 origin 6ed48e084bd58fab38e3bf061ac36fb295ecf103
+          git show 6ed48e084bd58fab38e3bf061ac36fb295ecf103:pdiddler/intelligence_lab/future_portfolio_planner.py > "$RUNNER_TEMP/system2-pin/planner.py"
+          git fetch --no-tags --depth=1 origin 94ecefee86fd36293dcac58d0c24d9f379e719e5
+          git show 94ecefee86fd36293dcac58d0c24d9f379e719e5:pdiddler/intelligence_lab/offer_snapshot_guard.py > "$RUNNER_TEMP/system2-pin/guard.py"
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/stage83.lua")" = 40e2a0ff01b70b2d0181c62cae347a08da82bcb8
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/planner.py")" = 78948cdacd2a760db5b888fce242d598fc6f14b6
+          test "$(git hash-object "$RUNNER_TEMP/system2-pin/guard.py")" = 11db895622d053ddced4fba9666135bf97bd615b
+          grep -Fq 'PROTECTED_GINGERSCOPE_OUTGOING' "$RUNNER_TEMP/system2-pin/guard.py"
+      - name: Run 311 inherited research-only Python regressions on exact source blobs
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/system2-pin/stage83.lua
+          STAGE120_REQUIRE_PINNED: '1'
+          STAGE120_PLANNER: ${{ runner.temp }}/system2-pin/planner.py
+          STAGE120_CORRECTED_GUARD: ${{ runner.temp }}/system2-pin/guard.py
+        run: |
+          python3 -m unittest -v \
+            pdiddler.ci.test_market_inventory_revision_gate \
+            pdiddler.ci.test_counterparty_candidate_explorer \
+            pdiddler.ci.test_sealed_decision_source \
+            pdiddler.ci.test_multitrade_growth_replay \
+            pdiddler.ci.test_attractiveness_evidence_lab \
+            pdiddler.ci.test_trade_scenario_lab \
+            pdiddler.ci.test_stage120_corrected_guard_preview \
+            pdiddler.ci.test_client_inventory_shadow \
+            pdiddler.ci.test_market_research_reader \
+            pdiddler.ci.test_publisher_page_parity \
+            pdiddler.ci.test_operator_capture_adapter \
+            pdiddler.ci.test_system2_catalog_discovery_diff
