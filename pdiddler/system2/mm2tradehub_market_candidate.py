@@ -62,8 +62,10 @@ def parse_tier(html, category):
     if not re.search(r"\b" + category + r"\s+values\b", title, re.I):
         fail("CATEGORY_PAGE_TITLE_MISMATCH")
     rows = []
-    seen = set()
+    seen = {}
+    card_count = 0
     for card in soup.select("a.group.card"):
+        card_count += 1
         href = card.get("href")
         parsed = urlparse(href or "")
         trusted_alias = parsed.scheme == "https" and parsed.netloc in (
@@ -76,9 +78,6 @@ def parse_tier(html, category):
         slug = parsed.path.removeprefix("/values/")
         if not SLUG.fullmatch(slug):
             fail("ITEM_SLUG_INVALID")
-        if slug in seen:
-            fail("DUPLICATE_ITEM_LINK")
-        seen.add(slug)
         heading = card.find("h3")
         if not heading:
             fail("ITEM_NAME_MISSING")
@@ -121,15 +120,25 @@ def parse_tier(html, category):
         stability = stability_node.get_text(" ", strip=True) if stability_node else None
         if stability and len(stability) > 80:
             fail("STABILITY_FIELD_INVALID")
-        rows.append({
+        row = {
             "providerName": name, "providerSlug": slug, "providerCategory": category,
             "mm2SourceLabel": mm2_text, "mm2Listed": mm2,
             "supremeSourceLabel": supreme_text, "supremeListed": supreme,
             "demandOrdinal": str(demand.normalize()), "stabilityLabel": stability,
             "rawGameWeaponKey": None, "chromaSubtypeVerified": False,
             "completedTradeLiquidityMeasured": False,
-        })
-    if len(rows) != CATEGORIES[category]:
+        }
+        existing = seen.get(slug)
+        if existing is not None:
+            # The source displays identical duplicate Chroma cards (19 as of
+            # Nov 14). Collapse only exact duplicate observations, never
+            # conflicting price, demand, stability or identity evidence.
+            if existing != row:
+                fail("CONFLICTING_DUPLICATE_ITEM")
+            continue
+        seen[slug] = row
+        rows.append(row)
+    if card_count != CATEGORIES[category]:
         fail("CATEGORY_ITEM_COUNT_INCOMPLETE")
     return rows
 
@@ -174,6 +183,8 @@ def collect(fetch, now):
         "website": SITE, "retrievedUtc": now, "siteEditionDate": published,
         "sourceTierPageSha256": page_hashes,
         "categoryCounts": {cat: sum(r["providerCategory"] == cat for r in entries) for cat in CATEGORIES},
+        "displayCardCounts": dict(CATEGORIES),
+        "deduplicatedCardCount": sum(CATEGORIES.values()) - len(entries),
         "itemCount": len(entries), "items": entries,
         "exactGameWeaponIdentityProven": False, "providerTimestampPrecision": "date-only",
         "canFeedLiveTrade": False, "authorizesOffer": False,
