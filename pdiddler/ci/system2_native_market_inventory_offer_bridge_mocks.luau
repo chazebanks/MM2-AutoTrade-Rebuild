@@ -173,25 +173,27 @@ eq(bridge.observeOffer().reason,"OUR_OUTGOING_TARGET_OR_QUANTITY_INVALID",
    "outgoing qty greater than profile")
 ours:FindFirstChild("Container"):FindFirstChild("Amount").Text="x6"
 ours.Attributes.ItemId="Gingerscope"
+ours:FindFirstChild("Tags").children.Chroma.Visible=false
 ours:FindFirstChild("ItemName"):FindFirstChild("Label").Text="Gingerscope"
 eq(bridge.observeOffer().reason,"OUR_OUTGOING_TARGET_OR_QUANTITY_INVALID",
    "Gingerscope never outbound")
 ours.Attributes.ItemId="EmberbowChroma"
+ours:FindFirstChild("Tags").children.Chroma.Visible=true
 ours:FindFirstChild("ItemName"):FindFirstChild("Label").Text="Chroma Emberbow"
 ours:FindFirstChild("Tags").children.Chroma.Visible=false
 eq(bridge.observeOffer().reason,"OUR_OFFER_RAW_KEY_LABEL_OR_CHROMA_CONFLICT",
    "wrong chroma tag fails closed")
 ours:FindFirstChild("Tags").children.Chroma.Visible=true
 ours.Attributes.ItemId=nil
-eq(bridge.observeOffer().reason,"ORIGINAL_GAME_GUI_CAPTURE_UNAVAILABLE",
+eq(bridge.observeOffer().reason,"OFFER_SESSION_PARTNER_OR_ROOT_UNVERIFIED",
    "no raw slot key rejects name-only")
 ours.Attributes.ItemId="EmberbowChroma"
 opponent.Name="SomeoneElse"
-eq(bridge.observeOffer().reason,"ORIGINAL_GAME_GUI_CAPTURE_UNAVAILABLE",
+eq(bridge.observeOffer().reason,"OFFER_SESSION_PARTNER_OR_ROOT_UNVERIFIED",
    "changed partner GUI association rejects")
 opponent.Name="PartnerUser"
 active=false
-eq(bridge.observeOffer().reason,"ORIGINAL_GAME_GUI_CAPTURE_UNAVAILABLE",
+eq(bridge.observeOffer().reason,"OFFER_SESSION_PARTNER_OR_ROOT_UNVERIFIED",
    "stolen or invalidated lease")
 active=true
 monotonic=40
