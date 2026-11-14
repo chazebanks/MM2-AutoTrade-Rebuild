@@ -1,3 +1,9 @@
+# CURRENT SYSTEM 2 DESIGN AUTHORITY — READ WITH NOV 14 MISSION LOCK
+
+This document remains the **architectural definition** of System 2 even when newer MAIN–ALT, P3 and P4 test handoffs appear above it in the chronology. Read `pdiddler/system2/SYSTEM2_MISSION_LOCK_AND_TEST_GOVERNANCE_2026_11_14.md` before this roadmap. Components S2.1–S2.9 below are capabilities, not a loop of similar inventory transfers. Five actual MAIN client delta confirmations have already closed the repeated-gift-flow test. The sixth trade's unclassified offer ID/quantity failure is distinct input evidence; diagnose it without losing sight of negotiation, opponent appeal, strategic growth, multiple routes and learning. Any table below labeled "not native tested" was written in Nov 13 and must be cross-checked against newer REAL device receipts; never silently interpret old table status as current.
+
+---
+
 # Gingerscope System 2 — modular planning + testing program (started Nov 13–14, 2026)
 
 **System 2 is the growth/strategy/decision-learning layer, not merely the inventory data plumbing.** The operator explicitly wants multiple independently tested functional parts, like System 1, before the end-to-end native testing phase. **Do not confuse completion of System 2 source parsing with a finished strategy.**
