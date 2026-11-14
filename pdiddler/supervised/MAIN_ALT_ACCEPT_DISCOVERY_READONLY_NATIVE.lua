@@ -93,7 +93,7 @@ local function frozen(sha,path)
  local ok,result=pcall(function()return assert(compiler(code))()end)
  return ok and type(result)=="table" and result or nil
 end
-local shape=frozen("b41bfae1a897e99c5775eff98dc48c4148d7adc2",
+local shape=frozen("cca3d8359b8ce537dc4a5f1aa474323c2833dd01",
  "supervised/main_alt_accept_control_shape_probe.lua")
 local stage9=frozen("1971b93d324f0275e6a9affb472ac3e804439ed8",
  "new_part4/p4_native_observer.lua")
