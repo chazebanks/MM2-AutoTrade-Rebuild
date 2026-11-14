@@ -145,7 +145,7 @@ local function fake(options)
   GetService=function(_,key)return services[key]end,
   HttpGet=function(_,url)
    table.insert(reads,url)
-   if url:find("cca3d8359b8ce537dc4a5f1aa474323c2833dd01",1,true)
+   if url:find("c6830816c23624d43da2242e15a716127629a189",1,true)
      and url:find("main_alt_accept_control_shape_probe.lua",1,true)then
     return coreCode
    elseif url:find("1971b93d324f0275e6a9affb472ac3e804439ed8",1,true)
@@ -275,6 +275,8 @@ do
  eq(runner.status().status,"CLIENT_ACCEPT_CONTROL_OBSERVED","client shape probe complete")
  eq(runner.status().controlShapeStatus,
    "ONE_VISIBLE_CANDIDATE_SHAPE","one candidate in original GUI")
+ eq(runner.status().visibleButtonCount,1,"one visible clickable candidate in trade root")
+ eq(runner.status().acceptTextLabelOnlyCount,0,"no title mistaken for Accept label")
  eq(runner.status().candidatePath,"Buttons/Accept/ActionButton","no dynamic path from user")
  eq(runner.status().theirVisibleSlots,1,"one ALT physical slot")
  eq(runner.status().ourVisibleSlots,0,"MAIN empty")
