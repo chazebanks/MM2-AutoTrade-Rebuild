@@ -137,7 +137,7 @@ class ScenarioTests(unittest.TestCase):
         self.assertIsNone(r["acceptanceProbability"])
     def test_range_downside_warning_is_not_auto_accept(self):
         self.observe({"Emberbow":1})
-        r=self.review([("Emberbow",1)],[("test_key_150",5)])
+        r=self.review([("Emberbow",1)],[("test_key_100",6)])
         self.assertIn("WORST_CASE_RANGE_LOSS_POSSIBLE",r["warnings"])
         self.assertFalse(r["authorizesOffer"])
     def test_no_fabricated_profit_or_completed_trade(self):
