@@ -1,3 +1,11 @@
+# LATEST: REAL MAIN SIX-FEATURE KEY RECONCILIATION CLIENT PASS — CLOSED (NOV 13/14, 2026)
+
+**User actual device receipt received for research-only PR #268** https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/268. Exact native immutable launcher `98e39c8d7e82e1ffbce4c0c15e3532e938f59274`; operator finished one profile read, all historical original 189 Stage83 raw keys matched game `Database.Sync` structurally and by displayed name; all currently owned provisionally eligible raw keys mapped to the old source candidate roster, with no outside-registry/structural/name/game-metadata mismatch. Correctly recognizes duplicates, safe four-distinct-slot caution and no Gingerscope outbound candidate. All script offers, accepts, declines, hops = ZERO. **Private owned inventory counts, raw keys, account names, the copied full report, and JobId MUST NOT be put in this public repo**; see privacy-safe `pdiddler/system2/S2_NEXT_KEY_RECONCILIATION_HANDOFF_2026_11_14.md`. Device receipt is CLIENT ONLY, not verified server item-instance or completion.
+
+**Do not repeat** Stage101, Stage119, two-read census, the five-feature catalog audit, or this six-feature key audit. **Next one real issue:** current Supreme publisher edition provenance plus source-validated mapped valuations and locked strategy research tests. Original Stage83 expired Nov 9; operator PRIVATE 189 export had `publisherVersion:null`, and even perfect historical raw-key matching cannot update its publication edition or authorize offers. No P3/P4 live change, auto-accept, Discord/profit, or strategy-learning until independently proven/authorized.
+
+---
+
 # NEXT MAIN iPad MULTI-FEATURE TEST PREPARED — HISTORICAL MARKET-KEY VS GAME RECONCILIATION (NOV 13/14, 2026)
 
 **Draft PR #268** https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/268 stacked onto CLOSED real-hardware PR #267 research branch. No main deployment, no P3/P4/Delta modification. Previous two-read census and five-feature classification tested successfully on MAIN iPad — **CLOSED; do not repeat**.
