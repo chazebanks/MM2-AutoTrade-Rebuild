@@ -22,6 +22,7 @@ local base={
  Weapons={
   StandardTool=row("Fang","Knife","Godly",false),
   ChromaTool=row("Fang","Knife","Godly",true),
+  SoleChroma=row("UniqueChroma","Knife","Godly",true),
   LaserGodly=row("Laser","Gun","Godly",false),
   LaserVintage=row("Laser","Gun","Vintage",false),
   NormalTool=row("Ember","Gun","Ancient",false),
@@ -68,6 +69,10 @@ good(slot("Chroma Fang","x2"),"ChromaTool",2,
   "explicit chroma title resolves matching variant")
 good(slot("Fang","",true),"ChromaTool",1,
   "visible Chroma tag resolves matching variant")
+deny(slot("UniqueChroma",""),"CHROMA_VARIANT_NOT_VISIBLY_PROVEN",
+  "single Chroma-only name requires explicit Chroma visual evidence")
+good(slot("UniqueChroma","",true),"SoleChroma",1,
+  "unique chroma with a confirmed visible Chroma tag")
 good(slot("Fang","",false,{ID="ChromaTool"}),
   "ChromaTool",1,"known exact raw ID proves variant even without tag")
 good(slot("Ember","1",false,{ItemId="NormalTool",WeaponID="NormalTool"}),
@@ -131,6 +136,12 @@ x,e=resolver.buildCatalog({Weapons={
 }})
 eq(x,nil,"invalid chroma metadata rejected")
 eq(e,"LIVE_CATALOG_METADATA_INVALID","malformed metadata reason")
+x,e=resolver.buildCatalog({Weapons={[123]=row("UnknownBadKey","Knife","Godly")}})
+eq(x,nil,"numeric game catalog ID rejected")
+eq(e,"LIVE_CATALOG_RAW_KEY_OR_ROW_INVALID","malformed catalog key reason")
+x,e=resolver.buildCatalog({Weapons={ValidThing=false}})
+eq(x,nil,"invalid catalog row rejected, not silently ignored")
+eq(e,"LIVE_CATALOG_RAW_KEY_OR_ROW_INVALID","invalid metadata row reason")
 -- No title means user cannot identify the actual sixth item or its
 -- raw game key from prior STOP reason. Never convert synthetic cases
 -- into an assertion that the exact user's unknown item is now resolved.
