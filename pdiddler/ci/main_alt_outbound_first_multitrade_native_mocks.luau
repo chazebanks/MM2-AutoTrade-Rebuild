@@ -32,7 +32,7 @@ function M.run(scanner,options)
  local armed,paused,stopped=false,false,false
  local verified=0
  local requests=0
- local S={processed={},verifiedClientDeltaCycles=0}
+ local S={processed={},verifiedClientDeltaCycles=0,sent=0}
  local obj={state=S}
  function obj.arm()
   if armed or stopped or options.exactAltMultiTrade~=true or
@@ -43,6 +43,7 @@ function M.run(scanner,options)
       scanner.isWhitelisted(999) then return false,"SENDER_GUARD_DENIED" end
   armed=true
   requests+=1
+  S.sent+=1
   return true,"MAIN_REQUEST_PENDING"
  end
  function obj.isArmed()return armed and not stopped end
@@ -58,7 +59,7 @@ function M.run(scanner,options)
   local count=options.verifiedClientDeltaCount()
   if count~=verified+1 then return false end
   verified=count;S.verifiedClientDeltaCycles=count
-  S.processed[202]=nil;paused=false;requests+=1
+  S.processed[202]=nil;paused=false;requests+=1;S.sent+=1
   return true,"NEXT_MAIN_OUTBOUND_SENT"
  end
  function obj.stop()stopped=true end
@@ -330,6 +331,11 @@ do
    {raw_alpha=1,raw_beta=5,raw_gamma=2,raw_delta=3})
  local v=r.status()
  eq(f.getRequests(),4,"fourth MAIN outbound REQUEST automatically sent after 3 completed cycles")
+ eq(v.readOnly,false,"sender's actual outbound click is not mislabeled read-only")
+ eq(v.mainAutomaticallyInitiatesTradeRequests,true,"declared MAIN primary outgoing")
+ eq(v.clientInventoryObserverReadOnly,true,"inventory witness remains read-only")
+ eq(v.confirmedPendingOutboundRequestCount,4,"pending-confirmed outbound requests counted")
+ eq(v.automaticFinalAcceptEnabled,false,"no premature autonomous final Accept")
  eq(v.corroboratedClientDeltas,3,"three successive separate trades")
  eq(v.tradeCyclesStarted,4,"fourth new baseline opened automatically")
  eq(v.actualScriptAccepts,0,"zero automated final Accept")
