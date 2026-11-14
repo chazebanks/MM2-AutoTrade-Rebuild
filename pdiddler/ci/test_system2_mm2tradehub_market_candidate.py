@@ -59,10 +59,27 @@ class CandidateMarketTests(unittest.TestCase):
         with self.assertRaisesRegex(m.MarketBlocked, 'CATEGORY_ITEM_COUNT_INCOMPLETE'):
             m.collect(get, NOW)
 
-    def test_duplicated_card_fails(self):
-        duplicate = tier('ancient').replace('</main>', card('ancient', 1) + '</main>')
-        with self.assertRaisesRegex(m.MarketBlocked, 'DUPLICATE_ITEM_LINK'):
+    def test_identical_duplicate_collapses_without_inflating_inventory(self):
+        duplicate = tier('ancient').replace(card('ancient', 16), card('ancient', 1))
+        self.assertEqual(len(m.parse_tier(duplicate, 'ancient')), 15)
+
+    def test_conflicting_duplicate_fails_closed(self):
+        duplicate = tier('ancient').replace(card('ancient', 16), card('ancient', 1, mm2='500'))
+        with self.assertRaisesRegex(m.MarketBlocked, 'CONFLICTING_DUPLICATE_ITEM'):
             m.parse_tier(duplicate, 'ancient')
+
+    def test_observed_chroma_65_cards_46_unique(self):
+        cards = ''.join(card('chroma', i) for i in range(1, 47))
+        cards += ''.join(card('chroma', i) for i in range(1, 20))
+        page = ('<html><head><title>MM2 Chroma Values (November 2026)</title></head>'
+                '<body><main>' + cards + '</main></body></html>')
+        def fetch(path):
+            return page if path.endswith('/chroma') else fixture(path)
+        result = m.collect(fetch, NOW)
+        self.assertEqual(result['itemCount'], 190)
+        self.assertEqual(result['deduplicatedCardCount'], 19)
+        self.assertEqual(result['displayCardCounts']['chroma'], 65)
+        self.assertEqual(result['categoryCounts']['chroma'], 46)
 
     def test_wrong_category_fails(self):
         bad = tier('ancient').replace('Ancient · TIER 5', 'Godly · TIER 5', 1)
