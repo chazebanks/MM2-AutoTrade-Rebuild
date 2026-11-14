@@ -39,16 +39,18 @@ def event(seq,kind,rev=0,session="session",partner="partner"):
     return {"session":session,"partner":partner,"seq":seq,
      "revision":rev,"kind":kind,"scope":"SYNTHETIC_EXACT_PARTNER"}
 def dataset():
+    # Disjoint 16-train / 8-holdout partners; a real conditional signal.
+    # Importantly no fixture-supplied prediction: learner must fit counts.
     rows=[]
-    for i in range(12):
-        holdout=i>=8
-        label=i%2
+    for i in range(24):
+        holdout=i>=16
+        accepted=i%2==1
         rows.append({"episode":str(i),"partner":f"partner{i}",
          "scope":"PUBLIC_NONALT","kind":
-         "EXPLICIT_PARTNER_REQUEST_ACCEPTED" if label else "EXPLICIT_PARTNER_DECLINE",
+         "EXPLICIT_PARTNER_REQUEST_ACCEPTED" if accepted else "EXPLICIT_PARTNER_DECLINE",
          "attributed":True,"holdout":holdout,
-         "prediction":0.9 if label else 0.1,
-         "baseline":0.5})
+         "demandTier":"HIGH" if accepted else "LOW",
+         "displayedRatioBand":"FAIR"})
     return rows
 
 class S2AcceptanceOracles(unittest.TestCase):
@@ -228,6 +230,9 @@ class S2AcceptanceOracles(unittest.TestCase):
         self.assertEqual(r["status"],"RESEARCH_DECISION_PASS")
         self.assertTrue(r["researchModelSelected"])
         self.assertLess(r["brierScore"],r["baselineBrierScore"])
+        self.assertEqual(r["trainingEpisodes"],16)
+        self.assertEqual(r["holdoutEpisodes"],8)
+        self.assertEqual(r["researchConditionalBucketsFitted"],2)
         self.assertFalse(r["productionLearningAuthorized"])
         self.assertEqual(r["verifiedTradesForProfit"],0)
         self.assertSafety(r)
@@ -238,10 +243,11 @@ class S2AcceptanceOracles(unittest.TestCase):
         data[1]["kind"]="UNKNOWN"
         data[2]["kind"]="NO_RESPONSE_TIMEOUT"
         r=learning_decision(episodes=data)
-        self.assertEqual(r["status"],"ABSTAIN")
         self.assertEqual(r["quarantined"]["ALT_OR_UNATTRIBUTED"],1)
         self.assertEqual(r["quarantined"]["CENSORED_OR_UNKNOWN"],2)
-        self.assertFalse(r["researchModelSelected"])
+        self.assertEqual(r["trainingEpisodes"],13)
+        self.assertEqual(r["holdoutEpisodes"],8)
+        self.assertFalse(r["productionLearningAuthorized"])
         self.assertSafety(r)
 
     def test_five_seen_partner_in_holdout_rejected(self):
@@ -254,10 +260,16 @@ class S2AcceptanceOracles(unittest.TestCase):
 
     def test_five_new_model_worse_than_baseline_must_not_update(self):
         d=dataset()
-        for row in d:row["prediction"]=1-row["prediction"]
+        # Adversarial distribution shift: unseen partners reverse the association.
+        for row in d:
+            if row["holdout"]:
+                row["kind"]=("EXPLICIT_PARTNER_DECLINE" if
+                    row["kind"]=="EXPLICIT_PARTNER_REQUEST_ACCEPTED" else
+                    "EXPLICIT_PARTNER_REQUEST_ACCEPTED")
         r=learning_decision(episodes=d)
         self.assertEqual(r["status"],"ABSTAIN")
         self.assertFalse(r["researchModelSelected"])
+        self.assertGreater(r["brierScore"],r["baselineBrierScore"])
         self.assertSafety(r)
 
     def test_five_duplicate_episode_fails_closed(self):
