@@ -84,11 +84,11 @@ class MissionLockContinuity(unittest.TestCase):
         self.assertIn(path,mission[:3000])
         for phrase in (
             "existing Discord bot",
-            "PRIVATE evidence archive",
+            "PRIVATE Discord evidence archive",
             "historical",
             "zero learning-eligible",
             "automatic FINAL ACCEPT",
-            "No autonomous",
+            "NO Roblox script",
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase.lower(),handoff.lower())
