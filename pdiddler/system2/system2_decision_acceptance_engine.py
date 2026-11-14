@@ -250,9 +250,15 @@ def growth_route_decision(*,catalog,inventory,at,routes):
             minimum_robust=10**9
             seen={tuple(sorted(own.items()))}
             for step in route:
-                if type(step) is not dict or set(step)!={"give","receive"}:
+                if type(step) is not dict or set(step)!={
+                    "give","receive","partnerStock","partnerEvidenceScope"}:
                     raise Blocked("BAD_GROWTH_STEP")
+                if step["partnerEvidenceScope"]!="SYNTHETIC_EXPLICIT_PARTNER_STOCK":
+                    raise Blocked("FUTURE_PARTNER_AVAILABILITY_UNSUPPORTED")
                 g=_slots(step["give"],quotes);t=_slots(step["receive"],quotes)
+                stock=_portfolio(step["partnerStock"],quotes)
+                if any(stock.get(k,0)<q for k,q in t.items()):
+                    raise Blocked("FUTURE_SELLER_CANNOT_SUPPLY_RECEIVED_COPIES")
                 candidate=_after(own,g,t)
                 nominal=_total(t,quotes)-_total(g,quotes)
                 robust=_total(t,quotes,"low")-_total(g,quotes,"high")
