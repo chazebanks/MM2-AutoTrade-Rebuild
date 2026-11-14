@@ -96,10 +96,34 @@ class MultitradeGrowthTests(unittest.TestCase):
         r=self.runpath(
             t([("Celestial",1)],[("test_key_100",20)]),
             t([("test_key_100",20)],[("Gingerscope",1)]))
-        self.assertEqual(r["status"],"OFFLINE_GROWTH_PATH_SIMULATED",r)
+        self.assertEqual(r["status"],"OFFLINE_GROWTH_PATH_STACK_UNCERTAIN",r)
+        self.assertFalse(r["growthPaperArithmeticReliableForNegotiation"])
+        self.assertTrue(r["unknownStackTradeValueNeedsIndependentEvidence"])
+        self.assertEqual(r["steps"][1]["outgoingUncertainStackKeys"],["test_key_100"])
         self.assertEqual(r["steps"][1]["outgoingPhysicalSlots"],1)
         self.assertEqual(r["steps"][1]["outgoingCopies"],20)
         self.assertIn("STACKED_COPIES_ARE_NOT_PHYSICAL_SLOTS",r["steps"][1]["warnings"])
+    def test_many_copies_across_separate_less_than_five_stacks(self):
+        self.owned({"test_key_100":1})
+        result=self.runpath(
+            t([("test_key_100",1)],[("test_key_100",4),("test_key_101",4)]),
+            t([("test_key_101",4)],[("Gingerscope",1)]))
+        self.assertEqual(result["status"],"OFFLINE_GROWTH_PATH_SIMULATED",result)
+        self.assertTrue(result["growthPaperArithmeticReliableForNegotiation"])
+        self.assertFalse(result["unknownStackTradeValueNeedsIndependentEvidence"])
+        self.assertEqual(result["steps"][0]["incomingCopies"],8)
+        self.assertEqual(result["steps"][0]["incomingPhysicalSlots"],2)
+
+    def test_stack_alert_is_not_realistic_growth_profit(self):
+        self.owned({"Celestial":1})
+        result=self.runpath(
+            t([("Celestial",1)],[("test_key_100",20)]),
+            t([("test_key_100",20)],[("Gingerscope",1)]))
+        self.assertEqual(result["status"],"OFFLINE_GROWTH_PATH_STACK_UNCERTAIN")
+        self.assertFalse(result["growthPaperArithmeticReliableForNegotiation"])
+        self.assertFalse(result["authorizesTrade"])
+        self.assertFalse(result["mayUseForStrategyLearning"])
+
     def test_future_item_unowned_in_hypothesis(self):
         self.blocked("STEP_2_HYPOTHETICAL_STOCK_SHORTFALL",
             t([("test_key_100",1)],[("test_key_105",1)]),
