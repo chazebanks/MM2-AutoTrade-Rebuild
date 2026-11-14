@@ -90,10 +90,21 @@ def parse_tier(html, category):
             fail("CARD_CATEGORY_MISMATCH")
         node1 = card.select_one(".vs-row.vs-mm2 .vs-num")
         node2 = card.select_one(".vs-row.vs-supreme .vs-num")
-        if node1 is None or node2 is None:
-            fail("SOURCE_PRICE_ROWS_MISSING")
-        mm2_text = node1.get_text(" ", strip=True)
-        supreme_text = node2.get_text(" ", strip=True)
+        if node1 is None and node2 is None:
+            solo = card.select_one(".vs-row.vs-row--only")
+            num = solo.select_one(".vs-num") if solo else None
+            tag = solo.select_one(".vs-tag") if solo else None
+            if num is None or tag is None:
+                fail("SOURCE_PRICE_ROWS_MISSING")
+            tag_text = tag.get_text(" ", strip=True)
+            if tag_text == "MM2":
+                node1 = num
+            elif tag_text == "Supreme":
+                node2 = num
+            else:
+                fail("SOURCE_PRICE_TAG_UNKNOWN")
+        mm2_text = node1.get_text(" ", strip=True) if node1 else "UNAVAILABLE"
+        supreme_text = node2.get_text(" ", strip=True) if node2 else "UNAVAILABLE"
         mm2, supreme = price_of(mm2_text), price_of(supreme_text)
         demand_nodes = card.select("[title^='Demand ']")
         if len(demand_nodes) != 1:
