@@ -199,7 +199,8 @@ local function fakeEnvironment(opts)
    if opts.badGui and k=="ScreenGui" then error("GUI_BLOCKED") end
    local n=node(k);instances[#instances+1]=n;return n end},
   Enum={ZIndexBehavior={Sibling="Sibling"},
-   TextXAlignment={Left="Left"},Font={GothamBold="BOLD",
+   TextXAlignment={Left="Left"},TextYAlignment={Top="Top"},
+   Font={GothamBold="BOLD",
      GothamSemibold="SEMIBOLD"}},
   UDim={new=function(...)return {...}end},
   UDim2={fromOffset=function(...)return {...}end},
