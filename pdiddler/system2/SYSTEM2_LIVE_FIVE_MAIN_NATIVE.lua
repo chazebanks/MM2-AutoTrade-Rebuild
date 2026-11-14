@@ -49,7 +49,7 @@ if game.PlaceId~=ORIGINAL_MM2 or
    E[OWNER_KEY]~=nil or E[USED_KEY]==game.JobId or
    E.PDIDDLER_OUTGOING_SESSION~=nil or
    E.PDIDDLER_PART4_SESSION~=nil or conflicts() then
- warn("[SYSTEM1 AUTO] Fresh original MM2 server with no other trader required")
+ warn("[SYSTEM2 LIVE FIVE] Fresh original MM2 server with no other trader required")
  return nil
 end
 local Players=game:GetService("Players")
@@ -63,7 +63,7 @@ if not PG or not LP or not World or not World.CurrentCamera or
    type(ALT.UserId)~="number" or ALT.UserId<=0 or
    ALT.Name~=ALT_NAME or
    Players:GetPlayerByUserId(ALT.UserId)~=ALT then
- warn("[SYSTEM1 AUTO] GUI or exact consenting ALT unavailable")
+ warn("[SYSTEM2 LIVE FIVE] GUI or exact consenting ALT unavailable")
  return nil
 end
 local altId=ALT.UserId
@@ -109,7 +109,7 @@ if not geometry or type(geometry.choose)~="function" or
    not shadowModule or type(shadowModule.new)~="function" or
    not controllerModule or type(controllerModule.new)~="function" or
    not strategyInterpreter or type(strategyInterpreter.review)~="function" then
- warn("[SYSTEM1 AUTO] SOURCE_UNAVAILABLE: no request/offer was started")
+ warn("[SYSTEM2 LIVE FIVE] SOURCE_UNAVAILABLE: no request/offer was started")
  return nil
 end
 local gate={}
@@ -120,11 +120,11 @@ if not okIO or type(io)~="table" or
  type(io.trade)~="function" or type(io.offerItem)~="function"
  or type(io.decline)~="function" or type(io.removeOne)~="function"
  or type(io.partnerName)~="function" then
- warn("[SYSTEM1 AUTO] ORIGINAL_PROTECTED_IO_UNAVAILABLE")
+ warn("[SYSTEM2 LIVE FIVE] ORIGINAL_PROTECTED_IO_UNAVAILABLE")
  return nil
 end
 local owner={
- job=game.JobId,running=true,armed=false,batch8=false,
+ job=game.JobId,running=true,armed=false,
  startAuthorized=false,alt=ALT,offerActive=false,
 }
 E[OWNER_KEY]=owner
@@ -161,7 +161,7 @@ local function copyPayload(payload)
  data.clientOnly=true
  local ok,json=pcall(function()return Http:JSONEncode(data)end)
  if not ok or type(json)~="string" then
-  warn("[SYSTEM1 AUTO] ERROR_JSON_ENCODING_FAILED")
+  warn("[SYSTEM2 LIVE FIVE] ERROR_JSON_ENCODING_FAILED")
   return false
  end
  E.PDIDDLER_SYSTEM2_LIVE_FIVE_LAST_JSON=json
@@ -174,7 +174,7 @@ local function copyPayload(payload)
   local success,answer=pcall(cp,json)
   copied=success and answer~=false
  end
- print("[SYSTEM1 MAIN AUTO JSON] "..json)
+ print("[SYSTEM2 LIVE FIVE JSON] "..json)
  if screen.copy then
   screen.copy.Text=copied and "COPIED" or "COPY ERR"
  end
@@ -189,13 +189,14 @@ local function earlyStop(reason)
  gate.checkOutbound=nil;shadowLoopLive=false
  copyPayload({
   status="STOPPED",round=0,phase="SETUP",reason=reason,
-  lastAction="BEFORE_ARM",completedRounds=0,
+  lastAction="BEFORE_ARM",processedStages=0,
+   livePassedStages=0,blockedPrerequisiteStages=0,
   offerAttemptsKnown=false,serverCompletionProven=false,
   tradeOutcome="UNKNOWN",authorizesAccept=false,
   mayUseForStrategyLearning=false,
  })
  if screen.title then
-  screen.title.Text="SYSTEM1 AUTO STOPPED"
+  screen.title.Text="SYSTEM2 LIVE FIVE STOPPED"
   screen.body.Text="Error: "..tostring(reason)..". Do not press final Accept."
  end
  return true
@@ -462,7 +463,7 @@ local function refreshSelection()
  if not owner.running or owner.armed then return end
  local count=#selected
  local available=availableForArm()
- screen.status.Text="Chosen: "..tostring(count).."/4 | ALT eligible: "..
+ screen.status.Text="Chosen: "..tostring(count).."/2 | ALT eligible: "..
    (available and "YES" or "WAITING")
  screen.arm.Visible=count==2 and available
  screen.arm.Active=screen.arm.Visible
@@ -768,15 +769,10 @@ function adapters.inspect(round,epoch)
  }
 end
 function adapters.offerApproved(round,count,epoch,choiceIndex)
- local permitted=owner.batch8 and
-   ((round==4 and count==2 and choiceIndex==1) or
-    (round==5 and count==2 and choiceIndex==1) or
-    (round==6 and count==4 and choiceIndex==1) or
-    (round==8 and count==1 and (choiceIndex==1 or choiceIndex==2))) or
-   (not owner.batch8 and
-    ((round==3 and count==1 and choiceIndex==1) or
-     (round==4 and count==2 and choiceIndex==1) or
-     (round==5 and count==1 and (choiceIndex==1 or choiceIndex==2))))
+ -- Exact System2 test action budget: only the two strategic A/B stages.
+ -- No legacy ARM4/5/8 paths and never a fifth-stage stale-research reoffer.
+ local permitted=(round==3 and count==1 and choiceIndex==1) or
+   (round==4 and count==2 and choiceIndex==1)
  if actionBusy or epochRound~=round or
    not liveBeforeAction() or not permitted then return nil end
  local b=currentClientSnapshot()
@@ -878,9 +874,8 @@ function adapters.removeOwnOne(round,root,epoch,allowAltItem)
     io.trade()~=root then return false end
  local b=currentClientSnapshot()
  if not b or b.snap.physicalOwnSlots<1 or
-   ((allowAltItem==true and (round~=(owner.batch8 and 8 or 5) or
-       b.snap.physicalTheirSlots~=1)) or
-    (allowAltItem~=true and b.snap.physicalTheirSlots~=0)) then return false end
+    (round~=3 and round~=4) or
+    allowAltItem==true or b.snap.physicalTheirSlots~=0 then return false end
  actionBusy=true
  local ok,clicked=pcall(io.removeOne,root)
  actionBusy=false
@@ -982,7 +977,7 @@ local function armRounds(requestedRounds)
  if requestedRounds~=5 or not owner.running or owner.armed or
     #selected~=2 or not availableForArm() or
     not profileReadAt or os.clock()-profileReadAt>180 or io.trade()~=nil then return end
- owner.startAuthorized=true;owner.batch8=false;owner.armed=true
+ owner.startAuthorized=true;owner.armed=true
  local engine=controllerModule.new(adapters,{
    exactConsentingAlt=true,explicitFiveLiveConsent=true,
    finalAcceptDisabled=true,offlinePrerequisitesReviewed=true,
