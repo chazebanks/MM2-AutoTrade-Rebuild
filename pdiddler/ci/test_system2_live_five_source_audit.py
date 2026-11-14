@@ -60,6 +60,16 @@ class SourceContract(unittest.TestCase):
         self.assertIn('if requestedRounds~=5',self.n)
         self.assertIn("controller.status().phase~=\"EXPECTED_TERMINAL_STOP\"",self.n)
 
+    def test_native_action_scope_exactly_rounds_three_and_four(self):
+        self.assertIn("local permitted=(round==3 and count==1 and choiceIndex==1)",self.n)
+        self.assertIn("(round==4 and count==2 and choiceIndex==1)",self.n)
+        self.assertNotIn("owner.batch8",self.n)
+        self.assertIn("(round~=3 and round~=4)",self.n)
+        self.assertIn("allowAltItem==true or b.snap.physicalTheirSlots~=0",self.n)
+        self.assertIn("if requestedRounds~=5",self.n)
+        self.assertIn('"Chosen: "..tostring(count).."/2',self.n)
+        self.assertNotIn('"SYSTEM1 AUTO',self.n)
+
     def test_native_source_pin_and_original_protected_io(self):
         self.assertRegex(self.n, r'local CTRL="[0-9a-f]{40}"')
         self.assertIn('loadPinned(CTRL,"system2/system2_live_five_controller.lua"',self.n)
