@@ -115,7 +115,7 @@ class S2AcceptanceOracles(unittest.TestCase):
                  dec([slot("OwnA")],[slot("Mid")])]
         r=task(bilateral_decision,alternatives=missing)
         self.assertEqual(r["status"],"BLOCKED")
-        self.assertEqual(r["reason"],"PARTNER_PREFERENCE_SCOPE_OR_EVIDENCE_MISSING")
+        self.assertEqual(r["reason"],"INVALID_BILATERAL_OPTION")
         self.assertSafety(r)
 
     def test_two_main_profit_without_partner_incentive_abstains(self):
@@ -124,7 +124,7 @@ class S2AcceptanceOracles(unittest.TestCase):
         r=task(bilateral_decision,alternatives=options)
         self.assertEqual(r["status"],"ABSTAIN")
         self.assertEqual(r["reason"],"NO_BILATERALLY_FEASIBLE_RANGE_SAFE_OPTION")
-        self.assertFalse(any(x["researchViable"] for x in r["considered"]))
+        self.assertFalse(any(x["researchViable"] for x in r["alternatives"]))
         self.assertSafety(r)
 
     def test_two_nominally_greater_but_risky_junk_loses_to_robust_good(self):
