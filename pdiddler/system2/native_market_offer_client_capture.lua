@@ -66,7 +66,7 @@ local function side(root,name)
   local slot=find(container,"NewItem"..tostring(i))
   if slot and visible(slot,root) then
    local raw,err=rawItemId(slot)
-   if not raw then return nil,nil,err end
+   if err then return nil,nil,err end
    local label=readText(find(find(slot,"ItemName"),"Label"))
    local amount=readText(find(find(slot,"Container"),"Amount"))
    local chromaTag=find(find(slot,"Tags"),"Chroma")
