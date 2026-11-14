@@ -128,6 +128,8 @@ class StrictPrivateDiscordV2(unittest.TestCase):
                      "DISCORD_V2_TIMEOUT_NOT_PENDING")
         self.blocked([a,row(1,2,"PARTNER_CANCELLED")],
                      "DISCORD_V2_CANCEL_OR_CLOSE_BEFORE_TRADE")
+        self.blocked([a,b,row(1,3,"PARTNER_DECLINED")],
+                     "DISCORD_V2_DECLINE_AFTER_TRADE_MISCLASSIFIED")
 
     def test_post_terminal_event_cannot_create_second_outcome(self):
         self.blocked([row(1,1,"MAIN_REQUEST_PENDING"),
