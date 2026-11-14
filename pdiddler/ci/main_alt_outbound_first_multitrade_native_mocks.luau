@@ -29,11 +29,15 @@ local outgoingCode=[[
 local M={}
 function M.run(scanner,options)
  local E=getgenv()
+ -- Mirror the ORIGINAL reviewed P3 fork's global session increment.
+ -- The old native mock omitted this, concealing the on-device self-collision.
+ E.PDIDDLER_OUTGOING_SESSION=(tonumber(E.PDIDDLER_OUTGOING_SESSION) or 0)+1
+ local myEpoch=E.PDIDDLER_OUTGOING_SESSION
  local armed,paused,stopped=false,false,false
  local verified=0
  local requests=0
  local S={processed={},verifiedClientDeltaCycles=0,sent=0}
- local obj={state=S}
+ local obj={state=S,session=myEpoch}
  function obj.arm()
   if armed or stopped or options.exactAltMultiTrade~=true or
       options.exactAltUserId~=202 or
@@ -62,7 +66,12 @@ function M.run(scanner,options)
   S.processed[202]=nil;paused=false;requests+=1;S.sent+=1
   return true,"NEXT_MAIN_OUTBOUND_SENT"
  end
- function obj.stop()stopped=true end
+ function obj.stop()
+  stopped=true
+  if E.PDIDDLER_OUTGOING_SESSION==myEpoch then
+   E.PDIDDLER_OUTGOING_SESSION=myEpoch+1
+  end
+ end
  function obj.requestCount()return requests end
  E.__P3_OUTBOUND_MOCK=obj
  return obj
@@ -213,6 +222,7 @@ local function gameFixture(opts)
  }
  local E={PDIDDLER_ACCEPT_DISCOVERY_ALT_NAME="FixtureAlt"}
  if opts.otherController then E.PDIDDLER_PART4_SESSION={} end
+ if opts.foreignP3AlreadyRunning then E.PDIDDLER_OUTGOING_SESSION=31 end
  local copied={}
  local env
  env={
@@ -385,6 +395,52 @@ do
  f.offer({{label="AlphaFixture",qty=1}});f.tick()
  eq(r.status().phase,"STABILIZING","inbound item in MAIN-initiated trade")
  eq(f.getRequests(),1,"no extra outgoing request mid-trade")
+end
+do
+ -- Real hardware regression: original P3 itself creates an epoch before
+ -- ARM. The old conflict guard rejected that *own* session, returning
+ -- PREARM_PAIR_OR_VIEWPORT_INVALID with zero inventory reads.
+ local f=gameFixture()
+ local r=f.run()
+ ok(type(r)=="table","exact ALT runner created")
+ eq(type(f.E.PDIDDLER_OUTGOING_SESSION),"number",
+   "own P3 epoch exists BEFORE ARM")
+ eq(f.getReads(),0,"no inventory reads prior to ARM")
+ eq(f.getRequests(),0,"no outbound requests prior to ARM")
+ f.button("ArmMultipleManualTrades").Activated:Fire()
+ eq(r.status().status,"READY","our own P3 session does not fail PREARM")
+ f.tick(0.5);f.tick(0.2)
+ eq(r.status().phase,"WAIT_OPEN","owned epoch permits baseline and outbound")
+ eq(f.getReads(),1,"ARM invokes first own profile census")
+ eq(f.getRequests(),1,"MAIN originates request only after census")
+end
+do
+ local f=gameFixture({foreignP3AlreadyRunning=true})
+ eq(f.run(),nil,"foreign P3 epoch rejected before new controller")
+ eq(#f.getSources(),0,"no frozen modules fetched for foreign epoch")
+ eq(f.getReads(),0,"no profile reads for foreign epoch")
+end
+do
+ local f=gameFixture()
+ local r=f.run()
+ ok(type(r)=="table","valid test runner created before mutation")
+ f.E.PDIDDLER_OUTGOING_SESSION=9999
+ f.button("ArmMultipleManualTrades").Activated:Fire()
+ eq(r.status().status,"STOPPED","foreign takeover before ARM stops")
+ eq(r.status().reason,"PREARM_OWNED_P3_EPOCH_CHANGED",
+    "specific ownership fault, not invented viewport")
+ eq(f.getReads(),0,"no profile reads after ownership takeover")
+ eq(f.getRequests(),0,"no send after ownership takeover")
+end
+do
+ local f=gameFixture()
+ local r=f.arm()
+ f.E.PDIDDLER_OUTGOING_SESSION=9999
+ f.tick()
+ eq(r.status().status,"STOPPED","replaced epoch mid-run stops globally")
+ eq(r.status().reason,"OWNED_P3_EPOCH_OR_CONTROLLER_CHANGED",
+    "specific mid-session ownership fault")
+ eq(f.getRequests(),1,"replaced epoch does not generate second send")
 end
 do
  local f=gameFixture({otherController=true})
