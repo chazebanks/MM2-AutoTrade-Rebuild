@@ -17,6 +17,22 @@ from pdiddler.system2.operator_capture_adapter import AUTHORITY_DENIED
 
 SCHEMA = "gingerscope-system2-offline-attractiveness-evidence-v1"
 
+# Publisher-defined categorical terms, not measured acceptance probabilities.
+# Reference: https://supremevalues.com/use (Supreme stability guide).
+# Do not collapse all labels other than "Stable" into an instability penalty.
+STABILITY_LABELS = frozenset({
+    "Rising", "Overpaid For", "Doing Well", "Improving", "Fluctuating",
+    "Receding", "Stable", "Underpaid For", "Decreasing", "Unsafe",
+})
+STABILITY_CAUTION = {
+    "Fluctuating": "PUBLISHER_FLUCTUATING_RANGE_UNCERTAINTY",
+    "Underpaid For": "PUBLISHER_FREQUENT_UNDERPAYS",
+    "Decreasing": "PUBLISHER_DECREASING_RISK",
+    "Unsafe": "PUBLISHER_UNSAFE_WARNING",
+    "Receding": "PUBLISHER_RECEDING_LABEL",
+}
+
+
 
 def _out(status, reason, **data):
     return {
@@ -108,10 +124,14 @@ def compare(mapped, shadow, alternatives, *, evaluated_at_utc=None):
                 issues.append("UNAPPROVED_LISTED_LOSS")
             if review["worstCaseRangeDelta"]<0:
                 issues.append("PRICE_RANGE_DOWNSIDE_EXPOSED")
-            if any(source["stability"]!="Stable"
-                   for row in candidate["incomingSlots"]
-                   for source in [idx[row["rawGameKey"]]]):
-                issues.append("NON_STABLE_PUBLISHER_STABILITY_LABEL")
+            labels = {idx[row["rawGameKey"]]["stability"]
+                      for row in candidate["incomingSlots"]}
+            if not labels.issubset(STABILITY_LABELS):
+                raise ValueError("UNKNOWN_PUBLISHER_STABILITY_LABEL")
+            for label in sorted(labels):
+                caution = STABILITY_CAUTION.get(label)
+                if caution:
+                    issues.append(caution)
             if any(idx[row["rawGameKey"]]["demand"]<=2
                    for row in candidate["incomingSlots"]):
                 issues.append("LOW_ORDINAL_PUBLISHER_DEMAND_LABEL")
