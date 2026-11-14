@@ -138,8 +138,8 @@ def replay(events):
                     raise ValueError("CLIENT_DELTA_NOT_BOUND_TO_ACTIVE_WINDOW")
                 entry["clientDeltas"] += 1
             elif kind in TERMINAL:
-                if kind == "PARTNER_NO_RESPONSE_TIMEOUT" and
-                    entry["stage"] != "REQUEST_PENDING":
+                if (kind == "PARTNER_NO_RESPONSE_TIMEOUT" and
+                        entry["stage"] != "REQUEST_PENDING"):
                     raise ValueError("NO_RESPONSE_TIMEOUT_AFTER_REQUEST_ACCEPTANCE")
                 if kind == "CLIENT_WINDOW_CLOSED_UNKNOWN" and
                     entry["stage"] != "IN_TRADE":
