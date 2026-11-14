@@ -127,6 +127,48 @@ def evaluate_batch(mapped, shadow, alternatives, paths, counterparty,
             partner.get("counterpartyOwnsAnyItemProven") is not False or
             partner.get("counterpartyConsentProven") is not False):
             raise ValueError("SYNTHETIC_PARTNER_SCOPE_NOT_ADMITTED")
+        # NEW S2.3–S2.4 research distinction: an attractive paper trade
+        # whose RECEIVED items are absent from the caller's declared
+        # synthetic partner shortlist is not even hypothetically
+        # inventory-feasible. Never mistake a source-labelled demand score
+        # or a candidate's profit for opponent inventory/consent.
+        partner_scope=counterparty.get("counterparty")
+        if type(partner_scope) is not dict or type(partner_scope.get("items")) is not list:
+            raise ValueError("SYNTHETIC_PARTNER_SCOPE_NOT_ADMITTED")
+        partner_counts={}
+        for entry in partner_scope["items"]:
+            if (type(entry) is not dict or set(entry)!={"rawGameKey","quantity"}
+                or type(entry["rawGameKey"]) is not str
+                or type(entry["quantity"]) is not int
+                or entry["rawGameKey"] in partner_counts):
+                raise ValueError("SYNTHETIC_PARTNER_SCOPE_NOT_ADMITTED")
+            partner_counts[entry["rawGameKey"]]=entry["quantity"]
+        for row in rows:
+            index=row.get("index")
+            if type(index) is not int or not 0 <= index < len(alternatives):
+                raise ValueError("ATTRACTIVENESS_RESULT_AUTHORITY_OR_STATUS")
+            candidate=alternatives[index]
+            incoming=candidate.get("incomingSlots") if type(candidate) is dict else None
+            if (row["status"]=="INVALID_ALTERNATIVE" or
+                type(incoming) is not list or not incoming):
+                row["syntheticPartnerIncomingCoverage"]="NOT_ASSESSED_INVALID_OR_EMPTY"
+            else:
+                received={}
+                for item in incoming:
+                    if (type(item) is not dict
+                        or set(item)!={"rawGameKey","quantity"}
+                        or type(item["rawGameKey"]) is not str
+                        or type(item["quantity"]) is not int
+                        or item["rawGameKey"] in received):
+                        raise ValueError("ATTRACTIVENESS_RESULT_AUTHORITY_OR_STATUS")
+                    received[item["rawGameKey"]]=item["quantity"]
+                row["syntheticPartnerIncomingCoverage"]=(
+                    "COVERED_BY_UNVERIFIED_SYNTHETIC_SHORTLIST"
+                    if all(partner_counts.get(k,0)>=q for k,q in received.items())
+                    else "NOT_IN_SYNTHETIC_PARTNER_SHORTLIST"
+                )
+            row["realPartnerOwnershipOrConsentProven"]=False
+            row["actionableCandidate"]=False
         behavior=replay(events)
         if (behavior["status"]!="OFFLINE_DIFFERENT_BEHAVIOR_TRAJECTORIES_REPLAYED" or
             behavior["authorizesAccept"] is not False or
@@ -155,6 +197,10 @@ def evaluate_batch(mapped, shadow, alternatives, paths, counterparty,
             riskBlockedPaths=sum(r["status"] in ("BLOCKED","BLOCKED_LOSS_POLICY")
                                  for r in tested_paths),
             untrustedStackPaths=sum(r["stackPriceUncertain"] for r in tested_paths),
+            syntheticAlternativesNotInDeclaredPartnerShortlist=sum(
+                row["syntheticPartnerIncomingCoverage"]==
+                "NOT_IN_SYNTHETIC_PARTNER_SHORTLIST" for row in rows
+            ),
             syntheticPartnerPairsConsidered=partner.get("totalHypotheticalPairsConsidered",0),
             partnerAcceptanceStillUnknown=True,
             playerResponseOutcomeDistribution=behavior["outcomeDistribution"],
