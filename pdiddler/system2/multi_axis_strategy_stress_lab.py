@@ -85,6 +85,7 @@ def evaluate_batch(mapped, shadow, alternatives, paths, counterparty,
             rows.append({
                 "index":item["candidateIndex"],"status":item["status"],
                 "listedDelta":item.get("listedDelta"),
+                "hypotheticalTargetReceived":item.get("hypotheticalTargetReceived") is True,
                 "warnings":sorted(set(warnings)),
                 "requiresVerifiedPartnerAppeal":True,
                 "requiresObservedRetradeLiquidity":True,
