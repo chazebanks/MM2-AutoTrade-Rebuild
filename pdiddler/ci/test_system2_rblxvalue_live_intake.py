@@ -127,6 +127,29 @@ class MarketSourceContract(unittest.TestCase):
             with self.assertRaisesRegex(m.DataFailure, "API_KEY_MISSING_OR_INVALID_FORMAT"):
                 m.HTTPTransport(key)
 
+    def test_public_meta_omits_secret_and_items_include_secret(self):
+        from unittest.mock import patch
+        seen = []
+
+        class Response:
+            status = 200
+            def __enter__(self):
+                return self
+            def __exit__(self, *_):
+                pass
+            def read(self, *_):
+                return b'{"sample": true}'
+
+        def respond(request, timeout):
+            seen.append((request.full_url, request.get_header("X-api-key")))
+            return Response()
+
+        with patch.object(m, "urlopen", side_effect=respond):
+            m.HTTPTransport("rbx_test")("/meta", {})
+            m.HTTPTransport("rbx_test")("/items", {"category": "ancient", "limit": 1, "offset": 0})
+        self.assertEqual(seen[0][1], None)
+        self.assertEqual(seen[1][1], "rbx_test")
+
     def test_deterministic_fingerprint(self):
         self.assertEqual(self.got(fake())["candidateRowsSha256"],
                          self.got(fake())["candidateRowsSha256"])
