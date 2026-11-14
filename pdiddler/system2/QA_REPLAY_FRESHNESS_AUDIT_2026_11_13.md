@@ -18,3 +18,9 @@ The original `client_inventory_shadow.evaluate(...,evaluated_at_utc=...)` valida
 5. Previous descriptions of the product as *growth planning* referred to **synthetic supplied-path replay**, not a usable optimizer. Correct terminology and plan distinct tested integration into strategy search and empirical appeal evidence. Do not merge the entire draft research stack or enable live trading based solely on green offline tests.
 
 All changes are research-only; no production P3/P4/Delta, remote calls, webhooks or player data added.
+
+## Verified repair result
+- Tested QA implementation at commit `f5d1f2eac25256c47342afbccc6649514a80d420` (draft PR #258) with **219/219** exact-focused Python tests passed, **no skips**, in original-source-bound GitHub run [43542475432](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/43542475432). The workflow verifies historical Stage83 + original PR106 planner + corrected PR182 guard Git blob IDs before tests.
+- Same commit's **8/8 GitHub workflow runs completed SUCCESS**. No existing trade runtime/Delta/P3/P4 files changed.
+- Source original user export bytes were independently inspected locally again: **64,793 bytes**, source SHA256 `bb91b545637a0fe8d7dcceebef9070ee9a76210015bdc1737fd78f068acaeb4f`, **189 distinct categories+images**, 15/128/46 weapon classes, 21 null historical prices, five starred value displays, 20 range-valued items.
+- **No real game identity, partner acceptance probability, settled transfer, or autonomous trading claim is supported by these tests.** The 60-second as-of parameter is caller-supplied, so this is a fail-closed offline freshness check, not a cryptographically trusted clock or replay-proof native receipt.
