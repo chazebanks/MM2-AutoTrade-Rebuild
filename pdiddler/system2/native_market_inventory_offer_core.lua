@@ -118,7 +118,7 @@ local function parseAmount(s)
  if s=="" then return 1 end -- original Stage9: empty Amount node means x1
  s=s:gsub("^%s+",""):gsub("%s+$","")
  s=s:gsub("^[xX]%s*","")
- if s:sub(1,3)=="×" then s=s:sub(4):gsub("^%s+","") end
+ if s:sub(1,#"×")=="×" then s=s:sub(#"×"+1):gsub("^%s+","") end
  if #s==0 or #s>7 or not s:match("^%d+$") then return nil end
  local q=tonumber(s)
  return natural(q) and q or nil
