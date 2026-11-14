@@ -1,0 +1,110 @@
+name: Gingerscope System2 S2.3 live market to original MM2 scanner + trade GUI bridge
+on:
+  push:
+    branches:
+      - research/system2-native-market-inventory-offer-nov14
+    paths:
+      - "pdiddler/system2/native_market_inventory_offer_core.lua"
+      - "pdiddler/system2/native_market_offer_client_capture.lua"
+      - "pdiddler/system2/native_market_inventory_offer_bridge.lua"
+      - "pdiddler/ci/system2_native_market_inventory_offer_bridge_mocks.luau"
+      - ".github/workflows/gingerscope-system2-native-market-offer-bridge.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: gingerscope-system2-native-bridge-source
+  cancel-in-progress: false
+jobs:
+  exact-source-and-native-bridge:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HTML parser and immutable Luau test interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check 'beautifulsoup4>=4.12,<5'
+          archive="$RUNNER_TEMP/lune-v0.11.1-linux-x86_64.zip"
+          curl -fsSL --retry 3 --connect-timeout 20 'https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip' -o "$archive"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/lune-dist"
+          lune_bin="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
+          test -n "$lune_bin"
+          install -m 0755 "$lune_bin" "$RUNNER_TEMP/lune"
+      - name: Recover original Stage83 from immutable Git blob
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --max-time 45 --retry 2 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua' -o "$RUNNER_TEMP/stage83.lua"
+          test "$(git hash-object "$RUNNER_TEMP/stage83.lua")" = '40e2a0ff01b70b2d0181c62cae347a08da82bcb8'
+          echo ORIGINAL_GAME_KEYS_PINNED=TRUE
+      - name: Run existing market and identity and decision regression suites
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/stage83.lua
+        run: |
+          python3 -m unittest -q pdiddler.ci.test_system2_mm2tradehub_market_candidate pdiddler.ci.test_system2_public_market_gamekey_crosswalk pdiddler.ci.test_system2_real_intelligence_decisions
+      - name: Acquire actual source and build exact live raw-key crosswalk
+        shell: bash
+        run: |
+          set -euo pipefail
+          export GINGERSCOPE_MARKET_OUTPUT="$RUNNER_TEMP/source-market.json"
+          python3 -m pdiddler.system2.mm2tradehub_market_candidate
+          python3 -m pdiddler.system2.public_market_gamekey_crosswalk \
+            --market "$RUNNER_TEMP/source-market.json" \
+            --stage83 "$RUNNER_TEMP/stage83.lua" \
+            --evaluated-utc "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+            --output "$RUNNER_TEMP/market-gamekey-bridge.json"
+          cp "$RUNNER_TEMP/market-gamekey-bridge.json" pdiddler/system2/research_market_crosswalk_current.json
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,datetime
+          p=Path('pdiddler/system2/research_market_crosswalk_current.json')
+          obj=json.loads(p.read_text())
+          assert obj['matchedHistoricalGameKeys']==189
+          t=datetime.datetime.fromisoformat(obj['sourceRetrievedUtc'].replace('Z','+00:00'))
+          Path('pdiddler/system2/research_market_epoch.txt').write_text(str(int(t.timestamp())))
+          print('MARKET_SOURCE_EPOCH_VALIDATED',t.isoformat())
+          PY
+      - name: Run actual native Luau scanner and GUI read-only integration tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_market_inventory_offer_bridge_mocks.luau
+      - name: Audit native bridge has no mutation calls
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          names=['native_market_inventory_offer_core.lua','native_market_offer_client_capture.lua','native_market_inventory_offer_bridge.lua']
+          for name in names:
+              text=Path('pdiddler/system2',name).read_text()
+              for forbidden in ('FireServer(', 'InvokeServer(', 'TeleportService', 'PostAsync(', 'AcceptTrade(', 'DeclineTrade(', 'mouse1click(', 'VirtualInputManager'):
+                  assert forbidden not in text,(name,forbidden)
+          print('NATIVE_READONLY_NO_TRADE_MUTATIONS=PASS')
+          PY
+      - name: Archive exact market+game-key research snapshot
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-system2-market-native-research-source
+          path: ${{ runner.temp }}/market-gamekey-bridge.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Publish only public market game-key research snapshot on draft branch
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add pdiddler/system2/research_market_crosswalk_current.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'data(system2): source-verified current read-only market crosswalk [skip ci]'
+            git push origin HEAD:research/system2-native-market-inventory-offer-nov14
+          fi
