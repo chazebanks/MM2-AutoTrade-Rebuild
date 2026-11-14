@@ -25,7 +25,16 @@ local function protected(k)
  return k:lower():find("gingerscope",1,true)~=nil
 end
 local function digestSide(entries,outbound)
- if type(entries)~="table" or #entries>4 then return nil,"SLOT_COUNT_INVALID" end
+ if type(entries)~="table" then return nil,"SLOT_COUNT_INVALID" end
+ local count=0
+ for index in pairs(entries) do
+  count+=1
+  if type(index)~="number" or index~=math.floor(index) or
+     index<1 or index>4 or count>4 then
+   return nil,"SLOT_INDEX_ARRAY_INVALID"
+  end
+ end
+ if count~=#entries then return nil,"SPARSE_OR_EXTRA_SLOT_ENTRIES" end
  local seen,positions,parts={}, {}, {}
  for _,r in ipairs(entries) do
   if type(r)~="table" or not key(r.rawKey) or
@@ -35,6 +44,15 @@ local function digestSide(entries,outbound)
      r.slotIndex<1 or r.slotIndex>4 or
      r.category~="Weapons" or seen[r.rawKey] or
      positions[r.slotIndex] then return nil,"SLOT_IDENTITY_OR_QUANTITY_INVALID" end
+  local propertyCount=0
+  for field in pairs(r) do
+   propertyCount+=1
+   if field~="rawKey" and field~="quantity" and
+       field~="slotIndex" and field~="category" then
+    return nil,"SLOT_UNEXPECTED_METADATA"
+   end
+  end
+  if propertyCount~=4 then return nil,"SLOT_FIELDS_INCOMPLETE" end
   if outbound and protected(r.rawKey) then return nil,"PROTECTED_GINGERSCOPE_OUTGOING" end
   seen[r.rawKey]=true;positions[r.slotIndex]=true
   parts[#parts+1]=tostring(r.slotIndex)..":"..r.rawKey..":"..tostring(r.quantity)
