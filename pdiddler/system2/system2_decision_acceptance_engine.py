@@ -334,29 +334,39 @@ def adaptive_response(*,events,expected_session,expected_partner):
     except (Blocked,ValueError,TypeError,KeyError) as e:
         return _out(name,"BLOCKED",str(e) if isinstance(e,Blocked) else "BAD_INPUT")
 
-def learning_decision(*,episodes,minimum_unique_partners=8):
-    """Train *research* classifier on verified response labels; holdout required.
+def learning_decision(*,episodes,minimum_unique_partners=12):
+    """Actually FIT a conditional response model, then test unseen partners.
 
-    ALT and UNKNOWN do not become rewards. Improvements checked against a
-    baseline on independent held-out episodes, NOT a guessed personality.
+    Observed request acceptance is NOT final trade acceptance or settlement.
+    Only independently attributable, unambiguous PUBLIC response episodes may
+    enter this *offline* training. ALT, ambiguous UNKNOWN/timeout/cancel are
+    quarantined, never converted to negative successful-trade labels.
+
+    A Beta-Bernoulli conditional model is trained on observed response
+    contexts (ordinal demand and displayed nominal offer ratio bins), NOT
+    account identities or presumed greedy personalities. The model's
+    TEST/HOLDOUT predictions are generated only AFTER fitting on training
+    data. A global training-rate baseline must be beaten on disjoint partners.
     """
     name="OUTCOME_QUALITY_LEARNING"
+    contexts={
+      ("LOW","UNDER"),("LOW","FAIR"),("LOW","OVER"),
+      ("MID","UNDER"),("MID","FAIR"),("MID","OVER"),
+      ("HIGH","UNDER"),("HIGH","FAIR"),("HIGH","OVER"),
+    }
     try:
-        if type(episodes) is not list or not 12<=len(episodes)<=1000:
+        if type(episodes) is not list or not 20<=len(episodes)<=1000:
             raise Blocked("RESPONSE_LEARNING_DATASET_INSUFFICIENT")
         eligible=[];quarantined=Counter();identities=set()
         for e in episodes:
             if type(e) is not dict or set(e)!={"episode","partner","scope","kind",
-                           "attributed","holdout","prediction","baseline"}:
+                  "attributed","holdout","demandTier","displayedRatioBand"}:
                 raise Blocked("LEARNING_EVIDENCE_FIELDS_INVALID")
             if (type(e["episode"]) is not str or not e["episode"] or
                 type(e["partner"]) is not str or not e["partner"] or
                 type(e["attributed"]) is not bool or type(e["holdout"]) is not bool or
-                type(e["prediction"]) not in (int,float) or
-                type(e["baseline"]) not in (int,float) or
-                not isfinite(e["prediction"]) or not isfinite(e["baseline"]) or
-                not 0<=e["prediction"]<=1 or not 0<=e["baseline"]<=1):
-                raise Blocked("LEARNING_EVENT_PREDICTION_INVALID")
+                (e["demandTier"],e["displayedRatioBand"]) not in contexts):
+                raise Blocked("LEARNING_EVENT_CONTEXT_INVALID")
             if e["episode"] in identities:
                 raise Blocked("LEARNING_REPLAYED_EPISODE")
             identities.add(e["episode"])
@@ -373,28 +383,46 @@ def learning_decision(*,episodes,minimum_unique_partners=8):
             else:
                 raise Blocked("UNSUPPORTED_OUTCOME_KIND")
             eligible.append((e,label))
-        unique_partners={e["partner"] for e,_ in eligible}
         holdout=[(e,y) for e,y in eligible if e["holdout"]]
         train=[(e,y) for e,y in eligible if not e["holdout"]]
-        if (len(unique_partners)<minimum_unique_partners or
-            len(holdout)<4 or len(train)<8 or
-            {e["partner"] for e,_ in holdout}.intersection(
-                {e["partner"] for e,_ in train})):
+        participants={e["partner"] for e,_ in eligible}
+        overlap={e["partner"] for e,_ in holdout}.intersection(
+                 {e["partner"] for e,_ in train})
+        if (len(participants)<minimum_unique_partners or
+            len(holdout)<6 or len(train)<12 or overlap):
             return _out(name,"ABSTAIN","INSUFFICIENT_INDEPENDENT_PARTNER_HOLDOUT",
                         eligible=len(eligible),quarantined=dict(quarantined),
-                        holdoutEpisodes=len(holdout),
+                        trainingEpisodes=len(train),holdoutEpisodes=len(holdout),
                         researchModelSelected=False)
-        def brier(col):
-            return sum((e[col]-y)**2 for e,y in holdout)/len(holdout)
-        model,bline=brier("prediction"),brier("baseline")
-        better=model+0.001<bline
+        # Conditional response counts are the learned model. No input prediction
+        # can be injected. Laplace smoothing avoids zero/one certainty.
+        positives=Counter()
+        totals=Counter()
+        for e,y in train:
+            context=(e["demandTier"],e["displayedRatioBand"])
+            totals[context]+=1
+            positives[context]+=y
+        global_rate=(1+sum(y for _,y in train))/(2+len(train))
+        def brier(kind):
+            score=0.0
+            for e,y in holdout:
+                c=(e["demandTier"],e["displayedRatioBand"])
+                prediction=((1+positives[c])/(2+totals[c])) if kind=="model" else global_rate
+                score+=(prediction-y)**2
+            return score/len(holdout)
+        model,baseline=brier("model"),brier("baseline")
+        better=model+0.001<baseline and all(
+            totals[(e["demandTier"],e["displayedRatioBand"])]>=2 for e,_ in holdout)
         return _out(name,"RESEARCH_DECISION_PASS" if better else "ABSTAIN",
-                    "HELDOUT_RESPONSE_MODEL_BEATS_BASELINE" if better else
+                    "TRAINED_MODEL_BEATS_UNSEEN_PARTNER_BASELINE" if better else
                     "NO_HELDOUT_GAIN_NO_LEARNING_UPDATE",
-                    eligible=len(eligible),holdoutEpisodes=len(holdout),
-                    quarantined=dict(quarantined),brierScore=round(model,5),
-                    baselineBrierScore=round(bline,5),
+                    eligible=len(eligible),trainingEpisodes=len(train),
+                    holdoutEpisodes=len(holdout),quarantined=dict(quarantined),
+                    brierScore=round(model,5),
+                    baselineBrierScore=round(baseline,5),
                     researchModelSelected=better,
+                    independentPartnerHoldout=True,
+                    researchConditionalBucketsFitted=len(totals),
                     productionLearningAuthorized=False,
                     verifiedTradesForProfit=0,
                     acceptedClientRequestNotGameSettlement=True)
