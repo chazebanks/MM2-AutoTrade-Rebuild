@@ -11,18 +11,31 @@ local OWNER="PDIDDLER_MAIN_ALT_MULTITRADE_MANUAL_OWNER"
 local USED="PDIDDLER_MAIN_ALT_MULTITRADE_MANUAL_USED_JOB"
 local ALT_KEY="PDIDDLER_ACCEPT_DISCOVERY_ALT_NAME"
 local PLACE=142823291
+-- Private exact-epoch ownership lease. A preexisting P3 session is a
+-- collision; OUR newly created guarded P3 session must not self-collide.
+local ownedP3Epoch=nil
 local function validName(x)
  return type(x)=="string" and #x>=3 and #x<=32 and x:match("^[%w_]+$")~=nil
 end
 local function conflict()
  for _,k in ipairs({
-  "PDIDDLER_SUPERVISED_P3_NATIVE_OWNER","PDIDDLER_OUTGOING_SESSION",
+  "PDIDDLER_SUPERVISED_P3_NATIVE_OWNER",
   "PDIDDLER_PART4_SESSION","PDIDDLER_STAGE119_LASTOFFER_OWNER",
   "PDIDDLER_STAGE119_P3_OWNER","PDIDDLER_STAGE101_IDENTITY_OWNER",
   "PDIDDLER_S2_SHADOW_OWNER","PDIDDLER_S2_KEY_RECON_OWNER",
   "PDIDDLER_S2_MULTIFEATURE_OWNER","PDIDDLER_ACCEPT_CONTROL_DISCOVERY_OWNER",
   "PDIDDLER_SUPERVISED_ONE_ITEM_PILOT",
  }) do if E[k]~=nil then return true end end
+ local liveP3Epoch=E.PDIDDLER_OUTGOING_SESSION
+ if ownedP3Epoch==nil then
+  -- Before we construct P3, ANY preexisting epoch is foreign.
+  if liveP3Epoch~=nil then return true end
+ elseif type(liveP3Epoch)~="number" or
+    liveP3Epoch~=ownedP3Epoch then
+  -- Once constructed, only our exact P3 epoch is allowed.
+  -- Missing/advanced/replaced owner permanently fails closed.
+  return true
+ end
  return E.PDIDDLER_AUTOTRADE_ACTIVE==true or
    E.PDIDDLER_PART4_CONTROLLER_ACTIVE==true or
    E.PDIDDLER_OUTGOING_CONTROLLER_ACTIVE==true
@@ -311,11 +324,20 @@ if not okOutgoing or type(outgoing)~="table" or
  type(outgoing.arm)~="function" or type(outgoing.isArmed)~="function" or
  type(outgoing.isPaused)~="function" or type(outgoing.fatalStatus)~="function" or
  type(outgoing.requeueVerifiedExactAlt)~="function" or
- type(outgoing.stop)~="function" then
+ type(outgoing.stop)~="function" or
+ type(outgoing.session)~="number" or
+ outgoing.session~=math.floor(outgoing.session) or outgoing.session<1 or
+ E.PDIDDLER_OUTGOING_SESSION~=outgoing.session then
+ if type(outgoing)=="table" and type(outgoing.stop)=="function" then
+  pcall(outgoing.stop)
+ end
  E[OWNER]=nil
- warn("[MAIN ALT MULTI] protected P3 exact ALT sender unavailable")
+ warn("[MAIN ALT MULTI] exact owned P3 epoch could not be bound")
  return nil
 end
+-- This is not a wildcard bypass: record the ONE epoch created by this
+-- exact guarded P3 instance, and reject any replacement at every tick/ARM.
+ownedP3Epoch=outgoing.session
 state.outgoing=outgoing
 local UI={}
 local built=pcall(function()
