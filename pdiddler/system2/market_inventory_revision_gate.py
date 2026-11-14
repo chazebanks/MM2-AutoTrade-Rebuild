@@ -220,6 +220,14 @@ def compare(previous, *, export_bytes, stage83_lua_bytes,
         "partnerUserIdHash", "offerRevision", "offerObservedAtUTC",
     }:
         return _result("BLOCKED", "PRIOR_RESEARCH_STAMP_SHAPE_INVALID")
+    # The previous stamp is caller-supplied. Validate its timestamp before
+    # consulting current inputs: a correctly shaped but impossible date must
+    # fail closed, not raise an uncaught exception during comparison.
+    try:
+        previous_evaluated = _timestamp(prev["evaluatedAtUTC"])
+    except (ValueError, TypeError, OverflowError):
+        return _result("BLOCKED", "PRIOR_RESEARCH_STAMP_TIMESTAMP_INVALID",
+                       researchDecisionReusable=False)
     current = observe(
         export_bytes=export_bytes, stage83_lua_bytes=stage83_lua_bytes,
         client_envelope=client_envelope, trade_binding=trade_binding,
@@ -232,7 +240,7 @@ def compare(previous, *, export_bytes, stage83_lua_bytes,
             researchDecisionReusable=False,
         )
     now_stamp = current["researchStamp"]
-    if _timestamp(prev["evaluatedAtUTC"]) > _timestamp(now_stamp["evaluatedAtUTC"]):
+    if previous_evaluated > _timestamp(now_stamp["evaluatedAtUTC"]):
         return _result("INVALIDATED", "RESEARCH_CLOCK_ROLLBACK",
                        researchDecisionReusable=False)
     reasons = []
