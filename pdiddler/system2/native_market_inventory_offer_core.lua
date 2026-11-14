@@ -216,7 +216,7 @@ function M.new(deps)
   table.sort(all)
   if table.concat(all,"|")~=inventory.fingerprint or sum~=inventory.rawOwned then
    return fail("OWN_RAW_CENSUS_FINGERPRINT_MISMATCH") end
-  local owned={}, listed=0, pricesHaveFullSupreme=true, supreme=0, keys=0,copies=0
+  local owned,listed,pricesHaveFullSupreme,supreme,keys,copies={},0,true,0,0,0
   for _,it in ipairs(inventory.items) do
    if type(it)~="table" or not validKey(it.id) or not natural(it.qty) or
       it.cat~="Weapons" or type(it.name)~="string" or owned[it.id] then
