@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - research/system2-live-five-distinct-shadow-nov14
+      - research/system2-real-intelligence-acceptance-nov14
   pull_request:
     paths:
       - 'pdiddler/system2/system2_live_five_controller.lua'
@@ -11,6 +12,8 @@ on:
       - 'pdiddler/system2/SYSTEM2_LIVE_FIVE_MAIN_NATIVE.lua'
       - 'pdiddler/ci/test_system2_live_five_controller.lua'
       - 'pdiddler/ci/test_system2_live_five_source_audit.py'
+      - 'pdiddler/system2/system2_decision_acceptance_engine.py'
+      - 'pdiddler/ci/test_system2_real_intelligence_decisions.py'
       - 'pdiddler/ci/system2_live_five_native_runner_mocks.luau'
       - 'pdiddler/system2/discord_v2_event_intake.py'
       - 'pdiddler/ci/test_discord_v2_event_intake.py'
@@ -102,6 +105,11 @@ jobs:
           set -euo pipefail
           lua5.4 pdiddler/ci/test_system2_live_strategy_evidence.lua
           lua5.4 pdiddler/ci/test_system2_live_five_controller.lua
+      - name: Five actual System2 strategy decision capabilities and adversarial oracles
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_system2_real_intelligence_decisions
       - name: Inherited System2 evidence/strategy regressions
         shell: bash
         run: |
