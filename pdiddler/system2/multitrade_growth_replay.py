@@ -32,6 +32,7 @@ def _out(status, reason, **fields):
         "serverTradeCompletionProven": False,
         "autoAcceptAuthorized": False,
         "sourceEditionAuthenticated": False,
+        "currentGameItemInstanceProven": False,
         "protectedGingerscopeNeverOutgoing": True,
         **fields, **AUTHORITY_DENIED,
     }
