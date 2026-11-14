@@ -171,6 +171,8 @@ def review(rows, *, expected_channel_id, expected_webhook_id):
                 state["phase"] = "TERMINAL"
                 counts["CENSORED_NO_RESPONSE"] += 1
             elif kind == "PARTNER_DECLINED":
+                if state["phase"] != "PENDING":
+                    raise ValueError("DISCORD_V2_DECLINE_AFTER_TRADE_MISCLASSIFIED")
                 state["phase"] = "TERMINAL"
                 counts["EXPLICIT_PARTNER_DECLINE_CLIENT"] += 1
             elif kind in ("PARTNER_CANCELLED","MAIN_CANCELLED",
