@@ -1,3 +1,11 @@
+# READ THE REAL SYSTEM 2 MISSION BEFORE THIS CHRONOLOGICAL DEVICE LOG
+
+**Priority correction 2026-11-14:** `pdiddler/system2/SYSTEM2_MISSION_LOCK_AND_TEST_GOVERNANCE_2026_11_14.md` is the controlling mission/test-governance contract on the active research branch. Read it and `pdiddler/system2/SYSTEM2_MODULAR_PLANNING_AND_TESTING_MATRIX_2026_11_13.md` BEFORE treating any below P3 MAIN–ALT test note as System 2's next priority. This file is a growing *chronological evidence log*, not the product specification; its newest prepended section can describe mechanics without redefining strategy.
+
+**Actual newest hardware receipt:** six MAIN-initiated client trade cycles, five matching MAIN client inventory deltas and manual Accept indications, sixth STOPPED `ALT_ITEM_ID_QUANTITY_OR_ELIGIBILITY_AMBIGUOUS`, no server-authoritative completion. The repetitive multi-trade pilot is CLOSED; no sixth-item identity can be inferred from this generic status. Follow the mission lock's distinct-feature coverage matrix, fix item evidence offline first, then return to bilateral attractiveness, growth, opponent reactions and safe learning. No repeat ALT→MAIN manual gifts to inflate test counts; no automatic Final Accept from this status.
+
+---
+
 # LATEST REAL IPAD FAILURE AND FIX — MAIN PREARM OWN-P3-EPOCH SELF-COLLISION (NOV 14 2026)
 
 **READ FIRST `pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_HANDOFF_2026_11_14.md`.** User ran MAIN-outbound-first multi-trade native and returned `STOPPED/PREARM_PAIR_OR_VIEWPORT_INVALID`, 0 own-profile reads, 0 confirmed outgoing requests, 0 offers/Accepts, 0 trade cycles. Code inspection found deterministic startup bug: new runner created its OWN reviewed P3 outgoing global `PDIDDLER_OUTGOING_SESSION`, then `exactPair()->conflict()` mistakenly rejected any nonnil epoch. This is NOT evidence of a viewport or exact ALT failure. No real trade occurred.

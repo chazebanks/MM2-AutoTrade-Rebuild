@@ -1,3 +1,9 @@
+# CURRENT SYSTEM 2 RECOVERY RULE — PRIORITIZE PRODUCT MISSION OVER LAST DEVICE TEST
+
+For Gingerscope **System 2** specifically, on the current research branch read `pdiddler/system2/SYSTEM2_MISSION_LOCK_AND_TEST_GOVERNANCE_2026_11_14.md` and the original `pdiddler/system2/SYSTEM2_MODULAR_PLANNING_AND_TESTING_MATRIX_2026_11_13.md` BEFORE selecting any implementation or hardware test. The most recent chronological P3/ALT device handoff is not the System 2 strategic requirements document. Existing five corroborated client trade-delta cycles have closed the repeatability question; a sixth ambiguous item requires offline item-evidence diagnosis, **not more identical human transfers**. Product coverage is measured by distinct strategy/attractiveness/growth/learning capabilities, NOT count of repeated trades. This index pointer does not change this metadata-only tool's functions or claim anything merged to main.
+
+---
+
 # Gingerscope Black Box / Execution Manager / Memory Recovery (v1)
 
 **Start new conversations at `pdiddler/START_HERE.md`, then the pinned `pdiddler/NEXT_CONVERSATION_HANDOFF_2026_11_11.md` and this continuity contract.** This directory is a **metadata-only control plane**. It does not change MM2 scripts, perform trades, authenticate server settlement, contact Discord, auto-retry a job, or provide automatic iPad runtime uploads.
