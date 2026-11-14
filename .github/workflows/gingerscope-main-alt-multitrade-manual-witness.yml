@@ -51,9 +51,9 @@ jobs:
           git show 1c874cdbc5e85418360148fbdf33fa17534cd1ad:pdiddler/supervised/pdiddler3_exact_alt_outbound_requeue.lua > "$RUNNER_TEMP/p3-exact-alt-requeue.lua"
           test "$(git hash-object "$RUNNER_TEMP/p3-exact-alt-requeue.lua")" = 05642da61f3c38cadf7bdcc8d3c2da30a077ab15
           cmp "$RUNNER_TEMP/p3-exact-alt-requeue.lua" pdiddler/supervised/pdiddler3_exact_alt_outbound_requeue.lua
-          git fetch --no-tags --depth=1 origin 3f00127e99a75a3bf01eb139afcc4e9c0ae246e4
-          git show 3f00127e99a75a3bf01eb139afcc4e9c0ae246e4:pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua > "$RUNNER_TEMP/main-initiated-multitrade.lua"
-          test "$(git hash-object "$RUNNER_TEMP/main-initiated-multitrade.lua")" = 50a588fb975d550c33422c76c2777bfe22bda406
+          git fetch --no-tags --depth=1 origin 0a7231d75a3bd95cb6071f733beccd2fa0674bf0
+          git show 0a7231d75a3bd95cb6071f733beccd2fa0674bf0:pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua > "$RUNNER_TEMP/main-initiated-multitrade.lua"
+          test "$(git hash-object "$RUNNER_TEMP/main-initiated-multitrade.lua")" = 643778b9f1146614fe9ebeae4067aa5b1690b403
           cmp "$RUNNER_TEMP/main-initiated-multitrade.lua" pdiddler/supervised/MAIN_ALT_OUTBOUND_FIRST_MULTITRADE_NATIVE.lua
           git fetch --no-tags --depth=1 origin 2036ae5bd937620f21d46600f99550a1b233a654
           git show 2036ae5bd937620f21d46600f99550a1b233a654:pdiddler/pdiddler3_scanner_MODULE_v6_5_PART4_STATUS_BRIDGE.lua > "$RUNNER_TEMP/original-p3-scanner.lua"
