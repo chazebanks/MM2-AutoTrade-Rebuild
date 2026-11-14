@@ -1,6 +1,7 @@
 -- Executes actual System2 five-scenario Lua controller against injectable
 -- original protected P3/P4 adapter contract. NO live Roblox activity here.
 local M=dofile("pdiddler/system2/system2_live_five_controller.lua")
+local E=dofile("pdiddler/system2/system2_live_strategy_evidence.lua")
 local passed=0
 local function eq(a,b,label)
  if a~=b then error((label or "mismatch").." expected "..tostring(b).." got "..tostring(a)) end
@@ -16,6 +17,9 @@ local function build(opts)
   stops=0,req=0,offer=0,remove=0,decline=0,receipt=nil,accepted=0,
   added={},revised={},cleared={},mutations=0}
  local api={}
+ function api.review(kind,ours,first,revised)
+  return E.review(kind,ours,first,revised)
+ end
  function api.startEpoch(round,nonce)
   eq(nonce,round,"fresh epoch")
   st.round=round;st.root={};st.ours={};st.theirs={}
@@ -140,6 +144,11 @@ test("five distinct bound epochs automatic progression with terminal revision",f
  eq(r.scenarios[4].status,"BLOCKED_PREREQUISITE")
  eq(r.scenarios[5].status,"LIVE_PASS")
  eq(r.scenarios[5].offerRevisionsObserved,1)
+ for i=1,5 do eq(r.scenarios[i].researchEvidenceEvaluations,1) end
+ eq(r.scenarios[2].researchDecisionInvalidated,true)
+ eq(r.scenarios[3].structuralAlternativesConsidered,2)
+ eq(r.scenarios[4].structuralAlternativesConsidered,2)
+ eq(r.scenarios[5].researchDecisionInvalidated,true)
  eq(r.scenarios[3].candidateOffersClientObserved,2)
  eq(r.actions.clientClosedWindows,4)
  eq(r.discordV2DeliveryVerified,false)
