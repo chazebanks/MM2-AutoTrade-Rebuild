@@ -24,13 +24,13 @@ jobs:
           set -euo pipefail
           python3 -m pdiddler.continuity.manager verify
           python3 -m pdiddler.continuity.manager recover
-          git fetch --no-tags --depth=1 origin b41bfae1a897e99c5775eff98dc48c4148d7adc2
-          git show b41bfae1a897e99c5775eff98dc48c4148d7adc2:pdiddler/supervised/main_alt_accept_control_shape_probe.lua > "$RUNNER_TEMP/original-shape.lua"
-          test "$(git hash-object "$RUNNER_TEMP/original-shape.lua")" = b99e1dc1c24cd24f85684bd302a17f4a9e4ac918
+          git fetch --no-tags --depth=1 origin cca3d8359b8ce537dc4a5f1aa474323c2833dd01
+          git show cca3d8359b8ce537dc4a5f1aa474323c2833dd01:pdiddler/supervised/main_alt_accept_control_shape_probe.lua > "$RUNNER_TEMP/original-shape.lua"
+          test "$(git hash-object "$RUNNER_TEMP/original-shape.lua")" = 4af4e30818308b18d756f09e6b5439d440f65d75
           cmp "$RUNNER_TEMP/original-shape.lua" pdiddler/supervised/main_alt_accept_control_shape_probe.lua
-          git fetch --no-tags --depth=1 origin b34c76e431ee7ee6cb3904ddf82add22f4a57e70
-          git show b34c76e431ee7ee6cb3904ddf82add22f4a57e70:pdiddler/supervised/MAIN_ALT_ACCEPT_DISCOVERY_READONLY_NATIVE.lua > "$RUNNER_TEMP/original-runner.lua"
-          test "$(git hash-object "$RUNNER_TEMP/original-runner.lua")" = 757d4fc6ca82f7257e12f0615013ba59dc6ad9e5
+          git fetch --no-tags --depth=1 origin 05e8f45739d15419c45848949aad2bbdfe241c06
+          git show 05e8f45739d15419c45848949aad2bbdfe241c06:pdiddler/supervised/MAIN_ALT_ACCEPT_DISCOVERY_READONLY_NATIVE.lua > "$RUNNER_TEMP/original-runner.lua"
+          test "$(git hash-object "$RUNNER_TEMP/original-runner.lua")" = ec9434502825855ad7898475526967aed6a5c3fb
           cmp "$RUNNER_TEMP/original-runner.lua" pdiddler/supervised/MAIN_ALT_ACCEPT_DISCOVERY_READONLY_NATIVE.lua
           git fetch --no-tags --depth=1 origin 1971b93d324f0275e6a9affb472ac3e804439ed8
           git show 1971b93d324f0275e6a9affb472ac3e804439ed8:pdiddler/new_part4/p4_native_observer.lua > "$RUNNER_TEMP/original-stage9.lua"
@@ -50,7 +50,7 @@ jobs:
           test "$(git hash-object pdiddler/new_part4/p4_native_observer.lua)" = a6338e946467ad738005bc5cb13cd2d2fbc2a2d0
           test "$(git hash-object pdiddler/new_part4/p4_observer_contract.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
           test "$(git hash-object pdiddler/new_part4/stage100_screen_prompt_overlay.lua)" = e0eac8e039655999bd7bbac1f12da179db7c22ed
-          grep -Fq b41bfae1a897e99c5775eff98dc48c4148d7adc2 pdiddler/supervised/MAIN_ALT_ACCEPT_DISCOVERY_READONLY_NATIVE.lua
+          grep -Fq cca3d8359b8ce537dc4a5f1aa474323c2833dd01 pdiddler/supervised/MAIN_ALT_ACCEPT_DISCOVERY_READONLY_NATIVE.lua
           echo MAIN_ALT_NATIVE_ALL_FOUR_READONLY_SOURCE_PINS_MATCH
       - name: Install immutable official Lune v0.11.1
         shell: bash
