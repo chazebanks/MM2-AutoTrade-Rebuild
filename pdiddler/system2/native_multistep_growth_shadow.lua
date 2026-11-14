@@ -165,7 +165,8 @@ local function bundles(held,maxKeys)
    if next(acc)~=nil then result[#result+1]=copy(acc) end
    return
   end
-  local key,q=keys[i],held[key]
+  local key=keys[i]
+  local q=held[key]
   go(i+1,acc)
   local counts={1}
   if q>=2 then counts[#counts+1]=2 end
