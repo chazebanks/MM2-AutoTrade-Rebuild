@@ -97,7 +97,7 @@ function M.new(api,opt)
     opt.twoDistinctCheapOwnItemsApproved~=true then
   return nil,"EXPLICIT_LIVE_TEST_CONTRACT_MISSING" end
  for _,fn in ipairs({"startEpoch","inspect","offerApproved","removeOwnOne",
-   "decline","endEpoch","stopAll","copyReport"}) do
+   "decline","endEpoch","stopAll","copyReport","review"}) do
   if type(api[fn])~="function" then return nil,"REQUIRED_PROTECTED_ADAPTER_MISSING" end
  end
  local round,phase,completed,requestEpoch=1,"REQUESTING",0,0
@@ -114,7 +114,9 @@ function M.new(api,opt)
  for i,name in ipairs(NAMES) do
   stages[i]={scenario=name,status="NOT_RUN",reason="NOT_STARTED",
     clientObserved=false,offerRevisionsObserved=0,
-    candidateOffersClientObserved=0,sourcePriceVerified=false,
+    candidateOffersClientObserved=0,researchEvidenceEvaluations=0,
+    structuralAlternativesConsidered=0,researchDecisionInvalidated=false,
+    sourcePriceVerified=false,
     discordV2Delivered=false,clientOutcomeOnly=true}
  end
  local acts={requestsStarted=0,offersAttempted=0,offersClientVisible=0,
@@ -127,6 +129,9 @@ function M.new(api,opt)
     clientObserved=s.clientObserved,
     offerRevisionsObserved=s.offerRevisionsObserved,
     candidateOffersClientObserved=s.candidateOffersClientObserved,
+    researchEvidenceEvaluations=s.researchEvidenceEvaluations,
+    structuralAlternativesConsidered=s.structuralAlternativesConsidered,
+    researchDecisionInvalidated=s.researchDecisionInvalidated,
     discordV2Delivered=false,sourcePriceVerified=false,
     clientOutcomeOnly=true}
   end
@@ -188,6 +193,29 @@ function M.new(api,opt)
    prev={ours=obs.ours,theirs=obs.theirs}
   end
   return consecutive>=2
+ end
+ local function assess(kind,ours,observed,revised)
+  local ok,evidence=pcall(api.review,kind,ours,observed,revised)
+  if not ok or type(evidence)~="table" or
+      evidence.schema~="gingerscope-system2-native-client-strategy-evidence-v1" or
+      evidence.status~="CLIENT_RESEARCH_EVIDENCE" or
+      evidence.clientObservedButUnauthenticated~=true or
+      evidence.marketPriceAuthenticated~=false or
+      evidence.realDiscordV2Delivered~=false or
+      evidence.serverSettlementProven~=false or
+      evidence.authorizesOffer~=false or
+      evidence.authorizesTrade~=false or
+      evidence.authorizesAccept~=false or
+      evidence.mayUseForStrategyLearning~=false or
+      evidence.tradeOutcome~="UNKNOWN" then
+   return false
+  end
+  local row=stages[round]
+  row.researchEvidenceEvaluations=row.researchEvidenceEvaluations+1
+  row.structuralAlternativesConsidered=evidence.bilateralClientAlternativeCount or
+    evidence.distinctStructuralPathOptions or 0
+  row.researchDecisionInvalidated=evidence.firstResearchCandidateInvalidated==true
+  return true
  end
  local function request(now)
   requestEpoch=requestEpoch+1
@@ -296,6 +324,11 @@ function M.new(api,opt)
    latest=first
    stages[round].clientObserved=true
    stages[round].candidateOffersClientObserved=1
+   if (round==1 or round==4) and
+      not assess(round==1 and "EVENT_PROVENANCE" or "GROWTH_STRUCTURE",
+        ob.ours,first,nil) then
+    return stop("SYSTEM2_CLIENT_RESEARCH_EVALUATION_FAILED")
+   end
    if round==2 or round==3 or round==5 then
     enter("WAIT_ALT_REVISED",now,"FIRST_OFFER_RECORDED_RESEARCH_ONLY")
    else
@@ -315,6 +348,11 @@ function M.new(api,opt)
    latest=ob.theirs
    stages[round].offerRevisionsObserved=1
    stages[round].candidateOffersClientObserved=2
+   local scenarioKind=round==2 and "BEHAVIOR_REVISION" or
+      (round==3 and "BILATERAL_ALTERNATIVES" or "INVALIDATE_STALE_RESEARCH")
+   if not assess(scenarioKind,ob.ours,first,latest) then
+    return stop("SYSTEM2_CLIENT_RESEARCH_EVALUATION_FAILED")
+   end
    if round==5 then
     -- Deliberate fail-stop: do NOT send a request, offer or Accept after
     -- a previously observed research candidate changes.
