@@ -1,0 +1,60 @@
+name: Gingerscope System2 historical game-key x current market exact crosswalk
+on:
+  push:
+    branches:
+      - research/system2-market-gamekey-crosswalk-nov14
+    paths:
+      - "pdiddler/system2/public_market_gamekey_crosswalk.py"
+      - "pdiddler/ci/test_system2_public_market_gamekey_crosswalk.py"
+      - ".github/workflows/gingerscope-system2-market-key-crosswalk.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gingerscope-system2-crosswalk
+  cancel-in-progress: false
+jobs:
+  independent-exact-key-mapping:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install original market reader dependency
+        run: python3 -m pip install --disable-pip-version-check 'beautifulsoup4>=4.12,<5'
+      - name: Recover immutable original Stage83 key reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --max-time 45 --retry 2 'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua' -o "$RUNNER_TEMP/stage83-original.lua"
+          test "$(git hash-object "$RUNNER_TEMP/stage83-original.lua")" = '40e2a0ff01b70b2d0181c62cae347a08da82bcb8'
+          echo 'PINNED_STAGE83_BLOB=VERIFIED'
+      - name: Offline exact-key variant and hostile source tests
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/stage83-original.lua
+        run: python3 -m unittest -v pdiddler.ci.test_system2_public_market_gamekey_crosswalk
+      - name: Collect independent actual public market pages (no mock)
+        env:
+          GINGERSCOPE_MARKET_OUTPUT: ${{ runner.temp }}/market-source-real.json
+        run: python3 -m pdiddler.system2.mm2tradehub_market_candidate
+      - name: Cross-index all real source rows to original 189 game keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.system2.public_market_gamekey_crosswalk \
+            --market "$RUNNER_TEMP/market-source-real.json" \
+            --stage83 "$RUNNER_TEMP/stage83-original.lua" \
+            --evaluated-utc "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+            --output "$RUNNER_TEMP/market-gamekey-crosswalk.json"
+      - name: Archive public-reference mapping candidate (no owned account data)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-s2-real-market-gamekey-crosswalk
+          path: ${{ runner.temp }}/market-gamekey-crosswalk.json
+          retention-days: 7
+          if-no-files-found: error
