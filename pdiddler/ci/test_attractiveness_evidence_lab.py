@@ -62,8 +62,43 @@ class AttractivenessTests(unittest.TestCase):
             alt([("Celestial",1)],[("EmberbowChroma",1)]),
             alt([("Celestial",1)],[("Gingerscope",1)]),
         )
-        self.assertIn("NON_STABLE_PUBLISHER_STABILITY_LABEL",x["alternatives"][0]["evidenceWarnings"])
-        self.assertNotIn("NON_STABLE_PUBLISHER_STABILITY_LABEL",x["alternatives"][1]["evidenceWarnings"])
+        self.assertIn("PUBLISHER_FLUCTUATING_RANGE_UNCERTAINTY",x["alternatives"][0]["evidenceWarnings"])
+        self.assertNotIn("PUBLISHER_FLUCTUATING_RANGE_UNCERTAINTY",x["alternatives"][1]["evidenceWarnings"])
+    def test_publisher_doing_well_not_punished_as_instability(self):
+        for r in self.market["records"]:
+            if r["rawGameKeyCandidate"]=="EmberbowChroma":
+                r["stability"]="Doing Well"
+        comparison=self.compare(
+            alt([("Celestial",1)],[("EmberbowChroma",1)]),
+            alt([("Celestial",1)],[("Gingerscope",1)]))
+        self.assertEqual(comparison["status"],"OFFLINE_ATTRACTIVENESS_EVIDENCE_COMPARISON_ONLY")
+        warnings=comparison["alternatives"][0]["evidenceWarnings"]
+        self.assertNotIn("PUBLISHER_FLUCTUATING_RANGE_UNCERTAINTY",warnings)
+        self.assertNotIn("PUBLISHER_FREQUENT_UNDERPAYS",warnings)
+        self.assertFalse(comparison["alternatives"][0]["verifiedPartnerAppeal"])
+
+    def test_publisher_underpaid_for_warns_about_underpays(self):
+        for r in self.market["records"]:
+            if r["rawGameKeyCandidate"]=="EmberbowChroma":
+                r["stability"]="Underpaid For"
+        comparison=self.compare(
+            alt([("Celestial",1)],[("EmberbowChroma",1)]),
+            alt([("Celestial",1)],[("Gingerscope",1)]))
+        warnings=comparison["alternatives"][0]["evidenceWarnings"]
+        self.assertIn("PUBLISHER_FREQUENT_UNDERPAYS",warnings)
+        self.assertNotIn("PUBLISHER_FLUCTUATING_RANGE_UNCERTAINTY",warnings)
+
+    def test_unknown_source_stability_fails_closed(self):
+        for r in self.market["records"]:
+            if r["rawGameKeyCandidate"]=="EmberbowChroma":
+                r["stability"]="Completely Perfect"
+        comparison=self.compare(
+            alt([("Celestial",1)],[("EmberbowChroma",1)]),
+            alt([("Celestial",1)],[("Gingerscope",1)]))
+        self.assertEqual(comparison["status"],"BLOCKED")
+        self.assertEqual(comparison["reason"],"UNKNOWN_PUBLISHER_STABILITY_LABEL")
+        self.assertFalse(comparison["authorizesTrade"])
+
     def test_concentration_worse_after_upgrade(self):
         self.observe({"test_key_100":1,"test_key_101":1})
         x=self.compare(
