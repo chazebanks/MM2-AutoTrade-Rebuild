@@ -252,7 +252,7 @@ class S2AcceptanceOracles(unittest.TestCase):
 
     def test_five_seen_partner_in_holdout_rejected(self):
         d=dataset()
-        d[8]["partner"]=d[0]["partner"]
+        d[16]["partner"]=d[0]["partner"]
         r=learning_decision(episodes=d)
         self.assertEqual(r["status"],"ABSTAIN")
         self.assertEqual(r["reason"],"INSUFFICIENT_INDEPENDENT_PARTNER_HOLDOUT")
