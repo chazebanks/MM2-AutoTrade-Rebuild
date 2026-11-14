@@ -24,6 +24,7 @@ def trade(out,inc):
 class ScenarioTests(unittest.TestCase):
     def setUp(self):
         self.market=data()
+        self.evaluated_at="2026-11-14T01:15:40.000Z"
         self.market["captureWindowUTC"]={"exportedAt":"2026-11-14T00:28:09.127Z"}
         self.observe({"Celestial":2,"EmberbowChroma":6,"Gingerscope":1})
     def observe(self,counts):
@@ -31,7 +32,7 @@ class ScenarioTests(unittest.TestCase):
         self.shadow=b.evaluate(self.market,env,evaluated_at_utc="2026-11-14T01:15:40.000Z")
         self.assertEqual(self.shadow["status"],"RESEARCH_CLIENT_INVENTORY_SHADOW_READY",self.shadow)
     def review(self,offer,receive):
-        return lab.inspect(self.market,self.shadow,trade(offer,receive))
+        return lab.inspect(self.market,self.shadow,trade(offer,receive),evaluated_at_utc=self.evaluated_at)
     def deny(self,offer,receive,reason):
         result=self.review(offer,receive)
         self.assertEqual(result["status"],"BLOCKED",result)
@@ -151,14 +152,27 @@ class ScenarioTests(unittest.TestCase):
         self.assertFalse(r["partnerInventoryAuthenticityProven"])
         self.assertFalse(r["fourPhysicalSlotExecutionProven"])
     def test_malformed_scenario_blocks(self):
-        r=lab.inspect(self.market,self.shadow,{"kind":"LIVE_MM2","outgoingSlots":[],"incomingSlots":[{"rawGameKey":"Gingerscope","quantity":1}]})
+        r=lab.inspect(self.market,self.shadow,{"kind":"LIVE_MM2","outgoingSlots":[],"incomingSlots":[{"rawGameKey":"Gingerscope","quantity":1}]},evaluated_at_utc=self.evaluated_at)
         self.assertEqual(r["status"],"BLOCKED")
     def test_mutable_scenario_authorize_false(self):
-        r=lab.inspect(self.market,self.shadow,{**trade([("Celestial",1)],[("Gingerscope",1)]),"authorizesTrade":True})
+        r=lab.inspect(self.market,self.shadow,{**trade([("Celestial",1)],[("Gingerscope",1)]),"authorizesTrade":True},evaluated_at_utc=self.evaluated_at)
         self.assertEqual(r["status"],"BLOCKED")
+    def test_reused_shadow_after_60_seconds_is_blocked(self):
+        self.evaluated_at="2026-11-14T01:16:31.000Z"
+        self.deny([("Celestial",1)],[("Gingerscope",1)],"SHADOW_OBSERVATION_EXPIRED_OR_FUTURE")
+
+    def test_future_client_shadow_is_blocked(self):
+        self.evaluated_at="2026-11-14T01:15:29.000Z"
+        self.deny([("Celestial",1)],[("Gingerscope",1)],"SHADOW_OBSERVATION_EXPIRED_OR_FUTURE")
+
+    def test_strategy_requires_explicit_evaluation_clock(self):
+        result=lab.inspect(self.market,self.shadow,trade([("Celestial",1)],[("Gingerscope",1)]))
+        self.assertEqual(result["status"],"BLOCKED")
+        self.assertEqual(result["reason"],"SHADOW_OBSERVATION_TIMESTAMP_INVALID")
+
     def test_replay_is_deterministic(self):
         s=trade([("Celestial",1)],[("EmberbowChroma",1)])
-        self.assertEqual(lab.inspect(self.market,self.shadow,s),lab.inspect(self.market,self.shadow,s))
+        self.assertEqual(lab.inspect(self.market,self.shadow,s,evaluated_at_utc=self.evaluated_at),lab.inspect(self.market,self.shadow,s,evaluated_at_utc=self.evaluated_at))
 
 
 if __name__=="__main__":
