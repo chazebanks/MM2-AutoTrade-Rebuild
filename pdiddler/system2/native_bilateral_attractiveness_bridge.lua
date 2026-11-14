@@ -16,7 +16,9 @@ function M.new(config)
   or type(config.bilateralCore)~="table"
   or type(config.bilateralCore.compare)~="function"
   or type(config.crosswalk)~="table"
-  or config.crosswalk.authorizesOffer~=false then
+  or config.crosswalk.mayUseForLiveOffer~=false or
+  config.crosswalk.authorizesTrade~=false or
+  config.crosswalk.authorizesAccept~=false then
   return nil,"BILATERAL_NATIVE_CONNECTION_INVALID" end
  local o={}
  function o:compare(alternatives)
