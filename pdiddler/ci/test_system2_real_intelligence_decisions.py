@@ -33,6 +33,13 @@ C={"schema":"SYNTHETIC_S2_EXACT_RAW_KEY_MARKET_FIXTURE",
 OWN={"OwnA":1,"OwnB":1}
 def slot(k,q=1):return {"key":k,"copies":q}
 def dec(give,rec):return {"give":give,"receive":rec}
+def bidec(give,receive,bonus=20):
+    x=dec(give,receive)
+    x["partnerIntent"]={
+       "kind":"SYNTHETIC_REVEALED_PARTNER_PREFERENCE",
+       "wantedKey":give[0]["key"],
+       "subjectiveValuePremium":bonus}
+    return x
 def task(fn,**args):
     return fn(catalog=C,inventory=OWN,at=AT,**args)
 def event(seq,kind,rev=0,session="session",partner="partner"):
@@ -99,21 +106,40 @@ class S2AcceptanceOracles(unittest.TestCase):
            at=AT,offer=five)
         self.assertEqual(blocked["status"],"BLOCKED")
 
+    def test_two_partner_stated_preference_must_be_explicit_and_supported(self):
+        missing=[dec([slot("OwnA")],[slot("Good")]),
+                 dec([slot("OwnA")],[slot("Mid")])]
+        r=task(bilateral_decision,alternatives=missing)
+        self.assertEqual(r["status"],"BLOCKED")
+        self.assertEqual(r["reason"],"PARTNER_PREFERENCE_SCOPE_OR_EVIDENCE_MISSING")
+        self.assertSafety(r)
+
+    def test_two_main_profit_without_partner_incentive_abstains(self):
+        options=[bidec([slot("OwnA")],[slot("Good")],bonus=0),
+                 bidec([slot("OwnA")],[slot("Mid")],bonus=0)]
+        r=task(bilateral_decision,alternatives=options)
+        self.assertEqual(r["status"],"ABSTAIN")
+        self.assertEqual(r["reason"],"NO_BILATERALLY_FEASIBLE_RANGE_SAFE_OPTION")
+        self.assertFalse(any(x["researchViable"] for x in r["considered"]))
+        self.assertSafety(r)
+
     def test_two_nominally_greater_but_risky_junk_loses_to_robust_good(self):
-        opts=[dec([slot("OwnA")],[slot("Junk")]),
-              dec([slot("OwnA")],[slot("Good")])]
+        opts=[bidec([slot("OwnA")],[slot("Junk")]),
+              bidec([slot("OwnA")],[slot("Good")])]
         r=task(bilateral_decision,alternatives=opts)
         self.assertEqual(r["status"],"RESEARCH_DECISION_PASS")
         self.assertEqual(r["selectedIndex"],1)
         self.assertEqual(r["considered"][0]["nominalGain"],35)
         self.assertEqual(r["considered"][0]["rangeWorstCaseGain"],-30)
         self.assertEqual(r["considered"][1]["rangeWorstCaseGain"],10)
-        self.assertFalse(r["opponentIncentiveKnown"])
+        self.assertTrue(r["counterpartPreferenceAssumptionExplicit"])
+        self.assertFalse(r["actualCounterpartPreferenceAuthenticated"])
+        self.assertGreater(r["considered"][1]["hypotheticalPartnerSubjectiveSurplus"],0)
         self.assertSafety(r)
 
     def test_two_five_demand_or_low_demand_not_probabilities(self):
-        opts=[dec([slot("OwnA")],[slot("Good")]),
-              dec([slot("OwnA")],[slot("Mid")])]
+        opts=[bidec([slot("OwnA")],[slot("Good")]),
+              bidec([slot("OwnA")],[slot("Mid")])]
         r=task(bilateral_decision,alternatives=opts)
         self.assertEqual(r["status"],"RESEARCH_DECISION_PASS")
         self.assertIsNone(r["considered"][0]["empiricalFillRate"])
@@ -122,15 +148,15 @@ class S2AcceptanceOracles(unittest.TestCase):
         self.assertSafety(r)
 
     def test_two_no_conservative_option_abstains_instead_of_fabrication(self):
-        opts=[dec([slot("OwnA")],[slot("OwnB")]),
-              dec([slot("OwnA")],[slot("Cheap")])]
+        opts=[bidec([slot("OwnA")],[slot("OwnB")]),
+              bidec([slot("OwnA")],[slot("Cheap")])]
         r=task(bilateral_decision,alternatives=opts)
         self.assertEqual(r["status"],"ABSTAIN")
         self.assertIsNone(r["selectedIndex"])
         self.assertSafety(r)
 
     def test_two_duplicate_hypothesis_rejected(self):
-        a=dec([slot("OwnA")],[slot("Good")])
+        a=bidec([slot("OwnA")],[slot("Good")])
         r=task(bilateral_decision,alternatives=[a,copy.deepcopy(a)])
         self.assertEqual(r["status"],"BLOCKED")
         self.assertEqual(r["reason"],"DUPLICATE_COUNTERFACTUAL")
@@ -283,8 +309,8 @@ class S2AcceptanceOracles(unittest.TestCase):
         result=[
           task(inventory_admission,offer=[slot("OwnA")]),
           task(bilateral_decision,alternatives=[
-            dec([slot("OwnA")],[slot("Junk")]),
-            dec([slot("OwnA")],[slot("Good")])]),
+            bidec([slot("OwnA")],[slot("Junk")]),
+            bidec([slot("OwnA")],[slot("Good")])]),
           task(growth_route_decision,routes=[
             [dec([slot("OwnB")],[slot("Cheap")]),
              dec([slot("OwnA")],[slot("Mid")])],
