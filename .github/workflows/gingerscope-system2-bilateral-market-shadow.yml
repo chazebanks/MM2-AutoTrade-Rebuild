@@ -74,6 +74,7 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_bilateral_market_mocks.luau
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_market_inventory_offer_bridge_mocks.luau
       - name: Native source and trade authority static audit
         run: |
           python3 - <<'PY'
