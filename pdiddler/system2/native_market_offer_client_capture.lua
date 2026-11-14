@@ -122,8 +122,8 @@ local function sig(frame)
  return table.concat(parts,";")
 end
 function M.new(config)
- if type(config)~="table" or type(config.game)~="table" or
-  type(config.players)~="table" or type(config.scope)~="table" or
+ if type(config)~="table" or config.game==nil or
+  config.players==nil or type(config.scope)~="table" or
   type(config.isBoundSession)~="function" then
   return nil,"GUI_CAPTURE_DEPENDENCY_INVALID" end
  local scope=config.scope
