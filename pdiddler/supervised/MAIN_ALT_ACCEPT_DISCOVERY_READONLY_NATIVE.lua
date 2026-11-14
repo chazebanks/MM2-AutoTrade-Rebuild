@@ -35,6 +35,7 @@ local function pack(status,reason)
   theirVisibleSlots=0,ourVisibleSlots=0,
   bothAcceptedIndicatorsReadable=false,acceptedState="UNKNOWN",
   controlShapeStatus="NOT_OBSERVED",candidateCount=0,
+  visibleButtonCount=0,acceptTextLabelOnlyCount=0,
   candidatePath="NOT_MAPPED",candidateClass="NONE",
   candidateLabel="NONE",candidateActive=false,candidateBoundsVerified=false,
   acceptNamedRemoteStatus="NOT_INSPECTED",
@@ -93,7 +94,7 @@ local function frozen(sha,path)
  local ok,result=pcall(function()return assert(compiler(code))()end)
  return ok and type(result)=="table" and result or nil
 end
-local shape=frozen("cca3d8359b8ce537dc4a5f1aa474323c2833dd01",
+local shape=frozen("c6830816c23624d43da2242e15a716127629a189",
  "supervised/main_alt_accept_control_shape_probe.lua")
 local stage9=frozen("1971b93d324f0275e6a9affb472ac3e804439ed8",
  "new_part4/p4_native_observer.lua")
@@ -222,7 +223,8 @@ local function sanitize(p)
  "originalStage9Used","observedLocalOfferTransition","twoStableCaptures",
  "stableIntervalMilliseconds","theirVisibleSlots","ourVisibleSlots",
  "bothAcceptedIndicatorsReadable","acceptedState","controlShapeStatus",
- "candidateCount","candidatePath","candidateClass","candidateLabel",
+ "candidateCount","visibleButtonCount","acceptTextLabelOnlyCount",
+ "candidatePath","candidateClass","candidateLabel",
  "candidateActive","candidateBoundsVerified","acceptNamedRemoteStatus",
  "uiPlacementSafe"}) do
   if p[name]~=nil then x[name]=p[name] end
@@ -379,6 +381,8 @@ local function tick()
  state.status.acceptedState="MAIN_FALSE_ALT_FALSE"
  state.status.controlShapeStatus=info.status
  state.status.candidateCount=math.min(100,info.candidateCount or 0)
+ state.status.visibleButtonCount=math.min(100,info.visibleButtonCount or 0)
+ state.status.acceptTextLabelOnlyCount=math.min(100,info.labelOnlyCount or 0)
  state.status.candidatePath=info.candidatePath or "NOT_MAPPED"
  state.status.candidateClass=info.candidateClass or "NONE"
  state.status.candidateLabel=info.candidateLabel or "NONE"
