@@ -178,9 +178,18 @@ def bilateral_decision(*,catalog,inventory,at,alternatives):
         considered=[]
         seen=set()
         for i,option in enumerate(alternatives):
-            if type(option) is not dict or set(option)!={"give","receive"}:
+            if type(option) is not dict or set(option)!={"give","receive","partnerIntent"}:
                 raise Blocked("INVALID_BILATERAL_OPTION")
             g=_slots(option["give"],q);t=_slots(option["receive"],q)
+            intent=option["partnerIntent"]
+            if (type(intent) is not dict or
+                set(intent)!={"kind","wantedKey","subjectiveValuePremium"} or
+                intent["kind"]!="SYNTHETIC_REVEALED_PARTNER_PREFERENCE" or
+                type(intent["wantedKey"]) is not str or
+                intent["wantedKey"] not in g or
+                type(intent["subjectiveValuePremium"]) is not int or
+                not 0<=intent["subjectiveValuePremium"]<=10000):
+                raise Blocked("PARTNER_PREFERENCE_SCOPE_OR_EVIDENCE_MISSING")
             signature=(tuple(sorted(g.items())),tuple(sorted(t.items())))
             if signature in seen:
                 raise Blocked("DUPLICATE_COUNTERFACTUAL")
@@ -190,25 +199,37 @@ def bilateral_decision(*,catalog,inventory,at,alternatives):
             robust=_total(t,q,"low")-_total(g,q,"high")
             quality=_quality(candidate,q)
             # An unknown seller cannot be assigned a probability here.
-            allowed=nominal>=0 and robust>=0
+            # We are not claiming a single public list permits both parties
+            # to gain listed value. The partner's SUBJECTIVE revealed-value
+            # premium is an explicit unverified fixture, not market evidence.
+            partnerSurplus=(_total(g,q)+
+                intent["subjectiveValuePremium"]*g[intent["wantedKey"]]-
+                _total(t,q))
+            allowed=nominal>=0 and robust>=0 and partnerSurplus>=0
             considered.append({"index":i,"nominalGain":nominal,
              "rangeWorstCaseGain":robust,"postInventory":quality,
-             "researchViable":allowed,"counterpartyAppeal":"UNMEASURED",
-             "empiricalFillRate":None})
+             "researchViable":allowed,
+             "hypotheticalPartnerSubjectiveSurplus":partnerSurplus,
+             "counterpartyAppeal":"SYNTHETIC_PREFERENCE_ONLY",
+             "empiricalFillRate":None,
+             "realCounterpartyPreferenceProven":False})
         accepted=[a for a in considered if a["researchViable"]]
         if not accepted:
-            return _out(name,"ABSTAIN","NO_RANGE_SAFE_AND_NO_LOSS_OPTION",
+            return _out(name,"ABSTAIN","NO_BILATERALLY_FEASIBLE_RANGE_SAFE_OPTION",
                         sourceFixtureSha256=seal,alternatives=considered,selectedIndex=None)
         # A conservative rule: avoid portfolio fragility before chasing
         # the biggest on-paper gain. If tied, choose robustness and demand.
         def rank(v):
             p=v["postInventory"]
             return (-p["unstableBasisPoints"],-p["concentrationBasisPoints"],
-                    v["rangeWorstCaseGain"],p["demandWeightedBasisPoints"],-v["index"])
+                    v["rangeWorstCaseGain"],v["hypotheticalPartnerSubjectiveSurplus"],
+                    p["demandWeightedBasisPoints"],-v["index"])
         winner=max(accepted,key=rank)
         return _out(name,"RESEARCH_DECISION_PASS","CONSERVATIVE_COUNTERFACTUAL_SELECTED",
                     sourceFixtureSha256=seal,selectedIndex=winner["index"],
-                    considered=considered,opponentIncentiveKnown=False,
+                    considered=considered,
+                    counterpartPreferenceAssumptionExplicit=True,
+                    actualCounterpartPreferenceAuthenticated=False,
                     reasonForAttention="ROBUST_RANGE_PORTFOLIO_RISK_NOT_POSTED_PROFIT",
                     deploymentWouldRequireMeasuredPartnerPreference=True)
     except (Blocked,ValueError,TypeError,KeyError) as e:
