@@ -555,6 +555,7 @@ local function captureTrade(root)
 end
 local function tick()
  if not state.active or not state.armed then return end
+ if conflict() then stop("OWNED_P3_EPOCH_OR_CONTROLLER_CHANGED");return end
  if not exactPair() or UI.screen.Parent~=PG or
     not World.CurrentCamera then stop("PAIR_OWNER_UI_OR_JOB_CHANGED");return end
  suppressScannerUI()
@@ -620,7 +621,14 @@ local function tick()
 end
 UI.arm.Activated:Connect(function()
  if not state.active or state.armed then return end
- if not exactPair() or not UIarea(nil) then stop("PREARM_PAIR_OR_VIEWPORT_INVALID");return end
+ -- Report ownership, exact pair and geometry failures independently.
+ -- Neither a valid UI nor matching ALT can override a stolen P3 epoch.
+ if E.PDIDDLER_OUTGOING_SESSION~=ownedP3Epoch then
+  stop("PREARM_OWNED_P3_EPOCH_CHANGED");return
+ end
+ if conflict() then stop("PREARM_COMPETING_CONTROLLER");return end
+ if not exactPair() then stop("PREARM_EXACT_ALT_PAIR_CHANGED");return end
+ if not UIarea(nil) then stop("PREARM_VIEWPORT_UNSAFE");return end
  state.armed=true
  UI.arm.Visible=false;UI.arm.Active=false
  state.lastRead=0
