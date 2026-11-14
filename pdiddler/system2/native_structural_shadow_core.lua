@@ -93,10 +93,10 @@ local function verifyAudit(a)
  end
  return true
 end
-local function fixture(slotsOut,slotsIn,mark)
+local function fixture(slotsOut,slotsIn)
  if type(slotsOut)~="table" or type(slotsIn)~="table" then return "BLOCKED" end
  if #slotsOut>4 or #slotsIn>4 or #slotsOut<1 or #slotsIn<1 then return "FOUR_SLOT_INVALID" end
- local seenOut,seenIn={},{},0
+ local seenOut,seenIn={},{}
  local valueOut,valueIn=0,0
  local hasNonlinear=false
  for _,side in ipairs({{slotsOut,seenOut},{slotsIn,seenIn}}) do
@@ -128,6 +128,9 @@ function M.syntheticTests()
   upgrade=fixture({a,b},{c}),
   downgrade=fixture({c},{a,b}),
   sidegrade=fixture({a},{d}),
+  smallGain=fixture({a},{{id="SYNTH_105",qty=1,val=105}}),
+  positiveDowngrade=fixture({c},{{id="SYNTH_D",qty=1,val=104},
+                                   {id="SYNTH_E",qty=1,val=104}}),
   loss=fixture({c},{a}),
   fiveSlot=fixture({a,b,c,d,e},{c}),
   duplicate=fixture({a,a},{c}),
@@ -136,7 +139,8 @@ function M.syntheticTests()
  }
  local expected={
   upgrade="UPGRADE",downgrade="UNAPPROVED_LOSS",
-  sidegrade="SIDEGRADE",loss="UNAPPROVED_LOSS",
+  sidegrade="SIDEGRADE",smallGain="SIDEGRADE",
+  positiveDowngrade="DOWNGRADE",loss="UNAPPROVED_LOSS",
   fiveSlot="FOUR_SLOT_INVALID",duplicate="INVALID_SYNTHETIC_SLOT",
   targetOutgoing="TARGET_PROTECTED",nonlinearStack="STACK_PRICE_UNVERIFIED",
  }
@@ -155,7 +159,8 @@ function M.assess(profile,sync,registry,jobId,started,ended,audit)
  if type(jobId)~="string" or #jobId<8 or #jobId>100 or
   not jobId:match("^[A-Za-z0-9_-]+$") or
   type(started)~="number" or type(ended)~="number" or
-  started~=started or ended~=ended or started<0 or ended<started or
+  started~=started or ended~=ended or started<0 or
+  started==math.huge or ended==math.huge or ended<started or
   ended-started>15 then
    return out("BLOCKED","LOCAL_SESSION_OR_READ_WINDOW_INVALID")
  end
