@@ -1,0 +1,38 @@
+name: Gingerscope System2 public MM2 source — validated live candidate
+on:
+  push:
+    branches:
+      - research/system2-live-public-tier-ingest-nov14
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gingerscope-system2-public-tier-source
+  cancel-in-progress: false
+jobs:
+  live-source-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install read-only HTML parsing dependency
+        run: python3 -m pip install --disable-pip-version-check 'beautifulsoup4>=4.12,<5'
+      - name: Verify hostile and positive local data contracts
+        run: python3 -m unittest -v pdiddler.ci.test_system2_mm2tradehub_market_candidate
+      - name: Fetch and admit actual source edition, tier pages and item counts
+        env:
+          GINGERSCOPE_MARKET_OUTPUT: ${{ runner.temp }}/gingerscope-real-market-candidate.json
+        run: python3 -m pdiddler.system2.mm2tradehub_market_candidate
+      - name: Save immutable per-run research candidate
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-real-mm2-public-market-candidate
+          path: ${{ runner.temp }}/gingerscope-real-market-candidate.json
+          retention-days: 7
+          if-no-files-found: error
