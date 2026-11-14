@@ -40,10 +40,16 @@ jobs:
           git fetch --no-tags --depth=1 origin 5b8ee35d7f281c23d9c2181abd97a063e59a0660
           git show 5b8ee35d7f281c23d9c2181abd97a063e59a0660:pdiddler/new_part4/stage100_screen_prompt_overlay.lua > "$RUNNER_TEMP/original-geometry.lua"
           test "$(git hash-object "$RUNNER_TEMP/original-geometry.lua")" = e0eac8e039655999bd7bbac1f12da179db7c22ed
-          for src in p4_native_observer.lua p4_observer_contract.lua; do
-            cmp "$RUNNER_TEMP/original-$(test "$src" = p4_native_observer.lua && echo stage9 || echo stage9-contract).lua" "pdiddler/new_part4/$src"
-          done
-          cmp "$RUNNER_TEMP/original-geometry.lua" pdiddler/new_part4/stage100_screen_prompt_overlay.lua
+          # These original historical files are immutable PR source blobs and
+          # are deliberately NOT checked in on the current stacked research branch.
+          # Restore byte-verified originals ONLY in this ephemeral CI runner.
+          mkdir -p pdiddler/new_part4
+          cp "$RUNNER_TEMP/original-stage9.lua" pdiddler/new_part4/p4_native_observer.lua
+          cp "$RUNNER_TEMP/original-stage9-contract.lua" pdiddler/new_part4/p4_observer_contract.lua
+          cp "$RUNNER_TEMP/original-geometry.lua" pdiddler/new_part4/stage100_screen_prompt_overlay.lua
+          test "$(git hash-object pdiddler/new_part4/p4_native_observer.lua)" = a6338e946467ad738005bc5cb13cd2d2fbc2a2d0
+          test "$(git hash-object pdiddler/new_part4/p4_observer_contract.lua)" = 7c84456006bd684dacb0217d0ae092d6d67575a4
+          test "$(git hash-object pdiddler/new_part4/stage100_screen_prompt_overlay.lua)" = e0eac8e039655999bd7bbac1f12da179db7c22ed
           grep -Fq b41bfae1a897e99c5775eff98dc48c4148d7adc2 pdiddler/supervised/MAIN_ALT_ACCEPT_DISCOVERY_READONLY_NATIVE.lua
           echo MAIN_ALT_NATIVE_ALL_FOUR_READONLY_SOURCE_PINS_MATCH
       - name: Install immutable official Lune v0.11.1
