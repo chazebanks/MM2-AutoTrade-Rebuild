@@ -41,10 +41,9 @@ jobs:
           import re
           native=Path('pdiddler/system2/SYSTEM2_LIVE_FIVE_MAIN_NATIVE.lua').read_text()
           m=re.search(r'local CTRL="([0-9a-f]{40})"',native)
-          assert m and m.group(1)=='98b3adaaa0ab6412f52f712947ba3604a690664f'
+          assert m and m.group(1)=='1acc000789d778cf02a595d1a1a164a6888f1fee'  # immutable commit, not blob
           for name in ('P3_EPOCH','SHADOW_PLAN','MAIN'):
               assert re.search(r'local '+name+r'="[0-9a-f]{40}"',native),name
-          assert 'SYSTEM2_LIVE_FIVE_MAIN_NATIVE' not in native or True
           print('SYSTEM2_LIVE_FIVE_ACTUAL_SOURCE_SHA_PINS_PASS')
           PY
       - name: Python source, authorization and five distinct scenario audit
