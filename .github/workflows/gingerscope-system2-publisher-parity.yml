@@ -20,6 +20,20 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Retrieve original pinned Stage83 Git source
+        run: |
+          git fetch --no-tags --depth=1 origin 25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae
+          git show FETCH_HEAD:pdiddler/intelligence_lab/stage83_public_slug_registry.lua > "$RUNNER_TEMP/stage83-original.lua"
+          python3 - <<'PY'
+          import hashlib, os
+          from pathlib import Path
+          raw=(Path(os.environ["RUNNER_TEMP"])/"stage83-original.lua").read_bytes()
+          sha=hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\0"+raw).hexdigest()
+          assert sha=="40e2a0ff01b70b2d0181c62cae347a08da82bcb8",sha
+          print("Original Stage83 Git blob SHA confirmed",sha)
+          PY
       - name: Run all offline System2 parity, immutable adapter and catalog tests
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/stage83-original.lua
         run: |
           python3 -m unittest -v pdiddler.ci.test_publisher_page_parity pdiddler.ci.test_operator_capture_adapter pdiddler.ci.test_system2_catalog_discovery_diff
