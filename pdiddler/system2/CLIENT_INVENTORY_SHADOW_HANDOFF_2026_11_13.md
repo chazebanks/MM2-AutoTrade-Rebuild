@@ -17,10 +17,11 @@ Completed previous draft research PRs #250→#251→#252→#253 provided a compl
 - Any unknown eligible raw key, replaced metadata, Chroma collision, malformed quantity, bogus source permission or inconsistent fingerprint returns **BLOCKED** with no partial value total.
 - Every result has `clientInventoryAuthenticity=UNVERIFIED_CALLER_SUPPLIED_CLIENT_SNAPSHOT`, `portfolioCompletenessProven=false`, `currentGameItemInstanceProven=false`, `actualTradeSessionProven=false`, `fourPhysicalSlotTradeFeasible=false`; all live price, offer, Accept, completion, Discord and learning authorizations FALSE. A client-asserted `source` string is not proof a game RPC really happened.
 
-## Tests and evidence (replace PENDING when actually checked)
+## Tests and evidence — exact-head green checkpoint
 - **34 new adversarial Python unit cases**, including >4 stacked Chroma copies, stale October31 scanner prices being ignored, Gingerscope counted but outgoing-protected, missing/duplicate raw keys, falsified Chroma/type/name, invalid owned counts and negative/malformed snapshots.
 - Inherited **88** previous Stage83/catalog/value/publisher/market reader tests; combined **122** expected. Dedicated CI re-fetches ORIGINAL SHA-pinned Stage83 Lua from immutable commit and executes all five System2 test groups.
-- First CI on preliminary head `fca8dfbfd4063467fe9187c4d06e535550914be7` was **RED**, because new synthetic market fixture omitted the required `captureWindowUTC.exportedAt`. It caught 23 fixture-based false failures plus 2 errors. The test fixture was corrected in commit `1d4adb5bd003741e248e8bc77e4e41e24f09723d`; **do not claim green until the exact final CI run shows pass**.
+- First CI on preliminary head `fca8dfbfd4063467fe9187c4d06e535550914be7` was **RED**, because the new synthetic market fixture omitted the required `captureWindowUTC.exportedAt`. It caught 23 fixture-based false failures plus 2 errors. The test fixture was corrected in commit `1d4adb5bd003741e248e8bc77e4e41e24f09723d`.
+- **Verified on corrected exact head `1d4adb5bd003741e248e8bc77e4e41e24f09723d`: 6/6 GitHub workflows PASS; dedicated System2 inventory-shadow Actions run `43540005474` PASS with 122/122 Python tests, no skip, original immutable Stage83 Git blob verified.** This proves offline source-contract handling, not a real native client inventory capture.
 - No actual real iPad `GetProfileData` client capture has been run for this adapter; a new native read-only intake/display would be a separately reviewed next issue if warranted. Existing Stage101 tests are CLOSED.
 
 ## Next one task after this issue actually passes
