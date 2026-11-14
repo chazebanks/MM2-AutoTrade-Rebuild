@@ -60,7 +60,8 @@ local function getMeta(sync,key)
     -- Reject mismatched duplicate rows instead of silent overwrite.
     if a~=nil and b~=nil and a~=b then
         for _,k in ipairs({"ItemName","Name","ItemType","Rarity","Chroma",
-                           "EvoBaseID","EvoIndex"}) do
+                           "EvoBaseID","EvoIndex","Tradable","CanTrade",
+                           "Untradable","NonTradable"}) do
             if a[k]~=b[k] then return nil,"CONFLICTING_SYNC_ROWS" end
         end
     end
@@ -81,6 +82,12 @@ local function classify(d)
     if d.EvoBaseID~=nil or d.EvoIndex~=nil then
         return "excludedEvolution"
     end
+    -- Original P3 scanner already honors these explicit game-side tradeability
+    -- flags; classification must not silently count them as eligible.
+    if d.Tradable==false or d.CanTrade==false or
+       d.Untradable==true or d.NonTradable==true then
+        return "excludedNontradable"
+    end
     local k=string.lower(kind)
     local r=string.lower(rarity)
     if k~="gun" and k~="knife" then return "excludedOther" end
@@ -93,7 +100,7 @@ end
 local CATEGORIES={
     "ancient","godly","chromaAncient","chromaGodly",
     "excludedOrdinary","excludedEvolution","excludedPlaceholder",
-    "excludedOther","unmapped","malformed","conflicting",
+    "excludedNontradable","excludedOther","unmapped","malformed","conflicting",
 }
 local function counts()
     local r={}
