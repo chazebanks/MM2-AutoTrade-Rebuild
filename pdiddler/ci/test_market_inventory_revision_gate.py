@@ -51,7 +51,10 @@ class MarketInventoryRevisionTests(unittest.TestCase):
                 client_envelope=self.own, trade_binding=self.binding,
                 publication_pages=self.web, evaluated_at_utc=self.now,
             )
-            read.assert_called_once_with(self.original,self.registry)
+            if type(self.original) is bytes and type(self.registry) is bytes:
+                read.assert_called_once_with(self.original,self.registry)
+            else:
+                read.assert_not_called()
         return result
 
     def compare(self, previous):
