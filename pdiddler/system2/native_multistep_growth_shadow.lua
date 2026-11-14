@@ -278,10 +278,18 @@ local function better(a,b)
   return x.minimumCrossListStepGain>y.minimumCrossListStepGain end
  return a.pathKey<b.pathKey
 end
-local function routeFor(first,future)
- local steps={first}
- for _,x in ipairs(future) do steps[#steps+1]=x end
- return steps
+local function beamPick(nodes)
+ table.sort(nodes,better)
+ local out,perFirst={},{}
+ for _,candidate in ipairs(nodes) do
+  local seed=candidate.firstChoiceFingerprint
+  if (perFirst[seed] or 0)<3 then
+   out[#out+1]=candidate
+   perFirst[seed]=(perFirst[seed] or 0)+1
+   if #out==BEAM then break end
+  end
+ end
+ return out
 end
 local function newState(first,index)
  local stamp=fingerprint(first.ownedAfter)
@@ -408,8 +416,7 @@ function M.search(context,market,spec,bilateral)
  end
  if #frontier<1 then
   return denied("ABSTAIN","NO_SOURCE_SAFE_FIRST_STEP_FROM_CURRENT_OFFER") end
- table.sort(frontier,better)
- while #frontier>BEAM do table.remove(frontier) end
+ frontier=beamPick(frontier)
  local comparisons=0
  local terminal={}
  local stageStats={}
@@ -433,8 +440,7 @@ function M.search(context,market,spec,bilateral)
       if step then
        local stamp=fingerprint(step.ownedAfter)
        if not node.seen[stamp] then
-        local newSteps=routeFor(nil,{})
-        newSteps={}
+        local newSteps={}
         for _,prior in ipairs(node.steps) do newSteps[#newSteps+1]=prior end
         newSteps[#newSteps+1]=step
         local pathKey=node.pathKey.."/"..stamp..":"..tostring(level+1)
@@ -461,8 +467,7 @@ function M.search(context,market,spec,bilateral)
   stageStats[#stageStats+1]={futureLevel=level,
     hypotheticalAcceptedRoutesAtLevel=levelUsed,
     futureSellerActuallyObserved=false}
-  table.sort(nextFrontier,better)
-  while #nextFrontier>BEAM do table.remove(nextFrontier) end
+  nextFrontier=beamPick(nextFrontier)
   if #nextFrontier==0 then break end
   for _,x in ipairs(nextFrontier) do terminal[#terminal+1]=x end
   frontier=nextFrontier
@@ -477,6 +482,7 @@ function M.search(context,market,spec,bilateral)
    local q=p.metrics
    results[#results+1]={
     index=#results+1,routeLength=#p.steps,
+    distinctFirstStepSignature=p.firstChoiceFingerprint,
     paperTargetHypotheticallyHeld=(p.holdings[TARGET] or 0)>0,
     typeSequence=(function()
      local ty={}
@@ -495,8 +501,12 @@ function M.search(context,market,spec,bilateral)
    if #results>=6 then break end
   end
  end
- if #results<2 then
-  return denied("ABSTAIN","NO_TWO_INDEPENDENT_DISTINCT_PATH_HYPOTHESES") end
+ local firstSet={}
+ for _,route in ipairs(results) do firstSet[route.distinctFirstStepSignature]=true end
+ local distinctFirst=0
+ for _ in pairs(firstSet) do distinctFirst+=1 end
+ if #results<2 or distinctFirst<2 then
+  return denied("ABSTAIN","NO_TWO_INDEPENDENT_FIRST_STEP_PATH_HYPOTHESES") end
  return {
   schema=SCHEMA,
   status="RESEARCH_GROWTH_ROUTE_DISCOVERY_ONLY",
@@ -511,6 +521,7 @@ function M.search(context,market,spec,bilateral)
   futureSellerStageCount=#stagePools,
   futureStages=stageStats,
   paperRoutesConsidered=#terminal,
+  distinctFirstStepRoutesDisplayed=distinctFirst,
   searchPairEvaluations=comparisons,
   rejectedListedLossPairs=skipped.loss,
   rejectedUnverifiedStackPairs=skipped.stack,
