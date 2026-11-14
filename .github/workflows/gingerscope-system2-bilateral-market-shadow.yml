@@ -67,6 +67,8 @@ jobs:
           pathlib.Path('pdiddler/system2/research_market_epoch.txt').write_text(str(int(stamp.timestamp())))
           print('LIVE_REAL_MARKET_SOURCE_AND_RAW_KEYS=189')
           PY
+      - name: Run independent Python randomized real-market bilateral oracle
+        run: python3 -m unittest -v pdiddler.ci.test_system2_native_bilateral_market_oracle
       - name: Execute real native bilateral decision logic with source-derived market numbers
         shell: bash
         run: |
