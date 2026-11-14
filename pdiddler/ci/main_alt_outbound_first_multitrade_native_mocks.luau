@@ -241,7 +241,12 @@ local function gameFixture(opts)
    local success,loader=pcall(luau.load,source,{environment=env,injectGlobals=true})
    if not success then print("[MOCK COMPILE FAILURE]",tostring(loader)) end
    if not success then error(loader) end
-   return loader
+   return function()
+    local okay,value=pcall(loader)
+    print("[MODULE EVAL]",#source,okay,type(value),not okay and tostring(value) or "")
+    if not okay then error(value) end
+    return value
+   end
   end,
   print=function()end,warn=function(...)print("[MOCK WARN]",...)end,
   setclipboard=function(x)table.insert(copied,x)end,
