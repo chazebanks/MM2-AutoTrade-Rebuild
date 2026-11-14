@@ -8,7 +8,7 @@ import argparse
 import json
 from pathlib import Path
 
-from pdiddler.system2.operator_capture_adapter import ingest, AUTHORITY_DENIED, SCHEMA as INPUT_SCHEMA
+from pdiddler.system2.operator_capture_adapter import ingest, AUTHORITY_DENIED, SCHEMA as INPUT_SCHEMA, EXPORT_SHA256
 
 SCHEMA='gingerscope-system2-market-research-reader-v1'
 TARGET_KEY='Gingerscope'
@@ -24,7 +24,8 @@ def _report(status,reason,**fields):
 def _index(mapped):
     if not isinstance(mapped,dict) or mapped.get('schema')!=INPUT_SCHEMA or mapped.get('status')!='OFFLINE_CROSSWALK_READY':
         raise ValueError('MAPPED_SOURCE_UNVERIFIED')
-    if len(mapped.get('records',[]))!=189 or mapped.get('publisherVersion') is not None:
+    if (len(mapped.get('records',[]))!=189 or mapped.get('publisherVersion') is not None
+            or mapped.get('sourceExportSha256') != EXPORT_SHA256):
         raise ValueError('UNEXPECTED_MAPPED_SOURCE_VERSION')
     if any(mapped.get(k) != v for k,v in AUTHORITY_DENIED.items()):
         raise ValueError('SOURCE_AUTHORITY_CONTRACT_VIOLATION')
@@ -32,7 +33,7 @@ def _index(mapped):
     for row in mapped['records']:
         key=row.get('rawGameKeyCandidate')
         if (not isinstance(key,str) or not key or key in known
-                or not isinstance(row.get('decimalValue'),int)
+                or type(row.get('decimalValue')) is not int
                 or row.get('decimalValue')<0):
             raise ValueError('DUPLICATE_OR_INVALID_MAPPED_KEY')
         known[key]=row
