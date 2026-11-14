@@ -140,6 +140,27 @@ local bridge,reason=glue.new({core=core,captureAdapter=capture,scope=scope,
  isBoundSession=function()return active end,
  utcNow=tick,monoNow=now,sourceRetrievedEpoch=sourceEpoch})
 ok(bridge~=nil,"scanner and P4 GUI bridge actually wired")
+local calls=0
+local pinned,whyPinned=glue.newWithPinnedSource({
+ core=core,captureAdapter=capture,scope=scope,game=game,players=players,
+ sync=sync,scannerApi=reader,isBoundSession=function()return active end,
+ utcNow=tick,monoNow=now,
+ sourceHttpGet=function(url)
+  calls+=1
+  ok(url:find("fd823dd0f0036c02ba4632a4f0a879bd429cb4fc",1,true)~=nil,
+     "source uses immutable verified Git commit")
+  return fs.readFile(base.."research_market_crosswalk_current.json")
+ end,
+ jsonDecode=function(bytes)return serde.decode("json",bytes)end,
+ isoToEpoch=function(s)
+  eq(s,market.sourceRetrievedUtc,"pinned source time actually parsed")
+  return sourceEpoch
+ end,
+})
+ok(pinned~=nil,"native can load real immutable source over HTTP")
+eq(calls,1,"pinned source downloaded once")
+eq(pinned.refreshOwn().status,"READONLY_OWN_MARKET_BOUND",
+   "actual native bridge can use downloaded price crosswalk")
 local stale=bridge.observeOffer()
 eq(stale.reason,"OWN_CENSUS_EXPIRED_REFRESH_REQUIRED","must inventory first")
 local own=bridge.refreshOwn()
@@ -185,15 +206,15 @@ eq(bridge.observeOffer().reason,"OUR_OFFER_RAW_KEY_LABEL_OR_CHROMA_CONFLICT",
    "wrong chroma tag fails closed")
 ours:FindFirstChild("Tags").children.Chroma.Visible=true
 ours.Attributes.ItemId=nil
-eq(bridge.observeOffer().reason,"OFFER_SESSION_PARTNER_OR_ROOT_UNVERIFIED",
+eq(bridge.observeOffer().reason,"GUI_CAPTURE_GUI_SLOT_RAW_ID_NOT_PROVEN",
    "no raw slot key rejects name-only")
 ours.Attributes.ItemId="EmberbowChroma"
 opponent.Name="SomeoneElse"
-eq(bridge.observeOffer().reason,"OFFER_SESSION_PARTNER_OR_ROOT_UNVERIFIED",
+eq(bridge.observeOffer().reason,"GUI_CAPTURE_GUI_PARTNER_DIFFERENT_FROM_BOUND_ACCOUNT",
    "changed partner GUI association rejects")
 opponent.Name="PartnerUser"
 active=false
-eq(bridge.observeOffer().reason,"OFFER_SESSION_PARTNER_OR_ROOT_UNVERIFIED",
+eq(bridge.observeOffer().reason,"GUI_CAPTURE_REVIEWED_P3_P4_LEASE_NOT_ACTIVE",
    "stolen or invalidated lease")
 active=true
 monotonic=40
