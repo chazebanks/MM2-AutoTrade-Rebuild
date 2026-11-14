@@ -155,6 +155,40 @@ class SealedSourceDecisionTests(unittest.TestCase):
         self.assertEqual(r["status"],"BLOCKED")
         self.assertIn("UNAPPROVED_LISTED_LOSS",r["reason"])
 
+    def test_explicit_counterparty_inventory_sealed_mode_only(self):
+        candidate_request={
+            "kind":"SYNTHETIC_OFFLINE_COUNTERPARTY_ENUMERATION",
+            "ownShortlist":["Celestial"],
+            "counterparty":{
+                "kind":"SYNTHETIC_UNVERIFIED_COUNTERPARTY",
+                "items":[{"rawGameKey":"Gingerscope","quantity":1}],
+                "ownershipProof":"UNKNOWN",
+            },
+            "maxDisplay":5,
+        }
+        result=self.runmode(mode="COUNTERPARTY_OPTIONS",payload=candidate_request)
+        self.assertEqual(result["status"],"SEALED_SOURCE_RESEARCH_ONLY",result)
+        research=result["researchResult"]
+        self.assertEqual(research["status"],"OFFLINE_COUNTERPARTY_OPTIONS_ENUMERATED")
+        self.assertTrue(research["previews"][0]["incomingGingerscopeHypothesis"])
+        self.assertFalse(research["counterpartyOwnsAnyItemProven"])
+        self.assertFalse(result["authorizesOffer"])
+
+    def test_no_fabricated_counterparty_census_in_sealed_mode(self):
+        bogus={
+            "kind":"SYNTHETIC_OFFLINE_COUNTERPARTY_ENUMERATION",
+            "ownShortlist":["Celestial"],
+            "counterparty":{
+                "kind":"SYNTHETIC_UNVERIFIED_COUNTERPARTY",
+                "items":[],
+                "ownershipProof":"UNKNOWN",
+            },
+            "maxDisplay":3,
+        }
+        result=self.runmode(mode="COUNTERPARTY_OPTIONS",payload=bogus)
+        self.assertEqual(result["status"],"BLOCKED")
+        self.assertIn("COUNTERPARTY_EXPLICIT_SHORTLIST_INVALID",result["reason"])
+
     def test_bad_research_mode(self):
         r=self.runmode(mode="LIVE_TRADE")
         self.assertEqual(r["status"],"BLOCKED")

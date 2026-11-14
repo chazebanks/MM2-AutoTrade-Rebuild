@@ -22,10 +22,11 @@ from pdiddler.system2.client_inventory_shadow import evaluate as validate_invent
 from pdiddler.system2.trade_scenario_lab import inspect as scenario_inspect
 from pdiddler.system2.attractiveness_evidence_lab import compare as compare_alternatives
 from pdiddler.system2.multitrade_growth_replay import simulate as growth_simulate
+from pdiddler.system2.counterparty_candidate_explorer import explore as counterpart_explore
 
 SCHEMA = "gingerscope-system2-sealed-source-decision-v1"
 EXPECTED_ROWS_SHA256 = "a33d2bace80b1375bd062cb634ee0dc0dff33962bac174814ce7a490dc184c16"
-MODES = ("SCENARIO", "ATTRACTIVENESS", "MULTITRADE_GROWTH")
+MODES = ("SCENARIO", "ATTRACTIVENESS", "MULTITRADE_GROWTH", "COUNTERPARTY_OPTIONS")
 
 
 def _result(status, reason, **data):
@@ -90,9 +91,12 @@ def inspect_sealed(*, export_bytes, stage83_lua_bytes, client_envelope,
         elif mode == "ATTRACTIVENESS":
             result = compare_alternatives(mapped, shadow, payload,
                                           evaluated_at_utc=evaluated_at_utc)
-        else:
+        elif mode == "MULTITRADE_GROWTH":
             result = growth_simulate(mapped, shadow, payload,
                                      evaluated_at_utc=evaluated_at_utc)
+        else:
+            result = counterpart_explore(mapped, shadow, payload,
+                                         evaluated_at_utc=evaluated_at_utc)
         if (result.get("status") in (
                 None, "BLOCKED", "BLOCKED_LOSS_POLICY",
                 "OFFLINE_LOSS_SCENARIO_BLOCKED_POLICY"
