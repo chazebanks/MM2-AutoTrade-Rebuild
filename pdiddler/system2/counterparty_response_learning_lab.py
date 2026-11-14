@@ -141,8 +141,8 @@ def replay(events):
                 if (kind == "PARTNER_NO_RESPONSE_TIMEOUT" and
                         entry["stage"] != "REQUEST_PENDING"):
                     raise ValueError("NO_RESPONSE_TIMEOUT_AFTER_REQUEST_ACCEPTANCE")
-                if kind == "CLIENT_WINDOW_CLOSED_UNKNOWN" and
-                    entry["stage"] != "IN_TRADE":
+                if (kind == "CLIENT_WINDOW_CLOSED_UNKNOWN" and
+                        entry["stage"] != "IN_TRADE"):
                     raise ValueError("WINDOW_CLOSE_WITHOUT_OBSERVED_TRADE")
                 entry["outcome"] = OUTCOMES[kind]
                 entry["stage"] = "TERMINAL"
