@@ -183,6 +183,36 @@ eq(observe.mm2ListedDelta,rows.Iceblaster.mm2Listed-
  6*rows.EmberbowChroma.mm2Listed,"current site bilateral delta")
 eq(observe.serverOfferRevisionProven,false,"not server proof")
 eq(observe.authorizesAccept,false,"never accepts")
+-- Original scanner + actual P4 GUI-shape observations now feed the new
+-- bilateral research engine, not merely fabricated standalone strategy input.
+local nativeBilateral=luau.load(fs.readFile(base.."native_bilateral_attractiveness_shadow.lua"))()
+local nativeBilateralBridge=luau.load(fs.readFile(base.."native_bilateral_attractiveness_bridge.lua"))()
+local research=bridge.researchContext()
+eq(research.status,"LOCAL_READONLY_MARKET_OFFER_CONTEXT",
+  "original scanner and GUI produce local bilateral research input")
+eq(research.ownCounts.EmberbowChroma,6,"private six-copy ownership local only")
+eq(research.crosswalkRowsSha256,market.crosswalkRowsSha256,
+  "bilateral source must match real crosswalk")
+eq(research.offer.their.items[1].id,"Iceblaster",
+  "actual GUI-shape their offer attached to research")
+local researchAdapter,researchErr=nativeBilateralBridge.new({
+ marketBridge=bridge,bilateralCore=nativeBilateral,crosswalk=market})
+ok(researchAdapter~=nil,"native quality engine connected to original scanner and P4 observer")
+local bilateral=researchAdapter:compare({
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="EmberbowChroma",quantity=1}},
+  receive={{id="Iceblaster",quantity=1}}},
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="FlowerwoodKnife",quantity=1}},
+  receive={{id="Iceblaster",quantity=1}}},
+})
+eq(bilateral.status,"ABSTAIN_PARTNER_INTENT_UNVERIFIED",
+ "loss or incomplete quote refuses to propose any live trade")
+eq(bilateral.alternatives[1].status,"RISK_FILTERED",
+ "market-backed original GUI alt cannot pass unapproved value loss")
+eq(bilateral.alternatives[2].reason,"DUAL_PUBLISHER_PRICE_NOT_AVAILABLE",
+ "genuine Flowerwood Supreme missing quote preserved")
+eq(bilateral.authorizesTrade,false,"full component3->component4 bridge is research-only")
 local repeatFrame=bridge.observeOffer()
 eq(repeatFrame.clientRevision,1,"unchanged stable client revision")
 ours:FindFirstChild("Container"):FindFirstChild("Amount").Text="x5"

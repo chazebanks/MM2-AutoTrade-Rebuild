@@ -37,6 +37,7 @@ function M.new(config)
  return {
   refreshOwn=function()return bound:refreshOwn()end,
   observeOffer=function()return bound:observe()end,
+  researchContext=function()return bound:researchContext()end,
   readOnly=true,authorizesOffer=false,authorizesAccept=false,
  },nil
 end
