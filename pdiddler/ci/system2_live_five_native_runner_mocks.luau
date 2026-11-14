@@ -45,6 +45,7 @@ local function fakeEnvironment(opts)
  local q={}
  local instances={}
  local asyncFault=nil
+ local warnings={}
  local E={PDIDDLER_SYSTEM2_ALT_NAME="venossgaming90190"}
  if opts.badAltConfig then E.PDIDDLER_SYSTEM2_ALT_NAME=nil end
  if opts.competingOwner then E.PDIDDLER_SYSTEM1_MAIN_AUTO_OWNER={} end
@@ -208,7 +209,11 @@ local function fakeEnvironment(opts)
    E.__COPIED=txt
    return true
   end,
-  warn=function(...)end,
+  warn=function(...)
+   local xs={...};local out={}
+   for _,v in ipairs(xs)do out[#out+1]=tostring(v)end
+   warnings[#warnings+1]=table.concat(out," ")
+  end,
   print=function(...)end,
   os={clock=function()times+=0.1;return times end},
   task=sched,
@@ -240,14 +245,14 @@ local function fakeEnvironment(opts)
   end
  end
  return {run=run,pump=pump,button=button,instances=instances,
-  E=E,LP=LP,ALT=ALT,PG=pg,reads=sourceReads,
+  E=E,LP=LP,ALT=ALT,PG=pg,reads=sourceReads,warnings=warnings,
   getFault=function()return asyncFault end}
 end
 
 do
  local x=fakeEnvironment()
  local runner=x.run()
- eq(type(runner),"table","native launcher")
+ eq(type(runner),"table","native launcher warnings="..table.concat(x.warnings," | "))
  eq(#x.reads,13,"all pinned source modules")
  eq(x.E.__NATIVE_P3_BOOT_COUNT,nil,"no implicit request startup")
  eq(x.button("ArmFiveIntelligence").Visible,false,"ARM hidden without selections")
