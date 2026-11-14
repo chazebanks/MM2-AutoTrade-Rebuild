@@ -216,7 +216,6 @@ class MarketInventoryRevisionTests(unittest.TestCase):
 
     def test_authorizing_source_payload_blocks_at_shadow_gate(self):
         self.mapped["authorizesTrade"]=True
-        self.blocked("PINNED_COMPLETE_189_ROWS_MISMATCH") if False else None
         # Synthetic adapter bypass is used only to test post-loader source
         # contracts; its data fields are not allowed to waive authority.
         self.blocked("SCANNER_SHADOW_INVALID:SOURCE_AUTHORITY_CONTRACT_VIOLATION")
