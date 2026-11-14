@@ -8,6 +8,7 @@ local base="pdiddler/system2/"
 local market=serde.decode("json",fs.readFile(base.."research_market_crosswalk_current.json"))
 local sourceEpoch=tonumber(fs.readFile(base.."research_market_epoch.txt"))
 local core=luau.load(fs.readFile(base.."native_market_inventory_offer_core.lua"))()
+local resolver=luau.load(fs.readFile(base.."native_offer_item_identity_resolver.lua"))()
 local capture=luau.load(fs.readFile(base.."native_market_offer_client_capture.lua"))()
 local glue=luau.load(fs.readFile(base.."native_market_inventory_offer_bridge.lua"))()
 local count=0
@@ -136,14 +137,14 @@ eq(firstFrame.doubleReadStable,true,"real-geometry two-read stable")
 eq(firstFrame.ourSlots[1].rawId,"EmberbowChroma","exact attribute raw id")
 eq(firstFrame.theirSlots[1].amountText,"","single stack empty amount preserved")
 local bridge,reason=glue.new({core=core,captureAdapter=capture,scope=scope,
- game=game,players=players,sync=sync,scannerApi=reader,crosswalk=market,
+ game=game,players=players,sync=sync,scannerApi=reader,nameResolver=resolver,crosswalk=market,
  isBoundSession=function()return active end,
  utcNow=tick,monoNow=now,sourceRetrievedEpoch=sourceEpoch})
 ok(bridge~=nil,"scanner and P4 GUI bridge actually wired")
 local calls=0
 local pinned,whyPinned=glue.newWithPinnedSource({
  core=core,captureAdapter=capture,scope=scope,game=game,players=players,
- sync=sync,scannerApi=reader,isBoundSession=function()return active end,
+ sync=sync,scannerApi=reader,nameResolver=resolver,isBoundSession=function()return active end,
  utcNow=tick,monoNow=now,
  sourceHttpGet=function(url)
   calls+=1
@@ -202,13 +203,31 @@ ours.Attributes.ItemId="EmberbowChroma"
 ours:FindFirstChild("Tags").children.Chroma.Visible=true
 ours:FindFirstChild("ItemName"):FindFirstChild("Label").Text="Chroma Emberbow"
 ours:FindFirstChild("Tags").children.Chroma.Visible=false
+ours:FindFirstChild("ItemName"):FindFirstChild("Label").Text="Emberbow"
 eq(bridge.observeOffer().reason,"OUR_OFFER_RAW_KEY_LABEL_OR_CHROMA_CONFLICT",
-   "wrong chroma tag fails closed")
+   "wrong chroma label AND tag fails closed")
 ours:FindFirstChild("Tags").children.Chroma.Visible=true
+ours:FindFirstChild("ItemName"):FindFirstChild("Label").Text="Chroma Emberbow"
 ours.Attributes.ItemId=nil
-eq(bridge.observeOffer().reason,"GUI_CAPTURE_GUI_SLOT_RAW_ID_NOT_PROVEN",
-   "no raw slot key rejects name-only")
+local nameOnly=bridge.observeOffer()
+eq(nameOnly.status,"CLIENT_OFFER_CHANGED_PREVIEW_INVALIDATED",
+   "original GUI has no raw item attr but exact name produces research candidate")
+eq(nameOnly.nameOnlyCatalogCandidateCount,1,
+   "name-only item explicitly remains unverified")
+eq(nameOnly.exactRawAttributesBothSidesObserved,false,
+   "name candidate cannot become exact raw attribute evidence")
+eq(nameOnly.authorizesOffer,false,"research-only label never authorizes offers")
+eq(nameOnly.our.items[1].clientIdentityEvidence,
+   "UNVERIFIED_NAME_ONLY_GAME_CATALOG_CANDIDATE",
+   "candidate identity uncertainty preserved")
 ours.Attributes.ItemId="EmberbowChroma"
+theirs.Attributes.ItemId=nil
+theirs:FindFirstChild("ItemName"):FindFirstChild("Label").Text="Laser"
+eq(bridge.observeOffer().reason,
+   "THEIR_NAME_CANDIDATE_KNOWN_CROSS_TIER_NAME_COLLISION_NEEDS_RAW_ID",
+   "old native Stage9 Laser collision remains blocked")
+theirs.Attributes.ItemId="Iceblaster"
+theirs:FindFirstChild("ItemName"):FindFirstChild("Label").Text="Iceblaster"
 opponent.Name="SomeoneElse"
 eq(bridge.observeOffer().reason,"GUI_CAPTURE_GUI_PARTNER_DIFFERENT_FROM_BOUND_ACCOUNT",
    "changed partner GUI association rejects")
