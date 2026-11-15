@@ -79,16 +79,21 @@ local function valueStats(owned,market)
   #market.items~=189 then return nil end
  local index={}
  for _,r in ipairs(market.items) do
+  -- A complete game-key roster may contain legitimately unpriced
+  -- items. The original C4 already checks market schema and raw keys;
+  -- require full quotes only for our actual owned keys, not unused rows.
   if type(r)~="table" or type(r.rawGameKeyCandidate)~="string" or
-   index[r.rawGameKeyCandidate] or not finite(r.mm2Listed) or
-   r.mm2Listed<=0 or not finite(tonumber(r.demandOrdinal)) or
-   type(r.stabilityLabel)~="string" then return nil end
+   index[r.rawGameKeyCandidate] or
+   (r.mm2Listed~=nil and
+    (not finite(r.mm2Listed) or r.mm2Listed<=0)) then return nil end
   index[r.rawGameKeyCandidate]=r
  end
  local total,largest,atRisk=0,0,0
  for k,q in pairs(owned) do
   local row=index[k]
-  if not row or not finite(q) or q<1 or q~=math.floor(q) then
+  if not row or not finite(row.mm2Listed) or row.mm2Listed<=0 or
+   not finite(tonumber(row.demandOrdinal)) or
+   not finite(q) or q<1 or q~=math.floor(q) then
    return nil end
   local v=row.mm2Listed*q
   total+=v
