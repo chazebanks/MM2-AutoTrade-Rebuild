@@ -4,6 +4,9 @@ on:
     paths:
       - 'pdiddler/system2/c9_supreme_firstparty_189_research.py'
       - 'pdiddler/ci/test_c9_supreme_firstparty_189_research.py'
+      - 'pdiddler/system2/c9_supreme_mediated_189_research_gate.py'
+      - 'pdiddler/ci/test_c9_supreme_mediated_189_research_gate.py'
+      - 'pdiddler/system2/c9_supreme_official_origin_mediated_189_2026_11_15.json'
       - '.github/workflows/gingerscope-c9-supreme-direct-189.yml'
   workflow_dispatch:
 permissions:
@@ -31,13 +34,38 @@ jobs:
             'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/734a316ee8d1afa14da50216a3d38de1ddd8694c/pdiddler/system2/c9_research_public_189_crosswalk.json' \
             -o "$RUNNER_TEMP/original-189-public-crosswalk.json"
           cmp -s pdiddler/system2/c9_research_public_189_crosswalk.json "$RUNNER_TEMP/original-189-public-crosswalk.json"
-      - name: Fetch ACTUAL official Supreme pages and compare all 189 keys
+      - name: Attempt DIRECT Supreme source fetch (WAF may block GitHub CI)
+        id: direct
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
           python3 -m pdiddler.system2.c9_supreme_firstparty_189_research \
             --mapped "$RUNNER_TEMP/original-189-public-crosswalk.json" \
             --output "$RUNNER_TEMP/c9-supreme-official-189-research.json"
+      - name: Fail closed on unsupported direct source and verify mediated first-party-origin receipt
+        if: ${{ steps.direct.outcome == 'failure' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'C9_DIRECT_SUPREME_FETCH=BLOCKED_CANNOT_CLAIM_DIRECT_SOURCE'
+          python3 -m unittest -v pdiddler.ci.test_c9_supreme_mediated_189_research_gate
+          python3 -m pdiddler.system2.c9_supreme_mediated_189_research_gate \
+            --original "$RUNNER_TEMP/original-189-public-crosswalk.json" \
+            --snapshot pdiddler/system2/c9_supreme_official_origin_mediated_189_2026_11_15.json \
+            --evaluated-utc "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          echo 'C9_PRIMARY_ORIGIN_CAPTURE=FIRECRAWL_MEDIATED_NOT_PUBLISHER_SIGNED'
+          echo 'C9_GROWTH_STRATEGY_FROM_AGGREGATE_SUPREME_COLUMN=BLOCKED'
+      - name: Record source pathway without laundering CI's HTTP 403
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ steps.direct.outcome }}" = success ]; then
+            echo 'C9_SUPREME_DIRECT_HTTP=SUCCESS_SOURCE_NOT_SIGNED'
+          else
+            echo 'C9_SUPREME_DIRECT_HTTP=BLOCKED_MEDIATED_RESEARCH_ONLY'
+          fi
+          echo 'C9_AUTONOMOUS_TRADE_AUTHORIZED=FALSE'
       - name: Verify first-party result never grants live trading
         shell: bash
         run: |
@@ -66,10 +94,18 @@ jobs:
           print("C9_LIVE_OFFER_AUTHORIZED=FALSE")
           PY
       - name: Store public official source research only (never private account data)
-        if: success()
+        if: ${{ steps.direct.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
-          name: gingerscope-c9-official-supreme-189-research-only
+          name: gingerscope-c9-official-supreme-189-direct-research-only
           path: ${{ runner.temp }}/c9-supreme-official-189-research.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Archive mediated captured research receipt separately
+        if: ${{ steps.direct.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-c9-supreme-189-mediated-source-not-signed
+          path: pdiddler/system2/c9_supreme_official_origin_mediated_189_2026_11_15.json
           retention-days: 7
           if-no-files-found: error
