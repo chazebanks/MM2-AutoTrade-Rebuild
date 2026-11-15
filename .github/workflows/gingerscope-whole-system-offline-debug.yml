@@ -93,8 +93,10 @@ jobs:
           setattr(HandoffIntegrityTests,method,unittest.skip(
             "Nov11 docs-only diff guard not applicable to full-system audit PR"
           )(old))
-          suite=unittest.defaultTestLoader.discover(
-            "pdiddler/ci",pattern="test_*.py",top_level_dir=".")
+          from pathlib import Path
+          names=["pdiddler.ci."+p.stem for p in sorted(
+            Path("pdiddler/ci").glob("test_*.py"))]
+          suite=unittest.defaultTestLoader.loadTestsFromNames(names)
           result=unittest.TextTestRunner(verbosity=2).run(suite)
           raise SystemExit(not result.wasSuccessful())
           PY
