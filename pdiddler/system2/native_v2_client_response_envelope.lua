@@ -153,6 +153,13 @@ function M.new(config)
    mayReportProfit=false,authorizesChat=false,authorizesOffer=false,
    authorizesTrade=false,authorizesAccept=false}
  end
+ -- C8 private LOCAL-only Boolean comparison to original C3 sessionScope.
+ -- No job/lease/account values or pseudo-digests leave the envelope instance.
+ -- The returned bool is NOT remote attestation or backend settlement.
+ function obj.matchesOriginalBoundScope(s)
+  return type(s)=="table" and s.jobId==b.jobId and
+   s.leaseId==b.leaseId and s.partnerUserId==b.partnerUserId and current()
+ end
  function obj.summary()
   return {status="CLIENT_ONLY_STAGED_V2_NOT_DISCORD_DELIVERED",
     stagedCount=#stored,clientSessionPhase=phase,
@@ -160,6 +167,7 @@ function M.new(config)
     discordNetworkDeliveryVerified=false,
     actualPrivateCollectorAckVerified=false,
     serverCompletionProven=false,maySendDiscordWebhook=false,
+    mayReportProfit=false,
     mayUseForStrategyLearning=false,authorizesOffer=false,
     authorizesTrade=false,authorizesAccept=false}
  end
