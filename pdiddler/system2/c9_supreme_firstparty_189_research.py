@@ -23,7 +23,7 @@ import sys
 from bs4 import BeautifulSoup
 
 SCHEMA = "gingerscope-c9-supreme-direct-189-research-audit-v1"
-SOURCE = "https://www.supremevalues.com"
+SOURCE = "https://supremevalues.com"
 CATEGORIES = {"ancient": "ancients", "godly": "godlies", "chroma": "chromas"}
 CATEGORY_KEYS = {"ancient": 15, "godly": 128, "chroma": 46}
 OFFICIAL_PAGE_HEADINGS = {"ancient": "MM2 Ancient Values",
@@ -231,8 +231,8 @@ def fetch_official_page(path):
     if path not in ("", "/mm2/ancients", "/mm2/godlies", "/mm2/chromas"):
         fail("OFFICIAL_UNAPPROVED_FETCH_PATH")
     req = Request(SOURCE + path, headers={
-        "User-Agent": "GingerscopeSupremeSourceAudit/1.0",
-        "Accept": "text/html"
+        "User-Agent": "Mozilla/5.0 (compatible; GingerscopeMarketResearch/1.0; +https://github.com/chazebanks/MM2-AutoTrade-Rebuild)",
+        "Accept": "text/html", "Accept-Language": "en-US,en;q=0.9"
     })
     try:
         with urlopen(req, timeout=24) as r:
@@ -242,7 +242,9 @@ def fetch_official_page(path):
             if "text/html" not in r.headers.get("Content-Type", ""):
                 fail("OFFICIAL_CONTENT_TYPE_NOT_HTML")
             raw = r.read(2_000_001)
-    except (HTTPError, URLError, TimeoutError, OSError):
+    except HTTPError as exc:
+        fail("OFFICIAL_SOURCE_HTTP_" + str(exc.code))
+    except (URLError, TimeoutError, OSError):
         fail("OFFICIAL_SOURCE_NETWORK_UNAVAILABLE")
     if not 500 < len(raw) < 2_000_000:
         fail("OFFICIAL_SOURCE_RESPONSE_SIZE_INVALID")
