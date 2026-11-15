@@ -29,6 +29,61 @@ local function validBound(b)
   int(b.partnerUserId) and b.partnerUserId>0 and
   b.localUserId~=b.partnerUserId and b.root~=nil
 end
+-- C3 refreshOwn() resets its local GUI revision. A partner's x1->x2
+-- offer mutation (or own holdings mutation) can therefore be observed at
+-- the SAME revision after a census refresh. Compare full client contents.
+local function sameCounts(a,b)
+ if type(a)~="table" or type(b)~="table" then return false end
+ for k,n in pairs(a) do
+  if type(k)~="string" or not int(n) or b[k]~=n then return false end
+ end
+ for k,n in pairs(b) do
+  if type(k)~="string" or not int(n) or a[k]~=n then return false end
+ end
+ return true
+end
+local function sameSide(a,b)
+ if type(a)~="table" or type(b)~="table" or
+  type(a.items)~="table" or type(b.items)~="table" or
+  #a.items~=#b.items or a.physicalSlots~=b.physicalSlots or
+  a.mm2Listed~=b.mm2Listed or a.supremeListed~=b.supremeListed or
+  a.clientNameOnlyCandidates~=b.clientNameOnlyCandidates or
+  a.allRawAttributesObserved~=b.allRawAttributesObserved then
+  return false end
+ for i,x in ipairs(a.items) do
+  local y=b.items[i]
+  if type(x)~="table" or type(y)~="table" or
+    x.slot~=y.slot or x.id~=y.id or x.quantity~=y.quantity or
+    x.clientIdentityEvidence~=y.clientIdentityEvidence then
+   return false end
+ end
+ return true
+end
+local function sameCtx(a,b)
+ if type(a)~="table" or type(b)~="table" or
+  a.status~="LOCAL_READONLY_MARKET_OFFER_CONTEXT" or
+  b.status~="LOCAL_READONLY_MARKET_OFFER_CONTEXT" or
+  a.readOnly~=true or b.readOnly~=true or
+  a.authorizesOffer~=false or b.authorizesOffer~=false or
+  a.authorizesAccept~=false or b.authorizesAccept~=false or
+  type(a.sessionScope)~="table" or type(b.sessionScope)~="table" or
+  a.sessionScope.jobId~=b.sessionScope.jobId or
+  a.sessionScope.leaseId~=b.sessionScope.leaseId or
+  a.sessionScope.partnerUserId~=b.sessionScope.partnerUserId or
+  a.crosswalkRowsSha256~=b.crosswalkRowsSha256 or
+  a.sourceRetrievedUtc~=b.sourceRetrievedUtc or
+  a.clientOfferRevision~=b.clientOfferRevision or
+  not sameCounts(a.ownCounts,b.ownCounts) then return false end
+ local x,y=a.offer,b.offer
+ return type(x)=="table" and type(y)=="table" and
+  x.status==y.status and x.clientRevision==y.clientRevision and
+  x.ourAccepted==y.ourAccepted and x.theirAccepted==y.theirAccepted and
+  x.mm2ListedDelta==y.mm2ListedDelta and
+  x.supremeListedDelta==y.supremeListedDelta and
+  x.nameOnlyCatalogCandidateCount==y.nameOnlyCatalogCandidateCount and
+  x.exactRawAttributesBothSidesObserved==y.exactRawAttributesBothSidesObserved and
+  sameSide(x.our,y.our) and sameSide(x.their,y.their)
+end
 local function failRead(reason)
  return type(reason)=="string" and reason:match("^[A-Z0-9_]+$")~=nil and
   #reason<=100 and reason or "ORIGINAL_COMPONENT_BLOCKED_OR_UNAVAILABLE"
@@ -161,6 +216,10 @@ function M.new(config)
    local freshLast,whyFresh=sourceFresh()
    if not okLast then return denial(whyLast,"FINAL_SESSION") end
    if not freshLast then return denial(whyFresh,"FINAL_SOURCE") end
+   local stable,unchanged=pcall(bridge.researchContext)
+   if not stable or not sameCtx(context,unchanged) then
+    return denial("C9_NATIVE_FINAL_GUI_OR_SESSION_CHANGED","FINAL_GUI")
+   end
    return {schema=SCHEMA,
     status="C9_LOCAL_READONLY_INVENTORY_AND_GUI_OBSERVED",
     reason="NO_TRADE_OR_RESEARCH_OPTIONS_REQUESTED",
@@ -208,13 +267,7 @@ function M.new(config)
   local ageFinal,whyAgeFinal=sourceFresh()
   if not ageFinal then return denial(whyAgeFinal,"FINAL_SOURCE") end
   local finalOK,last=pcall(bridge.researchContext)
-  if not finalOK or type(last)~="table" or
-   last.status~="LOCAL_READONLY_MARKET_OFFER_CONTEXT" or
-   last.clientOfferRevision~=context.clientOfferRevision or
-   last.sessionScope==nil or
-   last.sessionScope.jobId~=scope.jobId or
-   last.sessionScope.leaseId~=scope.leaseId or
-   last.sessionScope.partnerUserId~=scope.partnerUserId then
+  if not finalOK or not sameCtx(context,last) then
    return denial("C9_NATIVE_FINAL_GUI_OR_SESSION_CHANGED","FINAL_GUI") end
   -- The growth-first module already double-reconciles all original C3
   -- inventory and GUI contents internally. No raw holdings leave this gate.
