@@ -71,7 +71,7 @@ do
  eq(#x.offers,0,"C9 unapproved research mode never offers")
 end
 ]]
-local key=["do"," local x=fakeEnv()"," start(x)"," local r=conclude(x,13)"].join("\n")
+local key=table.concat({"do"," local x=fakeEnv()"," start(x)"," local r=conclude(x,13)"},"\n")
 assert(old:find(key,1,true),"C9 injected regression anchor not found")
 old=old:gsub(key:gsub("([^%w])","%%%1"),function()
  return insert.."\n"..key
