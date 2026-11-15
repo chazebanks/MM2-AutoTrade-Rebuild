@@ -150,7 +150,7 @@ local drift=c9.new({
  marketBridge={researchContext=function()
   n+=1
   local x=copy(ctx)
-  if n>2 then x.sessionScope.leaseId="C9_DIFFERENT_LEASE_001" end
+  if n>=2 then x.sessionScope.leaseId="C9_DIFFERENT_LEASE_001" end
   return x
  end},bilateralBridge=originalBridge,market=market})
 eq(drift:preview(options).reason,
