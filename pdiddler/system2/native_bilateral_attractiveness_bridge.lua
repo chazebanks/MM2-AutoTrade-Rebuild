@@ -24,6 +24,42 @@ local function sameCounts(a,b)
  end
  return true
 end
+-- A census refresh resets C3's local revision counter. Therefore even an
+-- unchanged revision and unchanged ownership are insufficient if the OTHER
+-- player's offered contents or either side's Accept state changed.
+local function sameOfferSide(a,b)
+ if type(a)~="table" or type(b)~="table" or
+    type(a.items)~="table" or type(b.items)~="table" or
+    #a.items~=#b.items or
+    a.physicalSlots~=b.physicalSlots or
+    a.mm2Listed~=b.mm2Listed or
+    a.supremeListed~=b.supremeListed or
+    a.clientNameOnlyCandidates~=b.clientNameOnlyCandidates or
+    a.allRawAttributesObserved~=b.allRawAttributesObserved then
+  return false
+ end
+ for i,x in ipairs(a.items) do
+  local y=b.items[i]
+  if type(x)~="table" or type(y)~="table" or
+     x.slot~=y.slot or x.id~=y.id or
+     x.quantity~=y.quantity or
+     x.clientIdentityEvidence~=y.clientIdentityEvidence then
+   return false
+  end
+ end
+ return true
+end
+local function sameOffer(a,b)
+ return type(a)=="table" and type(b)=="table" and
+    a.status==b.status and a.clientRevision==b.clientRevision and
+    a.ourAccepted==b.ourAccepted and
+    a.theirAccepted==b.theirAccepted and
+    a.mm2ListedDelta==b.mm2ListedDelta and
+    a.supremeListedDelta==b.supremeListedDelta and
+    a.nameOnlyCatalogCandidateCount==b.nameOnlyCatalogCandidateCount and
+    a.exactRawAttributesBothSidesObserved==b.exactRawAttributesBothSidesObserved and
+    sameOfferSide(a.our,b.our) and sameOfferSide(a.their,b.their)
+end
 function M.new(config)
  if type(config)~="table" or type(config.marketBridge)~="table"
   or type(config.marketBridge.researchContext)~="function"
@@ -57,6 +93,8 @@ function M.new(config)
   -- ranking unless both original scanner snapshots are compared.
   if not sameCounts(first.ownCounts,nextSnapshot.ownCounts) then
    return blocked("OWN_INVENTORY_CHANGED_DURING_STRATEGY_COMPARISON") end
+  if not sameOffer(first.offer,nextSnapshot.offer) then
+   return blocked("OFFER_CONTENT_CHANGED_DURING_STRATEGY_COMPARISON") end
   -- The same scanner census age bound is rechecked through the original bridge.
   -- Return the research output only; no command handler or offer-accept path.
   return result

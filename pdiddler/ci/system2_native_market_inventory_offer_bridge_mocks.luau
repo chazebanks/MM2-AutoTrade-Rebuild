@@ -261,6 +261,51 @@ eq(raceAfter.ownCounts.EmberbowChroma,7,
  "C8 originally scanned owned quantity genuinely changed")
 quantities.EmberbowChroma=6
 
+-- WHOLE-SYSTEM DEBUG: opponent changes a GUI stack while the scanner
+-- refreshes the SAME owned quantities. C3's local offer revision resets to 1,
+-- so source+revision+ownCount equality alone MUST NOT reuse the old offer.
+local opponentOfferBridge,opponentOfferErr=glue.new({
+ core=core,captureAdapter=capture,scope=scope,game=game,players=players,
+ sync=sync,scannerApi=raceScanner,nameResolver=resolver,crosswalk=market,
+ isBoundSession=function()return active end,
+ utcNow=tick,monoNow=now,sourceRetrievedEpoch=sourceEpoch})
+ok(opponentOfferBridge~=nil,"Debug original GUI+scanner opponent-offer race bridge")
+eq(opponentOfferBridge.refreshOwn().status,"READONLY_OWN_MARKET_BOUND",
+ "Debug baseline own census accepted")
+local originalOffer=opponentOfferBridge.researchContext()
+eq(originalOffer.clientOfferRevision,1,"Debug initial client offer revision")
+eq(originalOffer.offer.their.items[1].quantity,1,"Debug original opponent copy count")
+local opponentAmount=theirs:FindFirstChild("Container"):FindFirstChild("Amount")
+local opponentRaceCore={compare=function(first,source,options)
+ opponentAmount.Text="x2"
+ eq(opponentOfferBridge.refreshOwn().status,"READONLY_OWN_MARKET_BOUND",
+  "Debug real C3 refresh same own holdings while partner changes GUI")
+ return nativeBilateral.compare(first,source,options)
+end}
+local opponentRaceAdapter,opponentRaceErr=nativeBilateralBridge.new({
+ marketBridge=opponentOfferBridge,bilateralCore=opponentRaceCore,crosswalk=market})
+ok(opponentRaceAdapter~=nil,"Debug C4 genuine scorer connected to changing partner offer")
+local opponentRaceResult=opponentRaceAdapter:compare({
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="EmberbowChroma",quantity=1}},
+  receive={{id="Iceblaster",quantity=1}}},
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="FlowerwoodKnife",quantity=1}},
+  receive={{id="Iceblaster",quantity=1}}}
+})
+eq(opponentRaceResult.status,"BLOCKED",
+ "Debug partner quantity changed despite same local revision and own inventory")
+eq(opponentRaceResult.reason,"OFFER_CONTENT_CHANGED_DURING_STRATEGY_COMPARISON",
+ "Debug C4 must fail closed instead of returning old bilateral assessment")
+local newOffer=opponentOfferBridge.researchContext()
+eq(newOffer.clientOfferRevision,1,
+ "Debug C3 revision 1 reused after own-census refresh")
+eq(newOffer.ownCounts.EmberbowChroma,6,
+ "Debug own census same, offer mutation independent")
+eq(newOffer.offer.their.items[1].quantity,2,
+ "Debug real original opponent GUI quantity changed x1->x2")
+opponentAmount.Text=""
+
 local repeatFrame=bridge.observeOffer()
 eq(repeatFrame.clientRevision,1,"unchanged stable client revision")
 ours:FindFirstChild("Container"):FindFirstChild("Amount").Text="x5"

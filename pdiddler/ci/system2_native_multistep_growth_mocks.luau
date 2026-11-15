@@ -140,6 +140,28 @@ local changedOwn=bridge.new({
 eq(changedOwn:discover(stages.futureSellerStages).status,"BLOCKED",
  "changing owned client copy counts invalidate route")
 
+-- WHOLE-SYSTEM DEBUG C5: a client scanner refresh can reset the offer
+-- revision to the same value while the OTHER party's copy count changes.
+-- A multi-step research route must not survive that changed first trade.
+local opponentChanges=0
+local partnerChanged=bridge.new({
+ marketBridge={researchContext=function()
+  opponentChanges+=1
+  local c=context()
+  if opponentChanges>=2 then
+   c.offer.their.items[1].quantity=2
+  end
+  return c
+ end},
+ growthCore=c5,bilateralCore=c4,crosswalk=market})
+yes(partnerChanged~=nil,"C5 original bridge constructed with opponent change probe")
+local partnerResult=partnerChanged:discover(stages.futureSellerStages)
+eq(partnerResult.status,"BLOCKED",
+ "C5 original route MUST invalidate changed opponent offer at equal revision")
+eq(partnerResult.reason,
+ "OWN_INVENTORY_OFFER_OR_SOURCE_CHANGED_DURING_GROWTH_SEARCH",
+ "C5 opposite-side quantity must invalidate the entire growth research")
+
 local fakeFuture=copy(stages)
 fakeFuture.futureSellerStages[1].availabilityVerified=true
 eq(c5.search(context(),market,fakeFuture,c4).reason,

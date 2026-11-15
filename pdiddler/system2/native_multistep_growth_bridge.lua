@@ -18,6 +18,43 @@ local function sameCounts(a,b)
  for k,q in pairs(b) do if a[k]~=q then return false end end
  return true
 end
+-- The original C3 refreshOwn() resets clientOfferRevision to zero.
+-- Compare the actual bilateral offer as well as source, revision, and holdings:
+-- a partner's x1 -> x2 offer can otherwise retain the same revision after
+-- the refresh and leave the whole bounded route based on obsolete items.
+local function sameOfferSide(a,b)
+ if type(a)~="table" or type(b)~="table" or
+    type(a.items)~="table" or type(b.items)~="table" or
+    #a.items~=#b.items or
+    a.physicalSlots~=b.physicalSlots or
+    a.mm2Listed~=b.mm2Listed or
+    a.supremeListed~=b.supremeListed or
+    a.clientNameOnlyCandidates~=b.clientNameOnlyCandidates or
+    a.allRawAttributesObserved~=b.allRawAttributesObserved then
+  return false
+ end
+ for i,x in ipairs(a.items) do
+  local y=b.items[i]
+  if type(x)~="table" or type(y)~="table" or
+     x.slot~=y.slot or x.id~=y.id or
+     x.quantity~=y.quantity or
+     x.clientIdentityEvidence~=y.clientIdentityEvidence then
+   return false
+  end
+ end
+ return true
+end
+local function sameOffer(a,b)
+ return type(a)=="table" and type(b)=="table" and
+    a.status==b.status and a.clientRevision==b.clientRevision and
+    a.ourAccepted==b.ourAccepted and
+    a.theirAccepted==b.theirAccepted and
+    a.mm2ListedDelta==b.mm2ListedDelta and
+    a.supremeListedDelta==b.supremeListedDelta and
+    a.nameOnlyCatalogCandidateCount==b.nameOnlyCatalogCandidateCount and
+    a.exactRawAttributesBothSidesObserved==b.exactRawAttributesBothSidesObserved and
+    sameOfferSide(a.our,b.our) and sameOfferSide(a.their,b.their)
+end
 function M.new(config)
  if type(config)~="table" or type(config.marketBridge)~="table" or
     type(config.marketBridge.researchContext)~="function" or
@@ -51,7 +88,8 @@ function M.new(config)
     last.sourceRetrievedUtc~=first.sourceRetrievedUtc or
     last.crosswalkRowsSha256~=first.crosswalkRowsSha256 or
     last.clientOfferRevision~=first.clientOfferRevision or
-    not sameCounts(last.ownCounts,first.ownCounts) then
+    not sameCounts(last.ownCounts,first.ownCounts) or
+    not sameOffer(last.offer,first.offer) then
    return stop("OWN_INVENTORY_OFFER_OR_SOURCE_CHANGED_DURING_GROWTH_SEARCH") end
   if (type(report.clientOfferRevision)=="number" and
       report.clientOfferRevision~=first.clientOfferRevision) or
