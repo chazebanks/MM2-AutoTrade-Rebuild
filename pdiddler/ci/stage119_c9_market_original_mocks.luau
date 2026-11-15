@@ -60,7 +60,7 @@ local env={game=game,DateTime=dt,getgenv=function()return E end,]],
 swap('setTime=function(t)clock=t end,now=function()return clock end,',
  'setTime=function(t)clock=t end,now=function()return clock end,\n  setMarketTime=function(v)marketNow=v end,sourceEpoch=startEpoch,',
  "C9 test has distinct UTC market clock independent of P3 GUI clock")
-swap('   if url:find("stage100_screen_prompt_overlay.lua",1,true) then',
+swap('   if url:find("native_c9_original_p3_protected_host_adapter.lua",1,true) then',
  [[   if url:find("/pdiddler/system2/c9_research_public_189_crosswalk.json",1,true) then
      return fs.readFile("pdiddler/system2/c9_research_public_189_crosswalk.json")
    elseif url:find("/pdiddler/system2/c9_research_public_source_admission.json",1,true) then
@@ -69,7 +69,7 @@ swap('   if url:find("stage100_screen_prompt_overlay.lua",1,true) then',
      local filename=url:match("/system2/(native_[^/]+%.lua)$")
      assert(filename,"C9 original immutable native module path invalid")
      return fs.readFile("pdiddler/system2/"..filename)
-   elseif url:find("stage100_screen_prompt_overlay.lua",1,true) then]],
+   elseif url:find("native_c9_original_p3_protected_host_adapter.lua",1,true) then]],
  "C9 source-pinned actual nine modules and two real public JSON files")
 
 local insert=[[
