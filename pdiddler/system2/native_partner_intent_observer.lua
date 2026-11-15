@@ -190,6 +190,48 @@ local function classify(s,mentions)
  end
  return intent,items,constraints
 end
+-- C3 refreshOwn() resets its local offer revision. An x1 -> x2
+-- mutation during chat parsing may therefore be observed at the same
+-- revision after an own-census refresh. Compare original C3 contents.
+local function sameOwn(a,b)
+ if type(a)~="table" or type(b)~="table" then return false end
+ for k,n in pairs(a) do
+  if type(k)~="string" or type(n)~="number" or b[k]~=n then return false end
+ end
+ for k,n in pairs(b) do
+  if type(k)~="string" or type(n)~="number" or a[k]~=n then return false end
+ end
+ return true
+end
+local function sameOfferSide(a,b)
+ if type(a)~="table" or type(b)~="table" or
+  type(a.items)~="table" or type(b.items)~="table" or
+  #a.items~=#b.items or a.physicalSlots~=b.physicalSlots or
+  a.mm2Listed~=b.mm2Listed or
+  a.supremeListed~=b.supremeListed or
+  a.clientNameOnlyCandidates~=b.clientNameOnlyCandidates or
+  a.allRawAttributesObserved~=b.allRawAttributesObserved then return false end
+ for i,item in ipairs(a.items) do
+  local other=b.items[i]
+  if type(item)~="table" or type(other)~="table" or
+   item.slot~=other.slot or item.id~=other.id or
+   item.quantity~=other.quantity or
+   item.clientIdentityEvidence~=other.clientIdentityEvidence then
+   return false
+  end
+ end
+ return true
+end
+local function sameOffer(a,b)
+ return type(a)=="table" and type(b)=="table" and
+  a.status==b.status and a.clientRevision==b.clientRevision and
+  a.ourAccepted==b.ourAccepted and a.theirAccepted==b.theirAccepted and
+  a.mm2ListedDelta==b.mm2ListedDelta and
+  a.supremeListedDelta==b.supremeListedDelta and
+  a.nameOnlyCatalogCandidateCount==b.nameOnlyCatalogCandidateCount and
+  a.exactRawAttributesBothSidesObserved==b.exactRawAttributesBothSidesObserved and
+  sameOfferSide(a.our,b.our) and sameOfferSide(a.their,b.their)
+end
 local function acceptScope(bound,scope,ctx)
  if type(bound)~="table" or type(scope)~="table" or
    type(ctx)~="table" or ctx.schema~=CONTEXT or
@@ -362,6 +404,9 @@ function M.new(config)
      not acceptScope(bound,scopeAfter,ctxAfter) or
      ctxAfter.clientOfferRevision~=ctx.clientOfferRevision or
      ctxAfter.crosswalkRowsSha256~=ctx.crosswalkRowsSha256 or
+     ctxAfter.sourceRetrievedUtc~=ctx.sourceRetrievedUtc or
+     not sameOwn(ctx.ownCounts,ctxAfter.ownCounts) or
+     not sameOffer(ctx.offer,ctxAfter.offer) or
      scopeAfter.jobId~=scope.jobId or
      scopeAfter.leaseId~=scope.leaseId or
      not finite(timeAfter) or timeAfter<now or timeAfter-now>2 then
