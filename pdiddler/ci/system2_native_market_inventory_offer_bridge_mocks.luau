@@ -447,6 +447,114 @@ eq(c6ChangedOffer.reason,"PARTNER_OFFER_LEASE_OR_SOURCE_CHANGED_MID_MESSAGE",
  "C8 same local lease/revision must not mask changed GUI offer contents")
 theirs:FindFirstChild("Container"):FindFirstChild("Amount").Text=""
 
+-- C8 final cross-language OFFLINE chain: genuinely execute C3 scanner/P4
+-- GUI -> C6 passive speaker attribution -> C7 original V2 native staging.
+-- P3 request/accept and P4 closure receipts below are synthetic test state,
+-- NOT observed game requests, settlements or Discord transport.
+currentProtectedLease=lease
+local c8Bridge=buildForProtectedLease(lease)
+local c8C6,c8C6Error=c6.new({
+ bound=chatBound,crosswalk=market,now=now,readScope=oldChatScope,
+ readContext=function()return c8Bridge.researchContext()end})
+ok(c8C6~=nil,"C8 original C3/P4 to genuine C6 passive chat connected")
+local c8Other=c8C6.ingest({
+ speakerUserId=localPlayer.UserId,text="@MainTestUser_Alpha LF Harvester",
+ messageId="C8_ORIGINAL_OTHER_SPEAKER",channelName="RBXGeneral",
+ observedAt=monotonic})
+eq(c8Other.status,"IGNORED_OTHER_SPEAKER",
+ "C8 original C6 speaker rejection cannot classify different sender")
+local c8Tentative=c8C6.ingest({
+ speakerUserId=opponent.UserId,text="LF Harvester",
+ messageId="C8_ORIGINAL_UNADDRESSED_CHAT",channelName="RBXGeneral",
+ observedAt=monotonic})
+eq(c8Tentative.status,"PASSIVE_ITEM_PREFERENCE",
+ "C8 actual C6 notices item preference even if not addressed to main")
+eq(c8Tentative.personalReplyProven,false,
+ "C8 original unaddressed partner chat is not verified direct response")
+local c8Directed=c8C6.ingest({
+ speakerUserId=opponent.UserId,text="@MainTestUser_Alpha LF Harvester",
+ messageId="C8_ORIGINAL_DIRECT_CHAT",channelName="RBXGeneral",
+ observedAt=monotonic})
+eq(c8Directed.status,"PASSIVE_ITEM_PREFERENCE",
+ "C8 genuine C6 accepts exact bound speaker and username mention")
+eq(c8Directed.personalReplyProven,true,
+ "C8 only genuine original C6 directly addressed user is eligible for V2 direct")
+eq(c8Directed.clientOfferRevision,1,
+ "C8 genuine C3 local GUI revision is attached to C6 observation")
+local c8V2=luau.load(fs.readFile(base.."native_v2_client_response_envelope.lua"))()
+local function c8TestDigest(msg)
+ -- Intentionally non-cryptographic Lune test stub. NOT a real SHA256.
+ local h=2166136261
+ for i=1,#msg do
+  h=bit32.bxor(h,string.byte(msg,i))
+  h=(h*16777619)%4294967296
+ end
+ local t=string.format("%08x",h)
+ return t..t..t..t..t..t..t..t
+end
+local c8Bound={jobId=job,leaseId=lease,
+ localUserId=localPlayer.UserId,partnerUserId=opponent.UserId,
+ scope="PUBLIC_CLIENT_OBSERVATION"}
+local c8Envelope,c8EnvelopeError=c8V2.new({
+ salt=string.rep("g",48),nonce="C8_OFFLINE_SYNTHETIC_NONCE_V2",
+ bound=c8Bound,cryptoSha256=c8TestDigest,
+ readP3P4Lease=function()
+  return {jobId=job,leaseId=lease,localUserId=localPlayer.UserId,
+   partnerUserId=opponent.UserId,
+   active=active and currentProtectedLease==lease,clientOnly=true}
+ end})
+ok(c8Envelope~=nil,"C8 original C7 native V2 sequencer bound to C3/P4 scope")
+local function c8Receipt(kind,rev,witness)
+ return {kind=kind,revision=rev,clientOnly=true,
+  observedByReviewedP3P4=true,clientWitnessKind=witness}
+end
+local ca=c8Envelope.stage("MAIN_REQUEST_PENDING",
+ c8Receipt("MAIN_REQUEST_PENDING",0,"P3_REQUEST_SUBMITTED"))
+eq(ca.status,"CLIENT_V2_ENVELOPE_STAGED_NOT_SENT",
+ "C8 synthetic request baseline is never a network transmission")
+local cb=c8Envelope.stage("PARTNER_REQUEST_ACCEPTED",
+ c8Receipt("PARTNER_REQUEST_ACCEPTED",0,"P3_PARTNER_REQUEST_ACCEPTED"))
+eq(cb.payload.kind,"PARTNER_REQUEST_ACCEPTED",
+ "C8 synthetic request acceptance only a client phase")
+local cc=c8Envelope.stage("PARTNER_OFFER_REVISION",
+ c8Receipt("PARTNER_OFFER_REVISION",c8Directed.clientOfferRevision,
+  "P4_OFFER_REVISION_OBSERVED"))
+eq(cc.payload.revision,1,"C8 C3 actual GUI revision reaches V2 client revision")
+local tentativeV2=c8Receipt("CHAT_DIRECT_CLIENT_ATTRIBUTED",1,
+ "C6_PARTNER_CHAT_CLASSIFIED")
+tentativeV2.chatEvidenceClientOnly=true
+tentativeV2.provenDirectedPartnerMessage=c8Tentative.personalReplyProven
+eq(c8Envelope.stage("CHAT_DIRECT_CLIENT_ATTRIBUTED",tentativeV2).reason,
+ "V2_TENTATIVE_CHAT_NOT_DIRECT",
+ "C8 C6 tentative chat cannot be promoted to V2 directed message")
+local directV2=c8Receipt("CHAT_DIRECT_CLIENT_ATTRIBUTED",1,
+ "C6_PARTNER_CHAT_CLASSIFIED")
+directV2.chatEvidenceClientOnly=true
+directV2.provenDirectedPartnerMessage=c8Directed.personalReplyProven
+local cd=c8Envelope.stage("CHAT_DIRECT_CLIENT_ATTRIBUTED",directV2)
+eq(cd.payload.kind,"CHAT_DIRECT_CLIENT_ATTRIBUTED",
+ "C8 actual C6 verified speaker+address feeds C7 native body only")
+local ce=c8Envelope.stage("CLIENT_WINDOW_CLOSED_UNKNOWN",
+ c8Receipt("CLIENT_WINDOW_CLOSED_UNKNOWN",1,
+  "P4_TRADE_WINDOW_OUTCOME_OBSERVED"))
+eq(ce.payload.kind,"CLIENT_WINDOW_CLOSED_UNKNOWN",
+ "C8 synthetic terminal window closure stays UNKNOWN, never settlement")
+eq(c8Envelope.summary().clientSessionPhase,"TERMINAL",
+ "C8 native C7 V2 episode terminated locally without trading authority")
+eq(c8Envelope.summary().mayUseForStrategyLearning,false,
+ "C8 C7 no client-only feedback can train a live partner model")
+local c8Fixture={fixtureOnly=true,transportNeverSent=true,
+ syntheticP3Request=true,syntheticP4Closure=true,
+ actualOriginalC3C6C7CodeExecuted=true,
+ records={ca.payload,cb.payload,cc.payload,cd.payload,ce.payload}}
+local c8Encoded=serde.encode("json",c8Fixture)
+for _,secret in ipairs({job,lease,tostring(localPlayer.UserId),
+ tostring(opponent.UserId),"MainTestUser_Alpha"}) do
+ eq(c8Encoded:find(secret,1,true),nil,
+  "C8 native V2 receiver fixture must not leak private raw bindings")
+end
+fs.writeFile("pdiddler/ci/.generated_system2_c8_original_c6_v2.json",c8Encoded)
+
 local repeatFrame=bridge.observeOffer()
 eq(repeatFrame.clientRevision,1,"unchanged stable client revision")
 ours:FindFirstChild("Container"):FindFirstChild("Amount").Text="x5"
