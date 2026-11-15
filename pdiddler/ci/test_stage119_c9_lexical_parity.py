@@ -43,7 +43,7 @@ class Stage119C9OriginalResearchParity(unittest.TestCase):
             ("".join(original[i:j]), "".join(fork[k:l]))
             for tag, i, j, k, l in diff if tag != "equal"
         ]
-        self.assertEqual(len(mutated), 8, [
+        self.assertEqual(len(mutated), 12, [
             (a[:100], b[:100]) for a, b in mutated
         ])
         changes = []
@@ -63,6 +63,21 @@ class Stage119C9OriginalResearchParity(unittest.TestCase):
             elif ("local c9HostHandle=nil" in after
                   and before.strip() == ""):
                 changes.append("private_lexical_handle")
+            elif ('if identityPhase=="RESULT" or identityPhase=="FAILED"' in before
+                  and 'if cfg.c9ResearchOnly==true' in after
+                  and "NO weapon add/remove" in after):
+                changes.append("c9_screen_no_gift_lane")
+            elif (before.strip() == ""
+                  and "local function c9BindObservedProtected" in after
+                  and "supervisor.currentBoundReadOnly" in after):
+                changes.append("original_p3_p4_observer_without_gift")
+            elif ("local okIdentity=pcall(witnessTick,r)" in before
+                  and "pcall(c9BindObservedProtected,r)" in after
+                  and "else" in after):
+                changes.append("skip_old_lastoffer_witness_in_c9")
+            elif ('identityPhase="WAIT_EMPTY"' in before
+                  and 'identityPhase=cfg.c9ResearchOnly and' in after):
+                changes.append("c9_manual_arm_phase")
             elif (before.strip() == ""
                   and after.strip() == "c9HostHandle=nil"):
                 changes.append("terminal_handle_drop")
@@ -81,7 +96,9 @@ class Stage119C9OriginalResearchParity(unittest.TestCase):
             "header", "explicit_research_flag", "pinned_host_source",
             "source_module_contract", "private_lexical_handle",
             "terminal_handle_drop", "sanitized_readonly_function",
-            "sanitized_readonly_entry",
+            "sanitized_readonly_entry", "c9_screen_no_gift_lane",
+            "original_p3_p4_observer_without_gift",
+            "skip_old_lastoffer_witness_in_c9", "c9_manual_arm_phase",
         })
 
     def test_no_new_trade_or_network_side_effects(self):
