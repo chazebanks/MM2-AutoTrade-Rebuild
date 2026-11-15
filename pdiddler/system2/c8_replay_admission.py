@@ -56,6 +56,23 @@ def review(receipts, *, expected_context):
             return stop("C8_COMPONENT_STATUS_MISSING_" + name.upper())
         if item["status"] == "BLOCKED":
             return stop("C8_UPSTREAM_BLOCKED_" + name.upper())
+    # Explicitly pin two actual upstream Python output schemas; do not
+    # silently accept an arbitrary status that merely sounds successful.
+    if receipts["feedback"].get("schema") != (
+        "gingerscope-system2-real-v2-response-evidence-gate-v1"
+    ) or receipts["feedback"].get("status") != (
+        "PRIVATE_BOT_V2_RESPONSE_EPISODES_CLASSIFIED_RESEARCH_ONLY"
+    ):
+        return stop("C8_FEEDBACK_SOURCE_SCHEMA_OR_STATUS_UNVERIFIED")
+    if receipts["growth"].get("schema") != (
+        "gingerscope-system2-multitrade-growth-replay-v1"
+    ) or receipts["growth"].get("status") not in (
+        "OFFLINE_GROWTH_PATH_SIMULATED",
+        "OFFLINE_GROWTH_PATH_STACK_UNCERTAIN",
+    ):
+        return stop("C8_GROWTH_SOURCE_SCHEMA_OR_STATUS_UNVERIFIED")
+    if receipts["growth"].get("status") == "OFFLINE_GROWTH_PATH_STACK_UNCERTAIN":
+        return stop("C8_STACK_VALUATION_NOT_RELIABLE")
     if receipts["feedback"].get("realResponseRewardLabelsForModel") != 0:
         return stop("C8_UNVERIFIED_FEEDBACK_LABELS")
     if receipts["feedback"].get("offerBundleFeaturesAvailableInV2") is not False:
