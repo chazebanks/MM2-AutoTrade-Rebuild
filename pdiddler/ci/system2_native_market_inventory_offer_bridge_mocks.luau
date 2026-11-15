@@ -1051,7 +1051,8 @@ for _,secret in ipairs({job,lease,tostring(localPlayer.UserId),
   "C9 native preflight summary excludes private user/weapon data")
 end
 utc=sourceEpoch+21601
-eq(clientPreflight:run().reason,"C9_SOURCE_TOO_OLD_OR_CLOCK_INVALID",
+local expiredNative=clientPreflight:run()
+eq(expiredNative.reason,"C9_SOURCE_TOO_OLD_OR_CLOCK_INVALID",
  "C9 six-hour price expiry blocks read-only device strategy")
 utc=sourceEpoch+20
 local invalidSource=preflightFactory.new({
@@ -1065,18 +1066,22 @@ local invalidSource=preflightFactory.new({
  bilateralBridgeModule=nativeBilateralBridge,
  growthFirstModule=c9Source,
 })
-eq(invalidSource:run().reason,"C9_SOURCE_TIMESTAMP_NOT_BOUND_TO_MARKET",
+local invalidSourceResult=invalidSource:run()
+eq(invalidSourceResult.reason,"C9_SOURCE_TIMESTAMP_NOT_BOUND_TO_MARKET",
  "C9 cannot fake fresh source epoch independently from JSON timestamp")
 currentProtectedLease="C9_FOREIGN_P3_LEASE"
-eq(clientPreflight:run().reason,"C9_REVIEWED_P3_P4_LEASE_INACTIVE",
+local revokedNative=clientPreflight:run()
+eq(revokedNative.reason,"C9_REVIEWED_P3_P4_LEASE_INACTIVE",
  "C9 lost original protected lease blocks scanner before any strategy")
 currentProtectedLease=lease
 opponent.Parent=nil
-eq(clientPreflight:run().reason,"C9_PROTECTED_PARTNER_NOT_PRESENT",
+local missingPartnerNative=clientPreflight:run()
+eq(missingPartnerNative.reason,"C9_PROTECTED_PARTNER_NOT_PRESENT",
  "C9 user leaves job before observation; fail closed")
 opponent.Parent=players
 ours.Attributes.ItemId=nil
-eq(clientPreflight:run().reason,"C9_OFFER_RAW_INSTANCE_IDENTITY_UNPROVEN",
+local missingRawIdNative=clientPreflight:run()
+eq(missingRawIdNative.reason,"C9_OFFER_RAW_INSTANCE_IDENTITY_UNPROVEN",
  "C9 original P4 attribute absent is not a deployable exact item proof")
 ours.Attributes.ItemId="Frostsaber"
 eq(clientPreflight:run().status,"C9_LOCAL_READONLY_INVENTORY_AND_GUI_OBSERVED",
@@ -1105,5 +1110,30 @@ eq(staleDecision.status,"BLOCKED",
 eq(staleDecision.reason,"C9_NATIVE_FINAL_GUI_OR_SESSION_CHANGED",
  "C9 same local clientRevision after refresh cannot conceal offer mutation")
 theirs:FindFirstChild("Container"):FindFirstChild("Amount").Text=""
+
+-- Cross-language receipt is ONLY the sanitized local native mock output.
+-- No real game, user identity, raw inventory, trade request or Discord event.
+local c9Fixture={schema="gingerscope-c9-test-receipt-v1",
+ syntheticRobloxServices=true,originalSourceModulesExecuted=true,
+ actualNativeIpadRun=false,transportNeverSent=true,
+ observations={
+  inventoryAndGui=onlyInventory,
+  growthPreview=nativePreview,
+  sourceExpired=expiredNative,
+  sourceEpochForgery=invalidSourceResult,
+  leaseRevoked=revokedNative,
+  partnerLeft=missingPartnerNative,
+  rawItemIdMissing=missingRawIdNative,
+  clientOfferAba=staleDecision,
+ }}
+local c9Payload=serde.encode("json",c9Fixture)
+for _,raw in ipairs({job,lease,tostring(localPlayer.UserId),
+ tostring(opponent.UserId),"MainTestUser_Alpha","Frostsaber",
+ "Harvester","Icepiercer","SnowDagger"}) do
+ eq(c9Payload:find(raw,1,true),nil,
+ "C9 Python fixture cannot export private weapon, session or client identity")
+end
+fs.writeFile("pdiddler/ci/.generated_system2_c9_native_preflight_synthetic.json",
+ c9Payload)
 
 print("SYSTEM2_LIVE_MARKET_NATIVE_BRIDGE_ASSERTIONS_PASSED "..tostring(count))
