@@ -85,7 +85,8 @@ function M.new(config)
   type(config.c4)~="table" or type(config.c4.compare)~="function" or
   type(config.c5)~="table" or type(config.c5.discover)~="function" or
   type(config.c6)~="table" or type(config.c6.snapshot)~="function" or
-  type(config.c7)~="table" or type(config.c7.summary)~="function" then
+  type(config.c7)~="table" or type(config.c7.summary)~="function" or
+  type(config.c7.matchesOriginalBoundScope)~="function" then
   return nil,"C8_ACTUAL_COMPONENT_DEPENDENCY_MISSING" end
  local gate={}
  function gate:replay(alternatives,futureSellerStages)
@@ -97,6 +98,9 @@ function M.new(config)
   if not a or type(first)~="table" or
      not same(first,first) then
    return denied("C8_ORIGINAL_C3_STARTING_SCOPE_NOT_PROVEN") end
+  local boundAtStart,scopeAtStart=pcall(config.c7.matchesOriginalBoundScope,first.sessionScope)
+  if not boundAtStart or scopeAtStart~=true then
+   return denied("C8_NATIVE_C7_WRONG_OR_INACTIVE_PROTECTED_LEASE") end
   local b,bi=pcall(config.c4.compare,config.c4,alternatives)
   if not b or not safe(bi,"gingerscope-system2-bilateral-market-shadow-v1")
      or bi.status~="ABSTAIN_PARTNER_INTENT_UNVERIFIED" then
@@ -127,6 +131,9 @@ function M.new(config)
   local f,last=pcall(config.c3.researchContext)
   if not f or not same(first,last) then
    return denied("C8_ORIGINAL_SOURCE_SCOPE_OR_OFFER_CHANGED_DURING_REPLAY") end
+  local boundAtEnd,scopeAtEnd=pcall(config.c7.matchesOriginalBoundScope,last.sessionScope)
+  if not boundAtEnd or scopeAtEnd~=true then
+   return denied("C8_NATIVE_C7_WRONG_OR_INACTIVE_PROTECTED_LEASE") end
   return {schema=SCHEMA,status="OFFLINE_C8_ORIGINAL_CHAIN_RESEARCH_ONLY",
    c3Origin="ORIGINAL_CLIENT_SCANNER_AND_P4_GUI_RESEARCH_ONLY",
    c4Status=bi.status,c5Status=gr.status,
