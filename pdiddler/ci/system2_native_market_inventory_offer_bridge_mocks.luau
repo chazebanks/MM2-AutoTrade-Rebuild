@@ -370,6 +370,51 @@ eq(leaseResult.status,"BLOCKED",
 eq(leaseResult.reason,"P3_P4_SESSION_BINDING_CHANGED_DURING_STRATEGY_COMPARISON",
  "C8 different protected trade lease cannot share one C4 strategy assessment")
 
+-- C8 next distinct integration: actual C3 P3/P4 lease -> C6 passive
+-- TextChatMessage.UserId observer. Two source-bound C3 readers across
+-- DIFFERENT protected leases still have identical inventory/offer/revision.
+-- C6's independent readScope may briefly remain stale; C6 must bind the
+-- original C3 constructor sessionScope, not just accept old GUI revision.
+local c6=luau.load(fs.readFile(base.."native_partner_intent_observer.lua"))()
+local chatBound={jobId=job,leaseId=lease,localUserId=localPlayer.UserId,
+ partnerUserId=opponent.UserId,mainUsername="MainTestUser_Alpha"}
+local function oldChatScope()
+ return {jobId=job,leaseId=lease,localUserId=localPlayer.UserId,
+  partnerUserId=opponent.UserId,mainUsername="MainTestUser_Alpha",
+  tradeOpen=true,leaseActive=true}
+end
+currentProtectedLease=lease
+local c6First=buildForProtectedLease(lease)
+local firstSessionObserved=false
+local c6ResearchChanged=nil
+local c6Observer,c6Error=c6.new({
+ bound=chatBound,crosswalk=market,now=now,
+ readScope=oldChatScope,
+ readContext=function()
+  if not firstSessionObserved then
+   local first=c6First.researchContext()
+   firstSessionObserved=true
+   currentProtectedLease="REAL_P3_LEASE_002"
+   c6ResearchChanged=buildForProtectedLease(currentProtectedLease)
+   return first
+  end
+  return c6ResearchChanged.researchContext()
+ end})
+ok(c6Observer~=nil,"C8 genuine C3/P4 and C6 passive chat reader created")
+local rejectedChat=c6Observer.ingest({
+ speakerUserId=opponent.UserId,
+ text="@MainTestUser_Alpha LF Harvester",
+ messageId="C8_CHAT_AFTER_PROTECTED_LEASE_ABA",
+ observedAt=monotonic,channelName="RBXGeneral"})
+eq(firstSessionObserved,true,"C8 switch executed between real C3 context reads")
+eq(rejectedChat.status,"BLOCKED",
+ "C8 old bound TextChat speaker cannot contaminate next protected lease")
+eq(rejectedChat.reason,"PARTNER_OFFER_LEASE_OR_SOURCE_CHANGED_MID_MESSAGE",
+ "C8 C6 must compare its C3 constructor-bound session, not stale scope facade")
+eq(c6Observer.snapshot().status,"BLOCKED",
+ "C8 post-rebind snapshot cannot carry a prior lease wishlist")
+currentProtectedLease=lease
+
 local repeatFrame=bridge.observeOffer()
 eq(repeatFrame.clientRevision,1,"unchanged stable client revision")
 ours:FindFirstChild("Container"):FindFirstChild("Amount").Text="x5"
