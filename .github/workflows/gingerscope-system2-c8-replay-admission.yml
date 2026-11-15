@@ -5,6 +5,7 @@ on:
     paths:
       - 'pdiddler/system2/c8_replay_admission.py'
       - 'pdiddler/ci/test_system2_c8_replay_admission.py'
+      - 'pdiddler/ci/test_system2_c8_original_growth_integration.py'
       - '.github/workflows/gingerscope-system2-c8-replay-admission.yml'
   workflow_dispatch:
 
@@ -19,7 +20,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Run C8 admission tests
-        run: python -m unittest pdiddler.ci.test_system2_c8_replay_admission -v
+        run: python -m unittest pdiddler.ci.test_system2_c8_replay_admission pdiddler.ci.test_system2_c8_original_growth_integration -v
       - name: Assert no game or network actions in C8 gate
         run: |
           python - <<'PY'
