@@ -956,4 +956,52 @@ eq(acceptedFull.hasAuthenticatedGameSettlement,false,
 our:FindFirstChild("Accepted").Visible=false
 their:FindFirstChild("Accepted").Visible=false
 
+-- C9 actual ORIGINAL C3 scanner + P4 GUI + C4 protected bilateral
+-- market evaluator, unlike the separate price-controlled counterfactual
+-- fixture. This asserts research scope and no live-loss authority only.
+eq(growthC3.refreshOwn().status,"READONLY_OWN_MARKET_BOUND",
+ "C9 actual original C3 refresh anchors the current stock again")
+local c9Source=luau.load(fs.readFile(base.."native_c9_growth_first_preview.lua"))()
+local c9Original,c9Err=c9Source.new({
+ marketBridge=growthC3,bilateralBridge=c8C4Gate,market=market})
+ok(c9Original~=nil,"C9 original C3 + C4 wired to growth-first research")
+local c9RealOptions={
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="Harvester",quantity=1}},
+  receive={{id="Icepiercer",quantity=1}}},
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="Frostsaber",quantity=1}},
+  receive={{id="SnowDagger",quantity=1}}}
+}
+local c9RealResult=c9Original:preview(c9RealOptions)
+eq(c9RealResult.status,"GROWTH_FIRST_LISTED_LOSS_RESEARCH_ONLY",
+ "C9 real source-backed original scanner/C4 evaluates loss and gain together")
+ok(c9RealResult.lossAlternativesExamined>=1,
+ "C9 negative-value original C4 row is visible to research but not execution")
+eq(c9RealResult.liveLossAuthorized,false,
+ "C9 real original C3/C4 research never approves trading on a value loss")
+eq(c9RealResult.authorizesAccept,false,
+ "C9 real original GUI never authorizes final Accept")
+eq(c9RealResult.verifiedLongTermGain,false,
+ "C9 existing public demand ordinal does not establish future profit")
+eq(c9RealResult.empiricalExitLiquidity,nil,
+ "C9 real C3/C4 source does not contain independently verified retrades")
+eq(c9RealResult.maySendDiscordWebhook,false,
+ "C9 original bridge cannot send an unverified completion/profit notice")
+-- C9 also stops if the original C3 binding changes while the C4 oracle
+-- is scoring. A cloned local revision of 1 must not mask a new lease.
+local c9Reads=0
+local c9ABA={researchContext=function()
+ c9Reads+=1
+ if c9Reads==2 then
+  currentProtectedLease="C9_DIFFERENT_TEST_LEASE"
+ end
+ return growthC3.researchContext()
+end}
+local c9ABAGate=c9Source.new({
+ marketBridge=c9ABA,bilateralBridge=c8C4Gate,market=market})
+eq(c9ABAGate:preview(c9RealOptions).status,"BLOCKED",
+ "C9 original P3/P4 lease revoked between first C3 sample and C4 comparison")
+currentProtectedLease=lease
+
 print("SYSTEM2_LIVE_MARKET_NATIVE_BRIDGE_ASSERTIONS_PASSED "..tostring(count))
