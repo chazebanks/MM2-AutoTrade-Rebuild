@@ -147,6 +147,12 @@ end
 fs.writeFile("pdiddler/ci/.generated_system2_c9_native_preflight_synthetic.json",
  c9Payload)
 
+-- Distinct C9 integration: genuine original C3 scanner/P4 GUI and C4+growth
+-- modules read the ACTUAL immutable new public dataset, bound to the original
+-- protected P3/P4 client lease facade (read-only original-host stand-in).
+-- Separate module prevents historical C8 Luau 200-local script limit.
+luau.load(fs.readFile(
+ "pdiddler/ci/system2_native_c9_original_market_composition_replay.lua"))().run(d)
 
 end
 return M
