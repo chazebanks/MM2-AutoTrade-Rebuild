@@ -12,6 +12,21 @@ local function stop(reason)
    mayReportProfit=false,maySendDiscordWebhook=false,
    mayUseForStrategyLearning=false}
 end
+-- Local offer revisions can restart at 1 after an original C3/P3/P4
+-- rebind. Route research must not survive changed or missing protected
+-- job, lease or partner identity, even with identical GUI and census.
+local function validSessionScope(s)
+ return type(s)=="table" and type(s.jobId)=="string" and
+  #s.jobId>=8 and type(s.leaseId)=="string" and #s.leaseId>=8 and
+  type(s.partnerUserId)=="number" and
+  s.partnerUserId==math.floor(s.partnerUserId) and
+  s.partnerUserId>0 and s.partnerUserId<10^16
+end
+local function sameSessionScope(a,b)
+ return validSessionScope(a) and validSessionScope(b) and
+  a.jobId==b.jobId and a.leaseId==b.leaseId and
+  a.partnerUserId==b.partnerUserId
+end
 local function sameCounts(a,b)
  if type(a)~="table" or type(b)~="table" then return false end
  for k,q in pairs(a) do if b[k]~=q then return false end end
@@ -91,6 +106,8 @@ function M.new(config)
     not sameCounts(last.ownCounts,first.ownCounts) or
     not sameOffer(last.offer,first.offer) then
    return stop("OWN_INVENTORY_OFFER_OR_SOURCE_CHANGED_DURING_GROWTH_SEARCH") end
+  if not sameSessionScope(first.sessionScope,last.sessionScope) then
+   return stop("P3_P4_SESSION_BINDING_CHANGED_DURING_GROWTH_SEARCH") end
   if (type(report.clientOfferRevision)=="number" and
       report.clientOfferRevision~=first.clientOfferRevision) or
      (type(report.marketRowsSha256)=="string" and
