@@ -74,3 +74,70 @@ jobs:
             ${{ runner.temp }}/c9-source-admission.json
           retention-days: 7
           if-no-files-found: error
+
+  c9-publish-immutable-research-json:
+    name: Publish validated public JSON to this same draft PR branch only
+    needs: [c9-real-four-page-current-admission]
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'research/system2-c9-fresh-market-admission-nov15' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 1
+          persist-credentials: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: gingerscope-c9-current-189-market-research-only
+          path: ${{ runner.temp }}/c9-admitted-json
+      - name: Re-verify archived source and exact mapping before research-only publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          from datetime import datetime, timezone
+          import hashlib,json,os
+          p=Path(os.environ['RUNNER_TEMP'])/'c9-admitted-json'
+          source=json.loads((p/'c9-public-source-candidate.json').read_text())
+          mapped=json.loads((p/'c9-exact-189-crosswalk.json').read_text())
+          admission=json.loads((p/'c9-source-admission.json').read_text())
+          assert admission['schema']=='gingerscope-c9-current-189-research-source-admission-v1'
+          assert admission['status']=='PUBLIC_C9_RESEARCH_SOURCE_ADMITTED_NOT_LIVE_AUTHORITY'
+          assert source['retrievedUtc']==mapped['sourceRetrievedUtc']==admission['sourceRetrievedUtc']
+          assert source['siteEditionDate']==mapped['marketEdition']==admission['siteEditionDate']
+          assert mapped['crosswalkRowsSha256']==admission['crosswalkRowsSha256']
+          assert mapped['matchedHistoricalGameKeys']==admission['matchedHistoricalGameKeys']==189
+          assert mapped['outgoingGingerscopeProtected'] if 'outgoingGingerscopeProtected' in mapped else True
+          assert len(mapped['items'])==189
+          assert sum(x['outgoingGingerscopeProtected'] for x in mapped['items'])==1
+          assert all(source[q] is False for q in ('canFeedLiveTrade','authorizesOffer','authorizesAccept','verifiedServerSettlement','exactGameWeaponIdentityProven'))
+          assert all(mapped[q] is False for q in ('authorizesTrade','authorizesAccept','mayUseForLiveOffer','mayReportProfit','mayUseForLearning'))
+          assert all(admission[q] is False for q in ('authorizesTrade','authorizesOffer','authorizesAccept','mayUseForLiveOffer','mayUseForStrategyLearning','sourcePublisherSignatureVerified'))
+          age=(datetime.now(timezone.utc)-datetime.fromisoformat(source['retrievedUtc'].replace('Z','+00:00'))).total_seconds()
+          assert 0<=age<=21600, 'C9 captured data expired before publication'
+          digest=hashlib.sha256(json.dumps(source,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+          assert digest==admission['rawFourPageCandidateSha256']
+          print('C9_RESEARCH_PUBLIC_SNAPSHOT_VERIFIED_NO_LIVE_AUTHORITY')
+          PY
+      - name: Commit research-only source to immutable history without authorizing a trade
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p pdiddler/system2
+          cp "$RUNNER_TEMP/c9-admitted-json/c9-public-source-candidate.json" pdiddler/system2/c9_research_public_source_candidate.json
+          cp "$RUNNER_TEMP/c9-admitted-json/c9-exact-189-crosswalk.json" pdiddler/system2/c9_research_public_189_crosswalk.json
+          cp "$RUNNER_TEMP/c9-admitted-json/c9-source-admission.json" pdiddler/system2/c9_research_public_source_admission.json
+          git config user.name 'Gingerscope Research Source Gate'
+          git config user.email 'gingerscope-research-ci@users.noreply.github.com'
+          git add pdiddler/system2/c9_research_public_source_candidate.json pdiddler/system2/c9_research_public_189_crosswalk.json pdiddler/system2/c9_research_public_source_admission.json
+          if git diff --cached --quiet; then
+            echo C9_SOURCE_FILES_IDENTICAL_NO_COMMIT
+          else
+            git commit -m 'C9 admitted actual public source: research only, no execution authority'
+            git push origin HEAD:research/system2-c9-fresh-market-admission-nov15
+          fi
+          echo C9_RESEARCH_CAPTURE_PINNABLE_COMMIT=$(git rev-parse HEAD)
