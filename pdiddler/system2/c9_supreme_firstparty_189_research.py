@@ -26,6 +26,9 @@ SCHEMA = "gingerscope-c9-supreme-direct-189-research-audit-v1"
 SOURCE = "https://www.supremevalues.com"
 CATEGORIES = {"ancient": "ancients", "godly": "godlies", "chroma": "chromas"}
 CATEGORY_KEYS = {"ancient": 15, "godly": 128, "chroma": 46}
+OFFICIAL_PAGE_HEADINGS = {"ancient": "MM2 Ancient Values",
+                          "godly": "MM2 Godly Values",
+                          "chroma": "MM2 Chroma Values"}
 MANUAL_NAME_ALIASES = {"FlowerwoodKnife": "Flowerwood"}
 ISO = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$")
 PRICE = re.compile(r"^[1-9][0-9]{0,9}$")
@@ -84,10 +87,8 @@ def extract_category(html, category):
         fail("OFFICIAL_CATEGORY_HTML_SIZE_INVALID")
     soup = BeautifulSoup(html, "html.parser")
     heading = soup.find("h1")
-    if not heading or ("MM2 " + CATEGORIES[category][:-1].title() + " Values").lower() not in heading.get_text(" ", strip=True).lower():
-        # Godlies / Chromas use different pluralization than Ancients.
-        if not heading or CATEGORIES[category].removesuffix("s").lower() not in heading.get_text(" ", strip=True).lower():
-            fail("OFFICIAL_CATEGORY_HEADING_CHANGED")
+    if not heading or heading.get_text(" ", strip=True) != OFFICIAL_PAGE_HEADINGS[category]:
+        fail("OFFICIAL_CATEGORY_HEADING_CHANGED")
     rows = {}
     for col in soup.select('div.itemcolumn[data-value]'):
         cell = col.select_one("div.itemcell[id], div.itemcell-exp[id]")
@@ -123,7 +124,8 @@ def extract_category(html, category):
     return rows
 
 
-def audit(pages: dict, mapped: dict, *, captured_utc: str) -> dict:
+def audit(pages: dict, mapped: dict, *, captured_utc: str,
+          direct_https_validated: bool = False) -> dict:
     at = exact_utc(captured_utc)
     if type(mapped) is not dict or mapped.get("schema") != "gingerscope-system2-exact-market-gamekey-crosswalk-v1" or mapped.get("matchedHistoricalGameKeys") != 189 or mapped.get("historicalRegistryBlob") != "40e2a0ff01b70b2d0181c62cae347a08da82bcb8" or len(mapped.get("items", [])) != 189:
         fail("C9_ORIGINAL_189_MAPPING_NOT_REVIEWED")
@@ -209,7 +211,7 @@ def audit(pages: dict, mapped: dict, *, captured_utc: str) -> dict:
         "changedSupremePriceCount": len(differing),
         "changedGameKeys": sorted(differing),
         "all189OfficialPricesAndDemandParsed": True,
-        "publisherHTTPSDirectlyFetched": True,
+        "publisherHTTPSDirectlyFetched": direct_https_validated is True,
         "publisherCryptographicSignatureVerified": False,
         "sourceIndependentOfAggregateSupremeColumn": True,
         "timeOfPublisherPublicationNotTradeFillProbability": True,
@@ -267,7 +269,8 @@ def main() -> int:
         now = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
         if args.capture_utc is None:
             captured_utc = now
-        evidence = audit(pages, json.loads(args.mapped.read_text()), captured_utc=captured_utc)
+        evidence = audit(pages, json.loads(args.mapped.read_text()),
+                         captured_utc=captured_utc, direct_https_validated=True)
         args.output.write_text(json.dumps(evidence, indent=2, sort_keys=True) + "\n")
         print("C9_SUPREME_RESEARCH_STATUS=" + evidence["status"])
         print("OFFICIAL_SUPREME_PUBLISHED=" + evidence["sourceOfficialPublicationISO"])
