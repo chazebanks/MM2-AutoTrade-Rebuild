@@ -218,4 +218,38 @@ local stacked=c5.search(bigStack,market,
 yes(stacked.rejectedUnverifiedStackPairs>0,
  "six copies fit one physical slot but price is not verified linear")
 
+-- C8 growth strategy also owns a protected P3/P4 session boundary.
+-- A new original scanner lease/partner is NOT the same research session
+-- merely because its market, GUI and revision look identical.
+for _,variant in ipairs({"leaseId","partnerUserId","missing"}) do
+ local countReads=0
+ local live={researchContext=function()
+  countReads+=1
+  local now=context()
+  if countReads>=2 then
+   if variant=="leaseId" then
+    now.sessionScope.leaseId="SYNTHETIC_P3_LEASE_002"
+   elseif variant=="partnerUserId" then
+    now.sessionScope.partnerUserId=34567
+   else now.sessionScope=nil end
+  end
+  return now
+ end}
+ local candidate=bridge.new({
+  marketBridge=live,growthCore=c5,bilateralCore=c4,crosswalk=market})
+ yes(candidate~=nil,"C8 C5 original planner scope test created "..variant)
+ local verdict=candidate:discover(stages.futureSellerStages)
+ eq(verdict.status,"BLOCKED","C8 C5 route rejects new lease or partner "..variant)
+ eq(verdict.reason,"P3_P4_SESSION_BINDING_CHANGED_DURING_GROWTH_SEARCH",
+  "C8 C5 reason identifies protected session race "..variant)
+ eq(verdict.authorizesAccept,false,"C8 C5 cannot authorize Accept "..variant)
+end
+local missingScope=bridge.new({
+ marketBridge={researchContext=function()
+  local now=context();now.sessionScope=nil;return now
+ end},growthCore=c5,bilateralCore=c4,crosswalk=market})
+eq(missingScope:discover(stages.futureSellerStages).reason,
+ "P3_P4_SESSION_BINDING_CHANGED_DURING_GROWTH_SEARCH",
+ "C8 C5 both copies lack scope, never silently authorize route")
+
 print("SYSTEM2_GROWTH_MARKET_NATIVE_ASSERTIONS_PASSED "..tostring(count))
