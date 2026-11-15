@@ -229,4 +229,41 @@ local adapter2,why2=bridge.new({marketBridge=stable,bilateralCore=subject,crossw
 yes(adapter2~=nil,"replay correctly bound")
 eq(adapter2:compare(options).status,"ABSTAIN_PARTNER_INTENT_UNVERIFIED",
  "stable evidence but unwillingness unknown, sensible abstain")
+-- C8 rebind risk: actual C3 now exports private sessionScope. The
+-- bilateral bridge must invalidate a new P3/P4 lease, changed partner or
+-- missing session even when the GUI and local revision are otherwise equal.
+for _,variant in ipairs({"leaseId","partnerUserId","missing"}) do
+ local reads=0
+ local boundary={researchContext=function()
+  reads+=1
+  local now=context()
+  if reads>=2 then
+   if variant=="leaseId" then
+    now.sessionScope.leaseId="SYNTHETIC_P3_LEASE_002"
+   elseif variant=="partnerUserId" then
+    now.sessionScope.partnerUserId=34567
+   else now.sessionScope=nil end
+  end
+  return now
+ end}
+ local gate,why=bridge.new({
+  marketBridge=boundary,bilateralCore=subject,crosswalk=source})
+ yes(gate~=nil,"C8 C4 original scorer session boundary created "..variant)
+ local stopped=gate:compare(options)
+ eq(stopped.status,"BLOCKED","C8 C4 scoped drift rejects "..variant)
+ eq(stopped.reason,"P3_P4_SESSION_BINDING_CHANGED_DURING_STRATEGY_COMPARISON",
+  "C8 C4 exact invalidated protected identity "..variant)
+ eq(stopped.authorizesAccept,false,"C8 C4 still no auto Accept "..variant)
+end
+local absentSession={researchContext=function()
+ local now=context()
+ now.sessionScope=nil
+ return now
+end}
+local absentGate=bridge.new({
+ marketBridge=absentSession,bilateralCore=subject,crosswalk=source})
+eq(absentGate:compare(options).reason,
+ "P3_P4_SESSION_BINDING_CHANGED_DURING_STRATEGY_COMPARISON",
+ "C8 C4 missing binding even when same twice must fail closed")
+
 print("SYSTEM2_BILATERAL_LIVE_SOURCE_NATIVE_ASSERTIONS_PASSED "..tostring(count))
