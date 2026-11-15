@@ -1,35 +1,24 @@
 name: Gingerscope Recovery Gate
+
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
-  recovery:
+  candidate-tests:
+    name: Recovery regression tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          fetch-depth: 0
-      - name: Regression tests
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Run recovery unit tests
         run: python -m unittest discover -s pdiddler/continuity -p test_recovery_gate.py -v
-      - name: Block changes lacking recovery evidence
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          EVENT_NAME: ${{ github.event_name }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "$EVENT_NAME" != "pull_request" ]]; then
-            echo "Manual run tests gate only; not a PR approval."
-            exit 0
-          fi
-          git diff --name-only "$BASE_SHA" "$HEAD_SHA" > /tmp/gingerscope-changed.txt
-          if grep -Ev '^(pdiddler/continuity/(recovery_gate.py|test_recovery_gate.py|RECOVERY_GATE_README.md)|\.github/workflows/gingerscope-recovery-gate.yml)$' /tmp/gingerscope-changed.txt | grep -q .; then
-            test -f pdiddler/continuity/recovery_receipt.json || { echo "BLOCKED: missing recovery receipt"; exit 1; }
-            python pdiddler/continuity/recovery_gate.py pdiddler/continuity/recovery_receipt.json
-          else
-            echo "Gate-only changes: tests passed; no implementation authorization."
-          fi
+      - name: Verify submitted receipt against GitHub
+        if: github.event_name == 'pull_request'
+        run: python pdiddler/continuity/recovery_gate.py pdiddler/continuity/recovery_receipt.json

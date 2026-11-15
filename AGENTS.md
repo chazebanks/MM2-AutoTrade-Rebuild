@@ -1,6 +1,6 @@
 # Gingerscope mandatory code-agent instructions
 
-**First read the compact working index `pdiddler/START_HERE.md`;** then run the existing continuity verify/recover. Fetch the original large stage handoffs only for task-relevant evidence; never skip source checks or claim all stages audited.
+**Start with the [current recovery entry point](https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit).** Verify its checkpoint against GitHub and open original evidence for the task at hand. Read `pdiddler/START_HERE.md` for the historical source map and run continuity verify/recover for the November 11 baseline. Use `pdiddler/continuity/RECOVERY_GATE_README.md` for current receipt validation before relying on a recovery result.
 
 Applies to every Gingerscope/MM2 change in this repository. The existing game code is not authorized to change just because this file is read.
 

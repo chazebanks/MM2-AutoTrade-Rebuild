@@ -1,0 +1,32 @@
+{
+  "taskId": "GS-RECOVERY-20261114",
+  "baseHead": "44268df1e3080b49aa9e586851867fd602a3ce1f",
+  "sourceHead": "5925c6a4cb4b7eb7491d6bd00592039e1c83154b",
+  "sourcePullRequest": 289,
+  "recoveredEntrypoint": "00 - GINGERSCOPE RECOVERY ENTRYPOINT - READ FIRST",
+  "missionRead": true,
+  "matrixRead": true,
+  "historyCoverage": "PARTIAL_NOT_ALL_STAGES_AUDITED",
+  "relatedFailures": [
+    "F13 stale history index",
+    "PR 290 accepted a zero commit and raised type errors for malformed evidence fields"
+  ],
+  "priorEvidence": [
+    {
+      "url": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/289",
+      "head": "5925c6a4cb4b7eb7491d6bd00592039e1c83154b"
+    }
+  ],
+  "falsificationTests": [
+    "Reject missing, malformed, fabricated and stale receipt evidence",
+    "Use base workflow and read only the submitted receipt data for the required check"
+  ],
+  "scope": "DOCS_ONLY",
+  "authorization": "NO_LIVE_GAME_ACTIONS",
+  "risk": "NO_GAME_ACTIONS_NO_PRIVATE_DATA",
+  "newFindings": [
+    "The original historical archive remains partial",
+    "GitHub refs independently establish the current commit for each cited PR",
+    "Repository settings and a live merge-block exercise are necessary to verify enforcement"
+  ]
+}
