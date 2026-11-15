@@ -1,0 +1,75 @@
+name: Gingerscope C9 OFFICIAL Supreme 189 first-party values audit
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/c9_supreme_firstparty_189_research.py'
+      - 'pdiddler/ci/test_c9_supreme_firstparty_189_research.py'
+      - '.github/workflows/gingerscope-c9-supreme-direct-189.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  direct-first-party-research-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install audited HTML parser major version
+        run: python3 -m pip install --disable-pip-version-check 'beautifulsoup4>=4.12,<5'
+      - name: Test distinct offline forged site/identity/price cases
+        run: python3 -m unittest -v pdiddler.ci.test_c9_supreme_firstparty_189_research
+      - name: Confirm immutable historical 189-key aggregator reference unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/734a316ee8d1afa14da50216a3d38de1ddd8694c/pdiddler/system2/c9_research_public_189_crosswalk.json' \
+            -o "$RUNNER_TEMP/original-189-public-crosswalk.json"
+          cmp -s pdiddler/system2/c9_research_public_189_crosswalk.json "$RUNNER_TEMP/original-189-public-crosswalk.json"
+      - name: Fetch ACTUAL official Supreme pages and compare all 189 keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.system2.c9_supreme_firstparty_189_research \
+            --mapped "$RUNNER_TEMP/original-189-public-crosswalk.json" \
+            --output "$RUNNER_TEMP/c9-supreme-official-189-research.json"
+      - name: Verify first-party result never grants live trading
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os,json
+          from pathlib import Path
+          f=Path(os.environ["RUNNER_TEMP"])/"c9-supreme-official-189-research.json"
+          x=json.loads(f.read_text())
+          assert x["schema"]=="gingerscope-c9-supreme-direct-189-research-audit-v1"
+          assert x["matchedHistoricalGameKeys"]==len(x["rows"])==189
+          assert x["categoryMatchedCounts"]=={"ancient":15,"godly":128,"chroma":46}
+          assert x["publisherHTTPSDirectlyFetched"] is True
+          assert x["sourceIndependentOfAggregateSupremeColumn"] is True
+          assert x["publisherCryptographicSignatureVerified"] is False
+          assert x["authorizesTrade"] is False and x["authorizesOffer"] is False
+          assert x["authorizesAccept"] is False
+          assert x["canFeedAutomatedTrade"] is False
+          assert x["mayUseForStrategyLearning"] is False
+          assert x["canOverrideHistoricalMarketHashes"] is False
+          assert sum(x["outgoingGingerscopeProtected"] for x in x["rows"])==1
+          assert x["changedSupremePriceCount"]==len(x["changedGameKeys"])
+          assert len({x["rawGameKeyCandidate"] for x in x["rows"]})==189
+          print("C9_FIRST_PARTY_189_SOURCE_RESEARCH_AUDITED")
+          print("C9_AGGREGATOR_SUPREME_MISMATCHES",x["changedSupremePriceCount"])
+          print("C9_LIVE_OFFER_AUTHORIZED=FALSE")
+          PY
+      - name: Store public official source research only (never private account data)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-c9-official-supreme-189-research-only
+          path: ${{ runner.temp }}/c9-supreme-official-189-research.json
+          retention-days: 7
+          if-no-files-found: error
