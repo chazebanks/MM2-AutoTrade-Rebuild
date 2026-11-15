@@ -1,0 +1,61 @@
+name: Gingerscope Recovery Evidence
+
+on:
+  workflow_run:
+    workflows: [Gingerscope Recovery Gate]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+jobs:
+  trusted-evidence:
+    name: Verify recovery from main
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - name: Bind to an open main PR and load receipt data
+        id: receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_HEAD: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$PR_HEAD" =~ ^[0-9a-f]{40}$ ]]
+          pr_number="$(gh api --paginate "repos/$GITHUB_REPOSITORY/commits/$PR_HEAD/pulls" \
+            --jq ".[] | select(.state == \"open\" and .base.ref == \"main\" and .head.sha == \"$PR_HEAD\") | .number")"
+          [[ "$pr_number" =~ ^[1-9][0-9]*$ ]]
+          printf 'bound=true\n' >> "$GITHUB_OUTPUT"
+          gh api -X GET -H 'Accept: application/vnd.github.raw+json' \
+            "repos/$GITHUB_REPOSITORY/contents/pdiddler/continuity/recovery_receipt.json" \
+            -f ref="$PR_HEAD" > "$RUNNER_TEMP/gingerscope-recovery.json"
+      - name: Verify receipt using main code
+        id: audit
+        run: |
+          set -euo pipefail
+          python -I pdiddler/continuity/recovery_gate.py \
+            --expected-base "$(git rev-parse HEAD)" "$RUNNER_TEMP/gingerscope-recovery.json"
+      - name: Publish evidence status to the submitted commit
+        if: always() && steps.receipt.outputs.bound == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_HEAD: ${{ github.event.workflow_run.head_sha }}
+          AUDIT_OUTCOME: ${{ steps.audit.outcome }}
+        run: |
+          set -euo pipefail
+          state=failure
+          if [[ "$AUDIT_OUTCOME" == success ]]; then
+            state=success
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/statuses/$PR_HEAD" \
+            -f state="$state" \
+            -f context="gingerscope/recovery-evidence" \
+            -f description="Recovery evidence check from main" \
+            -f target_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --silent
