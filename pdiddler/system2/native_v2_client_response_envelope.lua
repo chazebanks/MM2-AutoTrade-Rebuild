@@ -167,6 +167,7 @@ function M.new(config)
     discordNetworkDeliveryVerified=false,
     actualPrivateCollectorAckVerified=false,
     serverCompletionProven=false,maySendDiscordWebhook=false,
+    mayReportProfit=false,
     mayUseForStrategyLearning=false,authorizesOffer=false,
     authorizesTrade=false,authorizesAccept=false}
  end
