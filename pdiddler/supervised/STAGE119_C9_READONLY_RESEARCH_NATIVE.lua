@@ -1,11 +1,10 @@
--- C9 RESEARCH VARIANT OF Stage119 V2 protected P3/P4 LastOffer witness.\n-- Original frozen STAGE119_P3_BOUND_READONLY_NATIVE.lua is untouched.
--- Retains the PROVEN real-iPad PR221 supervisor, ALT-only P3 request after
--- MAIN physically taps ARM P3, revocable bound P4 lease, and original Stage9.
--- ALT manually accepts REQUEST, adds then removes ONE inexpensive weapon;
--- MAIN offers NOTHING. Never automated OfferItem, final Accept or Decline.
--- Opaque LastOffer equality remains client-only, NOT server revision proof.
--- No price, trading profit, completed-trade, Discord or item identity claims.
-local E=(type(getgenv)=="function" and getgenv()) or _G
+-- C9 RESEARCH VARIANT OF Stage119 V2 original P3/P4 guarded observation.
+-- Original frozen STAGE119_P3_BOUND_READONLY_NATIVE.lua remains untouched.
+-- ONLY an explicit human ARM P3 may issue a REQUEST to the consenting ALT.
+-- ALT can accept the request; no scripted item add/remove or gift-test lane.
+-- This C9 mode bypasses the legacy five-step LastOffer witness and prompts.
+-- The revocable original P4 client lease does NOT attest server settlement.
+-- No pricing authority, trade profit, learned reward or final Accept.
 local KEY="PDIDDLER_P3_STAGE119_LASTOFFER_NATIVE"
 local cfg=E[KEY]
 if game.PlaceId~=142823291 or type(cfg)~="table"
