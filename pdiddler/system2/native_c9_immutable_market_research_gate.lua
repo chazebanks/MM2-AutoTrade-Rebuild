@@ -75,6 +75,9 @@ function M.new(deps)
    proof.fourPageReadObserved~=true or proof.researchOnly~=true or
    proof.outgoingGingerscopeProtected~=true or
    proof.sourcePublisherSignatureVerified~=false or
+   proof.providerMarketDataNotIndependent~=true or
+   proof.rawGameItemInstanceIdentityVerified~=false or
+   proof.completedTradeOrRetradabilityProven~=false or
    proof.authorizesTrade~=false or
    proof.authorizesOffer~=false or
    proof.authorizesAccept~=false or
