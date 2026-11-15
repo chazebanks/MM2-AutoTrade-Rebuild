@@ -4,6 +4,11 @@ on:
     paths:
       - 'pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua'
       - 'pdiddler/supervised/STAGE119_C9_READONLY_RESEARCH_NATIVE.lua'
+      - 'pdiddler/supervised/STAGE119_C9_MARKET_READONLY_NATIVE.lua'
+      - 'pdiddler/supervised/STAGE119_C9_MARKET_READONLY_START.lua'
+      - 'pdiddler/ci/stage119_c9_market_original_mocks.luau'
+      - 'pdiddler/ci/stage119_c9_market_loader_mocks.luau'
+      - 'pdiddler/ci/test_stage119_c9_market_loader_integrity.py'
       - 'pdiddler/supervised/STAGE119_C9_READONLY_RESEARCH_START.lua'
       - 'pdiddler/ci/stage119_c9_pinned_loader_mocks.luau'
       - 'pdiddler/ci/test_stage119_c9_loader_integrity.py'
@@ -105,6 +110,21 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_pinned_loader_mocks.luau
+      - name: Verify actual C9 protected original Stage119 market native integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_market_original_mocks.luau
+      - name: Verify separate C9 native market loader with no auto ARM or item gifts
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_market_loader_mocks.luau
+      - name: Verify pinned immutable separate C9 market loader code integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_stage119_c9_market_loader_integrity
       - name: Verify C9 loader exact reviewed immutable runner blob
         shell: bash
         run: |
