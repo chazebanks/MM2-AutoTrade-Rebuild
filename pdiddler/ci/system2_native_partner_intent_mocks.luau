@@ -66,6 +66,7 @@ local function ctx()
  schema="gingerscope-system2-local-bilateral-context-v1",
  status="LOCAL_READONLY_MARKET_OFFER_CONTEXT",
  ownCounts={Harvester=1,Iceblaster=1},
+ sessionScope={jobId=job,leaseId=lease,partnerUserId=opponent},
  offer={clientRevision=revision,clientOnly=true,readOnly=true,
   sourceAgeSeconds=90,ownedCensusAgeSeconds=1,
   our={items={}},their={items={{id="Harvester",quantity=1}}},
