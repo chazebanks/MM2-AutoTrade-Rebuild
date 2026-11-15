@@ -102,8 +102,13 @@ function M.new(config)
   if not boundAtStart or scopeAtStart~=true then
    return denied("C8_NATIVE_C7_WRONG_OR_INACTIVE_PROTECTED_LEASE") end
   local b,bi=pcall(config.c4.compare,config.c4,alternatives)
+  -- A current GUI Accepted indicator can support a *research-only*
+  -- preference, never server settlement or authorization to act.
   if not b or not safe(bi,"gingerscope-system2-bilateral-market-shadow-v1")
-     or bi.status~="ABSTAIN_PARTNER_INTENT_UNVERIFIED" then
+     or (bi.status~="ABSTAIN_PARTNER_INTENT_UNVERIFIED" and
+         bi.status~="CLIENT_SHADOW_PREFERS_OBSERVED_ACCEPTED_OFFER") or
+     bi.selectedIndexIsActionable~=false or
+     bi.completedTradeProven~=false then
    return denied("C8_ORIGINAL_C4_SCORER_FAILED_OR_FORGED") end
   local c,gr=pcall(config.c5.discover,config.c5,futureSellerStages)
   if not c or not safe(gr,"gingerscope-system2-multistep-source-growth-shadow-v1")
