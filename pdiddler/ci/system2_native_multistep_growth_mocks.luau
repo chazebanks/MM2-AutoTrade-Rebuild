@@ -29,10 +29,17 @@ end
 local rows={}
 for _,r in ipairs(market.items) do rows[r.rawGameKeyCandidate]=r end
 eq(#market.items,189,"actual current gamekey catalog")
-eq(rows.Gingerscope.mm2Listed,16000,"source target value—not guaranteed execution price")
-eq(rows.SnowDagger.mm2Listed,160,"source high paper gain trap")
-eq(rows.Icepiercer.mm2Listed,180,"source higher-demand goal")
-eq(rows.Icepiercer.demandOrdinal,"3","actual demand label not fill probability")
+yes(type(rows.Gingerscope.mm2Listed)=="number" and
+ rows.Gingerscope.mm2Listed>0 and
+ rows.Gingerscope.outgoingGingerscopeProtected==true,
+ "actual publisher target price positive, Gingerscope still outbound protected")
+yes(type(rows.SnowDagger.mm2Listed)=="number" and
+ rows.SnowDagger.mm2Listed>0,"actual SnowDagger source price")
+yes(type(rows.Icepiercer.mm2Listed)=="number" and
+ rows.Icepiercer.mm2Listed>0,"actual Icepiercer source price")
+yes(tonumber(rows.Icepiercer.demandOrdinal)>
+ tonumber(rows.SnowDagger.demandOrdinal),
+ "sourced Icepiercer demand currently exceeds SnowDagger; not fill odds")
 local function context()
  return {
  schema="gingerscope-system2-local-bilateral-context-v1",
@@ -67,7 +74,8 @@ yes(result.distinctFirstStepRoutesDisplayed>=2,"distinct first steps, not five c
 yes(#result.alternativeRoutes>=2,"competing paths actually returned")
 eq(result.futureSellerStageCount,2,"two different future seller hypotheses")
 yes(result.searchPairEvaluations>2,"real search rather than scripted replay")
-eq(result.targetListedValue,16000,"gap uses current source value")
+eq(result.targetListedValue,rows.Gingerscope.mm2Listed,
+ "route target re-evaluates actual publisher-listed Gingerscope value")
 eq(result.futureSellerAvailabilityVerified,false,"hypothetical future seller never proven")
 eq(result.anyPartnerWillingnessVerified,false,"no fake acceptance")
 eq(result.selectedRouteActionable,false,"research recommendation never gameplay action")

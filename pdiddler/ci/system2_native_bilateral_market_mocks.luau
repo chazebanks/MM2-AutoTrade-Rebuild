@@ -61,12 +61,24 @@ local report=subject.compare(context(),source,options)
 eq(report.status,"ABSTAIN_PARTNER_INTENT_UNVERIFIED","unknown interest abstains")
 eq(report.selectedIndex,nil,"no invented counterparty agreement")
 eq(report.researchAttentionIndices[1],2,"lower gain good demand beats higher gain junk")
-eq(report.alternatives[1].mm2ListedDelta,150,"actual SnowDagger 160 versus Frostsaber 10")
-eq(report.alternatives[2].mm2ListedDelta,145,"actual Icepiercer 180 versus Iceblaster 35")
-eq(report.alternatives[1].partnerMm2ListedDelta,-150,"their perspective is the opposite")
-eq(report.alternatives[2].partnerMm2ListedDelta,-145,"their sacrifice explicit")
-eq(report.alternatives[1].incomingLowOrdinalDemand,true,"source demand 2 only")
-eq(report.alternatives[2].incomingLowOrdinalDemand,false,"source demand 3")
+eq(report.alternatives[1].mm2ListedDelta,
+ rows.SnowDagger.mm2Listed-rows.Frostsaber.mm2Listed,
+ "actual sourced SnowDagger versus Frostsaber delta, any publisher edition")
+eq(report.alternatives[2].mm2ListedDelta,
+ rows.Icepiercer.mm2Listed-rows.Iceblaster.mm2Listed,
+ "actual sourced Icepiercer versus Iceblaster delta, any publisher edition")
+eq(report.alternatives[1].partnerMm2ListedDelta,
+ -report.alternatives[1].mm2ListedDelta,
+ "opponent delta exactly opposite for current publisher version")
+eq(report.alternatives[2].partnerMm2ListedDelta,
+ -report.alternatives[2].mm2ListedDelta,
+ "opponent sacrifice remains symmetric after publisher update")
+eq(report.alternatives[1].incomingLowOrdinalDemand,
+ tonumber(rows.SnowDagger.demandOrdinal)<=2,
+ "low ordinal demand derives from actual current publisher label")
+eq(report.alternatives[2].incomingLowOrdinalDemand,
+ tonumber(rows.Icepiercer.demandOrdinal)<=2,
+ "high ordinal demand derives from actual current publisher label")
 eq(report.alternatives[2].partnerSurplusProven,nil,"no fake partner subjective utility")
 eq(report.empiricalPartnerAcceptanceProbability,nil,"demand is not fill probability")
 eq(report.authorizesOffer,false,"never trade from research comparison")

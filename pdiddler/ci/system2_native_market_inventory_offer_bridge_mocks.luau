@@ -1004,4 +1004,20 @@ eq(c9ABAGate:preview(c9RealOptions).status,"BLOCKED",
  "C9 original P3/P4 lease revoked between first C3 sample and C4 comparison")
 currentProtectedLease=lease
 
+-- Original C3/P4 + C4 + C9 preflight is executed in its OWN chunk.
+-- The inherited C8 native test already approaches Luau's 200 local limit;
+-- do NOT re-inline the C9 test variables into this original source fixture.
+luau.load(fs.readFile("pdiddler/ci/system2_native_c9_preflight_replay.lua"))().run({
+ game=game,players=players,scope=scope,growthScanner=growthScanner,
+ sync=sync,market=market,sourceEpoch=sourceEpoch,core=core,capture=capture,
+ glue=glue,resolver=resolver,nativeBilateral=nativeBilateral,
+ nativeBilateralBridge=nativeBilateralBridge,c9Source=c9Source,
+ c9RealOptions=c9RealOptions,localPlayer=localPlayer,
+ opponent=opponent,ours=ours,theirs=theirs,job=job,lease=lease,
+ tick=tick,now=now,eq=eq,ok=ok,
+ isBoundSession=function()return active and currentProtectedLease==lease end,
+ setCurrentProtectedLease=function(v)currentProtectedLease=v end,
+ setUtc=function(v)utc=v end,
+})
+
 print("SYSTEM2_LIVE_MARKET_NATIVE_BRIDGE_ASSERTIONS_PASSED "..tostring(count))
