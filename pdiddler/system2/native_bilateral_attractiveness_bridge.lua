@@ -10,6 +10,22 @@ local function blocked(why)
   authorizesTrade=false,authorizesOffer=false,authorizesAccept=false,
   mayReportProfit=false,mayUseForStrategyLearning=false}
 end
+-- A local offer revision is not globally unique. When the original P3/P4
+-- lease or partner changes, a newly mounted C3 scanner may start at the same
+-- revision with identical inventory and GUI contents. Compare the *private*
+-- constructor-bound session identity; never promote it to settlement proof.
+local function validSessionScope(s)
+ return type(s)=="table" and type(s.jobId)=="string" and
+  #s.jobId>=8 and type(s.leaseId)=="string" and #s.leaseId>=8 and
+  type(s.partnerUserId)=="number" and
+  s.partnerUserId==math.floor(s.partnerUserId) and
+  s.partnerUserId>0 and s.partnerUserId<10^16
+end
+local function sameSessionScope(a,b)
+ return validSessionScope(a) and validSessionScope(b) and
+  a.jobId==b.jobId and a.leaseId==b.leaseId and
+  a.partnerUserId==b.partnerUserId
+end
 local function sameCounts(a,b)
  if type(a)~="table" or type(b)~="table" then return false end
  for k,n in pairs(a) do
@@ -88,6 +104,8 @@ function M.new(config)
       nextSnapshot.sourceRetrievedUtc~=first.sourceRetrievedUtc or
       nextSnapshot.clientOfferRevision~=first.clientOfferRevision then
    return blocked("OFFER_OR_SOURCE_CHANGED_DURING_STRATEGY_COMPARISON") end
+  if not sameSessionScope(first.sessionScope,nextSnapshot.sessionScope) then
+   return blocked("P3_P4_SESSION_BINDING_CHANGED_DURING_STRATEGY_COMPARISON") end
   -- A C3 refreshOwn() resets the local offer revision. A changed inventory
   -- may therefore return the same revision number, silently reusing an old
   -- ranking unless both original scanner snapshots are compared.
