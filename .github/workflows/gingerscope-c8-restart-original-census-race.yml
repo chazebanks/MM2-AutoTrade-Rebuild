@@ -4,6 +4,10 @@ on:
     paths:
       - 'pdiddler/system2/native_bilateral_attractiveness_bridge.lua'
       - 'pdiddler/ci/system2_native_market_inventory_offer_bridge_mocks.luau'
+      - 'pdiddler/system2/native_partner_intent_observer.lua'
+      - 'pdiddler/system2/native_v2_client_response_envelope.lua'
+      - 'pdiddler/system2/native_market_inventory_offer_core.lua'
+      - 'pdiddler/ci/test_system2_c8_original_source_v2.py'
       - '.github/workflows/gingerscope-c8-restart-original-census-race.yml'
   workflow_dispatch:
 permissions:
@@ -73,6 +77,11 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_market_inventory_offer_bridge_mocks.luau
+      - name: Read genuine C3 P4 C6 C7 offline envelope through strict Python V2 receiver
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest pdiddler.ci.test_system2_c8_original_source_v2 -v
       - name: Native bridge forbidden actions audit
         run: |
           python3 - <<'PY'
