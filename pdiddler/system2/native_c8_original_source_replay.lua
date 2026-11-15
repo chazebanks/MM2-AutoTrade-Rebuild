@@ -125,9 +125,19 @@ function M.new(config)
     feedback.discordNetworkDeliveryVerified~=false or
     feedback.serverCompletionProven~=false or
     feedback.mayUseForStrategyLearning~=false or
+    feedback.maySendDiscordWebhook~=false or
+    feedback.mayReportProfit~=false or
     feedback.authorizesTrade~=false or feedback.authorizesOffer~=false or
     feedback.authorizesAccept~=false then
    return denied("C8_ORIGINAL_C7_UNVERIFIED_TRANSPORT_OR_AUTHORITY") end
+  -- V2 categorical evidence has a client-local revision, not authenticated
+  -- settlement. A DIFFERENT revision must never be combined with the
+  -- current source-bound C3/C4/C5/C6 research even for the same lease.
+  if type(feedback.stagedCount)~="number" or
+    feedback.stagedCount<1 or feedback.stagedCount>1000 or
+    type(feedback.currentClientRevision)~="number" or
+    feedback.currentClientRevision~=first.clientOfferRevision then
+   return denied("C8_NATIVE_C7_OFFER_REVISION_NOT_CURRENT") end
   local f,last=pcall(config.c3.researchContext)
   if not f or not same(first,last) then
    return denied("C8_ORIGINAL_SOURCE_SCOPE_OR_OFFER_CHANGED_DURING_REPLAY") end
