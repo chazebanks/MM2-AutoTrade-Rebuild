@@ -1,9 +1,3 @@
-# NOVEMBER 15 2026 — C8 ORIGINAL-SOURCE OFFLINE REPLAY COMPLETE (RESEARCH ONLY)
-
-Latest C8 draft #295, branch `research/system2-c8-c6-c7-integrated-replay-nov15`, stacked on #294/#293/#292/#289. READ `pdiddler/system2/S2_COMPONENT8_OFFLINE_COMPLETION_HANDOFF_2026_11_15.md` FIRST after this header and the mission lock. Code SHA `7e8fd969e868334b63c227adbc72dfcb242562eb`: 7/7 CI PASS with actual source-backed protected C3/P4→C4→C5→C6→C7 offline integration and cross-language Python feedback, negative source/session/offer/revision/Accept tests. This is **C8 OFFLINE research completion only, NOT the autonomous trading bot, not C9 native iPad/Delta pass**, not live Accept, server settlement, Discord delivery, or verified behavioral learner. Do not merge/deploy without distinct approval. Previous C8 fabricated receipt PR #291 is superseded. Do NOT repeat the five completed MAIN–ALT gifts or revive old +15/highest opener.
-
----
-
 # CURRENT SYSTEM 2 READ-FIRST OVERRIDE — 2026-11-14
 
 **For any new Project Gingerscope System 2 conversation, FIRST read `pdiddler/system2/SYSTEM2_MISSION_LOCK_AND_TEST_GOVERNANCE_2026_11_14.md` on the current research branch, THEN the original `pdiddler/system2/SYSTEM2_MODULAR_PLANNING_AND_TESTING_MATRIX_2026_11_13.md`, relevant original `pdiddler/GINGERSCOPE_STRATEGY_AND_RESEARCH_PLAYBOOK.md`, and only THEN the recent P3/P4 or MAIN–ALT hardware handoffs.** The older November 11 P1 first-party source task below is a historical checkpoint, NOT a permanent override of the System 2 mission. Reconcile current operator instructions against dated records; inspect actual PR status and code before proceeding.
