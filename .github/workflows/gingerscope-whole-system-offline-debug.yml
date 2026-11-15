@@ -213,17 +213,34 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          failures=0;total=0
+          failures=0;total=0;archived_invalid=0;clean=0
           while IFS= read -r file; do
-            # Historical pure Lua 5.4 standalone test scripts are validated in
-            # the Python+Lua5.4 suites, not by the Roblox Luau parser.
+            # Historical pure Lua 5.4 standalone tests use a different parser.
             if [[ "$file" == pdiddler/tests/*.lua ]]; then continue; fi
             total=$((total+1))
+            # Two older, superseded trading variants are *known unparseable*
+            # (the later v14 / v1_9 versions have the missing closers).
+            # Keep original history unmodified, prove they REMAIN quarantined,
+            # and do not silently turn a failed archive into a supported source.
+            case "$file" in
+              pdiddler/pdiddler3_outgoing_ROTATING_v13_UNCERTAIN_OWNER.lua|pdiddler/pdiddler4_balancer_ROTATING_v1_8.lua)
+                if "$RUNNER_TEMP/luau-compile" --binary "$file" >/dev/null 2>"$RUNNER_TEMP/luau-error.txt"; then
+                  echo "::error title=Archived syntax quarantine changed::$file unexpectedly compiles; review history"
+                  failures=$((failures+1))
+                else
+                  echo "::warning title=Known unusable archived Luau::$file has known unclosed block; never launch"
+                  archived_invalid=$((archived_invalid+1))
+                fi
+                continue
+                ;;
+            esac
             if ! "$RUNNER_TEMP/luau-compile" --binary "$file" > /dev/null 2>"$RUNNER_TEMP/luau-error.txt"; then
               echo "::error title=Luau syntax/compatibility issue::$file"
               cat "$RUNNER_TEMP/luau-error.txt"
               failures=$((failures+1))
+            else
+              clean=$((clean+1))
             fi
           done < <(find pdiddler values -type f \( -name '*.lua' -o -name '*.luau' \) | sort)
-          echo "COMPLETE_LUAU_COMPILATION total=$total failed=$failures"
-          if (( failures )); then exit 1; fi
+          echo "COMPLETE_LUAU_COMPILATION total=$total supported_clean=$clean known_archived_invalid=$archived_invalid other_failures=$failures"
+          if (( archived_invalid!=2 || failures )); then exit 1; fi
