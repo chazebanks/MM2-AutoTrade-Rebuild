@@ -5,6 +5,7 @@
 -- This C9 mode bypasses the legacy five-step LastOffer witness and prompts.
 -- The revocable original P4 client lease does NOT attest server settlement.
 -- No pricing authority, trade profit, learned reward or final Accept.
+local E=(type(getgenv)=="function" and getgenv()) or _G
 local KEY="PDIDDLER_P3_STAGE119_LASTOFFER_NATIVE"
 local cfg=E[KEY]
 if game.PlaceId~=142823291 or type(cfg)~="table"
