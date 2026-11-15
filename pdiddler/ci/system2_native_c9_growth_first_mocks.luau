@@ -85,7 +85,7 @@ local engine,err=c9.new({marketBridge=source,bilateralBridge=originalBridge,mark
 yes(engine~=nil,"C9 standalone original C4 research engine composed")
 local r=engine:preview(options)
 eq(r.status,"GROWTH_FIRST_LISTED_LOSS_RESEARCH_ONLY",
- "C9 growth-first research permits discussing losses, not execution")
+ "C9 growth-first research permits discussing losses, not execution: "..tostring(r.reason))
 eq(r.lossAlternativesExamined,1,"C9 lost trade no longer invisible to research")
 eq(r.qualityImprovingLossHypotheses,1,
  "C9 only independently separated descriptive demand and concentration signals")
