@@ -127,6 +127,10 @@ jobs:
           set -uo pipefail
           if [[ "$AUDIT_SUITE" == python ]]; then
             "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_v2_feedback_staging_mocks.luau || exit 1
+            # The Python test consumes the actual C3 scanner/P4 GUI/C6/C7
+            # native Lune fixture, never a hardcoded Python mock receipt.
+            "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_market_inventory_offer_bridge_mocks.luau || exit 1
+            test -s pdiddler/ci/.generated_system2_c8_original_c6_v2.json || exit 1
             if python3 - <<'PY'
           import unittest
           from pdiddler.ci.test_next_conversation_handoff import HandoffIntegrityTests
