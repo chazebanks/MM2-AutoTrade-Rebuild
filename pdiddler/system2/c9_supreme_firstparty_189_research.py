@@ -94,7 +94,10 @@ def extract_category(html, category):
         cell = col.select_one("div.itemcell[id], div.itemcell-exp[id]")
         button = cell.select_one("button[data-name]") if cell else None
         if not cell or not button:
-            fail("OFFICIAL_ITEM_CARD_SHAPE_CHANGED")
+            # Official site also displays an untradeable/priceless special
+            # card not in the immutable 189 supported game-key registry.
+            # Missing ELIGIBLE cards still fail the exact 189-key join below.
+            continue
         name = button.get("data-name")
         key = norm(name)
         if not key or key in rows:
