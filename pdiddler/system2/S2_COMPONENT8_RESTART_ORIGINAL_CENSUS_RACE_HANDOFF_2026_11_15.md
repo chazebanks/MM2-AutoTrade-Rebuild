@@ -1,0 +1,26 @@
+# System 2 Component 8 RESTART — Original C3→C4 owned-inventory race
+
+Checkpoint: November 15, 2026 (NY). This record is a scoped first C8 integration issue, NOT full Component 8 completion.
+
+## Source of truth, scope and authority
+- Canonical repo `chazebanks/MM2-AutoTrade-Rebuild`. Fresh draft PR #292: https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/292 ; branch `research/system2-c8-restart-original-census-race-nov15`.
+- Created directly from **C7** branch HEAD `5925c6a4cb4b7eb7491d6bd00592039e1c83154b` (draft PR #289), NOT stacked on the prior flawed C8 approach.
+- Previous draft PR #291 remains untouched and **superseded for C8**. Do not merge #291 or copy its fabricated all-six-component receipt wrappers forward.
+- Read first `pdiddler/START_HERE.md`, `system2/SYSTEM2_MISSION_LOCK_AND_TEST_GOVERNANCE_2026_11_14.md`, `system2/SYSTEM2_MODULAR_PLANNING_AND_TESTING_MATRIX_2026_11_13.md`, C3–C7 original handoffs and actual source/tests, this checkpoint. P3/P4 are mechanics; System 2's product goal is intelligent, attractive, evidence-based, multi-route inventory growth toward acquiring Gingerscope.
+- No live trade actions, final Accept, chat sender, Discord network delivery, model learning, market-price loss budget, verified settlement or original MM2 device tests authorized. The first five repeated MAIN–ALT local deltas are CLOSED; sixth unclassified identity failure remains UNKNOWN.
+
+## One genuine, adversarial source-backed C8 integration bug
+C3's real `native_market_inventory_offer_core.lua` exposes `researchContext()`: original scanner ownCounts, P4-style GUI offer, protected job/lease/partner validations, read-only source hash and *client-local* offer revision. When original `refreshOwn()` runs it resets the local revision counter. A new GUI observation may return the same revision 1 after the inventory quantity has changed. C4's production `native_bilateral_attractiveness_bridge.lua` originally checked only market hash, source timestamp and client offer revision before returning a scorer result, *not* C3's changed owned counts. This could reuse a stale comparison without changing either of the checked identity fields.
+
+**Real reproduction:** `pdiddler/ci/system2_native_market_inventory_offer_bridge_mocks.luau` executes the ACTUAL C3 scanner/core/GUI capture/bridge, ACTUAL C4 scorer/bridge, and a newly introduced scanner refresh inside C4 comparison. Own EmberbowChroma copies 6→7, market unchanged, GUI offer unchanged, revision resets to 1 on both sides. Market is generated from current public source + immutable, Git-blob-checked original Stage83 189 keys in CI. The game services and inventory are Lune mocks; this is original production module code with mocked inputs, NOT live MM2 or settlement evidence.
+
+- Invalid first red: commit `599c229707e2985ff9d3e8daae5cfd89b5ced8c8`, [Actions run #43691439890](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/43691439890). Failure `TWO_TO_TWELVE_ALTERNATIVES_REQUIRED`: test incorrectly supplied a single option; **NOT** evidence of target bug. Corrected to two actual alternatives.
+- Valid red: commit `84726ff7a18d492b4a0099676b23daba6aa66312`, [Actions run #43691522861](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/43691522861): `expected BLOCKED, got ABSTAIN_PARTNER_INTENT_UNVERIFIED`, with same revision and changed own counts. It proves the missing invalidation in the real original source chain.
+- Fix: commit `6050d16910d5a65bcffdb9705d9af1bcf6e60338`, C4 bridge compares each original C3 ownCounts snapshot symmetrically after research scoring and rejects mutations as `BLOCKED / OWN_INVENTORY_CHANGED_DURING_STRATEGY_COMPARISON`; existing source/offer revision guards remain. No trading mutators introduced.
+- **PASS at FIX CODE COMMIT:** [new exact native C3→C4 source-backed workflow #43691592142](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/43691592142), incl. **68 inherited Python tests** (market/identity/intelligence), fresh 190 public market records → 189 Stage83 historical game-key matches, original native bridge assertions, and no-trade-action audit. All six PR workflows on `6050d16` passed (Lune, Luau CLI, quality, hypothesis, deterministic replay, new original bridge).
+- CI source retrieved November 15 but public publisher data edition was `2026-11-13`, NOT independently authenticated current game-server inventory or market authority.
+
+## Stop boundary and what remains
+**C8 is NOT complete.** This covers precisely one defect: original C3 scanned inventory must not change unnoticed during a C4 bilateral comparison. No fabricated bridge receipts or generic synthetic six-way admission substitute for original integration.
+
+NEXT distinct C8 issue (only after this fix is fully settled): evaluate protected P3/P4 **session/lease/partner** invalidation across original C3→C4→C5/C6 and ultimately native C7→Python feedback, with native Luau and Python original modules, deliberate negative and baseline cases, source-pinned CI and zero live permissions. Distinguish genuine item-bearing offer features from C7 V2 which has none; learning MUST abstain until evidence arrives. Do not create an action-capable planner as a test shortcut, and do not rerun old identical device gifts.

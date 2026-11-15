@@ -10,6 +10,20 @@ local function blocked(why)
   authorizesTrade=false,authorizesOffer=false,authorizesAccept=false,
   mayReportProfit=false,mayUseForStrategyLearning=false}
 end
+local function sameCounts(a,b)
+ if type(a)~="table" or type(b)~="table" then return false end
+ for k,n in pairs(a) do
+  if type(k)~="string" or type(n)~="number" or b[k]~=n then
+   return false
+  end
+ end
+ for k,n in pairs(b) do
+  if type(k)~="string" or type(n)~="number" or a[k]~=n then
+   return false
+  end
+ end
+ return true
+end
 function M.new(config)
  if type(config)~="table" or type(config.marketBridge)~="table"
   or type(config.marketBridge.researchContext)~="function"
@@ -38,6 +52,11 @@ function M.new(config)
       nextSnapshot.sourceRetrievedUtc~=first.sourceRetrievedUtc or
       nextSnapshot.clientOfferRevision~=first.clientOfferRevision then
    return blocked("OFFER_OR_SOURCE_CHANGED_DURING_STRATEGY_COMPARISON") end
+  -- A C3 refreshOwn() resets the local offer revision. A changed inventory
+  -- may therefore return the same revision number, silently reusing an old
+  -- ranking unless both original scanner snapshots are compared.
+  if not sameCounts(first.ownCounts,nextSnapshot.ownCounts) then
+   return blocked("OWN_INVENTORY_CHANGED_DURING_STRATEGY_COMPARISON") end
   -- The same scanner census age bound is rechecked through the original bridge.
   -- Return the research output only; no command handler or offer-accept path.
   return result
