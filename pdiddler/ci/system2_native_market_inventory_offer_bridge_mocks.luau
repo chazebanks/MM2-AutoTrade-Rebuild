@@ -886,4 +886,74 @@ eq(c8LateOfferGate:replay(c8Options,c8SellerStages).reason,
  "C8 changed two-sided offer after C6/C7 refuses stale planned routes")
 theirs:FindFirstChild("Container"):FindFirstChild("Amount").Text=""
 
+-- C8 alternate legitimate client state: both visible GUI Accepted
+-- indicators are ON for a coherent current offer, but this is NOT a
+-- server-approved settlement and must never imply final Accept authority.
+our:FindFirstChild("Accepted").Visible=true
+their:FindFirstChild("Accepted").Visible=true
+eq(growthC3.refreshOwn().status,"READONLY_OWN_MARKET_BOUND",
+ "C8 renew client-census epoch after changed Accepted indicators")
+local acceptedContext=growthC3.researchContext()
+eq(acceptedContext.clientOfferRevision,1,
+ "C8 accepted GUI state gets new local revision after scanner rebase")
+eq(acceptedContext.offer.ourAccepted,true,
+ "C8 original P4 observer sees client-side ours accepted")
+eq(acceptedContext.offer.theirAccepted,true,
+ "C8 original P4 observer sees client-side partner accepted")
+local acceptedOptions={
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="Frostsaber",quantity=1}},
+  receive={{id="SnowDagger",quantity=1},{id="Icepiercer",quantity=1}}},
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="Iceblaster",quantity=1}},
+  receive={{id="Icepiercer",quantity=1}}}
+}
+local acceptedScorer=c8C4Gate:compare(acceptedOptions)
+eq(acceptedScorer.status,"CLIENT_SHADOW_PREFERS_OBSERVED_ACCEPTED_OFFER",
+ "C8 C4 can flag exact observed accepted GUI offer only as client shadow")
+eq(acceptedScorer.selectedIndexIsActionable,false,
+ "C8 accepted client indicator is NOT a trade recommendation")
+eq(acceptedScorer.authorizesAccept,false,
+ "C8 accepted client indicator NEVER authorizes final Accept")
+local acceptedChat=c6.new({
+ bound=chatBound,crosswalk=market,
+ readContext=function()return growthC3.researchContext()end,
+ readScope=oldChatScope,now=now})
+ok(acceptedChat~=nil,"C8 fresh C6 passive observer after GUI revision renewal")
+local acceptedC6Signal=acceptedChat.ingest({
+ speakerUserId=opponent.UserId,text="@MainTestUser_Alpha LF Harvester",
+ messageId="C8_ACCEPTED_SHADOW_C6_CHAT",
+ channelName="RBXGeneral",observedAt=monotonic})
+eq(acceptedC6Signal.personalReplyProven,true,
+ "C8 accepted GUI still requires independently attributable client speaker")
+local acceptedEnvelope=c8V2.new({
+ bound=c8Bound,salt=string.rep("j",48),
+ nonce="C8_ACCEPTED_SHADOW_LOCAL_ONLY_NONCE_V2",
+ cryptoSha256=c8TestDigest,
+ readP3P4Lease=function()
+  return {jobId=job,leaseId=lease,localUserId=localPlayer.UserId,
+   partnerUserId=opponent.UserId,active=active,clientOnly=true}
+ end})
+ok(acceptedEnvelope~=nil,"C8 fresh C7 V2 client-local revision builder")
+acceptedEnvelope.stage("MAIN_REQUEST_PENDING",
+ c8Receipt("MAIN_REQUEST_PENDING",0,"P3_REQUEST_SUBMITTED"))
+acceptedEnvelope.stage("PARTNER_REQUEST_ACCEPTED",
+ c8Receipt("PARTNER_REQUEST_ACCEPTED",0,"P3_PARTNER_REQUEST_ACCEPTED"))
+acceptedEnvelope.stage("PARTNER_OFFER_REVISION",
+ c8Receipt("PARTNER_OFFER_REVISION",1,"P4_OFFER_REVISION_OBSERVED"))
+local acceptedFullGate=c8GateSource.new({
+ c3=growthC3,c4=c8C4Gate,c5=c8C5Gate,
+ c6=acceptedChat,c7=acceptedEnvelope})
+local acceptedFull=acceptedFullGate:replay(acceptedOptions,c8SellerStages)
+eq(acceptedFull.status,"OFFLINE_C8_ORIGINAL_CHAIN_RESEARCH_ONLY",
+ "C8 original accepted-but-client-only offer can pass research-only integration")
+eq(acceptedFull.c4Status,"CLIENT_SHADOW_PREFERS_OBSERVED_ACCEPTED_OFFER",
+ "C8 safe C4 preference is still nonactionable after all modules")
+eq(acceptedFull.authorizesAccept,false,
+ "C8 both sides Accepted indicators STILL never authorize a script Accept")
+eq(acceptedFull.hasAuthenticatedGameSettlement,false,
+ "C8 accepted indicator is not server settlement")
+our:FindFirstChild("Accepted").Visible=false
+their:FindFirstChild("Accepted").Visible=false
+
 print("SYSTEM2_LIVE_MARKET_NATIVE_BRIDGE_ASSERTIONS_PASSED "..tostring(count))
