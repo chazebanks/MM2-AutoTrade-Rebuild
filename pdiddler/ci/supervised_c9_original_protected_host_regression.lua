@@ -174,6 +174,12 @@ function M.run(deps)
    "C9 locally independent leases never share P3/partner identity string")
   eq(second.scope.partnerUserId,3,"C9 new exact P3 processed partner")
   eq(second.isBoundSession(),true,"C9 new lease intact after first revoked")
+  game.PlaceId=987654321
+  eq(second.isBoundSession(),false,
+   "C9 original MM2 PlaceId drift invalidates client lease even at same JobId")
+  game.PlaceId=142823291
+  eq(second.isBoundSession(),false,
+   "C9 original PlaceId restoration cannot revive an invalidated lease")
   eq(#x.sends,0,"C9 no physical trade action across protected sessions")
  end
  print("SYSTEM2_C9_ORIGINAL_P3_PROTECTED_LEASE_ASSERTIONS_PASSED")
