@@ -43,7 +43,7 @@ class Stage119C9OriginalResearchParity(unittest.TestCase):
             ("".join(original[i:j]), "".join(fork[k:l]))
             for tag, i, j, k, l in diff if tag != "equal"
         ]
-        self.assertEqual(len(mutated), 7, [
+        self.assertEqual(len(mutated), 8, [
             (a[:100], b[:100]) for a, b in mutated
         ])
         changes = []
@@ -51,8 +51,8 @@ class Stage119C9OriginalResearchParity(unittest.TestCase):
             if ("-- Stage119 V2 ORIGINAL MM2" in before
                     and "-- C9 RESEARCH VARIANT" in after):
                 changes.append("header")
-            elif ("cfg.stage119LastOfferReadOnly" in before
-                  and "cfg.c9ResearchOnly~=true" in after):
+            elif (before.strip() == ""
+                  and after.strip() == "or cfg.c9ResearchOnly~=true"):
                 changes.append("explicit_research_flag")
             elif ("local c9HostModule=loadFrozen" in after
                   and before.strip() == ""):
@@ -63,11 +63,14 @@ class Stage119C9OriginalResearchParity(unittest.TestCase):
             elif ("local c9HostHandle=nil" in after
                   and before.strip() == ""):
                 changes.append("private_lexical_handle")
-            elif ("c9HostHandle=nil" in after
-                  and "owner.running=false" in before):
+            elif (before.strip() == ""
+                  and after.strip() == "c9HostHandle=nil"):
                 changes.append("terminal_handle_drop")
-            elif ("c9ReadOnlyLeaseStatus" in after
-                  and "E.PDIDDLER_STAGE119_P3_RUNNER" in before):
+            elif (before.strip() == ""
+                  and "local function c9ReadOnlyLeaseStatus()" in after):
+                changes.append("sanitized_readonly_function")
+            elif (before.strip() == ""
+                  and after.strip() == "c9ReadOnlyLeaseStatus=c9ReadOnlyLeaseStatus,"):
                 changes.append("sanitized_readonly_entry")
             else:
                 self.fail(
@@ -77,7 +80,8 @@ class Stage119C9OriginalResearchParity(unittest.TestCase):
         self.assertEqual(set(changes), {
             "header", "explicit_research_flag", "pinned_host_source",
             "source_module_contract", "private_lexical_handle",
-            "terminal_handle_drop", "sanitized_readonly_entry",
+            "terminal_handle_drop", "sanitized_readonly_function",
+            "sanitized_readonly_entry",
         })
 
     def test_no_new_trade_or_network_side_effects(self):
