@@ -319,7 +319,21 @@ function guide:show(r)
     end
     local status=r.status or "UNKNOWN"
     self.phase=status
-    if identityPhase=="RESULT" or identityPhase=="FAILED" then
+    if cfg.c9ResearchOnly==true then
+        -- C9 MODE: no Stage119 add/remove or five-gift prompts.
+        -- ARM is still ONE explicit original P3 trade REQUEST, never
+        -- an automatic request/offer/Accept.
+        if status=="P3_SUPERVISOR_PREPARED_NOT_ARMED" then
+            ui.title.Text="C9 READ-ONLY | 1/2 ARM ORIGINAL P3"
+            ui.body.Text="MAIN: tap ARM P3 to REQUEST the consenting ALT. ALT may accept the trade REQUEST. Never add or remove items for this C9 check."
+        elseif status=="P4_TWO_SIDED_CLIENT_SNAPSHOT" then
+            ui.title.Text="C9 READ-ONLY | 2/2 P3/P4 OBSERVED"
+            ui.body.Text="Protected trade GUI observed. NO weapon add/remove test, NO final Accept. Use C9 read-only status, then STOP / COPY."
+        else
+            ui.title.Text="C9 PROTECTED CLIENT READ-ONLY"
+            ui.body.Text="Waiting for real bound original P3/P4 session. Do not add or remove weapons. STOP / COPY anytime."
+        end
+    elseif identityPhase=="RESULT" or identityPhase=="FAILED" then
         ui.title.Text=identityPhase=="RESULT"
              and "5/5 CLIENT LASTOFFER OBSERVED" or "5/5 CLIENT LASTOFFER INCONCLUSIVE"
         ui.body.Text="MAIN: manually DECLINE the trade, then tap STOP / COPY. NEVER final Accept."
@@ -779,6 +793,54 @@ local function witnessTick(observed)
  end
 end
 
+-- C9 OBSERVATION ONLY: the real original P3 coordinator must FIRST
+-- supply a protected, paused P4 client snapshot. No Stage118 ADD/REMOVE
+-- witness is started and no new P3 trade request is dispatched here.
+local c9BoundOnce=false
+local function c9BindObservedProtected(r)
+    if type(r)~="table" then return end
+    if r.status=="P3_RESUMED_AFTER_CLIENT_TRADE_CLOSED" or
+       r.status=="BLOCKED" then
+        boundScope=nil
+        return
+    end
+    if r.status~="P4_TWO_SIDED_CLIENT_SNAPSHOT" or
+       not armed or not stillLive() or not targetStillExact() or
+       not supervisor or supervisor.isP3Paused()~=true or
+       boundScope~=nil or c9BoundOnce then return end
+    local root=io.trade()
+    local epoch=E.PDIDDLER_OUTGOING_SESSION
+    if not root or type(epoch)~="number" or
+       epoch~=math.floor(epoch) or epoch<1 then return end
+    local okLease,lease,meta=pcall(supervisor.currentBoundReadOnly)
+    if not okLease or type(lease)~="table" or
+       type(lease.capture)~="function" or type(meta)~="table" or
+       meta.status~="P3_BOUND_CANDIDATE_READ_ONLY" or
+       meta.authorizesOffer~=false or
+       meta.authorizesAccept~=false or
+       meta.serverCompletionProven~=false then return end
+    local okSnap,snapshot=pcall(lease.capture)
+    if not okSnap or type(snapshot)~="table" or
+       snapshot.status~="CLIENT_UNPRICED_TWO_SIDED_SNAPSHOT" or
+       snapshot.partnerExactClientBound~=true or
+       snapshot.part3Paused~=true or
+       snapshot.part4TradeVisible~=true or
+       snapshot.authorizesOffer~=false or
+       snapshot.authorizesAccept~=false or
+       snapshot.rawItemIdsAuthenticated~=false or
+       snapshot.offerRevisionAuthenticated~=false or
+       snapshot.pricesAuthenticated~=false or
+       snapshot.serverCompletionProven~=false or
+       snapshot.tradeOutcome~="UNKNOWN" then return end
+    -- This original HOST lexical table is constructed only from an
+    -- original protected P3/P4 read. A separate adapter further checks
+    -- that this exact table and the original facade remain live.
+    boundScope={jobId=game.JobId,
+       session="p3stage119:"..tostring(epoch),
+       root=root,localPlayer=LP,partnerPlayer=target}
+    c9BoundOnce=true
+end
+
 local watchdogCtx={
     getJobId=ctx.getJobId,
     isLive=stillLive,
@@ -791,9 +853,20 @@ local watchdogCtx={
         evidence.lastObservedStatus=tostring(r.status or "UNKNOWN")
         -- Read-only Stage101 identity comparisons are performed after the
         -- protected P3/P4 poll and before presenting the next exact step.
-        local okIdentity=pcall(witnessTick,r)
-        if not okIdentity then
-            completeIdentity("INCONCLUSIVE","STAGE101_WATCHDOG_ADAPTER_FAILURE")
+        if cfg.c9ResearchOnly==true then
+            -- Separate C9 mode: NO old five-gift Stage119 witness.
+            local okObservation=pcall(c9BindObservedProtected,r)
+            if not okObservation then
+                boundScope=nil
+                last=statusRecord("BLOCKED","C9_PROTECTED_CLIENT_OBSERVER_FAILED")
+                clipboard(last)
+                return
+            end
+        else
+            local okIdentity=pcall(witnessTick,r)
+            if not okIdentity then
+                completeIdentity("INCONCLUSIVE","STAGE101_WATCHDOG_ADAPTER_FAILURE")
+            end
         end
         last=statusRecord(r.status,r.reason)
         local ok=pcall(guide.show,guide,last)
@@ -833,7 +906,8 @@ ui.arm.Activated:Connect(function()
     })
     if success==true then
         armed=true
-        identityPhase="WAIT_EMPTY"
+        identityPhase=cfg.c9ResearchOnly and "C9_WAIT_PROTECTED"
+            or "WAIT_EMPTY"
         evidence.p3ArmObservedClient=true
         evidence.lastObservedStatus="P3_ARMED_BY_OPERATOR"
         E.PDIDDLER_SUPERVISED_P3_USED_JOB=game.JobId
@@ -850,7 +924,7 @@ if started~=true then
     stop(startReason or "WATCHDOG_NOT_SCHEDULED")
     return nil
 end
--- ONE extra read-only status method on the dedicated C9 fork.
+-- C9-only read-only host lease status; original P3 user-request stays manual.
 -- This is not a live market preview: publisher integrity and item instance
 -- identity remain unverified and the original Stage119 host is still
 -- purpose-bound to its manually ARM-ed P3/ALT request.
