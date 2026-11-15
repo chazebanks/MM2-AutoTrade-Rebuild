@@ -1,0 +1,31 @@
+name: Gingerscope System2 C8 Read-Only Replay Admission
+
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/c8_replay_admission.py'
+      - 'pdiddler/ci/test_system2_c8_replay_admission.py'
+      - 'pdiddler/ci/test_system2_c8_original_growth_integration.py'
+      - '.github/workflows/gingerscope-system2-c8-replay-admission.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  c8-admission:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Run C8 admission tests
+        run: python -m unittest pdiddler.ci.test_system2_c8_replay_admission pdiddler.ci.test_system2_c8_original_growth_integration -v
+      - name: Assert no game or network actions in C8 gate
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path("pdiddler/system2/c8_replay_admission.py").read_text()
+          for forbidden in ("FireServer(", "InvokeServer(", "requests.post(", "httpx.", "urllib.request", "os.system(", "subprocess."):
+              assert forbidden not in source, forbidden
+          PY
