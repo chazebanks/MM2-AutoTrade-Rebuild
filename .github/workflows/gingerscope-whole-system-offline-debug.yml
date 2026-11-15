@@ -188,3 +188,42 @@ jobs:
         run: |
           set -euo pipefail
           python3 -m pdiddler.ci.audit_runtime_dependency_pins
+
+  all-native-source-syntax:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Install SHA-256 pinned official Luau 0.746 compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/luau-ubuntu-0.746.zip"
+          curl -fsSL --retry 3 --connect-timeout 20 \
+            'https://github.com/luau-lang/luau/releases/download/0.746/luau-ubuntu.zip' \
+            -o "$archive"
+          echo "30f11c9cde8be2dc0e3066d210705532aac3726a2db89a6c5078080b6faa6cf8  $archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/luau-dist"
+          compiler="$(find "$RUNNER_TEMP/luau-dist" -type f -name luau-compile -print -quit)"
+          test -n "$compiler"
+          install -m 0755 "$compiler" "$RUNNER_TEMP/luau-compile"
+      - name: Compile all Roblox Luau and Lune source files (report each failure)
+        shell: bash
+        run: |
+          set -uo pipefail
+          failures=0;total=0
+          while IFS= read -r file; do
+            # Historical pure Lua 5.4 standalone test scripts are validated in
+            # the Python+Lua5.4 suites, not by the Roblox Luau parser.
+            if [[ "$file" == pdiddler/tests/*.lua ]]; then continue; fi
+            total=$((total+1))
+            if ! "$RUNNER_TEMP/luau-compile" --binary "$file" > /dev/null 2>"$RUNNER_TEMP/luau-error.txt"; then
+              echo "::error title=Luau syntax/compatibility issue::$file"
+              cat "$RUNNER_TEMP/luau-error.txt"
+              failures=$((failures+1))
+            fi
+          done < <(find pdiddler values -type f \( -name '*.lua' -o -name '*.luau' \) | sort)
+          echo "COMPLETE_LUAU_COMPILATION total=$total failed=$failures"
+          if (( failures )); then exit 1; fi
