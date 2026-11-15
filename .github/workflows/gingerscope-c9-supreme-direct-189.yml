@@ -67,6 +67,7 @@ jobs:
           fi
           echo 'C9_AUTONOMOUS_TRADE_AUTHORIZED=FALSE'
       - name: Verify first-party result never grants live trading
+        if: ${{ steps.direct.outcome == 'success' }}
         shell: bash
         run: |
           set -euo pipefail
