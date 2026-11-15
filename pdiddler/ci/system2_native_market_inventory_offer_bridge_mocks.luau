@@ -245,6 +245,9 @@ ok(raceAdapter~=nil,"C8 original C3 to C4 real scorer bridge created")
 local raceReport=raceAdapter:compare({
  {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
   give={{id="EmberbowChroma",quantity=1}},
+  receive={{id="Iceblaster",quantity=1}}},
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="FlowerwoodKnife",quantity=1}},
   receive={{id="Iceblaster",quantity=1}}}
 })
 eq(raceReport.status,"BLOCKED",
