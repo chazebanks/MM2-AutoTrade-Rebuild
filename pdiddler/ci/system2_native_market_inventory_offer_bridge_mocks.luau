@@ -213,6 +213,51 @@ eq(bilateral.alternatives[1].status,"RISK_FILTERED",
 eq(bilateral.alternatives[2].reason,"DUAL_PUBLISHER_PRICE_NOT_AVAILABLE",
  "genuine Flowerwood Supreme missing quote preserved")
 eq(bilateral.authorizesTrade,false,"full component3->component4 bridge is research-only")
+-- C8 restart: source-backed ORIGINAL C3 scanner+P4 GUI -> C4 race test.
+-- A refreshed census resets C3's client revision. If owned quantities change
+-- during comparison, revision 1 can recur and MUST NOT validate stale ranking.
+local raceScanner={getOwnInventory=function()
+ local snapshot=scannerSnapshot()
+ snapshot.rawOwned=quantities.EmberbowChroma+
+    quantities.FlowerwoodKnife+quantities.Gingerscope
+ return snapshot,nil
+end}
+local raceBridge,raceErr=glue.new({
+ core=core,captureAdapter=capture,scope=scope,game=game,players=players,
+ sync=sync,scannerApi=raceScanner,nameResolver=resolver,crosswalk=market,
+ isBoundSession=function()return active end,
+ utcNow=tick,monoNow=now,sourceRetrievedEpoch=sourceEpoch})
+ok(raceBridge~=nil,"C8 real C3 separate census bridge created")
+eq(raceBridge.refreshOwn().status,"READONLY_OWN_MARKET_BOUND",
+ "C8 starting real scanner census valid")
+local raceBefore=raceBridge.researchContext()
+eq(raceBefore.clientOfferRevision,1,"C8 original GUI first offer revision")
+eq(raceBefore.ownCounts.EmberbowChroma,6,"C8 original scanner reads six")
+local raceCore={compare=function(first,source,options)
+ quantities.EmberbowChroma=7
+ eq(raceBridge.refreshOwn().status,"READONLY_OWN_MARKET_BOUND",
+  "C8 original scanner refreshes to seven inside strategy compare")
+ return nativeBilateral.compare(first,source,options)
+end}
+local raceAdapter,raceAdapterErr=nativeBilateralBridge.new({
+ marketBridge=raceBridge,bilateralCore=raceCore,crosswalk=market})
+ok(raceAdapter~=nil,"C8 original C3 to C4 real scorer bridge created")
+local raceReport=raceAdapter:compare({
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="EmberbowChroma",quantity=1}},
+  receive={{id="Iceblaster",quantity=1}}}
+})
+eq(raceReport.status,"BLOCKED",
+ "C8 census change amid comparison must not reuse old recommendation")
+eq(raceReport.reason,"OWN_INVENTORY_CHANGED_DURING_STRATEGY_COMPARISON",
+ "C8 same revision and market hash cannot disguise inventory mutation")
+local raceAfter=raceBridge.researchContext()
+eq(raceAfter.clientOfferRevision,1,
+ "C8 original C3 refresh resets same GUI to the same revision 1")
+eq(raceAfter.ownCounts.EmberbowChroma,7,
+ "C8 originally scanned owned quantity genuinely changed")
+quantities.EmberbowChroma=6
+
 local repeatFrame=bridge.observeOffer()
 eq(repeatFrame.clientRevision,1,"unchanged stable client revision")
 ours:FindFirstChild("Container"):FindFirstChild("Amount").Text="x5"
