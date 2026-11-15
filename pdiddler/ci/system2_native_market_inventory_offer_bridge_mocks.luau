@@ -718,7 +718,7 @@ local c8SellerStages={
 }
 local c8Full=c8Gate:replay(c8Options,c8SellerStages)
 eq(c8Full.status,"OFFLINE_C8_ORIGINAL_CHAIN_RESEARCH_ONLY",
- "C8 original C3/P4→C4→C5→C6→C7 must complete one protected offline replay")
+ "C8 original C3/P4→C4→C5→C6→C7 replay, blocked reason "..tostring(c8Full.reason))
 eq(c8Full.c4Status,"ABSTAIN_PARTNER_INTENT_UNVERIFIED",
  "C8 actual bilateral research abstains without verified partner consent")
 eq(c8Full.c5Status,"RESEARCH_GROWTH_ROUTE_DISCOVERY_ONLY",
