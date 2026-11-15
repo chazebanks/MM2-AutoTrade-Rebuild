@@ -415,6 +415,38 @@ eq(c6Observer.snapshot().status,"BLOCKED",
  "C8 post-rebind snapshot cannot carry a prior lease wishlist")
 currentProtectedLease=lease
 
+-- C8 second independent C6 counterexample: a P3/C3 own-census
+-- refresh resets the offer revision even though the partner's stack mutates.
+-- Chat processing spans TWO original C3/P4 GUI readings: do not attribute a
+-- message to a trade whose terms changed, despite identical lease+revision.
+local c6RevisedBridge=buildForProtectedLease(lease)
+local c6ReadNumber=0
+local c6OfferChanged=nil
+local c6NoContentDrift,c6NoContentWhy=c6.new({
+ bound=chatBound,crosswalk=market,now=now,readScope=oldChatScope,
+ readContext=function()
+  c6ReadNumber+=1
+  if c6ReadNumber==1 then
+   local before=c6RevisedBridge.researchContext()
+   local theirAmount=theirs:FindFirstChild("Container"):FindFirstChild("Amount")
+   theirAmount.Text="x2"
+   eq(c6RevisedBridge.refreshOwn().status,"READONLY_OWN_MARKET_BOUND",
+    "C8 original C3 inventory refresh resets local GUI revision")
+   return before
+  end
+  return c6RevisedBridge.researchContext()
+ end})
+ok(c6NoContentDrift~=nil,"C8 passive C6 constructed from actual C3/P4 GUI")
+local c6ChangedOffer=c6NoContentDrift.ingest({
+ speakerUserId=opponent.UserId,text="@MainTestUser_Alpha LF Harvester",
+ messageId="C8_CHAT_DURING_CHANGED_OFFER_ABA",
+ channelName="RBXGeneral",observedAt=monotonic})
+eq(c6ChangedOffer.status,"BLOCKED",
+ "C8 C6 must invalidate chat attribution when partner changes offered copies")
+eq(c6ChangedOffer.reason,"PARTNER_OFFER_LEASE_OR_SOURCE_CHANGED_MID_MESSAGE",
+ "C8 same local lease/revision must not mask changed GUI offer contents")
+theirs:FindFirstChild("Container"):FindFirstChild("Amount").Text=""
+
 local repeatFrame=bridge.observeOffer()
 eq(repeatFrame.clientRevision,1,"unchanged stable client revision")
 ours:FindFirstChild("Container"):FindFirstChild("Amount").Text="x5"
