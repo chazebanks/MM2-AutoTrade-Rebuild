@@ -787,4 +787,103 @@ eq(c8OtherSession.status,"BLOCKED",
 eq(c8OtherSession.reason,"C8_NATIVE_C7_WRONG_OR_INACTIVE_PROTECTED_LEASE",
  "C8 different lease privacy-preserving boolean session binding enforced")
 
+-- A failed protected lease/source event must not corrupt the in-memory
+-- baseline when original client scope is actually restored.
+eq(c8Gate:replay(c8Options,c8SellerStages).status,
+ "OFFLINE_C8_ORIGINAL_CHAIN_RESEARCH_ONLY",
+ "C8 recovery after revoked lease and stale publisher (same known valid scope)")
+-- C8 private V2 local revision must match C3 current offer revision even if
+-- all session IDs match; no stale success/acceptance label crosses revisions.
+local c8WrongRevision={matchesOriginalBoundScope=c8Envelope.matchesOriginalBoundScope,
+ summary=function()
+  local original=c8Envelope.summary()
+  local copy={}
+  for k,v in pairs(original) do copy[k]=v end
+  copy.currentClientRevision=999
+  return copy
+ end}
+local c8RevGate=c8GateSource.new({
+ c3=growthC3,c4=c8C4Gate,c5=c8C5Gate,
+ c6=c8PartnerChat,c7=c8WrongRevision})
+eq(c8RevGate:replay(c8Options,c8SellerStages).reason,
+ "C8_NATIVE_C7_OFFER_REVISION_NOT_CURRENT",
+ "C8 stale C7 local revision is not valid current GUI evidence")
+-- Reject forged C7 final Accept even with otherwise correct scope.
+local c8FalseAuth={matchesOriginalBoundScope=c8Envelope.matchesOriginalBoundScope,
+ summary=function()
+  local original=c8Envelope.summary()
+  local copy={}
+  for k,v in pairs(original) do copy[k]=v end
+  copy.authorizesAccept=true
+  return copy
+ end}
+local c8ForgedGate=c8GateSource.new({
+ c3=growthC3,c4=c8C4Gate,c5=c8C5Gate,
+ c6=c8PartnerChat,c7=c8FalseAuth})
+eq(c8ForgedGate:replay(c8Options,c8SellerStages).reason,
+ "C8_ORIGINAL_C7_UNVERIFIED_TRANSPORT_OR_AUTHORITY",
+ "C8 forged final Accept permission cannot pass the integrated replay")
+-- P3 job/server hop after C7 summary, before final original GUI read.
+local c8Hop={matchesOriginalBoundScope=c8Envelope.matchesOriginalBoundScope,
+ summary=function()
+  game.JobId="DIFFERENT_ORIGINAL_MM2_SERVER"
+  return c8Envelope.summary()
+ end}
+local c8HopGate=c8GateSource.new({
+ c3=growthC3,c4=c8C4Gate,c5=c8C5Gate,
+ c6=c8PartnerChat,c7=c8Hop})
+eq(c8HopGate:replay(c8Options,c8SellerStages).reason,
+ "C8_ORIGINAL_SOURCE_SCOPE_OR_OFFER_CHANGED_DURING_REPLAY",
+ "C8 actual original P4 GUI packet denies server hop mid-replay")
+game.JobId=job
+-- Same-userID player Name no longer matches P4 GUI username: no auto
+-- acceptance or carryover of prior speaker preferences.
+local c8OtherPartner={matchesOriginalBoundScope=c8Envelope.matchesOriginalBoundScope,
+ summary=function()
+  opponent.Name="DIFFERENT_BOUND_TRADING_PARTNER"
+  return c8Envelope.summary()
+ end}
+local c8OtherPartnerGate=c8GateSource.new({
+ c3=growthC3,c4=c8C4Gate,c5=c8C5Gate,
+ c6=c8PartnerChat,c7=c8OtherPartner})
+eq(c8OtherPartnerGate:replay(c8Options,c8SellerStages).reason,
+ "C8_ORIGINAL_SOURCE_SCOPE_OR_OFFER_CHANGED_DURING_REPLAY",
+ "C8 changed real GUI account name invalidates original partner association")
+opponent.Name="PartnerUser"
+-- C3 profile refreshed with a new actual owned key but SAME qty and
+-- SAME client offer revision. C8 must compare true raw inventory contents.
+local c8ReplaceCensus={matchesOriginalBoundScope=c8Envelope.matchesOriginalBoundScope,
+ summary=function()
+  goalOwned[3]="Slasher"
+  eq(growthC3.refreshOwn().status,"READONLY_OWN_MARKET_BOUND",
+   "C8 original C3 independent four-weapon scanner refresh")
+  return c8Envelope.summary()
+ end}
+local c8ReplaceGate=c8GateSource.new({
+ c3=growthC3,c4=c8C4Gate,c5=c8C5Gate,
+ c6=c8PartnerChat,c7=c8ReplaceCensus})
+eq(c8ReplaceGate:replay(c8Options,c8SellerStages).reason,
+ "C8_ORIGINAL_SOURCE_SCOPE_OR_OFFER_CHANGED_DURING_REPLAY",
+ "C8 changed owned weapon key hidden by unchanged qty/revision invalidates")
+goalOwned[3]="Harvester"
+eq(growthC3.refreshOwn().status,"READONLY_OWN_MARKET_BOUND",
+ "C8 original source can restore owned census without leaking trade actions")
+eq(c8Gate:replay(c8Options,c8SellerStages).status,
+ "OFFLINE_C8_ORIGINAL_CHAIN_RESEARCH_ONLY",
+ "C8 recovers after changed raw owned weapon was rejected")
+-- Finally change the partner's actual P4 GUI Amount without changing job,
+-- partner, lease, owned census, or source after C6 saw the old offer.
+local c8LateOffer={matchesOriginalBoundScope=c8Envelope.matchesOriginalBoundScope,
+ summary=function()
+  theirs:FindFirstChild("Container"):FindFirstChild("Amount").Text="x2"
+  return c8Envelope.summary()
+ end}
+local c8LateOfferGate=c8GateSource.new({
+ c3=growthC3,c4=c8C4Gate,c5=c8C5Gate,
+ c6=c8PartnerChat,c7=c8LateOffer})
+eq(c8LateOfferGate:replay(c8Options,c8SellerStages).reason,
+ "C8_ORIGINAL_SOURCE_SCOPE_OR_OFFER_CHANGED_DURING_REPLAY",
+ "C8 changed two-sided offer after C6/C7 refuses stale planned routes")
+theirs:FindFirstChild("Container"):FindFirstChild("Amount").Text=""
+
 print("SYSTEM2_LIVE_MARKET_NATIVE_BRIDGE_ASSERTIONS_PASSED "..tostring(count))
