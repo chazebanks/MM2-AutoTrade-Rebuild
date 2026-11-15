@@ -87,6 +87,15 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/supervised_p3_native_runner_mocks.luau
+      - name: C8 native V2 client envelope through real Python feedback and replay admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'rm -f pdiddler/ci/.generated_system2_v2_synthetic.json' EXIT
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_v2_feedback_staging_mocks.luau
+          python3 -m unittest -v \
+            pdiddler.ci.test_system2_native_to_private_v2_compatibility \
+            pdiddler.ci.test_system2_c8_native_v2_bridge
       - name: Assert that a failing Luau runtime assertion fails CI
         shell: bash
         run: |
