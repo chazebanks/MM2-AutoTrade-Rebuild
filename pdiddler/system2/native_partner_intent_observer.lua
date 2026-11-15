@@ -15,6 +15,7 @@ local function denied(reason)
    readOnly=true,personalReplyProven=false,verifiedPartnerPreference=false,
    verifiedTradeAcceptance=false,tradeOutcome="UNKNOWN",
    mayUseForStrategyLearning=false,maySendDiscordWebhook=false,
+   mayReportProfit=false,
    authorizesChat=false,authorizesTrade=false,authorizesOffer=false,
    authorizesAccept=false,estimatedAcceptProbability=nil}
 end
