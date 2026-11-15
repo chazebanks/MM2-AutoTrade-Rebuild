@@ -367,6 +367,11 @@ function M.new(deps)
   return {schema="gingerscope-system2-local-bilateral-context-v1",
    status="LOCAL_READONLY_MARKET_OFFER_CONTEXT",
    ownCounts=copy,offer=offer,
+   -- Private, client-only binding taken from the *actual C3 constructor*
+   -- whose P4 capture already validates job/lease/partner/root. It must
+   -- never be exported to GitHub, Discord, research logs or public telemetry.
+   sessionScope={jobId=deps.jobId,leaseId=deps.leaseId,
+    partnerUserId=deps.partnerUserId},
    crosswalkRowsSha256=self.market.crosswalkRowsSha256,
    sourceRetrievedUtc=self.market.sourceRetrievedUtc,
    clientOnly=true,readOnly=true,clientOfferRevision=offer.clientRevision,
