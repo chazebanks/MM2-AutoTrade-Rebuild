@@ -11,8 +11,8 @@ end
 swap('local runner=fs.readFile("pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua")',
  'local runner=fs.readFile("pdiddler/supervised/STAGE119_C9_READONLY_RESEARCH_NATIVE.lua")',
  "C9 must truly run new protected host research variant")
-swap('    stage119LastOfferReadOnly=true,',
- '    stage119LastOfferReadOnly=true,c9ResearchOnly=true,',
+swap('   stage119LastOfferReadOnly=true,',
+ '   stage119LastOfferReadOnly=true,c9ResearchOnly=true,',
  "C9 dedicated operator research opt-in remains mandatory")
 swap('eq(#x.readSources,12,"exact 12 frozen modules including protected P3 and Stage118")',
  'eq(#x.readSources,13,"exact original P3/P4 source plus pinned C9 adapter")',
