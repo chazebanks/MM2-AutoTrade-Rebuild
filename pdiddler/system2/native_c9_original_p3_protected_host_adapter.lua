@@ -105,6 +105,7 @@ function M.new(d)
       d.players,partner.UserId)
   if not okB or current~=bound or not validScope(current) or
     not okJ or newJob~=job or d.game.JobId~=job or
+    d.game.PlaceId~=142823291 or
     not okE or newEpoch~=epoch or
     current.jobId~=job or
     current.session~="p3stage119:"..tostring(epoch) or
