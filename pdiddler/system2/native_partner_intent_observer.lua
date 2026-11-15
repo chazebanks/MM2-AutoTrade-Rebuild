@@ -201,6 +201,12 @@ local function acceptScope(bound,scope,ctx)
    ctx.clientOfferRevision<1 or
    ctx.clientOfferRevision~=math.floor(ctx.clientOfferRevision) or
    ctx.clientOfferRevision~=ctx.offer.clientRevision or
+   -- The C3 original scanner/P4 GUI is bound to its own constructor scope.
+   -- A stale readScope callback must never bless a NEW active C3 lease.
+   type(ctx.sessionScope)~="table" or
+   ctx.sessionScope.jobId~=bound.jobId or
+   ctx.sessionScope.leaseId~=bound.leaseId or
+   ctx.sessionScope.partnerUserId~=bound.partnerUserId or
    type(scope.jobId)~="string" or scope.jobId~=bound.jobId or
    scope.leaseId~=bound.leaseId or
    scope.localUserId~=bound.localUserId or
