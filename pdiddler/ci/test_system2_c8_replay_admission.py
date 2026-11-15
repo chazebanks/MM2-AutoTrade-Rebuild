@@ -15,8 +15,12 @@ def sample():
             authorizesAccept=False, authorizesChat=False,
             mayUseForStrategyLearning=False, mayReportProfit=False,
             maySendDiscordWebhook=False, serverCompletionProven=False)
-    items["feedback"].update(realResponseRewardLabelsForModel=0,
+    items["feedback"].update(schema="gingerscope-system2-real-v2-response-evidence-gate-v1",
+        status="PRIVATE_BOT_V2_RESPONSE_EPISODES_CLASSIFIED_RESEARCH_ONLY",
+        realResponseRewardLabelsForModel=0,
         offerBundleFeaturesAvailableInV2=False, knownTradeSettlements=0)
+    items["growth"].update(schema="gingerscope-system2-multitrade-growth-replay-v1",
+        status="OFFLINE_GROWTH_PATH_SIMULATED")
     items["chat"]["personalReplyProven"] = False
     return items
 
@@ -75,6 +79,20 @@ class C8ReplayAdmission(unittest.TestCase):
                         ("sourceSha256",None)):
             x=copy.deepcopy(CONTEXT);x[key]=bad
             self.assertEqual(review(sample(),expected_context=x)["status"],"BLOCKED")
+    def test_forged_upstream_success_status(self):
+        for name in ("growth", "feedback"):
+            with self.subTest(name=name):
+                x=sample();x[name]["status"]="RESEARCH_ONLY"
+                self.assertEqual(review(x,expected_context=CONTEXT)["status"],"BLOCKED")
+    def test_forged_upstream_schema(self):
+        for name in ("growth", "feedback"):
+            with self.subTest(name=name):
+                x=sample();x[name]["schema"]="invented"
+                self.assertEqual(review(x,expected_context=CONTEXT)["status"],"BLOCKED")
+    def test_stack_uncertainty_blocks_comparison(self):
+        x=sample();x["growth"]["status"]="OFFLINE_GROWTH_PATH_STACK_UNCERTAIN"
+        self.assertEqual(review(x,expected_context=CONTEXT)["reason"],
+                         "C8_STACK_VALUATION_NOT_RELIABLE")
     def test_hypothetical_gingerscope_not_completed(self):
         x=sample();x["growth"]["goalTargetHypotheticallyReceived"]=True
         result=review(x,expected_context=CONTEXT)
