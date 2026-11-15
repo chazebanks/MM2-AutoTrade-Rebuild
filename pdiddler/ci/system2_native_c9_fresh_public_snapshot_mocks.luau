@@ -106,7 +106,8 @@ check(forged,nil,"C9 forged Accept claim in public receipt never used")
 check(bad.reason,"C9_RESEARCH_CROSSWALK_ADMISSION_MISMATCH",
  "C9 no source publisher can authorize Accept")
 right=receiptTxt
-local wrong=clone(market);wrong.items[1].rawGameKeyCandidate="Gingerscope"
+local wrong=clone(market)
+wrong.items[2].rawGameKeyCandidate=wrong.items[1].rawGameKeyCandidate
 left=serde.encode("json",wrong)
 local duplicate,whyDup=engine:open()
 check(duplicate,nil,"C9 original key duplication must block")
