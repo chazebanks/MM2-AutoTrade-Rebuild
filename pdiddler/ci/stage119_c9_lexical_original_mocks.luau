@@ -42,6 +42,10 @@ do
  x.screen.Enabled=true
  eq(x.E.__WATCH.tick().status,"P4_TWO_SIDED_CLIENT_SNAPSHOT",
     "C9 first original P3→P4 actual protected GUI read")
+ eq(x.named("CurrentStep").Text,"C9 READ-ONLY | 2/2 P3/P4 OBSERVED",
+    "C9 operator sees read-only research instruction, not old five-gift UI")
+ eq(x.named("WhatToDo").Text:find("NO weapon add/remove",1,true)~=nil,
+    true,"C9 original host must explicitly prohibit legacy ALT gift lane")
  x.setTime(100.22)
  x.E.__WATCH.tick()
  local c9=runtime.c9ReadOnlyLeaseStatus()
@@ -73,8 +77,12 @@ end
 ]]
 local key=table.concat({"do"," local x=fakeEnv()"," start(x)"," local r=conclude(x,13)"},"\n")
 assert(old:find(key,1,true),"C9 injected regression anchor not found")
-old=old:gsub(key:gsub("([^%w])","%%%1"),function()
- return insert.."\n"..key
-end,1)
+-- Existing Stage119's five-step ALT add/remove tests run UNCHANGED
+-- in the preceding original-frozen suite. The C9 fork deliberately does
+-- not run the gift lane; cut at its first test AFTER loading the same
+-- original fixture constructors and use only new C9 observations.
+local at=old:find(key,1,true)
+assert(at,"C9 original harness test-lane boundary missing")
+old=old:sub(1,at-1)..insert.."\n"
 luau.load(old)()
 print("C9_TRUE_ORIGINAL_STAGE119_LEXICAL_HOST_NATIVE_PASS")
