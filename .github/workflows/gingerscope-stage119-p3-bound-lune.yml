@@ -3,6 +3,10 @@ on:
   pull_request:
     paths:
       - 'pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua'
+      - 'pdiddler/supervised/STAGE119_C9_READONLY_RESEARCH_NATIVE.lua'
+      - 'pdiddler/system2/native_c9_original_p3_protected_host_adapter.lua'
+      - 'pdiddler/ci/stage119_c9_lexical_original_mocks.luau'
+      - 'pdiddler/ci/test_stage119_c9_lexical_parity.py'
       - 'pdiddler/supervised/STAGE119_P3_BOUND_READONLY_START.lua'
       - 'pdiddler/ci/stage119_p3_bound_original_mocks.luau'
       - 'pdiddler/ci/test_stage119_p3_parity_release_gate.py'
@@ -64,6 +68,9 @@ jobs:
           curl -fsSL --retry 3 --max-time 50 "$base/0e8e88fba07d72a7e1fb51178e0b105c3a647568/pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua" -o /tmp/gingerscope-stage220/stage119.lua
           test "$(git hash-object /tmp/gingerscope-stage220/stage119.lua)" = 'fc25514564e78d390b089742eb4e7da7508c12fa'
           cmp -s pdiddler/supervised/STAGE119_P3_BOUND_READONLY_NATIVE.lua /tmp/gingerscope-stage220/stage119.lua
+          curl -fsSL --retry 3 --max-time 50 "$base/cc445e5afce631e0545cd7e0ef79b2dc63651b20/pdiddler/system2/native_c9_original_p3_protected_host_adapter.lua" -o /tmp/gingerscope-stage220/c9_host_adapter.lua
+          test "$(git hash-object /tmp/gingerscope-stage220/c9_host_adapter.lua)" = '11f8e4794bed009fb8cf910750e6d3d72a4ba805'
+          cmp -s pdiddler/system2/native_c9_original_p3_protected_host_adapter.lua /tmp/gingerscope-stage220/c9_host_adapter.lua
           grep -Fq 'function supervisor.currentBoundReadOnly()' /tmp/gingerscope-stage220/frozen_boot.lua
           grep -Fq 'function controller.currentBoundReadOnly()' /tmp/gingerscope-stage220/frozen_coordinator.lua
           echo ACTUAL_FROZEN_PR221_P3_P4_STAGE119_SOURCE_BLOBS_VERIFIED
@@ -82,6 +89,16 @@ jobs:
         run: |
           set -euo pipefail
           "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_p3_bound_original_mocks.luau
+      - name: Test genuine Stage119 C9 research variant on original native P3 P4 fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_lexical_original_mocks.luau
+      - name: Enforce original frozen Stage119 and C9 fork minimal diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_stage119_c9_lexical_parity
       - name: Enforce strict RED-to-GREEN original P3 Stage119 parity
         shell: bash
         run: |
