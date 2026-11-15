@@ -1,0 +1,76 @@
+name: Gingerscope C9 live four-page public research source admission
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/c9_fresh_market_admission.py'
+      - 'pdiddler/ci/test_c9_fresh_market_admission.py'
+      - '.github/workflows/gingerscope-c9-current-public-market-capture.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  c9-real-four-page-current-admission:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned major source HTML parser
+        run: python3 -m pip install --disable-pip-version-check 'beautifulsoup4>=4.12,<5'
+      - name: Retrieve original Stage83 exact immutable weapon key source
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 --max-time 45 \
+            'https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua' \
+            -o "$RUNNER_TEMP/c9-stage83-original.lua"
+          test "$(git hash-object "$RUNNER_TEMP/c9-stage83-original.lua")" = '40e2a0ff01b70b2d0181c62cae347a08da82bcb8'
+          echo C9_ORIGINAL_STAGE83_189_KEY_BLOB=VERIFIED
+      - name: Run hostile synthetic market replay (not a live price test)
+        shell: bash
+        env:
+          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/c9-stage83-original.lua
+        run: |
+          set -euo pipefail
+          python3 -m unittest -v pdiddler.ci.test_c9_fresh_market_admission
+      - name: FETCH ACTUAL public MM2 Trade Hub four pages (all-or-none)
+        shell: bash
+        env:
+          GINGERSCOPE_MARKET_OUTPUT: ${{ runner.temp }}/c9-public-source-candidate.json
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.system2.mm2tradehub_market_candidate
+      - name: Reconcile LIVE fetched source against immutable original 189 game keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.system2.public_market_gamekey_crosswalk \
+            --market "$RUNNER_TEMP/c9-public-source-candidate.json" \
+            --stage83 "$RUNNER_TEMP/c9-stage83-original.lua" \
+            --evaluated-utc "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+            --output "$RUNNER_TEMP/c9-exact-189-crosswalk.json"
+      - name: Independent C9 fresh candidate/timestamp/source/row identity admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pdiddler.system2.c9_fresh_market_admission \
+            --source "$RUNNER_TEMP/c9-public-source-candidate.json" \
+            --registry "$RUNNER_TEMP/c9-stage83-original.lua" \
+            --crosswalk "$RUNNER_TEMP/c9-exact-189-crosswalk.json" \
+            --evaluated-utc "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+            --output "$RUNNER_TEMP/c9-source-admission.json"
+      - name: Archive ACTUAL candidate research evidence without user account data
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-c9-current-189-market-research-only
+          path: |
+            ${{ runner.temp }}/c9-public-source-candidate.json
+            ${{ runner.temp }}/c9-exact-189-crosswalk.json
+            ${{ runner.temp }}/c9-source-admission.json
+          retention-days: 7
+          if-no-files-found: error
