@@ -425,5 +425,12 @@ for _,bad in ipairs({
  eq(lease.capture().status,"REJECTED","permanent revoke after "..bad.key)
  eq(#x.sends,0,"no remote after forged "..bad.key)
 end
+-- C9 host adapter MUST reuse the exact original coordinator lease facade,
+-- never a synthetic separately invented P3/P4 active-session token.
+luau.load(fs.readFile(
+ "pdiddler/ci/supervised_c9_original_protected_host_regression.lua"))().run({
+ fixture=fixture,bind=bind,acceptP3=acceptP3,eq=eq,
+})
+
 print("[PASS] real P3 paused rotation to original P4 GUI observer, ",tests)
 print("[PASS] no offer/request/Accept, exact fresh processed user, safe P3 resumption")
