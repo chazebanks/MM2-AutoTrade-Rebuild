@@ -14,7 +14,7 @@ COMPOSER=ROOT/"pdiddler/system2/native_c9_original_host_market_composer.lua"
 
 def git_blob(p):
     b=p.read_bytes()
-    return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\\0"+b).hexdigest()
+    return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest()
 
 class C9MarketNativeIntegrity(unittest.TestCase):
     def test_immutable_original_and_prior_stage119_sources(self):
