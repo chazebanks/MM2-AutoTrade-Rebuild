@@ -628,4 +628,163 @@ local nope,err=core.new({scannerApi=reader,sync=sync,crosswalk=counterfeit,
  partnerUserId=opponent.UserId})
 eq(nope,nil,"forged trade authorization rejected")
 eq(err,"SOURCE_CROSSWALK_CONTRACT_INVALID","source authority denial")
+-- C8 end-to-end ORIGINAL-SOURCE *read-only* research, no user actions:
+-- genuine C3 scanner+P4 GUI, C4 bilateral scorer, C5 bounded multi-step
+-- search, C6 partner-speaker chat, C7 private native V2 summary, all wired
+-- to a single protected synthetic P3/P4 job/lease. This is not MM2 live.
+currentProtectedLease=lease
+active=true
+monotonic=1.4
+utc=sourceEpoch+20
+ours.Attributes.ItemId="Frostsaber"
+ours:FindFirstChild("ItemName"):FindFirstChild("Label").Text=rows.Frostsaber.expectedGameName
+ours:FindFirstChild("Container"):FindFirstChild("Amount").Text=""
+ours:FindFirstChild("Tags").children.Chroma.Visible=false
+theirs.Attributes.ItemId="SnowDagger"
+theirs:FindFirstChild("ItemName"):FindFirstChild("Label").Text=rows.SnowDagger.expectedGameName
+theirs:FindFirstChild("Container"):FindFirstChild("Amount").Text=""
+appendSlot(theirList,2,"Icepiercer",rows.Icepiercer.expectedGameName,"",false)
+local goalOwned={"Frostsaber","Iceblaster","Harvester","OrangeSeer"}
+local growthScanner={getOwnInventory=function()
+ local result={items={},seen={},rawOwned=#goalOwned,unmapped=0,badQty=0,
+  fingerprint="",total=99999999,unpriced=#goalOwned}
+ for _,id in ipairs(goalOwned) do
+  local v=rows[id]
+  result.items[#result.items+1]={id=id,cat="Weapons",
+   name=v.expectedGameName,qty=1,page=v.marketCategory,type=v.gameItemType}
+  result.seen[#result.seen+1]=id.."x1"
+ end
+ table.sort(result.seen)
+ result.fingerprint=table.concat(result.seen,"|")
+ return result,nil
+end}
+local growthC3,whyGrowthC3=glue.new({
+ core=core,captureAdapter=capture,scope=scope,game=game,players=players,
+ sync=sync,scannerApi=growthScanner,nameResolver=resolver,crosswalk=market,
+ isBoundSession=function()return active and currentProtectedLease==lease end,
+ utcNow=tick,monoNow=now,sourceRetrievedEpoch=sourceEpoch})
+ok(growthC3~=nil,"C8 real scanner/P4 GUI research bridge for target acquisition")
+eq(growthC3.refreshOwn().status,"READONLY_OWN_MARKET_BOUND",
+ "C8 original scanner observes four owned weapons with NO Gingerscope")
+local c8Start=growthC3.researchContext()
+eq(c8Start.ownCounts.Gingerscope,nil,
+ "C8 original source client census does not already own protected target")
+eq(c8Start.offer.their.items[1].id,"SnowDagger",
+ "C8 genuine P4 GUI gives first independently identifiable candidate")
+eq(c8Start.offer.their.items[2].id,"Icepiercer",
+ "C8 genuine P4 GUI gives second independent candidate")
+local c8C4Gate,c8C4Why=nativeBilateralBridge.new({
+ marketBridge=growthC3,bilateralCore=nativeBilateral,crosswalk=market})
+ok(c8C4Gate~=nil,"C8 actual C3 to C4 strategy scorer")
+local c8C5Core=luau.load(fs.readFile(base.."native_multistep_growth_shadow.lua"))()
+local c8C5Glue=luau.load(fs.readFile(base.."native_multistep_growth_bridge.lua"))()
+local c8C5Gate,c8C5Why=c8C5Glue.new({
+ marketBridge=growthC3,growthCore=c8C5Core,
+ bilateralCore=nativeBilateral,crosswalk=market})
+ok(c8C5Gate~=nil,"C8 genuine C3 to C4 oracle to C5 growth planner")
+local c8PartnerChat,c8PartnerErr=c6.new({
+ bound=chatBound,crosswalk=market,
+ readContext=function()return growthC3.researchContext()end,
+ readScope=oldChatScope,now=now})
+ok(c8PartnerChat~=nil,"C8 C6 partner attribution reads same original C3")
+local c8ChatSignal=c8PartnerChat.ingest({
+ speakerUserId=opponent.UserId,text="@MainTestUser_Alpha LF Harvester",
+ messageId="C8_COMPLETE_ORIGINAL_CHAIN_C6_DIRECT",
+ channelName="RBXGeneral",observedAt=monotonic})
+eq(c8ChatSignal.personalReplyProven,true,
+ "C8 speaker-bound C6 signal from actual original C3/P4 chain")
+local c8GateSource=luau.load(fs.readFile(base.."native_c8_original_source_replay.lua"))()
+local c8Gate,c8GateWhy=c8GateSource.new({
+ c3=growthC3,c4=c8C4Gate,c5=c8C5Gate,
+ c6=c8PartnerChat,c7=c8Envelope})
+ok(c8Gate~=nil,"C8 final original C3 through C7 gate constructed")
+local c8Options={
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="Frostsaber",quantity=1}},
+  receive={{id="SnowDagger",quantity=1}}},
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="Iceblaster",quantity=1}},
+  receive={{id="Icepiercer",quantity=1}}}
+}
+local c8SellerStages={
+ {kind="EXPLICIT_HYPOTHETICAL_FUTURE_SELLER_STOCK",
+  stock={{id="Waves_K",quantity=1},{id="FlowerwoodGun",quantity=1},
+   {id="Ocean_G",quantity=1},{id="Blizzard",quantity=1}},
+  availabilityVerified=false,willingnessVerified=false},
+ {kind="EXPLICIT_HYPOTHETICAL_FUTURE_SELLER_STOCK",
+  stock={{id="Snowcannon",quantity=1},{id="SunsetKnife",quantity=1},
+   {id="Bauble",quantity=1},{id="SunsetGun",quantity=1}},
+  availabilityVerified=false,willingnessVerified=false},
+}
+local c8Full=c8Gate:replay(c8Options,c8SellerStages)
+eq(c8Full.status,"OFFLINE_C8_ORIGINAL_CHAIN_RESEARCH_ONLY",
+ "C8 original C3/P4→C4→C5→C6→C7 must complete one protected offline replay")
+eq(c8Full.c4Status,"ABSTAIN_PARTNER_INTENT_UNVERIFIED",
+ "C8 actual bilateral research abstains without verified partner consent")
+eq(c8Full.c5Status,"RESEARCH_GROWTH_ROUTE_DISCOVERY_ONLY",
+ "C8 actual C5 generates multiple real-source hypothetical growth paths")
+ok(c8Full.c5HypotheticalRouteCount>=2,
+ "C8 multi-step planner genuinely compares different growth paths")
+eq(c8Full.c6Status,"CLIENT_ONLY_PASSIVE_PARTNER_PREFERENCE_RESEARCH",
+ "C8 real C6 passive chat research integrated")
+eq(c8Full.v2EventsStagedLocally,5,"C8 original V2 client-only staged episode")
+eq(c8Full.authorizesOffer,false,"C8 full replay cannot place offer")
+eq(c8Full.authorizesAccept,false,"C8 full replay cannot press final Accept")
+eq(c8Full.mayUseForStrategyLearning,false,"C8 unknown client feedback cannot train")
+eq(c8Full.actualTradeOutcome,"UNKNOWN","C8 no fabricated settled trade")
+eq(c8Full.hasAuthenticatedGameSettlement,false,
+ "C8 client-only C3/P4 source is not game-server evidence")
+local c8Rendered=serde.encode("json",c8Full)
+for _,private in ipairs({job,lease,tostring(localPlayer.UserId),
+ tostring(opponent.UserId),"MainTestUser_Alpha","Frostsaber","SnowDagger"}) do
+ eq(c8Rendered:find(private,1,true),nil,
+  "C8 combined summary never exports private trade or item identities")
+end
+-- C8 adversarial end-to-end protected lease swap after C7 summary, before
+-- final C3 read; even C4/C5 internal reads can each have been stable.
+local c8LostLease={summary=function()
+ currentProtectedLease="P3_PROTECTED_NEW_LEASE_99"
+ return c8Envelope.summary()
+end,matchesOriginalBoundScope=c8Envelope.matchesOriginalBoundScope}
+local c8ChangedGate=c8GateSource.new({
+ c3=growthC3,c4=c8C4Gate,c5=c8C5Gate,c6=c8PartnerChat,c7=c8LostLease})
+local c8Changed=c8ChangedGate:replay(c8Options,c8SellerStages)
+eq(c8Changed.status,"BLOCKED",
+ "C8 lease turnover even after planning invalidates whole chain")
+eq(c8Changed.reason,"C8_ORIGINAL_SOURCE_SCOPE_OR_OFFER_CHANGED_DURING_REPLAY",
+ "C8 source reader proves old protected lease was revoked")
+currentProtectedLease=lease
+-- C8 changed source publication while C7 is staging also fails closed.
+local c8OldMarket={summary=function()
+ utc=sourceEpoch+21601
+ return c8Envelope.summary()
+end,matchesOriginalBoundScope=c8Envelope.matchesOriginalBoundScope}
+local c8TimeGate=c8GateSource.new({
+ c3=growthC3,c4=c8C4Gate,c5=c8C5Gate,c6=c8PartnerChat,c7=c8OldMarket})
+local c8SourceDrift=c8TimeGate:replay(c8Options,c8SellerStages)
+eq(c8SourceDrift.status,"BLOCKED",
+ "C8 stale source during chain fails even if initial publisher was fresh")
+utc=sourceEpoch+20
+-- Reject a misleading C7 stream from a different lease independently.
+local badC7Bound={jobId=job,leaseId="MISMATCHED_PROTECTED_LEASE",
+ localUserId=localPlayer.UserId,partnerUserId=opponent.UserId,
+ scope="PUBLIC_CLIENT_OBSERVATION"}
+local differentC7=c8V2.new({bound=badC7Bound,
+ salt=string.rep("h",48),nonce="C8_DIFFERENT_CLIENT_EPISODE_02",
+ cryptoSha256=c8TestDigest,
+ readP3P4Lease=function()
+  return {jobId=job,leaseId=lease,
+   localUserId=localPlayer.UserId,partnerUserId=opponent.UserId,
+   active=active,clientOnly=true}
+ end})
+ok(differentC7~=nil,"C8 malformed-binding V2 test instance can be constructed")
+local c8BadV2Gate=c8GateSource.new({
+ c3=growthC3,c4=c8C4Gate,c5=c8C5Gate,
+ c6=c8PartnerChat,c7=differentC7})
+local c8OtherSession=c8BadV2Gate:replay(c8Options,c8SellerStages)
+eq(c8OtherSession.status,"BLOCKED",
+ "C8 V2 client feedback must belong to exact C3 job/lease/partner")
+eq(c8OtherSession.reason,"C8_NATIVE_C7_WRONG_OR_INACTIVE_PROTECTED_LEASE",
+ "C8 different lease privacy-preserving boolean session binding enforced")
+
 print("SYSTEM2_LIVE_MARKET_NATIVE_BRIDGE_ASSERTIONS_PASSED "..tostring(count))
