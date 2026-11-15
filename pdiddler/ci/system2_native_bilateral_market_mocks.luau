@@ -33,6 +33,8 @@ local function context()
   schema="gingerscope-system2-local-bilateral-context-v1",
   status="LOCAL_READONLY_MARKET_OFFER_CONTEXT",
   ownCounts=copy(baseOwn),
+  sessionScope={jobId="SYNTHETIC_JOB_BILATERAL_001",
+   leaseId="SYNTHETIC_P3_LEASE_001",partnerUserId=12345},
   crosswalkRowsSha256=source.crosswalkRowsSha256,
   sourceRetrievedUtc=source.sourceRetrievedUtc,
   clientOnly=true,readOnly=true,clientOfferRevision=7,
