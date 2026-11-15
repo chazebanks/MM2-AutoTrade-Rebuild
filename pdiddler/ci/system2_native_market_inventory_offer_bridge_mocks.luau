@@ -306,6 +306,70 @@ eq(newOffer.offer.their.items[1].quantity,2,
  "Debug real original opponent GUI quantity changed x1->x2")
 opponentAmount.Text=""
 
+-- C8 scoped P3/P4 lease-handoff adversary: two *actual* C3 scanner and
+-- original P4 GUI readers can produce the same source, copied inventory,
+-- offer contents and local revision 1 while protected lease A becomes B.
+-- This host facade rebinds to the currently active C3 capture instance.
+-- No live Roblox, requests, offers, chat, or Accept are performed.
+local currentProtectedLease=lease
+local function buildForProtectedLease(boundLease)
+ local boundScope={jobId=job,leaseId=boundLease,
+  localUserId=localPlayer.UserId,partnerUserId=opponent.UserId,root=root}
+ local target,err=glue.new({
+  core=core,captureAdapter=capture,scope=boundScope,game=game,
+  players=players,sync=sync,scannerApi=raceScanner,
+  nameResolver=resolver,crosswalk=market,
+  isBoundSession=function()return active and currentProtectedLease==boundLease end,
+  utcNow=tick,monoNow=now,sourceRetrievedEpoch=sourceEpoch})
+ ok(target~=nil,"C8 actual protected lease bridge constructed")
+ eq(target.refreshOwn().status,"READONLY_OWN_MARKET_BOUND",
+  "C8 scanner reads genuine source-bound census for active lease")
+ return target
+end
+local activeResearchBridge=buildForProtectedLease(currentProtectedLease)
+local beforeLeaseContext=activeResearchBridge.researchContext()
+eq(beforeLeaseContext.status,"LOCAL_READONLY_MARKET_OFFER_CONTEXT",
+ "C8 old protected lease has actual C3 source and GUI")
+eq(beforeLeaseContext.clientOfferRevision,1,
+ "C8 first protected lease starts at local revision one")
+local leaseFacade={researchContext=function()
+ return activeResearchBridge.researchContext()
+end}
+local swappedLeaseDuringCompare=false
+local leaseSwappingCore={compare=function(first,source,alternatives)
+ currentProtectedLease="REAL_P3_LEASE_002"
+ activeResearchBridge=buildForProtectedLease(currentProtectedLease)
+ swappedLeaseDuringCompare=true
+ return nativeBilateral.compare(first,source,alternatives)
+end}
+local leaseBoundResearch,leaseBoundError=nativeBilateralBridge.new({
+ marketBridge=leaseFacade,bilateralCore=leaseSwappingCore,crosswalk=market})
+ok(leaseBoundResearch~=nil,"C8 genuine C3->C4 protected lease facade")
+local leaseResult=leaseBoundResearch:compare({
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="EmberbowChroma",quantity=1}},
+  receive={{id="Iceblaster",quantity=1}}},
+ {kind="HYPOTHETICAL_CURRENT_OFFER_VARIANT",
+  give={{id="FlowerwoodKnife",quantity=1}},
+  receive={{id="Iceblaster",quantity=1}}}
+})
+ok(swappedLeaseDuringCompare,
+ "C8 protected lease switch genuinely occurred inside the scorer")
+local afterLeaseContext=activeResearchBridge.researchContext()
+eq(afterLeaseContext.status,"LOCAL_READONLY_MARKET_OFFER_CONTEXT",
+ "C8 new protected lease independently sampled original GUI")
+eq(afterLeaseContext.clientOfferRevision,beforeLeaseContext.clientOfferRevision,
+ "C8 local offer revision is identical even after different protected lease")
+eq(afterLeaseContext.ownCounts.EmberbowChroma,beforeLeaseContext.ownCounts.EmberbowChroma,
+ "C8 own raw copies identical across active protected lease change")
+eq(afterLeaseContext.offer.their.items[1].quantity,
+ beforeLeaseContext.offer.their.items[1].quantity,
+ "C8 exact partner GUI unchanged across lease change")
+eq(leaseResult.status,"BLOCKED",
+ "C8 distinct P3/P4 protected lease MUST invalidate original-source C4 result")
+eq(leaseResult.reason,"P3_P4_SESSION_BINDING_CHANGED_DURING_STRATEGY_COMPARISON",
+ "C8 different protected trade lease cannot share one C4 strategy assessment")
+
 local repeatFrame=bridge.observeOffer()
 eq(repeatFrame.clientRevision,1,"unchanged stable client revision")
 ours:FindFirstChild("Container"):FindFirstChild("Amount").Text="x5"
