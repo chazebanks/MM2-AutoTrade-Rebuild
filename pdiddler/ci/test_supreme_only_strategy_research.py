@@ -225,5 +225,56 @@ class SupremeOnlyStrategy(unittest.TestCase):
         self.assertIn("ONE_TO_FOUR_PHYSICAL_SLOTS_REQUIRED",x["reason"])
 
 
+    def test_exact_supreme_weapon_buckets_exclude_special_hidden_and_pets(self):
+        """Independent Nov16 Supreme-site census: 15 ordinary Ancient +
+        128 visible ordinary Godly + 46 Chroma KNIVES/GUNS. These are
+        weapon buckets, not all visible/hidden website HTML cards.
+        """
+        expected = {"ancient": 15, "godly": 128, "chroma": 46}
+        groups = {category: [r for r in DATA["rows"] if r["category"] == category]
+                  for category in expected}
+        self.assertEqual({category: len(rows) for category,rows in groups.items()},
+                         expected)
+        self.assertEqual(len(DATA["rows"]), 189)
+        keys = [r["rawGameKeyCandidate"] for r in DATA["rows"]]
+        self.assertEqual(len(set(keys)), 189)
+        ids = [(r["category"], r["officialItemId"]) for r in DATA["rows"]]
+        self.assertEqual(len(set(ids)), 189)
+
+        # Supreme Ancients HTML has 16 columns; the 16th is Nik's
+        # Scythe special-tier "Priceless" without a numeric ordinary quote.
+        self.assertNotIn("Nik's Scythe", [r["officialName"] for r in DATA["rows"]])
+        self.assertNotIn("Niks_Scythe", keys)
+        # Godlies HTML has 130 itemcolumns, but the extra two are marked
+        # style=display:none and Origin='Secret MM2 Item'. One reuses
+        # the ordinary Ancient Batwing name / item id. Never import either
+        # as a canonical Godly without new reviewed game-side identity proof.
+        self.assertNotIn("Black Luger",
+                         [r["officialName"] for r in groups["godly"]])
+        self.assertNotIn("Batwing",
+                         [r["officialName"] for r in groups["godly"]])
+        ancient_batwing=[r for r in groups["ancient"] if r["officialName"]=="Batwing"]
+        self.assertEqual(len(ancient_batwing),1)
+        self.assertEqual(ancient_batwing[0]["supremeListed"],40)
+
+        # Chroma HTML has 53 itemcolumns, but last seven are pets.
+        chroma_names={r["officialName"] for r in groups["chroma"]}
+        self.assertTrue(all(name.startswith("Chroma ") for name in chroma_names))
+        self.assertTrue({"Chroma Emberbow","Chroma Emberscythe"} <= chroma_names)
+        for pet in ("Bat","Bear","Bunny","Cat","Dog","Fox","Pig"):
+            self.assertNotIn("Chroma Fire "+pet, chroma_names)
+
+    def test_ordinary_supreme_weapon_census_does_not_assume_website_complete(self):
+        """A 189-row snapshot is exact for Nov15 publisher edition, not
+        a guarantee that every future release, secret item, or pet is covered.
+        """
+        self.assertEqual(DATA["sourceCapturedUtc"], "2026-11-16T04:36:35.765Z")
+        self.assertEqual(DATA["publisherUpdatedAt"],
+                         "2026-11-15T11:59:41-05:00")
+        self.assertIs(DATA["liveTradePricingAuthorized"],False)
+        self.assertIs(DATA["exactRobloxItemInstanceVerified"],False)
+
+
+
 if __name__=="__main__":
     unittest.main()
