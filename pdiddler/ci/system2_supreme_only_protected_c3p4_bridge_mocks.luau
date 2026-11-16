@@ -5,7 +5,10 @@ local fs=require("@lune/fs")
 local serde=require("@lune/serde")
 local luau=require("@lune/luau")
 local root="pdiddler/system2/"
-local catalog=serde.decode("json",fs.readFile(root.."supreme_only_189_research_catalog.json"))
+local sourceBytes=fs.readFile(root.."supreme_only_189_research_catalog.json")
+local catalog=serde.decode("json",sourceBytes)
+local SOURCE_SHA256="6a35dec71332e1f67cc7215073e41fe061b78cb76268baddaba68aca1600307a"
+assert(serde.hash("sha256",sourceBytes)==SOURCE_SHA256,"actual source must be SHA256 pinned")
 local supreme=luau.load(fs.readFile(root.."native_supreme_only_bilateral_research.lua"))()
 local protected=luau.load(fs.readFile(root.."native_supreme_only_protected_c3p4_adapter.lua"))()
 local p4=luau.load(fs.readFile(root.."native_market_offer_client_capture.lua"))()
@@ -51,7 +54,12 @@ function players:GetPlayerByUserId(id)
  return nil
 end
 local game={PlaceId=142823291,JobId="SYNTHETIC_ORIGINAL_JOB_NOV16"}
-function game:GetService(s)if s=="Players" then return players end end
+local http={}
+function http:JSONDecode(bytes)return serde.decode("json",bytes)end
+function game:GetService(s)
+ if s=="Players" then return players end
+ if s=="HttpService" then return http end
+end
 local screen=pg:put(node("ScreenGui","TradeGUI"))
 local trade=screen:put(node("Frame","Container")):put(node("Frame","Trade"))
 local function side(name)
@@ -146,7 +154,8 @@ local function config(changes)
   consentedToReadOnlyInventoryRpc=true,
   hostHandle=hostHandle(),game=game,players=players,
   sync=sync,scannerApi=scanner,captureAdapter=p4,
-  supremeCore=supreme,catalog=catalog,catalogPin=SOURCE_PIN,
+  supremeCore=supreme,sourceBytes=sourceBytes,
+  sha256=function(bytes)return serde.hash("sha256",bytes)end,
   utcNow=function()return clock end,
   monoNow=function()readingClock+=0.01;return readingClock end,
  }
@@ -200,10 +209,18 @@ eq(scanReads,0,"no scanner read when source expired")
 clock=CLOCK
 local injected=copy(catalog)
 injected.rows[1].alternateMarketPrice=123456
-local badSource,whyBadSource=protected.new(config({catalog=injected}))
-eq(badSource,nil,"price injection into catalog blocked")
-eq(whyBadSource,"SUPREME_ONLY_EXTRA_CATALOG_FIELD_FORBIDDEN",
- "alternate row cannot be read by new C3")
+local badSource,whyBadSource=protected.new(config({sourceBytes=serde.encode("json",injected)}))
+eq(badSource,nil,"price injection into catalog blocked by byte digest")
+eq(whyBadSource,"SUPREME_ONLY_SOURCE_SHA256_VERIFICATION_FAILED",
+ "alternate row cannot be passed off as approved Supreme catalog")
+local inflated=copy(catalog)
+for _,r in ipairs(inflated.rows) do
+ if r.rawGameKeyCandidate=="Harvester" then r.supremeListed=1000000 end
+end
+local forgedPrice,forgedWhy=protected.new(config({sourceBytes=serde.encode("json",inflated)}))
+eq(forgedPrice,nil,"modified Supreme price blocked before scanner read")
+eq(forgedWhy,"SUPREME_ONLY_SOURCE_SHA256_VERIFICATION_FAILED",
+ "same logical source header cannot launder altered Supreme listed price")
 local noId=new()
 ownSlot.Attributes.ItemId=nil
 eq(noId:preview({option}).status,"BLOCKED",
