@@ -26,9 +26,9 @@ local function fixture(opts)
   automaticP3ArmForbidden=true,
   targetName="TestAlt",
  }
- for k,v in pairs(plan) do e.GINGERSCOPE_C9_NATIVE_MARKET_PLAN=
-  e.GINGERSCOPE_C9_NATIVE_MARKET_PLAN or {}
-  e.GINGERSCOPE_C9_NATIVE_MARKET_PLAN[k]=v
+ for k,v in pairs(plan) do e.GINGERSCOPE_C9_SUPREME_ONLY_PLAN=
+  e.GINGERSCOPE_C9_SUPREME_ONLY_PLAN or {}
+  e.GINGERSCOPE_C9_SUPREME_ONLY_PLAN[k]=v
  end
  local players={}
  local me={Name="FakeMain",UserId=1352,Parent=players}
@@ -81,12 +81,12 @@ local function fixture(opts)
  local run=function()
   return luau.load(source,{environment=env,injectGlobals=true})()
  end
- return {run=run,e=e,plan=e.GINGERSCOPE_C9_NATIVE_MARKET_PLAN,
+ return {run=run,e=e,plan=e.GINGERSCOPE_C9_SUPREME_ONLY_PLAN,
   players=players,me=me,alt=alt,game=game,calls=calls,runtime=runtime}
 end
 do
  local a=fixture()
- a.e.GINGERSCOPE_C9_NATIVE_MARKET_PLAN=nil
+ a.e.GINGERSCOPE_C9_SUPREME_ONLY_PLAN=nil
  eq(a.run(),nil,"No active operator plan must fail closed")
  eq(a.calls.http,0,"No public source fetch without an explicit operator plan")
  eq(a.calls.compiler,0,"No code compile without approval")
