@@ -62,7 +62,8 @@ jobs:
           test -n "$binary"
           install -m 0755 "$binary" "$RUNNER_TEMP/lune"
       - name: Native Luau SUPREME ONLY bilateral real-source value regression
-        run: "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_supreme_only_bilateral_mocks.luau
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_supreme_only_bilateral_mocks.luau
       - name: Run historical Supreme source renewal tests without alternate pricing
         run: |
           python3 -m unittest -v pdiddler.ci.test_c9_supreme_fresh_mediated_archive
