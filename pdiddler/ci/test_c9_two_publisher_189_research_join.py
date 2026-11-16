@@ -11,7 +11,7 @@ import unittest
 
 from pdiddler.system2.c9_two_publisher_189_research_join import (
     TwoPublisherBlocked, MM2_SHA256, MM2_ROWS_SHA256, SCHEMA,
-    join, strictly_compare, strict_age, negative_licenses, map_exact,
+    join, strictly_compare, strict_age, negative_licenses, map_exact, read_pinned,
 )
 from pdiddler.system2.c9_mm2values_firstparty_189 import validate_freshness
 from pdiddler.system2.c9_supreme_fresh_mediated_archive_gate import audit as supreme_gate
@@ -115,14 +115,20 @@ class TwoPublisher189Contract(unittest.TestCase):
     def test_mutated_mm2_listed_price_sha_is_rejected(self):
         mm2=deepcopy(M)
         mm2["rows"][0]["mm2FirstPartyListed"]+=1
-        with self.assertRaisesRegex(TwoPublisherBlocked,"SHA256_PIN_FAILED_MM2"):
+        with self.assertRaisesRegex(TwoPublisherBlocked,"MM2_GIT_BLOB_PIN_FAILED"):
             self.task(mm2=json.dumps(mm2).encode())
 
     def test_forged_mm2_fresh_capture_sha_is_rejected(self):
         mm2=deepcopy(M)
         mm2["sourceCapturedUtc"]="2026-11-16T10:20:00Z"
-        with self.assertRaisesRegex(TwoPublisherBlocked,"SHA256_PIN_FAILED_MM2"):
+        with self.assertRaisesRegex(TwoPublisherBlocked,"MM2_GIT_BLOB_PIN_FAILED"):
             self.task(mm2=json.dumps(mm2).encode())
+
+    def test_independent_sha256_pin_catches_modified_source_without_git_gate(self):
+        altered=deepcopy(M)
+        altered["rows"][0]["mm2FirstPartyListed"] += 1
+        with self.assertRaisesRegex(TwoPublisherBlocked,"SHA256_PIN_FAILED_MM2"):
+            read_pinned(json.dumps(altered).encode(),MM2_SHA256,"MM2")
 
     def test_supreme_modified_listed_price_git_blob_rejected(self):
         supreme=deepcopy(S)
