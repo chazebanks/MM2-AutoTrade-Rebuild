@@ -1,0 +1,79 @@
+name: Gingerscope System2 SUPREME ONLY source and strategy research
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/supreme_only_189_research_catalog.json'
+      - 'pdiddler/system2/supreme_only_strategy_research.py'
+      - 'pdiddler/ci/test_supreme_only_strategy_research.py'
+      - 'pdiddler/system2/SYSTEM2_SUPREME_ONLY_SOURCE_CONTRACT_2026_11_16.md'
+      - '.github/workflows/gingerscope-system2-supreme-only.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  supreme-only-research-no-hybrid:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify 189 Supreme-only source rows and adversarial strategy trials
+        run: python3 -m unittest -v pdiddler.ci.test_supreme_only_strategy_research
+      - name: Ensure no current MM2Values or two-publisher source collector remains
+        run: |
+          test ! -e pdiddler/system2/c9_mm2values_direct_189_2026_11_16.json
+          test ! -e pdiddler/system2/c9_mm2values_firstparty_189.py
+          test ! -e pdiddler/system2/c9_two_publisher_189_research_join.py
+          test ! -e pdiddler/system2/c9_historical_dual_list_reconciliation.py
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          source=Path("pdiddler/system2/supreme_only_strategy_research.py").read_text()
+          catalog=json.loads(Path("pdiddler/system2/supreme_only_189_research_catalog.json").read_text())
+          assert "c9_two_publisher" not in source
+          assert "c9_mm2values" not in source
+          assert "mm2Listed" not in source
+          assert "mm2Values" not in source
+          assert "MM2VALUES" not in source
+          assert catalog["valueSource"] == "SUPREME_ONLY"
+          assert len(catalog["rows"]) == 189
+          for row in catalog["rows"]:
+              assert set(row) == {
+                  "rawGameKeyCandidate", "category","officialName","officialItemId",
+                  "supremeListed","supremeDemand","supremeStability","outgoingGingerscopeProtected"
+              }
+          print("SUPREME_ONLY_SYSTEM2_ACTIVE_PRICE_CODE_AND_CATALOG=PASS")
+          PY
+      - name: Run historical Supreme source renewal tests without alternate pricing
+        run: |
+          python3 -m unittest -v pdiddler.ci.test_c9_supreme_fresh_mediated_archive
+          python3 -m unittest -v pdiddler.ci.test_c9_supreme_mediated_189_research_gate
+      - name: Research-only CLI case uses Supreme values for both sides
+        run: |
+          cat > /tmp/supreme_only_research_case.json <<'JSON'
+          {"owned":{"Harvester":1,"FlowerwoodKnife":2},
+           "alternatives":[{"kind":"HYPOTHETICAL_RESEARCH_ONLY","valuationSource":"SUPREME_ONLY",
+           "give":[{"rawGameKeyCandidate":"Harvester","quantity":1}],
+           "receive":[{"rawGameKeyCandidate":"FlowerwoodKnife","quantity":2}]}]}
+          JSON
+          python3 -m pdiddler.system2.supreme_only_strategy_research \
+            --catalog pdiddler/system2/supreme_only_189_research_catalog.json \
+            --input /tmp/supreme_only_research_case.json \
+            --evaluated-utc '2026-11-16T04:37:05Z' \
+            --output /tmp/supreme_only_research_result.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('/tmp/supreme_only_research_result.json').read_text())
+          assert x['valueSource']=='SUPREME_ONLY'
+          assert x['hypotheticalAlternatives'][0]['supremeListedValueGain']==195
+          assert all(x[k] is False for k in (
+              'authorizesTrade','authorizesOffer','authorizesAccept',
+              'liveMarketAuthorized','mayUseForStrategyLearning','mayReportProfit'
+          ))
+          print('SUPREME_ONLY_NO_TRADING_PERMISSIONS=PASS')
+          PY
