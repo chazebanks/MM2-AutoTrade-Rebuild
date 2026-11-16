@@ -1,0 +1,82 @@
+name: Gingerscope C9 TWO independent publisher source receipts 189 research
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/c9_two_publisher_189_research_join.py'
+      - 'pdiddler/ci/test_c9_two_publisher_189_research_join.py'
+      - '.github/workflows/gingerscope-c9-two-publisher-189-research.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  immutable-multisource-research-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install historical source-parser dependency
+        run: python3 -m pip install --disable-pip-version-check 'beautifulsoup4>=4.12,<5'
+      - name: Download PR308 exact DIRECT first-party MM2Values research artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: gingerscope-c9-mm2values-firstparty-research-only
+          run-id: 43803829067
+          github-token: \${{ github.token }}
+          repository: chazebanks/MM2-AutoTrade-Rebuild
+          path: \${{ runner.temp }}/c9-mm2-firstparty-source
+      - name: Verify exact raw bytes and provenance of original first-party MM2 artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          file="$RUNNER_TEMP/c9-mm2-firstparty-source/c9-firstparty-mm2values-189-research.json"
+          test -f "$file"
+          test "$(wc -c < "$file")" -eq 93191
+          printf '%s  %s\n' 'b69d3652c6db22f238fb9e0f60be16b244e7a223fda08f1f8d3f82235a863b38' "$file" | sha256sum -c -
+      - name: Run distinct adversarial two-publisher tests against ACTUAL pinned sources
+        env:
+          C9_MM2_RESEARCH_ARCHIVE: \${{ runner.temp }}/c9-mm2-firstparty-source/c9-firstparty-mm2values-189-research.json
+        run: |
+          python3 -m unittest -v pdiddler.ci.test_c9_two_publisher_189_research_join
+          python3 -m unittest -v pdiddler.ci.test_c9_supreme_fresh_mediated_archive
+          python3 -m unittest -v pdiddler.ci.test_c9_mm2values_firstparty_189
+      - name: Produce read-only 189-row two-publisher archival comparison
+        run: |
+          python3 -m pdiddler.system2.c9_two_publisher_189_research_join \
+            --mm2 "$RUNNER_TEMP/c9-mm2-firstparty-source/c9-firstparty-mm2values-189-research.json" \
+            --supreme pdiddler/system2/c9_supreme_official_origin_mediated_189_2026_11_16.json \
+            --older-supreme pdiddler/system2/c9_supreme_official_origin_mediated_189_2026_11_15.json \
+            --crosswalk pdiddler/system2/c9_research_public_189_crosswalk.json \
+            --evaluated-utc '2026-11-16T06:44:54Z' \
+            --output "$RUNNER_TEMP/c9-pinned-dual-publisher-189-HISTORICAL-research.json"
+      - name: Reaffirm even a fresh captured comparison CANNOT authorize trade actions
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          x=json.loads((Path(os.environ["RUNNER_TEMP"])/"c9-pinned-dual-publisher-189-HISTORICAL-research.json").read_text())
+          assert len(x['rows']) == x['rawGameKeyCandidateCount'] == 189
+          assert x['mm2ComparedWithOldAggregatorConflictCount'] == 22
+          assert x['supremeComparedWithOldAggregatorConflictCount'] == 34
+          assert x['mm2Publisher']['transport'] == 'DIRECT_GITHUB_HTTPS'
+          assert x['supremePublisher']['transport'] == 'FIRECRAWL_MEDIATED_HTTPS'
+          assert all(x[k] is False for k in (
+              'safeForLiveMarketQuotes','autonomousStrategyRankingAuthorized',
+              'authorizesTrade','authorizesOffer','authorizesAccept',
+              'mayUseForStrategyLearning','mayReportProfit','realTradeCompletionProven'
+          ))
+          assert sum(z['outgoingGingerscopeProtected'] for z in x['rows']) == 1
+          print('C9_TWO_PUBLISHER_REAL_189_ROW_RESEARCH_PASS_NO_TRADES')
+          PY
+      - name: Store temporary PUBLIC archival comparison, not player data
+        uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-c9-two-publisher-189-HISTORICAL-only
+          path: \${{ runner.temp }}/c9-pinned-dual-publisher-189-HISTORICAL-research.json
+          retention-days: 7
+          if-no-files-found: error
