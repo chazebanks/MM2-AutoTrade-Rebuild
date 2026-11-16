@@ -12,7 +12,10 @@ function M.run(deps)
   local x=factory()
   x.ctx.job="MAIN_C9_NATIVE_JOB_0001"
   local manager=bind(x)
-  local game={PlaceId=142823291,JobId=x.ctx.job}
+  local game={PlaceId=142823291,JobId=x.ctx.job,
+  GetService=function(_,key)
+   if key=="Players" then return x.players end
+  end}
   local bound={jobId=x.ctx.job,session="p3stage119:"..tostring(x.ctx.epoch),
    root=x.trade,localPlayer=x.lp,partnerPlayer=x.p}
   local supervisor={
@@ -61,7 +64,10 @@ function M.run(deps)
   x.ctx.job="MAIN_C9_NATIVE_JOB_0002"
   local manager=bind(x)
   accept(x)
-  local game={PlaceId=142823291,JobId=x.ctx.job}
+  local game={PlaceId=142823291,JobId=x.ctx.job,
+  GetService=function(_,key)
+   if key=="Players" then return x.players end
+  end}
   local bound={jobId=x.ctx.job,session="p3stage119:"..tostring(x.ctx.epoch),
    root=x.trade,localPlayer=x.lp,partnerPlayer=x.p}
   local running=true
@@ -92,7 +98,10 @@ function M.run(deps)
   x.ctx.job="MAIN_C9_NATIVE_JOB_0003"
   local manager=bind(x)
   accept(x)
-  local game={PlaceId=142823291,JobId=x.ctx.job}
+  local game={PlaceId=142823291,JobId=x.ctx.job,
+  GetService=function(_,key)
+   if key=="Players" then return x.players end
+  end}
   local bound={jobId=x.ctx.job,session="p3stage119:"..tostring(x.ctx.epoch),
    root=x.trade,localPlayer=x.lp,partnerPlayer=x.p}
   local host={supervisor={
@@ -116,7 +125,10 @@ function M.run(deps)
   x.ctx.job="MAIN_C9_NATIVE_JOB_0004"
   local manager=bind(x)
   accept(x)
-  local game={PlaceId=142823291,JobId=x.ctx.job}
+  local game={PlaceId=142823291,JobId=x.ctx.job,
+  GetService=function(_,key)
+   if key=="Players" then return x.players end
+  end}
   local bound={jobId=x.ctx.job,session="p3stage119:"..tostring(x.ctx.epoch),
    root=x.trade,localPlayer=x.lp,partnerPlayer=x.p}
   local host={supervisor={
@@ -138,7 +150,10 @@ function M.run(deps)
   x.ctx.job="MAIN_C9_NATIVE_JOB_0005"
   local manager=bind(x)
   accept(x)
-  local game={PlaceId=142823291,JobId=x.ctx.job}
+  local game={PlaceId=142823291,JobId=x.ctx.job,
+  GetService=function(_,key)
+   if key=="Players" then return x.players end
+  end}
   local bound={jobId=x.ctx.job,session="p3stage119:"..tostring(x.ctx.epoch),
    root=x.trade,localPlayer=x.lp,partnerPlayer=x.p}
   local supervisor={
@@ -181,6 +196,42 @@ function M.run(deps)
   eq(second.isBoundSession(),false,
    "C9 original PlaceId restoration cannot revive an invalidated lease")
   eq(#x.sends,0,"C9 no physical trade action across protected sessions")
+ end
+ do
+  local x=factory()
+  x.ctx.job="MAIN_C9_REAL_SERVICE_REGRESSION"
+  local manager=bind(x)
+  accept(x)
+  local game={PlaceId=142823291,JobId=x.ctx.job,
+   GetService=function(_,key)
+    if key=="Players" then return x.players end
+   end}
+  local bound={jobId=x.ctx.job,session="p3stage119:"..tostring(x.ctx.epoch),
+   root=x.trade,localPlayer=x.lp,partnerPlayer=x.p}
+  local host={supervisor={
+     currentBoundReadOnly=manager.currentBoundReadOnly,
+     isP3Paused=x.p3.isPaused,
+    },readOriginalHostBoundScope=function()return bound end,
+    getJobId=x.ctx.getJobId,getP3Session=x.ctx.getP3Session,
+    isOriginalHostRunning=function()return true end,
+    io=x.io,players=x.players,game=game}
+  local good,why=a.new(host)
+  eq(type(good),"table","C9 original real Players service identity is accepted")
+  eq(why,nil,"C9 genuine service has no constructor denial")
+  local counterfeit={LocalPlayer=x.players.LocalPlayer,
+   GetPlayerByUserId=x.players.GetPlayerByUserId}
+  host.players=counterfeit
+  local bad,reason=a.new(host)
+  eq(bad,nil,"C9 counterfeit Players table cannot be used in protected host")
+  eq(reason.reason,"ORIGINAL_P3_PLAYERS_SERVICE_NOT_GENUINE",
+   "C9 must compare exact game GetService Players instance")
+  host.players=x.players
+  game.GetService=function()return nil end
+  local nilService,missing=a.new(host)
+  eq(nilService,nil,"C9 missing genuine Players service denies binding")
+  eq(missing.reason,"ORIGINAL_P3_PLAYERS_SERVICE_NOT_GENUINE",
+   "C9 no fake static Players wrapper")
+  eq(#x.sends,0,"C9 Players identity adversarial regression makes zero trades")
  end
  print("SYSTEM2_C9_ORIGINAL_P3_PROTECTED_LEASE_ASSERTIONS_PASSED")
 end

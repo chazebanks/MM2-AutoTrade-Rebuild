@@ -30,7 +30,7 @@ class Stage119C9OriginalResearchParity(unittest.TestCase):
         )
         self.assertEqual(
             blob(ADAPTER),
-            "11f8e4794bed009fb8cf910750e6d3d72a4ba805",
+            "b7c08b6ec77f81599cf42c979e9c38f9b8b4e72b",
         )
 
     def test_exact_surgical_categories(self):
@@ -43,7 +43,7 @@ class Stage119C9OriginalResearchParity(unittest.TestCase):
             ("".join(original[i:j]), "".join(fork[k:l]))
             for tag, i, j, k, l in diff if tag != "equal"
         ]
-        self.assertEqual(len(mutated), 12, [
+        self.assertEqual(len(mutated), 13, [
             (a[:100], b[:100]) for a, b in mutated
         ])
         changes = []
@@ -87,6 +87,10 @@ class Stage119C9OriginalResearchParity(unittest.TestCase):
             elif (before.strip() == ""
                   and after.strip() == "c9ReadOnlyLeaseStatus=c9ReadOnlyLeaseStatus,"):
                 changes.append("sanitized_readonly_entry")
+            elif ('print("[P3 STAGE119 READONLY]' in before
+                  and 'print("[C9 P3/P4 READONLY]' in after
+                  and "No item additions, removals" in after):
+                changes.append("no_legacy_add_remove_console_instruction")
             else:
                 self.fail(
                     "Unreviewed original Stage119 production change: "
@@ -99,6 +103,7 @@ class Stage119C9OriginalResearchParity(unittest.TestCase):
             "sanitized_readonly_entry", "c9_screen_no_gift_lane",
             "original_p3_p4_observer_without_gift",
             "skip_old_lastoffer_witness_in_c9", "c9_manual_arm_phase",
+            "no_legacy_add_remove_console_instruction",
         })
 
     def test_no_new_trade_or_network_side_effects(self):
@@ -118,7 +123,7 @@ class Stage119C9OriginalResearchParity(unittest.TestCase):
             self.assertNotIn(token, extra, token)
         self.assertIn("cfg.c9ResearchOnly~=true", fork)
         self.assertIn(
-            'loadFrozen("cc445e5afce631e0545cd7e0ef79b2dc63651b20",',
+            'loadFrozen("b7942ad7641c2d90172da5385207c7b631723f2e",',
             fork,
         )
         self.assertIn(

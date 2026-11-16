@@ -26,12 +26,12 @@ class C9PinnedConsentStart(unittest.TestCase):
         self.assertEqual(blob(ORIGINAL),
             "fc25514564e78d390b089742eb4e7da7508c12fa")
         self.assertEqual(blob(FORK),
-            "89b1c1cb813cae20e0c52c2858359a2749267f1f")
+            "e3ddff32b10e72c516175ce31f0fa394abf79825")
 
     def test_immutable_uri_and_explicit_no_gift_manual_request_plan(self):
         script = START.read_text()
         for text in (
-            "d054ae0519b6b9f46a6e2d6a631fcb553168adc7",
+            "a2c4855b75b234248917c73e670fad83176516e7",
             "STAGE119_C9_READONLY_RESEARCH_NATIVE.lua",
             "cfg.c9ResearchOnly~=true",
             "c9ReadOnlyLeaseStatus=c9ReadOnlyLeaseStatus",

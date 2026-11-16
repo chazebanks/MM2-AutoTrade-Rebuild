@@ -19,7 +19,7 @@ def git_blob(p):
 class C9MarketNativeIntegrity(unittest.TestCase):
     def test_immutable_original_and_prior_stage119_sources(self):
         self.assertEqual(git_blob(STAGE119),"fc25514564e78d390b089742eb4e7da7508c12fa")
-        self.assertEqual(git_blob(LEASE_ONLY),"89b1c1cb813cae20e0c52c2858359a2749267f1f")
+        self.assertEqual(git_blob(LEASE_ONLY),"e3ddff32b10e72c516175ce31f0fa394abf79825")
         self.assertEqual(git_blob(MARKET),"8ad6b63989c6821e31a589c282d6c118c2fc8604")
         self.assertEqual(git_blob(COMPOSER),"50943c08bdb6617b9630159ce329211d11c4caa5")
     def test_loader_matches_executable_pinned_git_revision(self):

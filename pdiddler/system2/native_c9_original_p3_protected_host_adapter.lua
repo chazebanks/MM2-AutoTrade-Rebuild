@@ -46,6 +46,29 @@ local function out(reason)
   mayReportProfit=false,maySendDiscordWebhook=false,
   mayUseForStrategyLearning=false}
 end
+-- Original Roblox Players is an Instance (type(players)=="userdata"),
+-- NOT a Lua table. Compare to the actual Players service from THIS live
+-- game's DataModel; this also works with the original CI mock service.
+-- A lookalike table or fabricated service must never bind a P3/P4 lease.
+local function actualPlayersService(d)
+ if d==nil or d.game==nil or d.players==nil then return false end
+ local ok,service=pcall(function()
+  return d.game:GetService("Players")
+ end)
+ if not ok or service~=d.players then return false end
+ local hasMethod,method=pcall(function()
+  return d.players.GetPlayerByUserId
+ end)
+ if not hasMethod or type(method)~="function" then return false end
+ if type(d.players)~="table" then
+  local isA,valid=pcall(function()
+   return d.players:IsA("Players")
+  end)
+  if not isA or valid~=true then return false end
+ end
+ return true
+end
+
 function M.new(d)
  if type(d)~="table" or type(d.supervisor)~="table" or
   type(d.supervisor.currentBoundReadOnly)~="function" or
@@ -55,10 +78,10 @@ function M.new(d)
   type(d.getP3Session)~="function" or
   type(d.isOriginalHostRunning)~="function" or
   type(d.io)~="table" or type(d.io.trade)~="function" or
-  type(d.players)~="table" or
-  type(d.players.GetPlayerByUserId)~="function" or
   d.game==nil or d.game.PlaceId~=142823291 then
   return nil,out("ORIGINAL_P3_SUPERVISOR_HOST_MISSING") end
+ if not actualPlayersService(d) then
+  return nil,out("ORIGINAL_P3_PLAYERS_SERVICE_NOT_GENUINE") end
  -- This is the ORIGINAL host's lexical boundScope, not a copy or
  -- externally guessed job/partner/lease. New trade binds a NEW table.
  local goodBound,bound=pcall(d.readOriginalHostBoundScope)
