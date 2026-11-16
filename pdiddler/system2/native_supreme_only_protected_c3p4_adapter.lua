@@ -6,6 +6,8 @@
 local M={}
 local SCHEMA="gingerscope-system2-original-p3p4-supreme-only-adapter-v1"
 local SOURCE="SUPREME_ONLY"
+local CATALOG_SHA256="6a35dec71332e1f67cc7215073e41fe061b78cb76268baddaba68aca1600307a"
+local SOURCE_GIT_BLOB="0fefb1d82d6841a787974478447f5d9e1db922e7"
 local PLACE=142823291
 local MAX_SCAN_SECONDS=10
 local MAX_OWN_AGE=30
@@ -216,11 +218,25 @@ function M.new(c)
    type(c.supremeCore)~="table" or
    type(c.supremeCore.sourceStatus)~="function" or
    type(c.supremeCore.review)~="function" or
-   type(c.catalog)~="table" or
-   type(c.catalogPin)~="string" or
+   type(c.sourceBytes)~="string" or
+   type(c.sha256)~="function" or
    type(c.utcNow)~="function" or
    type(c.monoNow)~="function" then
   return nil,"SUPREME_ONLY_PROTECTED_INPUT_OR_INVENTORY_CONSENT_MISSING" end
+ -- Validate the exact UTF-8 publisher catalog source bytes, not an
+ -- untrusted claimed Git blob SHA or caller-provided decoded price table.
+ -- The hash callback must come from an independently reviewed host module.
+ if #c.sourceBytes<50000 or #c.sourceBytes>150000 then
+  return nil,"SUPREME_ONLY_SOURCE_BYTE_LENGTH_INVALID" end
+ local hashed,digest=pcall(c.sha256,c.sourceBytes)
+ if not hashed or type(digest)~="string" or digest~=CATALOG_SHA256 then
+  return nil,"SUPREME_ONLY_SOURCE_SHA256_VERIFICATION_FAILED" end
+ local httpOK,http=pcall(function()return c.game:GetService("HttpService")end)
+ if not httpOK or not http or type(http.JSONDecode)~="function" then
+  return nil,"SUPREME_ONLY_VERIFIED_SOURCE_JSONDECODER_UNAVAILABLE" end
+ local decoded,catalog=pcall(function()return http:JSONDecode(c.sourceBytes)end)
+ if not decoded or type(catalog)~="table" then
+  return nil,"SUPREME_ONLY_VERIFIED_SOURCE_JSON_INVALID" end
  local scope=c.hostHandle.scope
  local function live()
   if c.game.PlaceId~=PLACE or tostring(c.game.JobId)~=scope.jobId then
@@ -253,7 +269,7 @@ function M.new(c)
  local function now()
   local ok,t=pcall(c.utcNow)
   if not ok or not finite(t) then return nil,"CURRENT_UTC_CLOCK_INVALID" end
-  local proof,source=pcall(c.supremeCore.sourceStatus,c.catalog,c.catalogPin,t)
+  local proof,source=pcall(c.supremeCore.sourceStatus,catalog,SOURCE_GIT_BLOB,t)
   if not proof or type(source)~="table" or
     source.status~="SUPREME_ONLY_RESEARCH_SOURCE_CHECKED" or
     source.valueSource~="SUPREME_ONLY" or
@@ -263,7 +279,7 @@ function M.new(c)
   return t,nil
  end
  local catalogRows={}
- for _,row in ipairs(c.catalog.rows or {}) do
+ for _,row in ipairs(catalog.rows or {}) do
   if type(row)~="table" or
     not rawKey(row.rawGameKeyCandidate) or
     catalogRows[row.rawGameKeyCandidate] then
@@ -361,7 +377,7 @@ function M.new(c)
       return fail("OPPONENT_ITEM_NOT_PRESENT_IN_BOUND_GUI") end
    end
   end
-  local success,preview=pcall(c.supremeCore.review,c.catalog,c.catalogPin,
+  local success,preview=pcall(c.supremeCore.review,catalog,SOURCE_GIT_BLOB,
       c.utcNow(),before.counts,options)
   if not success or type(preview)~="table" or
     preview.schema~="gingerscope-system2-native-supreme-only-bilateral-research-v1" or
