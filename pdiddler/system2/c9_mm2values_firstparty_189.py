@@ -141,9 +141,9 @@ def parse_tier(html, category):
         key = norm(name)
         if not 2 <= len(name) <= 110 or not key or key in found:
             deny("C9_FIRSTPARTY_DUPLICATE_OR_INVALID_PUBLIC_NAME")
-        img = card.select_one("img[src]")
-        if not img or not img.get("src", "").startswith(SITE + "img/"):
-            deny("C9_FIRSTPARTY_CARD_ART_ORIGIN_CHANGED")
+        # Artwork URL is not price, key, publisher identity or Roblox item
+        # proof. The first-party server can change image hosts/CDNs without
+        # changing a value; NEVER dereference or promote image URLs as IDs.
         strings = list(card.stripped_strings)
         value = numeric(field(strings, "Value:"))
         demand_rarity = field(strings, "Demand:")
