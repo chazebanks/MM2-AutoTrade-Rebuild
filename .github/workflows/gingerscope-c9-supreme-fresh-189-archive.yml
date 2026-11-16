@@ -1,0 +1,65 @@
+name: Gingerscope C9 Supreme verified fresh-mediated 189 archive
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/c9_supreme_official_origin_mediated_189_2026_11_16.json'
+      - 'pdiddler/system2/c9_supreme_fresh_mediated_archive_gate.py'
+      - 'pdiddler/ci/test_c9_supreme_fresh_mediated_archive.py'
+      - '.github/workflows/gingerscope-c9-supreme-fresh-189-archive.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-public-origin-snapshot-research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify new exact blob against old publisher edition and 189 historical raw keys
+        run: |
+          python3 -m unittest -v pdiddler.ci.test_c9_supreme_fresh_mediated_archive
+          python3 -m unittest -v pdiddler.ci.test_c9_supreme_mediated_189_research_gate
+      - name: Recheck captured November 16 public receipt at its actual historical test clock
+        run: |
+          python3 -m pdiddler.system2.c9_supreme_fresh_mediated_archive_gate \
+            --renewed pdiddler/system2/c9_supreme_official_origin_mediated_189_2026_11_16.json \
+            --older pdiddler/system2/c9_supreme_official_origin_mediated_189_2026_11_15.json \
+            --crosswalk pdiddler/system2/c9_research_public_189_crosswalk.json \
+            --at-utc '2026-11-16T04:37:05Z'
+      - name: Reject any promotion to live authority or a silently extended TTL
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from pdiddler.system2.c9_supreme_fresh_mediated_archive_gate import audit,C9SupremeRenewalBlocked
+          root=Path('pdiddler/system2')
+          a=(root/'c9_supreme_official_origin_mediated_189_2026_11_16.json').read_bytes()
+          b=(root/'c9_supreme_official_origin_mediated_189_2026_11_15.json').read_bytes()
+          c=(root/'c9_research_public_189_crosswalk.json').read_bytes()
+          report=audit(a,b,c,at_utc='2026-11-16T04:37:05Z')
+          assert report['authorizesTrade'] is False
+          assert report['authorizesOffer'] is False
+          assert report['authorizesAccept'] is False
+          assert report['safeForLivePricing'] is False
+          assert report['currentMm2valuesIndependentSnapshotBound'] is False
+          try:
+              audit(a,b,c,at_utc='2026-11-16T10:36:36Z')
+          except C9SupremeRenewalBlocked as exc:
+              assert 'CAPTURE_EXPIRED' in str(exc)
+          else:
+              raise AssertionError('expired source was admitted')
+          print('C9_SUPREME_FOUR_PAGE_189_REFRESH_RESEARCH_ONLY')
+          PY
+      - name: Archive only sanitized public-source receipt (not player data)
+        uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-c9-supreme-189-2026-11-16-MEDIATED-public-research
+          path: pdiddler/system2/c9_supreme_official_origin_mediated_189_2026_11_16.json
+          retention-days: 7
+          if-no-files-found: error
