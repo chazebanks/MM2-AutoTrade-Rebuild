@@ -27,9 +27,9 @@ jobs:
         with:
           name: gingerscope-c9-mm2values-firstparty-research-only
           run-id: 43803829067
-          github-token: \${{ github.token }}
+          github-token: ${{ github.token }}
           repository: chazebanks/MM2-AutoTrade-Rebuild
-          path: \${{ runner.temp }}/c9-mm2-firstparty-source
+          path: ${{ runner.temp }}/c9-mm2-firstparty-source
       - name: Verify exact raw bytes and provenance of original first-party MM2 artifact
         shell: bash
         run: |
@@ -40,7 +40,7 @@ jobs:
           printf '%s  %s\n' 'b69d3652c6db22f238fb9e0f60be16b244e7a223fda08f1f8d3f82235a863b38' "$file" | sha256sum -c -
       - name: Run distinct adversarial two-publisher tests against ACTUAL pinned sources
         env:
-          C9_MM2_RESEARCH_ARCHIVE: \${{ runner.temp }}/c9-mm2-firstparty-source/c9-firstparty-mm2values-189-research.json
+          C9_MM2_RESEARCH_ARCHIVE: ${{ runner.temp }}/c9-mm2-firstparty-source/c9-firstparty-mm2values-189-research.json
         run: |
           python3 -m unittest -v pdiddler.ci.test_c9_two_publisher_189_research_join
           python3 -m unittest -v pdiddler.ci.test_c9_supreme_fresh_mediated_archive
@@ -77,6 +77,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gingerscope-c9-two-publisher-189-HISTORICAL-only
-          path: \${{ runner.temp }}/c9-pinned-dual-publisher-189-HISTORICAL-research.json
+          path: ${{ runner.temp }}/c9-pinned-dual-publisher-189-HISTORICAL-research.json
           retention-days: 7
           if-no-files-found: error
