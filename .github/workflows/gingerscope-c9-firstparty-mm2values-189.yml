@@ -21,7 +21,7 @@ jobs:
           python-version: '3.12'
       - name: Install audited HTML parser
         run: python3 -m pip install --disable-pip-version-check 'beautifulsoup4>=4.12,<5'
-      - name: Fifteen distinct mock/adversarial source guards
+      - name: Adversarial first-party source guards
         run: |
           python3 -m unittest -v pdiddler.ci.test_c9_mm2values_firstparty_189
           python3 -m unittest -v pdiddler.ci.test_c9_historical_dual_list_reconciliation
@@ -32,11 +32,11 @@ jobs:
           python3 -m pdiddler.system2.c9_mm2values_firstparty_189 \
             --original pdiddler/system2/c9_research_public_189_crosswalk.json \
             --output /tmp/c9-firstparty-mm2values-189-research.json
-      - name: Never misrepresent an HTTP-blocked publisher fetch
+      - name: Report direct-source collector refusal without assuming HTTP failed
         if: steps.direct.outcome == 'failure'
         run: |
-          echo 'MM2VALUES_DIRECT_GITHUB_FETCH=BLOCKED'
-          echo 'MM2VALUES_MEDIATED_FALLBACK_REQUIRES_SEPARATE_PROVENANCE_AND_TEST'
+          echo 'MM2VALUES_DIRECT_SOURCE_PIPELINE=BLOCKED_OR_UNVERIFIED'
+          echo 'MM2VALUES_REASON=SEE_COLLECTOR_REASON_HTTP_PARSE_OR_SOURCE'
           echo 'CURRENT_TRADE_DATA_AUTHORIZED=FALSE'
       - name: Verify fresh research output is still non-actionable
         if: steps.direct.outcome == 'success'
