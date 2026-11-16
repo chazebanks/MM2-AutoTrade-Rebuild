@@ -100,7 +100,7 @@ local stage118=loadFrozen("891d548d2ef77763e9f7e3a679984a646bb9d4b4",
     "intelligence_lab/stage118_lastoffer_gui_correlation.lua")
 -- NEW research variant only. Exact immutable GitHub commit, never main/latest.
 -- This adapter uses the original P3 coordinator's existing guarded lease.
-local c9HostModule=loadFrozen("cc445e5afce631e0545cd7e0ef79b2dc63651b20",
+local c9HostModule=loadFrozen("b7942ad7641c2d90172da5385207c7b631723f2e",
     "system2/native_c9_original_p3_protected_host_adapter.lua")
 if not geometry or type(geometry.choose)~="function"
     or not ioModule or type(ioModule.new)~="function"
@@ -988,5 +988,5 @@ E.PDIDDLER_STAGE119_P3_RUNNER={
     isArmed=function()return armed and owner.running end,
     c9ReadOnlyLeaseStatus=c9ReadOnlyLeaseStatus,
 }
-print("[P3 STAGE119 READONLY] ARM P3, ALT accept original request with BOTH empty, ALT manually ADD then REMOVE ONE. MAIN never offers. STOP/COPY throughout.")
+print("[C9 P3/P4 READONLY] ARM P3 requests a trade from consenting ALT. Keep both offers EMPTY. No item additions, removals or final Accept. Read C9 client lease status, then STOP/COPY.")
 return E.PDIDDLER_STAGE119_P3_RUNNER
