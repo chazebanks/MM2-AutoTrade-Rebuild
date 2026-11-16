@@ -198,10 +198,10 @@ function M.run(deps)
   eq(#x.sends,0,"C9 no physical trade action across protected sessions")
  end
  do
-  local x=fixture()
+  local x=factory()
   x.ctx.job="MAIN_C9_REAL_SERVICE_REGRESSION"
   local manager=bind(x)
-  acceptP3(x)
+  accept(x)
   local game={PlaceId=142823291,JobId=x.ctx.job,
    GetService=function(_,key)
     if key=="Players" then return x.players end
