@@ -1,0 +1,63 @@
+name: Gingerscope System2 Supreme-only protected C3 P4 original read-only bridge
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/native_supreme_only_protected_c3p4_adapter.lua'
+      - 'pdiddler/system2/native_supreme_only_bilateral_research.lua'
+      - 'pdiddler/ci/system2_supreme_only_protected_c3p4_bridge_mocks.luau'
+      - 'pdiddler/system2/SUPREME_ONLY_PROTECTED_C3P4_ADAPTER_HANDOFF_2026_11_16.md'
+      - '.github/workflows/gingerscope-system2-supreme-only-protected-c3p4.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-client-observer-supreme-only-readonly:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install pinned Lune v0.11.1 actual Luau runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/lune.zip"
+          curl -fLsS --retry 3 --connect-timeout 20 "https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip" -o "$archive"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $archive" | sha256sum -c -
+          unzip -q "$archive" -d "$RUNNER_TEMP/lune-dist"
+          binary="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
+          test -n "$binary"
+          install -m 0755 "$binary" "$RUNNER_TEMP/lune"
+      - name: Execute actual original P4 native client module with protected lease, real 189 source and scanner mocks
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_supreme_only_protected_c3p4_bridge_mocks.luau
+      - name: Repeat Supreme-only native bilateral source and policy tests
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_native_supreme_only_bilateral_mocks.luau
+      - name: Audit no active gameplay or legacy dual-source functions in replacement path
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          pure=Path("pdiddler/system2/native_supreme_only_bilateral_research.lua").read_text()
+          joined=Path("pdiddler/system2/native_supreme_only_protected_c3p4_adapter.lua").read_text()
+          for txt in (pure, joined):
+              for word in (
+                  "FireServer", "InvokeServer", "PostAsync",
+                  "TeleportService", "AcceptTrade", "DeclineTrade",
+                  "mm2Listed", "mm2Values",
+                  "native_market_inventory_offer_core",
+                  "native_bilateral_attractiveness_shadow",
+                  "native_c9_growth_first_preview",
+              ):
+                  assert word not in txt, word
+          assert "native_market_offer_client_capture" not in joined, "module requires dependency injection, not untrusted global loading"
+          for word in ("consentedToReadOnlyInventoryRpc", "isBoundSession",
+                       "SUPREME_ONLY_SOURCE_EXPIRED_OR_UNVERIFIED",
+                       "ORIGINAL_C3_OWN_CENSUS_CHANGED_DURING_STRATEGY"):
+              assert word in joined,word
+          print("SUPREME_ONLY_PROTECTED_BRIDGE_NO_HYBRID_NO_GAME_ACTIONS=PASS")
+          PY
