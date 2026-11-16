@@ -33,6 +33,7 @@ from pdiddler.system2.c9_supreme_mediated_189_research_gate import timeparse
 
 SCHEMA = "gingerscope-c9-two-independent-publishers-189-source-join-v1"
 MM2_SHA256 = "b69d3652c6db22f238fb9e0f60be16b244e7a223fda08f1f8d3f82235a863b38"
+MM2_GIT_BLOB = "a7c51441728a4e298928406bcee1856adcba4974"
 MM2_ROWS_SHA256 = "0e99859a2a187b8b9cfc4461cb993783912e6be6918aa9a71f5e76df7f940ffa"
 MM2_SOURCE_CAPTURE = "2026-11-16T04:23:49Z"
 MM2_PUBLISHER_ISSUE = "2026-11-13T12:19:30-05:00"
@@ -212,6 +213,8 @@ def strictly_compare(mm2, supreme, crosswalk):
 
 def join(mm2_bytes, supreme_bytes, prior_bytes, registry_bytes, *, evaluated_utc):
     """Research-only join of REAL immutable Nov16 MM2 and Supreme source captures."""
+    if git_blob_sha(mm2_bytes) != MM2_GIT_BLOB:
+        deny("C9_TWO_SOURCE_MM2_GIT_BLOB_PIN_FAILED")
     mm2 = read_pinned(mm2_bytes, MM2_SHA256, "MM2")
     if git_blob_sha(supreme_bytes) != RENEWED_RECEIPT_BLOB or (
         git_blob_sha(prior_bytes) != PRIOR_RECEIPT_BLOB or
