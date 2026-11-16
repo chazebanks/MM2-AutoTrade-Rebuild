@@ -1,0 +1,54 @@
+name: Gingerscope C9 historical dual-list research reconciliation
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/c9_historical_dual_list_reconciliation.py'
+      - 'pdiddler/ci/test_c9_historical_dual_list_reconciliation.py'
+      - '.github/workflows/gingerscope-c9-historical-dual-list.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  immutable-archive-research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test original 189-row source, provenance, tamper and expiry
+        run: |
+          python3 -m unittest -v pdiddler.ci.test_c9_historical_dual_list_reconciliation
+          python3 -m unittest -v pdiddler.ci.test_c9_supreme_mediated_189_research_gate
+      - name: Reconcile Nov 15 archive at original historical evaluation clock ONLY
+        run: |
+          python3 -m pdiddler.system2.c9_historical_dual_list_reconciliation \
+            --original pdiddler/system2/c9_research_public_189_crosswalk.json \
+            --supreme pdiddler/system2/c9_supreme_official_origin_mediated_189_2026_11_15.json \
+            --evaluated-utc '2026-11-15T20:19:53Z' \
+            --output "$RUNNER_TEMP/c9-historical-nov15-dual-list.json"
+      - name: Prove old snapshot cannot pass as currently fresh
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads((Path(__import__('os').environ['RUNNER_TEMP']) / 'c9-historical-nov15-dual-list.json').read_text())
+          assert len(x['rows']) == x['matchedHistoricalGameKeys'] == 189
+          assert x['legacyAggregatorSupremeConflictsReplaced'] == 34
+          assert x['safeForLivePricing'] is False
+          assert x['currentMarketFreshnessProven'] is False
+          assert x['authorizesTrade'] is False
+          assert x['authorizesOffer'] is False
+          assert x['authorizesAccept'] is False
+          print('C9_ARCHIVED_SUPREME_34_RECONCILED_NOT_DEPLOYED')
+          PY
+      - name: Archive PUBLIC historical research only, no live marketing claims
+        uses: actions/upload-artifact@v4
+        with:
+          name: gingerscope-c9-nov15-dual-list-HISTORICAL-not-live
+          path: \${{ runner.temp }}/c9-historical-nov15-dual-list.json
+          retention-days: 7
