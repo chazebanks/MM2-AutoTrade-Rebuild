@@ -1,10 +1,11 @@
--- C9 ORIGINAL P3/P4 consented CLIENT-ONLY MARKET preflight loader.
+-- C9 ORIGINAL P3/P4 consented SUPREME-ONLY protected research launcher.
 -- Does not ARM, request, offer, Accept/Decline, chat, hop, or train.
 -- A user must independently approve any actual native test, then the
 -- separate original P3 GUI ARM can send ONE controlled request to ALT.
--- Runs original market C3/C4/C9 only ON explicit method invocation in bound P3.\n-- This is NOT device-verified, NOT authenticated server settlement or autonomy.
+-- Calls new Supreme-only read-only evaluator ONLY after original P3/P4 binding.
+-- NOT a device test, signed publisher source, server settlement or autonomy.
 local E=(type(getgenv)=="function" and getgenv()) or _G
-local plan=E.GINGERSCOPE_C9_NATIVE_MARKET_PLAN
+local plan=E.GINGERSCOPE_C9_SUPREME_ONLY_PLAN
 local function refuse(why)
     warn("[C9 RESEARCH START] "..tostring(why))
     return nil
