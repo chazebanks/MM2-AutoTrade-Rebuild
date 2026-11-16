@@ -129,6 +129,7 @@ class TrueOriginalSupremeOnlyBootIntegrity(unittest.TestCase):
 
     def test_new_start_pins_new_host_and_manual_only_plan(self):
         start=START.read_text()
+        self.assertIn("GINGERSCOPE_C9_SUPREME_ONLY_PLAN",start)
         self.assertIn(NATIVE_PIN,start)
         self.assertIn("STAGE119_C9_SUPREME_ONLY_READONLY_NATIVE.lua",start)
         for field in ("supremeOnlyResearchRequested",
