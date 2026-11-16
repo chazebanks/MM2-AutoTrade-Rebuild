@@ -226,7 +226,7 @@ function M.new(c)
  -- Validate the exact UTF-8 publisher catalog source bytes, not an
  -- untrusted claimed Git blob SHA or caller-provided decoded price table.
  -- The hash callback must come from an independently reviewed host module.
- if #c.sourceBytes<50000 or #c.sourceBytes>150000 then
+ if #c.sourceBytes<1000 or #c.sourceBytes>150000 then
   return nil,"SUPREME_ONLY_SOURCE_BYTE_LENGTH_INVALID" end
  local hashed,digest=pcall(c.sha256,c.sourceBytes)
  if not hashed or type(digest)~="string" or digest~=CATALOG_SHA256 then
