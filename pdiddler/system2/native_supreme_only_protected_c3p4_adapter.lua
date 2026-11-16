@@ -16,6 +16,9 @@ end
 local function nat(x)
  return finite(x) and x==math.floor(x) and x>=1 and x<=100000
 end
+local function userId(n)
+ return finite(n) and n==math.floor(n) and n>0 and n<10^16
+end
 local function rawKey(x)
  return type(x)=="string" and #x>=1 and #x<=90 and
   x:match("^[A-Za-z0-9_]+$")~=nil
@@ -188,8 +191,8 @@ end
 local function saneScope(s)
  return type(s)=="table" and type(s.jobId)=="string" and
    #s.jobId>=8 and type(s.leaseId)=="string" and
-   #s.leaseId>=8 and nat(s.localUserId)~=false and
-   nat(s.partnerUserId)~=false and
+   #s.leaseId>=8 and userId(s.localUserId) and
+   userId(s.partnerUserId) and
    s.localUserId~=s.partnerUserId and s.root~=nil
 end
 function M.new(c)
