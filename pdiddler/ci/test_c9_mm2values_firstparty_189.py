@@ -140,11 +140,14 @@ class FirstPartyMM2Values189(unittest.TestCase):
         pages["godly"]=pages["godly"].replace("godly items","common items",1)
         with self.assertRaisesRegex(MM2ValuesBlocked,"WRONG_CATEGORY_HEADER"):
             self.call(pages=pages)
+    def test_artwork_url_does_not_authenticate_or_poison_price_rows(self):
         pages=self.pages.copy()
         pages["godly"]=pages["godly"].replace("https://www.mm2values.com/img/fixture.png",
-                                               "https://evil.invalid/img/fixture.png",1)
-        with self.assertRaisesRegex(MM2ValuesBlocked,"ART_ORIGIN_CHANGED"):
-            self.call(pages=pages)
+                                               "https://example.invalid/img/fixture.png",1)
+        candidate=self.call(pages=pages)
+        baseline=self.call()
+        self.assertEqual(candidate["rows"],baseline["rows"])
+        self.assertNotIn("example.invalid",json.dumps(candidate["rows"]))
 
     def test_invalid_cards_do_not_silently_fallback(self):
         for from_text,to_text in [
