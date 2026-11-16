@@ -45,7 +45,7 @@ local function fixture(opts)
  function game:HttpGet(url)
   calls.http+=1
   local good="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
-   "d054ae0519b6b9f46a6e2d6a631fcb553168adc7/pdiddler/"..
+   "a2c4855b75b234248917c73e670fad83176516e7/pdiddler/"..
    "supervised/STAGE119_C9_READONLY_RESEARCH_NATIVE.lua"
   eq(url,good,"C9 only exact GitHub immutable source URI")
   if opts.badNetwork then error("offline fake CDN") end
