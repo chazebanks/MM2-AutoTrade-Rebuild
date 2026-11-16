@@ -137,6 +137,19 @@ local function concentration(group,rows)
   highest=math.max(highest,rows[id].supremeListed*q) end
  return math.floor(highest*10000/val)
 end
+-- Read-only source precheck before potentially invoking the ORIGINAL scanner RPC.
+-- The caller's catalogPin is a research-side claim, NOT independent hash
+-- verification on the live client. Do not promote this to publisher auth.
+function M.sourceStatus(catalog,catalogPin,nowEpoch)
+ local rows,why=validateSource(catalog,nowEpoch,catalogPin)
+ if not rows then return denied(why) end
+ return {schema=SCHEMA,status="SUPREME_ONLY_RESEARCH_SOURCE_CHECKED",
+  valueSource=SOURCE,readOnly=true,clientOnly=true,researchOnly=true,
+  publisherSignatureVerified=false,catalogBytesAuthenticatedOnClient=false,
+  realInventoryVerified=false,authorizesTrade=false,
+  authorizesOffer=false,authorizesAccept=false,
+  mayUseForStrategyLearning=false,mayReportProfit=false}
+end
 function M.review(catalog,claimedCatalogSha,nowEpoch,owned,options)
  local rows,why=validateSource(catalog,nowEpoch,claimedCatalogSha)
  if not rows then return denied(why) end
