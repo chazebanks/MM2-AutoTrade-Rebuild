@@ -1,0 +1,72 @@
+name: Gingerscope C9 Supreme-only immutable original P3 host bootstrap (research)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_READONLY_START.lua'
+      - 'pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_READONLY_NATIVE.lua'
+      - 'pdiddler/system2/native_sha256_rfc6234_readonly.lua'
+      - 'pdiddler/system2/native_supreme_only_bilateral_research_refresh.lua'
+      - 'pdiddler/system2/native_supreme_only_protected_c3p4_adapter_refresh.lua'
+      - 'pdiddler/system2/supreme_only_189_research_catalog_2026_11_16_refresh.json'
+      - 'pdiddler/ci/system2_supreme_only_protected_c3p4_refresh_mocks.luau'
+      - 'pdiddler/ci/stage119_c9_supreme_only_loader_mocks.luau'
+      - 'pdiddler/ci/stage119_c9_supreme_only_original_host_mocks.luau'
+      - 'pdiddler/ci/test_c9_supreme_only_bootstrap_integrity.py'
+      - '.github/workflows/gingerscope-c9-supreme-only-ipad-host-bootstrap.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-manual-arm-supreme-only-readonly:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify source bytes, SHA, publisher edition and pinned native bootstrap
+        run: python3 -m unittest -v pdiddler.ci.test_c9_supreme_only_bootstrap_integrity
+      - name: Install pinned audited Luau Lune interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/lune-v0.11.1.zip"
+          curl -fLsS --retry 3 --connect-timeout 20 \
+            "https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip" \
+            -o "$archive"
+          printf '%s  %s\n' '39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1' "$archive" | sha256sum -c -
+          unzip -q "$archive" -d "$RUNNER_TEMP/lune-dist"
+          binary="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
+          test -n "$binary"
+          install -m 0755 "$binary" "$RUNNER_TEMP/lune"
+      - name: Check actual standalone portable SHA-256 + refreshed 189 Supreme-only protected bridge
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_supreme_only_protected_c3p4_refresh_mocks.luau
+      - name: Check single-execute native startup/manual ARM guard through original loader mocks
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_supreme_only_loader_mocks.luau
+      - name: Check complete original protected P3/P4 lexical native host and new Supreme bridge
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_supreme_only_original_host_mocks.luau
+      - name: Check no hidden automated offer or trade permission in public launcher
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          start=Path("pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_READONLY_START.lua").read_text()
+          host=Path("pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_READONLY_NATIVE.lua").read_text()
+          for txt in (start,host):
+              for call in ("remote:FireServer(","remote:InvokeServer(",
+                           "AcceptTrade:FireServer","OfferItem:FireServer",
+                           "TeleportService:Teleport","sendChat("):
+                  assert call not in txt,call
+          assert "cfg.c9SupremeOnlyReadOnly~=true" in host
+          assert "c9SupremeOnlyReadOnlyPreview=c9SupremeOnlyReadOnlyPreview" in host
+          assert "native_sha256_rfc6234_readonly.lua" in host
+          print("C9_SUPREME_ONLY_IPAD_BOOTSTRAP_READONLY_STATIC_PASS")
+          PY
