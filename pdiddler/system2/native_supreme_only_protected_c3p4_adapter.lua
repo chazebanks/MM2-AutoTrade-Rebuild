@@ -377,8 +377,10 @@ function M.new(c)
       return fail("OPPONENT_ITEM_NOT_PRESENT_IN_BOUND_GUI") end
    end
   end
+  local quoteClock,quoteWhy=now()
+  if not quoteClock then return fail(quoteWhy) end
   local success,preview=pcall(c.supremeCore.review,catalog,SOURCE_GIT_BLOB,
-      c.utcNow(),before.counts,options)
+      quoteClock,before.counts,options)
   if not success or type(preview)~="table" or
     preview.schema~="gingerscope-system2-native-supreme-only-bilateral-research-v1" or
     preview.status~="SUPREME_ONLY_NATIVE_RESEARCH_NOT_EXECUTABLE" or
