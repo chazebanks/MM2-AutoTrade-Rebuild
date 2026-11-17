@@ -17,6 +17,8 @@ HOST=P/"supervised/STAGE119_C9_SUPREME_ONLY_BUTTON_NATIVE.lua"
 START=P/"supervised/STAGE119_C9_SUPREME_ONLY_BUTTON_START.lua"
 SHA="48107d3039caf620bcad2c08831c9ca7fe206780dfb0e2d96d8161e3c9210f4a"
 BLOB="1497e9644ae271ff7a144aa5de43c30609f5c722"
+LATEST_BLOB="958038a6b22c43e8d0359cb15e6704bc84253430"
+LATEST_SHA="fd657db48c00c996705093dadc384c1a0ddd4630398826108b5585ca76c2eca4"
 
 def git_blob(p):
     content=p.read_bytes()
@@ -63,11 +65,11 @@ class SupremeOnscreenButtonNativeIntegrity(unittest.TestCase):
         core=CORE.read_text()
         bridge=BRIDGE.read_text()
         button=BUTTON.read_text()
-        self.assertIn(BLOB,core)
-        self.assertIn(BLOB,bridge)
-        self.assertIn(SHA,bridge)
-        self.assertIn("1794924411",core)
-        self.assertIn("1794924411",bridge)
+        self.assertIn(LATEST_BLOB,core)
+        self.assertIn(LATEST_BLOB,bridge)
+        self.assertIn(LATEST_SHA,bridge)
+        self.assertIn("1794951678",core)
+        self.assertIn("1794951678",bridge)
         self.assertIn("sameOffer(option.receive,their)",bridge)
         self.assertIn("sameOffer(option.give,ours)",bridge)
         self.assertIn("ORIGINAL_P4_OFFER_ACCEPTANCE_OR_STACK_CHANGED",bridge)

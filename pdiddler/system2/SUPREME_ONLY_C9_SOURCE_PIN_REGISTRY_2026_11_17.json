@@ -11,13 +11,13 @@
   },
   "launcher": {
     "path": "pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua",
-    "revision": "8b189487a905abf2b5733a9b3a7dcffc6ffa44ce",
-    "blob": "bf8146bf676c852961dc4755eb99bcb1e1975214"
+    "revision": "12ceedf6788c496a8c33d8c40d96cc3e6a2f2886",
+    "blob": "fba03f20ba9ce5bdc412f8ed659d4442a8267d29"
   },
   "protectedHost": {
     "path": "pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua",
-    "revision": "f284dae578a8ec2558dba54ea828097567322a60",
-    "blob": "f412ae6db399eb41a9ddf9f13fb7e2895217676d"
+    "revision": "b87b2acb2c3228a2fa027b6a77904ce1fb38c474",
+    "blob": "02da2b46b544d5eeaf0418df9f97c96aee6781ad"
   },
   "directFrozenModules": [
     {
@@ -94,7 +94,7 @@
   "dynamicFrozenGroups": [
     {
       "group": "supremeResearch",
-      "commit": "3d23aeb45efe6dc87840b0f4f8a89198d0d8b4e3",
+      "commit": "06bddba07cad0e45fe37af47f84e0092c9bb1665",
       "hostLocal": "pin",
       "occurrences": 2,
       "files": [
@@ -124,7 +124,7 @@
         },
         {
           "role": "publisherCatalog",
-          "path": "pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_refresh.json"
+          "path": "pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json"
         }
       ]
     },
@@ -144,15 +144,15 @@
   "immutableBlobs": {
     "pdiddler/system2/native_supreme_five_scenario_gui_presentation.lua": "d03f4aa401ccc9754c9fc61a4ec855e515e6a666",
     "pdiddler/system2/native_supreme_only_five_scenario_recorder.lua": "caf78ba4f7d3984176684fd42f9ea9ea0013c994",
-    "pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_refresh.json": "1497e9644ae271ff7a144aa5de43c30609f5c722",
-    "pdiddler/system2/native_supreme_only_protected_c3p4_adapter_nov17.lua": "b35f4cbe7645ab704feeba5d3f55b768891e58c4"
+    "pdiddler/system2/native_supreme_only_protected_c3p4_adapter_nov17.lua": "379112fb34b351e7673e31ed5424d825cc21e001",
+    "pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json": "958038a6b22c43e8d0359cb15e6704bc84253430"
   },
   "supremeCatalog": {
-    "file": "pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_refresh.json",
-    "sha256": "48107d3039caf620bcad2c08831c9ca7fe206780dfb0e2d96d8161e3c9210f4a",
+    "file": "pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json",
+    "sha256": "fd657db48c00c996705093dadc384c1a0ddd4630398826108b5585ca76c2eca4",
     "publisherEdition": "2026-11-15T11:59:41-05:00",
-    "capturedUtc": "2026-11-17T14:06:51Z",
-    "absoluteExpiresUtc": "2026-11-17T20:06:51Z",
+    "capturedUtc": "2026-11-17T21:41:18Z",
+    "absoluteExpiresUtc": "2026-11-18T03:41:18Z",
     "maxAgeSeconds": 21600,
     "eligibleCounts": {
       "ancient": 15,

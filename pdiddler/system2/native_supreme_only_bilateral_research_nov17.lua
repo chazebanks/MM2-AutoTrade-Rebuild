@@ -5,9 +5,9 @@
 local M={}
 local SCHEMA="gingerscope-system2-native-supreme-only-bilateral-research-v1"
 local SOURCE_SCHEMA="gingerscope-system2-supreme-only-189-publisher-catalog-v3"
-local SOURCE_SHA="1497e9644ae271ff7a144aa5de43c30609f5c722"
+local SOURCE_SHA="958038a6b22c43e8d0359cb15e6704bc84253430"
 local ORIGINAL_SUPREME_SHA="5f208d43e99f71231131a6aa83b51db42f5a997d"
-local CAPTURE=1794924411
+local CAPTURE=1794951678
 local MAX_AGE=21600
 local SOURCE="SUPREME_ONLY"
 local COUNT={ancient=15,godly=128,chroma=46}
@@ -36,7 +36,7 @@ local function validateSource(catalog,now,callerPin)
    catalog.valueSource~=SOURCE or
    catalog.sourceOrigin~="https://supremevalues.com/" or
    catalog.sourceTransport~="FIRECRAWL_MEDIATED_HTTPS_RESEARCH" or
-   catalog.sourceCapturedUtc~="2026-11-17T14:06:51Z" or
+   catalog.sourceCapturedUtc~="2026-11-17T21:41:18Z" or
    catalog.publisherUpdatedAt~="2026-11-15T11:59:41-05:00" or
    catalog.originalHistoricalCatalogGitBlob~=ORIGINAL_SUPREME_SHA or
    callerPin~=SOURCE_SHA or

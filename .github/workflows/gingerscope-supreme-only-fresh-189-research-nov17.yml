@@ -1,0 +1,52 @@
+name: Gingerscope Supreme-only renewed 189-source integrity (research-only)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json'
+      - 'pdiddler/system2/native_supreme_only_bilateral_research_nov17.lua'
+      - 'pdiddler/system2/native_supreme_only_protected_c3p4_adapter_nov17.lua'
+      - 'pdiddler/system2/SUPREME_ONLY_C9_SOURCE_PIN_REGISTRY_2026_11_17.json'
+      - 'pdiddler/ci/supreme_c9_pin_audit.py'
+      - 'pdiddler/ci/test_supreme_nov17_214118z_refresh_research_only.py'
+      - 'pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua'
+      - 'pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua'
+      - '.github/workflows/gingerscope-supreme-only-fresh-189-research-nov17.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  immutable-supreme-only-source-research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify all 189 independently observed official Supreme cards, source hash, honest publisher clock, research-only authority
+        run: python3 -m unittest -v pdiddler.ci.test_supreme_nov17_214118z_refresh_research_only
+      - name: Verify immutable C9 source manifest and fresh capture chain
+        run: python3 -m pdiddler.ci.supreme_c9_pin_audit
+      - name: Verify ten adversarial source tampering and stale-source protections
+        run: python3 -m unittest -v pdiddler.ci.test_supreme_c9_pin_registry_nov17
+      - name: Reject any accidental second publisher or source restamp
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from datetime import datetime,timedelta
+          import json,hashlib
+          p=Path('pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json')
+          b=p.read_bytes();d=json.loads(b)
+          assert hashlib.sha256(b).hexdigest()=='fd657db48c00c996705093dadc384c1a0ddd4630398826108b5585ca76c2eca4'
+          assert len(d['rows'])==189
+          assert d['publisherUpdatedAt']=='2026-11-15T11:59:41-05:00'
+          assert d['sourceCapturedUtc']=='2026-11-17T21:41:18Z'
+          assert d['liveTradePricingAuthorized'] is False
+          assert d['authorizesOffer'] is False and d['authorizesAccept'] is False
+          assert d['mayUseForStrategyLearning'] is False
+          assert {r['rawGameKeyCandidate'] for r in d['rows'] if r['outgoingGingerscopeProtected']}=={'Gingerscope'}
+          print('SUPREME_RESEARCH_ONLY_189_REFRESHED_NO_TRADE_AUTHORITY=PASS')
+          PY

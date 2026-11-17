@@ -13,7 +13,7 @@ ROOT=Path(__file__).resolve().parents[1]
 START=ROOT/"supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_START.lua"
 HOST=ROOT/"supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_NATIVE.lua"
 RECORD=ROOT/"system2/native_supreme_only_five_scenario_recorder.lua"
-CATALOG=ROOT/"system2/supreme_only_189_research_catalog_2026_11_17_refresh.json"
+CATALOG=ROOT/"system2/supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json"
 TEST=ROOT/"ci/stage119_c9_supreme_only_five_scenario_original_host_mocks.luau"
 OLD=ROOT/"supervised/STAGE119_C9_SUPREME_ONLY_BUTTON_START.lua"
 
@@ -140,12 +140,12 @@ class ManualMultiScenarioPolicy(unittest.TestCase):
     def test_inherited_supreme_source_unchanged_and_expiring(self):
         raw=CATALOG.read_bytes()
         self.assertEqual(hashlib.sha256(raw).hexdigest(),
-                         "48107d3039caf620bcad2c08831c9ca7fe206780dfb0e2d96d8161e3c9210f4a")
+                         "fd657db48c00c996705093dadc384c1a0ddd4630398826108b5585ca76c2eca4")
         self.assertEqual(git_blob(CATALOG),
-                         "1497e9644ae271ff7a144aa5de43c30609f5c722")
+                         "958038a6b22c43e8d0359cb15e6704bc84253430")
         data=json.loads(raw)
         self.assertEqual(data["valueSource"],"SUPREME_ONLY")
-        self.assertEqual(data["sourceCapturedUtc"],"2026-11-17T14:06:51Z")
+        self.assertEqual(data["sourceCapturedUtc"],"2026-11-17T21:41:18Z")
         self.assertEqual(data["publisherUpdatedAt"],"2026-11-15T11:59:41-05:00")
         self.assertEqual(len(data["rows"]),189)
         self.assertEqual(data["categories"],{"ancient":15,"godly":128,"chroma":46})

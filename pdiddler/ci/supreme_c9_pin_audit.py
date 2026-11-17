@@ -27,7 +27,7 @@ DIRECT = re.compile(
 )
 HOST_PATH = "pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua"
 START_PATH = "pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua"
-CATALOG_PATH = "pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_refresh.json"
+CATALOG_PATH = "pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json"
 
 class PinAuditError(ValueError):
     """Fail-closed mismatched/ambiguous/bad source version."""
@@ -193,7 +193,7 @@ def verify(manifest: dict, files: dict[str, str]|None=None) -> dict:
         '"system2/native_supreme_only_current_offer_button.lua"',
         '"system2/native_market_offer_client_capture.lua"',
         '"system2/native_supreme_only_five_scenario_recorder.lua"',
-        "pin..\"/pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_refresh.json\"",
+        "pin..\"/pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json\"",
     ):
         check(needle in code,"RUNTIME_DYNAMIC_MODULE_PATH_CHANGED:"+needle)
     check("local captureUtc=" in starter and
