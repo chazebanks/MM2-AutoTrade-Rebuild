@@ -77,7 +77,7 @@ function M.render(args)
  local previewText=completed>=5 and "5/5 COMPLETE" or
       "TEST "..tostring(math.min(5,completed+1)).."/5"
  -- Preserve original 8-second ephemeral text precedence exactly.
- if type(args.previewText)=="string" and args.previewText~="" and
+ if type(args.previewText)=="string" and
     args.previewUntil>args.now and
     status=="P4_TWO_SIDED_CLIENT_SNAPSHOT" and args.hasBoundScope then
   body=args.previewText
