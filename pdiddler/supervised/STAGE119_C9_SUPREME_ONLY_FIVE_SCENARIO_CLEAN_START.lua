@@ -79,7 +79,7 @@ if not goodClock or type(stamp)~="number" or stamp~=stamp or
    stamp<captureUtc or stamp>captureUtc+21600 then
     return refuse("SUPREME_FIVE_TEST_SOURCE_EXPIRED_BEFORE_MANUAL_ARM")
 end
-local pinned="32ee770234ff6c3a38d73b183ae4c41cbc2a3472"
+local pinned="f284dae578a8ec2558dba54ea828097567322a60"
 local path="pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua"
 local url="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
     ..pinned.."/"..path
@@ -89,7 +89,7 @@ if not ok or type(source)~="string" or #source<39000 or
    not source:find("cfg.c9ResearchOnly~=true",1,true) or
    not source:find("c9ReadOnlyLeaseStatus=c9ReadOnlyLeaseStatus",1,true) or
    not source:find("c9SupremeOnlyReadOnlyPreview=c9SupremeOnlyReadOnlyPreview",1,true) or
-   not source:find("ui.preview.Visible=content.previewVisible",1,true) or
+   not source:find('setDisplayIfChanged(ui.preview,"Visible",content.previewVisible)',1,true) or
    not source:find("native_supreme_only_current_offer_button.lua",1,true) or
    not source:find("native_supreme_only_five_scenario_recorder.lua",1,true) or
    not source:find("native_supreme_five_scenario_gui_presentation.lua",1,true) or
