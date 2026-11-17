@@ -14,7 +14,7 @@ GUI=P/"system2/native_supreme_five_scenario_gui_presentation.lua"
 START=P/"supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua"
 OLD_START=P/"supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_START.lua"
 PRESENTER_SOURCE_PIN="3836738d83da5d49ae50be6dbed12155d1388702"
-HOST_SOURCE_PIN="f284dae578a8ec2558dba54ea828097567322a60"
+HOST_SOURCE_PIN="b87b2acb2c3228a2fa027b6a77904ce1fb38c474"
 
 class FiveStageGuiCleanupIntegrity(unittest.TestCase):
     def setUp(self):
@@ -29,11 +29,19 @@ class FiveStageGuiCleanupIntegrity(unittest.TestCase):
         marker="local function stop(reason)"
         self.assertEqual(self.old.count(marker),1)
         self.assertEqual(self.new.count(marker),1)
-        self.assertEqual(
-            self.new.split(marker,1)[1],
-            self.old.split(marker,1)[1],
-            "Protected original trade logic MUST not change in GUI cleanup"
-        )
+        updated=self.new.split(marker,1)[1]
+        original=self.old.split(marker,1)[1]
+        # The only allowed post-STOP changes are the TWO new fully pinned
+        # Supreme research-source revisions and the new catalog filename.
+        newpin="06bddba07cad0e45fe37af47f84e0092c9bb1665"
+        oldpin="3d23aeb45efe6dc87840b0f4f8a89198d0d8b4e3"
+        newcat="supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json"
+        oldcat="supreme_only_189_research_catalog_2026_11_17_refresh.json"
+        self.assertEqual(updated.count(newpin),2)
+        self.assertEqual(updated.count(newcat),1)
+        normalized=updated.replace(newpin,oldpin).replace(newcat,oldcat)
+        self.assertEqual(normalized,original,
+                         "Original protected P3/P4 logic changed outside verified source pins")
         for token in ("supervisor.arm({",
                       "c9SupremeOnlyReadOnlyPreview(options)",
                       'native_supreme_only_five_scenario_recorder.lua',
@@ -171,7 +179,14 @@ class FiveStageGuiCleanupIntegrity(unittest.TestCase):
         self.assertIn("pcall(presenter.buildUI,{",b)
         # Verify operator authorization and source-age gates are unchanged.
         prefix=a.split('local pinned="',1)[0]
-        self.assertEqual(prefix,b.split('local pinned="',1)[0])
+        updated_prefix=b.split('local pinned="',1)[0]
+        self.assertIn("local captureUtc=1794951678 -- 2026-11-17T21:41:18Z",updated_prefix)
+        self.assertIn("stamp>captureUtc+21600",updated_prefix)
+        normalized=updated_prefix.replace(
+            "local captureUtc=1794951678 -- 2026-11-17T21:41:18Z",
+            "local captureUtc=1794924411 -- 2026-11-17T14:06:51Z")
+        self.assertEqual(prefix,normalized,
+                         "Original loader policy changed beyond verified capture UTC")
         for flag in ("manualWeaponChangesSupervisedOnly",
                      "noAutomaticWeaponOffers",
                      "neverFinalAcceptDuringTest",
