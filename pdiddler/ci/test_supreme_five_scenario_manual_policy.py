@@ -52,6 +52,19 @@ class ManualMultiScenarioPolicy(unittest.TestCase):
         self.assertIn("manually swap weapon or stack",host)
         self.assertIn("MANUAL ITEM TEST | NEVER FINAL ACCEPT",host)
 
+    def test_expired_supreme_source_stops_before_p3_bootstrap(self):
+        code=START.read_text()
+        self.assertIn("local captureUtc=1794924411",code)
+        self.assertIn("stamp>captureUtc+21600",code)
+        self.assertIn("stamp<captureUtc",code)
+        self.assertIn("SUPREME_FIVE_TEST_SOURCE_EXPIRED_BEFORE_MANUAL_ARM",code)
+        self.assertIn("SUPREME_FIVE_TEST_CLIENT_UTC_CLOCK_UNAVAILABLE",code)
+        self.assertLess(
+            code.index("SUPREME_FIVE_TEST_SOURCE_EXPIRED_BEFORE_MANUAL_ARM"),
+            code.index('local pinned="d4252698840c78f0f109bed17e664ec2df91fc49"')
+        )
+        self.assertEqual(CATALOG.read_bytes().count(b"mm2Values"),0)
+
     def test_original_manual_p3_request_and_protected_p4_scope_unchanged(self):
         host=HOST.read_text()
         start=START.read_text()
