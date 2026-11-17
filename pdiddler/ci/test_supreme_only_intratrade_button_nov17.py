@@ -95,7 +95,7 @@ class SupremeOnscreenButtonNativeIntegrity(unittest.TestCase):
         self.assertIn("native_supreme_only_current_offer_button.lua",host)
         self.assertIn("0150f3bc2cff4638d8ad1352295f1156c186099a",host)
         self.assertIn("supreme_only_189_research_catalog_2026_11_17_refresh.json",host)
-        self.assertIn("7927e07284cd72f768b3ed63c135fe28a1244f1e",start)
+        self.assertIn("7f8068ce852eba851bcd6f5fe041f9055ba9bbb6",start)
         self.assertIn("GINGERSCOPE_C9_SUPREME_ONLY_PLAN",start)
         for field in ("explicitOwnInventoryReadRpcConsent","supremeOnlyResearchRequested",
                       "automaticP3ArmForbidden","consentVerifiedForNamedAlt"):
