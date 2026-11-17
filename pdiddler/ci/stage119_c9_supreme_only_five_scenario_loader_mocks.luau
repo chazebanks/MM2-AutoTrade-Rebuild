@@ -67,7 +67,14 @@ local function fixture(opts)
    isArmed=function()return false end,
    c9ReadOnlyLeaseStatus=function()return{status="BLOCKED"}end,
    c9SupremeOnlyReadOnlyPreview=function()return{status="BLOCKED"}end}
- local env={game=game,getgenv=function()return e end,
+ local DateTime=opts.noDateTime and nil or {
+  now=function()
+   return {UnixTimestamp=opts.expiredSource and 1794946012
+       or opts.futureSource and 1794924410
+       or 1794924441}
+  end
+ }
+ local env={game=game,DateTime=DateTime,getgenv=function()return e end,
   warn=function(msg)calls.warnings[#calls.warnings+1]=msg end,
   loadstring=function(actual)
    calls.compiler+=1
@@ -86,6 +93,22 @@ local function fixture(opts)
  end
  return {run=run,e=e,plan=e.GINGERSCOPE_C9_SUPREME_FIVE_TEST_PLAN,
   players=players,me=me,alt=alt,game=game,calls=calls,runtime=runtime}
+end
+do
+ local a=fixture({expiredSource=true})
+ eq(a.run(),nil,"expired Supreme price capture must reject BEFORE manual trade ARM")
+ eq(a.calls.http,0,"expired source must prevent even frozen host fetch")
+ eq(a.calls.arm,0,"expired source does not arm P3")
+end
+do
+ local a=fixture({futureSource=true})
+ eq(a.run(),nil,"source from the future must fail before P3")
+ eq(a.calls.http,0,"no source when client UTC clock is before capture")
+end
+do
+ local a=fixture({noDateTime=true})
+ eq(a.run(),nil,"no reliable Roblox UTC clock blocks startup")
+ eq(a.calls.http,0,"clock API absent must prevent host startup")
 end
 do
  local a=fixture()
