@@ -1,0 +1,102 @@
+name: Gingerscope Supreme five-stage GUI module extraction and protected host equivalence
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua'
+      - 'pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua'
+      - 'pdiddler/system2/native_supreme_five_scenario_gui_presentation.lua'
+      - 'pdiddler/ci/system2_supreme_five_stage_gui_presentation_mocks.luau'
+      - 'pdiddler/ci/stage119_c9_supreme_five_stage_clean_loader_mocks.luau'
+      - 'pdiddler/ci/stage119_c9_supreme_five_stage_clean_original_host_mocks.luau'
+      - 'pdiddler/ci/test_supreme_five_stage_gui_cleanup_integrity.py'
+      - '.github/workflows/gingerscope-supreme-five-stage-gui-cleanup.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-original-p3-protected-gui-presentation-equivalence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify untouched original protected host byte-for-byte, GUI parity, approved source pins
+        run: python3 -m unittest -v pdiddler.ci.test_supreme_five_stage_gui_cleanup_integrity
+      - name: Install pinned Lune v0.11.1 actual Luau runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/lune-v0.11.1.zip"
+          curl -fLsS --retry 3 --connect-timeout 20 \
+            "https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip" \
+            -o "$archive"
+          printf '%s  %s\n' '39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1' "$archive" | sha256sum -c -
+          unzip -q "$archive" -d "$RUNNER_TEMP/lune-dist"
+          binary="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
+          test -n "$binary"
+          install -m 0755 "$binary" "$RUNNER_TEMP/lune"
+      - name: Native Lua all original five stages and safe screen geometry equivalence
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_supreme_five_stage_gui_presentation_mocks.luau
+      - name: Original protected five-scenario state machine unchanged
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_supreme_only_five_scenario_recorder_mocks.luau
+      - name: Original Supreme-only current-offer policy unchanged
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_supreme_only_current_offer_button_mocks.luau
+      - name: Cleaned single-execute startup guard and original P3 manual ARM consent
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_supreme_five_stage_clean_loader_mocks.luau
+      - name: Prepare independent immutable original protected P3/P4 test fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild"
+          mkdir -p /tmp/gingerscope-stage220
+          curl -fLsS --retry 2 --max-time 50 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_observer_contract.lua" -o /tmp/gingerscope-stage220/stage9.lua
+          curl -fLsS --retry 2 --max-time 50 "$base/1971b93d324f0275e6a9affb472ac3e804439ed8/pdiddler/new_part4/p4_native_observer.lua" -o /tmp/gingerscope-stage220/native_stage9.lua
+          curl -fLsS --retry 2 --max-time 50 "$base/25b48b60fdb2f971bbb6b2a2020f3c7c4432f7ae/pdiddler/intelligence_lab/stage83_public_slug_registry.lua" -o /tmp/gingerscope-stage220/stage83.lua
+          curl -fLsS --retry 2 --max-time 50 "$base/15f762a27a968373ed82809345f1869e1f688b26/pdiddler/intelligence_lab/stage101_multiweapon_raw_key_match.lua" -o /tmp/gingerscope-stage220/stage101.lua
+          curl -fLsS --retry 2 --max-time 50 "$base/af84b23173620b03e919187b08cd352c101ba4ea/pdiddler/supervised/supervised_p3_startup_supervisor.lua" -o /tmp/gingerscope-stage220/frozen_boot.lua
+          curl -fLsS --retry 2 --max-time 50 "$base/9138751b5a57415939ffa1618ac57811d7c8ec7b/pdiddler/supervised/supervised_real_p3_rotation_handoff.lua" -o /tmp/gingerscope-stage220/frozen_coordinator.lua
+          test "$(git hash-object /tmp/gingerscope-stage220/stage9.lua)" = '7c84456006bd684dacb0217d0ae092d6d67575a4'
+          test "$(git hash-object /tmp/gingerscope-stage220/native_stage9.lua)" = 'a6338e946467ad738005bc5cb13cd2d2fbc2a2d0'
+          test "$(git hash-object /tmp/gingerscope-stage220/stage83.lua)" = '40e2a0ff01b70b2d0181c62cae347a08da82bcb8'
+          test "$(git hash-object /tmp/gingerscope-stage220/stage101.lua)" = '137585d778c3c08b8b6960013fa34a7b3fb7b463'
+          test "$(git hash-object /tmp/gingerscope-stage220/frozen_boot.lua)" = '881713c2abe644c0823f46c4007a80815608ea05'
+          test "$(git hash-object /tmp/gingerscope-stage220/frozen_coordinator.lua)" = '1d4decbc30378a3f83df7c6b83449c6ac5252899'
+      - name: Native original Stage119 complete five-stage GUI host after extraction
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_supreme_five_stage_clean_original_host_mocks.luau
+      - name: Fail closed on any new trade side effects, preserve main host and protected lease
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          gui=Path("pdiddler/system2/native_supreme_five_scenario_gui_presentation.lua").read_text()
+          host=Path("pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua").read_text()
+          start=Path("pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua").read_text()
+          for forbidden in ("FireServer","InvokeServer","AcceptTrade","DeclineTrade",
+                            "TeleportService","PostAsync","getgenv","game:HttpGet"):
+              assert forbidden not in gui,forbidden
+          for marker in ("cfg.noAutomaticWeaponOffers~=true",
+                         "cfg.neverFinalAcceptDuringTest~=true",
+                         "c9ReadOnlyLeaseStatus()", "supervisor.arm({",
+                         "native_supreme_only_five_scenario_recorder.lua"):
+              assert marker in host, marker
+          for marker in ("automaticP3ArmForbidden", "noWeaponAddOrRemoveTests==true",
+                         "SUPREME_FIVE_TEST_SOURCE_EXPIRED_BEFORE_MANUAL_ARM"):
+              assert marker in start,marker
+          assert "native_market_inventory_offer_core.lua" not in host
+          assert "native_bilateral_attractiveness_shadow.lua" not in host
+          print("C9_GUI_CLEANUP_PROTECTED_P3_P4_NO_NEW_TRADING_AUTHORITY=PASS")
+          PY

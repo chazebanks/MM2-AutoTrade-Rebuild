@@ -16,6 +16,13 @@ on:
       - 'pdiddler/ci/stage119_c9_supreme_only_five_scenario_loader_mocks.luau'
       - 'pdiddler/ci/stage119_c9_supreme_only_five_scenario_original_host_mocks.luau'
       - 'pdiddler/ci/test_supreme_only_intratrade_button_nov17.py'
+      - 'pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua'
+      - 'pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua'
+      - 'pdiddler/system2/native_supreme_five_scenario_gui_presentation.lua'
+      - 'pdiddler/ci/system2_supreme_five_stage_gui_presentation_mocks.luau'
+      - 'pdiddler/ci/stage119_c9_supreme_five_stage_clean_loader_mocks.luau'
+      - 'pdiddler/ci/stage119_c9_supreme_five_stage_clean_original_host_mocks.luau'
+      - 'pdiddler/ci/test_supreme_five_stage_gui_cleanup_integrity.py'
       - '.github/workflows/gingerscope-c9-supreme-only-five-scenario.yml'
   workflow_dispatch:
 permissions:
@@ -33,6 +40,8 @@ jobs:
           python-version: '3.12'
       - name: Verify source bytes, SHA, publisher edition and pinned native bootstrap
         run: python3 -m unittest -v pdiddler.ci.test_supreme_five_scenario_manual_policy
+      - name: Exact-byte protected host GUI refactor equivalence and source pins
+        run: python3 -m unittest -v pdiddler.ci.test_supreme_five_stage_gui_cleanup_integrity
       - name: Install pinned audited Luau Lune interpreter
         shell: bash
         run: |
@@ -46,6 +55,14 @@ jobs:
           binary="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
           test -n "$binary"
           install -m 0755 "$binary" "$RUNNER_TEMP/lune"
+      - name: Pure five-stage GUI and original protected panel renderer native tests
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_supreme_five_stage_gui_presentation_mocks.luau
+      - name: New immutable cleaned original Stage119 manual-only loader native tests
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_supreme_five_stage_clean_loader_mocks.luau
       - name: Check actual standalone portable SHA-256 + refreshed 189 Supreme-only protected bridge
         shell: bash
         run: |
@@ -84,12 +101,16 @@ jobs:
         shell: bash
         run: |
           "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_supreme_only_five_scenario_original_host_mocks.luau
+      - name: Run true original Stage119 protected P3/P4 with cleaned GUI in all five stages
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_supreme_five_stage_clean_original_host_mocks.luau
       - name: Check no hidden automated offer or trade permission in public launcher
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          start=Path("pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_START.lua").read_text()
-          host=Path("pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_NATIVE.lua").read_text()
+          start=Path("pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua").read_text()
+          host=Path("pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua").read_text()
           for txt in (start,host):
               for call in ("remote:FireServer(","remote:InvokeServer(",
                            "AcceptTrade:FireServer","OfferItem:FireServer",
@@ -98,7 +119,10 @@ jobs:
           assert "cfg.c9SupremeOnlyReadOnly~=true" in host
           assert "c9SupremeOnlyReadOnlyPreview=c9SupremeOnlyReadOnlyPreview" in host
           assert "native_sha256_rfc6234_readonly.lua" in host
-          assert "ui.preview=action" in host
+          assert "ui.preview.Visible=content.previewVisible" in host
+          gui=Path("pdiddler/system2/native_supreme_five_scenario_gui_presentation.lua").read_text()
+          assert 'ui.preview=action("SupremePreview","SUPREME PREVIEW",12)' in gui
+          assert "pcall(presenter.buildUI,{" in host
           assert "cfg.c9FiveScenarioManualTest~=true" in host
           assert "cfg.noAutomaticWeaponOffers~=true" in host
           assert "cfg.neverFinalAcceptDuringTest~=true" in host
