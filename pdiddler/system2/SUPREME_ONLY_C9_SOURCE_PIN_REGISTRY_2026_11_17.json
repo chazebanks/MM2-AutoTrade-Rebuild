@@ -1,0 +1,166 @@
+{
+  "schema": "gingerscope-system2-c9-immutable-source-pin-audit-v1",
+  "purpose": "OFFLINE_AUDIT_ONLY_NO_RUNTIME_IMPORT_OR_NEW_FETCH",
+  "repository": "chazebanks/MM2-AutoTrade-Rebuild",
+  "policy": {
+    "source": "SUPREME_ONLY",
+    "researchOnly": true,
+    "automaticOffers": false,
+    "finalAccept": false,
+    "neverOutgoing": "Gingerscope"
+  },
+  "launcher": {
+    "path": "pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua",
+    "revision": "b93f1186c52a9190cf8fe40fe6c7883867d58706",
+    "blob": "01c33b86d1185d99df9777e172af2e61c2b3e575"
+  },
+  "protectedHost": {
+    "path": "pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua",
+    "revision": "32ee770234ff6c3a38d73b183ae4c41cbc2a3472",
+    "blob": "cf3e03b78448e29bc850ea99ec388f1841dc9842"
+  },
+  "directFrozenModules": [
+    {
+      "symbol": "geometry",
+      "commit": "5b8ee35d7f281c23d9c2181abd97a063e59a0660",
+      "path": "pdiddler/new_part4/stage100_screen_prompt_overlay.lua"
+    },
+    {
+      "symbol": "presenter",
+      "commit": "3836738d83da5d49ae50be6dbed12155d1388702",
+      "path": "pdiddler/system2/native_supreme_five_scenario_gui_presentation.lua"
+    },
+    {
+      "symbol": "ioModule",
+      "commit": "a599c31c53d25e6799b9d631f45f282b445dcda0",
+      "path": "pdiddler/supervised/pdiddler4_tradeio_supervised_v2.lua"
+    },
+    {
+      "symbol": "bridge",
+      "commit": "2f556afac5e5fd9cfdbf9e081eeea01a542d293d",
+      "path": "pdiddler/supervised/supervised_p3_p4_handoff.lua"
+    },
+    {
+      "symbol": "coordinator",
+      "commit": "9138751b5a57415939ffa1618ac57811d7c8ec7b",
+      "path": "pdiddler/supervised/supervised_real_p3_rotation_handoff.lua"
+    },
+    {
+      "symbol": "outgoingModule",
+      "commit": "2036ae5bd937620f21d46600f99550a1b233a654",
+      "path": "pdiddler/supervised/pdiddler3_outgoing_START_GATED_v1.lua"
+    },
+    {
+      "symbol": "bootModule",
+      "commit": "af84b23173620b03e919187b08cd352c101ba4ea",
+      "path": "pdiddler/supervised/supervised_p3_startup_supervisor.lua"
+    },
+    {
+      "symbol": "watchdogModule",
+      "commit": "48c4b0fee594639c74f1bed408581db7a5bc6f1b",
+      "path": "pdiddler/supervised/supervised_p3_continuous_watchdog.lua"
+    },
+    {
+      "symbol": "stage9Contract",
+      "commit": "1971b93d324f0275e6a9affb472ac3e804439ed8",
+      "path": "pdiddler/new_part4/p4_observer_contract.lua"
+    },
+    {
+      "symbol": "stage9Native",
+      "commit": "1971b93d324f0275e6a9affb472ac3e804439ed8",
+      "path": "pdiddler/new_part4/p4_native_observer.lua"
+    },
+    {
+      "symbol": "lastOfferModule",
+      "commit": "7c12a2e9768ef294b411086deef9ddaf2bee8d21",
+      "path": "pdiddler/intelligence_lab/trade_lastoffer_client_audit.lua"
+    },
+    {
+      "symbol": "stage118",
+      "commit": "891d548d2ef77763e9f7e3a679984a646bb9d4b4",
+      "path": "pdiddler/intelligence_lab/stage118_lastoffer_gui_correlation.lua"
+    },
+    {
+      "symbol": "c9HostModule",
+      "commit": "cc445e5afce631e0545cd7e0ef79b2dc63651b20",
+      "path": "pdiddler/system2/native_c9_original_p3_protected_host_adapter.lua"
+    },
+    {
+      "symbol": "rawScanner",
+      "commit": "2036ae5bd937620f21d46600f99550a1b233a654",
+      "path": "pdiddler/pdiddler3_scanner_MODULE_v6_5_PART4_STATUS_BRIDGE.lua"
+    }
+  ],
+  "dynamicFrozenGroups": [
+    {
+      "group": "supremeResearch",
+      "commit": "3d23aeb45efe6dc87840b0f4f8a89198d0d8b4e3",
+      "hostLocal": "pin",
+      "occurrences": 2,
+      "files": [
+        {
+          "role": "sha256",
+          "path": "pdiddler/system2/native_sha256_rfc6234_readonly.lua"
+        },
+        {
+          "role": "supremeCore",
+          "path": "pdiddler/system2/native_supreme_only_bilateral_research_nov17.lua"
+        },
+        {
+          "role": "protectedBridge",
+          "path": "pdiddler/system2/native_supreme_only_protected_c3p4_adapter_nov17.lua"
+        },
+        {
+          "role": "captureAdapter",
+          "path": "pdiddler/system2/native_market_offer_client_capture.lua"
+        },
+        {
+          "role": "previewButton",
+          "path": "pdiddler/system2/native_supreme_only_current_offer_button.lua"
+        },
+        {
+          "role": "previewCapture",
+          "path": "pdiddler/system2/native_market_offer_client_capture.lua"
+        },
+        {
+          "role": "publisherCatalog",
+          "path": "pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_refresh.json"
+        }
+      ]
+    },
+    {
+      "group": "fiveScenario",
+      "commit": "851205f28790b17f410292637ad9449eff0303bc",
+      "hostLocal": "recorderPin",
+      "occurrences": 1,
+      "files": [
+        {
+          "role": "recorder",
+          "path": "pdiddler/system2/native_supreme_only_five_scenario_recorder.lua"
+        }
+      ]
+    }
+  ],
+  "immutableBlobs": {
+    "pdiddler/system2/native_supreme_five_scenario_gui_presentation.lua": "d03f4aa401ccc9754c9fc61a4ec855e515e6a666",
+    "pdiddler/system2/native_supreme_only_five_scenario_recorder.lua": "caf78ba4f7d3984176684fd42f9ea9ea0013c994",
+    "pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_refresh.json": "1497e9644ae271ff7a144aa5de43c30609f5c722",
+    "pdiddler/system2/native_supreme_only_protected_c3p4_adapter_nov17.lua": "b35f4cbe7645ab704feeba5d3f55b768891e58c4"
+  },
+  "supremeCatalog": {
+    "file": "pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_refresh.json",
+    "sha256": "48107d3039caf620bcad2c08831c9ca7fe206780dfb0e2d96d8161e3c9210f4a",
+    "publisherEdition": "2026-11-15T11:59:41-05:00",
+    "capturedUtc": "2026-11-17T14:06:51Z",
+    "absoluteExpiresUtc": "2026-11-17T20:06:51Z",
+    "maxAgeSeconds": 21600,
+    "eligibleCounts": {
+      "ancient": 15,
+      "godly": 128,
+      "chroma": 46
+    },
+    "rawInstanceIdentityVerified": false,
+    "publisherSigned": false,
+    "liveTradePricingAuthorized": false
+  }
+}
