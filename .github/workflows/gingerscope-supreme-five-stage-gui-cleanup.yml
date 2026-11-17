@@ -41,16 +41,20 @@ jobs:
           install -m 0755 "$binary" "$RUNNER_TEMP/lune"
       - name: Native Lua all original five stages and safe screen geometry equivalence
         shell: bash
-        run: "$RUNNER_TEMP/lune" run pdiddler/ci/system2_supreme_five_stage_gui_presentation_mocks.luau
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_supreme_five_stage_gui_presentation_mocks.luau
       - name: Original protected five-scenario state machine unchanged
         shell: bash
-        run: "$RUNNER_TEMP/lune" run pdiddler/ci/system2_supreme_only_five_scenario_recorder_mocks.luau
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_supreme_only_five_scenario_recorder_mocks.luau
       - name: Original Supreme-only current-offer policy unchanged
         shell: bash
-        run: "$RUNNER_TEMP/lune" run pdiddler/ci/system2_supreme_only_current_offer_button_mocks.luau
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_supreme_only_current_offer_button_mocks.luau
       - name: Cleaned single-execute startup guard and original P3 manual ARM consent
         shell: bash
-        run: "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_supreme_five_stage_clean_loader_mocks.luau
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_supreme_five_stage_clean_loader_mocks.luau
       - name: Prepare independent immutable original protected P3/P4 test fixtures
         shell: bash
         run: |
@@ -71,7 +75,8 @@ jobs:
           test "$(git hash-object /tmp/gingerscope-stage220/frozen_coordinator.lua)" = '1d4decbc30378a3f83df7c6b83449c6ac5252899'
       - name: Native original Stage119 complete five-stage GUI host after extraction
         shell: bash
-        run: "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_supreme_five_stage_clean_original_host_mocks.luau
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/stage119_c9_supreme_five_stage_clean_original_host_mocks.luau
       - name: Fail closed on any new trade side effects, preserve main host and protected lease
         shell: bash
         run: |
