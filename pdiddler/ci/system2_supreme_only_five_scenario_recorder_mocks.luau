@@ -49,7 +49,7 @@ local good={
  mayReportProfit=false,maySendDiscordWebhook=false,
  mayUseForStrategyLearning=false
 }
-local empty=f({},{}),one=f({ours},{}),both=f({ours},{theirs})
+local empty,one,both=f({},{}),f({ours},{}),f({ours},{theirs})
 local recorder=M.new()
 eq(recorder.progress().completedCount,0,"start 0/5")
 eq(recorder.progress().nextStep,1,"first stage")
