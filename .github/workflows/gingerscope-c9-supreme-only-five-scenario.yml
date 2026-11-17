@@ -109,8 +109,8 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          start=Path("pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_START.lua").read_text()
-          host=Path("pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_NATIVE.lua").read_text()
+          start=Path("pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua").read_text()
+          host=Path("pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua").read_text()
           for txt in (start,host):
               for call in ("remote:FireServer(","remote:InvokeServer(",
                            "AcceptTrade:FireServer","OfferItem:FireServer",
