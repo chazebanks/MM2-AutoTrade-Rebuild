@@ -91,7 +91,7 @@ local presenter=loadFrozen("3836738d83da5d49ae50be6dbed12155d1388702",
     "system2/native_supreme_five_scenario_gui_presentation.lua",12000)
 local ioModule=loadFrozen("a599c31c53d25e6799b9d631f45f282b445dcda0",
     "supervised/pdiddler4_tradeio_supervised_v2.lua")
-local bridge=loadFrozen("2f556afac5e5fd9cfdbf9e081eeea01a542d293",
+local bridge=loadFrozen("2f556afac5e5fd9cfdbf9e081eeea01a542d293d",
     "supervised/supervised_p3_p4_handoff.lua")
 local coordinator=loadFrozen("9138751b5a57415939ffa1618ac57811d7c8ec7b",
     "supervised/supervised_real_p3_rotation_handoff.lua")

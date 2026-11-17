@@ -1,0 +1,55 @@
+name: Gingerscope C9 Supreme-only immutable source pins and version registry
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/SUPREME_ONLY_C9_SOURCE_PIN_REGISTRY_2026_11_17.json'
+      - 'pdiddler/ci/supreme_c9_pin_audit.py'
+      - 'pdiddler/ci/test_supreme_c9_pin_registry_nov17.py'
+      - 'pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua'
+      - 'pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua'
+      - 'pdiddler/system2/native_supreme_five_scenario_gui_presentation.lua'
+      - 'pdiddler/system2/native_supreme_only_five_scenario_recorder.lua'
+      - 'pdiddler/system2/native_supreme_only_protected_c3p4_adapter_nov17.lua'
+      - 'pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_refresh.json'
+      - '.github/workflows/gingerscope-c9-supreme-source-pin-registry.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-strict-pin-registry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact current frozen source pins, 189 Supreme values SHA and publisher TTL
+        run: python3 -m pdiddler.ci.supreme_c9_pin_audit
+      - name: Adversarial source pin swapping, 39-char prefix, stale authority and no auto-trade tests
+        run: python3 -m unittest -v pdiddler.ci.test_supreme_c9_pin_registry_nov17
+      - name: Confirm protected Stage119 P3/P4 and GUI parity unchanged by full pin normalization
+        run: python3 -m unittest -v pdiddler.ci.test_supreme_five_stage_gui_cleanup_integrity
+      - name: Strict single source/version registry is not a live dependency
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from pdiddler.ci.supreme_c9_pin_audit import load_manifest,verify
+          m=load_manifest()
+          r=verify(m)
+          start=Path(m["launcher"]["path"]).read_text()
+          host=Path(m["protectedHost"]["path"]).read_text()
+          for s in (start,host):
+              assert "SUPREME_ONLY_C9_SOURCE_PIN_REGISTRY" not in s
+              assert "main/pdiddler" not in s
+              assert "OfferItem:FireServer" not in s
+              assert "AcceptTrade:FireServer" not in s
+          assert r["directModules"]==14
+          assert r["dynamicRoles"]==8
+          assert r["source"]=="SUPREME_ONLY"
+          assert r["mayTrade"] is False
+          print("SUPREME_C9_PIN_MANIFEST_NONRUNTIME_AUDIT_PASS")
+          PY
