@@ -217,8 +217,15 @@ failEnv.Instance=failInstance
 local failure,failureReason=M.buildUI(failEnv)
 eq(failure,nil,"partial UI creation must fail closed")
 eq(failureReason,"PRESENTER_GUI_CONSTRUCTION_FAILED","partial UI failure reason")
-ok(created[#created].destroyed==true or created[#created].ClassName~="ScreenGui",
- "previous created instances remain mock local (cleanup is performed on screen root)")
+local failedRoot=nil
+for i=#created,1,-1 do
+ if created[i].ClassName=="ScreenGui" then
+  failedRoot=created[i]
+  break
+ end
+end
+ok(failedRoot~=nil,"injected factory failure created one partial ScreenGui")
+eq(failedRoot.destroyed,true,"partial construction destroys root GUI")
 local source=fs.readFile(
  "pdiddler/system2/native_supreme_five_scenario_gui_presentation.lua")
 for _,word in ipairs({
