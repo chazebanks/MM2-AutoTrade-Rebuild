@@ -87,7 +87,7 @@ end
 local geometry=loadFrozen("5b8ee35d7f281c23d9c2181abd97a063e59a0660",
     "new_part4/stage100_screen_prompt_overlay.lua")
 -- Pure presentation module; session/geometry/identity/offer code remains here.
-local presenter=loadFrozen("bfaef21bf636f38146abcf557d4e235f621424b0",
+local presenter=loadFrozen("1290f1c9f1a331d894a0a2297c828a1eaf17f140",
     "system2/native_supreme_five_scenario_gui_presentation.lua",12000)
 local ioModule=loadFrozen("a599c31c53d25e6799b9d631f45f282b445dcda0",
     "supervised/pdiddler4_tradeio_supervised_v2.lua")
@@ -207,71 +207,19 @@ local function clipboard(r)
     print("[P3 NATIVE RESULT JSON] "..json)
     return copied
 end
-local ui={}
-local made=pcall(function()
-    ui.screen=Instance.new("ScreenGui")
-    ui.screen.Name="PDIDDLER_P3_STAGE101_ReadonlyIdentity"
-    ui.screen.ResetOnSpawn=false
-    ui.screen.IgnoreGuiInset=true
-    ui.screen.DisplayOrder=150
-    ui.screen.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
-    ui.screen.Parent=PG
-    ui.panel=Instance.new("Frame")
-    ui.panel.Name="LiveStatus"
-    ui.panel.BackgroundColor3=Color3.fromRGB(28,23,40)
-    ui.panel.BorderSizePixel=0
-    ui.panel.Active=false
-    ui.panel.Visible=false
-    ui.panel.Parent=ui.screen
-    local stroke=Instance.new("UIStroke")
-    stroke.Color=Color3.fromRGB(177,128,239)
-    stroke.Thickness=1
-    stroke.Parent=ui.panel
-    local corner=Instance.new("UICorner")
-    corner.CornerRadius=UDim.new(0,10)
-    corner.Parent=ui.panel
-    local function label(n,y,h,size)
-        local q=Instance.new("TextLabel")
-        q.Name=n
-        q.BackgroundTransparency=1
-        q.TextColor3=Color3.fromRGB(255,255,255)
-        q.TextSize=size
-        q.TextWrapped=true
-        q.TextXAlignment=Enum.TextXAlignment.Left
-        q.Font=Enum.Font.GothamBold
-        q.Position=UDim2.fromOffset(12,y)
-        q.Size=UDim2.fromOffset(280,h)
-        q.Parent=ui.panel
-        return q
-    end
-    ui.title=label("CurrentStep",7,24,14)
-    ui.body=label("WhatToDo",32,52,12)
-    ui.warning=label("Safety",90,18,11)
-    ui.warning.Text="MANUAL ITEM TEST | NEVER FINAL ACCEPT"
-    local function action(n,text,x)
-        local q=Instance.new("TextButton")
-        q.Name=n
-        q.Text=text
-        q.TextSize=13
-        q.TextColor3=Color3.fromRGB(255,255,255)
-        q.BackgroundColor3=Color3.fromRGB(88,55,129)
-        q.Position=UDim2.fromOffset(x,111)
-        q.Size=UDim2.fromOffset(128,28)
-        q.Parent=ui.panel
-        q.Active=false
-        q.Visible=false
-        return q
-    end
-    ui.arm=action("ArmP3","ARM P3",12)
-    -- Same known-safe x/y as ARM. The preview button replaces ARM only
-    -- after original protected P3 is armed, never overlays MM2 trade controls.
-    ui.preview=action("SupremePreview","SUPREME PREVIEW",12)
-    ui.stop=action("StopP3","STOP / COPY",164)
-end)
-if not made then
+local built,ui,uiWhy=pcall(presenter.buildUI,{
+    Instance=Instance,Color3=Color3,Enum=Enum,
+    UDim=UDim,UDim2=UDim2,Parent=PG,
+})
+if not built or type(ui)~="table" or
+   type(ui.screen)~="table" or type(ui.panel)~="table" or
+   ui.arm==nil or ui.preview==nil or ui.stop==nil or
+   ui.title==nil or ui.body==nil or ui.warning==nil then
     E.PDIDDLER_SUPERVISED_P3_NATIVE_OWNER=nil
-    if ui.screen then pcall(function()ui.screen:Destroy()end) end
-    warn("[P3 NATIVE] GUI construction failed; no P3 requested")
+    if type(ui)=="table" and ui.screen then
+        pcall(function()ui.screen:Destroy()end)
+    end
+    warn("[P3 NATIVE] GUI construction failed; no P3 requested: "..tostring(uiWhy))
     return nil
 end
 local guide={stopped=false,phase="PREPARED",layoutFailures=0}
