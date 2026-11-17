@@ -5,8 +5,15 @@ local M={}
 local SCHEMA="gingerscope-supreme-only-intrade-button-research-v1"
 local SOURCE="SUPREME_ONLY"
 local function denied(why,display)
+ local safeHints={
+  GUI_RAW_WEAPON_ID_OR_SLOT_NOT_PROVEN="SUPREME: Weapon IDs unavailable; cannot value safely.",
+  ORIGINAL_P4_GUI_CHANGED_DURING_PREVIEW="SUPREME: Offer changed; please preview again.",
+  ACCEPT_INDICATOR_ALREADY_ACTIVE="SUPREME: Accept state active. Preview blocked.",
+  SUPREME_ONLY_SOURCE_EXPIRED_OR_UNVERIFIED="SUPREME: Source expired; preview blocked.",
+  GINGERSCOPE_NEVER_OUTGOING="SUPREME: Gingerscope outgoing blocked.",
+ }
  return {schema=SCHEMA,status="BLOCKED",reason=why,
-  display=display or "SUPREME: Preview blocked. No trade action.",
+  display=display or safeHints[why] or "SUPREME: Preview blocked. No trade action.",
   valueSource=SOURCE,readOnly=true,researchOnly=true,clientOnly=true,
   authorizesTrade=false,authorizesOffer=false,authorizesAccept=false,
   mayReportProfit=false,mayUseForStrategyLearning=false,
@@ -135,6 +142,8 @@ function M.new(cfg)
   if r.status~="SUPREME_ONLY_PAPER_RESEARCH_NOT_EXECUTABLE" then
    text="SUPREME: "..(r.status=="BLOCKED_UNAPPROVED_SUPREME_LOSS"
      and "Listed loss NOT APPROVED." or "Risk guard BLOCKED preview.")
+   -- A rejected route is a BLOCKED status, never a successful quote.
+   return denied(r.status,text)
   end
   -- Never expose account, job, partner, lease, raw inventory or item names.
   return {schema=SCHEMA,status="SUPREME_ONLY_CURRENT_OFFER_CLIENT_PREVIEW",
