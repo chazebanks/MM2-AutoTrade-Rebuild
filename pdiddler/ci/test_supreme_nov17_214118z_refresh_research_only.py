@@ -23,7 +23,7 @@ SHA256="fd657db48c00c996705093dadc384c1a0ddd4630398826108b5585ca76c2eca4"
 BLOB="958038a6b22c43e8d0359cb15e6704bc84253430"
 
 def blob(b):
- return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\\0"+b).hexdigest()
+ return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest()
 def load(p): return json.loads(p.read_bytes())
 
 class SupremeRefreshResearch(unittest.TestCase):
