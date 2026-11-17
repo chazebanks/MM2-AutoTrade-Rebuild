@@ -95,12 +95,12 @@ end
 -- ARM/Preview/STOP buttons. Does not place the panel or change game state.
 -- All Roblox dependencies are passed explicitly and mocked under Lune.
 function M.buildUI(env)
- if type(env)~="table" or type(env.Instance)~="table" or
+ if type(env)~="table" or env.Instance==nil or
     type(env.Instance.new)~="function" or
-    type(env.Color3)~="table" or type(env.Color3.fromRGB)~="function" or
-    type(env.UDim)~="table" or type(env.UDim.new)~="function" or
-    type(env.UDim2)~="table" or type(env.UDim2.fromOffset)~="function" or
-    type(env.Enum)~="table" or env.Parent==nil then
+    env.Color3==nil or type(env.Color3.fromRGB)~="function" or
+    env.UDim==nil or type(env.UDim.new)~="function" or
+    env.UDim2==nil or type(env.UDim2.fromOffset)~="function" or
+    env.Enum==nil or env.Parent==nil then
    return nil,"PRESENTER_GUI_DEPENDENCIES_INVALID"
  end
  local Instance,Color3,UDim,UDim2,Enum=env.Instance,env.Color3,
