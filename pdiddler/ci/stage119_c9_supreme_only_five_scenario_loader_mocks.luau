@@ -67,13 +67,14 @@ local function fixture(opts)
    isArmed=function()return false end,
    c9ReadOnlyLeaseStatus=function()return{status="BLOCKED"}end,
    c9SupremeOnlyReadOnlyPreview=function()return{status="BLOCKED"}end}
- local DateTime=opts.noDateTime and nil or {
+ local DateTime={
   now=function()
    return {UnixTimestamp=opts.expiredSource and 1794946012
        or opts.futureSource and 1794924410
        or 1794924441}
   end
  }
+ if opts.noDateTime then DateTime=nil end
  local env={game=game,DateTime=DateTime,getgenv=function()return e end,
   warn=function(msg)calls.warnings[#calls.warnings+1]=msg end,
   loadstring=function(actual)
