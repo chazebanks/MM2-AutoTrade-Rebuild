@@ -113,7 +113,14 @@ class FiveStageGuiCleanupIntegrity(unittest.TestCase):
             "function guide:show(r)",1)[0]
         new=self.new.split("function guide:refresh()",1)[1].split(
             "function guide:show(r)",1)[0]
-        self.assertEqual(old,new)
+        # Source-only idempotent UI setter lives BETWEEN unchanged refresh()
+        # and show(). Do not mistake its addition for a geometry rewrite.
+        helper_marker="\n-- UI-only setter: avoid nine redundant"
+        self.assertIn(helper_marker,new)
+        refresh_only=new.split(helper_marker,1)[0]
+        self.assertEqual(old,refresh_only)
+        self.assertIn("local function setDisplayIfChanged(node,property,value)",new)
+        self.assertIn("if node[property]~=value then",new)
         self.assertIn("geometry.choose(",new)
         self.assertIn("{w=304,h=148}",new)
         self.assertIn('error("P3_GUIDE_"..tostring(why))',self.new)
