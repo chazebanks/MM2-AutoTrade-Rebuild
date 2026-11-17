@@ -147,7 +147,9 @@ class BilateralIncentiveShadowTests(unittest.TestCase):
    slot("Icebreaker",8),slot("Logchopper"),
    slot("Harvester"),slot("FlowerwoodKnife"),slot("GreenLuger")]
   self.blocked(req,"OUR_OUTGOING_PHYSICAL_SLOTS_INVALID")
+  req["partnerHypotheticalStock"]["Gingerscope"]=1
   req["routes"][0]["give"]=[slot("Icebreaker",8)]
+  req["routes"][0]["receive"]=[slot("Gingerscope")]
   x=self.evaluate(req)
   self.assertEqual(x["status"],"BILATERAL_FRICTION_SHADOW_RESEARCH_ONLY")
   self.assertEqual(x["routes"][0]["status"],"BLOCKED_STACK_PRICE_UNVERIFIED")
