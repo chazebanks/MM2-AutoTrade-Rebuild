@@ -128,9 +128,17 @@ eq(widget.preview().reason,"SUPREME_CURRENT_OFFER_SOURCE_OR_EVALUATION_BLOCKED",
 evaluateResult.authorizesAccept=false
 evaluateResult.hypotheticalAlternatives[1].status="BLOCKED_UNAPPROVED_SUPREME_LOSS"
 widget=configure()
-eq(widget.preview().status,"SUPREME_ONLY_CURRENT_OFFER_CLIENT_PREVIEW","negative risk still visible as blocked")
+eq(widget.preview().status,"BLOCKED","loss risk must never return successful preview status")
 yes(string.find(widget.preview().display,"Listed loss NOT APPROVED",1,true)~=nil,"no false positive when loss")
 evaluateResult.hypotheticalAlternatives[1].status="SUPREME_ONLY_PAPER_RESEARCH_NOT_EXECUTABLE"
+evaluateResult.status="BLOCKED"
+evaluateResult.reason="SUPREME_ONLY_SOURCE_EXPIRED_OR_UNVERIFIED"
+widget=configure()
+eq(widget.preview().status,"BLOCKED","expired quote is not successful")
+yes(string.find(widget.preview().display,"Source expired",1,true)~=nil,
+ "clear stale Supreme source message on GUI")
+evaluateResult.status="SUPREME_ONLY_PROTECTED_C3_P4_SHADOW_OBSERVED"
+evaluateResult.reason=nil
 local source=fs.readFile(path)
 for _,word in ipairs({"FireServer","InvokeServer","PostAsync","TeleportService",
  "AcceptTrade","DeclineTrade","mm2Listed","mm2Values","getgenv"}) do
