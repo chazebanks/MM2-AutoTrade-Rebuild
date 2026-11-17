@@ -70,7 +70,7 @@ end
 -- Fail BEFORE even loading the P3 host or showing ARM if the actual
 -- published-source capture has already exceeded its genuine six-hour TTL.
 -- This is a local clock boundary, not a fabricated new source refresh.
-local captureUtc=1794924411 -- 2026-11-17T14:06:51Z
+local captureUtc=1794951678 -- 2026-11-17T21:41:18Z
 if type(DateTime)~="table" or type(DateTime.now)~="function" then
     return refuse("SUPREME_FIVE_TEST_CLIENT_UTC_CLOCK_UNAVAILABLE")
 end
@@ -79,7 +79,7 @@ if not goodClock or type(stamp)~="number" or stamp~=stamp or
    stamp<captureUtc or stamp>captureUtc+21600 then
     return refuse("SUPREME_FIVE_TEST_SOURCE_EXPIRED_BEFORE_MANUAL_ARM")
 end
-local pinned="f284dae578a8ec2558dba54ea828097567322a60"
+local pinned="b87b2acb2c3228a2fa027b6a77904ce1fb38c474"
 local path="pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua"
 local url="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
     ..pinned.."/"..path
