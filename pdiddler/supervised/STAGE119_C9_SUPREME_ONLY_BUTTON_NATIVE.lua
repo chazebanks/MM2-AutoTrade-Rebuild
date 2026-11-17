@@ -1047,7 +1047,7 @@ local function c9SupremeOnlyReadOnlyPreview(options)
        return supremeDenial("C9_ROBLOX_CURRENT_UTC_NOT_AVAILABLE")
     end
     -- Exact immutable research commit of reviewed modules, not main/latest.
-    local pin="0150f3bc2cff4638d8ad1352295f1156c186099a"
+    local pin="3d23aeb45efe6dc87840b0f4f8a89198d0d8b4e3"
     if supremeModules==nil then
        local modules={
          sha256="native_sha256_rfc6234_readonly.lua",
@@ -1133,7 +1133,7 @@ ui.preview.Activated:Connect(function()
            type(c9HostHandle.scope)~="table" or
            type(c9HostHandle.isBoundSession)~="function" then
            return "SUPREME: Protected trade unavailable." end
-        local pin="0150f3bc2cff4638d8ad1352295f1156c186099a"
+        local pin="3d23aeb45efe6dc87840b0f4f8a89198d0d8b4e3"
         if supremeButtonModule==nil then
             supremeButtonModule=loadFrozen(pin,
               "system2/native_supreme_only_current_offer_button.lua",90000)
