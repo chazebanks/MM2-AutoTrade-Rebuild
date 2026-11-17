@@ -119,7 +119,7 @@ jobs:
           assert "cfg.c9SupremeOnlyReadOnly~=true" in host
           assert "c9SupremeOnlyReadOnlyPreview=c9SupremeOnlyReadOnlyPreview" in host
           assert "native_sha256_rfc6234_readonly.lua" in host
-          assert "ui.preview.Visible=content.previewVisible" in host
+          assert 'setDisplayIfChanged(ui.preview,"Visible",content.previewVisible)' in host
           gui=Path("pdiddler/system2/native_supreme_five_scenario_gui_presentation.lua").read_text()
           assert 'ui.preview=action("SupremePreview","SUPREME PREVIEW",12)' in gui
           assert "pcall(presenter.buildUI,{" in host
