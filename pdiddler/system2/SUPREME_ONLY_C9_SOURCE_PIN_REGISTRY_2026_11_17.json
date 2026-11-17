@@ -11,13 +11,13 @@
   },
   "launcher": {
     "path": "pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua",
-    "revision": "b93f1186c52a9190cf8fe40fe6c7883867d58706",
-    "blob": "01c33b86d1185d99df9777e172af2e61c2b3e575"
+    "revision": "8b189487a905abf2b5733a9b3a7dcffc6ffa44ce",
+    "blob": "bf8146bf676c852961dc4755eb99bcb1e1975214"
   },
   "protectedHost": {
     "path": "pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua",
-    "revision": "32ee770234ff6c3a38d73b183ae4c41cbc2a3472",
-    "blob": "cf3e03b78448e29bc850ea99ec388f1841dc9842"
+    "revision": "f284dae578a8ec2558dba54ea828097567322a60",
+    "blob": "f412ae6db399eb41a9ddf9f13fb7e2895217676d"
   },
   "directFrozenModules": [
     {
