@@ -67,6 +67,18 @@ local exact,checked=pcall(players.GetPlayerByUserId,players,target.UserId)
 if not exact or checked~=target then
     return refuse("C9_ALT_ACCOUNT_IDENTITY_NOT_CURRENT")
 end
+-- Fail BEFORE even loading the P3 host or showing ARM if the actual
+-- published-source capture has already exceeded its genuine six-hour TTL.
+-- This is a local clock boundary, not a fabricated new source refresh.
+local captureUtc=1794924411 -- 2026-11-17T14:06:51Z
+if type(DateTime)~="table" or type(DateTime.now)~="function" then
+    return refuse("SUPREME_FIVE_TEST_CLIENT_UTC_CLOCK_UNAVAILABLE")
+end
+local goodClock,stamp=pcall(function()return DateTime.now().UnixTimestamp end)
+if not goodClock or type(stamp)~="number" or stamp~=stamp or
+   stamp<captureUtc or stamp>captureUtc+21600 then
+    return refuse("SUPREME_FIVE_TEST_SOURCE_EXPIRED_BEFORE_MANUAL_ARM")
+end
 local pinned="d4252698840c78f0f109bed17e664ec2df91fc49"
 local path="pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_NATIVE.lua"
 local url="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
