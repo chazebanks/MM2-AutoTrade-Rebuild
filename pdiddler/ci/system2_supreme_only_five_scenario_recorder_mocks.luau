@@ -96,6 +96,15 @@ eq(valid.status,"SCENARIO_PASS","two-sided source verified")
 eq(valid.reason,"S4_PASS","stage4 recorded separately")
 eq(valid.completedCount,4,"four completed")
 eq(recorder.record(both,both,good,true).reason,"STAGE5_OFFER_NOT_CHANGED","reclick not manual change")
+local cosmetic=clone(both)
+cosmetic.ourSlots[1].slot=2
+eq(recorder.record(cosmetic,cosmetic,good,true).reason,
+ "STAGE5_OFFER_NOT_CHANGED","only rearranging an unchanged weapon is not a new trade")
+cosmetic=clone(both)
+cosmetic.ourSlots[1].amountText="x1"
+eq(recorder.record(cosmetic,cosmetic,good,true).reason,
+ "STAGE5_OFFER_NOT_CHANGED","display x1 equals empty quantity text (one copy)")
+
 local altered=clone(both)
 altered.theirSlots[1].amountText="x1"
 local changedWrong=recorder.record(altered,altered,blocked("SUPREME_ONLY_SOURCE_EXPIRED_OR_UNVERIFIED"),true)
