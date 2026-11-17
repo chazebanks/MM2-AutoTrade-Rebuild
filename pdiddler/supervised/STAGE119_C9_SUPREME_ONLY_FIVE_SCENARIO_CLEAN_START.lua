@@ -89,7 +89,7 @@ if not ok or type(source)~="string" or #source<39000 or
    not source:find("cfg.c9ResearchOnly~=true",1,true) or
    not source:find("c9ReadOnlyLeaseStatus=c9ReadOnlyLeaseStatus",1,true) or
    not source:find("c9SupremeOnlyReadOnlyPreview=c9SupremeOnlyReadOnlyPreview",1,true) or
-   not source:find('ui.preview=action("SupremePreview"',1,true) or
+   not source:find("ui.preview.Visible=content.previewVisible",1,true) or
    not source:find("native_supreme_only_current_offer_button.lua",1,true) or
    not source:find("native_supreme_only_five_scenario_recorder.lua",1,true) or
    not source:find("native_supreme_five_scenario_gui_presentation.lua",1,true) or
