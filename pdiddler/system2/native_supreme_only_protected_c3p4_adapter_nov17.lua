@@ -6,8 +6,8 @@
 local M={}
 local SCHEMA="gingerscope-system2-original-p3p4-supreme-only-adapter-v1"
 local SOURCE="SUPREME_ONLY"
-local CATALOG_SHA256="48107d3039caf620bcad2c08831c9ca7fe206780dfb0e2d96d8161e3c9210f4a"
-local SOURCE_GIT_BLOB="1497e9644ae271ff7a144aa5de43c30609f5c722"
+local CATALOG_SHA256="fd657db48c00c996705093dadc384c1a0ddd4630398826108b5585ca76c2eca4"
+local SOURCE_GIT_BLOB="958038a6b22c43e8d0359cb15e6704bc84253430"
 local PLACE=142823291
 local MAX_SCAN_SECONDS=10
 local MAX_OWN_AGE=30
@@ -436,7 +436,7 @@ function M.new(c)
   end
   return {schema=SCHEMA,
    status="SUPREME_ONLY_PROTECTED_C3_P4_SHADOW_OBSERVED",
-   valueSource=SOURCE,sourceAgeSeconds=math.floor(fresh-1794924411),
+   valueSource=SOURCE,sourceAgeSeconds=math.floor(fresh-1794951678),
    hypotheticalAlternatives=result,
    originalOfferSidesPhysicallyObserved=true,
    clientOfferChangedDuringResearch=false,
