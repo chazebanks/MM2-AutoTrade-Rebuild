@@ -43,6 +43,7 @@ local function receipt(state,kind,reason,display)
  }
 end
 local function bad(state,why,display)
+ state.blockedCount+=1
  return receipt(state,"SCENARIO_BLOCKED",why,
     display or ("S"..tostring(math.min(state.completed+1,5))..
     "/5 BLOCKED. Fix and tap Preview; never Accept."))
@@ -139,11 +140,9 @@ function M.new()
     "5/5 PASS. Close trade manually; STOP / COPY. Never final Accept.")
   end
   if leaseBound~=true or not viable(before) or not viable(after) then
-   state.blockedCount+=1
    return bad(state,"ORIGINAL_PROTECTED_P3_P4_FRAME_OR_LEASE_UNVERIFIED")
   end
   if not unchanged(before,after) then
-   state.blockedCount+=1
    return bad(state,"OFFER_OR_SESSION_CHANGED_DURING_SCENARIO",
      "SUPREME: Offer changed. Wait for stable GUI; tap again.")
   end
