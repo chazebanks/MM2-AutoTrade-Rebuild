@@ -117,7 +117,7 @@ class FiveStageGuiCleanupIntegrity(unittest.TestCase):
         # and show(). Do not mistake its addition for a geometry rewrite.
         helper_marker="\n-- UI-only setter: avoid nine redundant"
         self.assertIn(helper_marker,new)
-        refresh_only=new.split(helper_marker,1)[0]
+        refresh_only=new.split(helper_marker,1)[0]+"\n"
         self.assertEqual(old,refresh_only)
         self.assertIn("local function setDisplayIfChanged(node,property,value)",new)
         self.assertIn("if node[property]~=value then",new)
