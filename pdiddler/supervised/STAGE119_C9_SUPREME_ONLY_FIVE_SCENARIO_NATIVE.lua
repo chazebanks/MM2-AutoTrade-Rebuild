@@ -1197,7 +1197,7 @@ ui.preview.Activated:Connect(function()
         })
         if not preview or type(preview.preview)~="function" then
             return "SUPREME: Button contract unavailable." end
-        local recorderPin="82b78a7706d761927e9efaf1970ad878307096f0"
+        local recorderPin="851205f28790b17f410292637ad9449eff0303bc"
         if fiveScenarioHarness==nil then
             local module=loadFrozen(recorderPin,
               "system2/native_supreme_only_five_scenario_recorder.lua",90000)
