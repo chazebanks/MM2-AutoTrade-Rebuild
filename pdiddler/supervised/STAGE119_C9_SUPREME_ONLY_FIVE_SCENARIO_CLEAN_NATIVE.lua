@@ -1012,7 +1012,7 @@ local function c9SupremeOnlyReadOnlyPreview(options)
        return supremeDenial("C9_ROBLOX_CURRENT_UTC_NOT_AVAILABLE")
     end
     -- Exact immutable research commit of reviewed modules, not main/latest.
-    local pin="3d23aeb45efe6dc87840b0f4f8a89198d0d8b4e3"
+    local pin="06bddba07cad0e45fe37af47f84e0092c9bb1665"
     if supremeModules==nil then
        local modules={
          sha256="native_sha256_rfc6234_readonly.lua",
@@ -1046,7 +1046,7 @@ local function c9SupremeOnlyReadOnlyPreview(options)
        supremeModules=fetched
     end
     local url="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
-       pin.."/pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_refresh.json"
+       pin.."/pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json"
     local ok,source=pcall(function()return game:HttpGet(url)end)
     if not ok or type(source)~="string" or #source<1000 or
        #source>150000 then
@@ -1098,7 +1098,7 @@ ui.preview.Activated:Connect(function()
            type(c9HostHandle.scope)~="table" or
            type(c9HostHandle.isBoundSession)~="function" then
            return "SUPREME: Protected trade unavailable." end
-        local pin="3d23aeb45efe6dc87840b0f4f8a89198d0d8b4e3"
+        local pin="06bddba07cad0e45fe37af47f84e0092c9bb1665"
         if supremeButtonModule==nil then
             supremeButtonModule=loadFrozen(pin,
               "system2/native_supreme_only_current_offer_button.lua",90000)
