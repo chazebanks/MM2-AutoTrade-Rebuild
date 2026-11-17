@@ -94,7 +94,7 @@ if not ok or type(source)~="string" or #source<39000 or
    not source:find("native_supreme_only_five_scenario_recorder.lua",1,true) or
    not source:find("native_supreme_five_scenario_gui_presentation.lua",1,true) or
    not source:find("presenter.render({",1,true) or
-   not source:find("presenter.buildUI({",1,true) or
+   not source:find("pcall(presenter.buildUI,{",1,true) or
    not source:find("cfg.c9FiveScenarioManualTest~=true",1,true) then
     return refuse("C9_IMMUTABLE_RESEARCH_RUNNER_UNAVAILABLE")
 end
