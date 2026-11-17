@@ -106,17 +106,29 @@ local function safeBlock(output,reason)
   output.authorizesTrade==false and
   output.mayReportProfit==false and output.mayUseForStrategyLearning==false
 end
+local function positiveStack(s)
+ if type(s)~="string" or #s>20 then return nil end
+ if s=="" then return 1 end
+ local x=s:gsub("^%s+",""):gsub("%s+$",""):gsub("^[xX]","")
+ if #x<1 or #x>7 or not x:match("^%d+$") then return nil end
+ local n=tonumber(x)
+ return n and n==math.floor(n) and n>=1 and n<=100000 and n or nil
+end
 local function slotSignature(frame)
- -- Private, never serialized: distinguishes manual modification from re-click.
+ -- Private material-trade fingerprint: source raw ID AND numeric quantity
+ -- on EACH side, NEVER slot index, label/casing or x1 formatting. A GUI
+ -- rearrangement is not a trade change and must not count as Stage 5.
  local parts={}
  for _,side in ipairs({"ourSlots","theirSlots"}) do
-  local arr={}
+  local arr,seen={},{}
   for _,s in ipairs(frame[side]) do
-   arr[#arr+1]=table.concat({
-    tostring(s.slot),tostring(s.rawId),tostring(s.label),
-    tostring(s.amountText),tostring(s.chromaTag),
-    tostring(s.rawIdObserved)
-   },":")
+   local key=s.rawId
+   local qty=positiveStack(s.amountText)
+   if type(key)~="string" or #key<1 or seen[key] or not qty then
+    return nil
+   end
+   seen[key]=true
+   arr[#arr+1]=key..":"..tostring(qty)
   end
   table.sort(arr)
   parts[#parts+1]=side.."="..table.concat(arr,",")
@@ -168,7 +180,10 @@ function M.new()
      "3/5: Manually offer only ONE side, then Preview.")
   elseif nextStep==4 then
    if ours>0 and theirs>0 and safeQuote(output) then
-    state.previousOfferSignature=slotSignature(before)
+    local material=slotSignature(before)
+    if not material then
+     return bad(state,"STAGE4_MATERIAL_WEAPON_ID_OR_QUANTITY_UNVERIFIED") end
+    state.previousOfferSignature=material
     return mark(4,"4/5 PASS: Supreme prices checked. Manually change one item.")
    end
    return bad(state,"STAGE4_TWO_SIDED_VERIFIED_SUPREME_QUOTE_REQUIRED",
@@ -182,6 +197,8 @@ function M.new()
       "5/5: Change a weapon or stack, keeping both sides populated.")
    end
    local signature=slotSignature(before)
+   if not signature then
+    return bad(state,"STAGE5_MATERIAL_WEAPON_ID_OR_QUANTITY_UNVERIFIED") end
    if signature==state.previousOfferSignature then
     return bad(state,"STAGE5_OFFER_NOT_CHANGED",
       "5/5: Change weapon or quantity manually before Preview.")
