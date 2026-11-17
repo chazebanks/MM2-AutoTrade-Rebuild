@@ -157,8 +157,8 @@ def evaluate(request,*,now_epoch):
     warnings.append("STACK_VALUE_LINEAR_ASSUMPTION_NOT_VERIFIED")
    if pref=="HYPOTHETICAL_VALUE_WATCHER" and partner_delta<0:
     warnings.append("HYPOTHETICAL_VALUE_WATCHER_HAS_PAPER_DISINCENTIVE")
-   if pref=="HYPOTHETICAL_DEMAND_SEEKER" and
-      partner_receives_demand<partner_gives_demand:
+   if (pref=="HYPOTHETICAL_DEMAND_SEEKER" and
+       partner_receives_demand<partner_gives_demand):
     warnings.append("HYPOTHETICAL_DEMAND_SEEKER_HAS_DEMAND_DISINCENTIVE")
    if pref=="HYPOTHETICAL_COLLECTOR_INTEREST":
     warnings.append(
@@ -167,10 +167,12 @@ def evaluate(request,*,now_epoch):
       "HYPOTHETICAL_COLLECTOR_INTEREST_NOT_OFFERED")
    if pref=="HYPOTHETICAL_BUNDLE_PREFERENCE":
     warnings.append("HYPOTHETICAL_BUNDLE_SHAPE_ONLY_NOT_VERIFIED")
-   status="BLOCKED_UNAPPROVED_OUR_LOSS" if our_delta<0 else
-          "BLOCKED_STACK_PRICE_UNVERIFIED" if
-             "STACK_VALUE_LINEAR_ASSUMPTION_NOT_VERIFIED" in warnings else
-          "PAPER_BILATERAL_INCENTIVE_AUDITED"
+   if our_delta<0:
+    status="BLOCKED_UNAPPROVED_OUR_LOSS"
+   elif "STACK_VALUE_LINEAR_ASSUMPTION_NOT_VERIFIED" in warnings:
+    status="BLOCKED_STACK_PRICE_UNVERIFIED"
+   else:
+    status="PAPER_BILATERAL_INCENTIVE_AUDITED"
    checked.append({
      "index":index,"status":status,
      "ourSupremeListedDelta":our_delta,
