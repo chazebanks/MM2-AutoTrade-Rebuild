@@ -78,7 +78,7 @@ class ManualMultiScenarioPolicy(unittest.TestCase):
     def test_five_scenarios_are_strictly_distinct_and_not_optimistic(self):
         code=RECORD.read_text()
         for value in (
-            "S1_PASS", "SCENARIO_ORDER_INVALID",
+            "SCENARIO_ORDER_INVALID",
             "STAGE2_REQUIRES_BOTH_EMPTY",
             "STAGE3_REQUIRES_EXACTLY_ONE_OFFER_SIDE",
             "STAGE4_TWO_SIDED_VERIFIED_SUPREME_QUOTE_REQUIRED",
@@ -93,6 +93,8 @@ class ManualMultiScenarioPolicy(unittest.TestCase):
             "SUPREME_ONLY_PAPER_RESEARCH_NOT_EXECUTABLE",
         ):
             self.assertIn(value,code)
+        self.assertIn('("S"..i.."_PASS")',code)
+        self.assertIn('"S"..step.."_PASS"',code)
         self.assertIn("slotSignature(before)",code)
         self.assertIn("signature==state.previousOfferSignature",code)
         self.assertIn("leaseBound~=true",code)
