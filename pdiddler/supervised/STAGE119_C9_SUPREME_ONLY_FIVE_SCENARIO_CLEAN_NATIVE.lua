@@ -87,7 +87,7 @@ end
 local geometry=loadFrozen("5b8ee35d7f281c23d9c2181abd97a063e59a0660",
     "new_part4/stage100_screen_prompt_overlay.lua")
 -- Pure presentation module; session/geometry/identity/offer code remains here.
-local presenter=loadFrozen("1290f1c9f1a331d894a0a2297c828a1eaf17f140",
+local presenter=loadFrozen("3836738d83da5d49ae50be6dbed12155d1388702",
     "system2/native_supreme_five_scenario_gui_presentation.lua",12000)
 local ioModule=loadFrozen("a599c31c53d25e6799b9d631f45f282b445dcda0",
     "supervised/pdiddler4_tradeio_supervised_v2.lua")
@@ -212,7 +212,7 @@ local built,ui,uiWhy=pcall(presenter.buildUI,{
     UDim=UDim,UDim2=UDim2,Parent=PG,
 })
 if not built or type(ui)~="table" or
-   type(ui.screen)~="table" or type(ui.panel)~="table" or
+   ui.screen==nil or ui.panel==nil or
    ui.arm==nil or ui.preview==nil or ui.stop==nil or
    ui.title==nil or ui.body==nil or ui.warning==nil then
     E.PDIDDLER_SUPERVISED_P3_NATIVE_OWNER=nil
