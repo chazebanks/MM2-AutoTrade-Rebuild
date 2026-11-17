@@ -1,0 +1,1952 @@
+{
+  "schema": "gingerscope-system2-supreme-only-189-publisher-catalog-v3",
+  "status": "SUPREME_ONLY_MEDIATED_PUBLIC_RESEARCH_NOT_LIVE",
+  "valueSource": "SUPREME_ONLY",
+  "sourceOrigin": "https://supremevalues.com/",
+  "sourceTransport": "FIRECRAWL_MEDIATED_HTTPS_RESEARCH",
+  "publisherUpdatedAt": "2026-11-15T11:59:41-05:00",
+  "sourceCapturedUtc": "2026-11-17T14:06:51Z",
+  "originalHistoricalCatalogGitBlob": "5f208d43e99f71231131a6aa83b51db42f5a997d",
+  "originalPublisherEditionUnchanged": true,
+  "reviewedHistoricalRawGameKeyCandidates": 189,
+  "categories": {
+    "ancient": 15,
+    "godly": 128,
+    "chroma": 46
+  },
+  "pageEvidence": {
+    "home": {
+      "url": "https://supremevalues.com/",
+      "sourceStatus": 200,
+      "transport": "FIRECRAWL_MEDIATED_HTTPS",
+      "scrapeId": "01a1e9d4-f321-741f-b596-41f3158c9333",
+      "sourceHtmlCharacterCount": 79371
+    },
+    "ancient": {
+      "url": "https://supremevalues.com/mm2/ancients",
+      "sourceStatus": 200,
+      "transport": "FIRECRAWL_MEDIATED_HTTPS",
+      "scrapeId": "01a1e9d4-f36c-71fa-964b-b9ecc8b9d541",
+      "sourceHtmlCharacterCount": 76413,
+      "publisherItemcolumnCards": 16
+    },
+    "godly": {
+      "url": "https://supremevalues.com/mm2/godlies",
+      "sourceStatus": 200,
+      "transport": "FIRECRAWL_MEDIATED_HTTPS",
+      "scrapeId": "01a1e9d4-f3ab-738b-ac93-29a2a24d60e6",
+      "sourceHtmlCharacterCount": 328012,
+      "publisherItemcolumnCards": 130
+    },
+    "chroma": {
+      "url": "https://supremevalues.com/mm2/chromas",
+      "sourceStatus": 200,
+      "transport": "FIRECRAWL_MEDIATED_HTTPS",
+      "scrapeId": "01a1e9d4-f416-706f-b7f3-a88550306073",
+      "sourceHtmlCharacterCount": 158867,
+      "publisherItemcolumnCards": 53
+    }
+  },
+  "exactRobloxItemInstanceVerified": false,
+  "publisherSigned": false,
+  "currentInventoryVerified": false,
+  "sourceResearchOnly": true,
+  "liveTradePricingAuthorized": false,
+  "authorizesTrade": false,
+  "authorizesOffer": false,
+  "authorizesAccept": false,
+  "mayUseForStrategyLearning": false,
+  "mayReportProfit": false,
+  "rows": [
+    {
+      "rawGameKeyCandidate": "AmericaSword",
+      "category": "godly",
+      "officialName": "Old Glory",
+      "officialItemId": "Old_Glory",
+      "supremeListed": 15,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Amerilaser",
+      "category": "godly",
+      "officialName": "Amerilaser",
+      "officialItemId": "Amerilaser",
+      "supremeListed": 22,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "AuroraGun",
+      "category": "godly",
+      "officialName": "Borealis",
+      "officialItemId": "Borealis",
+      "supremeListed": 130,
+      "supremeDemand": "2",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "AuroraKnife",
+      "category": "godly",
+      "officialName": "Australis",
+      "officialItemId": "Australis",
+      "supremeListed": 125,
+      "supremeDemand": "2",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "BattleAxe",
+      "category": "godly",
+      "officialName": "Battleaxe",
+      "officialItemId": "Battleaxe",
+      "supremeListed": 12,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "BattleAxe2",
+      "category": "godly",
+      "officialName": "Battleaxe II",
+      "officialItemId": "BA2",
+      "supremeListed": 17,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Bauble",
+      "category": "godly",
+      "officialName": "Bauble",
+      "officialItemId": "Bauble",
+      "supremeListed": 675,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "BaubleChroma",
+      "category": "chroma",
+      "officialName": "Chroma Bauble",
+      "officialItemId": "CBaub",
+      "supremeListed": 29000,
+      "supremeDemand": "7",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "BaubleKnife",
+      "category": "godly",
+      "officialName": "Ornament",
+      "officialItemId": "Ornament",
+      "supremeListed": 65,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "BaubleKnifeChroma",
+      "category": "chroma",
+      "officialName": "Chroma Ornament",
+      "officialItemId": "COR",
+      "supremeListed": 1825,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Beachy",
+      "category": "godly",
+      "officialName": "Beachy",
+      "officialItemId": "Beachy",
+      "supremeListed": 70,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "BeachyChroma",
+      "category": "chroma",
+      "officialName": "Chroma Beachy",
+      "officialItemId": "CBeachy",
+      "supremeListed": 875,
+      "supremeDemand": "5",
+      "supremeStability": "Underpaid For",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Bioblade",
+      "category": "godly",
+      "officialName": "Bioblade",
+      "officialItemId": "Bioblade",
+      "supremeListed": 8,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Blaster",
+      "category": "godly",
+      "officialName": "Blaster",
+      "officialItemId": "Blaster",
+      "supremeListed": 17,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Blizzard",
+      "category": "godly",
+      "officialName": "Blizzard",
+      "officialItemId": "Blizzard",
+      "supremeListed": 250,
+      "supremeDemand": "3",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "BlizzardChroma",
+      "category": "chroma",
+      "officialName": "Chroma Blizzard",
+      "officialItemId": "CBZ",
+      "supremeListed": 5500,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Bloom",
+      "category": "godly",
+      "officialName": "Bloom",
+      "officialItemId": "Bloom",
+      "supremeListed": 395,
+      "supremeDemand": "4",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Blossom_G",
+      "category": "godly",
+      "officialName": "Blossom",
+      "officialItemId": "Blossom",
+      "supremeListed": 1160,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "BlueSeer",
+      "category": "godly",
+      "officialName": "Blue Seer",
+      "officialItemId": "Blue_Seer",
+      "supremeListed": 3,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Boneblade",
+      "category": "godly",
+      "officialName": "Boneblade",
+      "officialItemId": "Boneblade",
+      "supremeListed": 7,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "BonebladeChroma",
+      "category": "chroma",
+      "officialName": "Chroma Boneblade",
+      "officialItemId": "CBB",
+      "supremeListed": 22,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Candleflame",
+      "category": "godly",
+      "officialName": "Candleflame",
+      "officialItemId": "Candleflame",
+      "supremeListed": 30,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "CandleflameChroma",
+      "category": "chroma",
+      "officialName": "Chroma Candleflame",
+      "officialItemId": "CCF",
+      "supremeListed": 40,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Candy",
+      "category": "godly",
+      "officialName": "Candy",
+      "officialItemId": "Candy",
+      "supremeListed": 85,
+      "supremeDemand": "2",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Celestial",
+      "category": "ancient",
+      "officialName": "Celestial",
+      "officialItemId": "Celestial",
+      "supremeListed": 1950,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Chill",
+      "category": "godly",
+      "officialName": "Chill",
+      "officialItemId": "Chill",
+      "supremeListed": 10,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "ChromaDarkbringer",
+      "category": "chroma",
+      "officialName": "Chroma Darkbringer",
+      "officialItemId": "CDB",
+      "supremeListed": 65,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "ChromaLightbringer",
+      "category": "chroma",
+      "officialName": "Chroma Lightbringer",
+      "officialItemId": "CLB",
+      "supremeListed": 60,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Clockwork",
+      "category": "godly",
+      "officialName": "Clockwork",
+      "officialItemId": "Clockwork",
+      "supremeListed": 10,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Constellation",
+      "category": "godly",
+      "officialName": "Constellation",
+      "officialItemId": "Constellation",
+      "supremeListed": 2500,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "ConstellationChroma",
+      "category": "chroma",
+      "officialName": "Chroma Constellation",
+      "officialItemId": "CConst",
+      "supremeListed": 27000,
+      "supremeDemand": "6",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Cookieblade",
+      "category": "godly",
+      "officialName": "Cookieblade",
+      "officialItemId": "Cookieblade",
+      "supremeListed": 3,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Darkbringer",
+      "category": "godly",
+      "officialName": "Darkbringer",
+      "officialItemId": "Darkbringer",
+      "supremeListed": 32,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Darkshot",
+      "category": "godly",
+      "officialName": "Darkshot",
+      "officialItemId": "Darkshot",
+      "supremeListed": 1450,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Darksword",
+      "category": "godly",
+      "officialName": "Darksword",
+      "officialItemId": "Darksword",
+      "supremeListed": 1425,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Deathshard",
+      "category": "godly",
+      "officialName": "Deathshard",
+      "officialItemId": "Deathshard",
+      "supremeListed": 13,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "DeathshardChroma",
+      "category": "chroma",
+      "officialName": "Chroma Deathshard",
+      "officialItemId": "CDS",
+      "supremeListed": 33,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Eggblade",
+      "category": "godly",
+      "officialName": "Eggblade",
+      "officialItemId": "Eggblade",
+      "supremeListed": 5,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "ElderwoodGun",
+      "category": "godly",
+      "officialName": "Elderwood Revolver",
+      "officialItemId": "Elderwood_Revolver",
+      "supremeListed": 32,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "ElderwoodKnife",
+      "category": "godly",
+      "officialName": "Elderwood Blade",
+      "officialItemId": "Elderwood_Blade",
+      "supremeListed": 30,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "ElderwoodKnifeChroma",
+      "category": "chroma",
+      "officialName": "Chroma Elderwood Blade",
+      "officialItemId": "CEB",
+      "supremeListed": 37,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "ElderwoodScythe",
+      "category": "ancient",
+      "officialName": "Elderwood Scythe",
+      "officialItemId": "Elderwood_Scythe",
+      "supremeListed": 35,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Emberbow",
+      "category": "ancient",
+      "officialName": "Emberbow",
+      "officialItemId": "Emberbow",
+      "supremeListed": 650,
+      "supremeDemand": "5",
+      "supremeStability": "Fluctuating",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "EmberbowChroma",
+      "category": "chroma",
+      "officialName": "Chroma Emberbow",
+      "officialItemId": "CEmberbow",
+      "supremeListed": 6000,
+      "supremeDemand": "6",
+      "supremeStability": "Fluctuating",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Emberscythe",
+      "category": "ancient",
+      "officialName": "Emberscythe",
+      "officialItemId": "Emberscythe",
+      "supremeListed": 625,
+      "supremeDemand": "5",
+      "supremeStability": "Fluctuating",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "EmberscytheChroma",
+      "category": "chroma",
+      "officialName": "Chroma Emberscythe",
+      "officialItemId": "CEmberscythe",
+      "supremeListed": 12000,
+      "supremeDemand": "6",
+      "supremeStability": "Fluctuating",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Embersickle",
+      "category": "godly",
+      "officialName": "Embersickle",
+      "officialItemId": "Embersickle",
+      "supremeListed": 135,
+      "supremeDemand": "3",
+      "supremeStability": "Fluctuating",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "EmbersickleChroma",
+      "category": "chroma",
+      "officialName": "Chroma Embersickle",
+      "officialItemId": "CEmbersickle",
+      "supremeListed": 1900,
+      "supremeDemand": "5",
+      "supremeStability": "Fluctuating",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Eternal",
+      "category": "godly",
+      "officialName": "Eternal",
+      "officialItemId": "Eternal",
+      "supremeListed": 7,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Eternal2",
+      "category": "godly",
+      "officialName": "Eternal II",
+      "officialItemId": "Eternal2",
+      "supremeListed": 7,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Eternal3",
+      "category": "godly",
+      "officialName": "Eternal III",
+      "officialItemId": "Eternal3",
+      "supremeListed": 8,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Eternal4",
+      "category": "godly",
+      "officialName": "Eternal IV",
+      "officialItemId": "Eternal4",
+      "supremeListed": 8,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "EternalCane",
+      "category": "godly",
+      "officialName": "Eternalcane",
+      "officialItemId": "Eternalcane",
+      "supremeListed": 13,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Fang",
+      "category": "godly",
+      "officialName": "Fang",
+      "officialItemId": "Fang",
+      "supremeListed": 10,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "FangChroma",
+      "category": "chroma",
+      "officialName": "Chroma Fang",
+      "officialItemId": "CFang",
+      "supremeListed": 32,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Flames",
+      "category": "godly",
+      "officialName": "Flames",
+      "officialItemId": "Flames",
+      "supremeListed": 5,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Flora",
+      "category": "godly",
+      "officialName": "Flora",
+      "officialItemId": "Flora",
+      "supremeListed": 400,
+      "supremeDemand": "4",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "FlowerwoodGun",
+      "category": "godly",
+      "officialName": "Flowerwood Gun",
+      "officialItemId": "Flowerwood_Gun",
+      "supremeListed": 240,
+      "supremeDemand": "3",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "FlowerwoodKnife",
+      "category": "godly",
+      "officialName": "Flowerwood",
+      "officialItemId": "Flowerwood",
+      "supremeListed": 235,
+      "supremeDemand": "3",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Frostbite",
+      "category": "godly",
+      "officialName": "Frostbite",
+      "officialItemId": "Frostbite",
+      "supremeListed": 7,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Frostsaber",
+      "category": "godly",
+      "officialName": "Frostsaber",
+      "officialItemId": "Frostsaber",
+      "supremeListed": 10,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Gemstone",
+      "category": "godly",
+      "officialName": "Gemstone",
+      "officialItemId": "Gemstone",
+      "supremeListed": 15,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "GemstoneChroma",
+      "category": "chroma",
+      "officialName": "Chroma Gemstone",
+      "officialItemId": "CGem",
+      "supremeListed": 32,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Ghostblade",
+      "category": "godly",
+      "officialName": "Ghostblade",
+      "officialItemId": "Ghostblade",
+      "supremeListed": 7,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Gingerblade",
+      "category": "godly",
+      "officialName": "Gingerblade",
+      "officialItemId": "Gingerblade",
+      "supremeListed": 13,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "GingerbladeChroma",
+      "category": "chroma",
+      "officialName": "Chroma Gingerblade",
+      "officialItemId": "CGB",
+      "supremeListed": 25,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "GingerLuger",
+      "category": "godly",
+      "officialName": "Ginger Luger",
+      "officialItemId": "Ginger_Luger",
+      "supremeListed": 17,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Gingermint_G",
+      "category": "godly",
+      "officialName": "Gingermint",
+      "officialItemId": "Gingermint",
+      "supremeListed": 12,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Gingermint_K",
+      "category": "godly",
+      "officialName": "Cookiecane",
+      "officialItemId": "Cookiecane",
+      "supremeListed": 12,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Gingermint_KChroma",
+      "category": "chroma",
+      "officialName": "Chroma Cookiecane",
+      "officialItemId": "CCC",
+      "supremeListed": 32,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Gingerscope",
+      "category": "ancient",
+      "officialName": "Gingerscope",
+      "officialItemId": "Gingerscope",
+      "supremeListed": 16000,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": true
+    },
+    {
+      "rawGameKeyCandidate": "GreenLuger",
+      "category": "godly",
+      "officialName": "Green Luger",
+      "officialItemId": "Green_Luger",
+      "supremeListed": 23,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Hallow",
+      "category": "godly",
+      "officialName": "Hallow's Edge",
+      "officialItemId": "Hallows_Edge",
+      "supremeListed": 8,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Hallowgun",
+      "category": "godly",
+      "officialName": "Hallowgun",
+      "officialItemId": "Hallowgun",
+      "supremeListed": 20,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "HallowsBlade",
+      "category": "godly",
+      "officialName": "Hallow's Blade",
+      "officialItemId": "Hallows_Blade",
+      "supremeListed": 8,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Hallowscythe",
+      "category": "ancient",
+      "officialName": "Hallowscythe",
+      "officialItemId": "Hallowscythe",
+      "supremeListed": 30,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Handsaw",
+      "category": "godly",
+      "officialName": "Handsaw",
+      "officialItemId": "Handsaw",
+      "supremeListed": 8,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Harvester",
+      "category": "ancient",
+      "officialName": "Harvester",
+      "officialItemId": "Harvester",
+      "supremeListed": 275,
+      "supremeDemand": "3",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Heartblade",
+      "category": "godly",
+      "officialName": "Heartblade",
+      "officialItemId": "Heartblade",
+      "supremeListed": 65,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "HeartWand",
+      "category": "godly",
+      "officialName": "Heart Wand",
+      "officialItemId": "Heart_Wand",
+      "supremeListed": 340,
+      "supremeDemand": "4",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "HeartWandChroma",
+      "category": "chroma",
+      "officialName": "Chroma Heart Wand",
+      "officialItemId": "CHW",
+      "supremeListed": 3500,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Heat",
+      "category": "godly",
+      "officialName": "Heat",
+      "officialItemId": "Heat",
+      "supremeListed": 10,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "HeatChroma",
+      "category": "chroma",
+      "officialName": "Chroma Heat",
+      "officialItemId": "CHeat",
+      "supremeListed": 28,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Icebeam",
+      "category": "godly",
+      "officialName": "Icebeam",
+      "officialItemId": "Icebeam",
+      "supremeListed": 18,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Iceblaster",
+      "category": "godly",
+      "officialName": "Iceblaster",
+      "officialItemId": "Iceblaster",
+      "supremeListed": 32,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Icebreaker",
+      "category": "ancient",
+      "officialName": "Icebreaker",
+      "officialItemId": "Icebreaker",
+      "supremeListed": 65,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Icecream",
+      "category": "godly",
+      "officialName": "Icecream",
+      "officialItemId": "Icecream",
+      "supremeListed": 130,
+      "supremeDemand": "2",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "IcecreamChroma",
+      "category": "chroma",
+      "officialName": "Chroma Icecream",
+      "officialItemId": "CIcecream",
+      "supremeListed": 1650,
+      "supremeDemand": "5",
+      "supremeStability": "Underpaid For",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "IceDragon",
+      "category": "godly",
+      "officialName": "Ice Dragon",
+      "officialItemId": "Ice_Dragon",
+      "supremeListed": 7,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Iceflake",
+      "category": "godly",
+      "officialName": "Iceflake",
+      "officialItemId": "Iceflake",
+      "supremeListed": 15,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Icepiercer",
+      "category": "ancient",
+      "officialName": "Icepiercer",
+      "officialItemId": "Icepiercer",
+      "supremeListed": 185,
+      "supremeDemand": "3",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "IceShard",
+      "category": "godly",
+      "officialName": "Ice Shard",
+      "officialItemId": "Ice_Shard",
+      "supremeListed": 7,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Icewing",
+      "category": "ancient",
+      "officialName": "Icewing",
+      "officialItemId": "Icewing",
+      "supremeListed": 13,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Immortal",
+      "category": "godly",
+      "officialName": "Immortal",
+      "officialItemId": "Immortal",
+      "supremeListed": 120,
+      "supremeDemand": "2",
+      "supremeStability": "Fluctuating",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "ImmortalChroma",
+      "category": "chroma",
+      "officialName": "Chroma Immortal",
+      "officialItemId": "CImmortal",
+      "supremeListed": 1600,
+      "supremeDemand": "5",
+      "supremeStability": "Doing Well",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Jinglegun",
+      "category": "godly",
+      "officialName": "Jinglegun",
+      "officialItemId": "Jinglegun",
+      "supremeListed": 13,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Laser",
+      "category": "godly",
+      "officialName": "Laser",
+      "officialItemId": "Laser",
+      "supremeListed": 22,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "LaserChroma",
+      "category": "chroma",
+      "officialName": "Chroma Laser",
+      "officialItemId": "CLaser",
+      "supremeListed": 40,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Lightbringer",
+      "category": "godly",
+      "officialName": "Lightbringer",
+      "officialItemId": "Lightbringer",
+      "supremeListed": 32,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Logchopper",
+      "category": "ancient",
+      "officialName": "Logchopper",
+      "officialItemId": "Logchopper",
+      "supremeListed": 17,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Luger",
+      "category": "godly",
+      "officialName": "Luger",
+      "officialItemId": "Luger",
+      "supremeListed": 20,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Lugercane",
+      "category": "godly",
+      "officialName": "Lugercane",
+      "officialItemId": "Lugercane",
+      "supremeListed": 13,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "LugerChroma",
+      "category": "chroma",
+      "officialName": "Chroma Luger",
+      "officialItemId": "CLuger",
+      "supremeListed": 50,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Makeshift",
+      "category": "godly",
+      "officialName": "Makeshift",
+      "officialItemId": "Makeshift",
+      "supremeListed": 30,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Minty",
+      "category": "godly",
+      "officialName": "Minty",
+      "officialItemId": "Minty",
+      "supremeListed": 13,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Mortal",
+      "category": "godly",
+      "officialName": "Mortal",
+      "officialItemId": "Mortal",
+      "supremeListed": 120,
+      "supremeDemand": "2",
+      "supremeStability": "Fluctuating",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "MortalChroma",
+      "category": "chroma",
+      "officialName": "Chroma Mortal",
+      "officialItemId": "CMortal",
+      "supremeListed": 1600,
+      "supremeDemand": "5",
+      "supremeStability": "Doing Well",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Nebula",
+      "category": "godly",
+      "officialName": "Nebula",
+      "officialItemId": "Nebula",
+      "supremeListed": 13,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Nightblade",
+      "category": "godly",
+      "officialName": "Nightblade",
+      "officialItemId": "Nightblade",
+      "supremeListed": 20,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Ocean_G",
+      "category": "godly",
+      "officialName": "Ocean",
+      "officialItemId": "Ocean",
+      "supremeListed": 245,
+      "supremeDemand": "3",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "OrangeSeer",
+      "category": "godly",
+      "officialName": "Orange Seer",
+      "officialItemId": "Orange_Seer",
+      "supremeListed": 2,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Pearl_G",
+      "category": "godly",
+      "officialName": "Pearlshine",
+      "officialItemId": "Pearlshine",
+      "supremeListed": 80,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Pearl_K",
+      "category": "godly",
+      "officialName": "Pearl",
+      "officialItemId": "Pearl",
+      "supremeListed": 75,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Peppermint",
+      "category": "godly",
+      "officialName": "Peppermint",
+      "officialItemId": "Peppermint",
+      "supremeListed": 4,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Phantom2022",
+      "category": "godly",
+      "officialName": "Phantom",
+      "officialItemId": "Phantom",
+      "supremeListed": 32,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Pixel",
+      "category": "godly",
+      "officialName": "Pixel",
+      "officialItemId": "Pixel",
+      "supremeListed": 17,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Plasmabeam",
+      "category": "godly",
+      "officialName": "Plasmabeam",
+      "officialItemId": "Plasmabeam",
+      "supremeListed": 18,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Plasmablade",
+      "category": "godly",
+      "officialName": "Plasmablade",
+      "officialItemId": "Plasmablade",
+      "supremeListed": 15,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Prismatic",
+      "category": "godly",
+      "officialName": "Prismatic",
+      "officialItemId": "Prismatic",
+      "supremeListed": 7,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Pumpking",
+      "category": "godly",
+      "officialName": "Pumpking",
+      "officialItemId": "Pumpking",
+      "supremeListed": 7,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "PurpleSeer",
+      "category": "godly",
+      "officialName": "Purple Seer",
+      "officialItemId": "Purple_Seer",
+      "supremeListed": 3,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Rainbow_G",
+      "category": "godly",
+      "officialName": "Rainbow Gun",
+      "officialItemId": "Rainbow_Gun",
+      "supremeListed": 405,
+      "supremeDemand": "4",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Rainbow_K",
+      "category": "godly",
+      "officialName": "Rainbow",
+      "officialItemId": "Rainbow_Knife",
+      "supremeListed": 400,
+      "supremeDemand": "4",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Raygun",
+      "category": "godly",
+      "officialName": "Raygun",
+      "officialItemId": "Raygun",
+      "supremeListed": 1850,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "RaygunChroma",
+      "category": "chroma",
+      "officialName": "Chroma Raygun",
+      "officialItemId": "CRG",
+      "supremeListed": 12500,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "RedLuger",
+      "category": "godly",
+      "officialName": "Red Luger",
+      "officialItemId": "Red_Luger",
+      "supremeListed": 35,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "RedSeer",
+      "category": "godly",
+      "officialName": "Red Seer",
+      "officialItemId": "Red_Seer",
+      "supremeListed": 3,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Sakura_K",
+      "category": "godly",
+      "officialName": "Sakura",
+      "officialItemId": "Sakura",
+      "supremeListed": 1150,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Sands",
+      "category": "godly",
+      "officialName": "Sands",
+      "officialItemId": "Sands",
+      "supremeListed": 70,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SandsChroma",
+      "category": "chroma",
+      "officialName": "Chroma Sands",
+      "officialItemId": "CSands",
+      "supremeListed": 925,
+      "supremeDemand": "5",
+      "supremeStability": "Underpaid For",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Saw",
+      "category": "godly",
+      "officialName": "Saw",
+      "officialItemId": "Saw",
+      "supremeListed": 7,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SawChroma",
+      "category": "chroma",
+      "officialName": "Chroma Saw",
+      "officialItemId": "CSaw",
+      "supremeListed": 23,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Scythe",
+      "category": "ancient",
+      "officialName": "Batwing",
+      "officialItemId": "Batwing",
+      "supremeListed": 40,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SeerChroma",
+      "category": "chroma",
+      "officialName": "Chroma Seer",
+      "officialItemId": "CSeer",
+      "supremeListed": 27,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Shark",
+      "category": "godly",
+      "officialName": "Shark",
+      "officialItemId": "Shark",
+      "supremeListed": 20,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SharkChroma",
+      "category": "chroma",
+      "officialName": "Chroma Shark",
+      "officialItemId": "CShark",
+      "supremeListed": 32,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Slasher",
+      "category": "godly",
+      "officialName": "Slasher",
+      "officialItemId": "Slasher",
+      "supremeListed": 15,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SlasherChroma",
+      "category": "chroma",
+      "officialName": "Chroma Slasher",
+      "officialItemId": "CSlasher",
+      "supremeListed": 30,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Snowcannon",
+      "category": "godly",
+      "officialName": "Snowcannon",
+      "officialItemId": "Snowcannon",
+      "supremeListed": 850,
+      "supremeDemand": "6",
+      "supremeStability": "Doing Well",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SnowcannonChroma",
+      "category": "chroma",
+      "officialName": "Chroma Snowcannon",
+      "officialItemId": "CCannon",
+      "supremeListed": 7750,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SnowDagger",
+      "category": "godly",
+      "officialName": "Snow Dagger",
+      "officialItemId": "Snow_Dagger",
+      "supremeListed": 165,
+      "supremeDemand": "3",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SnowDaggerChroma",
+      "category": "chroma",
+      "officialName": "Chroma Snow Dagger",
+      "officialItemId": "CDagger",
+      "supremeListed": 2350,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Snowflake",
+      "category": "godly",
+      "officialName": "Snowflake",
+      "officialItemId": "Snowflake",
+      "supremeListed": 5,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Snowstorm",
+      "category": "godly",
+      "officialName": "Snowstorm",
+      "officialItemId": "Snowstorm",
+      "supremeListed": 250,
+      "supremeDemand": "3",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SnowstormChroma",
+      "category": "chroma",
+      "officialName": "Chroma Snowstorm",
+      "officialItemId": "CSnowstorm",
+      "supremeListed": 4250,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Spectre2022",
+      "category": "godly",
+      "officialName": "Spectre",
+      "officialItemId": "Spectre",
+      "supremeListed": 32,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Spider",
+      "category": "godly",
+      "officialName": "Spider",
+      "officialItemId": "Spider",
+      "supremeListed": 10,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Sugar",
+      "category": "godly",
+      "officialName": "Sugar",
+      "officialItemId": "Sugar",
+      "supremeListed": 30,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SunsetGun",
+      "category": "godly",
+      "officialName": "Sunrise",
+      "officialItemId": "Sunrise",
+      "supremeListed": 800,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SunsetGunChroma",
+      "category": "chroma",
+      "officialName": "Chroma Sunrise",
+      "officialItemId": "CSR",
+      "supremeListed": 8500,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SunsetKnife",
+      "category": "godly",
+      "officialName": "Sunset",
+      "officialItemId": "Sunset",
+      "supremeListed": 650,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SunsetKnifeChroma",
+      "category": "chroma",
+      "officialName": "Chroma Sunset",
+      "officialItemId": "CSS",
+      "supremeListed": 5500,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Sweet",
+      "category": "godly",
+      "officialName": "Sweet",
+      "officialItemId": "Sweet",
+      "supremeListed": 150,
+      "supremeDemand": "3",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SweetChroma",
+      "category": "chroma",
+      "officialName": "Chroma Sweet",
+      "officialItemId": "CSweet",
+      "supremeListed": 1725,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SwirlyAxe",
+      "category": "ancient",
+      "officialName": "Swirly Axe",
+      "officialItemId": "Swirly_Axe",
+      "supremeListed": 35,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SwirlyBlade",
+      "category": "godly",
+      "officialName": "Swirly Blade",
+      "officialItemId": "Swirly_Blade",
+      "supremeListed": 12,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SwirlyGun",
+      "category": "godly",
+      "officialName": "Swirly Gun",
+      "officialItemId": "Swirly_Gun",
+      "supremeListed": 18,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "SwirlyGunChroma",
+      "category": "chroma",
+      "officialName": "Chroma Swirly Gun",
+      "officialItemId": "CSG",
+      "supremeListed": 35,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "TheSeer",
+      "category": "godly",
+      "officialName": "Seer",
+      "officialItemId": "Seer",
+      "supremeListed": 3,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Tides",
+      "category": "godly",
+      "officialName": "Tides",
+      "officialItemId": "Tides",
+      "supremeListed": 10,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "TidesChroma",
+      "category": "chroma",
+      "officialName": "Chroma Tides",
+      "officialItemId": "CTides",
+      "supremeListed": 27,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "TravelerAxe",
+      "category": "ancient",
+      "officialName": "Traveler's Axe",
+      "officialItemId": "Travelers_Axe",
+      "supremeListed": 6700,
+      "supremeDemand": "5",
+      "supremeStability": "Underpaid For",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "TravelerGun",
+      "category": "godly",
+      "officialName": "Traveler's Gun",
+      "officialItemId": "Travelers_Gun",
+      "supremeListed": 4700,
+      "supremeDemand": "5",
+      "supremeStability": "Underpaid For",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "TravelerGunChroma",
+      "category": "chroma",
+      "officialName": "Chroma Traveler's Gun",
+      "officialItemId": "CTG",
+      "supremeListed": 140000,
+      "supremeDemand": "8",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Treat",
+      "category": "godly",
+      "officialName": "Treat",
+      "officialItemId": "Treat",
+      "supremeListed": 155,
+      "supremeDemand": "3",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "TreatChroma",
+      "category": "chroma",
+      "officialName": "Chroma Treat",
+      "officialItemId": "CTreat",
+      "supremeListed": 1775,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "TreeGun2023",
+      "category": "godly",
+      "officialName": "Evergun",
+      "officialItemId": "Evergun",
+      "supremeListed": 3450,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "TreeGun2023Chroma",
+      "category": "chroma",
+      "officialName": "Chroma Evergun",
+      "officialItemId": "CEvergun",
+      "supremeListed": 47000,
+      "supremeDemand": "7",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "TreeKnife2023",
+      "category": "godly",
+      "officialName": "Evergreen",
+      "officialItemId": "Evergreen",
+      "supremeListed": 2700,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "TreeKnife2023Chroma",
+      "category": "chroma",
+      "officialName": "Chroma Evergreen",
+      "officialItemId": "CEvergreen",
+      "supremeListed": 33000,
+      "supremeDemand": "7",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Turkey2023",
+      "category": "godly",
+      "officialName": "Turkey",
+      "officialItemId": "Turkey",
+      "supremeListed": 1950,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "UFOKnife",
+      "category": "godly",
+      "officialName": "Alienbeam",
+      "officialItemId": "Alienbeam",
+      "supremeListed": 1875,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "UFOKnifeChroma",
+      "category": "chroma",
+      "officialName": "Chroma Alienbeam",
+      "officialItemId": "CAB",
+      "supremeListed": 18000,
+      "supremeDemand": "6",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "VampireAxe",
+      "category": "ancient",
+      "officialName": "Vampire's Axe",
+      "officialItemId": "Vampires_Axe",
+      "supremeListed": 1300,
+      "supremeDemand": "5",
+      "supremeStability": "Underpaid For",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "VampireGun",
+      "category": "godly",
+      "officialName": "Vampire's Gun",
+      "officialItemId": "Vampires_Gun",
+      "supremeListed": 1900,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "VampireGunChroma",
+      "category": "chroma",
+      "officialName": "Chroma Vampire's Gun",
+      "officialItemId": "CVG",
+      "supremeListed": 24500,
+      "supremeDemand": "6",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "VampiresEdge",
+      "category": "godly",
+      "officialName": "Vampire's Edge",
+      "officialItemId": "Vampires_Edge",
+      "supremeListed": 15,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Virtual",
+      "category": "godly",
+      "officialName": "Virtual",
+      "officialItemId": "Virtual",
+      "supremeListed": 13,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Watergun",
+      "category": "godly",
+      "officialName": "Watergun",
+      "officialItemId": "Watergun",
+      "supremeListed": 130,
+      "supremeDemand": "2",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "WatergunChroma",
+      "category": "chroma",
+      "officialName": "Chroma Watergun",
+      "officialItemId": "CWG",
+      "supremeListed": 2300,
+      "supremeDemand": "5",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Waves_K",
+      "category": "godly",
+      "officialName": "Waves",
+      "officialItemId": "Waves",
+      "supremeListed": 240,
+      "supremeDemand": "3",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "WintersEdge",
+      "category": "godly",
+      "officialName": "Winter's Edge",
+      "officialItemId": "Winters_Edge",
+      "supremeListed": 5,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "WraithGun",
+      "category": "godly",
+      "officialName": "Soul",
+      "officialItemId": "Soul",
+      "supremeListed": 520,
+      "supremeDemand": "5",
+      "supremeStability": "Underpaid For",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "WraithKnife",
+      "category": "godly",
+      "officialName": "Spirit",
+      "officialItemId": "Spirit",
+      "supremeListed": 510,
+      "supremeDemand": "5",
+      "supremeStability": "Underpaid For",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "XenoGun",
+      "category": "godly",
+      "officialName": "Xenoshot",
+      "officialItemId": "Xenoshot",
+      "supremeListed": 400,
+      "supremeDemand": "4",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "XenoKnife",
+      "category": "godly",
+      "officialName": "Xenoknife",
+      "officialItemId": "Xenoknife",
+      "supremeListed": 400,
+      "supremeDemand": "4",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "Xmas",
+      "category": "godly",
+      "officialName": "Xmas",
+      "officialItemId": "Xmas",
+      "supremeListed": 7,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "YellowSeer",
+      "category": "godly",
+      "officialName": "Yellow Seer",
+      "officialItemId": "Yellow_Seer",
+      "supremeListed": 2,
+      "supremeDemand": "1",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    },
+    {
+      "rawGameKeyCandidate": "ZombieBat",
+      "category": "godly",
+      "officialName": "Bat",
+      "officialItemId": "Bat",
+      "supremeListed": 140,
+      "supremeDemand": "2",
+      "supremeStability": "Stable",
+      "outgoingGingerscopeProtected": false
+    }
+  ]
+}
