@@ -14,7 +14,7 @@ GUI=P/"system2/native_supreme_five_scenario_gui_presentation.lua"
 START=P/"supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua"
 OLD_START=P/"supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_START.lua"
 PRESENTER_SOURCE_PIN="3836738d83da5d49ae50be6dbed12155d1388702"
-HOST_SOURCE_PIN="cf9cf692da7a70e5080ad0167b73cb489bf782b0"
+HOST_SOURCE_PIN="32ee770234ff6c3a38d73b183ae4c41cbc2a3472"
 
 class FiveStageGuiCleanupIntegrity(unittest.TestCase):
     def setUp(self):
@@ -52,6 +52,13 @@ class FiveStageGuiCleanupIntegrity(unittest.TestCase):
         )
         self.assertIn(inserted,new)
         new=new.replace(inserted,"")
+        # Source hygiene: prior 39-char Git commit abbreviation resolved to the
+        # identical historical full commit; no underlying bridge bytes changed.
+        full_pin="2f556afac5e5fd9cfdbf9e081eeea01a542d293d"
+        short_pin=full_pin[:-1]
+        self.assertEqual(self.old.count(short_pin),1)
+        self.assertEqual(self.new.count(full_pin),1)
+        new=new.replace(full_pin,short_pin)
         new=new.replace('    or not presenter or type(presenter.render)~="function"\n',"")
         self.assertEqual(new,old,"All pre-GUI original P3 guards must match")
         self.assertIn("type(presenter.render)","".join(self.new.splitlines()))
