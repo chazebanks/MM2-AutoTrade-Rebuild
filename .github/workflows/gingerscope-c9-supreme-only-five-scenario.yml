@@ -7,6 +7,7 @@ on:
       - 'pdiddler/system2/native_supreme_only_current_offer_button.lua'
       - 'pdiddler/system2/native_supreme_only_five_scenario_recorder.lua'
       - 'pdiddler/ci/system2_supreme_only_five_scenario_recorder_mocks.luau'
+      - 'pdiddler/ci/system2_c9_idempotent_gui_writes_mocks.luau'
       - 'pdiddler/ci/test_supreme_five_scenario_manual_policy.py'
       - 'pdiddler/system2/native_sha256_rfc6234_readonly.lua'
       - 'pdiddler/system2/native_supreme_only_bilateral_research_nov17.lua'
@@ -55,6 +56,10 @@ jobs:
           binary="$(find "$RUNNER_TEMP/lune-dist" -type f -name lune -print -quit)"
           test -n "$binary"
           install -m 0755 "$binary" "$RUNNER_TEMP/lune"
+      - name: Measure redundant text/button writes with native Luau and test failing GUI properties
+        shell: bash
+        run: |
+          "$RUNNER_TEMP/lune" run pdiddler/ci/system2_c9_idempotent_gui_writes_mocks.luau
       - name: Pure five-stage GUI and original protected panel renderer native tests
         shell: bash
         run: |
