@@ -63,7 +63,7 @@ local exact,checked=pcall(players.GetPlayerByUserId,players,target.UserId)
 if not exact or checked~=target then
     return refuse("C9_ALT_ACCOUNT_IDENTITY_NOT_CURRENT")
 end
-local pinned="7927e07284cd72f768b3ed63c135fe28a1244f1e"
+local pinned="7f8068ce852eba851bcd6f5fe041f9055ba9bbb6"
 local path="pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_BUTTON_NATIVE.lua"
 local url="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
     ..pinned.."/"..path
