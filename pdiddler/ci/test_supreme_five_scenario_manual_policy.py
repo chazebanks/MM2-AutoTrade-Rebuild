@@ -61,7 +61,7 @@ class ManualMultiScenarioPolicy(unittest.TestCase):
         self.assertIn("SUPREME_FIVE_TEST_CLIENT_UTC_CLOCK_UNAVAILABLE",code)
         self.assertLess(
             code.index("SUPREME_FIVE_TEST_SOURCE_EXPIRED_BEFORE_MANUAL_ARM"),
-            code.index('local pinned="d4252698840c78f0f109bed17e664ec2df91fc49"')
+            code.index('local pinned="5a0e2a4f096970bcb3ff9b1f029efe3f92813688"')
         )
         self.assertEqual(CATALOG.read_bytes().count(b"mm2Values"),0)
 
