@@ -115,6 +115,13 @@ def verify(manifest: dict, files: dict[str, str]|None=None) -> dict:
     check("main/" not in starter and "/latest/" not in starter,
           "MUTABLE_SOURCE_VERSION_NOT_ALLOWED")
 
+    # Validate ALL literal loadFrozen(...) references, including attempts
+    # to sneak in a mutable branch name that HEX-only extraction would miss.
+    literals=re.findall(
+        r'local\s+(\w+)\s*=\s*loadFrozen\(\s*"([^"]+)"\s*,\s*"([^"]+)"',
+        code,
+    )
+    check(len(literals)==14,"DIRECT_FROZEN_DEPENDENCY_COUNT_DRIFT")
     actual=[{"symbol":a,"commit":b,"path":"pdiddler/"+c}
             for a,b,c in DIRECT.findall(code)]
     expected=manifest.get("directFrozenModules")
