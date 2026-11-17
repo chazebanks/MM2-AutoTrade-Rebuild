@@ -54,14 +54,14 @@ class ManualMultiScenarioPolicy(unittest.TestCase):
 
     def test_expired_supreme_source_stops_before_p3_bootstrap(self):
         code=START.read_text()
-        self.assertIn("local captureUtc=1794951678",code)
+        self.assertIn("local captureUtc=1794924411",code)
         self.assertIn("stamp>captureUtc+21600",code)
         self.assertIn("stamp<captureUtc",code)
         self.assertIn("SUPREME_FIVE_TEST_SOURCE_EXPIRED_BEFORE_MANUAL_ARM",code)
         self.assertIn("SUPREME_FIVE_TEST_CLIENT_UTC_CLOCK_UNAVAILABLE",code)
         self.assertLess(
             code.index("SUPREME_FIVE_TEST_SOURCE_EXPIRED_BEFORE_MANUAL_ARM"),
-            code.index('local pinned="b87b2acb2c3228a2fa027b6a77904ce1fb38c474"')
+            code.index('local pinned="5a0e2a4f096970bcb3ff9b1f029efe3f92813688"')
         )
         self.assertEqual(CATALOG.read_bytes().count(b"mm2Values"),0)
 
