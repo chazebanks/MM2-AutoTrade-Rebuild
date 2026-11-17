@@ -287,6 +287,15 @@ function guide:refresh()
     if not laid then return false,"PANEL_LAYOUT_FAILED" end
     return true,"NONOVERLAPPING_P3_PANEL"
 end
+-- UI-only setter: avoid nine redundant Roblox property writes on unchanged
+-- status ticks. No caching of viewport, trade bounds, lease, watcher or offer.
+-- Read errors and write errors still propagate to the original fail-closed
+-- guide.show caller; never silently substitute a cached safe position.
+local function setDisplayIfChanged(node,property,value)
+    if node[property]~=value then
+        node[property]=value
+    end
+end
 function guide:show(r)
     local ok,why=self:refresh()
     if not ok then
@@ -321,15 +330,15 @@ function guide:show(r)
        content.stopVisible~=true then
         error("P3_GUIDE_PRESENTATION_INVALID_"..tostring(err))
     end
-    ui.title.Text=content.title
-    ui.body.Text=content.body
-    ui.arm.Visible=content.armVisible
-    ui.arm.Active=ui.arm.Visible
-    ui.preview.Visible=content.previewVisible
-    ui.preview.Active=ui.preview.Visible
-    ui.preview.Text=content.previewButtonText
-    ui.stop.Visible=true
-    ui.stop.Active=true
+    setDisplayIfChanged(ui.title,"Text",content.title)
+    setDisplayIfChanged(ui.body,"Text",content.body)
+    setDisplayIfChanged(ui.arm,"Visible",content.armVisible)
+    setDisplayIfChanged(ui.arm,"Active",content.armVisible)
+    setDisplayIfChanged(ui.preview,"Visible",content.previewVisible)
+    setDisplayIfChanged(ui.preview,"Active",content.previewVisible)
+    setDisplayIfChanged(ui.preview,"Text",content.previewButtonText)
+    setDisplayIfChanged(ui.stop,"Visible",true)
+    setDisplayIfChanged(ui.stop,"Active",true)
 end
 local function stop(reason)
     if not owner.running then return false end
