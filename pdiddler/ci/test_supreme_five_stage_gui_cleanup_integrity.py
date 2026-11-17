@@ -114,7 +114,7 @@ class FiveStageGuiCleanupIntegrity(unittest.TestCase):
         self.assertIn('ui.arm.Active=ui.arm.Visible',self.new)
         self.assertIn('ui.preview.Active=ui.preview.Visible',self.new)
         self.assertIn("ui.stop.Active=true",self.new)
-        self.assertIn("supremePreviewUntil=supremePreviewUntil",self.new)
+        self.assertIn("previewUntil=supremePreviewUntil",self.new)
         self.assertIn("now=os.clock()",self.new)
 
     def test_render_pure_and_only_one_extra_frozen_read_at_startup(self):
