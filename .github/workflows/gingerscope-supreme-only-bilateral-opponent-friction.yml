@@ -1,0 +1,48 @@
+name: Gingerscope Supreme-only bilateral hypothetical opponent incentive research
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/system2/supreme_only_bilateral_partner_friction_shadow.py'
+      - 'pdiddler/ci/test_supreme_only_bilateral_partner_friction_shadow.py'
+      - 'pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json'
+      - '.github/workflows/gingerscope-supreme-only-bilateral-opponent-friction.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  python-bilateral-evidence-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile actual Python opponent friction code and adversarial tests
+        run: |
+          python3 -m py_compile pdiddler/system2/supreme_only_bilateral_partner_friction_shadow.py pdiddler/ci/test_supreme_only_bilateral_partner_friction_shadow.py
+      - name: Eighteen diverse bilateral behavioral counterexamples and source-proof tests
+        run: python3 -m unittest -v pdiddler.ci.test_supreme_only_bilateral_partner_friction_shadow
+      - name: Confirm no live control or fabricated acceptance probability
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          src=Path('pdiddler/system2/supreme_only_bilateral_partner_friction_shadow.py').read_text()
+          for forbidden in ('FireServer','InvokeServer','OfferItem','AcceptTrade',
+                            'PostAsync','getgenv','setclipboard','game:HttpGet',
+                            'MM2VALUES','MM2Values','mm2values.com'):
+              assert forbidden not in src,forbidden
+          from pdiddler.system2 import supreme_only_bilateral_partner_friction_shadow as lab
+          r=lab.deny('FOCUSED_NO_AUTHORITY_TEST')
+          assert r['valueSource']=='SUPREME_ONLY'
+          assert r['authorizesOffer'] is False
+          assert r['authorizesTrade'] is False
+          assert r['authorizesAccept'] is False
+          assert r['mayUseForStrategyLearning'] is False
+          assert r['empiricalPartnerAcceptanceProbability'] is None
+          print('SUPREME_ONLY_PARTNER_FRICTION_NO_LIVE_AUTHORITY_PASS')
+          PY
