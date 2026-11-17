@@ -83,11 +83,11 @@ do
  eq(runtime.c9ReadOnlyLeaseStatus().status,"BLOCKED",
    "no P3 lease before ARM")
  eq(runtime.status().fiveScenarioCompleted,0,"five-scenario result starts at zero")
- eq(x.named("ArmP3").Position.X.Offset,12,
+ eq(x.named("ArmP3").Position[1],12,
     "GUI factory preserves original ARM x=12")
- eq(x.named("SupremePreview").Position.X.Offset,12,
+ eq(x.named("SupremePreview").Position[1],12,
     "GUI factory preserves preview x=12")
- eq(x.named("StopP3").Position.X.Offset,164,
+ eq(x.named("StopP3").Position[1],164,
     "GUI factory preserves STOP x=164")
  eq(x.named("Safety").Text,"MANUAL ITEM TEST | NEVER FINAL ACCEPT",
     "GUI factory preserves manual-only warning")
