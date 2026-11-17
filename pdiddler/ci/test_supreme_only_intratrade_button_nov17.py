@@ -93,7 +93,7 @@ class SupremeOnscreenButtonNativeIntegrity(unittest.TestCase):
         self.assertIn('ui.preview.Visible=armed and not supremePreviewBusy',host)
         self.assertIn('c9SupremeOnlyReadOnlyPreview(options)',host)
         self.assertIn("native_supreme_only_current_offer_button.lua",host)
-        self.assertIn("0150f3bc2cff4638d8ad1352295f1156c186099a",host)
+        self.assertIn("3d23aeb45efe6dc87840b0f4f8a89198d0d8b4e3",host)
         self.assertIn("supreme_only_189_research_catalog_2026_11_17_refresh.json",host)
         self.assertIn("7f8068ce852eba851bcd6f5fe041f9055ba9bbb6",start)
         self.assertIn("GINGERSCOPE_C9_SUPREME_ONLY_PLAN",start)
