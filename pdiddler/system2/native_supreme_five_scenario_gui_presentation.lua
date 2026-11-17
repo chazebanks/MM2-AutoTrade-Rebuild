@@ -1,7 +1,8 @@
 -- Gingerscope Supreme-only Stage119 GUI text/state presenter.
--- Pure Luau: NO Roblox Instances, remotes, currency sources, weapon IDs,
--- timers, memory, IO, chat, trading actions, or mutable external state.
--- Keep original P3/P4 identity, session, geometry and buttons in the host.
+-- render() is pure Luau: NO Roblox Instances, remotes, weapon IDs,
+-- clocks or mutable state. buildUI() only creates the original local
+-- read-only panel from passed-in Roblox GUI constructors. The host retains
+-- all P3/P4 identity, lease, GUI collision geometry and trade controls.
 local M={}
 local SCHEMA="gingerscope-supreme-five-scenario-presentation-v1"
 function M.render(args)
@@ -88,5 +89,86 @@ function M.render(args)
   previewButtonText=previewText,
   stopVisible=true,
  },nil
+end
+
+-- Build exactly the original supervisor's three static text labels and
+-- ARM/Preview/STOP buttons. Does not place the panel or change game state.
+-- All Roblox dependencies are passed explicitly and mocked under Lune.
+function M.buildUI(env)
+ if type(env)~="table" or type(env.Instance)~="table" or
+    type(env.Instance.new)~="function" or
+    type(env.Color3)~="table" or type(env.Color3.fromRGB)~="function" or
+    type(env.UDim)~="table" or type(env.UDim.new)~="function" or
+    type(env.UDim2)~="table" or type(env.UDim2.fromOffset)~="function" or
+    type(env.Enum)~="table" or env.Parent==nil then
+   return nil,"PRESENTER_GUI_DEPENDENCIES_INVALID"
+ end
+ local Instance,Color3,UDim,UDim2,Enum=env.Instance,env.Color3,
+    env.UDim,env.UDim2,env.Enum
+ local ui={}
+ local ok=pcall(function()
+    ui.screen=Instance.new("ScreenGui")
+    ui.screen.Name="PDIDDLER_P3_STAGE101_ReadonlyIdentity"
+    ui.screen.ResetOnSpawn=false
+    ui.screen.IgnoreGuiInset=true
+    ui.screen.DisplayOrder=150
+    ui.screen.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
+    ui.screen.Parent=env.Parent
+    ui.panel=Instance.new("Frame")
+    ui.panel.Name="LiveStatus"
+    ui.panel.BackgroundColor3=Color3.fromRGB(28,23,40)
+    ui.panel.BorderSizePixel=0
+    ui.panel.Active=false
+    ui.panel.Visible=false
+    ui.panel.Parent=ui.screen
+    local stroke=Instance.new("UIStroke")
+    stroke.Color=Color3.fromRGB(177,128,239)
+    stroke.Thickness=1
+    stroke.Parent=ui.panel
+    local corner=Instance.new("UICorner")
+    corner.CornerRadius=UDim.new(0,10)
+    corner.Parent=ui.panel
+    local function label(n,y,h,size)
+        local q=Instance.new("TextLabel")
+        q.Name=n
+        q.BackgroundTransparency=1
+        q.TextColor3=Color3.fromRGB(255,255,255)
+        q.TextSize=size
+        q.TextWrapped=true
+        q.TextXAlignment=Enum.TextXAlignment.Left
+        q.Font=Enum.Font.GothamBold
+        q.Position=UDim2.fromOffset(12,y)
+        q.Size=UDim2.fromOffset(280,h)
+        q.Parent=ui.panel
+        return q
+    end
+    ui.title=label("CurrentStep",7,24,14)
+    ui.body=label("WhatToDo",32,52,12)
+    ui.warning=label("Safety",90,18,11)
+    ui.warning.Text="MANUAL ITEM TEST | NEVER FINAL ACCEPT"
+    local function action(n,text,x)
+        local q=Instance.new("TextButton")
+        q.Name=n
+        q.Text=text
+        q.TextSize=13
+        q.TextColor3=Color3.fromRGB(255,255,255)
+        q.BackgroundColor3=Color3.fromRGB(88,55,129)
+        q.Position=UDim2.fromOffset(x,111)
+        q.Size=UDim2.fromOffset(128,28)
+        q.Parent=ui.panel
+        q.Active=false
+        q.Visible=false
+        return q
+    end
+    ui.arm=action("ArmP3","ARM P3",12)
+    -- Preview replaces ARM only after the original guarded lease opens.
+    ui.preview=action("SupremePreview","SUPREME PREVIEW",12)
+    ui.stop=action("StopP3","STOP / COPY",164)
+ end)
+ if not ok then
+    if ui.screen then pcall(function()ui.screen:Destroy()end) end
+    return nil,"PRESENTER_GUI_CONSTRUCTION_FAILED"
+ end
+ return ui,nil
 end
 return M
