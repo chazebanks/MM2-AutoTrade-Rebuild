@@ -79,7 +79,7 @@ if not goodClock or type(stamp)~="number" or stamp~=stamp or
    stamp<captureUtc or stamp>captureUtc+21600 then
     return refuse("SUPREME_FIVE_TEST_SOURCE_EXPIRED_BEFORE_MANUAL_ARM")
 end
-local pinned="d4252698840c78f0f109bed17e664ec2df91fc49"
+local pinned="5a0e2a4f096970bcb3ff9b1f029efe3f92813688"
 local path="pdiddler/supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_NATIVE.lua"
 local url="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"
     ..pinned.."/"..path
