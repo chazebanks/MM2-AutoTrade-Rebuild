@@ -152,7 +152,7 @@ class FiveStageGuiCleanupIntegrity(unittest.TestCase):
         self.assertIn(HOST_SOURCE_PIN,b)
         self.assertIn("STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua",b)
         self.assertIn("presenter.render({",b)
-        self.assertIn("presenter.buildUI({",b)
+        self.assertIn("pcall(presenter.buildUI,{",b)
         # Verify operator authorization and source-age gates are unchanged.
         prefix=a.split('local pinned="',1)[0]
         self.assertEqual(prefix,b.split('local pinned="',1)[0])
