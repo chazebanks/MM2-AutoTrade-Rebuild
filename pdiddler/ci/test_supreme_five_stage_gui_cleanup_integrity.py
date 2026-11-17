@@ -14,7 +14,7 @@ GUI=P/"system2/native_supreme_five_scenario_gui_presentation.lua"
 START=P/"supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_START.lua"
 OLD_START=P/"supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_START.lua"
 PRESENTER_SOURCE_PIN="3836738d83da5d49ae50be6dbed12155d1388702"
-HOST_SOURCE_PIN="32ee770234ff6c3a38d73b183ae4c41cbc2a3472"
+HOST_SOURCE_PIN="f284dae578a8ec2558dba54ea828097567322a60"
 
 class FiveStageGuiCleanupIntegrity(unittest.TestCase):
     def setUp(self):
@@ -118,9 +118,9 @@ class FiveStageGuiCleanupIntegrity(unittest.TestCase):
         self.assertIn("{w=304,h=148}",new)
         self.assertIn('error("P3_GUIDE_"..tostring(why))',self.new)
         self.assertIn('error("P3_GUIDE_PRESENTATION_INVALID_"',self.new)
-        self.assertIn('ui.arm.Active=ui.arm.Visible',self.new)
-        self.assertIn('ui.preview.Active=ui.preview.Visible',self.new)
-        self.assertIn("ui.stop.Active=true",self.new)
+        self.assertIn('setDisplayIfChanged(ui.arm,"Active",content.armVisible)',self.new)
+        self.assertIn('setDisplayIfChanged(ui.preview,"Active",content.previewVisible)',self.new)
+        self.assertIn('setDisplayIfChanged(ui.stop,"Active",true)',self.new)
         self.assertIn("previewUntil=supremePreviewUntil",self.new)
         self.assertIn("now=os.clock()",self.new)
 
