@@ -33,7 +33,7 @@ class SupremeC9Pins(unittest.TestCase):
         self.assertEqual(result["source"],"SUPREME_ONLY")
         self.assertFalse(result["mayTrade"])
         self.assertFalse(result["deviceTestVerified"])
-        self.assertEqual(result["marketSnapshotExpiresUtc"],"2026-11-17T20:06:51Z")
+        self.assertEqual(result["marketSnapshotExpiresUtc"],"2026-11-18T03:41:18Z")
         self.assertEqual(self.m["policy"]["neverOutgoing"],"Gingerscope")
 
     def test_full_pin_used_for_historical_original_bridge_not_39_prefix(self):
@@ -133,7 +133,7 @@ class SupremeC9Pins(unittest.TestCase):
         m=deepcopy(self.m)
         m["supremeCatalog"]["eligibleCounts"]["chroma"]=45
         self.reject(m,expected="SUPREME_SOURCE_METADATA_OR_AUTHORITY_DRIFT")
-        fake_start=self.start.replace("local captureUtc=1794924411",
+        fake_start=self.start.replace("local captureUtc=1794951678",
                          "local captureUtc=1794924412")
         self.reject(files={audit.START_PATH:fake_start},
                     expected="LAUNCHER_CLOCK_NOT_LINKED_TO_CATALOG")
