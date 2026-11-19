@@ -5,26 +5,35 @@ local fs=require("@lune/fs")
 local serde=require("@lune/serde")
 local luau=require("@lune/luau")
 local root="pdiddler/system2/"
-local sourceBytes=fs.readFile(root.."supreme_only_189_research_catalog_2026_11_17_refresh.json")
+local sourceBytes=fs.readFile(root.."supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json")
+-- Keep the earlier verified source solely as an adversarial stale-input fixture.
+local legacySourceBytes=fs.readFile(root.."supreme_only_189_research_catalog_2026_11_17_refresh.json")
 local catalog=serde.decode("json",sourceBytes)
-local SOURCE_SHA256="48107d3039caf620bcad2c08831c9ca7fe206780dfb0e2d96d8161e3c9210f4a"
+local SOURCE_SHA256="fd657db48c00c996705093dadc384c1a0ddd4630398826108b5585ca76c2eca4"
 local sha=luau.load(fs.readFile(root.."native_sha256_rfc6234_readonly.lua"))()
 local function shaValue(s)return sha.hex(s)end
 assert(shaValue("")=="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
 assert(shaValue("abc")=="ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad")
 assert(shaValue(sourceBytes)==SOURCE_SHA256,"pure Luau 189-row source SHA")
 assert(serde.hash("sha256",sourceBytes)==SOURCE_SHA256,"actual source must be SHA256 pinned")
+assert(shaValue(legacySourceBytes)~=SOURCE_SHA256,"earlier real catalog must not pass renewed SHA")
 local supreme=luau.load(fs.readFile(root.."native_supreme_only_bilateral_research_nov17.lua"))()
 local protected=luau.load(fs.readFile(root.."native_supreme_only_protected_c3p4_adapter_nov17.lua"))()
 local p4=luau.load(fs.readFile(root.."native_market_offer_client_capture.lua"))()
-local SOURCE_PIN="1497e9644ae271ff7a144aa5de43c30609f5c722"
-local CLOCK=1794924441.0
+local SOURCE_PIN="958038a6b22c43e8d0359cb15e6704bc84253430"
+local CAPTURE=1794951678
+local CLOCK=CAPTURE+30
 local count=0
 local function eq(a,b,why)
  count+=1
  assert(a==b,why..": expected "..tostring(b)..", got "..tostring(a))
 end
 local function yes(a,why)count+=1;assert(a,why)end
+-- Both genuine publisher catalog pin and bounded simulated clock must agree.
+eq(supreme.sourceStatus(catalog,SOURCE_PIN,CLOCK).status,
+ "SUPREME_ONLY_RESEARCH_SOURCE_CHECKED","renewed source preflight")
+eq(supreme.sourceStatus(catalog,"1497e9644ae271ff7a144aa5de43c30609f5c722",CLOCK).status,
+ "BLOCKED","previous Git blob must not become a valid current catalog pin")
 local function copy(t)return serde.decode("json",serde.encode("json",t))end
 local function node(class,name)
  local self={ClassName=class,Name=name,Visible=true,Enabled=true,
@@ -206,7 +215,12 @@ eq(noConsent,nil,"explicit consent absent")
 eq(reason,"SUPREME_ONLY_PROTECTED_INPUT_OR_INVENTORY_CONSENT_MISSING",
  "read-only scanner RPC requires opt-in")
 eq(scanReads,0,"no read when no consent")
-clock=1794924411+21601
+local legacy,legacyWhy=protected.new(config({sourceBytes=legacySourceBytes}))
+eq(legacy,nil,"genuine prior capture cannot substitute for current approved catalog")
+eq(legacyWhy,"SUPREME_ONLY_SOURCE_SHA256_VERIFICATION_FAILED",
+ "source integrity fails closed on old authentic but no longer pinned bytes")
+eq(scanReads,0,"stale catalog rejected before any own-inventory scanner RPC")
+clock=CAPTURE+21601
 local expired,expiredWhy=protected.new(config())
 eq(expired,nil,"expired source blocked before scanner RPC")
 eq(expiredWhy,"SUPREME_ONLY_SOURCE_EXPIRED_OR_UNVERIFIED","no fallback for stale source")
