@@ -93,4 +93,25 @@ class SupremeRefreshResearch(unittest.TestCase):
   self.assertFalse(m["policy"]["automaticOffers"])
   self.assertFalse(m["policy"]["finalAccept"])
 
+
+ def test_protected_c3p4_native_fixture_uses_exact_renewal_and_rejects_old(self):
+  # An independently verified archive must not be silently passed to the new
+  # native adapter just because its 189 logical item rows did not change.
+  mock=(P/"ci/system2_supreme_only_protected_c3p4_nov17_mocks.luau").read_text()
+  self.assertNotEqual(hashlib.sha256(ORIGINAL.read_bytes()).hexdigest(),SHA256)
+  self.assertEqual(hashlib.sha256(NEW.read_bytes()).hexdigest(),SHA256)
+  self.assertIn('local sourceBytes=fs.readFile(root.."'+NEW.name+'")',mock)
+  self.assertIn('local SOURCE_SHA256="'+SHA256+'"',mock)
+  self.assertIn('local SOURCE_PIN="'+BLOB+'"',mock)
+  self.assertIn('local CAPTURE=1794951678',mock)
+  self.assertIn('local CLOCK=CAPTURE+30',mock)
+  self.assertIn('clock=CAPTURE+21601',mock)
+  self.assertIn('sourceStatus(catalog,SOURCE_PIN,CLOCK)',mock)
+  self.assertIn('local legacySourceBytes=fs.readFile(root.."'+ORIGINAL.name+'")',mock)
+  self.assertIn('sourceBytes=legacySourceBytes',mock)
+  self.assertIn('eq(legacyWhy,"SUPREME_ONLY_SOURCE_SHA256_VERIFICATION_FAILED"',mock)
+  self.assertIn('sourceBytes=serde.encode("json",injected)',mock)
+  self.assertNotIn('local CLOCK=1794924441.0',mock)
+  self.assertNotIn('local SOURCE_SHA256="48107d3039caf620bcad2c08831c9ca7fe206780dfb0e2d96d8161e3c9210f4a"',mock)
+
 if __name__=="__main__":unittest.main()
