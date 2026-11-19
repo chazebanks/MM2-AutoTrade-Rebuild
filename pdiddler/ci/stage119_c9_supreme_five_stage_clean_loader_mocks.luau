@@ -52,7 +52,7 @@ local function fixture(opts)
  function game:HttpGet(url)
   calls.http+=1
   local good="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/"..
-   "f284dae578a8ec2558dba54ea828097567322a60/pdiddler/"..
+   "b87b2acb2c3228a2fa027b6a77904ce1fb38c474/pdiddler/"..
    "supervised/STAGE119_C9_SUPREME_ONLY_FIVE_SCENARIO_CLEAN_NATIVE.lua"
   eq(url,good,"C9 only exact GitHub immutable source URI")
   if opts.badNetwork then error("offline fake CDN") end
@@ -67,11 +67,14 @@ local function fixture(opts)
    isArmed=function()return false end,
    c9ReadOnlyLeaseStatus=function()return{status="BLOCKED"}end,
    c9SupremeOnlyReadOnlyPreview=function()return{status="BLOCKED"}end}
+ -- Simulated clock tests use the real Nov 17 renewal capture, not the old archive.
+ -- Production still rejects expiry after six hours; these values affect mocks only.
+ local captureUtc=1794951678
  local DateTime={
   now=function()
-   return {UnixTimestamp=opts.expiredSource and 1794946012
-       or opts.futureSource and 1794924410
-       or 1794924441}
+   return {UnixTimestamp=opts.expiredSource and captureUtc+21601
+       or opts.futureSource and captureUtc-1
+       or captureUtc+30}
   end
  }
  if opts.noDateTime then DateTime=nil end
