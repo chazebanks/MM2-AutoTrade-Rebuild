@@ -92,8 +92,103 @@ def demand(v):
     return float(n)
 
 
+NOV25_CATALOG_BLOB_SHA = "b6f5c1eec48d59b422f53baa4d83a54ce6837b72"
+NOV25_SOURCE_CAPTURE = "2026-11-25T06:09:59Z"
+NOV25_SOURCE_PUBLICATION = "2026-11-23T19:13:44-05:00"
+
+
+def _validate_rows(rows):
+    if type(rows) is not list or len(rows) != 189:
+        deny("SUPREME_ONLY_SOURCE_CENSUS_NOT_189")
+    by_key, by_id, counts = {}, set(), {k: 0 for k in CENSUS}
+    for row in rows:
+        if type(row) is not dict or set(row) != ROW_KEYS:
+            deny("SUPREME_ONLY_ROW_SHAPE_CHANGED")
+        key, cat = row["rawGameKeyCandidate"], row["category"]
+        if (type(key) is not str or not RAW_KEY.fullmatch(key) or
+            key in by_key or cat not in counts):
+            deny("SUPREME_ONLY_RAW_GAME_KEY_OR_CATEGORY_AMBIGUOUS")
+        if (type(row["officialName"]) is not str or
+            not 1 <= len(row["officialName"]) <= 110 or
+            type(row["officialItemId"]) is not str or
+            not 1 <= len(row["officialItemId"]) <= 120 or
+            (cat, row["officialItemId"]) in by_id):
+            deny("SUPREME_ONLY_OFFICIAL_NAME_OR_ID_AMBIGUOUS")
+        value = row["supremeListed"]
+        if type(value) is not int or not 0 < value < 10**10:
+            deny("SUPREME_ONLY_PRICE_MISSING_OR_INVALID_NO_FALLBACK")
+        demand(row["supremeDemand"])
+        if (type(row["supremeStability"]) is not str or
+            not 1 <= len(row["supremeStability"]) <= 80):
+            deny("SUPREME_ONLY_STABILITY_MISSING")
+        if row["outgoingGingerscopeProtected"] is not (key == TARGET):
+            deny("SUPREME_ONLY_GINGERSCOPE_NEVER_OUTGOING")
+        by_key[key] = row
+        by_id.add((cat, row["officialItemId"]))
+        counts[cat] += 1
+    if counts != CENSUS or TARGET not in by_key:
+        deny("SUPREME_ONLY_CATEGORY_OR_GINGERSCOPE_CENSUS_MISMATCH")
+    return by_key
+
+
+def _nov25_source_rows(raw, *, evaluated_at_utc):
+    """Exact independently reviewed archive; no live authority or fallback."""
+    if blob_sha(raw) != NOV25_CATALOG_BLOB_SHA:
+        deny("SUPREME_ONLY_CATALOG_GIT_BLOB_MISMATCH")
+    document = json.loads(raw)
+    expected = {
+        "schema": "gingerscope-system2-supreme-only-189-publisher-catalog-v4-research",
+        "status": "SUPREME_ONLY_MEDIATED_PUBLIC_RESEARCH_NOT_LIVE",
+        "valueSource": SOURCE,
+        "sourceOrigin": "https://supremevalues.com/",
+        "sourceTransport": "FIRECRAWL_MEDIATED_HTTPS_RESEARCH",
+        "publisherUpdatedAt": NOV25_SOURCE_PUBLICATION,
+        "sourceCapturedUtc": NOV25_SOURCE_CAPTURE,
+        "sourceExpiresUtc": "2026-11-25T12:09:59Z",
+        "sourceMaxAgeSeconds": MAX_CAPTURE_AGE_SECONDS,
+        "priorResearchCatalogGitBlob": "958038a6b22c43e8d0359cb15e6704bc84253430",
+        "reviewedHistoricalRawGameKeyCandidates": 189,
+        "categories": CENSUS,
+        "sourceResearchOnly": True,
+        "publisherSigned": False,
+        "rawHtmlArchived": False,
+        "exactRobloxItemInstanceVerified": False,
+        "currentInventoryVerified": False,
+        "liveTradePricingAuthorized": False,
+        "authorizesTrade": False,
+        "authorizesOffer": False,
+        "authorizesAccept": False,
+        "mayUseForStrategyLearning": False,
+        "mayReportProfit": False,
+    }
+    for field, value in expected.items():
+        actual = document.get(field)
+        if type(actual) is not type(value) or actual != value:
+            deny("SUPREME_ONLY_NOV25_SOURCE_CONTRACT_INVALID_" + field)
+    now, capture, published = (utc(evaluated_at_utc),
+                               utc(NOV25_SOURCE_CAPTURE, captured=True),
+                               utc(NOV25_SOURCE_PUBLICATION))
+    capture_age = (now - capture).total_seconds()
+    edition_age = (capture - published).total_seconds()
+    if capture_age < 0:
+        deny("SUPREME_ONLY_CAPTURE_FROM_FUTURE")
+    if capture_age > MAX_CAPTURE_AGE_SECONDS:
+        deny("SUPREME_ONLY_SOURCE_EXPIRED_NO_OTHER_LIST_FALLBACK")
+    if edition_age < 0 or edition_age > MAX_PUBLICATION_AT_CAPTURE_SECONDS:
+        deny("SUPREME_ONLY_PUBLISHER_EDITION_EXPIRED")
+    return _validate_rows(document["rows"]), {
+        "publisherUpdatedAt": NOV25_SOURCE_PUBLICATION,
+        "capturedUtc": NOV25_SOURCE_CAPTURE,
+        "captureAgeSeconds": int(capture_age),
+        "catalogGitBlob": NOV25_CATALOG_BLOB_SHA,
+        "sourceSignatureVerified": False,
+    }
+
+
 def source_rows(raw, *, evaluated_at_utc):
     """Reject any tamper, stale capture, missing Supreme quote or extra catalog key."""
+    if blob_sha(raw) == NOV25_CATALOG_BLOB_SHA:
+        return _nov25_source_rows(raw, evaluated_at_utc=evaluated_at_utc)
     if blob_sha(raw) != CATALOG_BLOB_SHA:
         deny("SUPREME_ONLY_CATALOG_GIT_BLOB_MISMATCH")
     try:
@@ -140,37 +235,7 @@ def source_rows(raw, *, evaluated_at_utc):
         deny("SUPREME_ONLY_SOURCE_EXPIRED_NO_OTHER_LIST_FALLBACK")
     if edition_age < 0 or edition_age > MAX_PUBLICATION_AT_CAPTURE_SECONDS:
         deny("SUPREME_ONLY_PUBLISHER_EDITION_EXPIRED")
-    rows = document["rows"]
-    if type(rows) is not list or len(rows) != 189:
-        deny("SUPREME_ONLY_SOURCE_CENSUS_NOT_189")
-    by_key, by_id, counts = {}, set(), {k: 0 for k in CENSUS}
-    for row in rows:
-        if type(row) is not dict or set(row) != ROW_KEYS:
-            deny("SUPREME_ONLY_ROW_SHAPE_CHANGED")
-        key, cat = row["rawGameKeyCandidate"], row["category"]
-        if (type(key) is not str or not RAW_KEY.fullmatch(key) or
-            key in by_key or cat not in counts):
-            deny("SUPREME_ONLY_RAW_GAME_KEY_OR_CATEGORY_AMBIGUOUS")
-        if (type(row["officialName"]) is not str or
-            not 1 <= len(row["officialName"]) <= 110 or
-            type(row["officialItemId"]) is not str or
-            not 1 <= len(row["officialItemId"]) <= 120 or
-            (cat, row["officialItemId"]) in by_id):
-            deny("SUPREME_ONLY_OFFICIAL_NAME_OR_ID_AMBIGUOUS")
-        value = row["supremeListed"]
-        if type(value) is not int or not 0 < value < 10**10:
-            deny("SUPREME_ONLY_PRICE_MISSING_OR_INVALID_NO_FALLBACK")
-        demand(row["supremeDemand"])
-        if (type(row["supremeStability"]) is not str or
-            not 1 <= len(row["supremeStability"]) <= 80):
-            deny("SUPREME_ONLY_STABILITY_MISSING")
-        if row["outgoingGingerscopeProtected"] is not (key == TARGET):
-            deny("SUPREME_ONLY_GINGERSCOPE_NEVER_OUTGOING")
-        by_key[key] = row
-        by_id.add((cat, row["officialItemId"]))
-        counts[cat] += 1
-    if counts != CENSUS or TARGET not in by_key:
-        deny("SUPREME_ONLY_CATEGORY_OR_GINGERSCOPE_CENSUS_MISMATCH")
+    by_key = _validate_rows(document["rows"])
     return by_key, {"publisherUpdatedAt": SOURCE_PUBLICATION,
                     "capturedUtc": SOURCE_CAPTURE,
                     "captureAgeSeconds": int(capture_age),
