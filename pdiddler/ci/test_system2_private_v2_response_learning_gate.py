@@ -220,5 +220,52 @@ class V2EvidenceTest(unittest.TestCase):
         self.assertNotIn(x[0]["partner_digest"],str(a))
         self.assertIsNone(a["measuredTradeAcceptanceProbability"])
 
+    def test_late_training_episode_purges_entire_digest_group(self):
+        events=[]
+        for ep in range(1,13):
+            events.extend([row(ep,1,"MAIN_REQUEST_PENDING"),
+                           row(ep,2,"PARTNER_DECLINED")])
+        events.extend([row(13,1,"MAIN_REQUEST_PENDING",partner=1),
+                       row(13,2,"PARTNER_DECLINED",partner=1)])
+        a=gate(events)
+        self.assertEqual(a["temporalPurgedDigestGroups"],1)
+        self.assertEqual(a["partnerDisjointTrainGroups"],7)
+        self.assertFalse(a["chronologicalDigestHoldoutReady"])
+        self.assertFalse(a["partnerDisjointHoldoutReady"])
+        self.assertTrue(a["temporalDeliverySplitStrictlySeparated"])
+
+    def test_crossing_episode_and_exact_cutoff_are_purged(self):
+        for extra in (0,1):
+            with self.subTest(extra=extra):
+                x=[]
+                cutoff=datetime(2026,11,14,12,9,1,tzinfo=timezone.utc)
+                for ep in range(1,14):
+                    t=cutoff+timedelta(seconds=extra) if ep==1 else None
+                    x.extend([row(ep,1,"MAIN_REQUEST_PENDING"),
+                              row(ep,2,"PARTNER_DECLINED",stamp=t)])
+                a=gate(x)
+                # With 13 groups, first holdout begins at episode 10;
+                # use a separate explicit same-cutoff case below.
+                self.assertEqual(a["temporalPurgedDigestGroups"],0)
+                self.assertTrue(a["chronologicalDigestHoldoutReady"])
+                x[1]=row(1,2,"PARTNER_DECLINED",
+                         stamp=datetime(2026,11,14,12,10,1+extra,tzinfo=timezone.utc))
+                a=gate(x)
+                self.assertEqual(a["temporalPurgedDigestGroups"],1)
+                self.assertEqual(a["partnerDisjointTrainGroups"],8)
+                self.assertTrue(a["chronologicalDigestHoldoutReady"])
+
+    def test_digest_split_never_claims_real_player_identity_or_model_readiness(self):
+        x=[]
+        for ep in range(1,13):
+            x.extend([row(ep,1,"MAIN_REQUEST_PENDING"),
+                      row(ep,2,"PARTNER_DECLINED")])
+        a=gate(x)
+        self.assertTrue(a["chronologicalDigestHoldoutReady"])
+        for key in ("partnerDigestStableAcrossSessionsProven",
+                    "distinctRealPlayerHoldoutProven","serverEventChronologyProven",
+                    "realModelHoldoutReady","mayUseForStrategyLearning"):
+            self.assertIs(a[key],False)
+
 if __name__=="__main__":
     unittest.main()
