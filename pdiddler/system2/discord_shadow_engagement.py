@@ -103,6 +103,7 @@ def fit(archive_records, discord_events, synthetic_assignments):
                           "requestAccepted":False, "lastRevision":0}
         row=episodes[ep]
         kind=event.get("kind")
+        row["lastKind"]=kind
         if kind in ("PARTNER_OFFER_REVISION","MAIN_OFFER_REVISION"):
             row["partnerIndicator"]=False
             row["changed"]+=1
@@ -127,6 +128,14 @@ def fit(archive_records, discord_events, synthetic_assignments):
     candidate_counts=defaultdict(lambda:{"engaged":0,"declined":0,"censored":0})
     holdout_counts=defaultdict(lambda:{"engaged":0,"declined":0,"censored":0})
     changed=0
+    # Keep request and offer endpoints separate. No response or unknown close
+    # is an observed negative label for a particular bundle.
+    def phase_counts():
+        return {"requestOpened":0,"requestExplicitDeclined":0,"requestCensored":0,
+                "offerIndicatorFinalRevision":0,"offerStartedWithoutIndicator":0,
+                "offerNotReached":0}
+    phase_train=defaultdict(phase_counts)
+    phase_holdout=defaultdict(phase_counts)
     for ep,binding in associations.items():
         row=episodes[ep]
         label=row["final"] or "CENSORED_CANCEL_OR_UNKNOWN"
@@ -134,6 +143,19 @@ def fit(archive_records, discord_events, synthetic_assignments):
         changed+=row["changed"]
         counts=(candidate_counts if binding["split"]=="TRAIN"
                 else holdout_counts)[binding["candidateIndex"]]
+        stage=(phase_train if binding["split"]=="TRAIN" else phase_holdout)[binding["candidateIndex"]]
+        if row["requestAccepted"]:
+            stage["requestOpened"]+=1
+            if label=="ENGAGED_CLIENT_INDICATOR_ONLY":
+                stage["offerIndicatorFinalRevision"]+=1
+            else:
+                stage["offerStartedWithoutIndicator"]+=1
+        else:
+            stage["offerNotReached"]+=1
+            if label=="PARTNER_DECLINED_OBSERVED":
+                stage["requestExplicitDeclined"]+=1
+            else:
+                stage["requestCensored"]+=1
         if label=="ENGAGED_CLIENT_INDICATOR_ONLY":
             counts["engaged"]+=1
         elif label=="PARTNER_DECLINED_OBSERVED":
@@ -158,6 +180,10 @@ def fit(archive_records, discord_events, synthetic_assignments):
             "holdoutEngagementIndicators":hold["engaged"],
             "holdoutPartnerDeclines":hold["declined"],
             "holdoutCensored":hold["censored"],
+            "requestAndOfferStagesTrain":dict(phase_train[index]),
+            "requestAndOfferStagesHoldout":dict(phase_holdout[index]),
+            "bundleRejectionLabelsAvailable":0,
+            "bundleAcceptanceProbability":None,
             "realPartnerAcceptanceRate":None,
             "observedRealSettlements":0,
         }
@@ -175,6 +201,10 @@ def fit(archive_records, discord_events, synthetic_assignments):
         syntheticCandidateModel=[model[k] for k in sorted(model)],
         holdoutClaimOfImprovedRealPerformance=False,
         trainingSource="SYNTHETIC_V2_DISCORD_BOT_EVENTS_ONLY",
+        combinedEngagementProxyLegacySyntheticOnly=True,
+        requestDeclineIsNotBundleRejection=True,
+        actualOfferFeatureBindingProven=False,
+        empiricalBundleAcceptanceModelAvailable=False,
     )
 
 def reconsider(s2_strategy_receipt, shadow_feedback_receipt):
