@@ -171,5 +171,17 @@ class ManualMultiScenarioPolicy(unittest.TestCase):
         self.assertIn('theirItem.attributes.ItemId="ImmortalChroma"',t)
         self.assertIn('amount.Text="x2"',t)
 
+    def test_historical_host_fixture_matches_immutable_git_blobs(self):
+        archive=ROOT/"ci/fixtures/supreme_nov17_original"
+        for name, expected in (
+            ("native_supreme_only_bilateral_research_nov17.lua",
+             "bfd433a00af36b7b7151612596528045a2f081a6"),
+            ("native_supreme_only_protected_c3p4_adapter_nov17.lua",
+             "b35f4cbe7645ab704feeba5d3f55b768891e58c4"),
+        ):
+            with self.subTest(name=name):
+                self.assertEqual(git_blob(archive/(name+".fixture")),expected)
+                self.assertNotEqual(git_blob(ROOT/"system2"/name),expected)
+
 if __name__=="__main__":
     unittest.main()
