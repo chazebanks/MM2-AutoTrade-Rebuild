@@ -113,6 +113,39 @@ class ApplicationTests(unittest.TestCase):
         failure = self.invoke("current", args=[review["evaluationId"]], expected=2)
         self.assertIn("integrity verification", failure)
 
+    def test_current_detects_corrupt_edition_expiry(self):
+        review = self.invoke("review", data={"accounts": ACCOUNTS}, args=[str(self.request)])
+        lookup = "2026-11-25T12:10:00Z"
+        self.assertIsNone(self.invoke("current", args=[review["evaluationId"]], clock=lookup)["evaluation"])
+        with sqlite3.connect(self.database) as database:
+            database.execute("UPDATE markets SET expires='2026-11-26T00:00:00.000000Z'")
+        failure = self.invoke("current", args=[review["evaluationId"]], clock=lookup, expected=2)
+        self.assertIn("conflicts with its source or inventory revision", failure)
+
+    def test_saved_search_configuration_binds_recommendations(self):
+        first = self.invoke("review", data={"accounts": ACCOUNTS, "counterparties": [STOCK]},
+                            args=[str(self.request)])
+        configured = self.invoke("configure", data={"max_steps": 1, "max_pairs": 8},
+                                 args=[str(self.request)])
+        self.assertEqual(configured["searchDefaults"], {"max_steps": 1, "max_pairs": 8})
+        self.assertIsNone(self.invoke("current", args=[first["evaluationId"]])["evaluation"])
+        second = self.invoke("review", data={"accounts": ACCOUNTS, "counterparties": [STOCK]},
+                             args=[str(self.request)])
+        self.assertEqual(second["report"]["planning"]["search"]["max_pairs"], 8)
+        self.assertEqual(first["inputRevision"] + 1, second["inputRevision"])
+
+    def test_internal_reallocation_does_not_look_like_realized_growth(self):
+        first = self.invoke("review", data={"accounts": {"main": {"godly:Fang": 1}, "alt": {}}},
+                            args=[str(self.request)])
+        second = self.invoke("review", data={"accounts": {"main": {}, "alt": {"godly:Fang": 1}}},
+                             args=[str(self.request)])
+        movement = self.invoke("portfolio-diff", args=[str(first["inputRevision"]), str(second["inputRevision"])])
+        self.assertEqual(movement["status"], "ACCOUNT_REALLOCATION_COMPATIBLE_WITH_INTERNAL_TRANSFER")
+        self.assertEqual(movement["accountCopyChanges"], {"main": {"godly:Fang": -1}, "alt": {"godly:Fang": 1}})
+        self.assertEqual(movement["combinedCopyChanges"], {})
+        self.assertFalse(movement["transferCorroborated"])
+        self.assertIsNone(movement["realizedGrowth"])
+
     def test_single_offer_cannot_dispose_of_gingerscope(self):
         accounts = {"main": {"ancient:Gingerscope": 1}, "alt": {}}
         offer = {"give": accounts["main"], "receive": {"godly:Boneblade": 1},
@@ -121,6 +154,22 @@ class ApplicationTests(unittest.TestCase):
                               args=[str(self.request)], expected=2)
         self.assertIn("protected", failure)
         self.assertIsNone(self.invoke("status")["inputRevision"])
+
+    def test_scenario_entrypoint_compares_strategy_trajectories(self):
+        proc = subprocess.run(
+            [sys.executable, "-m", "pdiddler.gingerscope", "scenario",
+             "pdiddler/system2/examples/strategy-scenario.json"],
+            cwd=ROOT, capture_output=True, text=True, timeout=30,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        result = json.loads(proc.stdout)
+        self.assertIsNone(result["realized_growth"])
+        self.assertFalse(result["authorizes_trade"])
+        growth = result["strategies"]["listed_growth"]
+        self.assertEqual(result["strategies"]["hold"]["hypothetical_trade_growth"], 0)
+        self.assertEqual(growth["hypothetical_trade_growth"], 8)
+        self.assertEqual(growth["phases"][1]["opportunity_status"], "NO_SUPPLIED_OPPORTUNITIES")
+        self.assertEqual(growth["phases"][2]["opportunity_status"], "SUPPLIED_OUTCOME_UNAVAILABLE")
 
     def test_manual_database_uses_current_clock_and_separate_scope(self):
         from contextlib import redirect_stdout
@@ -160,6 +209,21 @@ class ApplicationTests(unittest.TestCase):
         # The old evaluation is still invalid within its own source time window.
         stale = self.invoke("current", args=[old["evaluationId"]], clock=BASE_CAPTURE)
         self.assertIsNone(stale["evaluation"])
+        history = self.invoke("history", args=[old["evaluationId"]], clock=NEXT_CAPTURE)
+        self.assertEqual(history["status"], "HISTORICAL_EVALUATION")
+        self.assertEqual(history["evaluation"]["report"]["portfolio"]["accounts"]["main"]["known_listed_value"], 23)
+
+    def test_changed_manual_offer_supersedes_previous_offer_with_same_holdings(self):
+        offer = {"give": {"godly:Fang": 1}, "receive": {"godly:Boneblade": 1},
+                 "counterpartyStock": STOCK}
+        old = self.invoke("review", data={"accounts": ACCOUNTS, "offer": offer},
+                          args=[str(self.request)])
+        offer["receive"] = {"godly:Orange_Seer": 1}
+        new = self.invoke("review", data={"accounts": ACCOUNTS, "offer": offer},
+                          args=[str(self.request)])
+        self.assertEqual(old["inputRevision"], new["inputRevision"])
+        self.assertIsNone(self.invoke("current", args=[old["evaluationId"]])["evaluation"])
+        self.assertIsNotNone(self.invoke("current", args=[new["evaluationId"]])["evaluation"])
 
     def test_synthetic_settlement_is_counted_once_and_preserves_reconciliation_after_replay(self):
         fixture = "fixture-settlement"

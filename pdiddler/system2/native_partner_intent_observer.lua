@@ -10,6 +10,13 @@ local MARKET="gingerscope-system2-exact-market-gamekey-crosswalk-v1"
 local WINDOW=12
 local TTL=120
 local MAX_EVENTS=48
+local QUOTE_PUNCTUATION={'"','`','“','”','‘','«','»'}
+local AMBIGUOUS_CONTEXT={
+ " quote "," quoted "," quoting "," they said "," someone said "," he said ",
+ " she said "," you said "," sarcasm "," sarcastic "," kidding "," joking ",
+ " yeah right "," as if "," jk "," maybe i want "," maybe i need ",
+ " not sure if "," don t know if ",
+}
 local function denied(reason)
  return {schema=SCHEMA,status="BLOCKED",reason=reason,clientOnly=true,
    readOnly=true,personalReplyProven=false,verifiedPartnerPreference=false,
@@ -29,6 +36,19 @@ local function clean(t)
  if type(t)~="string" or #t<1 or #t>240 then return nil end
  local s=t:lower():gsub("[^%w]+"," "):gsub("%s+"," ")
  return " "..s:gsub("^%s+",""):gsub("%s+$","").." "
+end
+local function ambiguousContext(raw,normalized)
+ -- Normalization removes quotation and tone punctuation. Abstain before
+ -- treating any quoted mention as an address or its text as a preference.
+ if raw:find("^%s*[>']") or raw:find("[%s%(%[{:=]'")
+     or raw:lower():find("/s%f[%W]") or raw:find("🙄",1,true) then return true end
+ for _,mark in ipairs(QUOTE_PUNCTUATION) do
+  if raw:find(mark,1,true) then return true end
+ end
+ for _,cue in ipairs(AMBIGUOUS_CONTEXT) do
+  if normalized:find(cue,1,true) then return true end
+ end
+ return false
 end
 local function phrase(p)
  if type(p)~="string" or #p<1 or #p>120 then return nil end
@@ -387,6 +407,9 @@ function M.new(config)
   end
   local text=clean(p.text)
   if not text then return denied("FILTERED_MESSAGE_EMPTY_OR_INVALID") end
+  if ambiguousContext(p.text,text) then
+   return envelope("AMBIGUOUS_CHAT_CONTEXT","QUOTED_REPORTED_OR_AMBIGUOUS_LANGUAGE")
+  end
   local mode,personal=address(p.text,scope,now,ctx.clientOfferRevision,channel)
   if mode=="AMBIGUOUS_OTHER_ACCOUNT_MENTION" then
    return envelope("AMBIGUOUS_RECIPIENT","MESSAGE_MENTIONS_ANOTHER_USER")

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 import json
@@ -12,9 +13,13 @@ import sys
 
 from pdiddler.system2.application_state import StateError, StateStore, encode_evaluation_report
 from pdiddler.system2.manual_portfolio_review import (
-    DEFAULT_CATALOG, MAX_REQUEST_BYTES, RequestError, _unique_keys, summarize_accounts,
+    COPIES_PER_SLOT_ASSUMPTION, DEFAULT_CATALOG, MAX_REQUEST_BYTES, RequestError, _unique_keys,
+    summarize_accounts,
 )
-from pdiddler.system2.portfolio_planner import evaluate_offer, plan
+from pdiddler.system2.portfolio_planner import (
+    MAX_BUNDLES_PER_SIDE, MAX_PAIRS, MAX_STEPS, evaluate_offer, plan,
+)
+from pdiddler.system2.portfolio_simulation import DEFAULT_STRATEGIES, MAX_PHASES, compare_strategies
 from pdiddler.system2.supreme_market_editions import (
     MAX_ARCHIVE_BYTES, capture_official, compare_editions, load_edition,
 )
@@ -27,6 +32,10 @@ AUTHORITY = dict.fromkeys(
 )
 OFFER_EVENTS = {"OFFER_OBSERVED", "MAIN_OFFER_REVISION", "PARTNER_OFFER_REVISION"}
 MAX_SESSION_EVENTS = 128
+MAX_SCENARIO_ARCHIVE_BYTES = 2 * MAX_ARCHIVE_BYTES
+SEARCH_LIMITS = {"max_steps": MAX_STEPS, "max_pairs": MAX_PAIRS,
+                 "max_bundles_per_side": MAX_BUNDLES_PER_SIDE,
+                 "copies_per_slot": COPIES_PER_SLOT_ASSUMPTION}
 
 
 def _read(path, limit):
@@ -46,6 +55,18 @@ def _read_request(path, *, required, optional=()):
                        parse_constant=_invalid_constant)
     if type(value) is not dict or required - value.keys() or value.keys() - required - set(optional):
         raise RequestError("The input fields do not match this command.")
+    return value
+
+
+def _search_settings(value):
+    if type(value) is not dict or value.keys() - SEARCH_LIMITS.keys() - {"include_loss_research"}:
+        raise RequestError("Search settings contain unsupported fields.")
+    for option, setting in value.items():
+        if option == "include_loss_research":
+            if type(setting) is not bool:
+                raise RequestError("The loss research setting must be a boolean.")
+        elif type(setting) is not int or not 1 <= setting <= SEARCH_LIMITS[option]:
+            raise RequestError(f"{option} must be an integer from 1 to {SEARCH_LIMITS[option]}.")
     return value
 
 
@@ -75,18 +96,30 @@ def _evaluation_key(revision, clock, session_id, offer_revision, report):
     return sha256(json.dumps(fields, sort_keys=True, allow_nan=False).encode()).hexdigest()
 
 
-def _current_report(state, evaluation_id, clock):
-    record = state.current_evaluation(evaluation_id, now=clock)
-    if record is not None:
-        report = record["report"]
-        expected_id = _evaluation_key(
-            record["inputRevision"], record["evaluatedAt"], record["sessionId"],
-            record["offerRevision"], report,
-        )
-        if (type(report) is not dict or expected_id != evaluation_id
-                or report.get("authority") != AUTHORITY
-                or any(flag is not False for flag in report["authority"].values())):
-            raise StateError("The stored evaluation report failed integrity verification.")
+def _verified_report(state, record, evaluation_id):
+    if record is None:
+        return None
+    report = record["report"]
+    expected_id = _evaluation_key(
+        record["inputRevision"], record["evaluatedAt"], record["sessionId"],
+        record["offerRevision"], report,
+    )
+    if (type(report) is not dict or expected_id != evaluation_id
+            or report.get("authority") != AUTHORITY
+            or any(flag is not False for flag in report["authority"].values())):
+        raise StateError("The stored evaluation report failed integrity verification.")
+    inputs = state.inputs(record["inputRevision"])
+    market = report["market"]
+    portfolio = {
+        account: {position["publisher_id"]: position["reported_copies"] for position in info["positions"]}
+        for account, info in report["portfolio"]["accounts"].items()
+    }
+    dates = {"publisherUpdatedAt": "publisherUpdatedAt", "capturedUtc": "capturedAt",
+             "expiresUtc": "expiresAt"}
+    if (inputs is None or inputs["marketSha256"] != market["archiveSha256"]
+            or inputs["accounts"] != portfolio
+            or any(utc(market[key]) != utc(inputs[field]) for key, field in dates.items())):
+        raise StateError("The stored evaluation conflicts with its source or inventory revision.")
     return record
 
 
@@ -114,18 +147,16 @@ def _portfolio_view(accounts, edition):
 
 
 def _review(args, state, catalog, edition, clock, clock_kind):
+    starting = state.inputs() if state is not None else None
     request = _read_request(args.input, required={"accounts"},
                             optional={"counterparties", "search", "offer"})
     portfolio = _portfolio_view(request["accounts"], edition)
-    search = request.get("search", {})
-    if type(search) is not dict or search.keys() - {
-        "max_steps", "max_pairs", "max_bundles_per_side", "copies_per_slot", "include_loss_research",
-    }:
-        raise RequestError("Search settings contain unsupported fields.")
+    search = _search_settings(request.get("search", {}))
+    configuration_revision, defaults = state.review_configuration() if state else (0, {})
     planning = None
     if "counterparties" in request:
         planning = plan(catalog, request["accounts"]["main"], request["counterparties"],
-                        evaluated_at_utc=clock, edition=edition, **search)
+                        evaluated_at_utc=clock, edition=edition, **{**_search_settings(defaults), **search})
     elif search:
         raise RequestError("Search settings require explicit hypothetical counterparties.")
 
@@ -144,10 +175,15 @@ def _review(args, state, catalog, edition, clock, clock_kind):
         )
 
     report = {"mode": "OFFLINE_ADVISORY", "clock": clock_kind, "market": edition.summary(),
-              "portfolio": portfolio, "planning": planning, "offer": offer, "authority": AUTHORITY}
+              "configurationRevision": configuration_revision, "portfolio": portfolio,
+              "planning": planning, "offer": offer, "authority": AUTHORITY}
     if state is not None:
         encode_evaluation_report(report)
-    revision = state.sync_inputs(**_input_fields(state, edition, request["accounts"])) if state else None
+    revision = state.sync_inputs(
+        **_input_fields(state, edition, request["accounts"]),
+        expected_input_revision=starting["inputRevision"] if starting is not None else 0,
+        expected_configuration_revision=configuration_revision,
+    ) if state else None
     evaluation = _record(state, revision, report, clock)
     return {"inputRevision": revision, "evaluationId": evaluation, "clock": clock_kind, "report": report}
 
@@ -155,6 +191,7 @@ def _review(args, state, catalog, edition, clock, clock_kind):
 def _simulate(args, state, catalog, edition, clock, clock_kind):
     if state is None or not args.synthetic:
         raise RequestError("Session simulation requires a synthetic state database.")
+    starting = state.inputs()
     request = _read_request(args.input,
                             required={"accounts", "sessionId", "counterpartyStock", "events"},
                             optional={"settlement"})
@@ -193,7 +230,8 @@ def _simulate(args, state, catalog, edition, clock, clock_kind):
     lease_until = (utc(clock) + timedelta(minutes=2)).isoformat()
     owner = state.start_session(session_id, account="main", now=clock, lease_until=lease_until,
                                 counterparty=request["counterpartyStock"],
-                                inputs=_input_fields(state, edition, request["accounts"]))
+                                inputs={**_input_fields(state, edition, request["accounts"]),
+                                        "expected_input_revision": starting["inputRevision"] if starting else 0})
     evaluations = []
     try:
         revision = state.inputs()["inputRevision"]
@@ -222,6 +260,53 @@ def _simulate(args, state, catalog, edition, clock, clock_kind):
             "offerEvaluations": evaluations, "status": state.summary(), "authority": AUTHORITY}
 
 
+def _scenario(path):
+    request = _read_request(path, required={"accounts", "phases"}, optional={"strategies"})
+    phases = request["phases"]
+    if type(phases) is not list or not 1 <= len(phases) <= MAX_PHASES:
+        raise RequestError(f"Provide one to {MAX_PHASES} scenario phases.")
+    archives = {}
+    remaining = MAX_SCENARIO_ARCHIVE_BYTES
+    for phase in phases:
+        if type(phase) is not dict or type(phase.get("catalog")) is not str or not phase["catalog"]:
+            raise RequestError("Each phase requires the path to a local Supreme archive.")
+        catalog_path = (path.parent / phase["catalog"]).absolute()
+        if catalog_path not in archives:
+            archives[catalog_path] = _read(catalog_path, min(MAX_ARCHIVE_BYTES, remaining))
+            remaining -= len(archives[catalog_path])
+        phase["catalog"] = archives[catalog_path]
+    return compare_strategies(request["accounts"], phases,
+                              strategy_names=request.get("strategies", DEFAULT_STRATEGIES))
+
+
+def _portfolio_change(state, previous, current):
+    if previous >= current:
+        raise RequestError("Choose two input revisions in chronological order.")
+    before, after = state.inputs(previous), state.inputs(current)
+    if before is None or after is None:
+        raise RequestError("Both input revisions must exist in this database.")
+    deltas = {}
+    for account in ("main", "alt"):
+        changes = Counter(after["accounts"][account])
+        changes.subtract(before["accounts"][account])
+        deltas[account] = {item: count for item, count in sorted(changes.items()) if count}
+    combined = Counter(deltas["main"])
+    combined.update(deltas["alt"])
+    combined = {item: count for item, count in sorted(combined.items()) if count}
+    if combined:
+        status = "COMBINED_HOLDINGS_CHANGED"
+    elif any(deltas.values()):
+        status = "ACCOUNT_REALLOCATION_COMPATIBLE_WITH_INTERNAL_TRANSFER"
+    else:
+        status = "HOLDINGS_UNCHANGED"
+    return {
+        "status": status, "accountCopyChanges": deltas, "combinedCopyChanges": combined,
+        "previousInputRevision": previous, "currentInputRevision": current,
+        "previousMarketSha256": before["marketSha256"], "currentMarketSha256": after["marketSha256"],
+        "transferCorroborated": False, "realizedGrowth": None,
+    }
+
+
 def _parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--database", type=Path, help="Local private SQLite state file")
@@ -237,11 +322,23 @@ def _parser():
     commands.add_parser("simulate-session", help="Replay manual observations and release ownership").add_argument(
         "input", type=Path,
     )
+    commands.add_parser("scenario", help="Compare strategy baselines through explicit market phases").add_argument(
+        "input", type=Path,
+    )
     commands.add_parser("current", help="Read an evaluation only if its bindings remain current").add_argument(
         "evaluation_id",
     )
+    commands.add_parser("history", help="Read one archived evaluation with its original provenance").add_argument(
+        "evaluation_id",
+    )
+    changes = commands.add_parser("portfolio-diff", help="Compare holdings across two stored input revisions")
+    changes.add_argument("previous", type=int)
+    changes.add_argument("current", type=int)
     commands.add_parser("status", help="Export a sanitized operational summary")
     commands.add_parser("recover", help="Release expired ownership and export sanitized status")
+    commands.add_parser("configure", help="Save bounded default search settings").add_argument(
+        "input", type=Path,
+    )
     commands.add_parser("capture-market", help="Capture current Supreme pages for review").add_argument(
         "output", type=Path,
     )
@@ -261,8 +358,22 @@ def _execute(args, state, clock, clock_kind):
     if command == "recover":
         retired = state.recover(now=clock)
         return {**state.summary(), "expiredSessionsRecovered": retired}
+    if command == "configure":
+        settings = _search_settings(_read_request(
+            args.input, required=set(), optional={*SEARCH_LIMITS, "include_loss_research"},
+        ))
+        revision = state.set_review_configuration(settings)
+        return {"configurationRevision": revision, "searchDefaults": settings}
+    if command == "scenario":
+        return _scenario(args.input)
     if command == "current":
-        return {"clock": clock_kind, "evaluation": _current_report(state, args.evaluation_id, clock)}
+        record = state.current_evaluation(args.evaluation_id, now=clock)
+        return {"clock": clock_kind, "evaluation": _verified_report(state, record, args.evaluation_id)}
+    if command == "history":
+        record = state.evaluation_history(args.evaluation_id)
+        return {"status": "HISTORICAL_EVALUATION", "evaluation": _verified_report(state, record, args.evaluation_id)}
+    if command == "portfolio-diff":
+        return _portfolio_change(state, args.previous, args.current)
 
     catalog = _read(args.catalog, MAX_ARCHIVE_BYTES)
     edition = load_edition(catalog, evaluated_at_utc=clock, expected_sha256=args.expected_market_sha256)
@@ -306,12 +417,16 @@ def _text_review(review, *, color=False):
 def main(argv=None):
     args = _parser().parse_args(argv)
     try:
-        if args.database is None and args.command in {"status", "recover", "current", "simulate-session"}:
+        if args.database is None and args.command in {
+            "status", "recover", "configure", "current", "history", "portfolio-diff", "simulate-session",
+        }:
             raise RequestError("This command requires a state database.")
         if args.database is not None and args.replay_at is not None and not args.synthetic:
             raise RequestError("Historical runs use a separate synthetic database or no database.")
         if args.command == "capture-market" and (args.database is not None or args.replay_at is not None):
             raise RequestError("Capture uses the current clock and creates an archive for review.")
+        if args.command == "scenario" and (args.database is not None or args.replay_at is not None):
+            raise RequestError("Scenario phases use their own clocks and do not modify portfolio state.")
         if args.text and args.command != "review":
             raise RequestError("The text view is available for review reports.")
         clock = args.replay_at or datetime.now(timezone.utc).isoformat()

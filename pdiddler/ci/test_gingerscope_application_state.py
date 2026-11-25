@@ -9,7 +9,7 @@ import sys
 import tempfile
 import unittest
 
-from pdiddler.system2.application_state import StateError, StateStore
+from pdiddler.system2.application_state import SCHEMA_VERSION, StateError, StateStore, _SCHEMA_V1
 
 
 CAPTURED = "2026-11-25T07:00:00Z"
@@ -57,6 +57,30 @@ class ApplicationStateTests(unittest.TestCase):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
         self.path = Path(directory.name) / "state.sqlite3"
+
+    def test_version_one_migrates_without_losing_portfolio_or_unresolved_evidence(self):
+        with sqlite3.connect(self.path) as previous:
+            self.path.chmod(0o600)
+            for statement in _SCHEMA_V1:
+                previous.execute(statement)
+            previous.execute("INSERT INTO metadata VALUES ('manual')")
+            previous.execute("PRAGMA user_version=1")
+            previous.execute("INSERT INTO markets VALUES (?, ?, ?, ?, '{}')",
+                             (MARKET_HASH, PUBLISHED, CAPTURED, EXPIRES))
+            previous.execute("INSERT INTO inputs VALUES (1, ?, ?)",
+                             (MARKET_HASH, json.dumps(ACCOUNTS)))
+            previous.execute(
+                """INSERT INTO sessions VALUES ('episode', 'main', ?, 1, NULL, 'CLOSED',
+                   'SESSION_INTERRUPTED', 0, 0, ?, ?)""", ("b" * 64, NOW, LEASE_END),
+            )
+        with StateStore(self.path) as state:
+            self.assertEqual(state.summary()["schemaVersion"], SCHEMA_VERSION)
+            self.assertEqual(state.summary()["unresolvedSessions"], 1)
+            self.assertEqual(state.inputs(1)["accounts"], ACCOUNTS)
+            self.assertEqual(state.review_configuration(), (0, {}))
+            self.assertEqual(state.set_review_configuration({"max_pairs": 10}), 1)
+        with StateStore(self.path) as state:
+            self.assertEqual(state.review_configuration(), (1, {"max_pairs": 10}))
 
     def test_persistent_market_and_separate_account_revisions(self):
         with StateStore(self.path) as state:
@@ -108,6 +132,7 @@ class ApplicationStateTests(unittest.TestCase):
             self.assertFalse(state.record_evaluation("eval", **fields))
             with self.assertRaises(StateError):
                 state.record_evaluation("eval", **{**fields, "report": {"mode": "CONFLICT"}})
+
             self.assertIsNotNone(state.current_evaluation("eval", now=EXPIRES))
             self.assertIsNone(state.current_evaluation("eval", now="2026-11-25T12:00:01Z"))
             self.assertIsNone(state.current_evaluation("eval", now=CAPTURED))
@@ -116,6 +141,14 @@ class ApplicationStateTests(unittest.TestCase):
             self.assertEqual(state.evaluation_history("eval")["inputRevision"], 1)
             with self.assertRaises(StateError):
                 state.record_evaluation("stale", **fields)
+
+    def test_late_insertion_with_older_clock_cannot_supersede_review(self):
+        with StateStore(self.path) as state:
+            sync(state)
+            state.record_evaluation("newer", input_revision=1, report={}, evaluated_at=LATER)
+            state.record_evaluation("older", input_revision=1, report={}, evaluated_at=NOW)
+            self.assertIsNone(state.current_evaluation("older", now=LATER))
+            self.assertEqual(state.current_evaluation("newer", now=LATER)["evaluationId"], "newer")
 
     def test_exact_offer_and_evidence_revisions_invalidate_advice(self):
         with StateStore(self.path) as state:

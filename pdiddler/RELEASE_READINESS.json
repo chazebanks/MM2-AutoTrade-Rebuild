@@ -72,9 +72,21 @@
   "reviewMatrix": "pdiddler/system2/gingerscope_requirements.json",
   "checkpointSourceCommitMeaning": "Immutable historical November 11 continuity anchor",
   "completionMilestones": {
-    "A_fullSoftware": "OPEN_RUNTIME_AND_AUTHORITATIVE_INTERFACES_UNVERIFIED",
+    "A_fullSoftware": "SUPPORTED_OFFLINE_CANDIDATE",
     "A_manualOfflineAnalysis": "INTEGRATED_OFFLINE_ADVISORY_AND_CONTROLLED_REPLAY",
     "B_supervisedRuntime": "OPEN_HISTORICAL_CLIENT_OBSERVATIONS_ONLY",
     "C_liveRelease": "NOT_AUTHORIZED"
+  },
+  "supportedOfflineEntrypoint": "python3 -m pdiddler.gingerscope",
+  "supportedOfflineVerification": {
+    "draftHeadEvidence": "Use the exact draft revision and action runs recorded in the rolling checkpoint.",
+    "stateSchemaVersion": 2,
+    "includes": [
+      "Supreme capture and immutable edition comparison",
+      "Independent route generation and multi-period scenarios",
+      "Controlled observations and synthetic settlement",
+      "Versioned configuration, history and recovery",
+      "Isolated, versioned private evaluation artifacts"
+    ]
   }
 }

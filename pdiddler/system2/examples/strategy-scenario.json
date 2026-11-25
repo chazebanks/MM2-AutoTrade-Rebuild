@@ -1,0 +1,27 @@
+{
+  "accounts": {"main": {"godly:Fang": 1}, "alt": {}},
+  "strategies": ["hold", "listed_growth", "purchasing_power"],
+  "phases": [
+    {
+      "catalog": "../supreme_only_189_research_catalog_2026_11_25_publication_nov23.json",
+      "evaluated_at_utc": "2026-11-25T07:00:00Z",
+      "counterparties": [{"godly:Gemstone": 1}]
+    },
+    {
+      "catalog": "../supreme_only_189_research_catalog_2026_11_25_publication_nov23.json",
+      "evaluated_at_utc": "2026-11-25T08:00:00Z",
+      "counterparties": []
+    },
+    {
+      "catalog": "../supreme_only_189_research_catalog_2026_11_25_publication_nov23.json",
+      "evaluated_at_utc": "2026-11-25T09:00:00Z",
+      "counterparties": [{"godly:Plasmabeam": 1}],
+      "unavailable_indices": [0]
+    },
+    {
+      "catalog": "../supreme_only_189_research_catalog_2026_11_25_publication_nov23.json",
+      "evaluated_at_utc": "2026-11-25T10:00:00Z",
+      "counterparties": [{"godly:Plasmabeam": 1}]
+    }
+  ]
+}

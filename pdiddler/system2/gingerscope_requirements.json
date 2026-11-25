@@ -77,6 +77,105 @@
       "successfulWorkflowCount": 3,
       "evidenceType": "Exact-head private V2 and isolated learner workflow verification",
       "publicV2Pin": "5da551192aaf6e438786bfad800e434b30c6a666"
+    },
+    "public-exact-initial-candidate": {
+      "repository": "chazebanks/MM2-AutoTrade-Rebuild",
+      "branch": "research/gingerscope-completion-sprint-nov25",
+      "draftPullRequest": 323,
+      "commit": "4bf114925baca83bbc2017347eb9be4ae84ff375",
+      "evidenceType": "Exact-head Actions and clean smoke check of the initial integrated candidate",
+      "gitHubActionsRunIds": [
+        45584108810
+      ],
+      "successfulWorkflowCount": 17,
+      "verifiedCleanInstall": "Isolated CPython 3.12 dependencies; help, advisory review, controlled session replay, report, recovery, pip check"
+    },
+    "public-state-v2-focused": {
+      "baseRevision": "public-exact-initial-candidate",
+      "evidenceType": "Worktree tests with source bytes checked immediately before and after",
+      "verificationCommandId": "state-v2-focused",
+      "passed": 30,
+      "sourceFileSha256": {
+        "pdiddler/gingerscope.py": "a0c699822dcea310dd17fd0206531aba9578a07446643b4d859c2c0a868ca073",
+        "pdiddler/system2/application_state.py": "b3d7b0e45efbc5bc69f2b5cfc6b155947c97234ce554b7db05ae2a7f09fe25b3",
+        "pdiddler/ci/test_gingerscope_application.py": "1308f70b2f23a0e045272a99b53069fa3490c9fba02dc227068ee52121e82d8f",
+        "pdiddler/ci/test_gingerscope_application_state.py": "1eb38be422244b56cc6b9dac82d4e7cd97f815bf58005cd520b252f17ee8b6b0"
+      }
+    },
+    "public-p2-focused": {
+      "baseRevision": "public-exact-initial-candidate",
+      "evidenceType": "Real Lune execution of unchanged baseline Part 2 code with controlled interface doubles",
+      "verificationCommandId": "part2-startup",
+      "passed": 9,
+      "part2SourceGitBlob": "463915e34d509b55b1a17634ec74396e7d82b76c",
+      "sourceFileSha256": {
+        "pdiddler/ci/gingerscope_part2_startup_mocks.luau": "edd46051d8240fd10d5ab9b587f09c21e943300e00422e7c6109c276f16cb7ad",
+        "pdiddler/pdiddler2.lua": "73324764bfdb07391c0b9b23315f8413aa8d844a63a4a83ef1135a12088f4ae3",
+        "pdiddler/pdiddler2_KNOWN_GOOD.lua": "73324764bfdb07391c0b9b23315f8413aa8d844a63a4a83ef1135a12088f4ae3"
+      }
+    },
+    "public-scenario-focused": {
+      "baseRevision": "public-exact-initial-candidate",
+      "evidenceType": "Worktree tests with source SHA-256 verified before and after and example command exercised in the isolated Python environment",
+      "verificationCommandIds": [
+        "strategy-simulation",
+        "strategy-simulation-example"
+      ],
+      "passed": 6,
+      "sourceFileSha256": {
+        "pdiddler/gingerscope.py": "79384a479a988a4ebfa482acd426c28bc98f65ae92c56ad5dd8a8cd760f66daa",
+        "pdiddler/system2/portfolio_simulation.py": "a8e8dbc7524821755759d50c18c85db8d7a4fc305625a26122bfc743616736b4",
+        "pdiddler/ci/test_portfolio_simulation.py": "ef07df57406bd9a4e069d22c8409115e48eba3a7d4adf4d47ec7e599c6a4102a"
+      }
+    },
+    "private-exact-snapshot": {
+      "repository": "chazebanks/MM2-Trade-Research-Private",
+      "branch": "research/system2-private-v2-response-analysis-nov14",
+      "draftPullRequest": 4,
+      "commit": "026e8865d09066c358288a7239598ec6a088fba9",
+      "evidenceType": "Exact-head private Actions with artifact save/load/rollback and synthetic isolation",
+      "gitHubActionsRunIds": [
+        45584654220,
+        45584654216,
+        45584640881
+      ],
+      "successfulWorkflowCount": 3,
+      "localSyntheticPassed": 47,
+      "additionalPublicStateIntegrationPassed": 1,
+      "publicV2Pin": "5da551192aaf6e438786bfad800e434b30c6a666"
+    },
+    "public-followup-local": {
+      "baseRevision": "public-exact-initial-candidate",
+      "evidenceType": "Focused application, strategy, state and market regressions",
+      "passed": 83,
+      "verificationCommandId": "followup-local",
+      "sourceFileSha256": {
+        "pdiddler/gingerscope.py": "484ad1309e9440ea38765e2d80f55e8fc8589b1eb9179833f70e8b62ca7431b3",
+        "pdiddler/system2/application_state.py": "9538b2ce121e27a426d62426c2285e02d1c057f27a722cf4010cb291552bc917",
+        "pdiddler/system2/portfolio_planner.py": "d37001004462e259a478f632f97cf793b4700edd1eeb23f23d99c086d7c2b220",
+        "pdiddler/system2/portfolio_simulation.py": "a8e8dbc7524821755759d50c18c85db8d7a4fc305625a26122bfc743616736b4",
+        "pdiddler/system2/supreme_market_editions.py": "789aa859482855b919b65544b05a219959a321b5e54ca0512a6896380d72d46c",
+        "pdiddler/system2/supreme_only_strategy_research.py": "ec50491e1feb9e72d8e83dd964a9af91b40726897ce414a6dad6d07ea99e6d39",
+        "pdiddler/system2/manual_portfolio_review.py": "59accacce9c5278ed02bf237718bc4d669e17e4e3e34647d864823c79d2dc934",
+        "pdiddler/ci/test_gingerscope_application.py": "0fe12e5dfdadeed882831b4e5762a11bb9c35be7d06ce398b24aed03b6bbe6ca",
+        "pdiddler/ci/test_gingerscope_application_state.py": "2e6137fc73f130a98419b2c7ebfdf04d8adafdd0d602e7630290cc8e1b219c9e",
+        "pdiddler/ci/test_portfolio_planner.py": "0e17256286655bae5af4bda36bb9470588379af6e886c573cbafe73bc5fe8973",
+        "pdiddler/ci/test_portfolio_simulation.py": "ef07df57406bd9a4e069d22c8409115e48eba3a7d4adf4d47ec7e599c6a4102a",
+        "pdiddler/ci/test_supreme_market_editions.py": "85beb762f3923984fc02deb2c16dd2bd152e067bc1ee52c74997ca895cc8441e",
+        "pdiddler/ci/test_manual_portfolio_review.py": "7d572fa38aff27c40087df7b220fd6c2fc4d2ca614b50e08fc530e02e1bd3ef5"
+      }
+    },
+    "public-passive-intent-focused": {
+      "baseRevision": "public-exact-initial-candidate",
+      "evidenceType": "Controlled offline Lune and independent Python oracle",
+      "assertionsPassed": 118,
+      "pythonTestsPassed": 14,
+      "verificationCommandId": "passive-intent",
+      "sourceFileSha256": {
+        "pdiddler/system2/native_partner_intent_observer.lua": "952518e63a1f611f91dc3362e619678357bc6b9457624e0ad1bf939a876ec8eb",
+        "pdiddler/ci/system2_native_partner_intent_mocks.luau": "faa93b41c3b2e319a54d2fc1c221fff73737d1c9d99b7fa8b274b628e23615d7",
+        "pdiddler/ci/test_system2_partner_intent_evidence_oracle.py": "a166e8e972271545ddae562a3ec1739e0a8cbc977b064786460b98e987851873"
+      }
     }
   },
   "implementationStatuses": [
@@ -159,6 +258,31 @@
       "id": "planner-benchmark",
       "command": "python3 -m pdiddler.system2.portfolio_planner_benchmark",
       "dependency": "Managed Linux measures do not establish iPad performance"
+    },
+    {
+      "id": "state-v2-focused",
+      "command": "python -m unittest -v pdiddler.ci.test_gingerscope_application pdiddler.ci.test_gingerscope_application_state"
+    },
+    {
+      "id": "part2-startup",
+      "command": "lune run pdiddler/ci/gingerscope_part2_startup_mocks.luau",
+      "dependency": "Lune 0.11.1 and the original identical Part 2 source blobs"
+    },
+    {
+      "id": "strategy-simulation",
+      "command": "python -m unittest -v pdiddler.ci.test_portfolio_simulation"
+    },
+    {
+      "id": "strategy-simulation-example",
+      "command": "python -m pdiddler.gingerscope scenario pdiddler/system2/examples/strategy-scenario.json"
+    },
+    {
+      "id": "followup-local",
+      "command": "python -m unittest pdiddler.ci.test_gingerscope_application pdiddler.ci.test_gingerscope_application_state pdiddler.ci.test_portfolio_planner pdiddler.ci.test_portfolio_simulation pdiddler.ci.test_supreme_market_editions pdiddler.ci.test_manual_portfolio_review"
+    },
+    {
+      "id": "passive-intent",
+      "command": "lune run pdiddler/ci/system2_native_partner_intent_mocks.luau && python -m unittest pdiddler.ci.test_system2_partner_intent_evidence_oracle"
     }
   ],
   "requirements": [
@@ -265,23 +389,23 @@
       "dependencies": [
         "P1.LIFECYCLE"
       ],
-      "implementationStatus": "PARTIAL",
-      "verificationStatus": "IMPLEMENTED BUT UNTESTED",
+      "implementationStatus": "IMPLEMENTED",
+      "verificationStatus": "OFFLINE VERIFIED",
       "acceptanceCriteria": [
         "Preserve known-good behavior and exercise readiness/failure without runtime extension"
       ],
       "supportingTests": [
-        "pdiddler/ci/supervised_p3_atomic_bootstrap_mocks.luau"
+        "pdiddler/ci/supervised_p3_atomic_bootstrap_mocks.luau",
+        "pdiddler/ci/gingerscope_part2_startup_mocks.luau"
       ],
-      "evidenceLimitations": "Bootstrap mocks verify downstream gating. They do not exercise both picker and Play in the present client.",
-      "remainingWork": [
-        "Test interface sequencing in controlled inputs"
-      ],
+      "evidenceLimitations": "Nine Lune scenarios exercise the unchanged original Tablet and join-friend Play source with controlled UI and time dependencies. Device observations remain historical and current native validation is external.",
+      "remainingWork": [],
       "externalBlockers": [
         "Supported, authorized runtime interface and scoped operator validation"
       ],
       "verifiedSourceRevision": [
-        "public-baseline"
+        "public-baseline",
+        "public-p2-focused"
       ]
     },
     {
@@ -320,16 +444,15 @@
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_supreme_market_editions.py"
       ],
-      "evidenceLimitations": "Closed historical client observations remain bounded. The supported manual path adds distinct priced, priceless, excluded and unknown classifications.",
-      "remainingWork": [
-        "Verify manual/controlled identity handoff"
-      ],
+      "evidenceLimitations": "Closed historical client observations remain bounded. The supported manual path adds distinct priced, priceless, excluded and unknown classifications. The supported manual route carries exact publisher IDs and distinguishes unknown, excluded, and priced items. Session observations are locally attributed.",
+      "remainingWork": [],
       "externalBlockers": [
         "Supported, authorized runtime interface and scoped operator validation"
       ],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-followup-local"
       ]
     },
     {
@@ -418,7 +541,7 @@
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_gingerscope_application_state.py"
       ],
-      "evidenceLimitations": "Controlled offer, inventory and market revisions invalidate and preserve historic observations. Server-side exact revision remains external.",
+      "evidenceLimitations": "Configuration and changed manual/observed offer inputs invalidate prior current recommendations. Retrieval cross-checks state bindings and refuses malformed or edited report and market metadata. Native control and authoritative outcomes remain independent.",
       "remainingWork": [
         "Verify exact native server-side offer revision when supported evidence becomes available."
       ],
@@ -428,7 +551,8 @@
       ],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-state-v2-focused"
       ]
     },
     {
@@ -543,7 +667,7 @@
       "implementationStatus": "IMPLEMENTED",
       "verificationStatus": "OFFLINE VERIFIED",
       "acceptanceCriteria": [
-        "Identify P1–P6 workplan tags as phases and distinguish P5 simulation"
+        "Identify P1\u2013P6 workplan tags as phases and distinguish P5 simulation"
       ],
       "supportingTests": [
         "pdiddler/ci/test_continuity_manager.py"
@@ -750,7 +874,7 @@
         "S2.2.PORTFOLIO",
         "STATE.OUTCOMES"
       ],
-      "implementationStatus": "PARTIAL",
+      "implementationStatus": "IMPLEMENTED",
       "verificationStatus": "INTEGRATED AND VERIFIED",
       "acceptanceCriteria": [
         "Detect impossible/duplicated balances and distinguish transfers, appreciation and trade growth"
@@ -761,14 +885,13 @@
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_gingerscope_application_state.py"
       ],
-      "evidenceLimitations": "Separate account revisions, immutable edition references and synthetic conservation persist. Application records do not treat a manual inventory change as realized profit.",
-      "remainingWork": [
-        "Implement explicit internal transfer classification and audited authoritative real outcomes if appropriate evidence becomes available."
-      ],
+      "evidenceLimitations": "Separate account revisions, immutable edition references and synthetic conservation persist. Application records do not treat a manual inventory change as realized profit. The historical snapshot comparison reports conserved account reallocations and leaves the transfer and realized growth unverified.",
+      "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-followup-local"
       ]
     },
     {
@@ -943,7 +1066,9 @@
         "pdiddler/system2/multitrade_growth_replay.py",
         "pdiddler/system2/manual_portfolio_review.py",
         "pdiddler/system2/portfolio_planner.py",
-        "pdiddler/gingerscope.py"
+        "pdiddler/gingerscope.py",
+        "pdiddler/system2/portfolio_simulation.py",
+        "pdiddler/system2/examples/strategy-scenario.json"
       ],
       "inputs": [
         "Available main inventory, explicit scenario counterparties, market edition and search bounds"
@@ -963,13 +1088,15 @@
       ],
       "supportingTests": [
         "pdiddler/ci/test_portfolio_planner.py",
-        "pdiddler/ci/test_gingerscope_application.py"
+        "pdiddler/ci/test_gingerscope_application.py",
+        "pdiddler/ci/test_portfolio_simulation.py"
       ],
       "evidenceLimitations": "The planner reports opportunity assumptions, retained paths and search truncation. Partner availability, willingness and retradability are unverified.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-scenario-focused"
       ]
     },
     {
@@ -985,7 +1112,9 @@
         "pdiddler/intelligence_lab/quality_loss_sensitivity.py",
         "pdiddler/system2/manual_portfolio_review.py",
         "pdiddler/system2/portfolio_planner.py",
-        "pdiddler/gingerscope.py"
+        "pdiddler/gingerscope.py",
+        "pdiddler/system2/portfolio_simulation.py",
+        "pdiddler/system2/examples/strategy-scenario.json"
       ],
       "inputs": [
         "Quotes and ranges, accounts, offer, policy and clock"
@@ -997,7 +1126,7 @@
         "S2.1.ARCHIVE",
         "S2.2.PORTFOLIO"
       ],
-      "implementationStatus": "PARTIAL",
+      "implementationStatus": "IMPLEMENTED",
       "verificationStatus": "INTEGRATED AND VERIFIED",
       "acceptanceCriteria": [
         "No unapproved losses, unknown outbound assets or speculative stack values; compare controlled loss to permitted options"
@@ -1007,16 +1136,17 @@
         "pdiddler/ci/test_growth_policy_decision.py",
         "pdiddler/ci/test_manual_portfolio_review.py",
         "pdiddler/ci/test_portfolio_planner.py",
-        "pdiddler/ci/test_gingerscope_application.py"
+        "pdiddler/ci/test_gingerscope_application.py",
+        "pdiddler/ci/test_portfolio_simulation.py"
       ],
-      "evidenceLimitations": "Numerical loss permissions remain null. Missing ranges and stack economics remain uncertain.",
-      "remainingWork": [
-        "Complete cumulative downside and cross-edition adverse scenario comparisons."
-      ],
+      "evidenceLimitations": "Lists per-exchange and cumulative published range downside only when every applied synthetic exchange has complete ranges. Compares no-loss and separately labeled hypothetical loss analyses. Market shocks are explicit publisher scenarios and numerical loss budgets remain inactive.",
+      "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-scenario-focused",
+        "public-followup-local"
       ]
     },
     {
@@ -1093,13 +1223,14 @@
         "private:tests/test_synthetic_learning.py",
         "private:tests/integration_public_state_learning.py"
       ],
-      "evidenceLimitations": "Synthetic only. Model versioning, evidence eligibility, baseline evaluation, monitoring and rollback are separate from verified real model readiness.",
+      "evidenceLimitations": "The synthetic learner validates temporally separated evidence, compares an explicit baseline, persists a sealed model/report artifact and selects an older valid snapshot for offline rollback. Metadata records configuration, scope, cutoff and versions. Real evidence and deployable model readiness remain separately gated.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-focused-candidate",
         "private-focused-candidate",
-        "private-exact-candidate"
+        "private-exact-candidate",
+        "private-exact-snapshot"
       ]
     },
     {
@@ -1184,14 +1315,15 @@
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_gingerscope_application_state.py"
       ],
-      "evidenceLimitations": "Current offline reports compare nondominated options on distinct dimensions and abstain when real preferences are unknown. The application has no game or policy deployment authority.",
+      "evidenceLimitations": "Configuration and changed manual/observed offer inputs invalidate prior current recommendations. Retrieval cross-checks state bindings and refuses malformed or edited report and market metadata. Native control and authoritative outcomes remain independent.",
       "remainingWork": [
         "Verify against current native/release evidence only when an authorized runtime is supported."
       ],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-state-v2-focused"
       ]
     },
     {
@@ -1275,7 +1407,7 @@
         "S2.8.BRIDGE"
       ],
       "implementationStatus": "PARTIAL",
-      "verificationStatus": "OFFLINE VERIFIED",
+      "verificationStatus": "INTEGRATED AND VERIFIED",
       "acceptanceCriteria": [
         "Run component, integrated, economic, adversarial, recovery and performance checks at exact heads"
       ],
@@ -1283,14 +1415,16 @@
         "pdiddler/ci/test_release_readiness.py",
         "pdiddler/ci/test_gingerscope_application.py"
       ],
-      "evidenceLimitations": "Focused worktree tests and exact baseline CI are separate. New draft heads require their own exact-head CI and final code review.",
+      "evidenceLimitations": "All 17 exact-head Actions workflows passed at the initial supported candidate. Follow-up worktree verification records its own source hashes until exact-head regression.",
       "remainingWork": [
-        "Record exact-head regression and independent review for each draft."
+        "Run exact-head regression for the follow-up candidate before closing offline release verification."
       ],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-exact-initial-candidate",
+        "public-followup-local"
       ]
     },
     {
@@ -1393,7 +1527,7 @@
       "dependencies": [
         "P4.REVISION"
       ],
-      "implementationStatus": "PARTIAL",
+      "implementationStatus": "IMPLEMENTED",
       "verificationStatus": "OFFLINE VERIFIED",
       "acceptanceCriteria": [
         "No assumed intent from silence, unrelated conversation or a decline; sarcasm and ambiguity stay uncertain"
@@ -1402,13 +1536,12 @@
         "pdiddler/ci/test_system2_partner_intent_evidence_oracle.py",
         "pdiddler/ci/system2_native_partner_intent_mocks.luau"
       ],
-      "evidenceLimitations": "Controlled attribution fixtures only; no measured sarcasm or intent interpretation reliability.",
-      "remainingWork": [
-        "Verify distinct false-attribution scenarios including sarcasm and quote cases"
-      ],
+      "evidenceLimitations": "Offline direct, indirect, unaddressed, revised and ambiguous cases pass. Explicit quotation, reported speech, marked sarcasm and hedging are withheld as uncertain. Unmarked sarcasm and true player intent remain unverified.",
+      "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-baseline"
+        "public-baseline",
+        "public-passive-intent-focused"
       ]
     },
     {
@@ -1494,7 +1627,8 @@
         "private-baseline",
         "public-focused-candidate",
         "private-focused-candidate",
-        "private-exact-candidate"
+        "private-exact-candidate",
+        "private-exact-snapshot"
       ]
     },
     {
@@ -1530,10 +1664,8 @@
         "pdiddler/ci/test_discord_v2_event_intake.py",
         "private:tests/integration_public_state_learning.py"
       ],
-      "evidenceLimitations": "Controlled SQLite schema, scope isolation, deduplicated synthetic settlement and private learner compatibility pass. Real authorized private transaction ingress and authoritative settlement remain external.",
-      "remainingWork": [
-        "Implement safe offline evidence envelope and migration/replay tests"
-      ],
+      "evidenceLimitations": "Controlled SQLite schema, scope isolation, deduplicated synthetic settlement and private learner compatibility pass. Real authorized private transaction ingress and authoritative settlement remain external. The controlled synthetic settlement envelope uses two independent fixture witnesses, scope checks, and preserved transaction identity across restart.",
+      "remainingWork": [],
       "externalBlockers": [
         "Independent game-backed, two-sided settlement, exact session/revision and inventory provenance",
         "Authorized real collection and supported private access"
@@ -1567,7 +1699,7 @@
       "dependencies": [
         "ARCH.CLOSURE"
       ],
-      "implementationStatus": "PARTIAL",
+      "implementationStatus": "IMPLEMENTED",
       "verificationStatus": "INTEGRATED AND VERIFIED",
       "acceptanceCriteria": [
         "Handle interrupted writes, conflict, duplicates, corruption, schema migration, missing dependencies and partial recovery"
@@ -1576,13 +1708,14 @@
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_gingerscope_application_state.py"
       ],
-      "evidenceLimitations": "Continuity persists development metadata only.",
-      "remainingWork": [
-        "Configuration and learning metadata do not yet share the application schema. Version 1 rejects unrecognized versions and has no predecessor migration."
-      ],
+      "evidenceLimitations": "Public SQLite stores versioned configuration/recovery, portfolio and observation state and migrates v1 to v2 transactionally. Private versioned model/evaluation artifacts carry their own metadata and rollback and remain isolated from public records.",
+      "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-state-v2-focused",
+        "private-exact-snapshot",
+        "public-followup-local"
       ]
     },
     {
@@ -1618,11 +1751,12 @@
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_gingerscope_application_state.py"
       ],
-      "evidenceLimitations": "SQLite recovery is tested in a controlled offline session. Unsupported schema versions fail closed. Native runtime recovery remains unverified.",
+      "evidenceLimitations": "Migration and recovery of the supported offline application preserve recorded evidence and verify stale ownership, partial writes and closed-session advice. Current native recovery remains separate.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-state-v2-focused"
       ]
     },
     {
@@ -1838,7 +1972,9 @@
         "pdiddler/system2/multitrade_growth_replay.py",
         "pdiddler/system2/manual_portfolio_review.py",
         "pdiddler/system2/portfolio_planner.py",
-        "pdiddler/gingerscope.py"
+        "pdiddler/gingerscope.py",
+        "pdiddler/system2/portfolio_simulation.py",
+        "pdiddler/system2/examples/strategy-scenario.json"
       ],
       "inputs": [
         "Reproducible fictional portfolios, market changes and counterparty opportunities"
@@ -1851,7 +1987,7 @@
         "S2.5.SEARCH",
         "MARKET.TRANSITION"
       ],
-      "implementationStatus": "PARTIAL",
+      "implementationStatus": "IMPLEMENTED",
       "verificationStatus": "INTEGRATED AND VERIFIED",
       "acceptanceCriteria": [
         "Track listed wealth, capacity, quality, target progress, attractiveness and reliability/protection; avoid invented empirical rates"
@@ -1860,16 +1996,17 @@
         "pdiddler/ci/test_multitrade_growth_replay.py",
         "pdiddler/ci/test_multi_axis_strategy_stress_lab.py",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_portfolio_planner.py"
+        "pdiddler/ci/test_portfolio_planner.py",
+        "pdiddler/ci/test_portfolio_simulation.py"
       ],
-      "evidenceLimitations": "Supplied hypothetical paths and synthetic strategy stress tests are offline. Integrated long-run search/scenarios unverified.",
-      "remainingWork": [
-        "Cover long-run opportunity scarcity, broad adverse shifts and independent strategies beyond the bounded explicit search."
-      ],
+      "evidenceLimitations": "Four declared baseline strategies use bounded sequential comparison across up to 12 supplied phases. Verified gains, scarcity, unsuccessful opportunities, target acquisition and post-acquisition growth are hypothetical. Market repricing and changing price coverage remain separate from synthetic trade growth. Six independent measurement axes remain available.",
+      "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-scenario-focused",
+        "public-followup-local"
       ]
     },
     {
@@ -1902,7 +2039,7 @@
         "STATE.RECOVERY",
         "S2.8.ARBITRATION"
       ],
-      "implementationStatus": "PARTIAL",
+      "implementationStatus": "IMPLEMENTED",
       "verificationStatus": "INTEGRATED AND VERIFIED",
       "acceptanceCriteria": [
         "Clean environment initializes, validates, exits safely and reproduces restore; pin dependencies and preserve rollback"
@@ -1911,14 +2048,13 @@
         "pdiddler/ci/test_manual_portfolio_review.py",
         "pdiddler/ci/test_gingerscope_application.py"
       ],
-      "evidenceLimitations": "The candidate runs with the pinned Python test environment and controlled inputs. Clean-environment and exact-head release evidence must be tracked separately.",
-      "remainingWork": [
-        "Verify isolated setup, startup, safe stop and recovery of candidate entry."
-      ],
+      "evidenceLimitations": "Clean isolated CPython setup exercised startup, example advisory, controlled session with interrupted outcome, sanitized recovery and package dependency validation at the initial exact public candidate.",
+      "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-exact-initial-candidate"
       ]
     },
     {
@@ -2024,7 +2160,7 @@
         28,
         29
       ],
-      "functionality": "Scenario 1 — Complete advisory workflow",
+      "functionality": "Scenario 1 \u2014 Complete advisory workflow",
       "component": "Integrated offline verification",
       "sourceFiles": [
         "pdiddler/gingerscope.py",
@@ -2063,7 +2199,7 @@
         28,
         29
       ],
-      "functionality": "Scenario 2 — Evidence revision",
+      "functionality": "Scenario 2 \u2014 Evidence revision",
       "component": "Integrated offline verification",
       "sourceFiles": [
         "pdiddler/gingerscope.py",
@@ -2089,11 +2225,12 @@
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_gingerscope_application_state.py"
       ],
-      "evidenceLimitations": "Verified for the supported controlled offline path. Native operation and external settlement remain distinct.",
+      "evidenceLimitations": "Configuration and changed manual/observed offer inputs invalidate prior current recommendations. Retrieval cross-checks state bindings and refuses malformed or edited report and market metadata. Native control and authoritative outcomes remain independent.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-state-v2-focused"
       ]
     },
     {
@@ -2102,7 +2239,7 @@
         28,
         29
       ],
-      "functionality": "Scenario 3 — Interrupted outcome",
+      "functionality": "Scenario 3 \u2014 Interrupted outcome",
       "component": "Integrated offline verification",
       "sourceFiles": [
         "pdiddler/gingerscope.py",
@@ -2141,7 +2278,7 @@
         28,
         29
       ],
-      "functionality": "Scenario 4 — Corroborated synthetic settlement",
+      "functionality": "Scenario 4 \u2014 Corroborated synthetic settlement",
       "component": "Integrated offline verification",
       "sourceFiles": [
         "pdiddler/gingerscope.py",
@@ -2182,7 +2319,7 @@
         28,
         29
       ],
-      "functionality": "Scenario 5 — Restart recovery",
+      "functionality": "Scenario 5 \u2014 Restart recovery",
       "component": "Integrated offline verification",
       "sourceFiles": [
         "pdiddler/gingerscope.py",
@@ -2207,11 +2344,12 @@
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_gingerscope_application_state.py"
       ],
-      "evidenceLimitations": "Verified for the supported controlled offline path. Native operation and external settlement remain distinct.",
+      "evidenceLimitations": "Verified controlled restart, stale lease fencing, atomic v1-to-v2 migration, preserved unresolved evidence and historical advice retrieval without treating old advice as current.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-state-v2-focused"
       ]
     },
     {
@@ -2220,11 +2358,13 @@
         28,
         29
       ],
-      "functionality": "Scenario 6 — Competing growth routes",
+      "functionality": "Scenario 6 \u2014 Competing growth routes",
       "component": "Integrated offline verification",
       "sourceFiles": [
         "pdiddler/gingerscope.py",
-        "pdiddler/system2/portfolio_planner.py"
+        "pdiddler/system2/portfolio_planner.py",
+        "pdiddler/system2/portfolio_simulation.py",
+        "pdiddler/system2/examples/strategy-scenario.json"
       ],
       "inputs": [
         "Controlled test-only equivalent of actual external inputs"
@@ -2244,13 +2384,15 @@
       "supportingTests": [
         "pdiddler/ci/test_multitrade_growth_replay.py",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_portfolio_planner.py"
+        "pdiddler/ci/test_portfolio_planner.py",
+        "pdiddler/ci/test_portfolio_simulation.py"
       ],
       "evidenceLimitations": "Verified for the supported controlled offline path. Native operation and external settlement remain distinct.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-scenario-focused"
       ]
     },
     {
@@ -2259,7 +2401,7 @@
         28,
         29
       ],
-      "functionality": "Scenario 7 — Inventory protection",
+      "functionality": "Scenario 7 \u2014 Inventory protection",
       "component": "Integrated offline verification",
       "sourceFiles": [
         "pdiddler/gingerscope.py",
@@ -2300,7 +2442,7 @@
         28,
         29
       ],
-      "functionality": "Scenario 8 — Failure propagation",
+      "functionality": "Scenario 8 \u2014 Failure propagation",
       "component": "Integrated offline verification",
       "sourceFiles": [
         "pdiddler/gingerscope.py",
@@ -2328,11 +2470,12 @@
         "pdiddler/ci/test_supreme_market_editions.py",
         "pdiddler/ci/test_gingerscope_application_state.py"
       ],
-      "evidenceLimitations": "Verified for the supported controlled offline path. Native operation and external settlement remain distinct.",
+      "evidenceLimitations": "Configuration and changed manual/observed offer inputs invalidate prior current recommendations. Retrieval cross-checks state bindings and refuses malformed or edited report and market metadata. Native control and authoritative outcomes remain independent.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "public-state-v2-focused"
       ]
     },
     {
@@ -2341,7 +2484,7 @@
         28,
         29
       ],
-      "functionality": "Scenario 9 — Market transition",
+      "functionality": "Scenario 9 \u2014 Market transition",
       "component": "Integrated offline verification",
       "sourceFiles": [
         "pdiddler/gingerscope.py",
@@ -2381,7 +2524,7 @@
         28,
         29
       ],
-      "functionality": "Scenario 10 — Learning isolation",
+      "functionality": "Scenario 10 \u2014 Learning isolation",
       "component": "Integrated offline verification",
       "sourceFiles": [
         "private:scripts/synthetic_learning.py",
@@ -2414,7 +2557,8 @@
       "verifiedSourceRevision": [
         "public-focused-candidate",
         "private-focused-candidate",
-        "private-exact-candidate"
+        "private-exact-candidate",
+        "private-exact-snapshot"
       ]
     },
     {
@@ -2423,7 +2567,7 @@
         28,
         29
       ],
-      "functionality": "Scenario 11 — Scale and reference equivalence",
+      "functionality": "Scenario 11 \u2014 Scale and reference equivalence",
       "component": "Integrated offline verification",
       "sourceFiles": [
         "pdiddler/gingerscope.py",
@@ -2461,7 +2605,7 @@
         28,
         29
       ],
-      "functionality": "Scenario 12 — Clean installation",
+      "functionality": "Scenario 12 \u2014 Clean installation",
       "component": "Integrated offline verification",
       "sourceFiles": [
         "pdiddler/gingerscope.py",
@@ -2476,20 +2620,20 @@
       "dependencies": [
         "INSTALL.OFFLINE"
       ],
-      "implementationStatus": "PARTIAL",
-      "verificationStatus": null,
+      "implementationStatus": "IMPLEMENTED",
+      "verificationStatus": "INTEGRATED AND VERIFIED",
       "acceptanceCriteria": [
         "Install/initialize, simulate, validate, safely stop and recover in a clean environment"
       ],
       "supportingTests": [
         "pdiddler/ci/test_gingerscope_application.py"
       ],
-      "evidenceLimitations": "No complete candidate-level verification at the baseline.",
-      "remainingWork": [
-        "Exercise the complete supported path in an executable integration test"
-      ],
+      "evidenceLimitations": "Clean isolated CPython setup exercised startup, example advisory, controlled session with interrupted outcome, sanitized recovery and package dependency validation at the initial exact public candidate.",
+      "remainingWork": [],
       "externalBlockers": [],
-      "verifiedSourceRevision": null
+      "verifiedSourceRevision": [
+        "public-exact-initial-candidate"
+      ]
     }
   ]
 }

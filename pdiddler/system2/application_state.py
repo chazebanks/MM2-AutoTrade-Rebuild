@@ -23,7 +23,7 @@ from pdiddler.system2.manual_portfolio_review import (
     COPIES_PER_SLOT_ASSUMPTION, ITEM_ID, MAX_ACCOUNT_COPIES_PER_ITEM, PHYSICAL_SLOTS,
 )
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 MAX_REPORT_BYTES = 8_388_608
 _DIGEST = re.compile(r"[a-f0-9]{64}\Z")
 _ID = re.compile(r"[A-Za-z0-9_-]{1,128}\Z")
@@ -36,7 +36,7 @@ _SETTLED = "CORROBORATED_SYNTHETIC_SETTLEMENT"
 _EVENT_FIELDS = {"event_id", "session_id", "sequence", "revision", "kind"}
 _WITNESS_FIELDS = {"side", "source_id", "before", "after"}
 
-_SCHEMA = (
+_SCHEMA_V1 = (
     "CREATE TABLE metadata (scope TEXT NOT NULL CHECK (scope IN ('manual', 'synthetic')))",
     """CREATE TABLE markets (
         sha256 TEXT PRIMARY KEY, published TEXT NOT NULL, captured TEXT NOT NULL,
@@ -73,6 +73,12 @@ _SCHEMA = (
         evidence TEXT NOT NULL CHECK (json_valid(evidence)),
         listed_delta INTEGER NOT NULL CHECK (listed_delta>=0)
     )""",
+)
+_SCHEMA = _SCHEMA_V1 + (
+    """CREATE TABLE review_configuration (
+        revision INTEGER PRIMARY KEY, settings TEXT NOT NULL CHECK (json_valid(settings))
+    )""",
+    "CREATE INDEX evaluations_by_input_session ON evaluations (input_revision, session)",
 )
 
 
@@ -181,6 +187,11 @@ class StateStore:
                         self._db.execute(statement)
                     self._db.execute("INSERT INTO metadata VALUES (?)", (scope,))
                     self._db.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
+                elif version == 1:
+                    self._verify(_SCHEMA_V1)
+                    for statement in _SCHEMA[len(_SCHEMA_V1):]:
+                        self._db.execute(statement)
+                    self._db.execute("PRAGMA user_version=2")
                 elif version != SCHEMA_VERSION:
                     raise StateError("The state schema version has no supported migration.")
                 self._verify()
@@ -219,11 +230,11 @@ class StateStore:
         except sqlite3.DatabaseError:
             raise StateError("The state transaction failed.") from None
 
-    def _verify(self):
+    def _verify(self, schema=_SCHEMA):
         definitions = {row[0] for row in self._db.execute(
             "SELECT sql FROM sqlite_master WHERE sql IS NOT NULL"
         )}
-        if definitions != set(_SCHEMA):
+        if definitions != set(schema):
             raise StateError("State schema definitions differ from the supported version.")
         if self._db.execute("PRAGMA quick_check(1)").fetchone()[0] != "ok":
             raise StateError("State integrity verification failed.")
@@ -251,7 +262,8 @@ class StateStore:
         ).lastrowid
 
     def sync_inputs(self, *, market_sha256, publisher_updated_at, captured_at, expires_at,
-                    accounts, listed_values=None, expected_input_revision=None):
+                    accounts, listed_values=None, expected_input_revision=None,
+                    expected_configuration_revision=None):
         """Persist validated Supreme provenance and manually supplied account holdings.
 
         The caller verifies the corresponding archive bytes before calling. Listed
@@ -262,7 +274,41 @@ class StateStore:
             accounts, listed_values, expected_input_revision,
         )
         with self._write():
+            if (expected_configuration_revision is not None
+                    and self.review_configuration()[0] != expected_configuration_revision):
+                raise StateError("Review configuration changed. Evaluate the inputs again.")
             return self._sync_prepared(*prepared)
+
+    def review_configuration(self):
+        """Read the latest explicit local search defaults and their revision."""
+        row = self._db.execute(
+            "SELECT revision, settings FROM review_configuration ORDER BY revision DESC LIMIT 1"
+        ).fetchone()
+        if row is None:
+            return 0, {}
+        settings = json.loads(row["settings"])
+        if type(settings) is not dict:
+            raise StateError("The stored review configuration is invalid.")
+        return row["revision"], settings
+
+    def set_review_configuration(self, settings):
+        """Save explicit configuration and retire advice prepared with earlier defaults."""
+        encoded = _json(settings)
+        if type(settings) is not dict or len(encoded) > 4096:
+            raise StateError("The review configuration must be a bounded JSON object.")
+        with self._write():
+            revision, existing = self.review_configuration()
+            if _json(existing) == encoded:
+                return revision
+            if self._db.execute("SELECT 1 FROM sessions WHERE outcome IS NULL").fetchone():
+                raise StateError("Stop or recover the active session before changing configuration.")
+            current = self._input_row()
+            if current is not None:
+                self._db.execute("INSERT INTO inputs (market, accounts) VALUES (?, ?)",
+                                 (current["market"], current["accounts"]))
+            return self._db.execute(
+                "INSERT INTO review_configuration (settings) VALUES (?)", (encoded,)
+            ).lastrowid
 
     def _prepare_inputs(self, market_sha256, publisher_updated_at, captured_at, expires_at,
                         accounts, listed_values=None, expected_input_revision=None):
@@ -518,8 +564,13 @@ class StateStore:
                LEFT JOIN sessions s ON s.id=e.session
                WHERE e.id=? AND i.revision=(SELECT max(revision) FROM inputs)
                  AND e.evaluated<=? AND m.expires>=?
-                 AND (e.session IS NULL OR (s.outcome IS NULL AND s.lease_until>?
-                      AND s.sequence=e.session_sequence AND s.revision=e.offer_revision))""",
+                 AND ((e.session IS NULL AND NOT EXISTS (
+                           SELECT 1 FROM evaluations newer WHERE newer.input_revision=e.input_revision
+                               AND newer.session IS NULL
+                               AND (newer.evaluated>e.evaluated
+                                    OR (newer.evaluated=e.evaluated AND newer.rowid>e.rowid))
+                      )) OR (e.session IS NOT NULL AND s.outcome IS NULL AND s.lease_until>?
+                             AND s.sequence=e.session_sequence AND s.revision=e.offer_revision))""",
             (_key(evaluation_id), now, now, now),
         ).fetchone()
         return None if row is None else self._report(row)

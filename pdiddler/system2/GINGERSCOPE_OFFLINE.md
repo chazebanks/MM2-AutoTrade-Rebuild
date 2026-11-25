@@ -48,6 +48,14 @@ and `counterpartyStock` holdings. The default compares one copy per slot.
 `--text` shows the local inventory and offer summary. The default JSON report
 includes the route search, uncertainty, and source provenance.
 
+`scenario pdiddler/system2/examples/strategy-scenario.json` runs competing
+rules across supplied stocks and market phases. Each phase names a local
+archive, a clock, and the supplied counterparties. An empty counterparty list
+models scarcity. An explicit `unavailable_indices` list models missed
+opportunities. Use `expected_sha256` for independently reviewed archives.
+The report keeps hypothetical trading growth, changes in listed prices,
+changes in price coverage, and cumulative conditional downside separate.
+
 `capture-market NEW_FILE` retrieves four official Supreme pages and reports
 their archive SHA-256 for independent review. After reviewing a genuine newer
 publisher edition, pass the saved archive and independently reviewed hash via
@@ -62,7 +70,18 @@ evaluation has an ID and is bound to the stored input revision, including the
 Supreme archive and both accounts. For controlled offer evaluation it is also
 bound to the session and offer revision. Read a stored evaluation using
 `current EVALUATION_ID` with the same database and mode. A changed binding,
-closed session, or expired source produces a null evaluation.
+closed session, expired source, or newer manual review produces a null
+evaluation. `history EVALUATION_ID` retrieves the archived report with its
+original source and input revision.
+`portfolio-diff PREVIOUS CURRENT` compares stored copy counts across the
+two accounts. A conserved combined inventory is compatible with an internal
+reallocation. The comparison carries no verified transfer or gain claim.
+
+`configure LOCAL_JSON` stores bounded default search settings in the selected
+database and retires advice based on earlier defaults. Individual review
+requests may override those settings with a `search` object. Schema version
+one upgrades atomically to version two and keeps existing revisions and
+unresolved outcomes.
 
 `simulate-session` runs a bounded, ordered observation sequence in a synthetic
 database. Ctrl-C stops the command and releases its session when possible.
@@ -85,7 +104,9 @@ path before verifying an older revision.
 ```sh
 python -m unittest -v pdiddler.ci.test_gingerscope_application \
   pdiddler.ci.test_gingerscope_application_state pdiddler.ci.test_portfolio_planner \
-  pdiddler.ci.test_supreme_market_editions pdiddler.ci.test_manual_portfolio_review
+  pdiddler.ci.test_portfolio_simulation pdiddler.ci.test_supreme_market_editions \
+  pdiddler.ci.test_manual_portfolio_review
+lune run pdiddler/ci/gingerscope_part2_startup_mocks.luau
 python -m pdiddler.continuity.manager verify
 python -m pdiddler.continuity.manager recover
 ```
@@ -106,3 +127,20 @@ apply to the supported app, historical client evidence, and release gates.
   Typed validation now handles these inputs before they reach state processing.
 - A changed stored JSON report could still appear current. Report retrieval
   verifies the evaluation digest as well as the source and revision bindings.
+- A revised manual offer could leave its previous offer marked current when
+  holdings and the edition were unchanged. The latest manual review now
+  supersedes earlier reports while keeping them available in history.
+- A modified state row could extend the saved Supreme cutoff. Evaluation
+  readback now checks the archive hash and clocks against the report.
+
+## External validation
+
+- Current pricing after the fixed archive cutoff needs a genuinely newer
+  Supreme edition and review of its capture and census.
+- Current supervised gameplay needs a supported client interface and an
+  authorized test with exact session, item, and offer-revision evidence.
+- Verified accounting and empirical learning need independent settlement with
+  exact two-sided holdings, legitimate offer-level outcomes, and a stable
+  private participant identifier suitable for held-out evaluation.
+- Runtime release requires separate operator approval and verified safeguards.
+  Numerical loss budgets remain unapproved.
