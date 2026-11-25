@@ -229,14 +229,7 @@ function M.new(c)
  if #c.sourceBytes<1000 or #c.sourceBytes>150000 then
   return nil,"SUPREME_ONLY_SOURCE_BYTE_LENGTH_INVALID" end
  local hashed,digest=pcall(c.sha256,c.sourceBytes)
- if not hashed or type(digest)~="string" then
-  return nil,"SUPREME_ONLY_SOURCE_SHA256_VERIFICATION_FAILED" end
- local activeSourceGitBlob,activeCapture
- if digest==CATALOG_SHA256 then
-  activeSourceGitBlob=SOURCE_GIT_BLOB;activeCapture=1794951678
- elseif digest=="3f0996b9ac20f3c4689519e1faf65e83796bce8b2d6afe6ad4d2e705ffca525e" then
-  activeSourceGitBlob="b6f5c1eec48d59b422f53baa4d83a54ce6837b72";activeCapture=1795586999
- else
+ if not hashed or type(digest)~="string" or digest~=CATALOG_SHA256 then
   return nil,"SUPREME_ONLY_SOURCE_SHA256_VERIFICATION_FAILED" end
  local httpOK,http=pcall(function()return c.game:GetService("HttpService")end)
  if not httpOK or not http or type(http.JSONDecode)~="function" then
@@ -276,7 +269,7 @@ function M.new(c)
  local function now()
   local ok,t=pcall(c.utcNow)
   if not ok or not finite(t) then return nil,"CURRENT_UTC_CLOCK_INVALID" end
-  local proof,source=pcall(c.supremeCore.sourceStatus,catalog,activeSourceGitBlob,t)
+  local proof,source=pcall(c.supremeCore.sourceStatus,catalog,SOURCE_GIT_BLOB,t)
   if not proof or type(source)~="table" or
     source.status~="SUPREME_ONLY_RESEARCH_SOURCE_CHECKED" or
     source.valueSource~="SUPREME_ONLY" or
@@ -400,7 +393,7 @@ function M.new(c)
   end
   local quoteClock,quoteWhy=now()
   if not quoteClock then return fail(quoteWhy) end
-  local success,preview=pcall(c.supremeCore.review,catalog,activeSourceGitBlob,
+  local success,preview=pcall(c.supremeCore.review,catalog,SOURCE_GIT_BLOB,
       quoteClock,before.counts,options)
   if not success or type(preview)~="table" or
     preview.schema~="gingerscope-system2-native-supreme-only-bilateral-research-v1" or
@@ -443,7 +436,7 @@ function M.new(c)
   end
   return {schema=SCHEMA,
    status="SUPREME_ONLY_PROTECTED_C3_P4_SHADOW_OBSERVED",
-   valueSource=SOURCE,sourceAgeSeconds=math.floor(fresh-activeCapture),
+   valueSource=SOURCE,sourceAgeSeconds=math.floor(fresh-1794951678),
    hypotheticalAlternatives=result,
    originalOfferSidesPhysicallyObserved=true,
    clientOfferChangedDuringResearch=false,

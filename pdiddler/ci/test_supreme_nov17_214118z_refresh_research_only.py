@@ -73,11 +73,10 @@ class SupremeRefreshResearch(unittest.TestCase):
   self.assertIn("supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json",h)
   self.assertIn('local SOURCE_SHA="'+BLOB+'"',c)
   self.assertIn("local CAPTURE=1794951678",c)
-  self.assertIn('catalog.sourceCapturedUtc=="'+CAPTURE+'"',c)
+  self.assertIn('catalog.sourceCapturedUtc~="'+CAPTURE+'"',c)
   self.assertIn('local CATALOG_SHA256="'+SHA256+'"',b)
   self.assertIn('local SOURCE_GIT_BLOB="'+BLOB+'"',b)
-  self.assertIn("activeCapture=1794951678",b)
-  self.assertIn("math.floor(fresh-activeCapture)",b)
+  self.assertIn("math.floor(fresh-1794951678)",b)
   self.assertIn("local captureUtc=1794951678",s)
   self.assertIn('local pinned="b87b2acb2c3228a2fa027b6a77904ce1fb38c474"',s)
   for part in (h,s,c,b):
@@ -196,16 +195,25 @@ class SupremeNov25Archive(unittest.TestCase):
                "currentInventoryVerified","liveTradePricingAuthorized","authorizesTrade",
                "authorizesOffer","authorizesAccept","mayUseForStrategyLearning","mayReportProfit"):
    self.assertIs(data[flag],False)
-  # The native core and read-only bridge now explicitly admit both exact
-  # archived editions within their own clocks. Frozen launchers remain old.
-  for p in (HOST,LOADER,REG):
+  for p in (CORE,BRIDGE,HOST,LOADER,REG):
    self.assertNotIn(NOV25.name,p.read_text())
    self.assertNotIn(NOV25_BLOB,p.read_text())
-  for p in (CORE,BRIDGE):
-   self.assertIn(NOV25_BLOB,p.read_text())
-  self.assertIn("1795586999",CORE.read_text())
-  self.assertIn("1795586999",BRIDGE.read_text())
+
+class Nov25NativeResearchCandidate(unittest.TestCase):
+ def test_separate_candidate_blobs_and_archive(self):
+  c=P/"system2/native_supreme_only_bilateral_research_nov25.lua"
+  b=P/"system2/native_supreme_only_protected_c3p4_adapter_nov25.lua"
+  self.assertEqual(blob(c.read_bytes()),"e12741bd250bf129aa49d71f3d5e3e1302d716d8")
+  self.assertEqual(blob(b.read_bytes()),"937ff7b75393d3adf06b04f88caafdd6d37060ad")
+  self.assertEqual(blob(CORE.read_bytes()),"8c776a38d317d193efb9cd4bff4eb617e8069f4b")
+  self.assertEqual(blob(BRIDGE.read_bytes()),"379112fb34b351e7673e31ed5424d825cc21e001")
   self.assertEqual(hashlib.sha256(NOV25.read_bytes()).hexdigest(),
                    "3f0996b9ac20f3c4689519e1faf65e83796bce8b2d6afe6ad4d2e705ffca525e")
+  for part in (c,b):
+   self.assertIn(NOV25_BLOB,part.read_text())
+   self.assertIn("1795586999",part.read_text())
+   self.assertNotIn("AcceptTrade:FireServer",part.read_text())
+  self.assertNotIn(c.name,HOST.read_text())
+  self.assertNotIn(b.name,HOST.read_text())
 
 if __name__=="__main__":unittest.main()
