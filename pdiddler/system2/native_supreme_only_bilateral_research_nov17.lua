@@ -29,18 +29,34 @@ local function denied(reason)
   maySendDiscordWebhook=false,mayUseForStrategyLearning=false,
   mayReportProfit=false}
 end
+local NOV25_SOURCE_SHA="b6f5c1eec48d59b422f53baa4d83a54ce6837b72"
+local NOV25_CAPTURE=1795586999
 local function validateSource(catalog,now,callerPin)
- if type(catalog)~="table" or
-   catalog.schema~=SOURCE_SCHEMA or
+ if type(catalog)~="table" then
+  return nil,"SUPREME_ONLY_SOURCE_MISSING_STALE_OR_WRONG_PUBLISHER" end
+ local capture
+ if callerPin==SOURCE_SHA and catalog.schema==SOURCE_SCHEMA and
+    catalog.sourceCapturedUtc=="2026-11-17T21:41:18Z" and
+    catalog.publisherUpdatedAt=="2026-11-15T11:59:41-05:00" and
+    catalog.originalHistoricalCatalogGitBlob==ORIGINAL_SUPREME_SHA and
+    catalog.originalPublisherEditionUnchanged==true then
+  capture=CAPTURE
+ elseif callerPin==NOV25_SOURCE_SHA and
+    catalog.schema=="gingerscope-system2-supreme-only-189-publisher-catalog-v4-research" and
+    catalog.sourceCapturedUtc=="2026-11-25T06:09:59Z" and
+    catalog.publisherUpdatedAt=="2026-11-23T19:13:44-05:00" and
+    catalog.priorResearchCatalogGitBlob==SOURCE_SHA and
+    catalog.originalPublisherEditionUnchanged==false and
+    catalog.sourceExpiresUtc=="2026-11-25T12:09:59Z" and
+    catalog.sourceMaxAgeSeconds==MAX_AGE and catalog.rawHtmlArchived==false then
+  capture=NOV25_CAPTURE
+ end
+ if not capture or
    catalog.status~="SUPREME_ONLY_MEDIATED_PUBLIC_RESEARCH_NOT_LIVE" or
    catalog.valueSource~=SOURCE or
    catalog.sourceOrigin~="https://supremevalues.com/" or
    catalog.sourceTransport~="FIRECRAWL_MEDIATED_HTTPS_RESEARCH" or
-   catalog.sourceCapturedUtc~="2026-11-17T21:41:18Z" or
-   catalog.publisherUpdatedAt~="2026-11-15T11:59:41-05:00" or
-   catalog.originalHistoricalCatalogGitBlob~=ORIGINAL_SUPREME_SHA or
-   callerPin~=SOURCE_SHA or
-   catalog.originalPublisherEditionUnchanged~=true or
+
    type(catalog.pageEvidence)~="table" or
    type(catalog.pageEvidence.home)~="table" or
    type(catalog.pageEvidence.ancient)~="table" or
@@ -56,7 +72,7 @@ local function validateSource(catalog,now,callerPin)
    catalog.exactRobloxItemInstanceVerified~=false or
    catalog.publisherSigned~=false or
    type(catalog.rows)~="table" or #catalog.rows~=189 or
-   not num(now) or now<CAPTURE or now>CAPTURE+MAX_AGE then
+   not num(now) or now<capture or now>capture+MAX_AGE then
    return nil,"SUPREME_ONLY_SOURCE_MISSING_STALE_OR_WRONG_PUBLISHER" end
  local byKey,ids,counts={},{},{ancient=0,godly=0,chroma=0}
  for _,r in ipairs(catalog.rows) do
@@ -243,8 +259,8 @@ function M.review(catalog,claimedCatalogSha,nowEpoch,owned,options)
  return {
   schema=SCHEMA,status="SUPREME_ONLY_NATIVE_RESEARCH_NOT_EXECUTABLE",
   valueSource=SOURCE,researchOnly=true,readOnly=true,clientOnly=true,
-  sourceCatalogGitBlob=SOURCE_SHA,
-  sourceCaptureAgeSeconds=math.floor(nowEpoch-CAPTURE),
+  sourceCatalogGitBlob=claimedCatalogSha,
+  sourceCaptureAgeSeconds=math.floor(nowEpoch-(claimedCatalogSha==NOV25_SOURCE_SHA and NOV25_CAPTURE or CAPTURE)),
   reviewedHistoricalGameKeyCandidates=189,
   gingerscopeTargetSupremeValue=rows.Gingerscope.supremeListed,
   hypotheticalAlternatives=answers,
