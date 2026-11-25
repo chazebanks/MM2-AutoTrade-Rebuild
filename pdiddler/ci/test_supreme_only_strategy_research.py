@@ -433,5 +433,66 @@ class SupremeMultistepPaths(unittest.TestCase):
         self.assertEqual(b["status"],"PAPER_PATH_COMPARED_NOT_EXECUTABLE")
 
 
+class IntegratedSupremeBilateral(unittest.TestCase):
+    def run_batch(self, request=None, clock=None, raw=None):
+        from pdiddler.system2.supreme_only_strategy_research import review_bilateral_batch
+        from pdiddler.ci.test_supreme_only_bilateral_partner_friction_shadow import request as fixture
+        return review_bilateral_batch(SupremeNov25Strategy.fresh if raw is None else raw,
+            request=fixture() if request is None else request,
+            evaluated_at_utc=SupremeNov25Strategy.capture if clock is None else clock)
+
+    def test_shared_economic_and_partner_comparison(self):
+        r=self.run_batch()
+        self.assertEqual(r["status"],"SUPREME_ONLY_INTEGRATED_BILATERAL_RESEARCH",r)
+        self.assertTrue(r["sameArchivedSourceAndArithmetic"])
+        a=r["hypotheticalAlternatives"][0]
+        self.assertEqual(a["economic"]["supremeListedValueGain"],75)
+        self.assertEqual(a["partnerIncentives"]["partnerSupremeListedDelta"],-75)
+        self.assertEqual(a["status"],"PAPER_COMPARISON_ONLY")
+        self.assertIn("HYPOTHETICAL_VALUE_WATCHER_HAS_PAPER_DISINCENTIVE",a["partnerIncentives"]["warnings"])
+        self.assertFalse(a["tradeActionable"])
+        for k in ("authorizesAccept","authorizesOffer","authorizesTrade","mayReportProfit",
+                  "mayUseForStrategyLearning","maySendDiscordWebhook","isOfferRanking"):
+            self.assertFalse(r[k])
+
+    def test_unowned_partner_item_and_expired_market_fail_closed(self):
+        from pdiddler.ci.test_supreme_only_bilateral_partner_friction_shadow import request
+        q=request()
+        q["routes"][0]["receive"][0]["quantity"]=2
+        r=self.run_batch(request=q)
+        self.assertEqual(r["status"],"BLOCKED")
+        self.assertIn("PARTNER_OUTGOING_RAW_KEY_OR_QUANTITY_NOT_PROVEN",r["reason"])
+        self.assertEqual(self.run_batch(clock=plus(SupremeNov25Strategy.capture,21600.1))["status"],"BLOCKED")
+        self.assertEqual(self.run_batch(raw=b"{}")["reason"],"SUPREME_ONLY_CATALOG_GIT_BLOB_MISMATCH")
+
+    def test_losses_and_nonlinear_stacks_remain_blocked(self):
+        from pdiddler.ci.test_supreme_only_bilateral_partner_friction_shadow import request, route, slot
+        q=request()
+        q["ownHypotheticalStock"]["Icebreaker"]=8
+        q["routes"]=[route([slot("Harvester")],[slot("FlowerwoodKnife")]),
+                     route([slot("Icebreaker",8)],[slot("Gingerscope")])]
+        r=self.run_batch(request=q)
+        self.assertEqual(r["status"],"SUPREME_ONLY_INTEGRATED_BILATERAL_RESEARCH")
+        self.assertEqual([a["status"] for a in r["hypotheticalAlternatives"]],
+                         ["BLOCKED_PAPER_COMPARISON"]*2)
+        self.assertEqual(r["hypotheticalAlternatives"][0]["economic"]["status"],
+                         "BLOCKED_UNAPPROVED_SUPREME_LOSS")
+        self.assertEqual(r["hypotheticalAlternatives"][1]["partnerIncentives"]["status"],
+                         "BLOCKED_STACK_PRICE_UNVERIFIED")
+
+    def test_disagreement_between_existing_evaluators_blocks_entire_batch(self):
+        from unittest.mock import patch
+        from pdiddler.system2 import supreme_only_bilateral_partner_friction_shadow as friction
+        from pdiddler.ci.test_supreme_only_bilateral_partner_friction_shadow import request
+        q=request()
+        good=friction.evaluate(q,now_epoch=int(datetime.fromisoformat(SupremeNov25Strategy.capture).timestamp()),
+                               source_bytes=SupremeNov25Strategy.fresh)
+        good["routes"][0]["ourSupremeListedDelta"]+=1
+        with patch.object(friction,"evaluate",return_value=good):
+            r=self.run_batch(request=q)
+        self.assertEqual(r["reason"],"SUPREME_ONLY_BILATERAL_ECONOMIC_DIVERGENCE")
+        self.assertNotIn("hypotheticalAlternatives",r)
+
+
 if __name__=="__main__":
     unittest.main()
