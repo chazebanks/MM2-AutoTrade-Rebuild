@@ -1,0 +1,8 @@
+# New official Supreme capture parsing
+beautifulsoup4==4.15.0
+soupsieve==4.1.3
+typing-extensions==4.16.0
+
+# Local property-based regression suite
+hypothesis==6.170.15
+sortedcontainers==2.4.0

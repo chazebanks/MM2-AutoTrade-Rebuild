@@ -98,12 +98,48 @@ def _account_summary(holdings, unpriced, market):
         price * min(copies, COPIES_PER_SLOT_ASSUMPTION) for price, copies in prices
     ), reverse=True)
     stacked_ceiling = sum(capped_stack[:PHYSICAL_SLOTS])
+    target = market.get(TARGET)
     return {
         **_wealth(holdings, unpriced, market),
         "four_slot_single_copy_listed_ceiling": sum(single_copy[:PHYSICAL_SLOTS]),
         "four_slot_capped_stack_listed_ceiling": stacked_ceiling,
-        "four_slot_capped_stack_target_gap": max(0, market[TARGET]["supremeListed"] - stacked_ceiling),
+        "four_slot_capped_stack_target_gap": (
+            max(0, target["supremeListed"] - stacked_ceiling) if target else None
+        ),
     }
+
+
+def _account_holdings(accounts, market):
+    if type(accounts) is not dict or set(accounts) != {"main", "alt"}:
+        raise RequestError("Provide separate main and alt holdings. Empty holdings are allowed.")
+    names = {_manual_key(row): key for key, row in market.items()}
+    if len(names) != len(market):
+        raise RequestError("The publisher identities are ambiguous.")
+    return names, _stocks(accounts["main"], names), _stocks(accounts["alt"], names)
+
+
+def _portfolio(main, main_unpriced, alt, alt_unpriced, market):
+    target = market.get(TARGET)
+    return {
+        "target": {
+            "name": target["officialName"] if target else TARGET,
+            "listed_value": target["supremeListed"] if target else None,
+        },
+        "accounts": {
+            "main": _account_summary(main, main_unpriced, market),
+            "alt": _account_summary(alt, alt_unpriced, market),
+        },
+        "combined": _wealth(main + alt, main_unpriced + alt_unpriced, market),
+        "estimated_copies_per_slot_limit": COPIES_PER_SLOT_ASSUMPTION,
+        "realized_growth": None,
+        "measured_retrade_liquidity": None,
+    }
+
+
+def summarize_accounts(accounts, market):
+    """Summarize local holdings using rows from one already validated edition."""
+    _, (main, main_unpriced), (alt, alt_unpriced) = _account_holdings(accounts, market)
+    return _portfolio(main, main_unpriced, alt, alt_unpriced, market)
 
 
 @dataclass(frozen=True)
@@ -383,30 +419,14 @@ def analyze(catalog, request, *, evaluated_at_utc):
         key: {**row, "published_range": ranges.get(_manual_key(row))}
         for key, row in market.items()
     }
-    names = {_manual_key(row): key for key, row in market.items()}
-    if len(names) != len(market):
-        raise RequestError("The publisher identities are ambiguous.")
     if (type(request) is not dict or "accounts" not in request
             or set(request) - {"accounts", "comparison", "growthPaths"}):
         raise RequestError("Enter accounts and optionally comparison and growthPaths.")
-    accounts = request["accounts"]
-    if type(accounts) is not dict or set(accounts) != {"main", "alt"}:
-        raise RequestError("Provide separate main and alt holdings. Empty holdings are allowed.")
-
-    main, main_unpriced = _stocks(accounts["main"], names)
-    alt, alt_unpriced = _stocks(accounts["alt"], names)
+    names, (main, main_unpriced), (alt, alt_unpriced) = _account_holdings(request["accounts"], market)
     result = {
         "mode": "MANUAL_PORTFOLIO_RESEARCH",
         "source": {**provenance, "published_range_row_count": len(ranges)},
-        "target": {"name": market[TARGET]["officialName"], "listed_value": market[TARGET]["supremeListed"]},
-        "accounts": {
-            "main": _account_summary(main, main_unpriced, market),
-            "alt": _account_summary(alt, alt_unpriced, market),
-        },
-        "combined": _wealth(main + alt, main_unpriced + alt_unpriced, market),
-        "estimated_copies_per_slot_limit": COPIES_PER_SLOT_ASSUMPTION,
-        "realized_growth": None,
-        "measured_retrade_liquidity": None,
+        **_portfolio(main, main_unpriced, alt, alt_unpriced, market),
     }
     if "comparison" in request:
         result["comparison"] = _compare(

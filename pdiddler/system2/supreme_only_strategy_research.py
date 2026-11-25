@@ -67,11 +67,11 @@ def utc(value, *, captured=False):
         deny("SUPREME_ONLY_CAPTURE_CLOCK_FORMAT_INVALID")
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if parsed.tzinfo is not None:
+            return parsed.astimezone(timezone.utc)
     except (ValueError, OverflowError):
         deny("SUPREME_ONLY_CLOCK_INVALID")
-    if parsed.tzinfo is None:
-        deny("SUPREME_ONLY_CLOCK_MUST_BE_OFFSET_AWARE")
-    return parsed.astimezone(timezone.utc)
+    deny("SUPREME_ONLY_CLOCK_MUST_BE_OFFSET_AWARE")
 
 
 def blob_sha(raw):
@@ -244,7 +244,7 @@ def source_rows(raw, *, evaluated_at_utc):
 
 
 def quantities(value, market):
-    if type(value) is not dict or not 0 < len(value) <= 189:
+    if type(value) is not dict or not 0 < len(value) <= len(market):
         deny("SUPREME_ONLY_HYPOTHETICAL_OWNERSHIP_REQUIRED")
     for key, qty in value.items():
         if key not in market or type(qty) is not int or not 0 < qty <= 100000:
@@ -309,7 +309,19 @@ def blocked(reason):
     }
 
 
-def review(catalog_bytes, *, owned, alternatives, evaluated_at_utc):
+def _assessment_market(catalog_bytes, edition, evaluated_at_utc):
+    if edition is None:
+        return source_rows(catalog_bytes, evaluated_at_utc=evaluated_at_utc)
+    from pdiddler.system2.supreme_market_editions import MarketEdition
+
+    if not isinstance(edition, MarketEdition):
+        deny("SUPREME_ONLY_REVIEWED_EDITION_REQUIRED")
+    if catalog_bytes is not None and hashlib.sha256(catalog_bytes).hexdigest() != edition.identity:
+        deny("SUPREME_ONLY_SOURCE_EDITION_DIVERGENCE")
+    return edition.rows, edition.require_current(evaluated_at_utc)
+
+
+def review(catalog_bytes, *, owned, alternatives, evaluated_at_utc, edition=None):
     """C3/C4/C9 strategy replacement: only Supreme numerical economics.
 
     Never consumes any other price, market source, secondary demand, or
@@ -317,7 +329,7 @@ def review(catalog_bytes, *, owned, alternatives, evaluated_at_utc):
     C3 client inventory attestation. No native game action is created.
     """
     try:
-        market, provenance = source_rows(catalog_bytes,evaluated_at_utc=evaluated_at_utc)
+        market, provenance = _assessment_market(catalog_bytes, edition, evaluated_at_utc)
         initial = quantities(owned,market)
         before_value = total(initial, market)
         if type(alternatives) is not list or not 1 <= len(alternatives) <= 12:
@@ -394,9 +406,10 @@ def review(catalog_bytes, *, owned, alternatives, evaluated_at_utc):
             "status":"SUPREME_ONLY_HYPOTHETICAL_STRATEGY_RESEARCH_NOT_EXECUTABLE",
             "valueSource":SOURCE,
             "source":provenance,
-            "historicalCatalogRawKeys":189,
+            "historicalCatalogRawKeys":sum(row.get("historicalRawGameKeyCandidate", key) is not None
+                                           for key, row in market.items()),
             "baselineSupremePortfolioValue":before_value,
-            "gingerscopeSupremeTargetValue":market[TARGET]["supremeListed"],
+            "gingerscopeSupremeTargetValue":market.get(TARGET, {}).get("supremeListed"),
             "hypotheticalAlternatives":outcomes,
             "portfolioOwnershipAuthenticated":False,
             "actualRobloxItemIdentityVerified":False,
@@ -412,7 +425,7 @@ def review(catalog_bytes, *, owned, alternatives, evaluated_at_utc):
 
 
 
-def review_paths(catalog_bytes, *, owned, paths, evaluated_at_utc):
+def review_paths(catalog_bytes, *, owned, paths, evaluated_at_utc, edition=None):
     """Compare distinct explicitly hypothetical multi-step growth alternatives.
 
     Reuses the existing single-step evaluator and exact Supreme source admission.
@@ -424,12 +437,12 @@ def review_paths(catalog_bytes, *, owned, paths, evaluated_at_utc):
     def result_blocked(reason):
         return {**blocked(reason), "schema": schema, "simulationOnly": True}
     try:
-        market, provenance = source_rows(catalog_bytes, evaluated_at_utc=evaluated_at_utc)
+        market, provenance = _assessment_market(catalog_bytes, edition, evaluated_at_utc)
         initial = quantities(owned, market)
         if type(paths) is not list or not 2 <= len(paths) <= 12:
             deny("SUPREME_ONLY_TWO_TO_TWELVE_DISTINCT_PATHS_REQUIRED")
         start_value = total(initial, market)
-        target = market[TARGET]["supremeListed"]
+        target = market.get(TARGET, {}).get("supremeListed")
         routes, signatures = [], set()
         for index, path in enumerate(paths, 1):
             holdings = initial.copy()
@@ -453,8 +466,9 @@ def review_paths(catalog_bytes, *, owned, paths, evaluated_at_utc):
                     if any(partner.get(k, 0) < q for k,q in receive.items()):
                         deny("SUPREME_ONLY_HYPOTHETICAL_PARTNER_STOCK_SHORTFALL")
                     signature.append((tuple(sorted(give.items())), tuple(sorted(receive.items()))))
-                    report = review(catalog_bytes, owned=dict(holdings),
-                                    alternatives=[option], evaluated_at_utc=evaluated_at_utc)
+                    report = review(catalog_bytes if edition is None else None, owned=dict(holdings),
+                                    alternatives=[option], evaluated_at_utc=evaluated_at_utc,
+                                    edition=edition)
                     if report["status"] == "BLOCKED":
                         deny(report["reason"])
                     row = report["hypotheticalAlternatives"][0]
@@ -501,7 +515,7 @@ def review_paths(catalog_bytes, *, owned, paths, evaluated_at_utc):
                     "completedHypotheticalSteps": len(transitions), "steps": transitions,
                     "endingHypotheticalListedValue": final_value,
                     "hypotheticalListedGrowth": final_value-start_value,
-                    "endingPaperTargetGap": max(0,target-final_value),
+                    "endingPaperTargetGap": max(0,target-final_value) if target is not None else None,
                     "hypotheticalTargetReceived": target_received,
                     "endingHypotheticalTargetCopies": holdings.get(TARGET,0),
                     "endingPublishedDemandMean": mean_demand(holdings,market),

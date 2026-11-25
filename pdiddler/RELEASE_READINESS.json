@@ -15,7 +15,7 @@
     {
       "id": "MARKET_INPUT",
       "status": "OFFLINE_VERIFIED",
-      "evidence": "Four direct Supreme HTTPS responses match the immutable November 25 archive. 189 priced weapons and 17 published ranges. Edition 2026-11-23T19:13:44-05:00. Archive cutoff remains 2026-11-25T12:09:59Z. See pdiddler/system2/supreme_publisher_parity_2026_11_25.json"
+      "evidence": "Four direct Supreme HTTPS responses match the immutable November 25 archive. 189 priced weapons and 17 published ranges. Edition 2026-11-23T19:13:44-05:00. Archive cutoff remains 2026-11-25T12:09:59Z. See pdiddler/system2/supreme_publisher_parity_2026_11_25.json A reviewed four-page Supreme capture can be admitted and compared independently of the historical census. The existing publication was rechecked without extending the cutoff."
     },
     {
       "id": "ITEM_IDENTITY_AND_QUANTITY",
@@ -25,27 +25,27 @@
     {
       "id": "TRADING_UI_AND_OUTBOUND",
       "status": "SUPERVISED_PARTIAL",
-      "evidence": "Historical P3/P4 client and fixture evidence covers specific behaviors. The November 25 candidate is a standalone Python analysis; the frozen device launcher still corresponds to older sources."
+      "evidence": "Historical P3/P4 client and fixture evidence covers specific behaviors. The supported operator entry point is offline. The frozen device launcher still corresponds to older sources."
     },
     {
       "id": "PORTFOLIO_STRATEGY",
-      "status": "OFFLINE_STANDALONE_VERIFIED",
-      "evidence": "Manual Supreme-only balance, target capacity, four physical slots, candidate examples, bounded stack hypotheses, risk and exact multi-step replay. See pdiddler/system2/manual_portfolio_review.py"
+      "status": "OFFLINE_ADVISORY_INTEGRATED",
+      "evidence": "The supported offline entry point binds separate account holdings and a Supreme edition to revisioned portfolio reports, bilateral offer analysis and bounded independent route generation."
     },
     {
       "id": "BILATERAL_OFFER_ATTRACTIVENESS",
       "status": "HYPOTHETICAL_ONLY",
-      "evidence": "Both listed deltas, burden, published demand, stability and available ranges are evaluated. Empirical retradeability, willingness and acceptance probabilities are unknown."
+      "evidence": "The planner compares both ledgers, physical slots and copies, published quality and range risk. Transparent tradeoffs and abstention preserve unknown preferences and empirical retradability."
     },
     {
       "id": "OUTCOME_LEARNING",
-      "status": "BLOCKED",
-      "evidence": "Private staged analyzer and intake enforce bounded files, exact replay, malformed-record and contradictory-report rejection and temporal evidence gates. No real V2 archive or independently verified settlement labels."
+      "status": "OFFLINE_SYNTHETIC_VALIDATION",
+      "evidence": "The private learner evaluates isolated synthetic outcomes with chronological, group-disjoint evaluation, baseline comparison and abstention. The existing private V2 client-only pipeline has no real learning labels."
     },
     {
       "id": "SETTLEMENT_AND_REVISION",
-      "status": "BLOCKED",
-      "evidence": "Session-specific two-sided authoritative outcome and exact revision evidence are absent. Indicators, local inventory changes and interface closure stay client observations."
+      "status": "OFFLINE_SYNTHETIC_SETTLEMENT_ONLY",
+      "evidence": "State binds controlled observations and offer revisions, invalidates stale evaluations and reconciles two synthetic witnesses in an isolated database. Independently attributable game settlement is unavailable."
     },
     {
       "id": "UNATTENDED_RUNTIME",
@@ -58,7 +58,7 @@
       "evidence": "Separate supported access, settlement and safety evidence, deployment approval and a reviewed numerical loss policy remain required."
     }
   ],
-  "nextDistinctWork": "Use the active matrix and exact PR head to recover results. For any future fresh manual quote, independently recapture Supreme and review edition and census changes before pinning a new archive. The full runtime and real learner remain unverified.",
+  "nextDistinctWork": "Verify the exact draft heads and the integrated compatibility test. For a current analysis after the archive cutoff, admit a genuine newer reviewed Supreme edition. Supported native observations and independently corroborated outcomes are separate release dependencies.",
   "exclusions": [
     "No forced highest opener",
     "No universal +15 minimum",
@@ -66,14 +66,14 @@
     "No outgoing Gingerscope",
     "No claiming historical webhook notifications are server-settled trades"
   ],
-  "latestReviewedResearchBase": "bc467c1bfaff026b87e4b09979e1e9d581895bbc",
+  "latestReviewedResearchBase": "2622777c47c7913a2b9097efc9d8c6283e7ba04f",
   "researchCandidateBranch": "research/gingerscope-completion-sprint-nov25",
   "researchCandidateDraft": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/323",
-  "reviewMatrix": "pdiddler/system2/GINGERSCOPE_COMPLETION_MATRIX_2026_11_25.md",
+  "reviewMatrix": "pdiddler/system2/gingerscope_requirements.json",
   "checkpointSourceCommitMeaning": "Immutable historical November 11 continuity anchor",
   "completionMilestones": {
     "A_fullSoftware": "OPEN_RUNTIME_AND_AUTHORITATIVE_INTERFACES_UNVERIFIED",
-    "A_manualOfflineAnalysis": "INTEGRATED_OFFLINE",
+    "A_manualOfflineAnalysis": "INTEGRATED_OFFLINE_ADVISORY_AND_CONTROLLED_REPLAY",
     "B_supervisedRuntime": "OPEN_HISTORICAL_CLIENT_OBSERVATIONS_ONLY",
     "C_liveRelease": "NOT_AUTHORIZED"
   }

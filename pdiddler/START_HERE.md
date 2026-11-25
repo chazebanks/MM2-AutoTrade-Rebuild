@@ -10,7 +10,7 @@
 
 ## November 25 completion review
 
-Start with [the current requirements and compatibility matrix](system2/GINGERSCOPE_COMPLETION_MATRIX_2026_11_25.md) and the [completion sprint handoff](system2/GINGERSCOPE_COMPLETION_SPRINT_2026_11_25.md). The matrix and the current GitHub draft supersede the historical market and next-action dates below. The manual portfolio report is a standalone offline entrypoint. Verify its current archive expiry and the exact draft CI before using results.
+Use the [machine-readable requirements matrix](system2/gingerscope_requirements.json) and [cross-system dependency map](system2/GINGERSCOPE_DEPENDENCY_MAP.md). The [offline application guide](system2/GINGERSCOPE_OFFLINE.md) covers installation, advisory analysis, controlled observations and application recovery. The [November 25 baseline review](system2/GINGERSCOPE_COMPLETION_MATRIX_2026_11_25.md) records the prior standalone candidate and historical evidence. Verify the current draft head, its exact CI and Supreme archive expiry.
 
 ## NOV 11 2026 — VERIFIED PLAN/HANDOFF ENTRYPOINT
 

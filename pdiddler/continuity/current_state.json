@@ -10,7 +10,7 @@
     "Historical client identity, offer revision and inventory deltas are partial. Full System 1 runtime, independent settlement and native compatibility remain unverified.",
     "No approved listed-loss budget or release authority exists."
   ],
-  "nextAction": "Read the November 25 completion matrix and PR #323 at its actual head. Verify exact-source CI and archive expiry. The standalone manual analysis and private offline evidence preflight are the verified implementation scope; system-wide runtime and real outcome gates remain open.",
+  "nextAction": "Recover the current draft heads and run the supported offline entry point and source-bound regressions. Consult the machine-readable requirements for remaining software and external verification. Keep real settlement and release gates closed.",
   "authority": {
     "authorizesTrade": false,
     "authorizesOffer": false,
@@ -23,6 +23,7 @@
   },
   "readBeforeCodeChange": [
     "pdiddler/START_HERE.md",
+    "pdiddler/system2/gingerscope_requirements.json",
     "pdiddler/system2/GINGERSCOPE_COMPLETION_MATRIX_2026_11_25.md",
     "pdiddler/system2/GINGERSCOPE_COMPLETION_SPRINT_2026_11_25.md",
     "pdiddler/NEXT_CONVERSATION_HANDOFF_2026_11_11.md",
@@ -64,9 +65,12 @@
   "activeReview": {
     "draft": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/323",
     "branch": "research/gingerscope-completion-sprint-nov25",
-    "reviewedBaselineCommit": "bc467c1bfaff026b87e4b09979e1e9d581895bbc",
-    "matrix": "pdiddler/system2/GINGERSCOPE_COMPLETION_MATRIX_2026_11_25.md",
+    "reviewedBaselineCommit": "2622777c47c7913a2b9097efc9d8c6283e7ba04f",
+    "matrix": "pdiddler/system2/gingerscope_requirements.json",
     "sourceEvidence": "pdiddler/system2/supreme_publisher_parity_2026_11_25.json",
-    "manualEntrypoint": "pdiddler/system2/manual_portfolio_review.py"
+    "manualEntrypoint": "pdiddler/gingerscope.py",
+    "installation": "pdiddler/system2/GINGERSCOPE_OFFLINE.md",
+    "dependencyMap": "pdiddler/system2/GINGERSCOPE_DEPENDENCY_MAP.md",
+    "rollingCheckpoint": "https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit"
   }
 }

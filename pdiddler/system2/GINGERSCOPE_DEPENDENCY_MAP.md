@@ -1,0 +1,37 @@
+# Gingerscope dependency map
+
+The engineering backlog is [gingerscope_requirements.json](gingerscope_requirements.json). Its source revisions identify the evidence checked for each requirement. The dated November 25 matrix records the standalone baseline.
+
+## Supported path and ownership
+
+| Producer or owner | Contract | Consumer and failure boundary |
+|---|---|---|
+| Offline entry `pdiddler/gingerscope.py` | Bounded, validated JSON, explicit command, clock and state scope | Dispatches `review`, `simulate-session`, `current`, `status`, `recover` `market-diff` and `capture-market`. Current-clock analysis requires an unexpired trusted Supreme archive. Controlled session replay uses an isolated synthetic store. The market capture command only writes original publisher pages for independent review. |
+| Supreme archive reader and edition comparison | Immutable archive identity, publisher edition and capture/expiry, exact category and publisher ID, descriptive metrics and quoted ranges | Portfolio summary, offer evaluation, planning and state synchronization. Untrusted values or a different provider cannot substitute for a valid Supreme archive. |
+| Manual inventory and Part 3 contract | Separate accounts, exact item identifiers, nonnegative inventory revisions, explicit unknowns and one lease for the account | Portfolio and session entry. Unpriced assets remain explicit and cannot enter a proposal. Publisher identifiers cannot establish native item-instance ownership. |
+| Controlled Part 4 contract | Session, sequence and offer revision, both sides' quantities and physical slots, event kind and provenance | Evaluator and state record. A changed inventory, edition, offer, lease or expiry invalidates applicable advice. The controlled bridge consumes manual observations without game-side action or transport. |
+| Bilateral evaluator and Part 5 planner | Known available quantities, one Supreme edition, two sides' arithmetic, separate slot/copy burdens, protected alternatives and bounded routes | Advisory arbitration and operator review. Explicit counterpart stock is a scenario input. Listed demand, paper ranges and route feasibility carry no acceptance or empirical liquidity claim. |
+| Local application store | Versioned database, edition and inventory revisions, evaluation bindings, leases and outcome evidence | Historical accounting, idempotent replay and recovery. Closed or client-only observations cannot create realized gains. Corroborated synthetic settlement remains isolated. |
+| Public V2 adapter and private intake | Staged V2 body, private transport binding, strict session/revision fields and immutable gate inputs | Private archive and aggregate analyzer. Client responses do not prove authoritative settlement. Public tests use isolated synthetic fixtures. |
+| Offline learning | Validated features and outcome provenance, source/feature timing and scope, versioned train/holdout metrics | Separate private model evaluation with evidence gates. Real-world learning remains gated on adequate independently attributed records. |
+| Development continuity | Immutable project metadata, policy and selected historical source blobs | Developer recovery and release review. Application leases, evidence and restart state belong to the local application store. |
+
+## Numbered Part references
+
+| Reference | Role and source | Compatibility and retained evidence |
+|---|---|---|
+| P1 | Historical boot in `loader.lua`, `core/health.lua` and `pdiddler1*.lua` | Loader fetches health from mutable main and performs a smoke check only. The supported entry owns its own initialization and database scope. The pure Lune gate exercises health independently. |
+| P2 | Historical Tablet and friend Play startup in `pdiddler2.lua` and `pdiddler2_KNOWN_GOOD.lua` | Protected supervisor harness checks startup gates downstream. Present native UI readiness depends on a supported runtime and separately scoped validation. |
+| P3 | Historical scanner and request sequencer under `pdiddler3_*`, protected startup and rotation handoff under `supervised/` | Bounded frozen client receipts and Lune fixtures cover scanner and lease succession. The offline lease and account revisions capture the supported handoff semantics. |
+| P4 | Historical observer under `new_part4/` and pinned original Stage9, Stage101 and Stage119 sources, research bridges under `system2/` | Original exact sources exercise P3/P4 coupling in frozen CI. Stage101/119 receipts demonstrate limited observed identity, quantity and token behavior. Actual authoritative server revision and settlement remain external. |
+| P5 | `system2/multitrade_growth_replay.py` and Supreme inventory/growth analysis | Preserved hypothetical replay and offline scenario ownership. Application restart belongs to the state store. |
+| P1–P6 workplan phase tags | `continuity/NEXT_WORKPLAN_2026_11_11.json` | Tags mean publisher authentication, item mapping, bilateral strategy, private outcomes, observational integration and release respectively. The reviewed tree has no distinct operational P6 or higher. Stage, test and S2.1–S2.9 component numbering designate separate kinds of records. |
+
+## Source selection and evidence
+
+- The supported Python path is independent of historical Luau launchers. The old Part 4 launcher and rotating balancers retain rules such as forced highest opener, minimum listed gain and stale pricing for historical evidence. MM2Values, hybrid and third-party price sources are archived or diagnostic only.
+- Protected native fixtures explicitly load original pinned Stage9/83/101 roots. The frozen five-scenario host and November 25 research variants use distinct versioned dependencies. The whole-system workflow stages original sources into a scratch runner and checks Git blobs before executing fixtures.
+- The private analyzer pins public commit `5da551192aaf6e438786bfad800e434b30c6a666`. The intake and learning gate are byte-identical at the public baseline to the private analyzer pins `20d8a0e8fda75c10a7101b242bfbd9a00d20cb7f` and `eaf22abce32eba3bfe2c4e1f42dec6cf89c498e7`. The controlled application evidence path preserves that staged V2 contract. A separate synthetic contract passes settled revision records from the actual SQLite state into the private learner without using V2 records as verified settlements.
+- Reproducible selected-family regression uses Python 3.12, Hypothesis 6.170.15, Lune 0.11.1, Lua 5.4 and archived dependencies listed in the whole-system workflow. Source pins for continuity and legacy launchers live in `continuity/manifest.json` and the relevant fixture and CI scripts.
+- The draft rollback references are public `2622777c47c7913a2b9097efc9d8c6283e7ba04f` and private `18648765aaa8b6a41e0fd86aba9e7baeb97f586f`. Public main at review was `44268df1e3080b49aa9e586851867fd602a3ce1f`. Existing draft ancestors and historical receipts remain available. The continuity gate's historical coverage remains partial.
+- The November 25 direct parity receipt verifies its pinned edition against the publisher and retains the original expiry. The exact baseline runs establish scoped offline verification. Current native observation, independent settlement, real learning and release approval require their own evidence. [Public draft](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/323) · [Whole-system regression](https://github.com/chazebanks/MM2-AutoTrade-Rebuild/actions/runs/45574795669)

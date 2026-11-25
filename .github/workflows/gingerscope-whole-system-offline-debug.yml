@@ -32,7 +32,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m pip install --disable-pip-version-check 'beautifulsoup4>=4.12,<5' 'hypothesis==6.170.15'
+          python3 -m pip install --disable-pip-version-check -r pdiddler/system2/requirements-gingerscope.txt
           archive="$RUNNER_TEMP/lune.zip"
           curl -fsSL --retry 3 --connect-timeout 20 'https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip' -o "$archive"
           echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $archive" | sha256sum --check

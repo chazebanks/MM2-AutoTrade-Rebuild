@@ -37,5 +37,16 @@
     "baselineCommit": "bc467c1bfaff026b87e4b09979e1e9d581895bbc",
     "evidenceTier": "RESEARCH_ONLY",
     "matrix": "pdiddler/system2/GINGERSCOPE_COMPLETION_MATRIX_2026_11_25.md"
+  },
+  "activeOfflineReview": {
+    "rollbackCommit": "2622777c47c7913a2b9097efc9d8c6283e7ba04f",
+    "draft": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/323",
+    "scope": "INTEGRATED_OFFLINE_ADVISORY_AND_CONTROLLED_REPLAY",
+    "references": [
+      "pdiddler/gingerscope.py",
+      "pdiddler/system2/gingerscope_requirements.json",
+      "pdiddler/system2/GINGERSCOPE_OFFLINE.md"
+    ],
+    "evidenceLimit": "New controlled replay evidence does not replace any historical native observation."
   }
 }
