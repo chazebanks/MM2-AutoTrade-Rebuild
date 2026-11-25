@@ -32,7 +32,7 @@
     "pdiddler/system2/supreme_market_editions.py": "c4172d8968ac9cc074e8106e522847a4abe05c89",
     "pdiddler/system2/requirements-gingerscope.txt": "b7c92ce8ad3030ed57d46806538218824b6d6fd6",
     "pdiddler/system2/gingerscope_requirements.json": "f5920e613d526d7a97315bf68dd3813d13b68a10",
-    "pdiddler/system2/GINGERSCOPE_OFFLINE.md": "604c375c431304ebbb805caacc04128413733431",
+    "pdiddler/system2/GINGERSCOPE_OFFLINE.md": "16918d79ae2432c9d753c38275400eefd4af661f",
     "pdiddler/system2/GINGERSCOPE_DEPENDENCY_MAP.md": "8e0e67455f53d12c0d71670d37e75665ccfd7a93",
     "pdiddler/ci/test_gingerscope_application.py": "1667f2a0090ef476cd544fbc5f8800f1467d3cca",
     "pdiddler/ci/test_gingerscope_application_state.py": "6be2b690617ec491d2411df3b19d52a5005132b6",

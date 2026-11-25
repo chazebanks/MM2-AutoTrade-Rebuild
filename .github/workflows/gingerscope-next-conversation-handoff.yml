@@ -62,6 +62,7 @@ jobs:
           import subprocess
           import sys
           allowed = {
+              '.github/workflows/gingerscope-c8-restart-original-census-race.yml',
               '.github/workflows/gingerscope-next-conversation-handoff.yml',
               '.github/workflows/gingerscope-whole-system-offline-debug.yml',
               'pdiddler/START_HERE.md',

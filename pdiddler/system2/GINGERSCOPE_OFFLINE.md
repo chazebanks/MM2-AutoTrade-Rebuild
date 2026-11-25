@@ -132,6 +132,10 @@ apply to the supported app, historical client evidence, and release gates.
   supersedes earlier reports while keeping them available in history.
 - A modified state row could extend the saved Supreme cutoff. Evaluation
   readback now checks the archive hash and clocks against the report.
+- The separate C8 historical bridge workflow tried to refresh a superseded
+  provider and stopped at `CARD_CATEGORY_MISMATCH`. It now verifies the
+  existing immutable historical fixture and replays at the recorded clock.
+  The parser unit tests and the original bridge assertions still run.
 
 ## External validation
 

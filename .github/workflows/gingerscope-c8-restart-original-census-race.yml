@@ -49,28 +49,25 @@ jobs:
             pdiddler.ci.test_system2_mm2tradehub_market_candidate \
             pdiddler.ci.test_system2_public_market_gamekey_crosswalk \
             pdiddler.ci.test_system2_real_intelligence_decisions
-      - name: Refresh public market and rebuild 189 original game-key records
+      - name: Verify immutable historical game-key replay fixture
         shell: bash
-        env:
-          GINGERSCOPE_PINNED_STAGE83: ${{ runner.temp }}/stage83.lua
-          GINGERSCOPE_MARKET_OUTPUT: ${{ runner.temp }}/c8-public-source.json
         run: |
           set -euo pipefail
-          python3 -m pdiddler.system2.mm2tradehub_market_candidate
-          python3 -m pdiddler.system2.public_market_gamekey_crosswalk \
-            --market "$RUNNER_TEMP/c8-public-source.json" \
-            --stage83 "$RUNNER_TEMP/stage83.lua" \
-            --evaluated-utc "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
-            --output "$RUNNER_TEMP/c8-crosswalk.json"
-          cp "$RUNNER_TEMP/c8-crosswalk.json" pdiddler/system2/research_market_crosswalk_current.json
+          test "$(git hash-object pdiddler/system2/research_market_crosswalk_current.json)" = 'e92cb3796bcb11c7df6c090e364a68f8e22270eb'
           python3 - <<'PY'
           from pathlib import Path
           import datetime,json
           x=json.loads(Path('pdiddler/system2/research_market_crosswalk_current.json').read_text())
-          assert x['matchedHistoricalGameKeys']==189
+          assert x['matchedHistoricalGameKeys']==189==len(x['items'])
+          assert len({row['rawGameKeyCandidate'] for row in x['items']})==189
+          assert x['historicalRegistryBlob']=='40e2a0ff01b70b2d0181c62cae347a08da82bcb8'
+          assert x['sourceRetrievedUtc']=='2026-11-14T21:43:14Z'
+          assert x['researchOnly'] is True
+          for flag in ('authorizesAccept','authorizesTrade','mayUseForLiveOffer','mayReportProfit','mayUseForLearning'):
+              assert x[flag] is False
           stamp=datetime.datetime.fromisoformat(x['sourceRetrievedUtc'].replace('Z','+00:00'))
           Path('pdiddler/system2/research_market_epoch.txt').write_text(str(int(stamp.timestamp())))
-          print('C8_AUTHENTIC_ORIGINAL_GAME_KEYS_189_REBUILT')
+          print('C8_ARCHIVED_GAME_KEY_REPLAY_ONLY', x['sourceRetrievedUtc'], x['matchedHistoricalGameKeys'])
           PY
       - name: Exercise actual C3 original GUI scanner through C4 scorer
         shell: bash
