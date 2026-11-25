@@ -411,6 +411,128 @@ def review(catalog_bytes, *, owned, alternatives, evaluated_at_utc):
         return blocked(str(e))
 
 
+
+def review_paths(catalog_bytes, *, owned, paths, evaluated_at_utc):
+    """Compare distinct explicitly hypothetical multi-step growth alternatives.
+
+    Reuses the existing single-step evaluator and exact Supreme source admission.
+    Every partner stock is a separate synthetic fixture, never a game observation.
+    A paper portfolio gap is not proof a target trade is feasible. No live ranking,
+    executable offers, accepted trade, real inventory, or training is asserted.
+    """
+    schema = "gingerscope-system2-supreme-only-multistep-research-v1"
+    def result_blocked(reason):
+        return {**blocked(reason), "schema": schema, "simulationOnly": True}
+    try:
+        market, provenance = source_rows(catalog_bytes, evaluated_at_utc=evaluated_at_utc)
+        initial = quantities(owned, market)
+        if type(paths) is not list or not 2 <= len(paths) <= 12:
+            deny("SUPREME_ONLY_TWO_TO_TWELVE_DISTINCT_PATHS_REQUIRED")
+        start_value = total(initial, market)
+        target = market[TARGET]["supremeListed"]
+        routes, signatures = [], set()
+        for index, path in enumerate(paths, 1):
+            holdings = initial.copy()
+            seen = {tuple(sorted(holdings.items()))}
+            signature, transitions = [], []
+            target_received = False
+            step_number = 0
+            try:
+                if type(path) is not list or not 2 <= len(path) <= 8:
+                    deny("SUPREME_ONLY_TWO_TO_EIGHT_STEPS_REQUIRED")
+                for step_number, step in enumerate(path, 1):
+                    if type(step) is not dict or set(step) != (
+                            INPUT_OPTION_KEYS | {"partnerHypotheticalStock"}):
+                        deny("SUPREME_ONLY_EXPLICIT_SYNTHETIC_PARTNER_STOCK_REQUIRED")
+                    option = {k:step[k] for k in INPUT_OPTION_KEYS}
+                    give = parse_slots(option["give"], market, side="GIVE")
+                    receive = parse_slots(option["receive"], market, side="RECEIVE")
+                    if set(give) & set(receive):
+                        deny("SUPREME_ONLY_SAME_KEY_BOTH_SIDES_AMBIGUOUS")
+                    partner = quantities(step["partnerHypotheticalStock"], market)
+                    if any(partner.get(k, 0) < q for k,q in receive.items()):
+                        deny("SUPREME_ONLY_HYPOTHETICAL_PARTNER_STOCK_SHORTFALL")
+                    signature.append((tuple(sorted(give.items())), tuple(sorted(receive.items()))))
+                    report = review(catalog_bytes, owned=dict(holdings),
+                                    alternatives=[option], evaluated_at_utc=evaluated_at_utc)
+                    if report["status"] == "BLOCKED":
+                        deny(report["reason"])
+                    row = report["hypotheticalAlternatives"][0]
+                    if row["status"] != "SUPREME_PAPER_GAIN_RESEARCH_NOT_ACTIONABLE":
+                        deny(row["status"])
+                    next_holdings = holdings.copy()
+                    next_holdings.subtract(give)
+                    next_holdings.update(receive)
+                    next_holdings = +next_holdings
+                    if total(next_holdings, market) != row["hypotheticalAfterSupremePortfolioValue"]:
+                        deny("SUPREME_ONLY_MULTISTEP_LEDGER_MISMATCH")
+                    stamp = tuple(sorted(next_holdings.items()))
+                    if stamp in seen:
+                        deny("SUPREME_ONLY_HYPOTHETICAL_PORTFOLIO_CYCLE")
+                    seen.add(stamp)
+                    holdings = next_holdings
+                    target_received = target_received or TARGET in receive
+                    transitions.append({
+                        "step": step_number,
+                        "physicalShape": "UPGRADE" if len(receive)<len(give) else (
+                            "DOWNGRADE" if len(receive)>len(give) else "SIDEGRADE"),
+                        "outgoingPhysicalSlots": len(give),
+                        "incomingPhysicalSlots": len(receive),
+                        "outgoingCopies": sum(give.values()),
+                        "incomingCopies": sum(receive.values()),
+                        "ourListedDelta": row["supremeListedValueGain"],
+                        "partnerListedDelta": row["opponentSupremeListedValueGain"],
+                        "ourListedPortfolioAfter": total(holdings, market),
+                        "partnerReceivesPublishedDemand": row["outgoingSupremeDemandOrdinal"],
+                        "partnerGivesPublishedDemand": row["incomingSupremeDemandOrdinal"],
+                        "partnerPaperLossNeedsOtherMotive": row["opponentSupremeListedValueGain"]<0,
+                        "incomingPublisherRiskKeys": row["incomingPublishedRiskLabelsForKeys"],
+                        "warnings": row["warnings"],
+                        "actualPartnerWouldAccept": None,
+                        "actionAuthorized": False,
+                    })
+                key = tuple(signature)
+                if key in signatures:
+                    deny("SUPREME_ONLY_DUPLICATE_HYPOTHETICAL_PATH")
+                signatures.add(key)
+                final_value = total(holdings, market)
+                routes.append({
+                    "index": index, "status": "PAPER_PATH_COMPARED_NOT_EXECUTABLE",
+                    "completedHypotheticalSteps": len(transitions), "steps": transitions,
+                    "endingHypotheticalListedValue": final_value,
+                    "hypotheticalListedGrowth": final_value-start_value,
+                    "endingPaperTargetGap": max(0,target-final_value),
+                    "hypotheticalTargetReceived": target_received,
+                    "endingHypotheticalTargetCopies": holdings.get(TARGET,0),
+                    "endingPublishedDemandMean": mean_demand(holdings,market),
+                    "endingConcentrationBasisPoints": concentration(holdings,market),
+                    "targetSufficiencyDoesNotProveFeasibleFourSlotTrade": True,
+                    "tradeActionable": False,
+                })
+            except (SupremeOnlyBlocked, KeyError, TypeError, OverflowError, ZeroDivisionError) as exc:
+                routes.append({"index": index, "status": "BLOCKED_PATH", "reason": str(exc),
+                               "blockedAtStep": step_number,
+                               "completedHypotheticalSteps": len(transitions),
+                               "tradeActionable": False})
+        return {
+            "schema": schema, "status": "SUPREME_ONLY_MULTI_PATH_RESEARCH_NOT_EXECUTABLE",
+            "source": provenance, "valueSource": SOURCE, "researchOnly": True,
+            "simulationOnly": True, "startingHypotheticalListedValue": start_value,
+            "startingPublishedDemandMean": mean_demand(initial,market),
+            "startingConcentrationBasisPoints": concentration(initial,market),
+            "startingPaperTargetGap": max(0,target-start_value),
+            "gingerscopeListedTarget": target, "hypotheticalRoutes": routes,
+            "isOfferRanking": False, "realInventoryVerified": False,
+            "actualPartnerOwnershipVerified": False, "empiricalAcceptanceProbability": None,
+            "empiricalLiquidity": "UNKNOWN", "serverTradeSettlementProven": False,
+            "authorizesTrade": False, "authorizesOffer": False, "authorizesAccept": False,
+            "mayReportProfit": False, "maySendDiscordWebhook": False,
+            "mayUseForStrategyLearning": False, "liveMarketAuthorized": False,
+        }
+    except (SupremeOnlyBlocked, KeyError, TypeError, OverflowError, ZeroDivisionError) as exc:
+        return result_blocked(str(exc))
+
+
 def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--catalog",type=Path,required=True)
