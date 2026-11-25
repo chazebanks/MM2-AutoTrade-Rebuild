@@ -73,10 +73,11 @@ class SupremeRefreshResearch(unittest.TestCase):
   self.assertIn("supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json",h)
   self.assertIn('local SOURCE_SHA="'+BLOB+'"',c)
   self.assertIn("local CAPTURE=1794951678",c)
-  self.assertIn('catalog.sourceCapturedUtc~="'+CAPTURE+'"',c)
+  self.assertIn('catalog.sourceCapturedUtc=="'+CAPTURE+'"',c)
   self.assertIn('local CATALOG_SHA256="'+SHA256+'"',b)
   self.assertIn('local SOURCE_GIT_BLOB="'+BLOB+'"',b)
-  self.assertIn("math.floor(fresh-1794951678)",b)
+  self.assertIn("activeCapture=1794951678",b)
+  self.assertIn("math.floor(fresh-activeCapture)",b)
   self.assertIn("local captureUtc=1794951678",s)
   self.assertIn('local pinned="b87b2acb2c3228a2fa027b6a77904ce1fb38c474"',s)
   for part in (h,s,c,b):
@@ -195,8 +196,16 @@ class SupremeNov25Archive(unittest.TestCase):
                "currentInventoryVerified","liveTradePricingAuthorized","authorizesTrade",
                "authorizesOffer","authorizesAccept","mayUseForStrategyLearning","mayReportProfit"):
    self.assertIs(data[flag],False)
-  for p in (CORE,BRIDGE,HOST,LOADER,REG):
+  # The native core and read-only bridge now explicitly admit both exact
+  # archived editions within their own clocks. Frozen launchers remain old.
+  for p in (HOST,LOADER,REG):
    self.assertNotIn(NOV25.name,p.read_text())
    self.assertNotIn(NOV25_BLOB,p.read_text())
+  for p in (CORE,BRIDGE):
+   self.assertIn(NOV25_BLOB,p.read_text())
+  self.assertIn("1795586999",CORE.read_text())
+  self.assertIn("1795586999",BRIDGE.read_text())
+  self.assertEqual(hashlib.sha256(NOV25.read_bytes()).hexdigest(),
+                   "3f0996b9ac20f3c4689519e1faf65e83796bce8b2d6afe6ad4d2e705ffca525e")
 
 if __name__=="__main__":unittest.main()
