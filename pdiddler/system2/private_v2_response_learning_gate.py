@@ -165,6 +165,7 @@ def compile_client_evidence(
                 "partner":first["partner_digest"],
                 "scope":first["scope"],
                 "firstReceivedAt":_utc(first["recorded_at_utc"]),
+                "lastReceivedAt":stamp,
                 "requestAcceptedClientOnly":accepted,
                 "result":result,
                 "offerRevisionChanges":revisions,
@@ -179,19 +180,30 @@ def compile_client_evidence(
         real=[x for x in summaries if x["scope"]=="PUBLIC_CLIENT_OBSERVATION"]
         alt=[x for x in summaries if x["scope"]=="MAIN_ALT_TEST"]
         public_partners={x["partner"] for x in real}
-        # One distinct partner is ONE holdout group regardless of episodes.
-        # Chronological split; no features, so no algorithm is fit.
+        # Digests are not verified distinct real players: the native sender may
+        # rotate its salt. This is only a prospective digest-level split.
+        # Purge whole earlier groups with any episode crossing the holdout start.
+        # Use delivery time, not a claim about server event chronology.
         first={}
         for x in real:
             first[x["partner"]]=min(x["firstReceivedAt"],
                 first.get(x["partner"],x["firstReceivedAt"]))
         groups=sorted(first,key=lambda p:(first[p],p))
         need=max(minimum_holdout_partners,3)
-        enough=len(groups)>=max(12,need*3)
-        hold=set(groups[-need:]) if enough else set()
-        train=set(groups[:-need]) if enough else set()
+        candidate_enough=len(groups)>=max(12,need*3)
+        hold=set(groups[-need:]) if candidate_enough else set()
+        prior=set(groups[:-need]) if candidate_enough else set()
+        cutoff=min((first[p] for p in hold),default=None)
+        last={}
+        for x in real:
+            last[x["partner"]]=max(x["lastReceivedAt"],
+                                   last.get(x["partner"],x["lastReceivedAt"]))
+        train={p for p in prior if last[p]<cutoff} if cutoff is not None else set()
+        purged=prior-train
+        enough=candidate_enough and len(train)>=max(12,need*3)-need
         disjoint=not(train & hold)
-        if not disjoint:
+        temporal=bool(train and hold) and max(last[p] for p in train)<cutoff
+        if not disjoint or (enough and not temporal):
             raise ValueError("PARTNER_HOLDOUT_OVERLAP")
         # Only caller-asserted delivery, not verified transport attestation.
         counts_all={x:counts[x] for x in sorted(counts)}
@@ -229,6 +241,13 @@ def compile_client_evidence(
             partnerDisjointHoldoutReady=enough,
             partnerDisjointTrainGroups=len(train),
             partnerDisjointHoldoutGroups=len(hold),
+            temporalPurgedDigestGroups=len(purged),
+            temporalDeliverySplitStrictlySeparated=temporal,
+            chronologicalDigestHoldoutReady=enough and temporal,
+            partnerDigestStableAcrossSessionsProven=False,
+            distinctRealPlayerHoldoutProven=False,
+            serverEventChronologyProven=False,
+            realModelHoldoutReady=False,
             holdoutNotUsedForTraining=True,
             offerBundleFeaturesAvailableInV2=False,
             deployableLearnedModelAvailable=False,
