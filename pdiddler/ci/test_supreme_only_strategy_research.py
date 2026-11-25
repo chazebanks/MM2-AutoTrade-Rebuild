@@ -276,5 +276,52 @@ class SupremeOnlyStrategy(unittest.TestCase):
 
 
 
+class SupremeNov25Strategy(unittest.TestCase):
+    fresh=(ROOT/"supreme_only_189_research_catalog_2026_11_25_publication_nov23.json").read_bytes()
+    capture="2026-11-25T06:09:59Z"
+
+    def test_renewed_source_admitted_by_existing_offline_evaluator(self):
+        rows,provenance=source_rows(self.fresh,evaluated_at_utc=self.capture)
+        self.assertEqual(len(rows),189)
+        self.assertEqual(rows["Harvester"]["supremeListed"],310)
+        self.assertEqual(rows["Gingerscope"]["supremeListed"],16000)
+        self.assertEqual(provenance["catalogGitBlob"],"b6f5c1eec48d59b422f53baa4d83a54ce6837b72")
+        self.assertEqual(provenance["publisherUpdatedAt"],"2026-11-23T19:13:44-05:00")
+        self.assertFalse(provenance["sourceSignatureVerified"])
+
+    def test_same_hypothesis_reprices_using_renewed_source_only(self):
+        current=task(src=self.fresh,clock=self.capture)
+        before=task()
+        self.assertEqual(current["status"],before["status"])
+        row=current["hypotheticalAlternatives"][0]
+        self.assertEqual(row["outgoingSupremeListedValue"],310)
+        self.assertEqual(row["incomingSupremeListedValue"],470)
+        self.assertEqual(row["supremeListedValueGain"],160)
+        self.assertEqual(row["opponentSupremeListedValueGain"],-160)
+        self.assertEqual(before["hypotheticalAlternatives"][0]["supremeListedValueGain"],195)
+        self.assertFalse(row["tradeActionable"])
+        for flag in ("authorizesOffer","authorizesAccept","authorizesTrade",
+                     "liveMarketAuthorized","mayReportProfit","mayUseForStrategyLearning"):
+            self.assertIs(current[flag],False)
+
+    def test_exact_expiration_and_no_fallback_to_older_capture(self):
+        for delta in (0,30,21600):
+            self.assertNotEqual(task(src=self.fresh,clock=plus(self.capture,delta))["status"],"BLOCKED")
+        self.assertEqual(task(src=self.fresh,clock=plus(self.capture,21601))["reason"],
+                         "SUPREME_ONLY_SOURCE_EXPIRED_NO_OTHER_LIST_FALLBACK")
+        self.assertEqual(task(src=self.fresh,clock=plus(self.capture,-1))["reason"],
+                         "SUPREME_ONLY_CAPTURE_FROM_FUTURE")
+        self.assertEqual(task(src=CATALOG,clock=self.capture)["reason"],
+                         "SUPREME_ONLY_SOURCE_EXPIRED_NO_OTHER_LIST_FALLBACK")
+
+    def test_tampering_or_outbound_target_never_admitted(self):
+        modified=json.loads(self.fresh)
+        modified["rows"][0]["supremeListed"]+=1
+        self.assertEqual(task(src=json.dumps(modified).encode(),clock=self.capture)["reason"],
+                         "SUPREME_ONLY_CATALOG_GIT_BLOB_MISMATCH")
+        r=task(src=self.fresh,clock=self.capture,alt=[option({"Gingerscope":1},{"Harvester":1})])
+        self.assertEqual(r["reason"],"SUPREME_ONLY_GINGERSCOPE_NEVER_OUTGOING")
+
+
 if __name__=="__main__":
     unittest.main()
