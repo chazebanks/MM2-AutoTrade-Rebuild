@@ -5,12 +5,12 @@
   "latestMergedPR": 233,
   "tradeOutcome": "UNKNOWN",
   "blockers": [
-    "Nov 11 2026 12:30 PM first-party Supreme publication is visible on canonical pages; exact original Stage111 three-page raw capture, publisher hash, expiry and item mapping have NOT been independently admitted for a live market strategy.",
-    "Real practical liquidity, partner offer attractiveness and retradeability are not established from completed verified transactions; online listings and private Discord webhook claims are NOT fills.",
-    "Part3/Part4 exact client identity, revision and independent server-settlement proof remain inadequate for unattended automatic final Accept.",
-    "Research-only growth loss caps 0, 0.5, 1, 2, 3 percent remain simulation scenarios; no per-trade or cumulative risk budget has been approved."
+    "Supreme source was independently checked on November 25. The current archive retains its original cutoff 2026-11-25T12:09:59Z. A future edition requires genuine capture and data review.",
+    "No independently verified settled exchanges establish retradeability, player response models or actual portfolio rewards. Private V2 storage contains no verified real learning rows.",
+    "Historical client identity, offer revision and inventory deltas are partial. Full System 1 runtime, independent settlement and native compatibility remain unverified.",
+    "No approved listed-loss budget or release authority exists."
   ],
-  "nextAction": "NEXT CONVERSATION ONE ISSUE ONLY: read the pinned handoff and sequential workplan, recheck live GitHub state, then independently validate genuine first-party Supreme publisher revision via original Stage111->110->104->69 canonical raw-source capture (research only). Do not alter Part3/Part4/Delta, learning, offers or final Accept merely due to this plan.",
+  "nextAction": "Read the November 25 completion matrix and PR #323 at its actual head. Verify exact-source CI and archive expiry. The standalone manual analysis and private offline evidence preflight are the verified implementation scope; system-wide runtime and real outcome gates remain open.",
   "authority": {
     "authorizesTrade": false,
     "authorizesOffer": false,
@@ -23,6 +23,8 @@
   },
   "readBeforeCodeChange": [
     "pdiddler/START_HERE.md",
+    "pdiddler/system2/GINGERSCOPE_COMPLETION_MATRIX_2026_11_25.md",
+    "pdiddler/system2/GINGERSCOPE_COMPLETION_SPRINT_2026_11_25.md",
     "pdiddler/NEXT_CONVERSATION_HANDOFF_2026_11_11.md",
     "pdiddler/continuity/NEXT_WORKPLAN_2026_11_11.json",
     "pdiddler/continuity/LEGACY_CLEANUP_AUDIT_2026_11_11.md",
@@ -58,5 +60,13 @@
       "capability": "Pinned nine-gate autonomy release snapshot",
       "result": "MERGED_SEVEN_CHECKS_SUCCESS_NOT_AUTONOMOUS"
     }
-  ]
+  ],
+  "activeReview": {
+    "draft": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/323",
+    "branch": "research/gingerscope-completion-sprint-nov25",
+    "reviewedBaselineCommit": "bc467c1bfaff026b87e4b09979e1e9d581895bbc",
+    "matrix": "pdiddler/system2/GINGERSCOPE_COMPLETION_MATRIX_2026_11_25.md",
+    "sourceEvidence": "pdiddler/system2/supreme_publisher_parity_2026_11_25.json",
+    "manualEntrypoint": "pdiddler/system2/manual_portfolio_review.py"
+  }
 }

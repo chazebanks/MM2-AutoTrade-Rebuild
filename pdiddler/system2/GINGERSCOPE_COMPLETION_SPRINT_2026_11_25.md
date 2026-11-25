@@ -2,6 +2,10 @@
 
 Operator authorized starting the concentrated completion sprint. This is a project governance and evidence checkpoint, not a release or live deployment authorization.
 
+## Current recovery entry
+
+[Completion matrix and compatibility map](GINGERSCOPE_COMPLETION_MATRIX_2026_11_25.md) records the standalone manual portfolio candidate, verified publisher parity, private evidence checks and open requirements. The active public ref is `research/gingerscope-completion-sprint-nov25` on draft PR #323. The reviewed starting revision is `bc467c1bfaff026b87e4b09979e1e9d581895bbc`. Use the actual draft head and its workflow results to recover the current state. The earlier failure hypotheses below are preserved as history.
+
 ## Working rules
 - Continue from the actual verified checkpoint, never restart. One root cause at a time; batch independent offline tests and reuse existing components.
 - Reproduce errors, inspect logs and actual source, test a targeted repair, run inherited regressions, record exact results and continue. After three failed distinct attempts reassess the hypothesis. No test weakening, fabricated receipts, timestamps or permissions.
