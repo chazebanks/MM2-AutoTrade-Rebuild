@@ -11,6 +11,49 @@ python -m pip install -r pdiddler/system2/requirements-gingerscope.txt
 python -m pdiddler.gingerscope --help
 ```
 
+## Full-system qualification
+
+Use clean public and private draft checkouts in sibling directories on Linux.
+Install Lune 0.11.1 and the pinned Python requirements above. Run from the
+public checkout with an absolute private checkout path and a new receipt path.
+
+```sh
+python -m pdiddler.gingerscope qualify \
+  --lune "$(command -v lune)" --private-root /path/to/private-checkout \
+  --expect-public-revision "$(git rev-parse HEAD)" \
+  --expect-private-revision "$(git -C /path/to/private-checkout rev-parse HEAD)" \
+  --cycles 128 --copy-to /path/to/new-receipt.json
+```
+
+The test prints its current stage on stderr. The JSON receipt on stdout is
+the copyable evidence. The optional receipt file is created with owner-only
+permissions and refuses to overwrite a previous receipt. `PASS_FULL` means
+all seven controlled stages completed. `--public-only` returns
+`PASS_PUBLIC_SCOPE` and marks private evaluation as outstanding for that run.
+A failure has an exit code of 2 and a stage reason. Ctrl-C stops the run,
+cleans up the temporary synthetic database and returns exit code 130 with a
+partial `STOPPED` receipt. Start a new qualification after correcting the
+reported failure. Use the state recovery commands below for a separate
+operator-owned database.
+
+| Stage | Expected behavior |
+| --- | --- |
+| 1. Startup | Verify the clean source revisions, installed tools, fixed Supreme replay edition, Luau startup order and bounded Tablet/Play fixtures. |
+| 2. Inventory | Preserve separate accounts, exact variants, explicit unknown prices and protected holdings. |
+| 3. Strategy | Search competing bounded routes, compare both ledgers, and verify slot limits and protective arbitration. |
+| 4. Lifecycle | Consume the Luau observations through the Python application. Offer changes retire prior advice, and declines, interruptions and unknown closure stay distinct. |
+| 5. Accounting | Reconcile one controlled synthetic settlement, reopen and replay without a duplicate, exercise private eligibility, and recalculate the portfolio. |
+| 6. Endurance | Exercise concurrent ownership defenses and abrupt process death, retry safely, cross the fixed cutoff and a fixture edition transition, and measure a large search. |
+| 7. Adversarial | Reject malformed source, evidence, holdings, historical policy regressions and unsupported settlement or learning. |
+
+The Lune host uses in-memory services and the checked-in health and readiness
+code, P3 startup supervision, the P4 observer and protected lease handling.
+Its observation envelope carries synthetic terms, sequence, revision, slots
+and edition. Python validates the envelope and owns all local persistence.
+The optional private evaluator consumes the same recovered synthetic ledger.
+The pinned market input is evaluated at its fixed historical replay clock.
+The receipt also displays whether current-clock pricing is available.
+
 The default Supreme archive is a reviewed historical edition with an exact
 expiry of 2026-11-25T12:09:59Z. Use the current UTC clock with a fresh reviewed
 edition. Use an explicit replay clock for reproducible analysis of an archive.
@@ -136,8 +179,20 @@ apply to the supported app, historical client evidence, and release gates.
   provider and stopped at `CARD_CATEGORY_MISMATCH`. It now verifies the
   existing immutable historical fixture and replays at the recorded clock.
   The parser unit tests and the original bridge assertions still run.
+- Controlled settlement could apply a one-sided or unsupported stack offer
+  which had abstained in bilateral review. Settlement now requires the
+  current eligible bilateral review. The store also rejects empty sides.
+- The state API could open a lease after its edition expired, even though
+  the CLI already refused expired pricing. Lease creation now verifies the
+  source window inside the same transaction.
+- A backdated review could replace settled holdings before its evaluation
+  was rejected. Snapshot admission checks the committed settlement clock in
+  the transaction that updates the input revision.
 
 ## External validation
+
+The [supervised validation handoff](GINGERSCOPE_SUPERVISED_VALIDATION.md)
+records the environment, conditions, evidence and limits for each external gate.
 
 - Current pricing after the fixed archive cutoff needs a genuinely newer
   Supreme edition and review of its capture and census.

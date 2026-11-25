@@ -1,6 +1,6 @@
 {
   "schema": "gingerscope-requirements-matrix-v1",
-  "purpose": "Authoritative engineering backlog for the supported Gingerscope candidate",
+  "purpose": "Authoritative requirements and evidence matrix for Gingerscope final integration",
   "scope": "Offline implementation, controlled simulation and separately identified native/release evidence requirements",
   "sourceRevisions": {
     "public-baseline": {
@@ -176,6 +176,62 @@
         "pdiddler/ci/system2_native_partner_intent_mocks.luau": "faa93b41c3b2e319a54d2fc1c221fff73737d1c9d99b7fa8b274b628e23615d7",
         "pdiddler/ci/test_system2_partner_intent_evidence_oracle.py": "a166e8e972271545ddae562a3ec1739e0a8cbc977b064786460b98e987851873"
       }
+    },
+    "public-exact-offline-snapshot": {
+      "repository": "chazebanks/MM2-AutoTrade-Rebuild",
+      "branch": "research/gingerscope-completion-sprint-nov25",
+      "draftPullRequest": 323,
+      "commit": "f7b4ff33f4015315a26f41d3c6ed812e7711032c",
+      "observedMain": "44268df1e3080b49aa9e586851867fd602a3ce1f",
+      "gitHubActionsRunIds": [
+        45585610515,
+        45585610376,
+        45585610381
+      ],
+      "successfulWorkflowCount": 18,
+      "pythonRegressionPassed": 928,
+      "pythonInheritedSkipped": 1,
+      "intelligenceTestsPassed": 126,
+      "luauFixtureGroupsPassed": 62
+    },
+    "controlled-full-system": {
+      "publicBaseRevision": "public-exact-offline-snapshot",
+      "privateBaseRevision": "private-exact-snapshot",
+      "evidenceType": "Controlled public-scope qualification from the worktree and current source inspection. Use the rolling checkpoint for the exact full candidate receipt and GitHub Actions.",
+      "publicScopeStatus": "PASS_PUBLIC_SCOPE",
+      "worktreeClean": false,
+      "stage5Scope": "PASS_PUBLIC_CHECKS_PRIVATE_EVIDENCE_REQUIRED",
+      "privateStageStatus": "Use the rolling checkpoint for the exact public/private adapter pairing.",
+      "verifiedSummary": {
+        "generatedAlternatives": 16,
+        "generatedRoutes": 24,
+        "controlledOfferRevisions": 2,
+        "syntheticSettlementCount": 1,
+        "syntheticListedDelta": 8,
+        "enduranceCycles": 16,
+        "plannerPairsExamined": 20000
+      },
+      "verifiedStages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "verificationCommandId": "controlled-full-system",
+      "rollingCheckpoint": "https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit",
+      "sourceFileSha256": {
+        "pdiddler/gingerscope.py": "25b6980a685e6fd19aec412776f174e602c33879937e2c8bc59535b1c0e4a847",
+        "pdiddler/system2/qualification.py": "6069e3f2e31698cf30907ae1e9794f0d61868f5c669e4ed5053e132ec06c4974",
+        "pdiddler/system2/application_state.py": "594ef939b11ecda6710330e8b16918a51721dec398c291d09a819e918b930e3f",
+        "pdiddler/system2/controlled_host.py": "d58c4811d4d446e72b38207773a1e5da0ab790bdc64580852755d6b994b47f63",
+        "pdiddler/system2/qualification_endurance.py": "fd04133e0306e73f93303ca621ef0f41791a1d22aff04458d72aef56657b16f4",
+        "pdiddler/system2/qualification_adversarial.py": "906f06e411121f274c5dc43539fdeac7b7adf0d0e0f7793c9fea31184cd49311",
+        "pdiddler/ci/gingerscope_controlled_host.luau": "44697c5c3a7accb074e0fed694c779cb0a80d9a6435bf01c7135e1a6aec0a34b",
+        "private:scripts/qualification_evidence.py": "2a612e1d342cfca77248aa40cea3bc1e46cf57ba81057a8791516ad391bab06c"
+      }
     }
   },
   "implementationStatuses": [
@@ -283,6 +339,12 @@
     {
       "id": "passive-intent",
       "command": "lune run pdiddler/ci/system2_native_partner_intent_mocks.luau && python -m unittest pdiddler.ci.test_system2_partner_intent_evidence_oracle"
+    },
+    {
+      "id": "controlled-full-system",
+      "command": "python -m pdiddler.gingerscope qualify --lune /path/to/lune --private-root /path/to/private-checkout --cycles 32 --copy-to /private/new-receipt.json",
+      "dependency": "CPython 3.12, SQLite with JSON support, pinned project dependencies, Lune 0.11.1 and the authorized private draft checkout",
+      "authority": "Controlled synthetic evidence only"
     }
   ],
   "requirements": [
@@ -312,13 +374,18 @@
         "Health module initializes in isolation and rejects invalid context"
       ],
       "supportingTests": [
-        "pdiddler/ci/lune_pure_runtime_tests.luau"
+        "pdiddler/ci/lune_pure_runtime_tests.luau",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Pure health tests exercise the module directly. Loader fetches from mutable main and only runs health.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-baseline"
+        "public-baseline",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        1
       ]
     },
     {
@@ -353,18 +420,29 @@
       "supportingTests": [
         "pdiddler/ci/supervised_p3_atomic_bootstrap_mocks.luau",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_gingerscope_qualification.py",
+        "pdiddler/ci/test_qualification_adversarial.py"
       ],
       "evidenceLimitations": "Supported offline entry, private state, duplicate-controller fencing and recovery pass. Historical Luau health and current native launch remain separate.",
       "remainingWork": [
-        "Retain historical boot evidence and verify current native dependency closure separately."
+        "Current native ownership and stop behavior need an approved host and exact device build."
       ],
       "externalBlockers": [
         "Supported, authorized runtime interface and scoped operator validation"
       ],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "remainingWorkClassification": "SUPPORTED NATIVE CAPABILITY",
+      "supervisedValidationGates": [
+        2
+      ],
+      "supportedQualificationStages": [
+        1,
+        7
       ]
     },
     {
@@ -396,7 +474,8 @@
       ],
       "supportingTests": [
         "pdiddler/ci/supervised_p3_atomic_bootstrap_mocks.luau",
-        "pdiddler/ci/gingerscope_part2_startup_mocks.luau"
+        "pdiddler/ci/gingerscope_part2_startup_mocks.luau",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Nine Lune scenarios exercise the unchanged original Tablet and join-friend Play source with controlled UI and time dependencies. Device observations remain historical and current native validation is external.",
       "remainingWork": [],
@@ -405,7 +484,11 @@
       ],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-p2-focused"
+        "public-p2-focused",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        1
       ]
     },
     {
@@ -433,7 +516,7 @@
         "P2.STARTUP"
       ],
       "implementationStatus": "PARTIAL",
-      "verificationStatus": "NATIVE CLIENT VERIFIED",
+      "verificationStatus": "INTEGRATED AND VERIFIED",
       "acceptanceCriteria": [
         "Exact identity and quantity must remain tied to the source, and unknown must not become ineligible"
       ],
@@ -442,17 +525,30 @@
         "pdiddler/ci/system2_offer_identity_error_taxonomy_mocks.luau",
         "pdiddler/ci/system2_native_own_census_mocks.luau",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_supreme_market_editions.py"
+        "pdiddler/ci/test_supreme_market_editions.py",
+        "pdiddler/ci/test_controlled_host.py",
+        "pdiddler/ci/test_qualification_adversarial.py"
       ],
-      "evidenceLimitations": "Closed historical client observations remain bounded. The supported manual path adds distinct priced, priceless, excluded and unknown classifications. The supported manual route carries exact publisher IDs and distinguishes unknown, excluded, and priced items. Session observations are locally attributed.",
-      "remainingWork": [],
+      "evidenceLimitations": "Closed historical client observations remain bounded. The supported manual path adds distinct priced, priceless, excluded and unknown classifications. The supported manual route carries exact publisher IDs and distinguishes unknown, excluded, and priced items. Session observations are locally attributed. Current integrated exercise uses controlled in-memory Lune observations. The native evidence remains separately historical.",
+      "remainingWork": [
+        "Authoritative instance identity and exact quantities need a source with documented item and slot semantics."
+      ],
       "externalBlockers": [
         "Supported, authorized runtime interface and scoped operator validation"
       ],
       "verifiedSourceRevision": [
         "public-baseline",
         "public-focused-candidate",
-        "public-followup-local"
+        "public-followup-local",
+        "controlled-full-system"
+      ],
+      "remainingWorkClassification": "SUPPORTED NATIVE CAPABILITY AND EXTERNAL EVIDENCE",
+      "supervisedValidationGates": [
+        3
+      ],
+      "supportedQualificationStages": [
+        2,
+        7
       ]
     },
     {
@@ -491,18 +587,31 @@
         "pdiddler/ci/supervised_real_p3_rotation_handoff_mocks.luau",
         "pdiddler/ci/supervised_p3_atomic_bootstrap_mocks.luau",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_controlled_host.py",
+        "pdiddler/ci/test_gingerscope_qualification.py",
+        "pdiddler/ci/test_qualification_endurance.py"
       ],
-      "evidenceLimitations": "Controlled offline session ownership, stale lease fencing and restart pass. Historical client evidence remains bounded and native validation is separate.",
+      "evidenceLimitations": "Controlled offline session ownership, stale lease fencing and restart pass. Historical client evidence remains bounded and native validation is separate. Controlled validation verifies lease fencing and offer and settlement clock monotonicity.",
       "remainingWork": [
-        "Verify current supported native scanner and lease provenance separately."
+        "The approved client interface must expose current owner, session generation, and release provenance."
       ],
       "externalBlockers": [
         "Supported, authorized runtime interface and scoped operator validation"
       ],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "remainingWorkClassification": "SUPPORTED NATIVE CAPABILITY",
+      "supervisedValidationGates": [
+        2,
+        3
+      ],
+      "supportedQualificationStages": [
+        4,
+        6
       ]
     },
     {
@@ -539,11 +648,14 @@
         "pdiddler/ci/test_market_inventory_revision_gate.py",
         "pdiddler/ci/system2_native_market_inventory_offer_bridge_mocks.luau",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_controlled_host.py",
+        "pdiddler/ci/test_gingerscope_qualification.py",
+        "pdiddler/ci/test_qualification_adversarial.py"
       ],
       "evidenceLimitations": "Configuration and changed manual/observed offer inputs invalidate prior current recommendations. Retrieval cross-checks state bindings and refuses malformed or edited report and market metadata. Native control and authoritative outcomes remain independent.",
       "remainingWork": [
-        "Verify exact native server-side offer revision when supported evidence becomes available."
+        "A source with documented revision semantics must bind a native observer to exact current terms."
       ],
       "externalBlockers": [
         "Supported, authorized runtime interface and scoped operator validation",
@@ -552,7 +664,16 @@
       "verifiedSourceRevision": [
         "public-baseline",
         "public-focused-candidate",
-        "public-state-v2-focused"
+        "public-state-v2-focused",
+        "controlled-full-system"
+      ],
+      "remainingWorkClassification": "SUPPORTED NATIVE CAPABILITY AND EXTERNAL EVIDENCE",
+      "supervisedValidationGates": [
+        3
+      ],
+      "supportedQualificationStages": [
+        4,
+        7
       ]
     },
     {
@@ -590,18 +711,30 @@
         "pdiddler/ci/system2_native_v2_feedback_staging_mocks.luau",
         "pdiddler/ci/main_alt_manual_multitrade_delta_mocks.luau",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_controlled_host.py",
+        "pdiddler/ci/test_gingerscope_qualification.py",
+        "pdiddler/ci/test_qualification_adversarial.py"
       ],
-      "evidenceLimitations": "Controlled interruption and two-witness synthetic settlement exercise persistence, classification and separation. Authoritative real settlement is unverified.",
+      "evidenceLimitations": "Controlled interruption and two-witness synthetic settlement exercise persistence, classification and separation. Authoritative real settlement is unverified. The application rejects one-sided offers as candidates for controlled settlement.",
       "remainingWork": [
-        "Authoritative real settlement and inventory provenance remain external."
+        "A transaction-scoped outcome and independently attributable deltas for both sides are unavailable."
       ],
       "externalBlockers": [
         "Independent game-backed, two-sided settlement, exact session/revision and inventory provenance"
       ],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "remainingWorkClassification": "EXTERNAL EVIDENCE",
+      "supervisedValidationGates": [
+        4
+      ],
+      "supportedQualificationStages": [
+        4,
+        7
       ]
     },
     {
@@ -637,13 +770,18 @@
       "supportingTests": [
         "pdiddler/ci/test_manual_portfolio_review.py",
         "pdiddler/ci/test_multitrade_growth_replay.py",
-        "pdiddler/ci/test_stage120_corrected_guard_preview.py"
+        "pdiddler/ci/test_stage120_corrected_guard_preview.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Integrated standalone manual analysis uses analyst-provided paths. Runtime recovery has separate ownership.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-baseline"
+        "public-baseline",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        3
       ]
     },
     {
@@ -706,7 +844,7 @@
       "dependencies": [
         "P6.PHASE"
       ],
-      "implementationStatus": "PARTIAL",
+      "implementationStatus": "IMPLEMENTED",
       "verificationStatus": "INTEGRATED AND VERIFIED",
       "acceptanceCriteria": [
         "Trace all active dependencies, isolate unsafe/superseded defaults and retain verifiable rollback"
@@ -715,16 +853,20 @@
         "pdiddler/ci/test_c9_supreme_only_bootstrap_integrity.py",
         "pdiddler/ci/test_supreme_c9_pin_registry_nov17.py",
         "pdiddler/ci/test_continuity_manager.py",
-        "pdiddler/ci/test_gingerscope_application.py"
+        "pdiddler/ci/test_gingerscope_application.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
-      "evidenceLimitations": "The supported entry has an offline dependency closure and draft rollback references. Original branch-only and historical stages retain partial audit coverage.",
-      "remainingWork": [
-        "Preserve exact candidate release evidence and verify full historical coverage only where project behavior depends on it."
-      ],
+      "evidenceLimitations": "The qualification entry binds its desktop host, controlled observer, Python/SQLite state, and private evidence process. Archived native launchers retain separate historical scope.",
+      "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "baselineGapClassification": "DOCUMENTATION AND INTEGRATION",
+      "supportedQualificationStages": [
+        1
       ]
     },
     {
@@ -756,14 +898,19 @@
       "supportingTests": [
         "pdiddler/ci/test_manual_portfolio_review.py",
         "pdiddler/ci/test_supreme_only_strategy_research.py",
-        "pdiddler/ci/test_publisher_page_parity.py"
+        "pdiddler/ci/test_publisher_page_parity.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Historical evidence verified 189 priced weapons and 17 range rows. Counts apply to that immutable edition.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        1
       ]
     },
     {
@@ -797,7 +944,8 @@
       "supportingTests": [
         "pdiddler/ci/test_system2_catalog_discovery_diff.py",
         "pdiddler/ci/test_publisher_page_parity.py",
-        "pdiddler/ci/test_supreme_market_editions.py"
+        "pdiddler/ci/test_supreme_market_editions.py",
+        "pdiddler/ci/test_controlled_host.py"
       ],
       "evidenceLimitations": "Variable census, identity/status and first-party archive verification are tested with a pinned real historic edition and controlled changed publications. A genuinely new publication is separately needed for a fresh current quote.",
       "remainingWork": [
@@ -808,7 +956,15 @@
       ],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        2
+      ],
+      "remainingWorkClassification": "EXTERNAL EVIDENCE",
+      "supervisedValidationGates": [
+        1
       ]
     },
     {
@@ -838,13 +994,18 @@
         "Never price unknowns at zero, spend alt holdings in a main package, or offer Gingerscope"
       ],
       "supportingTests": [
-        "pdiddler/ci/test_manual_portfolio_review.py"
+        "pdiddler/ci/test_manual_portfolio_review.py",
+        "pdiddler/ci/test_controlled_host.py"
       ],
       "evidenceLimitations": "Manual holdings are operator-supplied; capacity is a paper bound.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-baseline"
+        "public-baseline",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        2
       ]
     },
     {
@@ -891,7 +1052,11 @@
       "verifiedSourceRevision": [
         "public-baseline",
         "public-focused-candidate",
-        "public-followup-local"
+        "public-followup-local",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        5
       ]
     },
     {
@@ -924,13 +1089,18 @@
       ],
       "supportingTests": [
         "pdiddler/ci/test_manual_portfolio_review.py",
-        "pdiddler/ci/test_supreme_only_bilateral_partner_friction_shadow.py"
+        "pdiddler/ci/test_supreme_only_bilateral_partner_friction_shadow.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Publisher demand and linear capped stacks are paper indicators. Negotiated stack pricing is unknown.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-baseline"
+        "public-baseline",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        3
       ]
     },
     {
@@ -967,14 +1137,21 @@
         "pdiddler/ci/test_manual_portfolio_review.py",
         "pdiddler/ci/test_counterparty_candidate_explorer.py",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_portfolio_planner.py"
+        "pdiddler/ci/test_portfolio_planner.py",
+        "pdiddler/ci/test_controlled_host.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Uses explicit hypothetical stocks and a bounded search with pruning counters and exhaustive comparison on tractable cases.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        2,
+        3
       ]
     },
     {
@@ -1008,16 +1185,19 @@
       "supportingTests": [
         "pdiddler/ci/test_attractiveness_evidence_lab.py",
         "pdiddler/ci/test_manual_portfolio_review.py",
-        "pdiddler/ci/test_portfolio_planner.py"
+        "pdiddler/ci/test_portfolio_planner.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Observed offline comparisons use both listed deltas, demand, portfolio change, ranges, capacity and burden. Empirical liquidity requirements remain in S2.4.EMPIRICAL.",
-      "remainingWork": [
-        "Empirical evidence requirements are tracked in S2.4.EMPIRICAL and S2.7.REAL."
-      ],
+      "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        3
       ]
     },
     {
@@ -1046,12 +1226,18 @@
       ],
       "supportingTests": [],
       "evidenceLimitations": "No complete candidate-level verification at the baseline.",
-      "remainingWork": [],
+      "remainingWork": [
+        "Representative settled exchanges and legitimate offer-level responses with sufficient denominators are unavailable."
+      ],
       "externalBlockers": [
         "Representative independently verified settled exchanges and legitimate offer-level responses"
       ],
       "verifiedSourceRevision": [
         "public-baseline"
+      ],
+      "remainingWorkClassification": "EXTERNAL EVIDENCE",
+      "supervisedValidationGates": [
+        5
       ]
     },
     {
@@ -1089,14 +1275,21 @@
       "supportingTests": [
         "pdiddler/ci/test_portfolio_planner.py",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_portfolio_simulation.py"
+        "pdiddler/ci/test_portfolio_simulation.py",
+        "pdiddler/ci/test_gingerscope_qualification.py",
+        "pdiddler/ci/test_qualification_endurance.py"
       ],
       "evidenceLimitations": "The planner reports opportunity assumptions, retained paths and search truncation. Partner availability, willingness and retradability are unverified.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-focused-candidate",
-        "public-scenario-focused"
+        "public-scenario-focused",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        3,
+        6
       ]
     },
     {
@@ -1137,7 +1330,9 @@
         "pdiddler/ci/test_manual_portfolio_review.py",
         "pdiddler/ci/test_portfolio_planner.py",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_portfolio_simulation.py"
+        "pdiddler/ci/test_portfolio_simulation.py",
+        "pdiddler/ci/test_gingerscope_qualification.py",
+        "pdiddler/ci/test_qualification_adversarial.py"
       ],
       "evidenceLimitations": "Lists per-exchange and cumulative published range downside only when every applied synthetic exchange has complete ranges. Compares no-loss and separately labeled hypothetical loss analyses. Market shocks are explicit publisher scenarios and numerical loss budgets remain inactive.",
       "remainingWork": [],
@@ -1146,7 +1341,12 @@
         "public-baseline",
         "public-focused-candidate",
         "public-scenario-focused",
-        "public-followup-local"
+        "public-followup-local",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        3,
+        7
       ]
     },
     {
@@ -1187,7 +1387,8 @@
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline"
-      ]
+      ],
+      "exactPrivateQualificationEvidence": "https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit"
     },
     {
       "id": "S2.7.OFFLINE",
@@ -1231,7 +1432,8 @@
         "private-focused-candidate",
         "private-exact-candidate",
         "private-exact-snapshot"
-      ]
+      ],
+      "exactPrivateQualificationEvidence": "https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit"
     },
     {
       "id": "S2.7.REAL",
@@ -1266,13 +1468,19 @@
         "pdiddler/ci/test_system2_private_v2_response_learning_gate.py"
       ],
       "evidenceLimitations": "No legitimate real training rows verified; a per-session digest cannot establish distinct people.",
-      "remainingWork": [],
+      "remainingWork": [
+        "Eligible real outcomes need decision-time quote provenance, independently corroborated labels, stable private participant grouping and temporal coverage."
+      ],
       "externalBlockers": [
         "Authorized and corroborated response/settlement data with stable privacy-preserving group identity and sufficient temporal coverage"
       ],
       "verifiedSourceRevision": [
         "public-baseline",
         "private-baseline"
+      ],
+      "remainingWorkClassification": "EXTERNAL EVIDENCE AND AUTHORIZED PRIVATE ACCESS",
+      "supervisedValidationGates": [
+        5
       ]
     },
     {
@@ -1313,17 +1521,20 @@
         "pdiddler/ci/test_market_inventory_revision_gate.py",
         "pdiddler/ci/test_portfolio_planner.py",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Configuration and changed manual/observed offer inputs invalidate prior current recommendations. Retrieval cross-checks state bindings and refuses malformed or edited report and market metadata. Native control and authoritative outcomes remain independent.",
-      "remainingWork": [
-        "Verify against current native/release evidence only when an authorized runtime is supported."
-      ],
+      "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
         "public-focused-candidate",
-        "public-state-v2-focused"
+        "public-state-v2-focused",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        3
       ]
     },
     {
@@ -1354,7 +1565,7 @@
         "S2.7.INGEST",
         "S2.8.ARBITRATION"
       ],
-      "implementationStatus": "PARTIAL",
+      "implementationStatus": "IMPLEMENTED",
       "verificationStatus": "INTEGRATED AND VERIFIED",
       "acceptanceCriteria": [
         "Exercise actual contracts across initialization, inventory, offers, outcomes and recovery; reject malformed or stale inputs"
@@ -1365,19 +1576,25 @@
         "pdiddler/ci/test_system2_native_to_private_v2_compatibility.py",
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_gingerscope_application_state.py",
-        "private:tests/integration_public_state_learning.py"
+        "private:tests/integration_public_state_learning.py",
+        "pdiddler/ci/test_controlled_host.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
-      "evidenceLimitations": "Controlled P3/P4 revisions feed the supported strategy and state paths. Real synthetic settlement records feed private learner tests. The frozen Luau/V2 native path remains independently verified only.",
-      "remainingWork": [
-        "Controlled application and independent staged V2 use different contracts. Validate any future authorized live integration with exact producer/consumer provenance."
-      ],
+      "evidenceLimitations": "Actual Lune fixture observations flow through the current advisory ledger and into the private evaluation of that same controlled settlement. Client-only V2 keeps its separate evidence contract. Public-scope qualification verifies the shared ledger. Use the exact full receipt for the private adapter pairing.",
+      "remainingWork": [],
       "externalBlockers": [
         "Supported, authorized runtime interface and scoped operator validation"
       ],
       "verifiedSourceRevision": [
         "public-baseline",
         "public-focused-candidate",
-        "private-focused-candidate"
+        "private-focused-candidate",
+        "controlled-full-system"
+      ],
+      "baselineGapClassification": "INTEGRATION AND COVERAGE",
+      "supportedQualificationStages": [
+        4,
+        5
       ]
     },
     {
@@ -1406,25 +1623,31 @@
         "ARCH.CLOSURE",
         "S2.8.BRIDGE"
       ],
-      "implementationStatus": "PARTIAL",
+      "implementationStatus": "IMPLEMENTED",
       "verificationStatus": "INTEGRATED AND VERIFIED",
       "acceptanceCriteria": [
         "Run component, integrated, economic, adversarial, recovery and performance checks at exact heads"
       ],
       "supportingTests": [
         "pdiddler/ci/test_release_readiness.py",
-        "pdiddler/ci/test_gingerscope_application.py"
+        "pdiddler/ci/test_gingerscope_application.py",
+        "pdiddler/ci/test_gingerscope_qualification.py",
+        "pdiddler/ci/test_qualification_adversarial.py"
       ],
-      "evidenceLimitations": "All 17 exact-head Actions workflows passed at the initial supported candidate. Follow-up worktree verification records its own source hashes until exact-head regression.",
-      "remainingWork": [
-        "Run exact-head regression for the follow-up candidate before closing offline release verification."
-      ],
+      "evidenceLimitations": "Use the seven-stage receipt and the exact public/private Actions results in the rolling checkpoint. Controlled qualification has its own acceptance criteria and grants no native or release authority.",
+      "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
         "public-focused-candidate",
         "public-exact-initial-candidate",
-        "public-followup-local"
+        "public-followup-local",
+        "controlled-full-system"
+      ],
+      "baselineGapClassification": "INTEGRATION, COVERAGE AND DOCUMENTATION",
+      "supportedQualificationStages": [
+        1,
+        7
       ]
     },
     {
@@ -1457,13 +1680,21 @@
         "pdiddler/ci/test_stage119_p3_parity_release_gate.py"
       ],
       "evidenceLimitations": "Historical observations do not establish current device state or server settlement.",
-      "remainingWork": [],
+      "remainingWork": [
+        "The current candidate requires an approved observation host and independent authoritative outcome evidence."
+      ],
       "externalBlockers": [
         "Supported, authorized runtime interface and scoped operator validation",
         "Independent game-backed, two-sided settlement, exact session/revision and inventory provenance"
       ],
       "verifiedSourceRevision": [
         "public-baseline"
+      ],
+      "remainingWorkClassification": "SUPPORTED NATIVE CAPABILITY AND EXTERNAL EVIDENCE",
+      "supervisedValidationGates": [
+        2,
+        3,
+        4
       ]
     },
     {
@@ -1498,13 +1729,17 @@
         "pdiddler/ci/test_release_readiness.py"
       ],
       "evidenceLimitations": "Draft/offline checks grant no release or live action authority.",
-      "remainingWork": [],
+      "remainingWork": [
+        "An exact release scope and approval are outstanding. Any future numerical loss policy requires separate evidence and approval."
+      ],
       "externalBlockers": [
         "Explicit release decision and approved budgets for any future loss policy"
       ],
       "verifiedSourceRevision": [
         "public-baseline"
-      ]
+      ],
+      "remainingWorkClassification": "OPERATOR AUTHORIZATION",
+      "supervisedValidationGates": []
     },
     {
       "id": "NEGOTIATION.PASSIVE",
@@ -1581,7 +1816,8 @@
         "public-baseline",
         "private-baseline",
         "private-exact-candidate"
-      ]
+      ],
+      "exactPrivateQualificationEvidence": "https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit"
     },
     {
       "id": "PRIVATE.CONTRACT",
@@ -1629,7 +1865,8 @@
         "private-focused-candidate",
         "private-exact-candidate",
         "private-exact-snapshot"
-      ]
+      ],
+      "exactPrivateQualificationEvidence": "https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit"
     },
     {
       "id": "PRIVATE.AUTHORITY",
@@ -1665,7 +1902,9 @@
         "private:tests/integration_public_state_learning.py"
       ],
       "evidenceLimitations": "Controlled SQLite schema, scope isolation, deduplicated synthetic settlement and private learner compatibility pass. Real authorized private transaction ingress and authoritative settlement remain external. The controlled synthetic settlement envelope uses two independent fixture witnesses, scope checks, and preserved transaction identity across restart.",
-      "remainingWork": [],
+      "remainingWork": [
+        "The private ingress lacks reviewed real transaction authority and authorized custody of the required source evidence."
+      ],
       "externalBlockers": [
         "Independent game-backed, two-sided settlement, exact session/revision and inventory provenance",
         "Authorized real collection and supported private access"
@@ -1675,7 +1914,13 @@
         "private-baseline",
         "public-focused-candidate",
         "private-focused-candidate"
-      ]
+      ],
+      "remainingWorkClassification": "EXTERNAL EVIDENCE AND AUTHORIZED PRIVATE ACCESS",
+      "supervisedValidationGates": [
+        4,
+        5
+      ],
+      "exactPrivateQualificationEvidence": "https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit"
     },
     {
       "id": "STATE.ATOMIC",
@@ -1706,16 +1951,23 @@
       ],
       "supportingTests": [
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_gingerscope_qualification.py",
+        "pdiddler/ci/test_controlled_host.py"
       ],
-      "evidenceLimitations": "Public SQLite stores versioned configuration/recovery, portfolio and observation state and migrates v1 to v2 transactionally. Private versioned model/evaluation artifacts carry their own metadata and rollback and remain isolated from public records.",
+      "evidenceLimitations": "Public SQLite stores versioned configuration/recovery, portfolio and observation state and migrates v1 to v2 transactionally. Private versioned model/evaluation artifacts carry their own metadata and rollback and remain isolated from public records. Controlled validation verifies lease fencing and offer and settlement clock monotonicity.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-focused-candidate",
         "public-state-v2-focused",
         "private-exact-snapshot",
-        "public-followup-local"
+        "public-followup-local",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        1,
+        4
       ]
     },
     {
@@ -1749,14 +2001,19 @@
       ],
       "supportingTests": [
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_qualification_endurance.py"
       ],
       "evidenceLimitations": "Migration and recovery of the supported offline application preserve recorded evidence and verify stale ownership, partial writes and closed-session advice. Current native recovery remains separate.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-focused-candidate",
-        "public-state-v2-focused"
+        "public-state-v2-focused",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        6
       ]
     },
     {
@@ -1793,18 +2050,29 @@
       "supportingTests": [
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_gingerscope_application_state.py",
-        "private:tests/integration_public_state_learning.py"
+        "private:tests/integration_public_state_learning.py",
+        "pdiddler/ci/test_controlled_host.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
-      "evidenceLimitations": "No complete candidate-level verification at the baseline.",
+      "evidenceLimitations": "The controlled outcome chain distinguishes decline, interruption, ambiguous UI closure and corroborated synthetic settlement. The same reconciled record survives reopen and redelivery and is eligible only for isolated private evaluation. Real settlement requires independent evidence. Controlled validation verifies lease fencing and offer and settlement clock monotonicity.",
       "remainingWork": [
-        "Preserve independent real settlement gate. Corroboration and accounting are isolated to controlled synthetic outcomes."
+        "The synthetic store is qualified for controlled accounting. A real settlement gate needs an approved independently corroborated outcome source."
       ],
       "externalBlockers": [
         "Independent game-backed, two-sided settlement, exact session/revision and inventory provenance"
       ],
       "verifiedSourceRevision": [
         "public-focused-candidate",
-        "private-focused-candidate"
+        "private-focused-candidate",
+        "controlled-full-system"
+      ],
+      "remainingWorkClassification": "EXTERNAL EVIDENCE",
+      "supervisedValidationGates": [
+        4
+      ],
+      "supportedQualificationStages": [
+        4,
+        5
       ]
     },
     {
@@ -1847,14 +2115,19 @@
         "pdiddler/ci/test_manual_portfolio_review.py",
         "pdiddler/ci/test_supreme_market_editions.py",
         "pdiddler/ci/test_gingerscope_application_state.py",
-        "pdiddler/ci/test_gingerscope_application.py"
+        "pdiddler/ci/test_gingerscope_application.py",
+        "pdiddler/ci/test_qualification_endurance.py"
       ],
       "evidenceLimitations": "Changed controlled Supreme editions recalculate the same account holdings, invalidate prior advice and preserve historical state. Real publication availability is independent.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        6
       ]
     },
     {
@@ -1883,7 +2156,7 @@
         "S2.8.ARBITRATION",
         "STATE.RECOVERY"
       ],
-      "implementationStatus": "PARTIAL",
+      "implementationStatus": "IMPLEMENTED",
       "verificationStatus": "INTEGRATED AND VERIFIED",
       "acceptanceCriteria": [
         "Essential controls remain visible, diagnostics omit private fields and refresh is bounded"
@@ -1892,18 +2165,25 @@
         "pdiddler/ci/system2_supreme_five_stage_gui_presentation_mocks.luau",
         "pdiddler/ci/system2_c9_idempotent_gui_writes_mocks.luau",
         "pdiddler/ci/test_manual_portfolio_review.py",
-        "pdiddler/ci/test_gingerscope_application.py"
+        "pdiddler/ci/test_gingerscope_application.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
-      "evidenceLimitations": "The CLI preserves separate account views, current/replay and source labels, unknown values, safe stop and sanitized status. Terminal color uses purple headings and black account headers where ANSI is supported. The native move/minimize and STOP/COPY overlay remain historical.",
-      "remainingWork": [
-        "Native movable/minimized panel and any current native STOP/COPY behavior require a separately supported host."
-      ],
+      "evidenceLimitations": "The supported desktop command exposes stage progress, terminal status, safe stopping and an explicitly copied sanitized receipt. Native move/minimize and STOP/COPY are separate device-host validation.",
+      "remainingWork": [],
       "externalBlockers": [
         "Supported, authorized runtime interface and scoped operator validation"
       ],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "baselineGapClassification": "SOFTWARE AND COVERAGE",
+      "supportedQualificationStages": [
+        1
+      ],
+      "supervisedValidationGates": [
+        2
       ]
     },
     {
@@ -1934,7 +2214,7 @@
         "STATE.ATOMIC",
         "UI.OPERATOR"
       ],
-      "implementationStatus": "PARTIAL",
+      "implementationStatus": "IMPLEMENTED",
       "verificationStatus": "INTEGRATED AND VERIFIED",
       "acceptanceCriteria": [
         "Compare tractable exhaustive reference, retain important alternatives and disclose truncation and hardware"
@@ -1944,18 +2224,25 @@
         "pdiddler/ci/test_counterparty_candidate_explorer.py",
         "pdiddler/ci/test_portfolio_planner.py",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_qualification_endurance.py"
       ],
-      "evidenceLimitations": "Small exhaustive agreement and bounded scenario benchmarks cover the offline planner. A managed Linux probe with 24 main identities, 12 counterparties and an 8-step/100,000-pair cap successfully persisted and reopened an identical 2.84 MB rendered report. No iPad performance estimate.",
-      "remainingWork": [
-        "Broader multi-account and device performance require measurements in their respective environments."
-      ],
+      "evidenceLimitations": "Qualification Stage 6 reports actual bounded desktop workload metrics, recovery cycles and resource pressure. Any iPad performance claim requires measurement on the intended supported device.",
+      "remainingWork": [],
       "externalBlockers": [
         "Device measurements for any future iPad performance claim"
       ],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "baselineGapClassification": "COVERAGE",
+      "supportedQualificationStages": [
+        6
+      ],
+      "supervisedValidationGates": [
+        2
       ]
     },
     {
@@ -1997,7 +2284,9 @@
         "pdiddler/ci/test_multi_axis_strategy_stress_lab.py",
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_portfolio_planner.py",
-        "pdiddler/ci/test_portfolio_simulation.py"
+        "pdiddler/ci/test_portfolio_simulation.py",
+        "pdiddler/ci/test_gingerscope_qualification.py",
+        "pdiddler/ci/test_qualification_endurance.py"
       ],
       "evidenceLimitations": "Four declared baseline strategies use bounded sequential comparison across up to 12 supplied phases. Verified gains, scarcity, unsuccessful opportunities, target acquisition and post-acquisition growth are hypothetical. Market repricing and changing price coverage remain separate from synthetic trade growth. Six independent measurement axes remain available.",
       "remainingWork": [],
@@ -2006,7 +2295,12 @@
         "public-baseline",
         "public-focused-candidate",
         "public-scenario-focused",
-        "public-followup-local"
+        "public-followup-local",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        3,
+        6
       ]
     },
     {
@@ -2046,7 +2340,8 @@
       ],
       "supportingTests": [
         "pdiddler/ci/test_manual_portfolio_review.py",
-        "pdiddler/ci/test_gingerscope_application.py"
+        "pdiddler/ci/test_gingerscope_application.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Clean isolated CPython setup exercised startup, example advisory, controlled session with interrupted outcome, sanitized recovery and package dependency validation at the initial exact public candidate.",
       "remainingWork": [],
@@ -2054,7 +2349,11 @@
       "verifiedSourceRevision": [
         "public-baseline",
         "public-focused-candidate",
-        "public-exact-initial-candidate"
+        "public-exact-initial-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        1
       ]
     },
     {
@@ -2100,14 +2399,21 @@
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_portfolio_planner.py",
         "pdiddler/ci/test_supreme_market_editions.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_gingerscope_qualification.py",
+        "pdiddler/ci/test_qualification_adversarial.py"
       ],
       "evidenceLimitations": "Verified scoped offline sources. Historical launchers remain unsafe for current use.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-baseline",
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        1,
+        7
       ]
     },
     {
@@ -2143,15 +2449,18 @@
         "Run verify/recover, summarize current outstanding work, preserve source evidence and report actual failures"
       ],
       "supportingTests": [
-        "pdiddler/ci/test_continuity_manager.py"
+        "pdiddler/ci/test_continuity_manager.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
-      "evidenceLimitations": "Continuity PASS covers 22 pinned sources and partial historical coverage.",
-      "remainingWork": [
-        "Update candidate checkpoint after exact verification"
-      ],
+      "evidenceLimitations": "Continuity PASS covers 22 pinned sources and partial historical coverage. The rolling checkpoint carries the exact draft heads and their current CI receipts.",
+      "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-baseline"
+        "public-baseline",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        1
       ]
     },
     {
@@ -2184,13 +2493,20 @@
       ],
       "supportingTests": [
         "pdiddler/ci/test_manual_portfolio_review.py",
-        "pdiddler/ci/test_gingerscope_application.py"
+        "pdiddler/ci/test_gingerscope_application.py",
+        "pdiddler/ci/test_controlled_host.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Verified for the supported controlled offline path. Native operation and external settlement remain distinct.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        2,
+        3
       ]
     },
     {
@@ -2223,14 +2539,20 @@
       "supportingTests": [
         "pdiddler/ci/test_market_inventory_revision_gate.py",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_controlled_host.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
-      "evidenceLimitations": "Configuration and changed manual/observed offer inputs invalidate prior current recommendations. Retrieval cross-checks state bindings and refuses malformed or edited report and market metadata. Native control and authoritative outcomes remain independent.",
+      "evidenceLimitations": "Configuration and changed manual/observed offer inputs invalidate prior current recommendations. Retrieval cross-checks state bindings and refuses malformed or edited report and market metadata. Native control and authoritative outcomes remain independent. Controlled validation verifies lease fencing and offer and settlement clock monotonicity.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-focused-candidate",
-        "public-state-v2-focused"
+        "public-state-v2-focused",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        4
       ]
     },
     {
@@ -2263,13 +2585,19 @@
       "supportingTests": [
         "pdiddler/ci/test_discord_v2_event_intake.py",
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_controlled_host.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Verified for the supported controlled offline path. Native operation and external settlement remain distinct.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        4
       ]
     },
     {
@@ -2303,14 +2631,21 @@
       "supportingTests": [
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_gingerscope_application_state.py",
-        "private:tests/integration_public_state_learning.py"
+        "private:tests/integration_public_state_learning.py",
+        "pdiddler/ci/test_controlled_host.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Application persistence and reporting plus the actual private learner verify a corroborated synthetic path. Synthetic growth never enters actual outcome records.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-focused-candidate",
-        "private-focused-candidate"
+        "private-focused-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        4,
+        5
       ]
     },
     {
@@ -2342,14 +2677,19 @@
       ],
       "supportingTests": [
         "pdiddler/ci/test_gingerscope_application.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_qualification_endurance.py"
       ],
       "evidenceLimitations": "Verified controlled restart, stale lease fencing, atomic v1-to-v2 migration, preserved unresolved evidence and historical advice retrieval without treating old advice as current.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-focused-candidate",
-        "public-state-v2-focused"
+        "public-state-v2-focused",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        6
       ]
     },
     {
@@ -2385,14 +2725,19 @@
         "pdiddler/ci/test_multitrade_growth_replay.py",
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_portfolio_planner.py",
-        "pdiddler/ci/test_portfolio_simulation.py"
+        "pdiddler/ci/test_portfolio_simulation.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Verified for the supported controlled offline path. Native operation and external settlement remain distinct.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-focused-candidate",
-        "public-scenario-focused"
+        "public-scenario-focused",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        3
       ]
     },
     {
@@ -2427,13 +2772,20 @@
         "pdiddler/ci/test_manual_portfolio_review.py",
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_portfolio_planner.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_gingerscope_qualification.py",
+        "pdiddler/ci/test_qualification_adversarial.py"
       ],
       "evidenceLimitations": "Verified for the supported controlled offline path. Native operation and external settlement remain distinct.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        3,
+        7
       ]
     },
     {
@@ -2468,14 +2820,19 @@
         "pdiddler/ci/test_evidence_quality_arbiter.py",
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_supreme_market_editions.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_qualification_adversarial.py"
       ],
-      "evidenceLimitations": "Configuration and changed manual/observed offer inputs invalidate prior current recommendations. Retrieval cross-checks state bindings and refuses malformed or edited report and market metadata. Native control and authoritative outcomes remain independent.",
+      "evidenceLimitations": "Configuration and changed manual/observed offer inputs invalidate prior current recommendations. Retrieval cross-checks state bindings and refuses malformed or edited report and market metadata. Native control and authoritative outcomes remain independent. Controlled validation verifies lease fencing and offer and settlement clock monotonicity.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
         "public-focused-candidate",
-        "public-state-v2-focused"
+        "public-state-v2-focused",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        7
       ]
     },
     {
@@ -2509,13 +2866,18 @@
         "pdiddler/ci/test_market_inventory_revision_gate.py",
         "pdiddler/ci/test_gingerscope_application.py",
         "pdiddler/ci/test_supreme_market_editions.py",
-        "pdiddler/ci/test_gingerscope_application_state.py"
+        "pdiddler/ci/test_gingerscope_application_state.py",
+        "pdiddler/ci/test_qualification_endurance.py"
       ],
       "evidenceLimitations": "Verified for the supported controlled offline path. Native operation and external settlement remain distinct.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        6
       ]
     },
     {
@@ -2549,7 +2911,8 @@
         "pdiddler/ci/test_evidence_quality_arbiter.py",
         "pdiddler/ci/test_system2_private_v2_response_learning_gate.py",
         "private:tests/test_synthetic_learning.py",
-        "private:tests/integration_public_state_learning.py"
+        "private:tests/integration_public_state_learning.py",
+        "pdiddler/ci/test_qualification_adversarial.py"
       ],
       "evidenceLimitations": "Verified synthetic event validation and holdout controls. Real ingestion remains gated and excluded from synthetic results.",
       "remainingWork": [],
@@ -2558,8 +2921,13 @@
         "public-focused-candidate",
         "private-focused-candidate",
         "private-exact-candidate",
-        "private-exact-snapshot"
-      ]
+        "private-exact-snapshot",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        7
+      ],
+      "exactPrivateQualificationEvidence": "https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit"
     },
     {
       "id": "E2E.SCALE",
@@ -2590,13 +2958,18 @@
       ],
       "supportingTests": [
         "pdiddler/ci/test_manual_portfolio_review.py",
-        "pdiddler/ci/test_portfolio_planner.py"
+        "pdiddler/ci/test_portfolio_planner.py",
+        "pdiddler/ci/test_qualification_endurance.py"
       ],
       "evidenceLimitations": "Verified for the supported controlled offline path. Native operation and external settlement remain distinct.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-focused-candidate"
+        "public-focused-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        6
       ]
     },
     {
@@ -2626,14 +2999,47 @@
         "Install/initialize, simulate, validate, safely stop and recover in a clean environment"
       ],
       "supportingTests": [
-        "pdiddler/ci/test_gingerscope_application.py"
+        "pdiddler/ci/test_gingerscope_application.py",
+        "pdiddler/ci/test_gingerscope_qualification.py"
       ],
       "evidenceLimitations": "Clean isolated CPython setup exercised startup, example advisory, controlled session with interrupted outcome, sanitized recovery and package dependency validation at the initial exact public candidate.",
       "remainingWork": [],
       "externalBlockers": [],
       "verifiedSourceRevision": [
-        "public-exact-initial-candidate"
+        "public-exact-initial-candidate",
+        "controlled-full-system"
+      ],
+      "supportedQualificationStages": [
+        1
       ]
     }
-  ]
+  ],
+  "supervisedValidationProtocol": "pdiddler/system2/GINGERSCOPE_SUPERVISED_VALIDATION.md",
+  "finalIntegrationAudit": {
+    "requirementsReviewed": 54,
+    "baselinePublic": "f7b4ff33f4015315a26f41d3c6ed812e7711032c",
+    "baselinePrivate": "026e8865d09066c358288a7239598ec6a088fba9",
+    "baselineImplementationCounts": {
+      "IMPLEMENTED": 38,
+      "PARTIAL": 13,
+      "NOT IMPLEMENTED": 3
+    },
+    "currentImplementationCounts": {
+      "IMPLEMENTED": 43,
+      "PARTIAL": 8,
+      "NOT IMPLEMENTED": 3
+    },
+    "supportedCandidate": "CONTROLLED DESKTOP",
+    "historicalScope": "Original safety and source-pinned receipts retain their specific tiers. The project history index remains partial.",
+    "exactCurrentEvidence": "https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit",
+    "marketObservation": {
+      "officialRecaptureUtc": "2026-11-25T15:10:31.975049Z",
+      "matchedPublishedPageHashes": 4,
+      "publisherEdition": "2026-11-23T19:13:44-05:00",
+      "archiveSha256": "3f0996b9ac20f3c4689519e1faf65e83796bce8b2d6afe6ad4d2e705ffca525e",
+      "archiveExpiresUtc": "2026-11-25T12:09:59Z",
+      "replayUtc": "2026-11-25T07:52:05Z",
+      "currentClockStatus": "PINNED_EDITION_OUTSIDE_VALIDITY_WINDOW"
+    }
+  }
 }

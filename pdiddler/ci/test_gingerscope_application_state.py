@@ -107,6 +107,22 @@ class ApplicationStateTests(unittest.TestCase):
                 )
             self.assertEqual(state.inputs()["accounts"], ACCOUNTS)
 
+    def test_session_cannot_open_before_capture_or_after_source_expiry(self):
+        with StateStore(self.path, scope="synthetic") as state:
+            inputs = dict(
+                market_sha256=MARKET_HASH, publisher_updated_at=PUBLISHED, captured_at=CAPTURED,
+                expires_at=EXPIRES, accounts=ACCOUNTS,
+            )
+            for now in ("2026-11-25T06:59:59Z", "2026-11-25T12:00:01Z"):
+                with self.subTest(now=now), self.assertRaisesRegex(StateError, "market source"):
+                    state.start_session("episode", account="main", now=now,
+                                        lease_until="2026-11-25T12:10:00Z", inputs=inputs)
+            self.assertIsNone(state.inputs())
+            self.assertEqual(state.summary()["activeSessions"], 0)
+            token = state.start_session("episode", account="main", now=EXPIRES,
+                                        lease_until="2026-11-25T12:10:00Z", inputs=inputs)
+            self.assertTrue(state.stop_session("episode", owner=token, now="2026-11-25T12:00:01Z"))
+
     def test_older_edition_and_stale_inventory_writer_are_rejected(self):
         with StateStore(self.path) as state:
             sync(state)
@@ -313,6 +329,51 @@ class ApplicationStateTests(unittest.TestCase):
                                        transaction_id="x", revision=1, witnesses=witnesses())
             self.assertEqual(state.synthetic_settlement_rows(), [])
             self.assertEqual(state.inputs()["accounts"], ACCOUNTS)
+
+    def test_post_settlement_inputs_cannot_be_read_or_reopened_at_an_earlier_clock(self):
+        with StateStore(self.path, scope="synthetic") as state:
+            sync(state, accounts={"main": GIVE, "alt": {}},
+                 listed_values={"godly:Fang": 10, "godly:Boneblade": 15})
+            token = state.start_session("episode", account="main", now=NOW,
+                                        lease_until=LEASE_END, counterparty=RECEIVE)
+            offer(state, token)
+            state.settle_synthetic("episode", owner=token, now=LATER, transaction_id="simulation",
+                                   revision=1, witnesses=witnesses())
+            state.set_review_configuration({"max_pairs": 10})
+            revision = state.inputs()["inputRevision"]
+            self.assertGreater(revision, 2)
+            with self.assertRaisesRegex(StateError, "committed synthetic settlement"):
+                state.start_session("backdated", account="main", now=NOW, lease_until=LEASE_END)
+            with self.assertRaisesRegex(StateError, "committed synthetic settlement"):
+                state.record_evaluation("too-early", input_revision=revision, report={}, evaluated_at=NOW)
+            self.assertTrue(state.record_evaluation("admissible", input_revision=revision,
+                                                   report={}, evaluated_at=LATER))
+            self.assertIsNotNone(state.current_evaluation("admissible", now=LATER))
+
+        # An earlier release could persist a backdated report in this schema.
+        with sqlite3.connect(self.path) as connection:
+            connection.execute("UPDATE evaluations SET evaluated=? WHERE id='admissible'",
+                               ("2026-11-25T08:00:00.000000Z",))
+        with StateStore(self.path, scope="synthetic") as state:
+            self.assertIsNone(state.current_evaluation("admissible", now=LATER))
+            self.assertIsNotNone(state.evaluation_history("admissible"))
+
+    def test_one_sided_observation_cannot_become_a_bilateral_settlement(self):
+        with StateStore(self.path, scope="synthetic") as state:
+            inventory = {"main": {}, "alt": {}}
+            sync(state, accounts=inventory, listed_values={"godly:Boneblade": 15})
+            token = state.start_session("episode", account="main", counterparty=RECEIVE,
+                                        now=NOW, lease_until=LEASE_END)
+            self.assertTrue(offer(state, token, give={}, receive=RECEIVE))
+            agreeing = [
+                {"side": "account", "source_id": "observer-a", "before": {}, "after": RECEIVE},
+                {"side": "counterparty", "source_id": "observer-b", "before": RECEIVE, "after": {}},
+            ]
+            with self.assertRaisesRegex(StateError, "bilateral"):
+                state.settle_synthetic("episode", owner=token, now=LATER,
+                                       transaction_id="one-sided", revision=1, witnesses=agreeing)
+            self.assertEqual(state.inputs()["accounts"], inventory)
+            self.assertEqual(state.synthetic_settlement_rows(), [])
 
     def test_unsafe_synthetic_offers_do_not_change_holdings(self):
         protected = {"ancient:Gingerscope": 1}

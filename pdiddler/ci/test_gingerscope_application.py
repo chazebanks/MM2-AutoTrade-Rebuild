@@ -225,14 +225,14 @@ class ApplicationTests(unittest.TestCase):
         self.assertIsNone(self.invoke("current", args=[old["evaluationId"]])["evaluation"])
         self.assertIsNotNone(self.invoke("current", args=[new["evaluationId"]])["evaluation"])
 
-    def test_synthetic_settlement_is_counted_once_and_preserves_reconciliation_after_replay(self):
+    def settlement_request(self, copies):
         fixture = "fixture-settlement"
         catalog = archive()
         path = self.folder / "market.json"
         path.write_bytes(catalog)
         options = ("--catalog", str(path), "--expected-market-sha256", sha256(catalog).hexdigest())
-        own = {"godly:Bioblade": 1}
-        other = {"godly:RemovedWeapon": 1}
+        own = {"godly:Bioblade": copies}
+        other = {"godly:RemovedWeapon": copies}
         request = {
             "accounts": {"main": own, "alt": {}}, "sessionId": fixture, "counterpartyStock": other,
             "events": [
@@ -249,6 +249,10 @@ class ApplicationTests(unittest.TestCase):
                 ],
             },
         }
+        return request, options
+
+    def test_synthetic_settlement_is_counted_once_and_preserves_reconciliation_after_replay(self):
+        request, options = self.settlement_request(1)
         settled = self.invoke("simulate-session", data=request, args=[str(self.request)],
                               clock=BASE_CAPTURE, options=options)["status"]
         self.assertEqual(settled["syntheticSettlements"], 1)
@@ -257,3 +261,17 @@ class ApplicationTests(unittest.TestCase):
         self.invoke("simulate-session", data=request, args=[str(self.request)],
                     clock=BASE_CAPTURE, options=options, expected=2)
         self.assertEqual(self.invoke("status", clock=BASE_CAPTURE), settled)
+        stale = self.invoke("review", data={"accounts": request["accounts"]},
+                            args=[str(self.request)], clock=BASE_CAPTURE, options=options, expected=2)
+        self.assertIn("predates a committed synthetic settlement", stale)
+        self.assertEqual(self.invoke("status", clock=BASE_CAPTURE), settled)
+
+    def test_settlement_cannot_bypass_abstention_on_a_stack(self):
+        request, options = self.settlement_request(2)
+        failure = self.invoke("simulate-session", data=request, args=[str(self.request)],
+                              clock=BASE_CAPTURE, options=options, expected=2)
+        self.assertIn("current, eligible bilateral evaluation", failure)
+        summary = self.invoke("status", clock=BASE_CAPTURE)
+        self.assertEqual(summary["syntheticSettlements"], 0)
+        self.assertEqual(summary["activeSessions"], 0)
+        self.assertIsNone(summary["realizedGrowth"])

@@ -10,6 +10,8 @@
 
 ## November 25 completion review
 
+Run the supported seven-stage qualification with `python -m pdiddler.gingerscope qualify` against the exact public and private drafts. The [qualification instructions](system2/GINGERSCOPE_OFFLINE.md#full-system-qualification) cover startup, current-stage output, STOP/COPY, and recovery. The [supervised validation handoff](system2/GINGERSCOPE_SUPERVISED_VALIDATION.md) records the external evidence gates.
+
 Use the [machine-readable requirements matrix](system2/gingerscope_requirements.json) and [cross-system dependency map](system2/GINGERSCOPE_DEPENDENCY_MAP.md). The [offline application guide](system2/GINGERSCOPE_OFFLINE.md) covers installation, advisory analysis, controlled observations and application recovery. The [November 25 baseline review](system2/GINGERSCOPE_COMPLETION_MATRIX_2026_11_25.md) records the prior standalone candidate and historical evidence. Verify the current draft head, its exact CI and Supreme archive expiry.
 
 ## NOV 11 2026 — VERIFIED PLAN/HANDOFF ENTRYPOINT

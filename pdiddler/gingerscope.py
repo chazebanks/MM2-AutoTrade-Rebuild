@@ -183,9 +183,34 @@ def _review(args, state, catalog, edition, clock, clock_kind):
         **_input_fields(state, edition, request["accounts"]),
         expected_input_revision=starting["inputRevision"] if starting is not None else 0,
         expected_configuration_revision=configuration_revision,
+        evaluated_at=clock,
     ) if state else None
     evaluation = _record(state, revision, report, clock)
     return {"inputRevision": revision, "evaluationId": evaluation, "clock": clock_kind, "report": report}
+
+
+def _controlled_offer_view(catalog, edition, clock, accounts, counterparty, event):
+    try:
+        return evaluate_offer(catalog, accounts["main"], counterparty,
+                              event.get("give"), event.get("receive"),
+                              evaluated_at_utc=clock, edition=edition)
+    except RequestError as error:
+        return {"status": "ABSTAIN", "reason": str(error)}
+
+
+def _record_controlled_offer(state, input_revision, event, view, portfolio, edition, clock, clock_kind):
+    report = {"mode": "CONTROLLED_OBSERVATION", "clock": clock_kind,
+              "market": edition.summary(), "portfolio": portfolio, "offer": view, "authority": AUTHORITY}
+    evaluation = _record(state, input_revision, report, clock, session_id=event["session_id"],
+                         offer_revision=event["revision"])
+    return {"evaluationId": evaluation, "offerRevision": event["revision"], "offer": view}
+
+
+def _require_settlement_review(state, evaluation, revision, clock):
+    if (evaluation is None or evaluation["offerRevision"] != revision
+            or evaluation["offer"].get("disposition") != "NON_LOSS_PAPER_COMPARISON"
+            or state.current_evaluation(evaluation["evaluationId"], now=clock) is None):
+        raise StateError("Synthetic settlement requires a current, eligible bilateral evaluation.")
 
 
 def _simulate(args, state, catalog, edition, clock, clock_kind):
@@ -216,16 +241,9 @@ def _simulate(args, state, catalog, edition, clock, clock_kind):
     views = {}
     for index, event in enumerate(events):
         if event.get("kind") in OFFER_EVENTS:
-            try:
-                views[index] = evaluate_offer(
-                    catalog, request["accounts"]["main"], request["counterpartyStock"],
-                    event.get("give"), event.get("receive"), evaluated_at_utc=clock,
-                    edition=edition,
-                )
-            except RequestError as error:
-                # Preserve a validly shaped observation even when its economic
-                # inputs cannot justify a recommendation.
-                views[index] = {"status": "ABSTAIN", "reason": str(error)}
+            views[index] = _controlled_offer_view(
+                catalog, edition, clock, request["accounts"], request["counterpartyStock"], event,
+            )
 
     lease_until = (utc(clock) + timedelta(minutes=2)).isoformat()
     owner = state.start_session(session_id, account="main", now=clock, lease_until=lease_until,
@@ -238,15 +256,12 @@ def _simulate(args, state, catalog, edition, clock, clock_kind):
         for index, event in enumerate(events):
             is_new = state.observe(event, owner=owner, now=clock)
             if is_new and index in views:
-                report = {"mode": "CONTROLLED_OBSERVATION", "clock": clock_kind,
-                          "market": edition.summary(), "portfolio": portfolio,
-                          "offer": views[index], "authority": AUTHORITY}
-                offer_revision = event["revision"]
-                evaluation = _record(state, revision, report, clock, session_id=session_id,
-                                     offer_revision=offer_revision)
-                evaluations.append({"evaluationId": evaluation, "offerRevision": offer_revision,
-                                    "offer": views[index]})
+                evaluations.append(_record_controlled_offer(
+                    state, revision, event, views[index], portfolio, edition, clock, clock_kind,
+                ))
         if settlement is not None:
+            _require_settlement_review(state, evaluations[-1] if evaluations else None,
+                                       settlement["revision"], settlement["at"])
             state.settle_synthetic(
                 session_id, owner=owner, now=settlement["at"],
                 transaction_id=settlement["transaction_id"], revision=settlement["revision"],
@@ -336,6 +351,15 @@ def _parser():
     changes.add_argument("current", type=int)
     commands.add_parser("status", help="Export a sanitized operational summary")
     commands.add_parser("recover", help="Release expired ownership and export sanitized status")
+    qualify = commands.add_parser("qualify", help="Run seven controlled full-system qualification stages")
+    qualify.add_argument("--lune", default="lune", help="Path to Lune 0.11.1")
+    scope = qualify.add_mutually_exclusive_group(required=True)
+    scope.add_argument("--private-root", type=Path, help="Exact reviewed private checkout")
+    scope.add_argument("--public-only", action="store_true", help="Exercise public stages without private evaluation")
+    qualify.add_argument("--expect-public-revision", help="Required clean public revision")
+    qualify.add_argument("--expect-private-revision", help="Required clean private revision")
+    qualify.add_argument("--cycles", type=int, default=32, help="Bounded endurance session count, 1–128")
+    qualify.add_argument("--copy-to", type=Path, help="New file for the sanitized qualification receipt")
     commands.add_parser("configure", help="Save bounded default search settings").add_argument(
         "input", type=Path,
     )
@@ -416,6 +440,12 @@ def _text_review(review, *, color=False):
 
 def main(argv=None):
     args = _parser().parse_args(argv)
+    if args.command == "qualify":
+        from pdiddler.system2.qualification import qualify
+
+        receipt, status = qualify(args)
+        print(json.dumps(receipt, indent=2, allow_nan=False))
+        return status
     try:
         if args.database is None and args.command in {
             "status", "recover", "configure", "current", "history", "portfolio-diff", "simulate-session",

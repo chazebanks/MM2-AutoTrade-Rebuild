@@ -5,12 +5,12 @@
   "latestMergedPR": 233,
   "tradeOutcome": "UNKNOWN",
   "blockers": [
-    "Supreme source was independently checked on November 25. The current archive retains its original cutoff 2026-11-25T12:09:59Z. A future edition requires genuine capture and data review.",
+    "The reviewed Supreme archive expired at 2026-11-25T12:09:59Z. The official November 25 15:10 UTC recapture matches the same publication and cannot extend the window. The original historical replay clock remains usable.",
     "No independently verified settled exchanges establish retradeability, player response models or actual portfolio rewards. Private V2 storage contains no verified real learning rows.",
     "Historical client identity, offer revision and inventory deltas are partial. Full System 1 runtime, independent settlement and native compatibility remain unverified.",
     "No approved listed-loss budget or release authority exists."
   ],
-  "nextAction": "Recover the current draft heads and run the supported offline entry point and source-bound regressions. Consult the machine-readable requirements for remaining software and external verification. Keep real settlement and release gates closed.",
+  "nextAction": "Run the canonical seven-stage controlled qualification against the exact reviewed public and private draft heads. Use the supervised handoff when its supported environment and independent evidence are available.",
   "authority": {
     "authorizesTrade": false,
     "authorizesOffer": false,
@@ -65,12 +65,14 @@
   "activeReview": {
     "draft": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/323",
     "branch": "research/gingerscope-completion-sprint-nov25",
-    "reviewedBaselineCommit": "2622777c47c7913a2b9097efc9d8c6283e7ba04f",
+    "reviewedBaselineCommit": "f7b4ff33f4015315a26f41d3c6ed812e7711032c",
     "matrix": "pdiddler/system2/gingerscope_requirements.json",
     "sourceEvidence": "pdiddler/system2/supreme_publisher_parity_2026_11_25.json",
     "manualEntrypoint": "pdiddler/gingerscope.py",
     "installation": "pdiddler/system2/GINGERSCOPE_OFFLINE.md",
     "dependencyMap": "pdiddler/system2/GINGERSCOPE_DEPENDENCY_MAP.md",
-    "rollingCheckpoint": "https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit"
+    "rollingCheckpoint": "https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit",
+    "qualificationEntrypoint": "python -m pdiddler.gingerscope qualify",
+    "supervisedHandoff": "pdiddler/system2/GINGERSCOPE_SUPERVISED_VALIDATION.md"
   }
 }

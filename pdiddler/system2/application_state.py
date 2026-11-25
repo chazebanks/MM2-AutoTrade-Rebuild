@@ -261,9 +261,17 @@ class StateStore:
             "INSERT INTO inputs (market, accounts) VALUES (?, ?)", (market, accounts)
         ).lastrowid
 
+    def _require_settlement_clock(self, revision, clock):
+        if self._db.execute(
+            """SELECT 1 FROM settlements t JOIN sessions settled ON settled.id=t.session
+               WHERE t.resulting_revision<=? AND settled.last_seen>? LIMIT 1""",
+            (revision, clock),
+        ).fetchone():
+            raise StateError("The clock predates a committed synthetic settlement in this input revision.")
+
     def sync_inputs(self, *, market_sha256, publisher_updated_at, captured_at, expires_at,
                     accounts, listed_values=None, expected_input_revision=None,
-                    expected_configuration_revision=None):
+                    expected_configuration_revision=None, evaluated_at=None):
         """Persist validated Supreme provenance and manually supplied account holdings.
 
         The caller verifies the corresponding archive bytes before calling. Listed
@@ -273,11 +281,18 @@ class StateStore:
             market_sha256, publisher_updated_at, captured_at, expires_at,
             accounts, listed_values, expected_input_revision,
         )
+        evaluated = None if evaluated_at is None else _clock(evaluated_at)
         with self._write():
             if (expected_configuration_revision is not None
                     and self.review_configuration()[0] != expected_configuration_revision):
                 raise StateError("Review configuration changed. Evaluate the inputs again.")
-            return self._sync_prepared(*prepared)
+            revision = self._sync_prepared(*prepared)
+            if evaluated is not None:
+                row = self._input_row(revision)
+                if not row["captured"] <= evaluated <= row["expires"]:
+                    raise StateError("The review's market source is unavailable at the evaluation time.")
+                self._require_settlement_clock(revision, evaluated)
+            return revision
 
     def review_configuration(self):
         """Read the latest explicit local search defaults and their revision."""
@@ -418,6 +433,9 @@ class StateStore:
             initial = self._input_row()
             if initial is None:
                 raise StateError("Record portfolio and market inputs before opening a session.")
+            if not initial["captured"] <= now <= initial["expires"]:
+                raise StateError("The session's market source is unavailable at the opening time.")
+            self._require_settlement_clock(initial["revision"], now)
             self._db.execute(
                 "INSERT INTO sessions VALUES (?, ?, ?, ?, ?, 'PENDING', NULL, 0, 0, ?, ?)",
                 (session_id, account, _digest(token), initial["revision"], partner, now, lease_until),
@@ -521,6 +539,7 @@ class StateStore:
             if (current is None or current["revision"] != input_revision
                     or not current["captured"] <= evaluated <= current["expires"]):
                 raise StateError("The evaluation's portfolio or source edition is stale.")
+            self._require_settlement_clock(input_revision, evaluated)
             sequence = None
             if session_id is not None:
                 session = self._session(session_id)
@@ -564,6 +583,10 @@ class StateStore:
                LEFT JOIN sessions s ON s.id=e.session
                WHERE e.id=? AND i.revision=(SELECT max(revision) FROM inputs)
                  AND e.evaluated<=? AND m.expires>=?
+                 AND NOT EXISTS (
+                     SELECT 1 FROM settlements t JOIN sessions settled ON settled.id=t.session
+                     WHERE t.resulting_revision<=i.revision AND settled.last_seen>e.evaluated
+                 )
                  AND ((e.session IS NULL AND NOT EXISTS (
                            SELECT 1 FROM evaluations newer WHERE newer.input_revision=e.input_revision
                                AND newer.session IS NULL
@@ -620,7 +643,9 @@ class StateStore:
             offer = json.loads(trade["payload"])
             give = _holdings(offer["give"], limit=PHYSICAL_SLOTS, max_quantity=COPIES_PER_SLOT_ASSUMPTION)
             receive = _holdings(offer["receive"], limit=PHYSICAL_SLOTS, max_quantity=COPIES_PER_SLOT_ASSUMPTION)
-            if (not (give or receive) or give.keys() & receive.keys()
+            if not give or not receive:
+                raise StateError("Synthetic settlement requires a bilateral exchange with both sides present.")
+            if (give.keys() & receive.keys()
                     or any(item.split(":", 1)[1].casefold() == "gingerscope" for item in give)):
                 raise StateError("The synthetic offer conflicts with inventory protections.")
             prices = json.loads(current["prices"])
