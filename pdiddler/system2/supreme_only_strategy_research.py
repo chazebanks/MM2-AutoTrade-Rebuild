@@ -584,7 +584,8 @@ def review_bilateral_batch(catalog_bytes, *, request, evaluated_at_utc):
         return {**blocked("PAPER_ECONOMICS_AND_HYPOTHETICAL_INCENTIVES_ONLY"),
                 "schema":schema,"status":"SUPREME_ONLY_INTEGRATED_BILATERAL_RESEARCH",
                 "source":provenance,"simulationOnly":True,
-                "sourceFreshnessProven":True,"sameArchivedSourceAndArithmetic":True,
+                "sourceFreshnessProven":False,"sourceWithinSuppliedEvaluationWindow":True,
+                "sameArchivedSourceAndArithmetic":True,
                 "hypotheticalAlternatives":rows, "isOfferRanking":False,
                 "actualPartnerOwnershipVerified":False,"serverTradeSettlementProven":False,
                 "maySendDiscordWebhook":False}
