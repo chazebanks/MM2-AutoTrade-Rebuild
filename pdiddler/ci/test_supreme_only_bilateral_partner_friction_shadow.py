@@ -200,5 +200,43 @@ class BilateralIncentiveShadowTests(unittest.TestCase):
   self.assertTrue(all(not r["tradeActionable"] for r in x["routes"]))
   self.assertFalse(x["authorizesTrade"])
   self.assertFalse(x["authorizesAccept"])
+
+class RenewedBilateralSourceTests(unittest.TestCase):
+ def setUp(self):
+  from pathlib import Path
+  from datetime import datetime
+  self.raw=(Path(__file__).resolve().parents[1]/
+    "system2/supreme_only_189_research_catalog_2026_11_25_publication_nov23.json").read_bytes()
+  self.capture=int(datetime.fromisoformat("2026-11-25T06:09:59+00:00").timestamp())
+
+ def test_shared_source_reprices_hypothetical_partner_incentive(self):
+  r=lab.evaluate(request(),now_epoch=self.capture,source_bytes=self.raw)
+  self.assertEqual(r["status"],"BILATERAL_FRICTION_SHADOW_RESEARCH_ONLY")
+  self.assertEqual(r["sourcePublisherEdition"],"2026-11-23T19:13:44-05:00")
+  self.assertEqual(r["sourceCaptureUtc"],"2026-11-25T06:09:59Z")
+  self.assertEqual(r["routes"][0]["ourSupremeListedDelta"],75)
+  self.assertEqual(r["routes"][0]["partnerSupremeListedDelta"],-75)
+  self.assertIn("HYPOTHETICAL_VALUE_WATCHER_HAS_PAPER_DISINCENTIVE",r["routes"][0]["warnings"])
+  self.assertIsNone(r["empiricalPartnerAcceptanceProbability"])
+  self.assertFalse(r["authorizesOffer"])
+
+ def test_expired_or_tampered_explicit_source_cannot_fall_back(self):
+  for clock,raw,reason in (
+     (self.capture+21601,self.raw,"SOURCE_EXPIRED_NO_OTHER_LIST_FALLBACK"),
+     (self.capture-1,self.raw,"CAPTURE_FROM_FUTURE"),
+     (self.capture,self.raw+b" ","CATALOG_GIT_BLOB_MISMATCH"),
+     (NOW,b"{}","CATALOG_GIT_BLOB_MISMATCH")):
+   with self.subTest(clock=clock,reason=reason):
+    r=lab.evaluate(request(),now_epoch=clock,source_bytes=raw)
+    self.assertEqual(r["status"],"BLOCKED")
+    self.assertIn(reason,r["reason"])
+    self.assertFalse(r["authorizesAccept"])
+  self.assertEqual(lab.evaluate(request(),now_epoch=self.capture)["status"],"BLOCKED")
+
+ def test_old_historical_default_stays_reproducible(self):
+  r=lab.evaluate(request(),now_epoch=NOW)
+  self.assertEqual(r["routes"][0]["ourSupremeListedDelta"],40)
+  self.assertEqual(r["sourcePublisherEdition"],"2026-11-15T11:59:41-05:00")
+
 if __name__=="__main__":
  unittest.main()

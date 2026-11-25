@@ -1,0 +1,39 @@
+name: Gingerscope full-system qualification (public scope)
+on:
+  pull_request:
+    paths:
+      - 'pdiddler/**'
+      - '.github/workflows/gingerscope-full-system-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  controlled-qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      EXPECTED_PUBLIC: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Install pinned Python dependencies and Lune
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install -r pdiddler/system2/requirements-gingerscope.txt
+          archive="$RUNNER_TEMP/lune.zip"
+          curl -fsSL --retry 3 --connect-timeout 20 'https://github.com/lune-org/lune/releases/download/v0.11.1/lune-0.11.1-linux-x86_64.zip' -o "$archive"
+          echo "39859282ce677fce19e6eb45c37596a90a25c324c95b4e7e02d428b6cae294a1  $archive" | sha256sum --check
+          unzip -q "$archive" -d "$RUNNER_TEMP/lune-dist"
+          install -m 0755 "$RUNNER_TEMP/lune-dist/lune" "$RUNNER_TEMP/lune"
+      - name: Qualify the exact public candidate
+        shell: bash
+        run: |
+          python3 -m pdiddler.gingerscope qualify --public-only --lune "$RUNNER_TEMP/lune" \
+            --expect-public-revision "$EXPECTED_PUBLIC" --cycles 128

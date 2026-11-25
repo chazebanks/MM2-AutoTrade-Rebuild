@@ -276,5 +276,223 @@ class SupremeOnlyStrategy(unittest.TestCase):
 
 
 
+class SupremeNov25Strategy(unittest.TestCase):
+    fresh=(ROOT/"supreme_only_189_research_catalog_2026_11_25_publication_nov23.json").read_bytes()
+    capture="2026-11-25T06:09:59Z"
+
+    def test_renewed_source_admitted_by_existing_offline_evaluator(self):
+        rows,provenance=source_rows(self.fresh,evaluated_at_utc=self.capture)
+        self.assertEqual(len(rows),189)
+        self.assertEqual(rows["Harvester"]["supremeListed"],310)
+        self.assertEqual(rows["Gingerscope"]["supremeListed"],16000)
+        self.assertEqual(provenance["catalogGitBlob"],"b6f5c1eec48d59b422f53baa4d83a54ce6837b72")
+        self.assertEqual(provenance["publisherUpdatedAt"],"2026-11-23T19:13:44-05:00")
+        self.assertFalse(provenance["sourceSignatureVerified"])
+
+    def test_same_hypothesis_reprices_using_renewed_source_only(self):
+        current=task(src=self.fresh,clock=self.capture)
+        before=task()
+        self.assertEqual(current["status"],before["status"])
+        row=current["hypotheticalAlternatives"][0]
+        self.assertEqual(row["outgoingSupremeListedValue"],310)
+        self.assertEqual(row["incomingSupremeListedValue"],470)
+        self.assertEqual(row["supremeListedValueGain"],160)
+        self.assertEqual(row["opponentSupremeListedValueGain"],-160)
+        self.assertEqual(before["hypotheticalAlternatives"][0]["supremeListedValueGain"],195)
+        self.assertFalse(row["tradeActionable"])
+        for flag in ("authorizesOffer","authorizesAccept","authorizesTrade",
+                     "liveMarketAuthorized","mayReportProfit","mayUseForStrategyLearning"):
+            self.assertIs(current[flag],False)
+
+    def test_exact_expiration_and_no_fallback_to_older_capture(self):
+        for delta in (0,30,21600):
+            self.assertNotEqual(task(src=self.fresh,clock=plus(self.capture,delta))["status"],"BLOCKED")
+        self.assertEqual(task(src=self.fresh,clock=plus(self.capture,21601))["reason"],
+                         "SUPREME_ONLY_SOURCE_EXPIRED_NO_OTHER_LIST_FALLBACK")
+        self.assertEqual(task(src=self.fresh,clock=plus(self.capture,-1))["reason"],
+                         "SUPREME_ONLY_CAPTURE_FROM_FUTURE")
+        self.assertEqual(task(src=CATALOG,clock=self.capture)["reason"],
+                         "SUPREME_ONLY_SOURCE_EXPIRED_NO_OTHER_LIST_FALLBACK")
+
+    def test_tampering_or_outbound_target_never_admitted(self):
+        modified=json.loads(self.fresh)
+        modified["rows"][0]["supremeListed"]+=1
+        self.assertEqual(task(src=json.dumps(modified).encode(),clock=self.capture)["reason"],
+                         "SUPREME_ONLY_CATALOG_GIT_BLOB_MISMATCH")
+        r=task(src=self.fresh,clock=self.capture,alt=[option({"Gingerscope":1},{"Harvester":1})])
+        self.assertEqual(r["reason"],"SUPREME_ONLY_GINGERSCOPE_NEVER_OUTGOING")
+
+
+class SupremeMultistepPaths(unittest.TestCase):
+    fresh=SupremeNov25Strategy.fresh
+    capture=SupremeNov25Strategy.capture
+
+    @staticmethod
+    def step(give,receive,partner=None,**overrides):
+        result=option(give,receive,partnerHypotheticalStock=(
+            dict(receive) if partner is None else partner))
+        result.update(overrides)
+        return result
+
+    def paths(self):
+        a,b=self.step,self.step
+        return [[a({"Boneblade":1,"Bioblade":1},{"Amerilaser":1}),
+                 a({"Amerilaser":1,"BlueSeer":1},{"Candleflame":1})],
+                [b({"Boneblade":1,"Bioblade":1},{"Blaster":1}),
+                 b({"Blaster":1,"BlueSeer":1},{"Amerilaser":1})]]
+
+    def run_paths(self,paths=None,owned=None,clock=None,source=None):
+        from pdiddler.system2.supreme_only_strategy_research import review_paths
+        return review_paths(self.fresh if source is None else source,
+            owned={"Boneblade":1,"Bioblade":1,"BlueSeer":1} if owned is None else owned,
+            paths=self.paths() if paths is None else paths,
+            evaluated_at_utc=self.capture if clock is None else clock)
+
+    def test_distinct_paths_reuse_updated_portfolio_and_compare_growth(self):
+        r=self.run_paths(); a,b=r["hypotheticalRoutes"]
+        self.assertEqual(r["startingHypotheticalListedValue"],18)
+        self.assertEqual([a["endingHypotheticalListedValue"],b["endingHypotheticalListedValue"]],[30,22])
+        self.assertEqual([a["hypotheticalListedGrowth"],b["hypotheticalListedGrowth"]],[12,4])
+        self.assertEqual([s["ourListedDelta"] for s in a["steps"]],[7,5])
+        self.assertEqual([s["partnerListedDelta"] for s in a["steps"]],[-7,-5])
+        self.assertEqual(a["endingPaperTargetGap"],15970)
+        self.assertTrue(all(s["partnerPaperLossNeedsOtherMotive"] for s in a["steps"]))
+        self.assertFalse(r["isOfferRanking"])
+        self.assertIsNone(r["empiricalAcceptanceProbability"])
+        self.assertEqual(r["empiricalLiquidity"],"UNKNOWN")
+        for flag in ("authorizesTrade","authorizesOffer","authorizesAccept",
+                     "mayReportProfit","maySendDiscordWebhook","mayUseForStrategyLearning"):
+            self.assertFalse(r[flag])
+
+    def test_downgrade_then_upgrade_compares_physical_shapes(self):
+        s=self.step
+        r=self.run_paths(owned={"Candleflame":1},paths=[
+            [s({"Candleflame":1},{"GreenLuger":1,"Bioblade":1}),
+             s({"GreenLuger":1,"Bioblade":1},{"FangChroma":1})],
+            [s({"Candleflame":1},{"Iceblaster":1}),
+             s({"Iceblaster":1},{"ChromaLightbringer":1})]])
+        a,b=r["hypotheticalRoutes"]
+        self.assertEqual([x["physicalShape"] for x in a["steps"]],["DOWNGRADE","UPGRADE"])
+        self.assertEqual(a["hypotheticalListedGrowth"],2)
+        self.assertEqual(b["endingHypotheticalListedValue"],60)
+
+    def test_later_stock_shortfall_blocks_only_affected_route(self):
+        paths=self.paths()
+        paths[0][1]=self.step({"Amerilaser":2},{"Candleflame":1})
+        a,b=self.run_paths(paths=paths)["hypotheticalRoutes"]
+        self.assertEqual(a["completedHypotheticalSteps"],1)
+        self.assertEqual(a["blockedAtStep"],2)
+        self.assertIn("GIVE_EXCEEDS_HYPOTHETICAL_OWNERSHIP",a["reason"])
+        self.assertNotIn("endingHypotheticalListedValue",a)
+        self.assertEqual(b["status"],"PAPER_PATH_COMPARED_NOT_EXECUTABLE")
+
+    def test_counterparty_missing_stock_and_unapproved_loss(self):
+        paths=self.paths()
+        paths[0][0]=self.step({"Boneblade":1,"Bioblade":1},{"Amerilaser":1},partner={"Candleflame":1})
+        paths[1][1]=self.step({"Blaster":1,"BlueSeer":1},{"Boneblade":1})
+        a,b=self.run_paths(paths=paths)["hypotheticalRoutes"]
+        self.assertIn("PARTNER_STOCK_SHORTFALL",a["reason"])
+        self.assertEqual(b["reason"],"BLOCKED_UNAPPROVED_SUPREME_LOSS")
+
+    def test_zero_gain_cycle_and_duplicate_path_fail_closed(self):
+        s=self.step
+        cycle=[s({"Chill":1},{"Clockwork":1}),s({"Clockwork":1},{"Chill":1})]
+        good=[s({"Chill":1},{"BattleAxe":1}),s({"BattleAxe":1},{"Amerilaser":1})]
+        a,b,c=self.run_paths(owned={"Chill":1},paths=[cycle,good,deepcopy(good)])["hypotheticalRoutes"]
+        self.assertEqual(a["reason"],"SUPREME_ONLY_HYPOTHETICAL_PORTFOLIO_CYCLE")
+        self.assertEqual(b["status"],"PAPER_PATH_COMPARED_NOT_EXECUTABLE")
+        self.assertEqual(c["reason"],"SUPREME_ONLY_DUPLICATE_HYPOTHETICAL_PATH")
+
+    def test_target_receipt_does_not_authorize_outbound_target(self):
+        s=self.step
+        a,b=self.run_paths(owned={"TravelerAxe":1},paths=[
+            [s({"TravelerAxe":1},{"Gingerscope":1}),s({"Gingerscope":1},{"Harvester":1})],
+            [s({"TravelerAxe":1},{"Gingerscope":1,"Boneblade":1}),s({"Boneblade":1},{"Bioblade":1})]
+        ])["hypotheticalRoutes"]
+        self.assertEqual(a["reason"],"SUPREME_ONLY_GINGERSCOPE_NEVER_OUTGOING")
+        self.assertTrue(b["hypotheticalTargetReceived"])
+        self.assertEqual(b["endingHypotheticalTargetCopies"],1)
+        self.assertFalse(b["tradeActionable"])
+
+    def test_stack_and_fifth_physical_slot_remain_blocked(self):
+        s=self.step
+        a,b=self.run_paths(owned={"Boneblade":5},paths=[
+            [s({"Boneblade":5},{"Amerilaser":2}),s({"Amerilaser":1},{"Candleflame":1})],
+            [s({"Boneblade":1},{"Bioblade":1,"BlueSeer":1,"Chill":1,"Fang":1,"Heat":1}),
+             s({"Bioblade":1},{"Amerilaser":1})]
+        ])["hypotheticalRoutes"]
+        self.assertEqual(a["reason"],"BLOCKED_NONLINEAR_STACK_PRICE")
+        self.assertIn("ONE_TO_FOUR_PHYSICAL_SLOTS_REQUIRED",b["reason"])
+
+    def test_expired_source_and_mixed_publisher_fail_closed(self):
+        self.assertEqual(self.run_paths(clock=plus(self.capture,21601))["reason"],
+                         "SUPREME_ONLY_SOURCE_EXPIRED_NO_OTHER_LIST_FALLBACK")
+        p=self.paths();p[0][0]["valuationSource"]="HYBRID"
+        a,b=self.run_paths(paths=p)["hypotheticalRoutes"]
+        self.assertEqual(a["reason"],"SUPREME_ONLY_NO_HYBRID_OR_UNKNOWN_PRICING_INPUT")
+        self.assertEqual(b["status"],"PAPER_PATH_COMPARED_NOT_EXECUTABLE")
+
+
+class IntegratedSupremeBilateral(unittest.TestCase):
+    def run_batch(self, request=None, clock=None, raw=None):
+        from pdiddler.system2.supreme_only_strategy_research import review_bilateral_batch
+        from pdiddler.ci.test_supreme_only_bilateral_partner_friction_shadow import request as fixture
+        return review_bilateral_batch(SupremeNov25Strategy.fresh if raw is None else raw,
+            request=fixture() if request is None else request,
+            evaluated_at_utc=SupremeNov25Strategy.capture if clock is None else clock)
+
+    def test_shared_economic_and_partner_comparison(self):
+        r=self.run_batch()
+        self.assertEqual(r["status"],"SUPREME_ONLY_INTEGRATED_BILATERAL_RESEARCH",r)
+        self.assertTrue(r["sameArchivedSourceAndArithmetic"])
+        a=r["hypotheticalAlternatives"][0]
+        self.assertEqual(a["economic"]["supremeListedValueGain"],75)
+        self.assertEqual(a["partnerIncentives"]["partnerSupremeListedDelta"],-75)
+        self.assertEqual(a["status"],"PAPER_COMPARISON_ONLY")
+        self.assertIn("HYPOTHETICAL_VALUE_WATCHER_HAS_PAPER_DISINCENTIVE",a["partnerIncentives"]["warnings"])
+        self.assertFalse(a["tradeActionable"])
+        for k in ("authorizesAccept","authorizesOffer","authorizesTrade","mayReportProfit",
+                  "mayUseForStrategyLearning","maySendDiscordWebhook","isOfferRanking"):
+            self.assertFalse(r[k])
+
+    def test_unowned_partner_item_and_expired_market_fail_closed(self):
+        from pdiddler.ci.test_supreme_only_bilateral_partner_friction_shadow import request
+        q=request()
+        q["routes"][0]["receive"][0]["quantity"]=2
+        r=self.run_batch(request=q)
+        self.assertEqual(r["status"],"BLOCKED")
+        self.assertIn("PARTNER_OUTGOING_RAW_KEY_OR_QUANTITY_NOT_PROVEN",r["reason"])
+        self.assertEqual(self.run_batch(clock=plus(SupremeNov25Strategy.capture,21600.1))["status"],"BLOCKED")
+        self.assertEqual(self.run_batch(raw=b"{}")["reason"],"SUPREME_ONLY_CATALOG_GIT_BLOB_MISMATCH")
+
+    def test_losses_and_nonlinear_stacks_remain_blocked(self):
+        from pdiddler.ci.test_supreme_only_bilateral_partner_friction_shadow import request, route, slot
+        q=request()
+        q["ownHypotheticalStock"]["Icebreaker"]=8
+        q["routes"]=[route([slot("Harvester")],[slot("FlowerwoodKnife")]),
+                     route([slot("Icebreaker",8)],[slot("Gingerscope")])]
+        r=self.run_batch(request=q)
+        self.assertEqual(r["status"],"SUPREME_ONLY_INTEGRATED_BILATERAL_RESEARCH")
+        self.assertEqual([a["status"] for a in r["hypotheticalAlternatives"]],
+                         ["BLOCKED_PAPER_COMPARISON"]*2)
+        self.assertEqual(r["hypotheticalAlternatives"][0]["economic"]["status"],
+                         "BLOCKED_UNAPPROVED_SUPREME_LOSS")
+        self.assertEqual(r["hypotheticalAlternatives"][1]["partnerIncentives"]["status"],
+                         "BLOCKED_STACK_PRICE_UNVERIFIED")
+
+    def test_disagreement_between_existing_evaluators_blocks_entire_batch(self):
+        from unittest.mock import patch
+        from pdiddler.system2 import supreme_only_bilateral_partner_friction_shadow as friction
+        from pdiddler.ci.test_supreme_only_bilateral_partner_friction_shadow import request
+        q=request()
+        good=friction.evaluate(q,now_epoch=int(datetime.fromisoformat(SupremeNov25Strategy.capture).timestamp()),
+                               source_bytes=SupremeNov25Strategy.fresh)
+        good["routes"][0]["ourSupremeListedDelta"]+=1
+        with patch.object(friction,"evaluate",return_value=good):
+            r=self.run_batch(request=q)
+        self.assertEqual(r["reason"],"SUPREME_ONLY_BILATERAL_ECONOMIC_DIVERGENCE")
+        self.assertNotIn("hypotheticalAlternatives",r)
+
+
 if __name__=="__main__":
     unittest.main()

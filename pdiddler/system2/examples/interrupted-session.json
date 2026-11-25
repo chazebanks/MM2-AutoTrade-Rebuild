@@ -1,0 +1,25 @@
+{
+  "accounts": {"main": {"godly:Fang": 1}, "alt": {}},
+  "sessionId": "fixture-session",
+  "counterpartyStock": {"godly:Boneblade": 1, "godly:Orange_Seer": 1},
+  "events": [
+    {
+      "session_id": "fixture-session", "event_id": "fixture-request",
+      "sequence": 1, "revision": 0, "kind": "PARTNER_REQUEST_ACCEPTED"
+    },
+    {
+      "session_id": "fixture-session", "event_id": "fixture-offer",
+      "sequence": 2, "revision": 1, "kind": "OFFER_OBSERVED",
+      "give": {"godly:Fang": 1}, "receive": {"godly:Boneblade": 1}
+    },
+    {
+      "session_id": "fixture-session", "event_id": "fixture-revised",
+      "sequence": 3, "revision": 2, "kind": "PARTNER_OFFER_REVISION",
+      "give": {"godly:Fang": 1}, "receive": {"godly:Orange_Seer": 1}
+    },
+    {
+      "session_id": "fixture-session", "event_id": "fixture-interrupted",
+      "sequence": 4, "revision": 2, "kind": "SESSION_INTERRUPTED"
+    }
+  ]
+}

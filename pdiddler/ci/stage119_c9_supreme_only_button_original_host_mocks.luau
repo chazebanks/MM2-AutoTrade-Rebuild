@@ -56,7 +56,7 @@ local dt={
  now=function()return {UnixTimestamp=marketNow}end,
 }
 local env={game=game,DateTime=dt,getgenv=function()return E end,]],
- "C9 synthetic exact timestamp is taken from genuine November15 file")
+ "C9 synthetic timestamp is taken from the original November17 archive")
 swap('setTime=function(t)clock=t end,now=function()return clock end,',
  'setTime=function(t)clock=t end,now=function()return clock end,\n  setMarketTime=function(v)marketNow=v end,sourceEpoch=startEpoch,',
  "C9 test has distinct UTC market clock independent of P3 GUI clock")
@@ -66,6 +66,13 @@ swap('   if url:find("native_c9_original_p3_protected_host_adapter.lua",1,true) 
    elseif url:find("/pdiddler/system2/native_",1,true) then
      local filename=url:match("/system2/(native_[^/]+%.lua)$")
      assert(filename,"C9 original immutable native module path invalid")
+     -- Historical test must load the exact archived module version, not HEAD.
+     if filename=="native_supreme_only_bilateral_research_nov17.lua" or
+        filename=="native_supreme_only_protected_c3p4_adapter_nov17.lua" then
+       assert(url=="https://raw.githubusercontent.com/chazebanks/MM2-AutoTrade-Rebuild/3d23aeb45efe6dc87840b0f4f8a89198d0d8b4e3/pdiddler/system2/"..filename,
+         "historical fixture immutable module pin mismatch")
+       return fs.readFile("pdiddler/ci/fixtures/supreme_nov17_original/"..filename..".fixture")
+     end
      return fs.readFile("pdiddler/system2/"..filename)
    elseif url:find("native_c9_original_p3_protected_host_adapter.lua",1,true) then]],
  "C9 source-pinned actual nine modules and two real public JSON files")

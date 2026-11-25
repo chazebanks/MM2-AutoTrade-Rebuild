@@ -1,7 +1,7 @@
 {
   "schema": "gingerscope-autonomy-release-readiness-v1",
   "checkpointSourceCommit": "f27002118363a544321bb7f0f1af00c2f2124d1a",
-  "asOfDate": "2026-11-11",
+  "asOfDate": "2026-11-25",
   "target": "Autonomous inventory growth and MM2 trading toward acquiring protected Gingerscope",
   "completeAutonomousSystemProven": false,
   "liveAutonomousTradingAuthorized": false,
@@ -14,56 +14,107 @@
   "requiredGates": [
     {
       "id": "MARKET_INPUT",
-      "status": "BLOCKED",
-      "evidence": "Stage121 first-party provenance firewall research-only; Nov 11 publication text visible but no admitted raw canonical collector receipt for live use"
+      "status": "HISTORICAL_REPLAY_VERIFIED_CURRENT_CLOCK_EXPIRED",
+      "evidence": "The reviewed November 23 19:13:44 EST Supreme edition has 189 priced weapons and 17 published ranges. A fresh official capture at 2026-11-25T15:10:31.975049Z matched all four raw page SHA-256 values in pdiddler/system2/supreme_publisher_parity_2026_11_25.json. The fixed cutoff of 2026-11-25T12:09:59Z has passed and the publisher edition had not advanced. Qualification uses the explicitly pinned historical clock."
     },
     {
       "id": "ITEM_IDENTITY_AND_QUANTITY",
       "status": "CLIENT_PARTIAL",
-      "evidence": "Stage101/119 client-side item/GUI observations; unique instance and authoritative session attribution not independently proven"
+      "evidence": "Controlled Luau observations cross a versioned desktop contract before current advisory evaluation. Historical Stage101/119 receipts cover scoped client observations. Exact authoritative current-client item ownership and revisions require a separately supported source."
     },
     {
       "id": "TRADING_UI_AND_OUTBOUND",
       "status": "SUPERVISED_PARTIAL",
-      "evidence": "PR218/226 controlled iPad client observations; not a general validated fully automated open/offer/rebalance/close lifecycle"
+      "evidence": "The controlled qualification exposes stage progress, stop and sanitized report copy. Historical P3/P4 client receipts cover bounded observations on older source. Current client UI and native handoff remain gated on a supported approved host."
     },
     {
       "id": "PORTFOLIO_STRATEGY",
-      "status": "SYNTHETIC_ONLY",
-      "evidence": "PR106/182 Stage120 synthetic planner/guard; PR232 economic sensitivity; 4 physical slots vs original 4-copy candidate restriction outstanding"
+      "status": "OFFLINE_ADVISORY_INTEGRATED",
+      "evidence": "The supported offline entry point binds separate account holdings and a Supreme edition to revisioned portfolio reports, bilateral offer analysis and bounded independent route generation."
     },
     {
       "id": "BILATERAL_OFFER_ATTRACTIVENESS",
-      "status": "BLOCKED",
-      "evidence": "No measured verified counterparty acceptance denominators or independent practical exit liquidity; demand labels not probabilities"
+      "status": "HYPOTHETICAL_ONLY",
+      "evidence": "The planner compares both ledgers, physical slots and copies, published quality and range risk. Transparent tradeoffs and abstention preserve unknown preferences and empirical retradability."
     },
     {
       "id": "OUTCOME_LEARNING",
-      "status": "BLOCKED",
-      "evidence": "Private Discord archive 30 test exclusions, 17 unverified claims, 3 quarantine; 0 independently verified samples"
+      "status": "OFFLINE_SYNTHETIC_VALIDATION",
+      "evidence": "The private learner can exercise isolated synthetic outcomes with chronological, group-disjoint evaluation, baseline comparison and abstention. Real learning requires independent provenance, legitimate responses, corroborated settlement and adequate longitudinal and group coverage."
     },
     {
       "id": "SETTLEMENT_AND_REVISION",
-      "status": "BLOCKED",
-      "evidence": "Client events and GUI consistency do not independently prove MM2 server-settled transfer or exact revision"
+      "status": "OFFLINE_SYNTHETIC_SETTLEMENT_ONLY",
+      "evidence": "State binds controlled observations and offer revisions, invalidates stale evaluations and reconciles two synthetic witnesses in an isolated database. Independently attributable game settlement is unavailable."
     },
     {
       "id": "UNATTENDED_RUNTIME",
-      "status": "NOT_INTEGRATED",
-      "evidence": "No proven full system-wide restart/hop/recovery with immutable no-repeat side effects and production safeguards"
+      "status": "SUPPORTED_NATIVE_HOST_UNAVAILABLE",
+      "evidence": "The supported desktop candidate runs a controlled Luau observation process with Python and SQLite. The repository contains no reviewed supported interface for the current live MM2 client with the trusted identity, revision, state ownership and settlement capabilities required for native integration."
     },
     {
       "id": "FINAL_ACCEPT_AND_DEPLOYMENT",
       "status": "NOT_AUTHORIZED",
-      "evidence": "No explicit approved live deployment or independently tested and approved risk budget"
+      "evidence": "Separate supported access, settlement and safety evidence, deployment approval and a reviewed numerical loss policy remain required."
     }
   ],
-  "nextDistinctWork": "After verifying the latest GitHub HEAD, run exactly P1 in the source-pinned next-conversation workplan: independent first-party canonical publisher capture and review; no live trading code changes or authorization from this documentation.",
+  "nextDistinctWork": "Match the exact public and private heads to the consolidated controlled qualification receipt and draft CI. The supervised validation protocol tracks the distinct evidence needed for any supported native host, authoritative real settlement and permitted real-world learning.",
   "exclusions": [
     "No forced highest opener",
     "No universal +15 minimum",
     "No autonomous chat negotiation",
     "No outgoing Gingerscope",
     "No claiming historical webhook notifications are server-settled trades"
-  ]
+  ],
+  "latestReviewedResearchBase": "f7b4ff33f4015315a26f41d3c6ed812e7711032c",
+  "researchCandidateBranch": "research/gingerscope-completion-sprint-nov25",
+  "researchCandidateDraft": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/323",
+  "reviewMatrix": "pdiddler/system2/gingerscope_requirements.json",
+  "checkpointSourceCommitMeaning": "Immutable historical November 11 continuity anchor",
+  "completionMilestones": {
+    "A_fullSoftware": "CONTROLLED_DESKTOP_CANDIDATE",
+    "A_manualOfflineAnalysis": "INTEGRATED_OFFLINE_ADVISORY_AND_CONTROLLED_REPLAY",
+    "B_supervisedRuntime": "OPEN_HISTORICAL_CLIENT_OBSERVATIONS_ONLY",
+    "C_liveRelease": "NOT_AUTHORIZED"
+  },
+  "supportedOfflineEntrypoint": "python3 -m pdiddler.gingerscope",
+  "supportedOfflineVerification": {
+    "draftHeadEvidence": "Use the exact draft revision and action runs recorded in the rolling checkpoint.",
+    "stateSchemaVersion": 2,
+    "includes": [
+      "Supreme capture and immutable edition comparison",
+      "Independent route generation and multi-period scenarios",
+      "Controlled observations and synthetic settlement",
+      "Versioned configuration, history and recovery",
+      "Isolated, versioned private evaluation artifacts"
+    ]
+  },
+  "supportedQualificationEntrypoint": "python -m pdiddler.gingerscope qualify",
+  "supervisedValidationProtocol": "pdiddler/system2/GINGERSCOPE_SUPERVISED_VALIDATION.md",
+  "supportedQualification": {
+    "host": "Desktop CPython 3.12, SQLite with JSON support and Lune 0.11.1",
+    "profile": "Controlled historical replay with an explicitly selected private checkout for the full run",
+    "verification": "Use the exact revisions and passing sanitized qualification receipt recorded in the rolling checkpoint.",
+    "stages": [
+      "Complete startup",
+      "Inventory and opportunity analysis",
+      "Strategic decision-making",
+      "Controlled transaction lifecycle",
+      "Accounting and evidence",
+      "Recovery and endurance",
+      "Adversarial validation"
+    ],
+    "marketArchiveExpiresUtc": "2026-11-25T12:09:59Z",
+    "currentMarketAfterCutoff": "Requires a genuinely newer independently reviewed Supreme publication",
+    "rollbackPublic": "f7b4ff33f4015315a26f41d3c6ed812e7711032c",
+    "rollbackPrivate": "026e8865d09066c358288a7239598ec6a088fba9",
+    "rollingCheckpoint": "https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit",
+    "marketClockCheck": {
+      "replayUtc": "2026-11-25T07:52:05Z",
+      "officialRecaptureUtc": "2026-11-25T15:10:31.975049Z",
+      "matchedPublishedPageHashes": 4,
+      "publisherEdition": "2026-11-23T19:13:44-05:00",
+      "currentQuoteAdmitted": false
+    }
+  }
 }

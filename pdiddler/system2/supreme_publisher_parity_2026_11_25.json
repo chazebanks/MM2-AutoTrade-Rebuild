@@ -1,0 +1,162 @@
+{
+  "capturePurpose": "DIRECT_HTTPS_OFFLINE_ARCHIVE_PARITY",
+  "publisherUpdatedAt": "2026-11-23T19:13:44-05:00",
+  "archiveSha256": "3f0996b9ac20f3c4689519e1faf65e83796bce8b2d6afe6ad4d2e705ffca525e",
+  "archiveExpiresUtc": "2026-11-25T12:09:59Z",
+  "captureRenewsExistingArchive": false,
+  "publisherSignatureVerified": false,
+  "pricedWeaponEntries": 189,
+  "pages": {
+    "home": {
+      "url": "https://supremevalues.com/",
+      "status": 200,
+      "requestStartedUtc": "2026-11-25T07:52:00.046579+00:00",
+      "responseReceivedUtc": "2026-11-25T07:52:04.740415+00:00",
+      "sha256": "c63427a5f603da3de3592ed3088c990afeef3cfd4aab19e5ee5131e11df771f8",
+      "byteCount": 86783,
+      "publisherUpdatedAt": "2026-11-23T19:13:44-05:00",
+      "itemCards": 0,
+      "verifiedPricedItems": 0,
+      "pricedItemsWithPublishedRanges": 0,
+      "excluded": {
+        "hidden": [],
+        "unpriced": [],
+        "pets": []
+      }
+    },
+    "ancient": {
+      "url": "https://supremevalues.com/mm2/ancients",
+      "status": 200,
+      "requestStartedUtc": "2026-11-25T07:52:00.047203+00:00",
+      "responseReceivedUtc": "2026-11-25T07:52:04.700975+00:00",
+      "sha256": "09393a40ca83e6a8865b9c7ddaaa4ab641ed01ebc93d3a5f184671bf579bbfc3",
+      "byteCount": 74805,
+      "publisherUpdatedAt": "2026-11-23T19:13:44-05:00",
+      "itemCards": 16,
+      "verifiedPricedItems": 15,
+      "pricedItemsWithPublishedRanges": 4,
+      "excluded": {
+        "hidden": [],
+        "unpriced": [
+          "Nik's Scythe"
+        ],
+        "pets": []
+      }
+    },
+    "godly": {
+      "url": "https://supremevalues.com/mm2/godlies",
+      "status": 200,
+      "requestStartedUtc": "2026-11-25T07:52:00.047635+00:00",
+      "responseReceivedUtc": "2026-11-25T07:52:04.752910+00:00",
+      "sha256": "991f0a26e0086e0785223c5a7b7feb5e2517141f3f7a4a5eb397a688b5d9f4b4",
+      "byteCount": 331480,
+      "publisherUpdatedAt": "2026-11-23T19:13:44-05:00",
+      "itemCards": 130,
+      "verifiedPricedItems": 128,
+      "pricedItemsWithPublishedRanges": 7,
+      "excluded": {
+        "hidden": [
+          "Batwing",
+          "Black_Luger"
+        ],
+        "unpriced": [],
+        "pets": []
+      }
+    },
+    "chroma": {
+      "url": "https://supremevalues.com/mm2/chromas",
+      "status": 200,
+      "requestStartedUtc": "2026-11-25T07:52:00.048377+00:00",
+      "responseReceivedUtc": "2026-11-25T07:52:04.888671+00:00",
+      "sha256": "ac9e4a54fb44e0e4d2caafdfaaeb0f938542db7734c3ac264891dbdb1321c1ad",
+      "byteCount": 159938,
+      "publisherUpdatedAt": "2026-11-23T19:13:44-05:00",
+      "itemCards": 53,
+      "verifiedPricedItems": 46,
+      "pricedItemsWithPublishedRanges": 6,
+      "excluded": {
+        "hidden": [],
+        "unpriced": [],
+        "pets": [
+          "CBat",
+          "CBear",
+          "CBunny",
+          "CCat",
+          "CDog",
+          "CFox",
+          "CPig"
+        ]
+      }
+    }
+  },
+  "publishedRangesByPublisherItem": {
+    "ancient:Celestial": {
+      "low": 2025,
+      "high": 2075
+    },
+    "ancient:Emberbow": {
+      "low": 525,
+      "high": 575
+    },
+    "ancient:Emberscythe": {
+      "low": 525,
+      "high": 575
+    },
+    "ancient:Vampires_Axe": {
+      "low": 1050,
+      "high": 1100
+    },
+    "chroma:CEmberbow": {
+      "low": 5000,
+      "high": 5500
+    },
+    "chroma:CEmberscythe": {
+      "low": 5500,
+      "high": 6000
+    },
+    "chroma:CEmbersickle": {
+      "low": 1750,
+      "high": 1800
+    },
+    "chroma:CEvergreen": {
+      "low": 42000,
+      "high": 44000
+    },
+    "chroma:CEvergun": {
+      "low": 53000,
+      "high": 55000
+    },
+    "chroma:CIcecream": {
+      "low": 1475,
+      "high": 1525
+    },
+    "godly:Bauble": {
+      "low": 775,
+      "high": 825
+    },
+    "godly:Embersickle": {
+      "low": 125,
+      "high": 135
+    },
+    "godly:Evergreen": {
+      "low": 2850,
+      "high": 3000
+    },
+    "godly:Evergun": {
+      "low": 3550,
+      "high": 3600
+    },
+    "godly:Immortal": {
+      "low": 115,
+      "high": 125
+    },
+    "godly:Mortal": {
+      "low": 115,
+      "high": 125
+    },
+    "godly:Travelers_Gun": {
+      "low": 4300,
+      "high": 4400
+    }
+  }
+}

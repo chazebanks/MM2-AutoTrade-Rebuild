@@ -5,12 +5,12 @@
   "latestMergedPR": 233,
   "tradeOutcome": "UNKNOWN",
   "blockers": [
-    "Nov 11 2026 12:30 PM first-party Supreme publication is visible on canonical pages; exact original Stage111 three-page raw capture, publisher hash, expiry and item mapping have NOT been independently admitted for a live market strategy.",
-    "Real practical liquidity, partner offer attractiveness and retradeability are not established from completed verified transactions; online listings and private Discord webhook claims are NOT fills.",
-    "Part3/Part4 exact client identity, revision and independent server-settlement proof remain inadequate for unattended automatic final Accept.",
-    "Research-only growth loss caps 0, 0.5, 1, 2, 3 percent remain simulation scenarios; no per-trade or cumulative risk budget has been approved."
+    "The reviewed Supreme archive expired at 2026-11-25T12:09:59Z. The official November 25 15:10 UTC recapture matches the same publication and cannot extend the window. The original historical replay clock remains usable.",
+    "No independently verified settled exchanges establish retradeability, player response models or actual portfolio rewards. Private V2 storage contains no verified real learning rows.",
+    "Historical client identity, offer revision and inventory deltas are partial. Full System 1 runtime, independent settlement and native compatibility remain unverified.",
+    "No approved listed-loss budget or release authority exists."
   ],
-  "nextAction": "NEXT CONVERSATION ONE ISSUE ONLY: read the pinned handoff and sequential workplan, recheck live GitHub state, then independently validate genuine first-party Supreme publisher revision via original Stage111->110->104->69 canonical raw-source capture (research only). Do not alter Part3/Part4/Delta, learning, offers or final Accept merely due to this plan.",
+  "nextAction": "Run the canonical seven-stage controlled qualification against the exact reviewed public and private draft heads. Use the supervised handoff when its supported environment and independent evidence are available.",
   "authority": {
     "authorizesTrade": false,
     "authorizesOffer": false,
@@ -23,6 +23,9 @@
   },
   "readBeforeCodeChange": [
     "pdiddler/START_HERE.md",
+    "pdiddler/system2/gingerscope_requirements.json",
+    "pdiddler/system2/GINGERSCOPE_COMPLETION_MATRIX_2026_11_25.md",
+    "pdiddler/system2/GINGERSCOPE_COMPLETION_SPRINT_2026_11_25.md",
     "pdiddler/NEXT_CONVERSATION_HANDOFF_2026_11_11.md",
     "pdiddler/continuity/NEXT_WORKPLAN_2026_11_11.json",
     "pdiddler/continuity/LEGACY_CLEANUP_AUDIT_2026_11_11.md",
@@ -58,5 +61,18 @@
       "capability": "Pinned nine-gate autonomy release snapshot",
       "result": "MERGED_SEVEN_CHECKS_SUCCESS_NOT_AUTONOMOUS"
     }
-  ]
+  ],
+  "activeReview": {
+    "draft": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/323",
+    "branch": "research/gingerscope-completion-sprint-nov25",
+    "reviewedBaselineCommit": "f7b4ff33f4015315a26f41d3c6ed812e7711032c",
+    "matrix": "pdiddler/system2/gingerscope_requirements.json",
+    "sourceEvidence": "pdiddler/system2/supreme_publisher_parity_2026_11_25.json",
+    "manualEntrypoint": "pdiddler/gingerscope.py",
+    "installation": "pdiddler/system2/GINGERSCOPE_OFFLINE.md",
+    "dependencyMap": "pdiddler/system2/GINGERSCOPE_DEPENDENCY_MAP.md",
+    "rollingCheckpoint": "https://docs.google.com/document/d/1QQkA5PHgm8yGk-go-J0_SNzeAEqQZjDpHPwiWzIwfqU/edit",
+    "qualificationEntrypoint": "python -m pdiddler.gingerscope qualify",
+    "supervisedHandoff": "pdiddler/system2/GINGERSCOPE_SUPERVISED_VALIDATION.md"
+  }
 }

@@ -151,6 +151,31 @@ class Gate2DiscordShadowLearning(unittest.TestCase):
         self.assertIsNone(m["partnerAcceptanceProbability"])
         self.assertFalse(m["realLearnerUpdated"])
 
+    def test_request_declines_are_not_offer_rejection_labels(self):
+        events, bindings = synthetic_feedback_batch()
+        result = fit(actual_importer_fixtures(), events, bindings)
+        self.assertEqual(result["status"],"SYNTHETIC_DISCORD_SHADOW_FEEDBACK_FIT")
+        rows = {r["candidateIndex"]:r for r in result["syntheticCandidateModel"]}
+        self.assertEqual(rows[0]["requestAndOfferStagesTrain"], {
+            "requestOpened":0,"requestExplicitDeclined":2,"requestCensored":1,
+            "offerIndicatorFinalRevision":0,"offerStartedWithoutIndicator":0,
+            "offerNotReached":3,
+        })
+        self.assertEqual(rows[1]["requestAndOfferStagesTrain"], {
+            "requestOpened":2,"requestExplicitDeclined":0,"requestCensored":0,
+            "offerIndicatorFinalRevision":1,"offerStartedWithoutIndicator":1,
+            "offerNotReached":0,
+        })
+        self.assertEqual(rows[1]["requestAndOfferStagesHoldout"]["offerIndicatorFinalRevision"],1)
+        self.assertEqual(rows[0]["requestAndOfferStagesHoldout"]["requestExplicitDeclined"],1)
+        for r in rows.values():
+            self.assertEqual(r["bundleRejectionLabelsAvailable"],0)
+            self.assertIsNone(r["bundleAcceptanceProbability"])
+        self.assertTrue(result["requestDeclineIsNotBundleRejection"])
+        self.assertFalse(result["actualOfferFeatureBindingProven"])
+        self.assertFalse(result["empiricalBundleAcceptanceModelAvailable"])
+        self.assertFalse(result["mayUseForStrategyLearning"])
+
     def test_training_and_holdout_are_separate(self):
         events,bindings=synthetic_feedback_batch()
         m=fit(actual_importer_fixtures(),events,bindings)

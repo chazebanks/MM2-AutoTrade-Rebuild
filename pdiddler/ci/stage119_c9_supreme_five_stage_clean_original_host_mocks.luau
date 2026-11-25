@@ -45,7 +45,7 @@ swap('HttpService={JSONEncode=function(_,r)return serde.encode("json",r)end}',
  "C9 original test HttpService supports read-only public JSON decode")
 swap('local env={game=game,getgenv=function()return E end,',
  [[local crosswalk=serde.decode("json",fs.readFile(
- "pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_refresh.json"))
+ "pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json"))
 local yr,mo,da,hr,mi,se=crosswalk.sourceCapturedUtc:match(
  "^(%d%d%d%d)%-(%d%d)%-(%d%d)T(%d%d):(%d%d):(%d%d)Z$")
 local startEpoch=os.time({year=tonumber(yr),month=tonumber(mo),
@@ -60,13 +60,13 @@ local dt={
  now=function()return {UnixTimestamp=marketNow}end,
 }
 local env={game=game,DateTime=dt,getgenv=function()return E end,]],
- "C9 synthetic exact timestamp is taken from genuine November15 file")
+ "C9 synthetic clock uses the genuine renewed November17 archive")
 swap('setTime=function(t)clock=t end,now=function()return clock end,',
  'setTime=function(t)clock=t end,now=function()return clock end,\n  setMarketTime=function(v)marketNow=v end,sourceEpoch=startEpoch,',
  "C9 test has distinct UTC market clock independent of P3 GUI clock")
 swap('   if url:find("native_c9_original_p3_protected_host_adapter.lua",1,true) then',
- [[   if url:find("/pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_refresh.json",1,true) then
-     return fs.readFile("pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_refresh.json")
+ [[   if url:find("/pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json",1,true) then
+     return fs.readFile("pdiddler/system2/supreme_only_189_research_catalog_2026_11_17_214118z_refresh.json")
    elseif url:find("/pdiddler/system2/native_",1,true) then
      local filename=url:match("/system2/(native_[^/]+%.lua)$")
      assert(filename,"C9 original immutable native module path invalid")

@@ -67,11 +67,11 @@ def utc(value, *, captured=False):
         deny("SUPREME_ONLY_CAPTURE_CLOCK_FORMAT_INVALID")
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if parsed.tzinfo is not None:
+            return parsed.astimezone(timezone.utc)
     except (ValueError, OverflowError):
         deny("SUPREME_ONLY_CLOCK_INVALID")
-    if parsed.tzinfo is None:
-        deny("SUPREME_ONLY_CLOCK_MUST_BE_OFFSET_AWARE")
-    return parsed.astimezone(timezone.utc)
+    deny("SUPREME_ONLY_CLOCK_MUST_BE_OFFSET_AWARE")
 
 
 def blob_sha(raw):
@@ -92,8 +92,103 @@ def demand(v):
     return float(n)
 
 
+NOV25_CATALOG_BLOB_SHA = "b6f5c1eec48d59b422f53baa4d83a54ce6837b72"
+NOV25_SOURCE_CAPTURE = "2026-11-25T06:09:59Z"
+NOV25_SOURCE_PUBLICATION = "2026-11-23T19:13:44-05:00"
+
+
+def _validate_rows(rows):
+    if type(rows) is not list or len(rows) != 189:
+        deny("SUPREME_ONLY_SOURCE_CENSUS_NOT_189")
+    by_key, by_id, counts = {}, set(), {k: 0 for k in CENSUS}
+    for row in rows:
+        if type(row) is not dict or set(row) != ROW_KEYS:
+            deny("SUPREME_ONLY_ROW_SHAPE_CHANGED")
+        key, cat = row["rawGameKeyCandidate"], row["category"]
+        if (type(key) is not str or not RAW_KEY.fullmatch(key) or
+            key in by_key or cat not in counts):
+            deny("SUPREME_ONLY_RAW_GAME_KEY_OR_CATEGORY_AMBIGUOUS")
+        if (type(row["officialName"]) is not str or
+            not 1 <= len(row["officialName"]) <= 110 or
+            type(row["officialItemId"]) is not str or
+            not 1 <= len(row["officialItemId"]) <= 120 or
+            (cat, row["officialItemId"]) in by_id):
+            deny("SUPREME_ONLY_OFFICIAL_NAME_OR_ID_AMBIGUOUS")
+        value = row["supremeListed"]
+        if type(value) is not int or not 0 < value < 10**10:
+            deny("SUPREME_ONLY_PRICE_MISSING_OR_INVALID_NO_FALLBACK")
+        demand(row["supremeDemand"])
+        if (type(row["supremeStability"]) is not str or
+            not 1 <= len(row["supremeStability"]) <= 80):
+            deny("SUPREME_ONLY_STABILITY_MISSING")
+        if row["outgoingGingerscopeProtected"] is not (key == TARGET):
+            deny("SUPREME_ONLY_GINGERSCOPE_NEVER_OUTGOING")
+        by_key[key] = row
+        by_id.add((cat, row["officialItemId"]))
+        counts[cat] += 1
+    if counts != CENSUS or TARGET not in by_key:
+        deny("SUPREME_ONLY_CATEGORY_OR_GINGERSCOPE_CENSUS_MISMATCH")
+    return by_key
+
+
+def _nov25_source_rows(raw, *, evaluated_at_utc):
+    """Exact independently reviewed archive; no live authority or fallback."""
+    if blob_sha(raw) != NOV25_CATALOG_BLOB_SHA:
+        deny("SUPREME_ONLY_CATALOG_GIT_BLOB_MISMATCH")
+    document = json.loads(raw)
+    expected = {
+        "schema": "gingerscope-system2-supreme-only-189-publisher-catalog-v4-research",
+        "status": "SUPREME_ONLY_MEDIATED_PUBLIC_RESEARCH_NOT_LIVE",
+        "valueSource": SOURCE,
+        "sourceOrigin": "https://supremevalues.com/",
+        "sourceTransport": "FIRECRAWL_MEDIATED_HTTPS_RESEARCH",
+        "publisherUpdatedAt": NOV25_SOURCE_PUBLICATION,
+        "sourceCapturedUtc": NOV25_SOURCE_CAPTURE,
+        "sourceExpiresUtc": "2026-11-25T12:09:59Z",
+        "sourceMaxAgeSeconds": MAX_CAPTURE_AGE_SECONDS,
+        "priorResearchCatalogGitBlob": "958038a6b22c43e8d0359cb15e6704bc84253430",
+        "reviewedHistoricalRawGameKeyCandidates": 189,
+        "categories": CENSUS,
+        "sourceResearchOnly": True,
+        "publisherSigned": False,
+        "rawHtmlArchived": False,
+        "exactRobloxItemInstanceVerified": False,
+        "currentInventoryVerified": False,
+        "liveTradePricingAuthorized": False,
+        "authorizesTrade": False,
+        "authorizesOffer": False,
+        "authorizesAccept": False,
+        "mayUseForStrategyLearning": False,
+        "mayReportProfit": False,
+    }
+    for field, value in expected.items():
+        actual = document.get(field)
+        if type(actual) is not type(value) or actual != value:
+            deny("SUPREME_ONLY_NOV25_SOURCE_CONTRACT_INVALID_" + field)
+    now, capture, published = (utc(evaluated_at_utc),
+                               utc(NOV25_SOURCE_CAPTURE, captured=True),
+                               utc(NOV25_SOURCE_PUBLICATION))
+    capture_age = (now - capture).total_seconds()
+    edition_age = (capture - published).total_seconds()
+    if capture_age < 0:
+        deny("SUPREME_ONLY_CAPTURE_FROM_FUTURE")
+    if capture_age > MAX_CAPTURE_AGE_SECONDS:
+        deny("SUPREME_ONLY_SOURCE_EXPIRED_NO_OTHER_LIST_FALLBACK")
+    if edition_age < 0 or edition_age > MAX_PUBLICATION_AT_CAPTURE_SECONDS:
+        deny("SUPREME_ONLY_PUBLISHER_EDITION_EXPIRED")
+    return _validate_rows(document["rows"]), {
+        "publisherUpdatedAt": NOV25_SOURCE_PUBLICATION,
+        "capturedUtc": NOV25_SOURCE_CAPTURE,
+        "captureAgeSeconds": int(capture_age),
+        "catalogGitBlob": NOV25_CATALOG_BLOB_SHA,
+        "sourceSignatureVerified": False,
+    }
+
+
 def source_rows(raw, *, evaluated_at_utc):
     """Reject any tamper, stale capture, missing Supreme quote or extra catalog key."""
+    if blob_sha(raw) == NOV25_CATALOG_BLOB_SHA:
+        return _nov25_source_rows(raw, evaluated_at_utc=evaluated_at_utc)
     if blob_sha(raw) != CATALOG_BLOB_SHA:
         deny("SUPREME_ONLY_CATALOG_GIT_BLOB_MISMATCH")
     try:
@@ -140,37 +235,7 @@ def source_rows(raw, *, evaluated_at_utc):
         deny("SUPREME_ONLY_SOURCE_EXPIRED_NO_OTHER_LIST_FALLBACK")
     if edition_age < 0 or edition_age > MAX_PUBLICATION_AT_CAPTURE_SECONDS:
         deny("SUPREME_ONLY_PUBLISHER_EDITION_EXPIRED")
-    rows = document["rows"]
-    if type(rows) is not list or len(rows) != 189:
-        deny("SUPREME_ONLY_SOURCE_CENSUS_NOT_189")
-    by_key, by_id, counts = {}, set(), {k: 0 for k in CENSUS}
-    for row in rows:
-        if type(row) is not dict or set(row) != ROW_KEYS:
-            deny("SUPREME_ONLY_ROW_SHAPE_CHANGED")
-        key, cat = row["rawGameKeyCandidate"], row["category"]
-        if (type(key) is not str or not RAW_KEY.fullmatch(key) or
-            key in by_key or cat not in counts):
-            deny("SUPREME_ONLY_RAW_GAME_KEY_OR_CATEGORY_AMBIGUOUS")
-        if (type(row["officialName"]) is not str or
-            not 1 <= len(row["officialName"]) <= 110 or
-            type(row["officialItemId"]) is not str or
-            not 1 <= len(row["officialItemId"]) <= 120 or
-            (cat, row["officialItemId"]) in by_id):
-            deny("SUPREME_ONLY_OFFICIAL_NAME_OR_ID_AMBIGUOUS")
-        value = row["supremeListed"]
-        if type(value) is not int or not 0 < value < 10**10:
-            deny("SUPREME_ONLY_PRICE_MISSING_OR_INVALID_NO_FALLBACK")
-        demand(row["supremeDemand"])
-        if (type(row["supremeStability"]) is not str or
-            not 1 <= len(row["supremeStability"]) <= 80):
-            deny("SUPREME_ONLY_STABILITY_MISSING")
-        if row["outgoingGingerscopeProtected"] is not (key == TARGET):
-            deny("SUPREME_ONLY_GINGERSCOPE_NEVER_OUTGOING")
-        by_key[key] = row
-        by_id.add((cat, row["officialItemId"]))
-        counts[cat] += 1
-    if counts != CENSUS or TARGET not in by_key:
-        deny("SUPREME_ONLY_CATEGORY_OR_GINGERSCOPE_CENSUS_MISMATCH")
+    by_key = _validate_rows(document["rows"])
     return by_key, {"publisherUpdatedAt": SOURCE_PUBLICATION,
                     "capturedUtc": SOURCE_CAPTURE,
                     "captureAgeSeconds": int(capture_age),
@@ -179,7 +244,7 @@ def source_rows(raw, *, evaluated_at_utc):
 
 
 def quantities(value, market):
-    if type(value) is not dict or not 0 < len(value) <= 189:
+    if type(value) is not dict or not 0 < len(value) <= len(market):
         deny("SUPREME_ONLY_HYPOTHETICAL_OWNERSHIP_REQUIRED")
     for key, qty in value.items():
         if key not in market or type(qty) is not int or not 0 < qty <= 100000:
@@ -244,7 +309,19 @@ def blocked(reason):
     }
 
 
-def review(catalog_bytes, *, owned, alternatives, evaluated_at_utc):
+def _assessment_market(catalog_bytes, edition, evaluated_at_utc):
+    if edition is None:
+        return source_rows(catalog_bytes, evaluated_at_utc=evaluated_at_utc)
+    from pdiddler.system2.supreme_market_editions import MarketEdition
+
+    if not isinstance(edition, MarketEdition):
+        deny("SUPREME_ONLY_REVIEWED_EDITION_REQUIRED")
+    if catalog_bytes is not None and hashlib.sha256(catalog_bytes).hexdigest() != edition.identity:
+        deny("SUPREME_ONLY_SOURCE_EDITION_DIVERGENCE")
+    return edition.rows, edition.require_current(evaluated_at_utc)
+
+
+def review(catalog_bytes, *, owned, alternatives, evaluated_at_utc, edition=None):
     """C3/C4/C9 strategy replacement: only Supreme numerical economics.
 
     Never consumes any other price, market source, secondary demand, or
@@ -252,7 +329,7 @@ def review(catalog_bytes, *, owned, alternatives, evaluated_at_utc):
     C3 client inventory attestation. No native game action is created.
     """
     try:
-        market, provenance = source_rows(catalog_bytes,evaluated_at_utc=evaluated_at_utc)
+        market, provenance = _assessment_market(catalog_bytes, edition, evaluated_at_utc)
         initial = quantities(owned,market)
         before_value = total(initial, market)
         if type(alternatives) is not list or not 1 <= len(alternatives) <= 12:
@@ -329,9 +406,10 @@ def review(catalog_bytes, *, owned, alternatives, evaluated_at_utc):
             "status":"SUPREME_ONLY_HYPOTHETICAL_STRATEGY_RESEARCH_NOT_EXECUTABLE",
             "valueSource":SOURCE,
             "source":provenance,
-            "historicalCatalogRawKeys":189,
+            "historicalCatalogRawKeys":sum(row.get("historicalRawGameKeyCandidate", key) is not None
+                                           for key, row in market.items()),
             "baselineSupremePortfolioValue":before_value,
-            "gingerscopeSupremeTargetValue":market[TARGET]["supremeListed"],
+            "gingerscopeSupremeTargetValue":market.get(TARGET, {}).get("supremeListed"),
             "hypotheticalAlternatives":outcomes,
             "portfolioOwnershipAuthenticated":False,
             "actualRobloxItemIdentityVerified":False,
@@ -344,6 +422,189 @@ def review(catalog_bytes, *, owned, alternatives, evaluated_at_utc):
         }
     except (SupremeOnlyBlocked,KeyError,TypeError,OverflowError,ZeroDivisionError) as e:
         return blocked(str(e))
+
+
+
+def review_paths(catalog_bytes, *, owned, paths, evaluated_at_utc, edition=None):
+    """Compare distinct explicitly hypothetical multi-step growth alternatives.
+
+    Reuses the existing single-step evaluator and exact Supreme source admission.
+    Every partner stock is a separate synthetic fixture, never a game observation.
+    A paper portfolio gap is not proof a target trade is feasible. No live ranking,
+    executable offers, accepted trade, real inventory, or training is asserted.
+    """
+    schema = "gingerscope-system2-supreme-only-multistep-research-v1"
+    def result_blocked(reason):
+        return {**blocked(reason), "schema": schema, "simulationOnly": True}
+    try:
+        market, provenance = _assessment_market(catalog_bytes, edition, evaluated_at_utc)
+        initial = quantities(owned, market)
+        if type(paths) is not list or not 2 <= len(paths) <= 12:
+            deny("SUPREME_ONLY_TWO_TO_TWELVE_DISTINCT_PATHS_REQUIRED")
+        start_value = total(initial, market)
+        target = market.get(TARGET, {}).get("supremeListed")
+        routes, signatures = [], set()
+        for index, path in enumerate(paths, 1):
+            holdings = initial.copy()
+            seen = {tuple(sorted(holdings.items()))}
+            signature, transitions = [], []
+            target_received = False
+            step_number = 0
+            try:
+                if type(path) is not list or not 2 <= len(path) <= 8:
+                    deny("SUPREME_ONLY_TWO_TO_EIGHT_STEPS_REQUIRED")
+                for step_number, step in enumerate(path, 1):
+                    if type(step) is not dict or set(step) != (
+                            INPUT_OPTION_KEYS | {"partnerHypotheticalStock"}):
+                        deny("SUPREME_ONLY_EXPLICIT_SYNTHETIC_PARTNER_STOCK_REQUIRED")
+                    option = {k:step[k] for k in INPUT_OPTION_KEYS}
+                    give = parse_slots(option["give"], market, side="GIVE")
+                    receive = parse_slots(option["receive"], market, side="RECEIVE")
+                    if set(give) & set(receive):
+                        deny("SUPREME_ONLY_SAME_KEY_BOTH_SIDES_AMBIGUOUS")
+                    partner = quantities(step["partnerHypotheticalStock"], market)
+                    if any(partner.get(k, 0) < q for k,q in receive.items()):
+                        deny("SUPREME_ONLY_HYPOTHETICAL_PARTNER_STOCK_SHORTFALL")
+                    signature.append((tuple(sorted(give.items())), tuple(sorted(receive.items()))))
+                    report = review(catalog_bytes if edition is None else None, owned=dict(holdings),
+                                    alternatives=[option], evaluated_at_utc=evaluated_at_utc,
+                                    edition=edition)
+                    if report["status"] == "BLOCKED":
+                        deny(report["reason"])
+                    row = report["hypotheticalAlternatives"][0]
+                    if row["status"] != "SUPREME_PAPER_GAIN_RESEARCH_NOT_ACTIONABLE":
+                        deny(row["status"])
+                    next_holdings = holdings.copy()
+                    next_holdings.subtract(give)
+                    next_holdings.update(receive)
+                    next_holdings = +next_holdings
+                    if total(next_holdings, market) != row["hypotheticalAfterSupremePortfolioValue"]:
+                        deny("SUPREME_ONLY_MULTISTEP_LEDGER_MISMATCH")
+                    stamp = tuple(sorted(next_holdings.items()))
+                    if stamp in seen:
+                        deny("SUPREME_ONLY_HYPOTHETICAL_PORTFOLIO_CYCLE")
+                    seen.add(stamp)
+                    holdings = next_holdings
+                    target_received = target_received or TARGET in receive
+                    transitions.append({
+                        "step": step_number,
+                        "physicalShape": "UPGRADE" if len(receive)<len(give) else (
+                            "DOWNGRADE" if len(receive)>len(give) else "SIDEGRADE"),
+                        "outgoingPhysicalSlots": len(give),
+                        "incomingPhysicalSlots": len(receive),
+                        "outgoingCopies": sum(give.values()),
+                        "incomingCopies": sum(receive.values()),
+                        "ourListedDelta": row["supremeListedValueGain"],
+                        "partnerListedDelta": row["opponentSupremeListedValueGain"],
+                        "ourListedPortfolioAfter": total(holdings, market),
+                        "partnerReceivesPublishedDemand": row["outgoingSupremeDemandOrdinal"],
+                        "partnerGivesPublishedDemand": row["incomingSupremeDemandOrdinal"],
+                        "partnerPaperLossNeedsOtherMotive": row["opponentSupremeListedValueGain"]<0,
+                        "incomingPublisherRiskKeys": row["incomingPublishedRiskLabelsForKeys"],
+                        "warnings": row["warnings"],
+                        "actualPartnerWouldAccept": None,
+                        "actionAuthorized": False,
+                    })
+                key = tuple(signature)
+                if key in signatures:
+                    deny("SUPREME_ONLY_DUPLICATE_HYPOTHETICAL_PATH")
+                signatures.add(key)
+                final_value = total(holdings, market)
+                routes.append({
+                    "index": index, "status": "PAPER_PATH_COMPARED_NOT_EXECUTABLE",
+                    "completedHypotheticalSteps": len(transitions), "steps": transitions,
+                    "endingHypotheticalListedValue": final_value,
+                    "hypotheticalListedGrowth": final_value-start_value,
+                    "endingPaperTargetGap": max(0,target-final_value) if target is not None else None,
+                    "hypotheticalTargetReceived": target_received,
+                    "endingHypotheticalTargetCopies": holdings.get(TARGET,0),
+                    "endingPublishedDemandMean": mean_demand(holdings,market),
+                    "endingConcentrationBasisPoints": concentration(holdings,market),
+                    "targetSufficiencyDoesNotProveFeasibleFourSlotTrade": True,
+                    "tradeActionable": False,
+                })
+            except (SupremeOnlyBlocked, KeyError, TypeError, OverflowError, ZeroDivisionError) as exc:
+                routes.append({"index": index, "status": "BLOCKED_PATH", "reason": str(exc),
+                               "blockedAtStep": step_number,
+                               "completedHypotheticalSteps": len(transitions),
+                               "tradeActionable": False})
+        return {
+            "schema": schema, "status": "SUPREME_ONLY_MULTI_PATH_RESEARCH_NOT_EXECUTABLE",
+            "source": provenance, "valueSource": SOURCE, "researchOnly": True,
+            "simulationOnly": True, "startingHypotheticalListedValue": start_value,
+            "startingPublishedDemandMean": mean_demand(initial,market),
+            "startingConcentrationBasisPoints": concentration(initial,market),
+            "startingPaperTargetGap": max(0,target-start_value),
+            "gingerscopeListedTarget": target, "hypotheticalRoutes": routes,
+            "isOfferRanking": False, "realInventoryVerified": False,
+            "actualPartnerOwnershipVerified": False, "empiricalAcceptanceProbability": None,
+            "empiricalLiquidity": "UNKNOWN", "serverTradeSettlementProven": False,
+            "authorizesTrade": False, "authorizesOffer": False, "authorizesAccept": False,
+            "mayReportProfit": False, "maySendDiscordWebhook": False,
+            "mayUseForStrategyLearning": False, "liveMarketAuthorized": False,
+        }
+    except (SupremeOnlyBlocked, KeyError, TypeError, OverflowError, ZeroDivisionError) as exc:
+        return result_blocked(str(exc))
+
+
+
+def review_bilateral_batch(catalog_bytes, *, request, evaluated_at_utc):
+    """One offline entrypoint for economic and opponent-incentive comparisons.
+
+    Both existing evaluators independently check identical immutable source and
+    explicit hypothetical stocks. Cross-check their arithmetic before returning
+    a combined report. Nothing is an actual offer, player profile or prediction.
+    """
+    schema = "gingerscope-system2-supreme-only-integrated-bilateral-research-v1"
+    def fail(reason):
+        return {**blocked(reason), "schema": schema, "simulationOnly": True,
+                "isOfferRanking": False, "maySendDiscordWebhook": False}
+    try:
+        _, provenance = source_rows(catalog_bytes, evaluated_at_utc=evaluated_at_utc)
+        from pdiddler.system2.supreme_only_bilateral_partner_friction_shadow import evaluate
+        now = utc(evaluated_at_utc)
+        friction = evaluate(request, now_epoch=int(now.timestamp()), source_bytes=catalog_bytes)
+        if friction["status"] != "BILATERAL_FRICTION_SHADOW_RESEARCH_ONLY":
+            return fail(friction.get("reason", "BILATERAL_EVALUATION_BLOCKED"))
+        if (friction["sourcePublisherEdition"] != provenance["publisherUpdatedAt"] or
+            friction["sourceCaptureUtc"] != provenance["capturedUtc"]):
+            deny("SUPREME_ONLY_BILATERAL_SOURCE_DIVERGENCE")
+        if len(friction["routes"]) != len(request["routes"]):
+            deny("SUPREME_ONLY_BILATERAL_ROUTE_COUNT_DIVERGENCE")
+        rows = []
+        for index, (option, partner) in enumerate(zip(request["routes"],friction["routes"])):
+            def convert(slots):
+                return [{"rawGameKeyCandidate":s["rawGameKey"],"quantity":s["quantity"]} for s in slots]
+            economic = review(catalog_bytes, owned=request["ownHypotheticalStock"],
+                alternatives=[{"kind":"HYPOTHETICAL_RESEARCH_ONLY","valuationSource":SOURCE,
+                    "give":convert(option["give"]),"receive":convert(option["receive"])}],
+                evaluated_at_utc=evaluated_at_utc)
+            if economic["status"] == "BLOCKED":
+                return fail(economic["reason"])
+            own = economic["hypotheticalAlternatives"][0]
+            if (partner["index"] != index or economic["source"] != provenance or
+                own["outgoingSupremeListedValue"] != partner["outgoingListed"] or
+                own["incomingSupremeListedValue"] != partner["incomingListed"] or
+                own["supremeListedValueGain"] != partner["ourSupremeListedDelta"] or
+                own["opponentSupremeListedValueGain"] != partner["partnerSupremeListedDelta"] or
+                abs(own["outgoingSupremeDemandOrdinal"]-partner["partnerReceivesPublishedDemandMean"])>0.0000051 or
+                abs(own["incomingSupremeDemandOrdinal"]-partner["partnerGivesPublishedDemandMean"])>0.0000051):
+                deny("SUPREME_ONLY_BILATERAL_ECONOMIC_DIVERGENCE")
+            prohibited = own["status"].startswith("BLOCKED") or partner["status"].startswith("BLOCKED")
+            rows.append({"index":index,
+                "status":"BLOCKED_PAPER_COMPARISON" if prohibited else "PAPER_COMPARISON_ONLY",
+                "economic":own, "partnerIncentives":partner,
+                "hypotheticalOnly":True, "tradeActionable":False})
+        return {**blocked("PAPER_ECONOMICS_AND_HYPOTHETICAL_INCENTIVES_ONLY"),
+                "schema":schema,"status":"SUPREME_ONLY_INTEGRATED_BILATERAL_RESEARCH",
+                "source":provenance,"simulationOnly":True,
+                "sourceFreshnessProven":False,"sourceWithinSuppliedEvaluationWindow":True,
+                "sameArchivedSourceAndArithmetic":True,
+                "hypotheticalAlternatives":rows, "isOfferRanking":False,
+                "actualPartnerOwnershipVerified":False,"serverTradeSettlementProven":False,
+                "maySendDiscordWebhook":False}
+    except (SupremeOnlyBlocked,KeyError,TypeError,ValueError,OverflowError,ZeroDivisionError) as exc:
+        return fail(str(exc)[:160])
 
 
 def main(argv=None):

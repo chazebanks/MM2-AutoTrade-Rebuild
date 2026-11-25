@@ -166,7 +166,26 @@ local maybe={}
 for _,it in ipairs(tentative.itemPreferences) do maybe[it.key]=it.intent end
 eq(maybe.Iceblaster,"MENTION_ONLY",
  "maybe cannot upgrade a speculative item into a confirmed wishlist")
+local beforeAmbiguity=api.snapshot()
+for _,message in ipairs({
+ [=[@MainTestUser_Alpha someone said "LF Harvester"]=],
+ [=[“@MainTestUser_Alpha no dupes”]=],
+ [=[@MainTestUser_Alpha 'I want Harvester']=],
+ "@MainTestUser_Alpha They said LF Harvester",
+ "@MainTestUser_Alpha I want Harvester (/s)",
+ "@MainTestUser_Alpha Yeah right, I want Harvester",
+ "@MainTestUser_Alpha Maybe I want Harvester",
+}) do
+ local ambiguous=emit(message)
+ eq(ambiguous.status,"AMBIGUOUS_CHAT_CONTEXT","quoted or ambiguous material abstains")
+ eq(ambiguous.personalReplyProven,false,"quotation or sarcasm cannot establish direct intent")
+ eq(ambiguous.itemPreferences,nil,"ambiguous material does not become item preferences")
+ eq(ambiguous.verifiedPartnerPreference,false,"ambiguity cannot prove a preference")
+ eq(ambiguous.authorizesOffer,false,"ambiguous text cannot authorize offers")
+end
 local snapshot=api.snapshot()
+eq(snapshot.activeSignals,beforeAmbiguity.activeSignals,
+ "ambiguous material cannot add retained preference or condition events")
 eq(snapshot.status,"CLIENT_ONLY_PASSIVE_PARTNER_PREFERENCE_RESEARCH",
  "only client evidence local snapshot")
 eq(snapshot.explicitDirectedSignals>=4,true,"explicitly directed statements counted separately")
@@ -247,6 +266,14 @@ eq(portable.FangChroma.intent,"AVOIDS",
  "explicit NLF remains short-lived within same partner lease")
 eq(portable.FangChroma.carriedAcrossOfferChange,true,
  "carried preference is visibly tagged from earlier offer revision")
+time+=1
+local changedPreference=emit("@MainTestUser_Alpha LF Chroma Fang")
+eq(changedPreference.clientOfferRevision,revision,"new preference belongs to current offer")
+local changedItems={}
+for _,p in ipairs(api.snapshot().itemPreferences) do changedItems[p.rawGameKeyCandidate]=p end
+eq(changedItems.FangChroma.intent,"WANTS","explicit new statement replaces old preference")
+eq(changedItems.FangChroma.statedAtClientOfferRevision,revision,"revision context remains visible")
+eq(changedItems.FangChroma.carriedAcrossOfferChange,false,"new statement is not carried evidence")
 local duplicateAfterRevision=api.readonlyProcessDeliveredTextChatMessage(firstMsg)
 eq(duplicateAfterRevision.status,"IGNORED_DUPLICATE_MESSAGE",
  "same TextChatMessage cannot be reintroduced on new revision")

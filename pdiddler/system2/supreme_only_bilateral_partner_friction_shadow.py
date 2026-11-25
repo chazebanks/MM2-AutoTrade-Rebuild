@@ -98,13 +98,28 @@ def demand(group,rows):
  return sum(rows[k]["supremeListed"]*q*int(rows[k]["supremeDemand"])
             for k,q in group.items())/t
 
-def evaluate(request,*,now_epoch):
- """2-12 competing synthetic routes; outputs warning matrix, NOT offer rank."""
+def evaluate(request,*,now_epoch,source_bytes=None):
+ """2-12 competing synthetic routes; outputs warning matrix, NOT offer rank.
+
+ An explicitly supplied archive is admitted only by the common exact-source
+ verifier. Historical default remains available at its original fixture time;
+ a rejected supplied source can never fall back to it.
+ """
  try:
-  check(type(now_epoch) is int and
-        CAPTURE_EPOCH<=now_epoch<=CAPTURE_EPOCH+MAX_AGE,
-        "SUPREME_ONLY_RESEARCH_CAPTURE_STALE_OR_FUTURE")
-  rows=catalog()
+  check(type(now_epoch) is int,"SUPREME_ONLY_RESEARCH_CAPTURE_STALE_OR_FUTURE")
+  if source_bytes is None:
+   check(CAPTURE_EPOCH<=now_epoch<=CAPTURE_EPOCH+MAX_AGE,
+         "SUPREME_ONLY_RESEARCH_CAPTURE_STALE_OR_FUTURE")
+   rows=catalog()
+   publisher="2026-11-15T11:59:41-05:00"
+   captured="2026-11-17T21:41:18Z"
+  else:
+   from datetime import datetime, timezone
+   from pdiddler.system2.supreme_only_strategy_research import source_rows
+   evaluated=datetime.fromtimestamp(now_epoch,timezone.utc).isoformat()
+   rows,provenance=source_rows(source_bytes,evaluated_at_utc=evaluated)
+   publisher=provenance["publisherUpdatedAt"]
+   captured=provenance["capturedUtc"]
   check(type(request) is dict and set(request)=={
         "kind","valueSource","ownHypotheticalStock",
         "partnerHypotheticalStock","routes"},
@@ -187,8 +202,8 @@ def evaluate(request,*,now_epoch):
      "tradeActionable":False,
    })
   return {"schema":SCHEMA,"status":"BILATERAL_FRICTION_SHADOW_RESEARCH_ONLY",
-          "sourcePublisherEdition":"2026-11-15T11:59:41-05:00",
-          "sourceCaptureUtc":"2026-11-17T21:41:18Z",
+          "sourcePublisherEdition":publisher,
+          "sourceCaptureUtc":captured,
           "routes":checked,"isOfferRanking":False,**RESEARCH_ONLY}
- except (Invalid,ValueError,TypeError,KeyError,OverflowError) as e:
+ except (Invalid,ValueError,TypeError,KeyError,OverflowError,OSError) as e:
   return deny(str(e))

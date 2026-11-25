@@ -114,4 +114,106 @@ class SupremeRefreshResearch(unittest.TestCase):
   self.assertNotIn('local CLOCK=1794924441.0',mock)
   self.assertNotIn('local SOURCE_SHA256="48107d3039caf620bcad2c08831c9ca7fe206780dfb0e2d96d8161e3c9210f4a"',mock)
 
+NOV25=P/"system2/supreme_only_189_research_catalog_2026_11_25_publication_nov23.json"
+NOV25_BLOB="b6f5c1eec48d59b422f53baa4d83a54ce6837b72"
+
+class SupremeNov25Archive(unittest.TestCase):
+ def test_exact_new_archive_and_prior_identity(self):
+  from collections import Counter
+  raw=NOV25.read_bytes()
+  self.assertEqual(blob(raw),NOV25_BLOB)
+  current=json.loads(raw)
+  prior=load(NEW)
+  self.assertEqual(current["priorResearchCatalogGitBlob"],blob(NEW.read_bytes()))
+  self.assertEqual(current["valueSource"],"SUPREME_ONLY")
+  self.assertEqual(len(current["rows"]),189)
+  self.assertEqual(len({r["rawGameKeyCandidate"] for r in current["rows"]}),189)
+  self.assertEqual(Counter(r["category"] for r in current["rows"]),current["categories"])
+  self.assertEqual(current["categories"],{"ancient":15,"godly":128,"chroma":46})
+  self.assertEqual(len({(r["category"],r["officialItemId"]) for r in current["rows"]}),189)
+  price_fields={"supremeListed","supremeDemand","supremeStability"}
+  for a,b in zip(prior["rows"],current["rows"],strict=True):
+   self.assertEqual({k:v for k,v in a.items() if k not in price_fields},
+                    {k:v for k,v in b.items() if k not in price_fields})
+   self.assertIs(type(b["supremeListed"]),int)
+   self.assertGreater(b["supremeListed"],0)
+   self.assertTrue(b["supremeDemand"].isdigit())
+   self.assertIn(int(b["supremeDemand"]),range(12))
+   self.assertTrue(b["supremeStability"])
+  self.assertEqual([r["rawGameKeyCandidate"] for r in current["rows"]
+                    if r["outgoingGingerscopeProtected"]],["Gingerscope"])
+
+ def test_publication_change_counts_and_selected_market_values(self):
+  prior,current=load(NEW),load(NOV25)
+  fields={"supremeListed":"changedValueRows","supremeDemand":"changedDemandRows",
+          "supremeStability":"changedStabilityRows"}
+  pairs=list(zip(prior["rows"],current["rows"],strict=True))
+  self.assertEqual(sum(a!=b for a,b in pairs),34)
+  self.assertEqual(current["changedRows"],34)
+  for field,count_key in fields.items():
+   self.assertEqual(sum(a[field]!=b[field] for a,b in pairs),current[count_key])
+  self.assertEqual([current[k] for k in fields.values()],[32,10,19])
+  self.assertEqual(current["publisherUpdatedAt"],"2026-11-23T19:13:44-05:00")
+  self.assertIs(current["originalPublisherEditionUnchanged"],False)
+  index={r["rawGameKeyCandidate"]:r for r in current["rows"]}
+  for key,value in {"Gingerscope":16000,"Harvester":310,"Icepiercer":220,
+                    "Celestial":2025,"Emberbow":575,"VampireAxe":1100}.items():
+   self.assertEqual(index[key]["supremeListed"],value)
+
+ def test_capture_receipts_and_conservative_six_hour_expiry(self):
+  import uuid
+  data=load(NOV25)
+  self.assertEqual(set(data["pageEvidence"]),{"home","ancient","godly","chroma"})
+  times=[]
+  for page in data["pageEvidence"].values():
+   ident=uuid.UUID(page["scrapeId"])
+   self.assertEqual(ident.version,7)
+   stamp=datetime.fromtimestamp((ident.int>>80)/1000,timezone.utc)
+   self.assertEqual(stamp,datetime.fromisoformat(page["scrapeIdUtc"]))
+   self.assertEqual(page["sourceStatus"],200)
+   self.assertEqual(page["transport"],"FIRECRAWL_MEDIATED_HTTPS")
+   self.assertGreater(page["sourceHtmlCharacterCount"],1000)
+   times.append(stamp)
+  captured=datetime.fromisoformat(data["sourceCapturedUtc"])
+  expiry=datetime.fromisoformat(data["sourceExpiresUtc"])
+  self.assertEqual(captured,min(times).replace(microsecond=0))
+  self.assertLess(max(times)-min(times),timedelta(minutes=2))
+  self.assertEqual(expiry-captured,timedelta(hours=6))
+  self.assertEqual(data["sourceMaxAgeSeconds"],21600)
+  self.assertLess(datetime.fromisoformat(data["publisherUpdatedAt"]),captured)
+
+ def test_precise_exclusions_and_research_authority_boundary(self):
+  data=load(NOV25); pages=data["pageEvidence"]
+  self.assertEqual([pages[k]["publisherItemcolumnCards"] for k in
+                    ("ancient","godly","chroma")],[16,130,53])
+  self.assertEqual(pages["ancient"]["unpricedCardNames"],["Nik's Scythe"])
+  self.assertEqual(set(pages["godly"]["excludedCardIds"]),{"Batwing","Black_Luger"})
+  self.assertEqual(set(pages["chroma"]["excludedCardIds"]),
+                   {"CBat","CBear","CBunny","CCat","CDog","CFox","CPig"})
+  self.assertIs(data["sourceResearchOnly"],True)
+  for flag in ("publisherSigned","rawHtmlArchived","exactRobloxItemInstanceVerified",
+               "currentInventoryVerified","liveTradePricingAuthorized","authorizesTrade",
+               "authorizesOffer","authorizesAccept","mayUseForStrategyLearning","mayReportProfit"):
+   self.assertIs(data[flag],False)
+  for p in (CORE,BRIDGE,HOST,LOADER,REG):
+   self.assertNotIn(NOV25.name,p.read_text())
+   self.assertNotIn(NOV25_BLOB,p.read_text())
+
+class Nov25NativeResearchCandidate(unittest.TestCase):
+ def test_separate_candidate_blobs_and_archive(self):
+  c=P/"system2/native_supreme_only_bilateral_research_nov25.lua"
+  b=P/"system2/native_supreme_only_protected_c3p4_adapter_nov25.lua"
+  self.assertEqual(blob(c.read_bytes()),"e12741bd250bf129aa49d71f3d5e3e1302d716d8")
+  self.assertEqual(blob(b.read_bytes()),"937ff7b75393d3adf06b04f88caafdd6d37060ad")
+  self.assertEqual(blob(CORE.read_bytes()),"8c776a38d317d193efb9cd4bff4eb617e8069f4b")
+  self.assertEqual(blob(BRIDGE.read_bytes()),"379112fb34b351e7673e31ed5424d825cc21e001")
+  self.assertEqual(hashlib.sha256(NOV25.read_bytes()).hexdigest(),
+                   "3f0996b9ac20f3c4689519e1faf65e83796bce8b2d6afe6ad4d2e705ffca525e")
+  for part in (c,b):
+   self.assertIn(NOV25_BLOB,part.read_text())
+   self.assertIn("1795586999",part.read_text())
+   self.assertNotIn("AcceptTrade:FireServer",part.read_text())
+  self.assertNotIn(c.name,HOST.read_text())
+  self.assertNotIn(b.name,HOST.read_text())
+
 if __name__=="__main__":unittest.main()

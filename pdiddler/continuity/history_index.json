@@ -31,5 +31,24 @@
         "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/228"
       ]
     }
-  ]
+  ],
+  "currentResearchReview": {
+    "draft": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/323",
+    "baselineCommit": "bc467c1bfaff026b87e4b09979e1e9d581895bbc",
+    "evidenceTier": "RESEARCH_ONLY",
+    "matrix": "pdiddler/system2/GINGERSCOPE_COMPLETION_MATRIX_2026_11_25.md"
+  },
+  "activeOfflineReview": {
+    "rollbackCommit": "f7b4ff33f4015315a26f41d3c6ed812e7711032c",
+    "draft": "https://github.com/chazebanks/MM2-AutoTrade-Rebuild/pull/323",
+    "scope": "INTEGRATED_OFFLINE_FULL_SYSTEM_QUALIFICATION",
+    "references": [
+      "pdiddler/gingerscope.py",
+      "pdiddler/system2/qualification.py",
+      "pdiddler/system2/gingerscope_requirements.json",
+      "pdiddler/system2/GINGERSCOPE_OFFLINE.md",
+      "pdiddler/system2/GINGERSCOPE_SUPERVISED_VALIDATION.md"
+    ],
+    "evidenceLimit": "New controlled replay evidence does not replace any historical native observation."
+  }
 }

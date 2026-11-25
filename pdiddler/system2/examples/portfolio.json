@@ -1,0 +1,11 @@
+{
+  "accounts": {
+    "main": {"godly:Fang": 1, "ancient:Harvester": 4},
+    "alt": {"godly:Boneblade": 1, "godly:UnpricedExample": 1}
+  },
+  "counterparties": [
+    {"godly:Boneblade": 1, "godly:Orange_Seer": 2},
+    {"godly:Fang": 2, "godly:Orange_Seer": 2}
+  ],
+  "search": {"max_steps": 2, "copies_per_slot": 1}
+}

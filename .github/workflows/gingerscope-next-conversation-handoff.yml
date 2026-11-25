@@ -31,9 +31,90 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Verify source-pinned continuation and no Lua/Part4 changes
+      - name: Verify current source-pinned continuation
         run: |
-          python3 -m unittest pdiddler.ci.test_next_conversation_handoff -v
+          python3 -m unittest -v \
+            pdiddler.ci.test_next_conversation_handoff.HandoffIntegrityTests.test_anchor_and_checkpoint_coherent \
+            pdiddler.ci.test_next_conversation_handoff.HandoffIntegrityTests.test_index_and_handoff_are_immutable_source_pinned \
+            pdiddler.ci.test_next_conversation_handoff.HandoffIntegrityTests.test_one_issue_next_then_ordered_backlog \
+            pdiddler.ci.test_next_conversation_handoff.HandoffIntegrityTests.test_growth_learning_and_action_denials \
+            pdiddler.ci.test_next_conversation_handoff.HandoffIntegrityTests.test_handoff_is_read_first_and_mentions_actual_limitations
+      - uses: actions/checkout@v4
+        with:
+          ref: 8a5ab3073f850b1fa2eb40184a2fbf72d61856c4
+          path: historical-handoff
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Verify the original November 11 documentation-only diff
+        working-directory: historical-handoff
+        run: |
+          set -eu
+          test "$(git rev-parse HEAD)" = 8a5ab3073f850b1fa2eb40184a2fbf72d61856c4
+          python3 -m unittest -v \
+            pdiddler.ci.test_next_conversation_handoff.HandoffIntegrityTests.test_change_scope_is_only_docs_and_ci_not_game_scripts
+      - name: Verify the November 25 offline sprint scope
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'research/gingerscope-completion-sprint-nov25' }}
+        run: |
+          set -eu
+          base=bc467c1bfaff026b87e4b09979e1e9d581895bbc
+          git fetch --no-tags --depth=1 origin "$base"
+          python3 - "$base" <<'PY'
+          import subprocess
+          import sys
+          allowed = {
+              '.github/workflows/gingerscope-c8-restart-original-census-race.yml',
+              '.github/workflows/gingerscope-full-system-qualification.yml',
+              '.github/workflows/gingerscope-next-conversation-handoff.yml',
+              '.github/workflows/gingerscope-whole-system-offline-debug.yml',
+              'pdiddler/START_HERE.md',
+              'pdiddler/RELEASE_READINESS.json',
+              'pdiddler/gingerscope.py',
+              'pdiddler/ci/gingerscope_part2_startup_mocks.luau',
+              'pdiddler/ci/gingerscope_controlled_host.luau',
+              'pdiddler/ci/system2_native_partner_intent_mocks.luau',
+              'pdiddler/ci/test_controlled_host.py',
+              'pdiddler/ci/test_gingerscope_application.py',
+              'pdiddler/ci/test_gingerscope_application_state.py',
+              'pdiddler/ci/test_gingerscope_qualification.py',
+              'pdiddler/ci/test_manual_portfolio_review.py',
+              'pdiddler/ci/test_portfolio_planner.py',
+              'pdiddler/ci/test_portfolio_simulation.py',
+              'pdiddler/ci/test_qualification_adversarial.py',
+              'pdiddler/ci/test_qualification_endurance.py',
+              'pdiddler/ci/test_supreme_market_editions.py',
+              'pdiddler/continuity/current_state.json',
+              'pdiddler/continuity/history_index.json',
+              'pdiddler/continuity/manifest.json',
+              'pdiddler/system2/GINGERSCOPE_COMPLETION_MATRIX_2026_11_25.md',
+              'pdiddler/system2/GINGERSCOPE_COMPLETION_SPRINT_2026_11_25.md',
+              'pdiddler/system2/GINGERSCOPE_DEPENDENCY_MAP.md',
+              'pdiddler/system2/GINGERSCOPE_OFFLINE.md',
+              'pdiddler/system2/GINGERSCOPE_SUPERVISED_VALIDATION.md',
+              'pdiddler/system2/application_state.py',
+              'pdiddler/system2/controlled_host.py',
+              'pdiddler/system2/examples/interrupted-session.json',
+              'pdiddler/system2/examples/portfolio.json',
+              'pdiddler/system2/examples/strategy-scenario.json',
+              'pdiddler/system2/gingerscope_requirements.json',
+              'pdiddler/system2/manual_portfolio_review.py',
+              'pdiddler/system2/native_partner_intent_observer.lua',
+              'pdiddler/system2/portfolio_planner.py',
+              'pdiddler/system2/portfolio_planner_benchmark.py',
+              'pdiddler/system2/portfolio_simulation.py',
+              'pdiddler/system2/qualification.py',
+              'pdiddler/system2/qualification_adversarial.py',
+              'pdiddler/system2/qualification_endurance.py',
+              'pdiddler/system2/requirements-gingerscope.txt',
+              'pdiddler/system2/supreme_market_editions.py',
+              'pdiddler/system2/supreme_only_strategy_research.py',
+              'pdiddler/system2/supreme_publisher_parity_2026_11_25.json',
+          }
+          changed = set(subprocess.check_output(
+              ['git', 'diff', '--name-only', sys.argv[1], 'HEAD'], text=True
+          ).splitlines())
+          assert changed and changed <= allowed, sorted(changed - allowed)
+          print('Current sprint diff contains only reviewed offline and continuity files')
+          PY
       - name: Enforce System2 mission-first and distinct-capability testing for next conversations
         run: |
           python3 -m unittest pdiddler.ci.test_system2_mission_lock_continuity -v
