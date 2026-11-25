@@ -533,6 +533,65 @@ def review_paths(catalog_bytes, *, owned, paths, evaluated_at_utc):
         return result_blocked(str(exc))
 
 
+
+def review_bilateral_batch(catalog_bytes, *, request, evaluated_at_utc):
+    """One offline entrypoint for economic and opponent-incentive comparisons.
+
+    Both existing evaluators independently check identical immutable source and
+    explicit hypothetical stocks. Cross-check their arithmetic before returning
+    a combined report. Nothing is an actual offer, player profile or prediction.
+    """
+    schema = "gingerscope-system2-supreme-only-integrated-bilateral-research-v1"
+    def fail(reason):
+        return {**blocked(reason), "schema": schema, "simulationOnly": True,
+                "isOfferRanking": False, "maySendDiscordWebhook": False}
+    try:
+        _, provenance = source_rows(catalog_bytes, evaluated_at_utc=evaluated_at_utc)
+        from pdiddler.system2.supreme_only_bilateral_partner_friction_shadow import evaluate
+        now = utc(evaluated_at_utc)
+        friction = evaluate(request, now_epoch=int(now.timestamp()), source_bytes=catalog_bytes)
+        if friction["status"] != "BILATERAL_FRICTION_SHADOW_RESEARCH_ONLY":
+            return fail(friction.get("reason", "BILATERAL_EVALUATION_BLOCKED"))
+        if (friction["sourcePublisherEdition"] != provenance["publisherUpdatedAt"] or
+            friction["sourceCaptureUtc"] != provenance["capturedUtc"]):
+            deny("SUPREME_ONLY_BILATERAL_SOURCE_DIVERGENCE")
+        if len(friction["routes"]) != len(request["routes"]):
+            deny("SUPREME_ONLY_BILATERAL_ROUTE_COUNT_DIVERGENCE")
+        rows = []
+        for index, (option, partner) in enumerate(zip(request["routes"],friction["routes"])):
+            def convert(slots):
+                return [{"rawGameKeyCandidate":s["rawGameKey"],"quantity":s["quantity"]} for s in slots]
+            economic = review(catalog_bytes, owned=request["ownHypotheticalStock"],
+                alternatives=[{"kind":"HYPOTHETICAL_RESEARCH_ONLY","valuationSource":SOURCE,
+                    "give":convert(option["give"]),"receive":convert(option["receive"])}],
+                evaluated_at_utc=evaluated_at_utc)
+            if economic["status"] == "BLOCKED":
+                return fail(economic["reason"])
+            own = economic["hypotheticalAlternatives"][0]
+            if (partner["index"] != index or economic["source"] != provenance or
+                own["outgoingSupremeListedValue"] != partner["outgoingListed"] or
+                own["incomingSupremeListedValue"] != partner["incomingListed"] or
+                own["supremeListedValueGain"] != partner["ourSupremeListedDelta"] or
+                own["opponentSupremeListedValueGain"] != partner["partnerSupremeListedDelta"] or
+                abs(own["outgoingSupremeDemandOrdinal"]-partner["partnerReceivesPublishedDemandMean"])>0.0000051 or
+                abs(own["incomingSupremeDemandOrdinal"]-partner["partnerGivesPublishedDemandMean"])>0.0000051):
+                deny("SUPREME_ONLY_BILATERAL_ECONOMIC_DIVERGENCE")
+            prohibited = own["status"].startswith("BLOCKED") or partner["status"].startswith("BLOCKED")
+            rows.append({"index":index,
+                "status":"BLOCKED_PAPER_COMPARISON" if prohibited else "PAPER_COMPARISON_ONLY",
+                "economic":own, "partnerIncentives":partner,
+                "hypotheticalOnly":True, "tradeActionable":False})
+        return {**blocked("PAPER_ECONOMICS_AND_HYPOTHETICAL_INCENTIVES_ONLY"),
+                "schema":schema,"status":"SUPREME_ONLY_INTEGRATED_BILATERAL_RESEARCH",
+                "source":provenance,"simulationOnly":True,
+                "sourceFreshnessProven":True,"sameArchivedSourceAndArithmetic":True,
+                "hypotheticalAlternatives":rows, "isOfferRanking":False,
+                "actualPartnerOwnershipVerified":False,"serverTradeSettlementProven":False,
+                "maySendDiscordWebhook":False}
+    except (SupremeOnlyBlocked,KeyError,TypeError,ValueError,OverflowError,ZeroDivisionError) as exc:
+        return fail(str(exc)[:160])
+
+
 def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--catalog",type=Path,required=True)
