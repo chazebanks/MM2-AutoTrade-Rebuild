@@ -345,6 +345,44 @@ eq(acceptance:preview({option}).reason,
  "ORIGINAL_P4_OFFER_ACCEPTANCE_OR_STACK_CHANGED",
  "changed Accept state blocks")
 theirAccepted.Visible=false
+-- Nov25 exact archived source is accepted only in its own replay window.
+local renewedBytes=fs.readFile(root.."supreme_only_189_research_catalog_2026_11_25_publication_nov23.json")
+local renewedCatalog=serde.decode("json",renewedBytes)
+local renewedPin="b6f5c1eec48d59b422f53baa4d83a54ce6837b72"
+local renewedCapture=1795586999
+local renewedDigest="3f0996b9ac20f3c4689519e1faf65e83796bce8b2d6afe6ad4d2e705ffca525e"
+eq(shaValue(renewedBytes),renewedDigest,"renewed pure Luau SHA")
+eq(serde.hash("sha256",renewedBytes),renewedDigest,"renewed independent SHA")
+eq(supreme.sourceStatus(renewedCatalog,renewedPin,renewedCapture).status,
+ "SUPREME_ONLY_RESEARCH_SOURCE_CHECKED","new edition source admitted")
+eq(supreme.sourceStatus(renewedCatalog,SOURCE_PIN,renewedCapture).status,
+ "BLOCKED","new edition cannot borrow old pin")
+eq(supreme.sourceStatus(renewedCatalog,renewedPin,renewedCapture-1).status,
+ "BLOCKED","future capture blocked")
+eq(supreme.sourceStatus(renewedCatalog,renewedPin,renewedCapture+21600).status,
+ "SUPREME_ONLY_RESEARCH_SOURCE_CHECKED","exact expiry boundary")
+eq(supreme.sourceStatus(renewedCatalog,renewedPin,renewedCapture+21601).status,
+ "BLOCKED","renewed source expiry")
+clock=renewedCapture+30
+local renewed=new({sourceBytes=renewedBytes})
+local newReport=renewed:preview({option})
+eq(newReport.status,"SUPREME_ONLY_PROTECTED_C3_P4_SHADOW_OBSERVED","new edition protected preview")
+eq(newReport.hypotheticalAlternatives[1].supremeListedGain,160,"new edition exact values")
+eq(newReport.sourceAgeSeconds,30,"correct archive clock")
+eq(newReport.authorizesAccept,false,"renewal never enables accept")
+local prior,priorWhy=protected.new(config())
+eq(prior,nil,"historic source not valid at new clock")
+eq(priorWhy,"SUPREME_ONLY_SOURCE_EXPIRED_OR_UNVERIFIED","no old source fallback")
+local changed=copy(renewedCatalog)
+changed.rows[1].supremeListed+=1
+local tampered,tamperedWhy=protected.new(config({sourceBytes=serde.encode("json",changed)}))
+eq(tampered,nil,"changed renewed source bytes rejected")
+eq(tamperedWhy,"SUPREME_ONLY_SOURCE_SHA256_VERIFICATION_FAILED","new edition hash enforced")
+clock=renewedCapture+21601
+local expiredNew,expiredNewWhy=protected.new(config({sourceBytes=renewedBytes}))
+eq(expiredNew,nil,"renewed expired source denied")
+eq(expiredNewWhy,"SUPREME_ONLY_SOURCE_EXPIRED_OR_UNVERIFIED","renewed expiry before scanner")
+clock=CLOCK
 local frozenLua=fs.readFile(root.."native_supreme_only_protected_c3p4_adapter_nov17.lua")
 for _,forbidden in ipairs({
  "native_market_inventory_offer_core","native_bilateral_attractiveness_shadow",
